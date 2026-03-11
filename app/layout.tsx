@@ -1,16 +1,54 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Manrope } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
-const cormorantGaramond = Cormorant_Garamond({
-  variable: "--font-cormorant",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+const hallowModerat = localFont({
+  src: [
+    {
+      path: "./fonts/Hallow-Moderat-Regular.woff2",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "./fonts/Hallow-Moderat-Bold.woff2",
+      weight: "700",
+      style: "normal",
+    },
+    {
+      path: "./fonts/Hallow-Moderat-Extrabold.woff2",
+      weight: "800",
+      style: "normal",
+    },
+  ],
+  variable: "--font-hallow-moderat",
+  display: "swap",
 });
 
-const manrope = Manrope({
-  variable: "--font-manrope",
-  subsets: ["latin"],
+const hallowModeratSerif = localFont({
+  src: [
+    {
+      path: "./fonts/Hallow-Moderat-Serif-Regular.woff2",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "./fonts/Hallow-Moderat-Serif-Semibold.woff",
+      weight: "600",
+      style: "normal",
+    },
+    {
+      path: "./fonts/Hallow-Moderat-Serif-Regular-Italic.woff",
+      weight: "400",
+      style: "italic",
+    },
+    {
+      path: "./fonts/Hallow-Moderat-Serif-Semibold-Italic.woff",
+      weight: "600",
+      style: "italic",
+    },
+  ],
+  variable: "--font-hallow-moderat-serif",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -26,7 +64,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${cormorantGaramond.variable} ${manrope.variable}`}
+      className={`${hallowModerat.variable} ${hallowModeratSerif.variable}`}
     >
       <body className="antialiased">{children}</body>
     </html>

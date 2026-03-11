@@ -43,29 +43,28 @@ export function getGreetingName(email: string | undefined): string {
 export const DASHBOARD_CARDS: DashboardCard[] = [
   {
     title: "Pleros Welcome Pack",
-    description:
-      "Start with guided resources crafted to help you settle into the Pleros rhythm.",
+    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
     href: "#",
     featured: true,
   },
   {
     title: "PPC",
-    description: "Explore prayer partner commitments and weekly focus notes.",
+    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
     href: "#",
   },
   {
     title: "Partnership",
-    description: "Review collaboration opportunities and partnership pathways.",
+    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
     href: "#",
   },
   {
     title: "Podcast",
-    description: "Listen to the latest Pleros conversations and devotionals.",
+    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
     href: "/podcast",
   },
   {
     title: "Prayer Watch",
-    description: "Join live moments and keep track of intercession schedules.",
+    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
     href: "#",
   },
 ];
