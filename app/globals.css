@@ -1,10 +1,4 @@
 @import "tailwindcss";
-@import "tw-animate-css";
-@import "shadcn/tailwind.css";
-/*
-  ---break---
-*/
-@custom-variant dark (&:is(.dark *));
 
 /*
   Pleros Design Tokens
@@ -16,7 +10,7 @@
 
 :root {
   /* Typography */
-  --font-sans: "Suisse Int'l", Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-suisse-intl), "Suisse Int'l", Inter, ui-sans-serif, system-ui, sans-serif;
 
   --text-display: clamp(2.4rem, 5vw, 4.8rem);
   --text-h1: clamp(2rem, 4vw, 3.4rem);
@@ -51,11 +45,11 @@
   --space-24: 6rem;
 
   /* Radius */
-  --radius-sm: 1rem;      /* 16px */
+  --radius-sm: 0.875rem;  /* 14px */
   --radius-md: 1.125rem;  /* 18px */
   --radius-lg: 1.25rem;   /* 20px */
-  --radius-xl: 1.5rem;    /* 24px */
-  --radius-2xl: 1.75rem;  /* 28px */
+  --radius-xl: 1.375rem;  /* 22px */
+  --radius-2xl: 1.5rem;   /* 24px */
   --radius-pill: 999px;
 
   /* Layout */
@@ -71,10 +65,10 @@
   --color-brand-green: #70d20b;
 
   /* Neutrals */
-  --color-cream-50: #fbf8f2;
-  --color-cream-100: #f6f1e8;
+  --color-cream-50: #fcfbf8;
+  --color-cream-100: #f8f6f2;
   --color-surface: #ffffff;
-  --color-surface-muted: #f8f5ef;
+  --color-surface-muted: #f8f7f4;
 
   --color-ink-900: #0f1728;
   --color-ink-800: #162034;
@@ -89,7 +83,7 @@
   --color-line: rgba(15, 23, 40, 0.08);
   --color-line-strong: rgba(15, 23, 40, 0.14);
 
-  --color-bg: var(--color-cream-50);
+  --color-bg: #fdfdfc;
   --color-link: var(--color-brand-blue);
   --color-primary: var(--color-brand-blue);
   --color-primary-hover: var(--color-brand-blue-hover);
@@ -101,23 +95,25 @@
   --shadow-lg: 0 20px 45px rgba(15, 23, 40, 0.1);
 
   /* shadcn bridge tokens */
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
+  --background: var(--color-bg);
+  --foreground: var(--color-text);
+  --card: var(--color-surface);
+  --card-foreground: var(--color-text);
+  --popover: var(--color-surface);
+  --popover-foreground: var(--color-text);
+  --primary: var(--color-primary);
+  --primary-foreground: #ffffff;
+  --secondary: var(--color-surface-muted);
+  --secondary-foreground: var(--color-text);
+  --muted: var(--color-surface-muted);
+  --muted-foreground: var(--color-text-muted);
+  --accent: rgba(1, 21, 133, 0.07);
+  --accent-foreground: var(--color-text-strong);
+  --destructive: #b42318;
   --destructive-foreground: #ffffff;
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --border: var(--color-line);
+  --input: var(--color-line-strong);
+  --ring: var(--color-focus);
 
   /* Questions theme */
   --questions-surface: #fbe4d3;
@@ -157,22 +153,6 @@
   --page-accent-soft: rgba(1, 21, 133, 0.08);
   --page-accent-ring: rgba(1, 21, 133, 0.18);
   --page-accent-glow: var(--shadow-md);
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --chart-1: oklch(0.809 0.105 251.813);
-  --chart-2: oklch(0.623 0.214 259.815);
-  --chart-3: oklch(0.546 0.245 262.881);
-  --chart-4: oklch(0.488 0.243 264.376);
-  --chart-5: oklch(0.424 0.199 265.638);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
 }
 
 @theme inline {
@@ -203,21 +183,6 @@
   --radius-lg: var(--radius-lg);
   --radius-xl: var(--radius-xl);
   --radius-2xl: var(--radius-2xl);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
 }
 
 * {
@@ -243,7 +208,7 @@ body {
   color: var(--color-text-strong);
 }
 
-a {
+:where(a) {
   color: inherit;
   text-decoration: none;
 }
@@ -340,21 +305,21 @@ select {
 .surface-card {
   background: var(--page-surface-raised);
   border: 1px solid var(--color-line);
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
 }
 
 .surface-card-muted {
   background: var(--page-accent-surface);
   border: 1px solid var(--color-line);
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
 }
 
 .surface-dark {
   background: linear-gradient(180deg, #14203a 0%, #0f1728 100%);
   color: var(--color-text-on-dark);
-  border-radius: var(--radius-2xl);
+  border-radius: var(--radius-lg);
   border: 1px solid rgba(255, 255, 255, 0.06);
   box-shadow: var(--shadow-lg);
 }
@@ -370,8 +335,8 @@ select {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  min-height: 3rem;
-  padding-inline: 1.1rem;
+  min-height: 2.75rem;
+  padding-inline: 1rem;
   border: 0;
   border-radius: var(--radius-pill);
   background: var(--color-primary);
@@ -404,8 +369,8 @@ select {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  min-height: 3rem;
-  padding-inline: 1.1rem;
+  min-height: 2.75rem;
+  padding-inline: 1rem;
   border: 1px solid var(--color-line-strong);
   border-radius: var(--radius-pill);
   background: rgba(255, 255, 255, 0.8);
@@ -432,7 +397,7 @@ select {
   min-height: 3rem;
   padding: 0.875rem 1rem;
   border: 1px solid var(--color-line-strong);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   background: rgba(255, 255, 255, 0.96);
   color: var(--color-text);
   outline: none;
@@ -505,7 +470,7 @@ select {
   gap: 1rem;
   padding: 1.1rem;
   border: 1px solid rgba(15, 23, 40, 0.08);
-  border-radius: var(--radius-2xl);
+  border-radius: var(--radius-xl);
   background: var(--page-accent-surface);
   box-shadow: var(--shadow-sm);
   transition:
@@ -528,7 +493,7 @@ select {
 .pleros-media-card {
   overflow: hidden;
   border: 1px solid var(--color-line);
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-md);
   background: #fff;
   box-shadow: var(--shadow-sm);
 }
@@ -549,7 +514,7 @@ select {
 .pleros-featured-card {
   overflow: hidden;
   border: 1px solid var(--color-line);
-  border-radius: var(--radius-2xl);
+  border-radius: var(--radius-lg);
   background: #fff;
   box-shadow: var(--shadow-md);
 }
@@ -557,7 +522,7 @@ select {
 .pleros-audio-card,
 .pleros-payment-card {
   border: 1px solid var(--color-line);
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-md);
   background: #fff;
   box-shadow: var(--shadow-sm);
 }
@@ -568,14 +533,14 @@ select {
   position: sticky;
   top: 0;
   z-index: 40;
-  backdrop-filter: blur(16px);
-  background: rgba(251, 248, 242, 0.8);
-  border-bottom: 1px solid rgba(15, 23, 40, 0.06);
+  background: #011585;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 8px 22px rgba(1, 21, 133, 0.34);
 }
 
 .pleros-footer {
   border-top: 1px solid var(--color-line);
-  background: #faf6ee;
+  background: var(--color-cream-100);
 }
 
 /* Motion safety */
@@ -590,59 +555,5 @@ select {
   *::after {
     animation: none !important;
     transition: none !important;
-  }
-}
-
-/*
-  ---break---
-*/
-
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.809 0.105 251.813);
-  --chart-2: oklch(0.623 0.214 259.815);
-  --chart-3: oklch(0.546 0.245 262.881);
-  --chart-4: oklch(0.488 0.243 264.376);
-  --chart-5: oklch(0.424 0.199 265.638);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
-}
-
-/*
-  ---break---
-*/
-
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-  html {
-    @apply font-sans;
   }
 }

@@ -1,63 +1,44 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import { Geist } from "next/font/google";
-import { cn } from "@/lib/utils";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
-
-const hallowModerat = localFont({
+const suisseIntl = localFont({
   src: [
     {
-      path: "./fonts/Hallow-Moderat-Regular.woff2",
+      path: "./fonts/suisse-intl/SuisseIntl-Light.woff2",
+      weight: "300",
+      style: "normal",
+    },
+    {
+      path: "./fonts/suisse-intl/SuisseIntl-Regular.woff2",
       weight: "400",
       style: "normal",
     },
     {
-      path: "./fonts/Hallow-Moderat-Bold.woff2",
+      path: "./fonts/suisse-intl/SuisseIntl-Medium.woff2",
+      weight: "500",
+      style: "normal",
+    },
+    {
+      path: "./fonts/suisse-intl/SuisseIntl-SemiBold.woff2",
+      weight: "600",
+      style: "normal",
+    },
+    {
+      path: "./fonts/suisse-intl/SuisseIntl-Bold.woff2",
       weight: "700",
       style: "normal",
     },
-    {
-      path: "./fonts/Hallow-Moderat-Extrabold.woff2",
-      weight: "800",
-      style: "normal",
-    },
   ],
-  variable: "--font-hallow-moderat",
+  variable: "--font-suisse-intl",
   display: "swap",
-});
-
-const hallowModeratSerif = localFont({
-  src: [
-    {
-      path: "./fonts/Hallow-Moderat-Serif-Regular.woff2",
-      weight: "400",
-      style: "normal",
-    },
-    {
-      path: "./fonts/Hallow-Moderat-Serif-Semibold.woff",
-      weight: "600",
-      style: "normal",
-    },
-    {
-      path: "./fonts/Hallow-Moderat-Serif-Regular-Italic.woff",
-      weight: "400",
-      style: "italic",
-    },
-    {
-      path: "./fonts/Hallow-Moderat-Serif-Semibold-Italic.woff",
-      weight: "600",
-      style: "italic",
-    },
-  ],
-  variable: "--font-hallow-moderat-serif",
-  display: "swap",
+  preload: true,
+  fallback: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
 });
 
 export const metadata: Metadata = {
   title: "Pleros",
-  description: "Pleros member dashboard",
+  description: "Pleros website foundations",
 };
 
 export default function RootLayout({
@@ -66,11 +47,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={cn(hallowModerat.variable, hallowModeratSerif.variable, "font-sans", geist.variable)}
-    >
-      <body className="antialiased">{children}</body>
+    <html lang="en" className={suisseIntl.variable}>
+      <body className="page-shell antialiased">{children}</body>
     </html>
   );
 }
