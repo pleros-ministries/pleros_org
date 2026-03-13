@@ -79,3 +79,4 @@ Deliverables:
 - The Suisse Int'l font files live in `app/fonts/suisse-intl/`; they are committed to the repo.
 - PPC platform routes (`/ppc/*`) require DB for most pages, but `/ppc/sign-in` works without it via demo auth (no `DEMO_AUTH` env var needed — defaults to enabled).
 - The `(site)` route group (homepage, style-demo) is fully static and works without any env vars or DB.
+- Drizzle query modules in `lib/db/queries/` import `db` via `@/lib/db` and schema via `import * as schema from "../schema"`. They use the relational query API (`db.query.*`) and require a Neon `DATABASE_URL` at runtime.
