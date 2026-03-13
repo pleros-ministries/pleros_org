@@ -57,3 +57,25 @@ Deliverables:
 - app shell implemented
 - style-demo page implemented
 - brief summary of files added/changed
+
+## Cursor Cloud specific instructions
+
+### Services
+
+| Service | Command | Notes |
+|---------|---------|-------|
+| Next.js dev server | `npm run dev` | Port 3000. No `.env` needed for UI-only work (homepage, style-demo). DB routes require `DATABASE_URL`. |
+
+### Key commands
+
+- **Lint**: `npm run lint` (ESLint 9, warnings expected for unused vars in PPC modules)
+- **Test**: `npm test` (Vitest, 14 files / 59 pure-logic tests, no DB needed)
+- **Dev**: `npm run dev` (Turbopack, hot reload)
+- **Build**: `npm run build`
+
+### Gotchas
+
+- Both `package-lock.json` and `pnpm-lock.yaml` exist; use **npm** (`package-lock.json` is canonical).
+- The Suisse Int'l font files live in `app/fonts/suisse-intl/`; they are committed to the repo.
+- PPC platform routes (`/ppc/*`) require DB for most pages, but `/ppc/sign-in` works without it via demo auth (no `DEMO_AUTH` env var needed — defaults to enabled).
+- The `(site)` route group (homepage, style-demo) is fully static and works without any env vars or DB.
