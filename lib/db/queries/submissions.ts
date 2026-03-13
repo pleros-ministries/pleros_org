@@ -1,141 +1,68 @@
-import { eq, and, desc, asc } from "drizzle-orm";
-import { db } from "../index";
-import { writtenSubmissions, studentProgress, users, lessons } from "../schema";
+import { eq, and, desc } from "drizzle-orm";
+import { db } from "@/lib/db";
+import * as schema from "../schema";
 
 export async function getSubmission(userId: string, lessonId: number) {
-  const [sub] = await db
-    .select()
-    .from(writtenSubmissions)
-    .where(
-      and(
-        eq(writtenSubmissions.userId, userId),
-        eq(writtenSubmissions.lessonId, lessonId),
-      ),
-    )
-    .orderBy(desc(writtenSubmissions.createdAt))
-    .limit(1);
-  return sub ?? null;
+  return db.query.writtenSubmissions.findFirst({
+    where: (s, { eq: eq2, and: and2 }) =>
+      and2(eq2(s.userId, userId), eq2(s.lessonId, lessonId)),
+  }) ?? null;
 }
 
-export async function getSubmissionById(submissionId: number) {
-  const [sub] = await db
-    .select({
-      submission: writtenSubmissions,
-      studentName: users.name,
-      studentEmail: users.email,
-      lessonNumber: lessons.lessonNumber,
-      lessonTitle: lessons.title,
-      levelId: lessons.levelId,
-    })
-    .from(writtenSubmissions)
-    .innerJoin(users, eq(writtenSubmissions.userId, users.id))
-    .innerJoin(lessons, eq(writtenSubmissions.lessonId, lessons.id))
-    .where(eq(writtenSubmissions.id, submissionId));
-  return sub ?? null;
-}
-
-export async function listPendingSubmissions(levelIds?: number[]) {
-  const baseQuery = db
-    .select({
-      submission: writtenSubmissions,
-      studentName: users.name,
-      lessonNumber: lessons.lessonNumber,
-      lessonTitle: lessons.title,
-      levelId: lessons.levelId,
-    })
-    .from(writtenSubmissions)
-    .innerJoin(users, eq(writtenSubmissions.userId, users.id))
-    .innerJoin(lessons, eq(writtenSubmissions.lessonId, lessons.id))
-    .where(eq(writtenSubmissions.status, "submitted"))
-    .orderBy(asc(writtenSubmissions.submittedAt));
-
-  return baseQuery;
-}
-
-export async function listSubmissionsByStatus(status: "draft" | "submitted" | "approved" | "needs_revision") {
-  return db
-    .select({
-      submission: writtenSubmissions,
-      studentName: users.name,
-      studentEmail: users.email,
-      lessonNumber: lessons.lessonNumber,
-      lessonTitle: lessons.title,
-      levelId: lessons.levelId,
-    })
-    .from(writtenSubmissions)
-    .innerJoin(users, eq(writtenSubmissions.userId, users.id))
-    .innerJoin(lessons, eq(writtenSubmissions.lessonId, lessons.id))
-    .where(eq(writtenSubmissions.status, status))
-    .orderBy(desc(writtenSubmissions.submittedAt));
-}
-
-export async function saveDraft(userId: string, lessonId: number, content: string) {
+export async function upsertDraft(userId: string, lessonId: number, content: string) {
   const existing = await getSubmission(userId, lessonId);
+
   if (existing) {
     const [updated] = await db
-      .update(writtenSubmissions)
-      .set({ content, status: "draft" })
-      .where(eq(writtenSubmissions.id, existing.id))
+      .update(schema.writtenSubmissions)
+      .set({ content })
+      .where(eq(schema.writtenSubmissions.id, existing.id))
       .returning();
     return updated;
   }
+
   const [created] = await db
-    .insert(writtenSubmissions)
+    .insert(schema.writtenSubmissions)
     .values({ userId, lessonId, content, status: "draft" })
     .returning();
   return created;
 }
 
-export async function submitForReview(userId: string, lessonId: number, content: string) {
-  const existing = await getSubmission(userId, lessonId);
-  if (existing) {
-    const [updated] = await db
-      .update(writtenSubmissions)
-      .set({ content, status: "submitted", submittedAt: new Date(), reviewerNote: null })
-      .where(eq(writtenSubmissions.id, existing.id))
-      .returning();
-    return updated;
-  }
-  const [created] = await db
-    .insert(writtenSubmissions)
-    .values({ userId, lessonId, content, status: "submitted", submittedAt: new Date() })
+export async function submitForReview(userId: string, lessonId: number) {
+  const submission = await getSubmission(userId, lessonId);
+  if (!submission) throw new Error("No draft found");
+
+  const [updated] = await db
+    .update(schema.writtenSubmissions)
+    .set({ status: "submitted", submittedAt: new Date() })
+    .where(eq(schema.writtenSubmissions.id, submission.id))
     .returning();
-  return created;
+  return updated;
 }
 
 export async function approveSubmission(submissionId: number, reviewerId: string) {
   const [updated] = await db
-    .update(writtenSubmissions)
+    .update(schema.writtenSubmissions)
     .set({
       status: "approved",
       reviewedBy: reviewerId,
       reviewedAt: new Date(),
     })
-    .where(eq(writtenSubmissions.id, submissionId))
+    .where(eq(schema.writtenSubmissions.id, submissionId))
     .returning();
 
   if (updated) {
-    const [existing] = await db
-      .select()
-      .from(studentProgress)
-      .where(
-        and(
-          eq(studentProgress.userId, updated.userId),
-          eq(studentProgress.lessonId, updated.lessonId),
-        ),
-      );
-    if (existing) {
-      await db
-        .update(studentProgress)
-        .set({ writtenApproved: true })
-        .where(eq(studentProgress.id, existing.id));
-    } else {
-      await db.insert(studentProgress).values({
+    await db
+      .insert(schema.studentProgress)
+      .values({
         userId: updated.userId,
         lessonId: updated.lessonId,
         writtenApproved: true,
+      })
+      .onConflictDoUpdate({
+        target: [schema.studentProgress.userId, schema.studentProgress.lessonId],
+        set: { writtenApproved: true },
       });
-    }
   }
 
   return updated;
@@ -143,14 +70,46 @@ export async function approveSubmission(submissionId: number, reviewerId: string
 
 export async function requestRevision(submissionId: number, reviewerId: string, note: string) {
   const [updated] = await db
-    .update(writtenSubmissions)
+    .update(schema.writtenSubmissions)
     .set({
       status: "needs_revision",
       reviewedBy: reviewerId,
-      reviewedAt: new Date(),
       reviewerNote: note,
+      reviewedAt: new Date(),
     })
-    .where(eq(writtenSubmissions.id, submissionId))
+    .where(eq(schema.writtenSubmissions.id, submissionId))
     .returning();
   return updated;
+}
+
+export async function getPendingSubmissions() {
+  return db.query.writtenSubmissions.findMany({
+    where: (s, { eq: eq2 }) => eq2(s.status, "submitted"),
+    orderBy: (s, { asc }) => [asc(s.submittedAt)],
+  });
+}
+
+export async function getReviewQueue() {
+  const submissions = await db
+    .select({
+      id: schema.writtenSubmissions.id,
+      userId: schema.writtenSubmissions.userId,
+      lessonId: schema.writtenSubmissions.lessonId,
+      content: schema.writtenSubmissions.content,
+      status: schema.writtenSubmissions.status,
+      reviewerNote: schema.writtenSubmissions.reviewerNote,
+      submittedAt: schema.writtenSubmissions.submittedAt,
+      reviewedAt: schema.writtenSubmissions.reviewedAt,
+      studentName: schema.users.name,
+      studentEmail: schema.users.email,
+      lessonTitle: schema.lessons.title,
+      lessonNumber: schema.lessons.lessonNumber,
+      levelId: schema.lessons.levelId,
+    })
+    .from(schema.writtenSubmissions)
+    .innerJoin(schema.users, eq(schema.writtenSubmissions.userId, schema.users.id))
+    .innerJoin(schema.lessons, eq(schema.writtenSubmissions.lessonId, schema.lessons.id))
+    .orderBy(desc(schema.writtenSubmissions.submittedAt));
+
+  return submissions;
 }

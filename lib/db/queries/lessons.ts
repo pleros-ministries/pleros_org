@@ -1,64 +1,66 @@
 import { eq, and, asc } from "drizzle-orm";
-import { db } from "../index";
-import { lessons, levels, studentProgress } from "../schema";
+import { db } from "@/lib/db";
+import * as schema from "../schema";
 
 export async function getLevels() {
-  return db.select().from(levels).orderBy(asc(levels.sortOrder));
+  return db.query.levels.findMany({
+    orderBy: (l, { asc }) => [asc(l.sortOrder)],
+  });
 }
 
-export async function getLevelById(levelId: number) {
-  const [level] = await db.select().from(levels).where(eq(levels.id, levelId));
-  return level ?? null;
+export async function getLevelById(id: number) {
+  return db.query.levels.findFirst({
+    where: (l, { eq: eq2 }) => eq2(l.id, id),
+  }) ?? null;
 }
 
 export async function getLessonsByLevel(levelId: number) {
-  return db
-    .select()
-    .from(lessons)
-    .where(eq(lessons.levelId, levelId))
-    .orderBy(asc(lessons.lessonNumber));
+  return db.query.lessons.findMany({
+    where: (l, { eq: eq2, and: and2 }) => and2(eq2(l.levelId, levelId), eq2(l.status, "published")),
+    orderBy: (l, { asc }) => [asc(l.lessonNumber)],
+  });
 }
 
-export async function getPublishedLessonsByLevel(levelId: number) {
-  return db
-    .select()
-    .from(lessons)
-    .where(and(eq(lessons.levelId, levelId), eq(lessons.status, "published")))
-    .orderBy(asc(lessons.lessonNumber));
+export async function getAllLessonsByLevel(levelId: number) {
+  return db.query.lessons.findMany({
+    where: (l, { eq: eq2 }) => eq2(l.levelId, levelId),
+    orderBy: (l, { asc }) => [asc(l.lessonNumber)],
+  });
 }
 
-export async function getLessonById(lessonId: number) {
-  const [lesson] = await db.select().from(lessons).where(eq(lessons.id, lessonId));
-  return lesson ?? null;
+export async function getLessonById(id: number) {
+  return db.query.lessons.findFirst({
+    where: (l, { eq: eq2 }) => eq2(l.id, id),
+  }) ?? null;
 }
 
 export async function getLessonWithProgress(lessonId: number, userId: string) {
-  const [lesson] = await db.select().from(lessons).where(eq(lessons.id, lessonId));
+  const lesson = await getLessonById(lessonId);
   if (!lesson) return null;
 
-  const [progress] = await db
-    .select()
-    .from(studentProgress)
-    .where(
-      and(eq(studentProgress.lessonId, lessonId), eq(studentProgress.userId, userId)),
-    );
+  const progress = await db.query.studentProgress.findFirst({
+    where: (p, { eq: eq2, and: and2 }) =>
+      and2(eq2(p.userId, userId), eq2(p.lessonId, lessonId)),
+  });
 
-  const [level] = await db.select().from(levels).where(eq(levels.id, lesson.levelId));
-
-  return {
-    lesson,
-    progress: progress ?? null,
-    level: level ?? null,
-  };
+  return { lesson, progress: progress ?? null };
 }
 
-export async function getAdjacentLessons(lessonId: number, levelId: number) {
-  const allLessons = await getLessonsByLevel(levelId);
-  const idx = allLessons.findIndex((l) => l.id === lessonId);
-  return {
-    prev: idx > 0 ? allLessons[idx - 1] : null,
-    next: idx < allLessons.length - 1 ? allLessons[idx + 1] : null,
-  };
+export async function getStudentLevelProgress(userId: string, levelId: number) {
+  const lessons = await getLessonsByLevel(levelId);
+  const progress = await db
+    .select()
+    .from(schema.studentProgress)
+    .where(eq(schema.studentProgress.userId, userId));
+
+  return lessons.map((lesson) => {
+    const p = progress.find((pr) => pr.lessonId === lesson.id);
+    return {
+      lesson,
+      progress: p ?? null,
+      completed: p ? p.audioListened && p.notesRead && p.quizPassed && p.writtenApproved : false,
+    };
+  });
 }
 
 export async function createLesson(data: {
@@ -69,30 +71,25 @@ export async function createLesson(data: {
   notesContent?: string;
   status?: "draft" | "published";
 }) {
-  const [lesson] = await db
-    .insert(lessons)
-    .values(data)
-    .returning();
+  const [lesson] = await db.insert(schema.lessons).values(data).returning();
   return lesson;
 }
 
-export async function updateLesson(
-  lessonId: number,
-  data: Partial<{
-    title: string;
-    audioUrl: string | null;
-    notesContent: string | null;
-    status: "draft" | "published";
-  }>,
-) {
+export async function updateLesson(id: number, data: Partial<{
+  title: string;
+  audioUrl: string | null;
+  notesContent: string | null;
+  status: "draft" | "published";
+  lessonNumber: number;
+}>) {
   const [lesson] = await db
-    .update(lessons)
+    .update(schema.lessons)
     .set({ ...data, updatedAt: new Date() })
-    .where(eq(lessons.id, lessonId))
+    .where(eq(schema.lessons.id, id))
     .returning();
   return lesson;
 }
 
-export async function deleteLesson(lessonId: number) {
-  await db.delete(lessons).where(eq(lessons.id, lessonId));
+export async function deleteLesson(id: number) {
+  await db.delete(schema.lessons).where(eq(schema.lessons.id, id));
 }

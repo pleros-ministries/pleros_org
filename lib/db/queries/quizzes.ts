@@ -1,122 +1,97 @@
-import { eq, and, asc, desc } from "drizzle-orm";
-import { db } from "../index";
-import { quizQuestions, quizAttempts, studentProgress } from "../schema";
+import { eq, and, desc, count } from "drizzle-orm";
+import { db } from "@/lib/db";
+import * as schema from "../schema";
 
 export async function getQuizQuestions(lessonId: number) {
-  return db
+  return db.query.quizQuestions.findMany({
+    where: (q, { eq: eq2 }) => eq2(q.lessonId, lessonId),
+    orderBy: (q, { asc }) => [asc(q.sortOrder)],
+  });
+}
+
+export async function getBestQuizScore(userId: string, lessonId: number) {
+  const attempts = await db
     .select()
-    .from(quizQuestions)
-    .where(eq(quizQuestions.lessonId, lessonId))
-    .orderBy(asc(quizQuestions.sortOrder));
+    .from(schema.quizAttempts)
+    .where(and(eq(schema.quizAttempts.userId, userId), eq(schema.quizAttempts.lessonId, lessonId)))
+    .orderBy(desc(schema.quizAttempts.score))
+    .limit(1);
+
+  return attempts[0]?.score ?? null;
 }
 
 export async function getQuizAttempts(userId: string, lessonId: number) {
   return db
     .select()
-    .from(quizAttempts)
-    .where(
-      and(eq(quizAttempts.userId, userId), eq(quizAttempts.lessonId, lessonId)),
-    )
-    .orderBy(desc(quizAttempts.createdAt));
+    .from(schema.quizAttempts)
+    .where(and(eq(schema.quizAttempts.userId, userId), eq(schema.quizAttempts.lessonId, lessonId)))
+    .orderBy(desc(schema.quizAttempts.createdAt));
 }
 
-export async function getBestQuizScore(userId: string, lessonId: number) {
-  const attempts = await getQuizAttempts(userId, lessonId);
-  if (attempts.length === 0) return null;
-  return Math.max(...attempts.map((a) => a.score));
+export async function getAttemptCount(userId: string, lessonId: number) {
+  const [result] = await db
+    .select({ count: count() })
+    .from(schema.quizAttempts)
+    .where(and(eq(schema.quizAttempts.userId, userId), eq(schema.quizAttempts.lessonId, lessonId)));
+  return result?.count ?? 0;
 }
 
 export async function submitQuizAttempt(data: {
   userId: string;
   lessonId: number;
   answers: Record<string, string>;
+  score: number;
+  attemptNumber: number;
 }) {
-  const questions = await getQuizQuestions(data.lessonId);
-  const mcQuestions = questions.filter((q) => q.questionType === "multiple_choice");
+  const [attempt] = await db.insert(schema.quizAttempts).values(data).returning();
 
-  let correct = 0;
-  for (const q of mcQuestions) {
-    if (data.answers[String(q.id)] === q.correctAnswer) {
-      correct++;
-    }
-  }
-
-  const totalGradable = mcQuestions.length;
-  const score = totalGradable === 0 ? 100 : Math.round((correct / totalGradable) * 100);
-
-  const existingAttempts = await getQuizAttempts(data.userId, data.lessonId);
-  const attemptNumber = existingAttempts.length + 1;
-
-  const [attempt] = await db
-    .insert(quizAttempts)
-    .values({
-      userId: data.userId,
-      lessonId: data.lessonId,
-      answers: data.answers,
-      score,
-      attemptNumber,
-    })
-    .returning();
-
-  if (score >= 70) {
-    const [existing] = await db
-      .select()
-      .from(studentProgress)
-      .where(
-        and(
-          eq(studentProgress.userId, data.userId),
-          eq(studentProgress.lessonId, data.lessonId),
-        ),
-      );
-
-    if (existing) {
-      const newHighest = Math.max(existing.highestQuizScore ?? 0, score);
-      await db
-        .update(studentProgress)
-        .set({ quizPassed: true, highestQuizScore: newHighest })
-        .where(eq(studentProgress.id, existing.id));
-    } else {
-      await db.insert(studentProgress).values({
+  if (data.score >= 70) {
+    await db
+      .insert(schema.studentProgress)
+      .values({
         userId: data.userId,
         lessonId: data.lessonId,
         quizPassed: true,
-        highestQuizScore: score,
+        highestQuizScore: data.score,
+      })
+      .onConflictDoUpdate({
+        target: [schema.studentProgress.userId, schema.studentProgress.lessonId],
+        set: {
+          quizPassed: true,
+          highestQuizScore: data.score,
+        },
       });
-    }
   }
 
-  return { attempt, score, passed: score >= 70, totalQuestions: questions.length, mcCorrect: correct, mcTotal: totalGradable };
+  return attempt;
 }
 
 export async function createQuizQuestion(data: {
   lessonId: number;
   questionType: "multiple_choice" | "short_text";
   questionText: string;
-  options?: string[];
-  correctAnswer?: string;
-  sortOrder: number;
+  options?: string[] | null;
+  correctAnswer?: string | null;
+  sortOrder?: number;
 }) {
-  const [q] = await db.insert(quizQuestions).values(data).returning();
-  return q;
+  const [question] = await db.insert(schema.quizQuestions).values(data).returning();
+  return question;
 }
 
-export async function updateQuizQuestion(
-  questionId: number,
-  data: Partial<{
-    questionText: string;
-    options: string[];
-    correctAnswer: string;
-    sortOrder: number;
-  }>,
-) {
-  const [q] = await db
-    .update(quizQuestions)
+export async function updateQuizQuestion(id: number, data: Partial<{
+  questionText: string;
+  options: string[] | null;
+  correctAnswer: string | null;
+  sortOrder: number;
+}>) {
+  const [question] = await db
+    .update(schema.quizQuestions)
     .set(data)
-    .where(eq(quizQuestions.id, questionId))
+    .where(eq(schema.quizQuestions.id, id))
     .returning();
-  return q;
+  return question;
 }
 
-export async function deleteQuizQuestion(questionId: number) {
-  await db.delete(quizQuestions).where(eq(quizQuestions.id, questionId));
+export async function deleteQuizQuestion(id: number) {
+  await db.delete(schema.quizQuestions).where(eq(schema.quizQuestions.id, id));
 }

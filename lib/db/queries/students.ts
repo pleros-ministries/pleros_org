@@ -1,162 +1,146 @@
-import { eq, and, ilike, or, sql, desc, asc, count } from "drizzle-orm";
-import { db } from "../index";
-import {
-  users,
-  studentProgress,
-  lessons,
-  levels,
-  levelGraduations,
-  writtenSubmissions,
-  qaThreads,
-} from "../schema";
+import { eq, sql, desc, and, count } from "drizzle-orm";
+import { db } from "@/lib/db";
+import * as schema from "../schema";
 
-export type StudentListItem = {
-  id: string;
-  name: string;
-  email: string;
-  location: string | null;
-  level: number;
-  levelTitle: string;
-  progressPercent: number;
-  currentLesson: string;
-  lastActivity: string | null;
-  qaPending: number;
-  reviewsPending: number;
-  graduationStatus: "in_progress" | "ready_for_review" | "graduated";
-  createdAt: Date;
-};
-
-export type StudentFilter = {
-  query?: string;
+type StudentListParams = {
+  search?: string;
   level?: number;
-  page?: number;
-  perPage?: number;
+  limit?: number;
+  offset?: number;
   sortBy?: "name" | "level" | "progress" | "lastActivity";
   sortDir?: "asc" | "desc";
 };
 
+export async function getStudentList(params: StudentListParams = {}) {
+  const { search, level, limit = 50, offset = 0 } = params;
+
+  const students = await db.query.users.findMany({
+    where: (u, { eq: eq2, and: and2, like }) => {
+      const conditions = [eq2(u.role, "student")];
+      if (search) {
+        conditions.push(
+          sql`(${u.name} ILIKE ${'%' + search + '%'} OR ${u.email} ILIKE ${'%' + search + '%'})` as any
+        );
+      }
+      return and2(...conditions);
+    },
+    limit,
+    offset,
+    orderBy: (u, { asc }) => [asc(u.name)],
+  });
+
+  const enriched = await Promise.all(
+    students.map(async (student) => {
+      const progress = await db
+        .select()
+        .from(schema.studentProgress)
+        .where(eq(schema.studentProgress.userId, student.id));
+
+      const graduations = await db
+        .select()
+        .from(schema.levelGraduations)
+        .where(eq(schema.levelGraduations.userId, student.id));
+
+      const graduatedLevels = graduations.map((g) => g.levelId);
+      const currentLevel = graduatedLevels.length > 0
+        ? Math.max(...graduatedLevels) + 1
+        : student.startingLevel;
+
+      const currentLevelLessons = await db.query.lessons.findMany({
+        where: (l, { eq: eq2 }) => eq2(l.levelId, Math.min(currentLevel, 5)),
+      });
+
+      const completedLessons = progress.filter((p) => 
+        p.audioListened && p.notesRead && p.quizPassed && p.writtenApproved
+      );
+
+      const totalLessons = currentLevelLessons.length || 1;
+      const currentLevelProgress = progress.filter((p) =>
+        currentLevelLessons.some((l) => l.id === p.lessonId)
+      );
+      const currentLevelCompleted = currentLevelProgress.filter((p) =>
+        p.audioListened && p.notesRead && p.quizPassed && p.writtenApproved
+      );
+      const progressPercent = Math.round((currentLevelCompleted.length / totalLessons) * 100);
+
+      const nextLesson = currentLevelLessons
+        .sort((a, b) => a.lessonNumber - b.lessonNumber)
+        .find((l) => !currentLevelProgress.some((p) => p.lessonId === l.id && p.audioListened && p.notesRead && p.quizPassed && p.writtenApproved));
+
+      const openQa = await db
+        .select({ count: count() })
+        .from(schema.qaThreads)
+        .where(and(eq(schema.qaThreads.userId, student.id), eq(schema.qaThreads.status, "open")));
+
+      const pendingReviews = await db
+        .select({ count: count() })
+        .from(schema.writtenSubmissions)
+        .where(and(eq(schema.writtenSubmissions.userId, student.id), eq(schema.writtenSubmissions.status, "submitted")));
+
+      if (level && currentLevel !== level) return null;
+
+      return {
+        ...student,
+        currentLevel: Math.min(currentLevel, 5),
+        progressPercent,
+        currentLesson: nextLesson ? `L${Math.min(currentLevel, 5)}.${nextLesson.lessonNumber}` : "Complete",
+        qaPending: openQa[0]?.count ?? 0,
+        reviewsPending: pendingReviews[0]?.count ?? 0,
+        graduationStatus: currentLevelCompleted.length === totalLessons ? "ready" : "in_progress",
+        completedLessons: completedLessons.length,
+      };
+    })
+  );
+
+  return enriched.filter(Boolean);
+}
+
 export async function getStudentById(userId: string) {
-  const [user] = await db
-    .select()
-    .from(users)
-    .where(and(eq(users.id, userId), eq(users.role, "student")));
-  return user ?? null;
+  const student = await db.query.users.findFirst({
+    where: (u, { eq: eq2 }) => eq2(u.id, userId),
+  });
+  return student ?? null;
 }
 
-export async function listStudents(filter: StudentFilter = {}) {
-  const { query, level, page = 1, perPage = 20 } = filter;
-  const offset = (page - 1) * perPage;
+export async function getDashboardStats() {
+  const [studentCount] = await db
+    .select({ count: count() })
+    .from(schema.users)
+    .where(eq(schema.users.role, "student"));
 
-  const conditions = [eq(users.role, "student")];
-  if (query) {
-    conditions.push(
-      or(
-        ilike(users.name, `%${query}%`),
-        ilike(users.email, `%${query}%`),
-      )!,
-    );
+  const [pendingReviews] = await db
+    .select({ count: count() })
+    .from(schema.writtenSubmissions)
+    .where(eq(schema.writtenSubmissions.status, "submitted"));
+
+  const [openQa] = await db
+    .select({ count: count() })
+    .from(schema.qaThreads)
+    .where(eq(schema.qaThreads.status, "open"));
+
+  const allProgress = await db.select().from(schema.studentProgress);
+  const studentProgressMap = new Map<string, number[]>();
+  for (const p of allProgress) {
+    const arr = studentProgressMap.get(p.userId) || [];
+    if (p.audioListened && p.notesRead && p.quizPassed && p.writtenApproved) {
+      arr.push(1);
+    }
+    studentProgressMap.set(p.userId, arr);
   }
 
-  const rows = await db
-    .select()
-    .from(users)
-    .where(and(...conditions))
-    .orderBy(asc(users.name))
-    .limit(perPage)
-    .offset(offset);
-
-  const [{ total }] = await db
-    .select({ total: count() })
-    .from(users)
-    .where(and(...conditions));
-
-  return { rows, total };
-}
-
-export async function getStudentProgress(userId: string) {
-  return db
-    .select({
-      lessonId: studentProgress.lessonId,
-      audioListened: studentProgress.audioListened,
-      notesRead: studentProgress.notesRead,
-      quizPassed: studentProgress.quizPassed,
-      highestQuizScore: studentProgress.highestQuizScore,
-      writtenApproved: studentProgress.writtenApproved,
-      completedAt: studentProgress.completedAt,
-      lessonNumber: lessons.lessonNumber,
-      lessonTitle: lessons.title,
-      levelId: lessons.levelId,
-    })
-    .from(studentProgress)
-    .innerJoin(lessons, eq(studentProgress.lessonId, lessons.id))
-    .where(eq(studentProgress.userId, userId))
-    .orderBy(asc(lessons.levelId), asc(lessons.lessonNumber));
-}
-
-export async function getStudentGraduations(userId: string) {
-  return db
-    .select({
-      levelId: levelGraduations.levelId,
-      graduatedAt: levelGraduations.graduatedAt,
-      isOverride: levelGraduations.isOverride,
-    })
-    .from(levelGraduations)
-    .where(eq(levelGraduations.userId, userId))
-    .orderBy(asc(levelGraduations.levelId));
-}
-
-export async function getStudentCurrentLevel(userId: string): Promise<number> {
-  const graduations = await getStudentGraduations(userId);
-  const graduatedLevels = new Set(graduations.map((g) => g.levelId));
-  for (let l = 1; l <= 5; l++) {
-    if (!graduatedLevels.has(l)) return l;
+  let totalPercent = 0;
+  let studentWithProgress = 0;
+  for (const [, completed] of studentProgressMap) {
+    if (completed.length > 0) {
+      totalPercent += Math.min(completed.length * 20, 100);
+      studentWithProgress++;
+    }
   }
-  return 5;
-}
-
-export async function getStudentLevelProgress(userId: string, levelId: number) {
-  const levelLessons = await db
-    .select({ id: lessons.id, lessonNumber: lessons.lessonNumber })
-    .from(lessons)
-    .where(eq(lessons.levelId, levelId))
-    .orderBy(asc(lessons.lessonNumber));
-
-  const progress = await db
-    .select()
-    .from(studentProgress)
-    .innerJoin(lessons, eq(studentProgress.lessonId, lessons.id))
-    .where(
-      and(
-        eq(studentProgress.userId, userId),
-        eq(lessons.levelId, levelId),
-      ),
-    );
-
-  const completedCount = progress.filter(
-    (p) =>
-      p.student_progress.audioListened &&
-      p.student_progress.notesRead &&
-      p.student_progress.quizPassed &&
-      p.student_progress.writtenApproved,
-  ).length;
-
-  const totalLessons = levelLessons.length;
-  const progressPercent = totalLessons === 0 ? 0 : Math.round((completedCount / totalLessons) * 100);
 
   return {
-    totalLessons,
-    completedCount,
-    progressPercent,
-    lessons: levelLessons,
-    progress: progress.map((p) => p.student_progress),
+    activeStudents: studentCount?.count ?? 0,
+    averageProgress: studentWithProgress > 0 ? Math.round(totalPercent / studentWithProgress) : 0,
+    pendingReviews: pendingReviews?.count ?? 0,
+    openQa: openQa?.count ?? 0,
   };
-}
-
-export async function updateStudentLevel(userId: string, level: number) {
-  await db.update(users).set({ startingLevel: level }).where(eq(users.id, userId));
-}
-
-export async function resetStudentProgress(userId: string) {
-  await db.delete(studentProgress).where(eq(studentProgress.userId, userId));
-  await db.delete(levelGraduations).where(eq(levelGraduations.userId, userId));
 }
