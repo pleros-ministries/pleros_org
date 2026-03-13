@@ -69,7 +69,7 @@ Deliverables:
 ### Key commands
 
 - **Lint**: `npm run lint` (ESLint 9, warnings expected for unused vars in PPC modules)
-- **Test**: `npm test` (Vitest, 14 files / 59 pure-logic tests, no DB needed)
+- **Test**: `npm test` (Vitest, 7 files / 30 pure-logic tests, no DB needed)
 - **Dev**: `npm run dev` (Turbopack, hot reload)
 - **Build**: `npm run build`
 
