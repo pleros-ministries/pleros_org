@@ -1,76 +1,52 @@
-"use client";
+import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 
-import { useMemo, useState } from "react";
+import { getAppSession } from "@/lib/app-session";
+import { toExternalPpcPath } from "@/lib/ppc-access";
+import { getReviewQueue } from "@/lib/db/queries/submissions";
+import { PageHeader } from "@/components/ppc/page-header";
+import { ReviewQueueClient } from "@/components/ppc/review-queue-client";
 
-import { DEMO_REVIEW_QUEUE, formatShortDate } from "@/lib/ppc-demo";
+function serializeDate(value: Date | string | null | undefined): string | null {
+  if (!value) return null;
+  return value instanceof Date ? value.toISOString() : value;
+}
 
-type ReviewFilter = "all" | "pending" | "in_review" | "needs_revision";
+export default async function ReviewQueuePage() {
+  const session = await getAppSession();
+  if (!session) {
+    const h = await headers();
+    redirect(toExternalPpcPath(h.get("host"), "/sign-in"));
+  }
 
-export default function PpcReviewPage() {
-  const [filter, setFilter] = useState<ReviewFilter>("all");
+  const rawQueue = await getReviewQueue();
 
-  const items = useMemo(
-    () =>
-      DEMO_REVIEW_QUEUE.filter((item) => {
-        if (filter === "all") {
-          return true;
-        }
-
-        return item.status === filter;
-      }),
-    [filter],
-  );
+  const submissions = rawQueue.map((item) => ({
+    id: item.id,
+    userId: item.userId,
+    lessonId: item.lessonId,
+    content: item.content,
+    status: item.status === "submitted" ? "pending_review" : item.status,
+    reviewerNote: item.reviewerNote,
+    submittedAt: serializeDate(item.submittedAt),
+    reviewedAt: serializeDate(item.reviewedAt),
+    studentName: item.studentName,
+    studentEmail: item.studentEmail,
+    lessonTitle: item.lessonTitle,
+    lessonNumber: item.lessonNumber,
+    levelId: item.levelId,
+  }));
 
   return (
-    <div className="grid gap-4">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h2 className="text-2xl font-semibold tracking-tight text-zinc-900">Review Queue</h2>
-          <p className="mt-1 text-sm text-zinc-600">
-            Unified grading queue for short-text and written submissions.
-          </p>
-        </div>
-
-        <label className="grid gap-1">
-          <span className="text-xs font-medium uppercase tracking-[0.08em] text-zinc-500">
-            Filter
-          </span>
-          <select
-            value={filter}
-            onChange={(event) => setFilter(event.target.value as ReviewFilter)}
-            className="h-10 rounded border border-zinc-300 px-3 text-sm outline-none focus:border-zinc-700"
-          >
-            <option value="all">All</option>
-            <option value="pending">Pending</option>
-            <option value="in_review">In review</option>
-            <option value="needs_revision">Needs revision</option>
-          </select>
-        </label>
-      </div>
-
-      <section className="grid gap-3">
-        {items.map((item) => (
-          <article
-            key={item.id}
-            className="rounded-sm border border-zinc-200 bg-white p-4"
-          >
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <p className="text-sm font-semibold text-zinc-900">
-                {item.studentName} - Level {item.level} - {item.lesson}
-              </p>
-              <span className="rounded-full border border-zinc-300 px-2.5 py-1 text-xs font-medium text-zinc-700">
-                {item.status.replace("_", " ")}
-              </span>
-            </div>
-            <p className="mt-2 text-sm text-zinc-600">
-              {item.type === "short_text" ? "Short text" : "Written response"} submission
-            </p>
-            <p className="mt-1 text-xs text-zinc-500">
-              Submitted {formatShortDate(item.submittedAt)}
-            </p>
-          </article>
-        ))}
-      </section>
+    <div className="grid gap-6">
+      <PageHeader
+        title="Review queue"
+        description={`${submissions.length} total submissions`}
+      />
+      <ReviewQueueClient
+        submissions={submissions}
+        reviewerId={session.user.id}
+      />
     </div>
   );
 }
