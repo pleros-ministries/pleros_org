@@ -50,14 +50,14 @@ export function DataTable<T extends Record<string, unknown>>({
 
   if (sorted.length === 0) {
     return (
-      <div className="rounded-lg border border-zinc-200 bg-white px-4 py-8 text-center text-xs text-zinc-400">
+      <div className="rounded border border-zinc-200 bg-white px-4 py-8 text-center text-xs text-zinc-400">
         {emptyMessage}
       </div>
     );
   }
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-zinc-200 bg-white">
+    <div className="overflow-x-auto rounded border border-zinc-200 bg-white">
       <table className="w-full text-left">
         <thead>
           <tr className="border-b border-zinc-100">

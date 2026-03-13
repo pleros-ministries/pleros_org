@@ -1,4 +1,11 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "PPC Platform",
@@ -6,5 +13,5 @@ export const metadata: Metadata = {
 };
 
 export default function PpcRootLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return <div className={`${inter.variable} font-[family-name:var(--font-inter)]`}>{children}</div>;
 }

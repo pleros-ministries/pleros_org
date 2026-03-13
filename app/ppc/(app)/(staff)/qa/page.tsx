@@ -38,7 +38,7 @@ export default function PpcQaPage() {
           <select
             value={filter}
             onChange={(event) => setFilter(event.target.value as QaFilter)}
-            className="h-10 rounded-lg border border-zinc-300 px-3 text-sm outline-none focus:border-zinc-700"
+            className="h-10 rounded border border-zinc-300 px-3 text-sm outline-none focus:border-zinc-700"
           >
             <option value="all">All</option>
             <option value="open">Open</option>
@@ -49,7 +49,7 @@ export default function PpcQaPage() {
 
       <section className="grid gap-3">
         {threads.map((thread) => (
-          <article key={thread.id} className="rounded-xl border border-zinc-200 bg-white p-4">
+          <article key={thread.id} className="rounded-sm border border-zinc-200 bg-white p-4">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h3 className="text-sm font-semibold text-zinc-900">{thread.subject}</h3>

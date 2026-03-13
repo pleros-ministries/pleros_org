@@ -39,17 +39,17 @@ export default function AdminContentPage() {
       </div>
 
       <section className="grid gap-4 md:grid-cols-3">
-        <article className="rounded-xl border border-zinc-200 bg-white p-4">
+        <article className="rounded-sm border border-zinc-200 bg-white p-4">
           <p className="text-xs font-semibold uppercase tracking-[0.1em] text-zinc-500">Published levels</p>
           <p className="mt-2 text-2xl font-semibold text-zinc-900">{summary.published}</p>
         </article>
 
-        <article className="rounded-xl border border-zinc-200 bg-white p-4">
+        <article className="rounded-sm border border-zinc-200 bg-white p-4">
           <p className="text-xs font-semibold uppercase tracking-[0.1em] text-zinc-500">Draft levels</p>
           <p className="mt-2 text-2xl font-semibold text-zinc-900">{summary.draft}</p>
         </article>
 
-        <article className="rounded-xl border border-zinc-200 bg-white p-4">
+        <article className="rounded-sm border border-zinc-200 bg-white p-4">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.1em] text-zinc-500">
@@ -62,7 +62,7 @@ export default function AdminContentPage() {
         </article>
       </section>
 
-      <section className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
+      <section className="overflow-hidden rounded-sm border border-zinc-200 bg-white">
         <div className="overflow-x-auto">
           <table className="min-w-[760px] divide-y divide-zinc-200 text-left text-sm">
             <thead className="bg-zinc-50 text-xs uppercase tracking-[0.08em] text-zinc-600">

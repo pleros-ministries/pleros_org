@@ -15,7 +15,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-md items-center px-5 py-10">
-      <section className="w-full rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">
+      <section className="w-full rounded-md border border-zinc-200 bg-white p-6 shadow-sm">
         <p className="text-xs font-semibold uppercase tracking-[0.12em] text-zinc-500">
           PPC Demo Auth
         </p>
@@ -40,7 +40,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
                   name="name"
                   required
                   defaultValue="Demo User"
-                  className="h-11 rounded-lg border border-zinc-300 px-3 text-sm outline-none focus:border-zinc-700"
+                  className="h-11 rounded border border-zinc-300 px-3 text-sm outline-none focus:border-zinc-700"
                 />
               </label>
 
@@ -53,7 +53,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
                   type="email"
                   required
                   defaultValue="demo@pleros.test"
-                  className="h-11 rounded-lg border border-zinc-300 px-3 text-sm outline-none focus:border-zinc-700"
+                  className="h-11 rounded border border-zinc-300 px-3 text-sm outline-none focus:border-zinc-700"
                 />
               </label>
 
@@ -64,7 +64,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
                 <select
                   name="role"
                   defaultValue="admin"
-                  className="h-11 rounded-lg border border-zinc-300 px-3 text-sm outline-none focus:border-zinc-700"
+                  className="h-11 rounded border border-zinc-300 px-3 text-sm outline-none focus:border-zinc-700"
                 >
                   <option value="admin">Admin</option>
                   <option value="instructor">Instructor/Reviewer</option>
@@ -74,14 +74,14 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
 
               <button
                 type="submit"
-                className="mt-2 h-11 rounded-lg bg-zinc-900 px-4 text-sm font-semibold text-white hover:bg-zinc-800"
+                className="mt-2 h-11 rounded bg-zinc-900 px-4 text-sm font-semibold text-white hover:bg-zinc-800"
               >
                 Continue
               </button>
             </form>
           </>
         ) : (
-          <div className="mt-5 grid gap-3 rounded-lg border border-zinc-200 bg-zinc-50 p-4 text-sm text-zinc-700">
+          <div className="mt-5 grid gap-3 rounded border border-zinc-200 bg-zinc-50 p-4 text-sm text-zinc-700">
             <p>
               Better Auth mode is enabled. Use configured auth endpoints under
               <code className="ml-1 rounded bg-zinc-200 px-1.5 py-0.5 text-xs">/api/auth</code>.

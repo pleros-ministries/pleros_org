@@ -46,10 +46,10 @@ export default async function StudentDashboard() {
               href={isLocked ? "#" : `/ppc/student/level/${level.id}`}
               className={
                 isCurrent
-                  ? "block rounded-lg border border-zinc-900 bg-zinc-900 px-3 py-2.5 text-white"
+                  ? "block rounded border border-zinc-900 bg-zinc-900 px-3 py-2.5 text-white"
                   : isLocked
-                    ? "block cursor-not-allowed rounded-lg border border-zinc-100 bg-zinc-50 px-3 py-2.5 text-zinc-400"
-                    : "block rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-zinc-700 hover:border-zinc-300 transition-colors"
+                    ? "block cursor-not-allowed rounded border border-zinc-100 bg-zinc-50 px-3 py-2.5 text-zinc-400"
+                    : "block rounded border border-zinc-200 bg-white px-3 py-2.5 text-zinc-700 hover:border-zinc-300 transition-colors"
               }
             >
               <div className="flex items-center justify-between">
@@ -76,7 +76,7 @@ export default async function StudentDashboard() {
           description={`Lesson ${nextLessonNumber} of ${levelProgress.totalLessons}`}
         />
 
-        <div className="rounded-lg border border-zinc-200 bg-white p-4">
+        <div className="rounded border border-zinc-200 bg-white p-4">
           <div className="flex items-center justify-between text-xs text-zinc-500">
             <span>Level progress</span>
             <span className="font-medium text-zinc-900">{levelProgress.progressPercent}%</span>

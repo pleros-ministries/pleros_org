@@ -38,7 +38,7 @@ export default function PpcReviewPage() {
           <select
             value={filter}
             onChange={(event) => setFilter(event.target.value as ReviewFilter)}
-            className="h-10 rounded-lg border border-zinc-300 px-3 text-sm outline-none focus:border-zinc-700"
+            className="h-10 rounded border border-zinc-300 px-3 text-sm outline-none focus:border-zinc-700"
           >
             <option value="all">All</option>
             <option value="pending">Pending</option>
@@ -52,7 +52,7 @@ export default function PpcReviewPage() {
         {items.map((item) => (
           <article
             key={item.id}
-            className="rounded-xl border border-zinc-200 bg-white p-4"
+            className="rounded-sm border border-zinc-200 bg-white p-4"
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="text-sm font-semibold text-zinc-900">

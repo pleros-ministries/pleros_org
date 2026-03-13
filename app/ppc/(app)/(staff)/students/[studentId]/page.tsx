@@ -69,13 +69,13 @@ export default async function StudentDetailPage({ params }: StudentDetailPagePro
       </div>
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <article className="rounded-xl border border-zinc-200 bg-white p-4">
+        <article className="rounded-sm border border-zinc-200 bg-white p-4">
           <p className="text-xs font-semibold uppercase tracking-[0.1em] text-zinc-500">Current level</p>
           <p className="mt-2 text-lg font-semibold text-zinc-900">Level {student.level}</p>
           <p className="mt-1 text-xs text-zinc-600">{levelSummary.completedLessons} completed lessons</p>
         </article>
 
-        <article className="rounded-xl border border-zinc-200 bg-white p-4">
+        <article className="rounded-sm border border-zinc-200 bg-white p-4">
           <div className="flex items-start justify-between gap-2">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.1em] text-zinc-500">Graduation</p>
@@ -92,13 +92,13 @@ export default async function StudentDetailPage({ params }: StudentDetailPagePro
           </div>
         </article>
 
-        <article className="rounded-xl border border-zinc-200 bg-white p-4">
+        <article className="rounded-sm border border-zinc-200 bg-white p-4">
           <p className="text-xs font-semibold uppercase tracking-[0.1em] text-zinc-500">Pending reviews</p>
           <p className="mt-2 text-lg font-semibold text-zinc-900">{levelSummary.pendingResponseClearance}</p>
           <p className="mt-1 text-xs text-zinc-600">Need approval/revision</p>
         </article>
 
-        <article className="rounded-xl border border-zinc-200 bg-white p-4">
+        <article className="rounded-sm border border-zinc-200 bg-white p-4">
           <div className="flex items-start justify-between gap-2">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.1em] text-zinc-500">Location</p>
@@ -111,7 +111,7 @@ export default async function StudentDetailPage({ params }: StudentDetailPagePro
       </section>
 
       <section className="grid gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-        <article className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
+        <article className="overflow-hidden rounded-sm border border-zinc-200 bg-white">
           <div className="flex items-center justify-between border-b border-zinc-200 px-4 py-3">
             <div>
               <p className="text-sm font-semibold text-zinc-900">Submission history</p>
@@ -153,7 +153,7 @@ export default async function StudentDetailPage({ params }: StudentDetailPagePro
           </div>
         </article>
 
-        <article className="rounded-xl border border-zinc-200 bg-white p-4">
+        <article className="rounded-sm border border-zinc-200 bg-white p-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-semibold text-zinc-900">Private timeline</p>
@@ -164,7 +164,7 @@ export default async function StudentDetailPage({ params }: StudentDetailPagePro
 
           <div className="mt-3 grid gap-2">
             {timeline.map((event) => (
-              <article key={event.id} className="rounded-lg border border-zinc-200 bg-zinc-50 p-3">
+              <article key={event.id} className="rounded border border-zinc-200 bg-zinc-50 p-3">
                 <p className="text-xs font-medium text-zinc-900">{event.event}</p>
                 <p className="mt-1 text-[11px] text-zinc-500">{formatShortDate(event.occurredAt)}</p>
               </article>

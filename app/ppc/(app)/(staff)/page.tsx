@@ -40,7 +40,7 @@ const metricCards = [
 export default function PpcDashboardPage() {
   return (
     <div className="grid gap-6">
-      <section className="rounded-2xl border border-zinc-200 bg-white p-5 sm:p-6">
+      <section className="rounded-md border border-zinc-200 bg-white p-5 sm:p-6">
         <p className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-500">
           Perfecting Courses Platform
         </p>
@@ -60,7 +60,7 @@ export default function PpcDashboardPage() {
           return (
             <article
               key={metric.label}
-              className="rounded-xl border border-zinc-200 bg-white p-4"
+              className="rounded-sm border border-zinc-200 bg-white p-4"
             >
               <div className="flex items-center justify-between">
                 <p className="text-sm font-medium text-zinc-600">{metric.label}</p>
@@ -76,7 +76,7 @@ export default function PpcDashboardPage() {
       </section>
 
       <section className="grid gap-4 xl:grid-cols-[1.2fr_1fr]">
-        <article className="rounded-xl border border-zinc-200 bg-white p-4">
+        <article className="rounded-sm border border-zinc-200 bg-white p-4">
           <div className="flex items-center justify-between">
             <h3 className="text-base font-semibold text-zinc-900">Review queue</h3>
             <span className="text-xs font-medium uppercase tracking-[0.08em] text-zinc-500">
@@ -87,7 +87,7 @@ export default function PpcDashboardPage() {
             {DEMO_REVIEW_QUEUE.slice(0, 4).map((item) => (
               <div
                 key={item.id}
-                className="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2"
+                className="rounded border border-zinc-200 bg-zinc-50 px-3 py-2"
               >
                 <p className="text-sm font-medium text-zinc-900">
                   {item.studentName} - L{item.level} {item.lesson}
@@ -101,14 +101,14 @@ export default function PpcDashboardPage() {
           </div>
         </article>
 
-        <article className="rounded-xl border border-zinc-200 bg-white p-4">
+        <article className="rounded-sm border border-zinc-200 bg-white p-4">
           <div className="flex items-center justify-between">
             <h3 className="text-base font-semibold text-zinc-900">Recent activity</h3>
             <NotebookText className="size-4 text-zinc-500" />
           </div>
           <div className="mt-3 grid gap-2">
             {DEMO_STUDENTS.slice(0, 5).map((student) => (
-              <div key={student.id} className="rounded-lg border border-zinc-200 px-3 py-2">
+              <div key={student.id} className="rounded border border-zinc-200 px-3 py-2">
                 <p className="text-sm font-medium text-zinc-900">{student.name}</p>
                 <p className="mt-1 text-xs text-zinc-600">
                   {student.currentLesson} - {formatRelativeDay(student.lastActivity)}
@@ -119,11 +119,11 @@ export default function PpcDashboardPage() {
         </article>
       </section>
 
-      <section className="rounded-xl border border-zinc-200 bg-white p-4">
+      <section className="rounded-sm border border-zinc-200 bg-white p-4">
         <h3 className="text-base font-semibold text-zinc-900">Open Q&A threads</h3>
         <div className="mt-3 grid gap-2 md:grid-cols-2">
           {DEMO_QA_THREADS.map((thread) => (
-            <div key={thread.id} className="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2">
+            <div key={thread.id} className="rounded border border-zinc-200 bg-zinc-50 px-3 py-2">
               <p className="text-sm font-medium text-zinc-900">{thread.subject}</p>
               <p className="mt-1 text-xs text-zinc-600">
                 {thread.studentName} - L{thread.level} - {thread.status}

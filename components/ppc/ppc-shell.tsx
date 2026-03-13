@@ -138,7 +138,7 @@ function SidebarNavigation({
             aria-current={isActive ? "page" : undefined}
             onClick={onNavigate}
             className={cn(
-              "flex items-center rounded-lg px-3 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/70",
+              "flex items-center rounded px-3 py-2 text-sm font-medium transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/70",
               collapsed ? "justify-center" : "gap-3",
               isActive
                 ? "bg-zinc-900 text-white visited:text-white [&_span]:text-white [&_svg]:text-white"

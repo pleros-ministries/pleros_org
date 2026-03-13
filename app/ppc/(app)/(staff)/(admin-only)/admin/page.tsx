@@ -11,7 +11,7 @@ export default function PpcAdminPage() {
       </div>
 
       <section className="grid gap-4 lg:grid-cols-3">
-        <article className="rounded-xl border border-zinc-200 bg-white p-4">
+        <article className="rounded-sm border border-zinc-200 bg-white p-4">
           <h3 className="text-sm font-semibold text-zinc-900">Content publishing</h3>
           <p className="mt-2 text-sm text-zinc-600">
             Draft and publish lessons. New publish replaces content globally.
@@ -24,14 +24,14 @@ export default function PpcAdminPage() {
           </Link>
         </article>
 
-        <article className="rounded-xl border border-zinc-200 bg-white p-4">
+        <article className="rounded-sm border border-zinc-200 bg-white p-4">
           <h3 className="text-sm font-semibold text-zinc-900">Staff access</h3>
           <p className="mt-2 text-sm text-zinc-600">
             Assign instructors by level and limit visibility to active students in scope.
           </p>
         </article>
 
-        <article className="rounded-xl border border-zinc-200 bg-white p-4">
+        <article className="rounded-sm border border-zinc-200 bg-white p-4">
           <h3 className="text-sm font-semibold text-zinc-900">Overrides + audit</h3>
           <p className="mt-2 text-sm text-zinc-600">
             Manual graduation override requires reason and writes audit records.

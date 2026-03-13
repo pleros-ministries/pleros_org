@@ -66,7 +66,7 @@ export default function PpcStudentsPage() {
         </p>
       </div>
 
-      <section className="rounded-xl border border-zinc-200 bg-white p-4">
+      <section className="rounded-sm border border-zinc-200 bg-white p-4">
         <div className="grid gap-3 md:grid-cols-[1.5fr_repeat(4,minmax(0,1fr))]">
           <label className="grid gap-1">
             <span className="text-xs font-medium uppercase tracking-[0.08em] text-zinc-500">
@@ -77,7 +77,7 @@ export default function PpcStudentsPage() {
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Name or email"
-              className="h-10 rounded-lg border border-zinc-300 px-3 text-sm outline-none ring-0 focus:border-zinc-700"
+              className="h-10 rounded border border-zinc-300 px-3 text-sm outline-none ring-0 focus:border-zinc-700"
             />
           </label>
 
@@ -91,7 +91,7 @@ export default function PpcStudentsPage() {
                 const value = event.target.value;
                 setSelectedLevel(value === "all" ? "all" : Number(value));
               }}
-              className="h-10 rounded-lg border border-zinc-300 px-3 text-sm outline-none focus:border-zinc-700"
+              className="h-10 rounded border border-zinc-300 px-3 text-sm outline-none focus:border-zinc-700"
             >
               <option value="all">All</option>
               <option value="1">Level 1</option>
@@ -111,7 +111,7 @@ export default function PpcStudentsPage() {
               onChange={(event) =>
                 setSelectedStatus(event.target.value as DemoStudentStatus | "all")
               }
-              className="h-10 rounded-lg border border-zinc-300 px-3 text-sm outline-none focus:border-zinc-700"
+              className="h-10 rounded border border-zinc-300 px-3 text-sm outline-none focus:border-zinc-700"
             >
               <option value="all">All</option>
               <option value="active">Active</option>
@@ -126,7 +126,7 @@ export default function PpcStudentsPage() {
             <select
               value={sortBy}
               onChange={(event) => setSortBy(event.target.value as StudentSortOptions["sortBy"])}
-              className="h-10 rounded-lg border border-zinc-300 px-3 text-sm outline-none focus:border-zinc-700"
+              className="h-10 rounded border border-zinc-300 px-3 text-sm outline-none focus:border-zinc-700"
             >
               {sortOptions.map((option) => (
                 <option key={option.value} value={option.value}>
@@ -145,7 +145,7 @@ export default function PpcStudentsPage() {
               onChange={(event) =>
                 setDirection(event.target.value as StudentSortOptions["direction"])
               }
-              className="h-10 rounded-lg border border-zinc-300 px-3 text-sm outline-none focus:border-zinc-700"
+              className="h-10 rounded border border-zinc-300 px-3 text-sm outline-none focus:border-zinc-700"
             >
               <option value="desc">Descending</option>
               <option value="asc">Ascending</option>
@@ -154,7 +154,7 @@ export default function PpcStudentsPage() {
         </div>
       </section>
 
-      <section className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
+      <section className="overflow-hidden rounded-sm border border-zinc-200 bg-white">
         <div className="overflow-x-auto">
           <table className="min-w-[1160px] divide-y divide-zinc-200 text-left text-sm">
             <thead className="bg-zinc-50 text-xs uppercase tracking-[0.08em] text-zinc-600">
