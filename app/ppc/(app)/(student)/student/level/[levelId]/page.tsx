@@ -1,13 +1,9 @@
-import { redirect } from "next/navigation";
 import Link from "next/link";
-import { eq, and } from "drizzle-orm";
-import { CheckCircle2, Circle, Lock } from "lucide-react";
-
+import { redirect, notFound } from "next/navigation";
+import { headers } from "next/headers";
 import { getAppSession } from "@/lib/app-session";
-import { db } from "@/lib/db";
-import { users, studentProgress, lessons as lessonsTable } from "@/lib/db/schema";
-import { getLevelById, getPublishedLessonsByLevel } from "@/lib/db/queries/lessons";
-import { getStudentCurrentLevel, getStudentGraduations } from "@/lib/db/queries/students";
+import { toExternalPpcPath } from "@/lib/ppc-access";
+import { getLevelById, getStudentLevelProgress } from "@/lib/db/queries/lessons";
 import { isLevelGraduated, checkGraduationReadiness } from "@/lib/db/queries/graduations";
 import { Breadcrumb } from "@/components/ppc/breadcrumb";
 import { PageHeader } from "@/components/ppc/page-header";
@@ -24,47 +20,46 @@ export default async function LevelDetailPage({
   const levelId = Number(levelIdStr);
 
   const session = await getAppSession();
-  if (!session) redirect("/ppc/sign-in");
+  if (!session) {
+    const h = await headers();
+    redirect(toExternalPpcPath(h.get("host"), "/sign-in"));
+  }
 
-  const [dbUser] = await db.select().from(users).where(eq(users.email, session.user.email));
-  if (!dbUser) redirect("/ppc/sign-in");
-
+  const userId = session.user.id;
   const level = await getLevelById(levelId);
-  if (!level) redirect("/ppc/student");
+  if (!level) notFound();
 
-  const lessons = await getPublishedLessonsByLevel(levelId);
-  const graduated = await isLevelGraduated(dbUser.id, levelId);
-  const readiness = await checkGraduationReadiness(dbUser.id, levelId);
+  const graduated = await isLevelGraduated(userId, levelId);
+  const readiness = await checkGraduationReadiness(userId, levelId);
+  const lessonProgress = await getStudentLevelProgress(userId, levelId);
 
-  const progressRows = await db
-    .select()
-    .from(studentProgress)
-    .innerJoin(lessonsTable, eq(studentProgress.lessonId, lessonsTable.id))
-    .where(
-      and(eq(studentProgress.userId, dbUser.id), eq(lessonsTable.levelId, levelId)),
-    );
-
-  const progressMap = new Map(
-    progressRows.map((r) => [r.lessons.id, r.student_progress]),
-  );
+  const progressPercent =
+    readiness.total > 0
+      ? Math.round((readiness.completed / readiness.total) * 100)
+      : 0;
 
   return (
     <div className="space-y-4">
       <Breadcrumb
         items={[
-          { label: "My Learning", href: "/ppc/student" },
+          { label: "My learning", href: "/ppc/student" },
           { label: level.title },
         ]}
       />
 
-      <PageHeader title={level.title} description={level.description ?? undefined} />
+      <PageHeader
+        title={level.title}
+        description={level.description ?? undefined}
+      />
 
       <div className="rounded border border-zinc-200 bg-white p-3">
-        <div className="flex items-center justify-between text-xs text-zinc-500 mb-1.5">
+        <div className="mb-1.5 flex items-center justify-between text-xs text-zinc-500">
           <span>Level progress</span>
-          <span className="font-medium text-zinc-900">{readiness.completedCount}/{readiness.totalCount}</span>
+          <span className="font-medium text-zinc-900">
+            {readiness.completed}/{readiness.total}
+          </span>
         </div>
-        <ProgressBar value={readiness.completedCount} max={readiness.totalCount || 1} size="md" />
+        <ProgressBar value={progressPercent} size="md" />
       </div>
 
       {graduated ? (
@@ -78,48 +73,44 @@ export default async function LevelDetailPage({
       ) : null}
 
       <div className="space-y-2">
-        {lessons.map((lesson) => {
-          const prog = progressMap.get(lesson.id);
-          const isComplete =
-            prog?.audioListened && prog?.notesRead && prog?.quizPassed && prog?.writtenApproved;
-
-          return (
-            <Link
-              key={lesson.id}
-              href={`/ppc/student/level/${levelId}/lesson/${lesson.id}`}
-              className="flex items-center justify-between gap-3 rounded border border-zinc-200 bg-white px-3 py-2.5 hover:border-zinc-300 transition-colors"
-            >
-              <div className="flex items-center gap-3 min-w-0">
-                <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-[10px] font-semibold text-zinc-600">
-                  {lesson.lessonNumber}
-                </span>
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-zinc-900">{lesson.title}</p>
-                  {prog && (
-                    <div className="mt-1">
-                      <CompletionSignals
-                        audioListened={prog.audioListened}
-                        notesRead={prog.notesRead}
-                        quizPassed={prog.quizPassed}
-                        writtenApproved={prog.writtenApproved}
-                        compact
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div className="shrink-0">
-                {isComplete ? (
-                  <StatusBadge status="complete" variant="success" />
-                ) : prog ? (
-                  <StatusBadge status="in progress" variant="warning" />
-                ) : (
-                  <StatusBadge status="not started" />
+        {lessonProgress.map(({ lesson, progress, completed }) => (
+          <Link
+            key={lesson.id}
+            href={`/ppc/student/level/${levelId}/lesson/${lesson.id}`}
+            className="flex items-center justify-between gap-3 rounded border border-zinc-200 bg-white px-3 py-2.5 transition-colors hover:border-zinc-300"
+          >
+            <div className="flex min-w-0 items-center gap-3">
+              <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-[10px] font-semibold text-zinc-600">
+                {lesson.lessonNumber}
+              </span>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium text-zinc-900">
+                  {lesson.title}
+                </p>
+                {progress && (
+                  <div className="mt-1">
+                    <CompletionSignals
+                      audioListened={progress.audioListened}
+                      notesRead={progress.notesRead}
+                      quizPassed={progress.quizPassed}
+                      writtenApproved={progress.writtenApproved}
+                      compact
+                    />
+                  </div>
                 )}
               </div>
-            </Link>
-          );
-        })}
+            </div>
+            <div className="shrink-0">
+              {completed ? (
+                <StatusBadge status="complete" variant="success" />
+              ) : progress ? (
+                <StatusBadge status="in progress" variant="warning" />
+              ) : (
+                <StatusBadge status="not started" />
+              )}
+            </div>
+          </Link>
+        ))}
       </div>
     </div>
   );
