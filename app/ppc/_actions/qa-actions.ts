@@ -1,16 +1,23 @@
 "use server";
 
-import { createThread, addMessage } from "@/lib/db/queries/qa";
+import { revalidatePath } from "next/cache";
+import {
+  createThread,
+  addMessage,
+  closeThread,
+  getThreadMessages,
+} from "@/lib/db/queries/qa";
 
 export async function createQaThread(data: {
   userId: string;
   lessonId: number;
   subject: string;
-  content: string;
+  message: string;
   authorRole: "student" | "instructor" | "admin";
 }) {
   const thread = await createThread(data);
-  return { success: true, thread };
+  revalidatePath("/ppc", "layout");
+  return thread;
 }
 
 export async function replyToThread(data: {
@@ -20,5 +27,19 @@ export async function replyToThread(data: {
   content: string;
 }) {
   const message = await addMessage(data);
-  return { success: true, message };
+  revalidatePath("/ppc", "layout");
+  return message;
+}
+
+export async function closeQaThread(threadId: number) {
+  await closeThread(threadId);
+  revalidatePath("/ppc", "layout");
+}
+
+export async function fetchThreadMessages(threadId: number) {
+  const messages = await getThreadMessages(threadId);
+  return messages.map((m) => ({
+    ...m,
+    createdAt: m.createdAt.toISOString(),
+  }));
 }
