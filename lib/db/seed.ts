@@ -2,257 +2,268 @@ import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import * as schema from "./schema";
 
-const LEVEL_CONFIG = [
-  { id: 1, title: "Level 1", description: "Foundations of faith and Christian living", lessonCount: 5 },
-  { id: 2, title: "Level 2", description: "Deepening understanding of scripture", lessonCount: 11 },
-  { id: 3, title: "Level 3", description: "Practical ministry and service", lessonCount: 30 },
-  { id: 4, title: "Level 4", description: "Leadership and discipleship", lessonCount: 60 },
-  { id: 5, title: "Level 5", description: "Advanced theology and mission", lessonCount: 300 },
-];
-
-const DEMO_USERS = [
-  { id: "admin-001", name: "Admin User", email: "admin@pleros.test", role: "admin" as const, location: "Lagos, NG" },
-  { id: "inst-001", name: "Instructor One", email: "instructor@pleros.test", role: "instructor" as const, location: "Abuja, NG" },
-  { id: "stu-001", name: "Ada Nwosu", email: "ada@pleros.test", role: "student" as const, location: "Lagos, NG" },
-  { id: "stu-002", name: "Ben Udo", email: "ben@pleros.test", role: "student" as const, location: "Abuja, NG" },
-  { id: "stu-003", name: "Chiamaka Obi", email: "chiamaka@pleros.test", role: "student" as const, location: "Port Harcourt, NG" },
-  { id: "stu-004", name: "Deborah Ibe", email: "deborah@pleros.test", role: "student" as const, location: "Enugu, NG" },
-  { id: "stu-005", name: "Emeka Yusuf", email: "emeka@pleros.test", role: "student" as const, location: "Kaduna, NG" },
-  { id: "stu-006", name: "Favour Bassey", email: "favour@pleros.test", role: "student" as const, location: "Calabar, NG" },
-  { id: "stu-007", name: "Gloria Mensah", email: "gloria@pleros.test", role: "student" as const, location: "Accra, GH" },
-  { id: "stu-008", name: "Henry Okon", email: "henry@pleros.test", role: "student" as const, location: "Uyo, NG" },
-  { id: "stu-009", name: "Ifeoma Okeke", email: "ifeoma@pleros.test", role: "student" as const, location: "Onitsha, NG" },
-  { id: "stu-010", name: "James Adeyemi", email: "james@pleros.test", role: "student" as const, location: "Ibadan, NG" },
-];
-
-function generateLessonTitle(level: number, lesson: number): string {
-  const topics: Record<number, string[]> = {
-    1: ["The call to discipleship", "Understanding grace", "Prayer foundations", "Walking in faith", "The heart of worship"],
-    2: ["Old Testament overview", "New Testament survey", "The Psalms", "Prophetic books", "The Gospels", "Acts of the Apostles", "Pauline epistles", "General epistles", "Revelation introduction", "Biblical hermeneutics", "Scripture memorization"],
-    3: Array.from({ length: 30 }, (_, i) => `Ministry practice ${i + 1}`),
-    4: Array.from({ length: 60 }, (_, i) => `Leadership study ${i + 1}`),
-    5: Array.from({ length: 300 }, (_, i) => `Advanced study ${i + 1}`),
-  };
-  return topics[level]?.[lesson - 1] ?? `Lesson ${lesson}`;
-}
-
-const sampleNotes = `## Teaching Notes
-
-This lesson covers foundational principles that every believer should understand.
-
-### Key Points
-- God's grace is sufficient for all circumstances
-- Prayer is the foundation of spiritual growth
-- Community and fellowship strengthen our walk
-
-### Reflection
-Take time to meditate on the scriptures referenced in the audio teaching. Journal your thoughts and any questions that arise.
-
-### Memory Verse
-"For by grace you have been saved through faith. And this is not your own doing; it is the gift of God." - Ephesians 2:8`;
-
-function generateQuizQuestions(lessonId: number, lessonNumber: number) {
-  return [
-    {
-      lessonId,
-      questionType: "multiple_choice" as const,
-      questionText: `What is the primary theme of lesson ${lessonNumber}?`,
-      options: ["Grace and redemption", "Prayer and worship", "Service and ministry", "Faith and obedience"],
-      correctAnswer: "Grace and redemption",
-      sortOrder: 1,
-    },
-    {
-      lessonId,
-      questionType: "multiple_choice" as const,
-      questionText: `Which scripture is most relevant to the teaching in lesson ${lessonNumber}?`,
-      options: ["Ephesians 2:8", "Romans 8:28", "John 3:16", "Philippians 4:13"],
-      correctAnswer: "Ephesians 2:8",
-      sortOrder: 2,
-    },
-    {
-      lessonId,
-      questionType: "short_text" as const,
-      questionText: "In your own words, summarize the key takeaway from this lesson.",
-      options: null,
-      correctAnswer: null,
-      sortOrder: 3,
-    },
-  ];
-}
+const sql = neon(process.env.DATABASE_URL_UNPOOLED!);
+const db = drizzle(sql, { schema });
 
 async function seed() {
-  const sql = neon(process.env.DATABASE_URL_UNPOOLED!);
-  const db = drizzle(sql, { schema });
-
   console.log("Seeding database...");
 
-  // Clear existing data in reverse dependency order
-  await db.delete(schema.qaMessages);
-  await db.delete(schema.qaThreads);
-  await db.delete(schema.writtenSubmissions);
-  await db.delete(schema.quizAttempts);
-  await db.delete(schema.studentProgress);
-  await db.delete(schema.levelGraduations);
-  await db.delete(schema.reviewerAssignments);
-  await db.delete(schema.quizQuestions);
-  await db.delete(schema.lessons);
-  await db.delete(schema.users);
-  await db.delete(schema.levels);
-
-  // Seed levels
-  for (const level of LEVEL_CONFIG) {
-    await db.insert(schema.levels).values({
-      id: level.id,
-      title: level.title,
-      description: level.description,
-      lessonCount: level.lessonCount,
-      sortOrder: level.id,
-    });
-  }
-  console.log("  Levels seeded");
-
-  // Seed users
-  for (const user of DEMO_USERS) {
-    await db.insert(schema.users).values({
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      emailVerified: true,
-      location: user.location,
-    });
-  }
-  console.log("  Users seeded");
-
-  // Seed lessons for levels 1 and 2 fully, plus a few for levels 3-5
-  const lessonSeedCounts = { 1: 5, 2: 11, 3: 10, 4: 10, 5: 10 };
-  const insertedLessonIds: Record<string, number> = {};
-
-  for (const level of LEVEL_CONFIG) {
-    const count = lessonSeedCounts[level.id as keyof typeof lessonSeedCounts] ?? 5;
-    for (let n = 1; n <= count; n++) {
-      const result = await db
-        .insert(schema.lessons)
-        .values({
-          levelId: level.id,
-          lessonNumber: n,
-          title: generateLessonTitle(level.id, n),
-          audioUrl: `https://example.com/audio/level-${level.id}/lesson-${n}.mp3`,
-          notesContent: sampleNotes,
-          status: "published",
-        })
-        .returning({ id: schema.lessons.id });
-      insertedLessonIds[`${level.id}-${n}`] = result[0].id;
-    }
-  }
-  console.log("  Lessons seeded");
-
-  // Seed quiz questions for levels 1 and 2
-  for (const level of [1, 2]) {
-    const count = lessonSeedCounts[level];
-    for (let n = 1; n <= count; n++) {
-      const lessonId = insertedLessonIds[`${level}-${n}`];
-      if (!lessonId) continue;
-      const questions = generateQuizQuestions(lessonId, n);
-      for (const q of questions) {
-        await db.insert(schema.quizQuestions).values(q);
-      }
-    }
-  }
-  console.log("  Quiz questions seeded");
-
-  // Seed student progress for demo students
-  const studentProgressData: { userId: string; level: number; completedLessons: number }[] = [
-    { userId: "stu-001", level: 2, completedLessons: 5 },
-    { userId: "stu-002", level: 1, completedLessons: 4 },
-    { userId: "stu-003", level: 3, completedLessons: 1 },
-    { userId: "stu-004", level: 4, completedLessons: 3 },
-    { userId: "stu-005", level: 5, completedLessons: 7 },
-    { userId: "stu-006", level: 2, completedLessons: 9 },
-    { userId: "stu-007", level: 3, completedLessons: 5 },
-    { userId: "stu-008", level: 1, completedLessons: 1 },
-    { userId: "stu-009", level: 4, completedLessons: 6 },
-    { userId: "stu-010", level: 5, completedLessons: 9 },
+  // ─── Users ────────────────────────────────────────────────────────────────
+  const userRows = [
+    { id: "admin-1", name: "Grace Admin", email: "admin@pleros.test", role: "admin" as const, location: "Cape Town, ZA" },
+    { id: "instructor-1", name: "James Instructor", email: "instructor@pleros.test", role: "instructor" as const, location: "Nairobi, KE" },
+    { id: "student-ada", name: "Ada Lovelace", email: "ada@pleros.test", role: "student" as const, startingLevel: 1, location: "London, UK" },
+    { id: "student-ben", name: "Ben Carson", email: "ben@pleros.test", role: "student" as const, startingLevel: 1, location: "Detroit, US" },
+    { id: "student-chi", name: "Chi Zhang", email: "chi@pleros.test", role: "student" as const, startingLevel: 1, location: "Shanghai, CN" },
+    { id: "student-david", name: "David Okafor", email: "david@pleros.test", role: "student" as const, startingLevel: 1, location: "Lagos, NG" },
+    { id: "student-elena", name: "Elena Petrov", email: "elena@pleros.test", role: "student" as const, startingLevel: 1, location: "Moscow, RU" },
+    { id: "student-fatima", name: "Fatima Hassan", email: "fatima@pleros.test", role: "student" as const, startingLevel: 2, location: "Cairo, EG" },
+    { id: "student-george", name: "George Mensah", email: "george@pleros.test", role: "student" as const, startingLevel: 1, location: "Accra, GH" },
+    { id: "student-hana", name: "Hana Kimura", email: "hana@pleros.test", role: "student" as const, startingLevel: 1, location: "Tokyo, JP" },
+    { id: "student-ivan", name: "Ivan Reyes", email: "ivan@pleros.test", role: "student" as const, startingLevel: 1, location: "Manila, PH" },
+    { id: "student-julia", name: "Julia Santos", email: "julia@pleros.test", role: "student" as const, startingLevel: 1, location: "São Paulo, BR" },
   ];
 
-  for (const sp of studentProgressData) {
-    // Graduate previous levels
-    for (let l = 1; l < sp.level; l++) {
-      await db.insert(schema.levelGraduations).values({
-        userId: sp.userId,
-        levelId: l,
-        graduatedBy: "admin-001",
-      });
-    }
+  for (const user of userRows) {
+    await db.insert(schema.users).values(user).onConflictDoNothing();
+  }
+  console.log(`  ✓ ${userRows.length} users`);
 
-    // Add progress for current level lessons
-    for (let n = 1; n <= sp.completedLessons; n++) {
-      const lessonId = insertedLessonIds[`${sp.level}-${n}`];
-      if (!lessonId) continue;
+  // ─── Levels ───────────────────────────────────────────────────────────────
+  const levelRows = [
+    { id: 1, title: "Level 1 – Foundations", description: "Core Gospel foundations and basic Christian doctrine.", lessonCount: 5, sortOrder: 1 },
+    { id: 2, title: "Level 2 – Growth", description: "Deepening understanding of Scripture and personal growth.", lessonCount: 11, sortOrder: 2 },
+    { id: 3, title: "Level 3 – Ministry", description: "Practical ministry skills and servant leadership.", lessonCount: 30, sortOrder: 3 },
+    { id: 4, title: "Level 4 – Leadership", description: "Advanced leadership principles and church planting.", lessonCount: 60, sortOrder: 4 },
+    { id: 5, title: "Level 5 – Mastery", description: "Comprehensive mastery and mentorship training.", lessonCount: 300, sortOrder: 5 },
+  ];
+
+  for (const level of levelRows) {
+    await db.insert(schema.levels).values(level).onConflictDoNothing();
+  }
+  console.log(`  ✓ ${levelRows.length} levels`);
+
+  // ─── Lessons ──────────────────────────────────────────────────────────────
+  const lessonSets: { levelId: number; count: number }[] = [
+    { levelId: 1, count: 5 },
+    { levelId: 2, count: 11 },
+    { levelId: 3, count: 10 },
+    { levelId: 4, count: 10 },
+    { levelId: 5, count: 10 },
+  ];
+
+  const lessonTitles: Record<number, string[]> = {
+    1: ["The Gospel message", "Salvation and grace", "The nature of God", "Prayer foundations", "The Bible as God's Word"],
+    2: ["Old Testament overview", "New Testament overview", "The Holy Spirit", "Spiritual gifts", "Worship in spirit", "Faith and works", "The church body", "Baptism and communion", "Forgiveness and reconciliation", "Stewardship", "Evangelism basics"],
+    3: ["Preaching foundations", "Teaching methods", "Pastoral care", "Small group leadership", "Community outreach", "Discipleship models", "Conflict resolution", "Cross-cultural ministry", "Youth ministry", "Missions awareness"],
+    4: ["Vision casting", "Strategic planning", "Team building", "Financial management", "Church governance", "Mentoring leaders", "Church planting 101", "Urban ministry", "Rural ministry", "Digital ministry"],
+    5: ["Advanced hermeneutics", "Systematic theology review", "Apologetics", "World religions survey", "Ethics in leadership", "Seminary-level exegesis", "Counseling foundations", "Organizational development", "Global missions strategy", "Capstone project"],
+  };
+
+  let totalLessons = 0;
+  for (const set of lessonSets) {
+    const titles = lessonTitles[set.levelId]!;
+    for (let i = 0; i < set.count; i++) {
+      await db.insert(schema.lessons).values({
+        levelId: set.levelId,
+        lessonNumber: i + 1,
+        title: titles[i] ?? `Lesson ${i + 1}`,
+        audioUrl: `https://placeholder.pleros.test/audio/level-${set.levelId}/lesson-${i + 1}.mp3`,
+        notesContent: `# ${titles[i] ?? `Lesson ${i + 1}`}\n\nThis is the teaching content for this lesson. In production, this will contain rich markdown notes covering the key points of the audio teaching.\n\n## Key points\n\n- Point one: Understanding the foundational concept\n- Point two: Applying the teaching practically\n- Point three: Reflecting on personal growth\n\n## Scripture references\n\n- Reference passages will be listed here\n- Additional study material and context`,
+        status: "published",
+      }).onConflictDoNothing();
+      totalLessons++;
+    }
+  }
+  console.log(`  ✓ ${totalLessons} lessons`);
+
+  // ─── Quiz questions ───────────────────────────────────────────────────────
+  const allLessons = await db.select().from(schema.lessons).where(
+    // levels 1 and 2 only
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (schema.lessons.levelId as any).in?.([1, 2]) ?? undefined,
+  );
+
+  const l1l2Lessons = await db.query.lessons.findMany({
+    where: (l, { inArray }) => inArray(l.levelId, [1, 2]),
+    orderBy: (l, { asc }) => [asc(l.levelId), asc(l.lessonNumber)],
+  });
+
+  let totalQuestions = 0;
+  for (const lesson of l1l2Lessons) {
+    const questions = [
+      {
+        lessonId: lesson.id,
+        questionType: "multiple_choice" as const,
+        questionText: `What is the main theme of "${lesson.title}"?`,
+        options: ["Option A: The primary concept", "Option B: A secondary idea", "Option C: An unrelated topic", "Option D: None of the above"],
+        correctAnswer: "Option A: The primary concept",
+        sortOrder: 1,
+      },
+      {
+        lessonId: lesson.id,
+        questionType: "multiple_choice" as const,
+        questionText: `Which Scripture passage is most relevant to "${lesson.title}"?`,
+        options: ["John 3:16", "Romans 8:28", "Psalm 23:1", "Matthew 28:19"],
+        correctAnswer: "John 3:16",
+        sortOrder: 2,
+      },
+      {
+        lessonId: lesson.id,
+        questionType: "short_text" as const,
+        questionText: `In your own words, explain the key takeaway from "${lesson.title}".`,
+        options: null,
+        correctAnswer: null,
+        sortOrder: 3,
+      },
+    ];
+
+    for (const q of questions) {
+      await db.insert(schema.quizQuestions).values(q).onConflictDoNothing();
+      totalQuestions++;
+    }
+  }
+  console.log(`  ✓ ${totalQuestions} quiz questions`);
+
+  // ─── Student progress ─────────────────────────────────────────────────────
+  // Ada: graduated L1, on L2 lesson 4
+  const l1Lessons = l1l2Lessons.filter((l) => l.levelId === 1);
+  const l2Lessons = l1l2Lessons.filter((l) => l.levelId === 2);
+
+  for (const lesson of l1Lessons) {
+    await db.insert(schema.studentProgress).values({
+      userId: "student-ada",
+      lessonId: lesson.id,
+      audioListened: true,
+      notesRead: true,
+      quizPassed: true,
+      highestQuizScore: 90,
+      writtenApproved: true,
+      completedAt: new Date(),
+    }).onConflictDoNothing();
+  }
+
+  for (let i = 0; i < 3; i++) {
+    if (l2Lessons[i]) {
       await db.insert(schema.studentProgress).values({
-        userId: sp.userId,
-        lessonId,
+        userId: "student-ada",
+        lessonId: l2Lessons[i].id,
         audioListened: true,
         notesRead: true,
         quizPassed: true,
-        highestQuizScore: 80 + Math.floor(Math.random() * 20),
+        highestQuizScore: 85,
         writtenApproved: true,
         completedAt: new Date(),
+      }).onConflictDoNothing();
+    }
+  }
+
+  if (l2Lessons[3]) {
+    await db.insert(schema.studentProgress).values({
+      userId: "student-ada",
+      lessonId: l2Lessons[3].id,
+      audioListened: true,
+      notesRead: true,
+      quizPassed: false,
+      writtenApproved: false,
+    }).onConflictDoNothing();
+  }
+
+  // Ben: on L1 lesson 3
+  for (let i = 0; i < 2; i++) {
+    if (l1Lessons[i]) {
+      await db.insert(schema.studentProgress).values({
+        userId: "student-ben",
+        lessonId: l1Lessons[i].id,
+        audioListened: true,
+        notesRead: true,
+        quizPassed: true,
+        highestQuizScore: 80,
+        writtenApproved: true,
+        completedAt: new Date(),
+      }).onConflictDoNothing();
+    }
+  }
+
+  if (l1Lessons[2]) {
+    await db.insert(schema.studentProgress).values({
+      userId: "student-ben",
+      lessonId: l1Lessons[2].id,
+      audioListened: true,
+      notesRead: false,
+      quizPassed: false,
+      writtenApproved: false,
+    }).onConflictDoNothing();
+  }
+
+  console.log("  ✓ student progress (Ada L2, Ben L1)");
+
+  // ─── Level graduations ────────────────────────────────────────────────────
+  await db.insert(schema.levelGraduations).values({
+    userId: "student-ada",
+    levelId: 1,
+    graduatedBy: "instructor-1",
+  }).onConflictDoNothing();
+  console.log("  ✓ 1 graduation (Ada L1)");
+
+  // ─── Written submissions ──────────────────────────────────────────────────
+  const submissionData = [
+    { userId: "student-ada", lessonId: l2Lessons[0]?.id, content: "My reflection on this teaching is that it provides a strong foundation...", status: "approved" as const, reviewedBy: "instructor-1" },
+    { userId: "student-ada", lessonId: l2Lessons[1]?.id, content: "The key insight I gained from this lesson is the importance of...", status: "approved" as const, reviewedBy: "instructor-1" },
+    { userId: "student-ada", lessonId: l2Lessons[2]?.id, content: "I found this lesson particularly challenging because...", status: "submitted" as const },
+    { userId: "student-ben", lessonId: l1Lessons[0]?.id, content: "This lesson opened my eyes to the reality of God's grace...", status: "approved" as const, reviewedBy: "instructor-1" },
+    { userId: "student-ben", lessonId: l1Lessons[1]?.id, content: "I need to revise my understanding of this topic...", status: "needs_revision" as const, reviewedBy: "instructor-1", reviewerNote: "Please expand on how this applies to daily life." },
+  ];
+
+  for (const sub of submissionData) {
+    if (!sub.lessonId) continue;
+    await db.insert(schema.writtenSubmissions).values({
+      userId: sub.userId,
+      lessonId: sub.lessonId,
+      content: sub.content,
+      status: sub.status,
+      reviewedBy: sub.reviewedBy ?? null,
+      reviewerNote: sub.reviewerNote ?? null,
+      submittedAt: new Date(),
+      reviewedAt: sub.reviewedBy ? new Date() : null,
+    }).onConflictDoNothing();
+  }
+  console.log(`  ✓ ${submissionData.length} written submissions`);
+
+  // ─── Q&A threads + messages ───────────────────────────────────────────────
+  const threadData = [
+    { userId: "student-ada", lessonId: l2Lessons[1]?.id, subject: "Clarification on covenant types", message: "Could you explain the difference between the old and new covenants in more detail?" },
+    { userId: "student-ben", lessonId: l1Lessons[2]?.id, subject: "Struggling with the concept of the Trinity", message: "I'm having difficulty understanding how God can be three persons in one. Can you help?" },
+    { userId: "student-chi", lessonId: l1Lessons[0]?.id, subject: "Application of the Gospel in daily life", message: "How do I practically apply the Gospel message in my workplace?" },
+  ];
+
+  for (const t of threadData) {
+    if (!t.lessonId) continue;
+    const [thread] = await db.insert(schema.qaThreads).values({
+      userId: t.userId,
+      lessonId: t.lessonId,
+      subject: t.subject,
+    }).returning();
+
+    if (thread) {
+      await db.insert(schema.qaMessages).values({
+        threadId: thread.id,
+        authorId: t.userId,
+        authorRole: "student",
+        content: t.message,
       });
     }
   }
-  console.log("  Student progress seeded");
+  console.log(`  ✓ ${threadData.length} Q&A threads`);
 
-  // Seed reviewer assignments
-  await db.insert(schema.reviewerAssignments).values({ userId: "inst-001", levelId: 1 });
-  await db.insert(schema.reviewerAssignments).values({ userId: "inst-001", levelId: 2 });
-  console.log("  Reviewer assignments seeded");
+  // ─── Reviewer assignments ─────────────────────────────────────────────────
+  await db.insert(schema.reviewerAssignments).values([
+    { userId: "instructor-1", levelId: 1 },
+    { userId: "instructor-1", levelId: 2 },
+  ]).onConflictDoNothing();
+  console.log("  ✓ 2 reviewer assignments");
 
-  // Seed some Q&A threads
-  const qaData = [
-    { userId: "stu-002", lessonKey: "1-5", subject: "Clarification on prayer cadence in Lesson 5" },
-    { userId: "stu-001", lessonKey: "2-6", subject: "Difference between reflection and confession tasks" },
-    { userId: "stu-005", lessonKey: "5-7", subject: "How to approach Lesson 7 prerequisites" },
-  ];
-  for (const qa of qaData) {
-    const lessonId = insertedLessonIds[qa.lessonKey];
-    if (!lessonId) continue;
-    const [thread] = await db
-      .insert(schema.qaThreads)
-      .values({ userId: qa.userId, lessonId, subject: qa.subject, status: "open" })
-      .returning({ id: schema.qaThreads.id });
-    await db.insert(schema.qaMessages).values({
-      threadId: thread.id,
-      authorId: qa.userId,
-      authorRole: "student",
-      content: "I have a question about the material covered in this lesson. Could you help clarify?",
-    });
-  }
-  console.log("  Q&A threads seeded");
-
-  // Seed some written submissions and review items
-  const submissionData = [
-    { userId: "stu-001", lessonKey: "2-6", status: "submitted" as const },
-    { userId: "stu-004", lessonKey: "4-4", status: "needs_revision" as const, reviewerNote: "Please expand on the practical application section." },
-    { userId: "stu-007", lessonKey: "3-6", status: "submitted" as const },
-    { userId: "stu-009", lessonKey: "4-7", status: "submitted" as const },
-    { userId: "stu-005", lessonKey: "5-8", status: "submitted" as const },
-  ];
-  for (const sub of submissionData) {
-    const lessonId = insertedLessonIds[sub.lessonKey];
-    if (!lessonId) continue;
-    await db.insert(schema.writtenSubmissions).values({
-      userId: sub.userId,
-      lessonId,
-      content: "This is my written response to the lesson material. I reflected on the key teachings and applied them to my personal faith journey.",
-      status: sub.status,
-      reviewerNote: sub.reviewerNote ?? null,
-      submittedAt: new Date(),
-    });
-  }
-  console.log("  Written submissions seeded");
-
-  console.log("Seed complete!");
+  console.log("\nSeed complete!");
 }
 
 seed().catch((err) => {

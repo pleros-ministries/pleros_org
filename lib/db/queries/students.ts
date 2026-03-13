@@ -1,4 +1,4 @@
-import { eq, sql, desc, and, count } from "drizzle-orm";
+import { eq, sql, and, count, type SQL } from "drizzle-orm";
 import { db } from "@/lib/db";
 import * as schema from "../schema";
 
@@ -19,7 +19,7 @@ export async function getStudentList(params: StudentListParams = {}) {
       const conditions = [eq2(u.role, "student")];
       if (search) {
         conditions.push(
-          sql`(${u.name} ILIKE ${'%' + search + '%'} OR ${u.email} ILIKE ${'%' + search + '%'})` as any
+          sql`(${u.name} ILIKE ${'%' + search + '%'} OR ${u.email} ILIKE ${'%' + search + '%'})` as unknown as SQL,
         );
       }
       return and2(...conditions);

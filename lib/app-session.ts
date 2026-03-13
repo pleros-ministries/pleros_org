@@ -8,9 +8,13 @@ import {
   isDemoAuthEnabled,
   type DemoAuthSession,
 } from "@/lib/demo-auth-session";
+import { db } from "@/lib/db";
+import { users } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
 
 export type AppSession = {
   user: {
+    id: string;
     name: string;
     email: string;
     role: AppRole;
@@ -18,9 +22,21 @@ export type AppSession = {
   source: "demo" | "better-auth";
 };
 
-function toAppSession(session: DemoAuthSession, source: AppSession["source"]): AppSession {
+async function resolveDbUserId(email: string): Promise<string | null> {
+  try {
+    const user = await db.query.users.findFirst({
+      where: (u, { eq: eq2 }) => eq2(u.email, email.toLowerCase()),
+    });
+    return user?.id ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function toAppSession(session: DemoAuthSession, id: string, source: AppSession["source"]): AppSession {
   return {
     user: {
+      id,
       name: session.user.name,
       email: session.user.email,
       role: session.user.role,
@@ -46,7 +62,8 @@ export async function getAppSession(): Promise<AppSession | null> {
       return null;
     }
 
-    return toAppSession(demoSession, "demo");
+    const dbUserId = await resolveDbUserId(demoSession.user.email);
+    return toAppSession(demoSession, dbUserId ?? demoSession.user.email, "demo");
   }
 
   try {
@@ -59,8 +76,10 @@ export async function getAppSession(): Promise<AppSession | null> {
       return null;
     }
 
+    const dbUserId = await resolveDbUserId(authSession.user.email);
     return {
       user: {
+        id: dbUserId ?? authSession.user.id ?? authSession.user.email,
         name: authSession.user.name,
         email: authSession.user.email,
         role: resolveRoleForEmail(authSession.user.email),
