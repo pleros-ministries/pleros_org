@@ -75,7 +75,7 @@ Deliverables:
 
 ### Gotchas
 
-- Both `package-lock.json` and `pnpm-lock.yaml` exist; use **npm** (`package-lock.json` is canonical).
+- Both `package-lock.json` and `pnpm-lock.yaml` exist; use **pnpm** for installs (`pnpm-lock.yaml` is the actively maintained lockfile).
 - The Suisse Int'l font files live in `app/fonts/suisse-intl/`; they are committed to the repo.
 - PPC platform routes (`/ppc/*`) require DB for most pages, but `/ppc/sign-in` works without it via demo auth (no `DEMO_AUTH` env var needed — defaults to enabled).
 - The `(site)` route group (homepage, style-demo) is fully static and works without any env vars or DB.
