@@ -61,19 +61,19 @@ export default async function StudentDashboardPage() {
               href={locked ? "#" : `/ppc/student/level/${level.id}`}
               className={`rounded-lg border p-3 transition ${
                 isCurrent
-                  ? "border-zinc-900 bg-zinc-900 text-white"
+                  ? "border-zinc-900 bg-zinc-900"
                   : graduated
                     ? "border-emerald-200 bg-emerald-50"
                     : "border-zinc-200 bg-white opacity-60"
               }`}
             >
               <div className="flex items-center justify-between">
-                <LevelBadge level={level.id} size="sm" />
+                <LevelBadge level={level.id} size="sm" variant={isCurrent ? "light" : "dark"} />
                 {graduated && <GraduationCap className="size-3.5 text-emerald-600" />}
                 {locked && <Lock className="size-3.5 text-zinc-400" />}
-                {isCurrent && <BookOpen className="size-3.5" />}
+                {isCurrent && <BookOpen className="size-3.5 text-white" />}
               </div>
-              <p className="mt-2 text-xs font-medium">{level.title}</p>
+              <p className={`mt-2 text-xs font-medium ${isCurrent ? "text-white" : "text-zinc-700"}`}>{level.title}</p>
             </Link>
           );
         })}
