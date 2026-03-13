@@ -1,28 +1,29 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import {
-  saveDraft as saveDraftQuery,
-  submitForReview as submitForReviewQuery,
-  approveSubmission as approveSubmissionQuery,
-  requestRevision as requestRevisionQuery,
+  upsertDraft,
+  submitForReview,
+  approveSubmission,
+  requestRevision,
 } from "@/lib/db/queries/submissions";
 
 export async function saveDraft(userId: string, lessonId: number, content: string) {
-  const sub = await saveDraftQuery(userId, lessonId, content);
-  return { success: true, submission: sub };
+  await upsertDraft(userId, lessonId, content);
+  revalidatePath("/ppc", "layout");
 }
 
-export async function submitWrittenResponse(userId: string, lessonId: number, content: string) {
-  const sub = await submitForReviewQuery(userId, lessonId, content);
-  return { success: true, submission: sub };
+export async function submitWrittenResponse(userId: string, lessonId: number) {
+  await submitForReview(userId, lessonId);
+  revalidatePath("/ppc", "layout");
 }
 
-export async function approveSubmission(submissionId: number, reviewerId: string) {
-  const sub = await approveSubmissionQuery(submissionId, reviewerId);
-  return { success: true, submission: sub };
+export async function approveWrittenSubmission(submissionId: number, reviewerId: string) {
+  await approveSubmission(submissionId, reviewerId);
+  revalidatePath("/ppc", "layout");
 }
 
-export async function requestRevision(submissionId: number, reviewerId: string, note: string) {
-  const sub = await requestRevisionQuery(submissionId, reviewerId, note);
-  return { success: true, submission: sub };
+export async function requestSubmissionRevision(submissionId: number, reviewerId: string, note: string) {
+  await requestRevision(submissionId, reviewerId, note);
+  revalidatePath("/ppc", "layout");
 }
