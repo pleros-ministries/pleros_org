@@ -64,19 +64,21 @@ Deliverables:
 
 | Service | Command | Notes |
 |---------|---------|-------|
-| Next.js dev server | `npm run dev` | Port 3000. No `.env` needed for UI-only work (homepage, style-demo). DB routes require `DATABASE_URL`. |
+| Next.js dev server | `npm run dev` | Port 3000. PPC platform requires `DATABASE_URL` env var pointing to Neon Postgres. `/ppc/sign-in` works without DB. |
 
 ### Key commands
 
-- **Lint**: `npm run lint` (ESLint 9, warnings expected for unused vars in PPC modules)
+- **Lint**: `npm run lint` (ESLint 9, 0 errors expected)
 - **Test**: `npm test` (Vitest, 7 files / 30 pure-logic tests, no DB needed)
 - **Dev**: `npm run dev` (Turbopack, hot reload)
-- **Build**: `npm run build`
+- **Build**: `npm run build` (21 routes, all compile)
 
 ### Gotchas
 
-- Both `package-lock.json` and `pnpm-lock.yaml` exist; use **pnpm** for installs (`pnpm-lock.yaml` is the actively maintained lockfile).
-- The Suisse Int'l font files live in `app/fonts/suisse-intl/`; they are committed to the repo.
-- PPC platform routes (`/ppc/*`) require DB for most pages, but `/ppc/sign-in` works without it via demo auth (no `DEMO_AUTH` env var needed — defaults to enabled).
-- The `(site)` route group (homepage, style-demo) is fully static and works without any env vars or DB.
-- Drizzle query modules in `lib/db/queries/` import `db` via `@/lib/db` and schema via `import * as schema from "../schema"`. They use the relational query API (`db.query.*`) and require a Neon `DATABASE_URL` at runtime.
+- Both `package-lock.json` and `pnpm-lock.yaml` exist; use **npm** (`package-lock.json` is canonical).
+- The Suisse Int'l font files live in `app/fonts/suisse-intl/`; committed to repo.
+- PPC routes (`/ppc/*`) require `DATABASE_URL` for DB pages. `/ppc/sign-in` works without DB (demo auth defaults enabled).
+- Homepage (`/`) redirects to `/ppc/sign-in`.
+- Demo auth creates base64url cookie with name/email/role. `resolveDbUserId()` in `app-session.ts` maps email to DB user ID.
+- Server actions use `revalidatePath("/ppc", "layout")` after all mutations.
+- DB seed: `npx tsx lib/db/seed.ts` (requires `DATABASE_URL_UNPOOLED`). Schema push: `npx drizzle-kit push --force`.
