@@ -1,74 +1,95 @@
-import { eq, and, desc, asc } from "drizzle-orm";
-import { db } from "../index";
-import { qaThreads, qaMessages, users, lessons } from "../schema";
+import { eq, and, desc } from "drizzle-orm";
+import { db } from "@/lib/db";
+import * as schema from "../schema";
 
-export async function listThreadsForLesson(lessonId: number, userId?: string) {
-  const conditions = [eq(qaThreads.lessonId, lessonId)];
-  if (userId) conditions.push(eq(qaThreads.userId, userId));
+export async function getThreadsByLesson(lessonId: number, userId?: string) {
+  const conditions = [eq(schema.qaThreads.lessonId, lessonId)];
+  if (userId) conditions.push(eq(schema.qaThreads.userId, userId));
 
   return db
-    .select({
-      thread: qaThreads,
-      studentName: users.name,
-    })
-    .from(qaThreads)
-    .innerJoin(users, eq(qaThreads.userId, users.id))
+    .select()
+    .from(schema.qaThreads)
     .where(and(...conditions))
-    .orderBy(desc(qaThreads.createdAt));
+    .orderBy(desc(schema.qaThreads.createdAt));
 }
 
-export async function listAllThreads(status?: "open" | "answered" | "closed") {
-  const conditions = status ? [eq(qaThreads.status, status)] : [];
-
+export async function getThreadsByUser(userId: string) {
   return db
-    .select({
-      thread: qaThreads,
-      studentName: users.name,
-      studentEmail: users.email,
-      lessonNumber: lessons.lessonNumber,
-      levelId: lessons.levelId,
-    })
-    .from(qaThreads)
-    .innerJoin(users, eq(qaThreads.userId, users.id))
-    .innerJoin(lessons, eq(qaThreads.lessonId, lessons.id))
-    .where(conditions.length > 0 ? and(...conditions) : undefined)
-    .orderBy(desc(qaThreads.createdAt));
+    .select()
+    .from(schema.qaThreads)
+    .where(eq(schema.qaThreads.userId, userId))
+    .orderBy(desc(schema.qaThreads.createdAt));
 }
 
-export async function listThreadsForStudent(userId: string) {
-  return db
-    .select({
-      thread: qaThreads,
-      lessonNumber: lessons.lessonNumber,
-      levelId: lessons.levelId,
-    })
-    .from(qaThreads)
-    .innerJoin(lessons, eq(qaThreads.lessonId, lessons.id))
-    .where(eq(qaThreads.userId, userId))
-    .orderBy(desc(qaThreads.createdAt));
+export async function getAllThreads(status?: "open" | "answered" | "closed") {
+  const threads = status
+    ? await db
+        .select({
+          id: schema.qaThreads.id,
+          userId: schema.qaThreads.userId,
+          lessonId: schema.qaThreads.lessonId,
+          subject: schema.qaThreads.subject,
+          status: schema.qaThreads.status,
+          createdAt: schema.qaThreads.createdAt,
+          studentName: schema.users.name,
+          studentEmail: schema.users.email,
+          lessonTitle: schema.lessons.title,
+          levelId: schema.lessons.levelId,
+          lessonNumber: schema.lessons.lessonNumber,
+        })
+        .from(schema.qaThreads)
+        .innerJoin(schema.users, eq(schema.qaThreads.userId, schema.users.id))
+        .innerJoin(schema.lessons, eq(schema.qaThreads.lessonId, schema.lessons.id))
+        .where(eq(schema.qaThreads.status, status))
+        .orderBy(desc(schema.qaThreads.createdAt))
+    : await db
+        .select({
+          id: schema.qaThreads.id,
+          userId: schema.qaThreads.userId,
+          lessonId: schema.qaThreads.lessonId,
+          subject: schema.qaThreads.subject,
+          status: schema.qaThreads.status,
+          createdAt: schema.qaThreads.createdAt,
+          studentName: schema.users.name,
+          studentEmail: schema.users.email,
+          lessonTitle: schema.lessons.title,
+          levelId: schema.lessons.levelId,
+          lessonNumber: schema.lessons.lessonNumber,
+        })
+        .from(schema.qaThreads)
+        .innerJoin(schema.users, eq(schema.qaThreads.userId, schema.users.id))
+        .innerJoin(schema.lessons, eq(schema.qaThreads.lessonId, schema.lessons.id))
+        .orderBy(desc(schema.qaThreads.createdAt));
+
+  return threads;
 }
 
 export async function getThreadMessages(threadId: number) {
   return db
     .select({
-      message: qaMessages,
-      authorName: users.name,
+      id: schema.qaMessages.id,
+      threadId: schema.qaMessages.threadId,
+      authorId: schema.qaMessages.authorId,
+      authorRole: schema.qaMessages.authorRole,
+      content: schema.qaMessages.content,
+      createdAt: schema.qaMessages.createdAt,
+      authorName: schema.users.name,
     })
-    .from(qaMessages)
-    .innerJoin(users, eq(qaMessages.authorId, users.id))
-    .where(eq(qaMessages.threadId, threadId))
-    .orderBy(asc(qaMessages.createdAt));
+    .from(schema.qaMessages)
+    .innerJoin(schema.users, eq(schema.qaMessages.authorId, schema.users.id))
+    .where(eq(schema.qaMessages.threadId, threadId))
+    .orderBy(schema.qaMessages.createdAt);
 }
 
 export async function createThread(data: {
   userId: string;
   lessonId: number;
   subject: string;
-  content: string;
+  message: string;
   authorRole: "student" | "instructor" | "admin";
 }) {
   const [thread] = await db
-    .insert(qaThreads)
+    .insert(schema.qaThreads)
     .values({
       userId: data.userId,
       lessonId: data.lessonId,
@@ -76,12 +97,14 @@ export async function createThread(data: {
     })
     .returning();
 
-  await db.insert(qaMessages).values({
-    threadId: thread.id,
-    authorId: data.userId,
-    authorRole: data.authorRole,
-    content: data.content,
-  });
+  if (thread) {
+    await db.insert(schema.qaMessages).values({
+      threadId: thread.id,
+      authorId: data.userId,
+      authorRole: data.authorRole,
+      content: data.message,
+    });
+  }
 
   return thread;
 }
@@ -92,13 +115,23 @@ export async function addMessage(data: {
   authorRole: "student" | "instructor" | "admin";
   content: string;
 }) {
-  const [msg] = await db.insert(qaMessages).values(data).returning();
+  const [message] = await db
+    .insert(schema.qaMessages)
+    .values(data)
+    .returning();
 
   const newStatus = data.authorRole === "student" ? "open" : "answered";
   await db
-    .update(qaThreads)
+    .update(schema.qaThreads)
     .set({ status: newStatus })
-    .where(eq(qaThreads.id, data.threadId));
+    .where(eq(schema.qaThreads.id, data.threadId));
 
-  return msg;
+  return message;
+}
+
+export async function closeThread(threadId: number) {
+  await db
+    .update(schema.qaThreads)
+    .set({ status: "closed" })
+    .where(eq(schema.qaThreads.id, threadId));
 }
