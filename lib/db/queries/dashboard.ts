@@ -1,13 +1,10 @@
-import { eq, and, count, desc, sql } from "drizzle-orm";
+import { eq, count, desc } from "drizzle-orm";
 import { db } from "../index";
 import {
   users,
-  studentProgress,
   writtenSubmissions,
   qaThreads,
-  qaMessages,
   lessons,
-  levels,
 } from "../schema";
 
 export type DashboardStats = {

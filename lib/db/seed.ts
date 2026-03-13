@@ -78,12 +78,6 @@ async function seed() {
   console.log(`  ✓ ${totalLessons} lessons`);
 
   // ─── Quiz questions ───────────────────────────────────────────────────────
-  const allLessons = await db.select().from(schema.lessons).where(
-    // levels 1 and 2 only
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (schema.lessons.levelId as any).in?.([1, 2]) ?? undefined,
-  );
-
   const l1l2Lessons = await db.query.lessons.findMany({
     where: (l, { inArray }) => inArray(l.levelId, [1, 2]),
     orderBy: (l, { asc }) => [asc(l.levelId), asc(l.lessonNumber)],

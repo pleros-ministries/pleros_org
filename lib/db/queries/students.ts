@@ -15,7 +15,7 @@ export async function getStudentList(params: StudentListParams = {}) {
   const { search, level, limit = 50, offset = 0 } = params;
 
   const students = await db.query.users.findMany({
-    where: (u, { eq: eq2, and: and2, like }) => {
+    where: (u, { eq: eq2, and: and2 }) => {
       const conditions = [eq2(u.role, "student")];
       if (search) {
         conditions.push(

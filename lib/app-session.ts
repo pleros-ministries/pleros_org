@@ -9,8 +9,6 @@ import {
   type DemoAuthSession,
 } from "@/lib/demo-auth-session";
 import { db } from "@/lib/db";
-import { users } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
 
 export type AppSession = {
   user: {

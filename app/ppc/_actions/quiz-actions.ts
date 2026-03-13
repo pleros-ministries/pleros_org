@@ -17,7 +17,7 @@ export async function submitQuiz(userId: string, lessonId: number, answers: Reco
   const score = mcQuestions.length > 0 ? Math.round((correct / mcQuestions.length) * 100) : 0;
   const attemptCount = await getAttemptCount(userId, lessonId);
 
-  const attempt = await submitQuizAttempt({
+  await submitQuizAttempt({
     userId,
     lessonId,
     answers,
