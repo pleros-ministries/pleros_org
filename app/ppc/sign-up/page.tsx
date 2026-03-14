@@ -1,7 +1,5 @@
 import Link from "next/link";
 
-import { isDemoAuthEnabled } from "@/lib/demo-auth-session";
-import { redirect } from "next/navigation";
 import { SignUpForm } from "./sign-up-form";
 
 type SignUpPageProps = {
@@ -11,9 +9,6 @@ type SignUpPageProps = {
 };
 
 export default async function SignUpPage({ searchParams }: SignUpPageProps) {
-  const demoMode = isDemoAuthEnabled();
-  if (demoMode) redirect("/ppc/sign-in");
-
   const params = await searchParams;
   const returnTo = params.returnTo?.startsWith("/") ? params.returnTo : "/";
 

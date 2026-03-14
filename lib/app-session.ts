@@ -1,13 +1,7 @@
-import { cookies, headers } from "next/headers";
+import { headers } from "next/headers";
 
 import { normalizeEmailList, resolveRoleFromEmail, type AppRole } from "@/lib/app-role";
 import { betterAuthServer } from "@/lib/auth/better-auth";
-import {
-  decodeDemoSession,
-  DEMO_AUTH_COOKIE_NAME,
-  isDemoAuthEnabled,
-  type DemoAuthSession,
-} from "@/lib/demo-auth-session";
 import { db } from "@/lib/db";
 
 export type AppSession = {
@@ -17,7 +11,6 @@ export type AppSession = {
     email: string;
     role: AppRole;
   };
-  source: "demo" | "better-auth";
 };
 
 async function resolveDbUserId(email: string): Promise<string | null> {
@@ -42,7 +35,6 @@ async function ensurePpcUser(opts: {
 
   try {
     const { users } = await import("@/lib/db/schema");
-    const { eq } = await import("drizzle-orm");
     await db.insert(users).values({
       id: opts.id,
       name: opts.name,
@@ -55,18 +47,6 @@ async function ensurePpcUser(opts: {
   }
 }
 
-function toAppSession(session: DemoAuthSession, id: string, source: AppSession["source"]): AppSession {
-  return {
-    user: {
-      id,
-      name: session.user.name,
-      email: session.user.email,
-      role: session.user.role,
-    },
-    source,
-  };
-}
-
 function resolveRoleForEmail(email: string): AppRole {
   const adminEmails = normalizeEmailList(process.env.PPC_ADMIN_EMAILS);
   const instructorEmails = normalizeEmailList(process.env.PPC_INSTRUCTOR_EMAILS);
@@ -75,19 +55,6 @@ function resolveRoleForEmail(email: string): AppRole {
 }
 
 export async function getAppSession(): Promise<AppSession | null> {
-  if (isDemoAuthEnabled()) {
-    const cookieStore = await cookies();
-    const rawCookie = cookieStore.get(DEMO_AUTH_COOKIE_NAME)?.value;
-    const demoSession = decodeDemoSession(rawCookie);
-
-    if (!demoSession) {
-      return null;
-    }
-
-    const dbUserId = await resolveDbUserId(demoSession.user.email);
-    return toAppSession(demoSession, dbUserId ?? demoSession.user.email, "demo");
-  }
-
   try {
     const headerStore = await headers();
     const authSession = await betterAuthServer.api.getSession({
@@ -113,7 +80,6 @@ export async function getAppSession(): Promise<AppSession | null> {
         email: authSession.user.email,
         role,
       },
-      source: "better-auth",
     };
   } catch {
     return null;

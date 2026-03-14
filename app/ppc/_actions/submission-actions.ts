@@ -11,18 +11,22 @@ import { sendSubmissionReviewed } from "@/lib/email/send";
 import { db } from "@/lib/db";
 import { users, lessons } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import { requireAuth, requireStaff } from "@/lib/auth/require-role";
 
 export async function saveDraft(userId: string, lessonId: number, content: string) {
+  await requireAuth();
   await upsertDraft(userId, lessonId, content);
   revalidatePath("/ppc", "layout");
 }
 
 export async function submitWrittenResponse(userId: string, lessonId: number) {
+  await requireAuth();
   await submitForReview(userId, lessonId);
   revalidatePath("/ppc", "layout");
 }
 
 export async function approveWrittenSubmission(submissionId: number, reviewerId: string) {
+  await requireStaff();
   const updated = await approveSubmission(submissionId, reviewerId);
   revalidatePath("/ppc", "layout");
 
@@ -44,6 +48,7 @@ export async function approveWrittenSubmission(submissionId: number, reviewerId:
 }
 
 export async function requestSubmissionRevision(submissionId: number, reviewerId: string, note: string) {
+  await requireStaff();
   const updated = await requestRevision(submissionId, reviewerId, note);
   revalidatePath("/ppc", "layout");
 

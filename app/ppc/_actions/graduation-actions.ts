@@ -5,6 +5,7 @@ import { checkGraduationReadiness, graduateStudent } from "@/lib/db/queries/grad
 import { sendGraduationCongratulations } from "@/lib/email/send";
 import { db } from "@/lib/db";
 import { getLevels } from "@/lib/db/queries/lessons";
+import { requireStaff } from "@/lib/auth/require-role";
 
 async function notifyGraduation(userId: string, levelId: number) {
   try {
@@ -24,6 +25,7 @@ async function notifyGraduation(userId: string, levelId: number) {
 }
 
 export async function markGraduation(userId: string, levelId: number, graduatedBy: string) {
+  await requireStaff();
   const readiness = await checkGraduationReadiness(userId, levelId);
   if (!readiness.ready) {
     return { error: `Not ready: ${readiness.completed}/${readiness.total} lessons completed` };
@@ -36,6 +38,7 @@ export async function markGraduation(userId: string, levelId: number, graduatedB
 }
 
 export async function overrideGraduation(userId: string, levelId: number, graduatedBy: string) {
+  await requireStaff();
   const grad = await graduateStudent(userId, levelId, graduatedBy, true);
   revalidatePath("/ppc", "layout");
   await notifyGraduation(userId, levelId);
