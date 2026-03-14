@@ -43,7 +43,7 @@ export function MCQuestion({
               onClick={() => !disabled && onSelect(opt)}
               disabled={disabled}
               className={cn(
-                "flex items-center gap-2 rounded-md border px-3 py-2 text-left text-sm transition-colors",
+                "flex items-center gap-2 rounded-sm border px-3 py-2 text-left text-sm transition-colors",
                 isCorrect
                   ? "border-emerald-300 bg-emerald-50 text-emerald-800"
                   : isWrong
@@ -93,7 +93,7 @@ export function ShortTextQuestion({
         rows={4}
         placeholder="Type your answer..."
         className={cn(
-          "w-full resize-y rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400/50 transition-colors",
+          "w-full resize-y rounded-sm border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400/50 transition-colors",
           disabled && "cursor-not-allowed bg-zinc-50",
         )}
       />

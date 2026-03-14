@@ -8,9 +8,11 @@ import {
   isDemoAuthEnabled,
   type DemoAuthSession,
 } from "@/lib/demo-auth-session";
+import { db } from "@/lib/db";
 
 export type AppSession = {
   user: {
+    id: string;
     name: string;
     email: string;
     role: AppRole;
@@ -18,9 +20,45 @@ export type AppSession = {
   source: "demo" | "better-auth";
 };
 
-function toAppSession(session: DemoAuthSession, source: AppSession["source"]): AppSession {
+async function resolveDbUserId(email: string): Promise<string | null> {
+  try {
+    const user = await db.query.users.findFirst({
+      where: (u, { eq: eq2 }) => eq2(u.email, email.toLowerCase()),
+    });
+    return user?.id ?? null;
+  } catch {
+    return null;
+  }
+}
+
+async function ensurePpcUser(opts: {
+  id: string;
+  name: string;
+  email: string;
+  role: AppRole;
+}): Promise<string> {
+  const existing = await resolveDbUserId(opts.email);
+  if (existing) return existing;
+
+  try {
+    const { users } = await import("@/lib/db/schema");
+    const { eq } = await import("drizzle-orm");
+    await db.insert(users).values({
+      id: opts.id,
+      name: opts.name,
+      email: opts.email.toLowerCase(),
+      role: opts.role,
+    }).onConflictDoNothing();
+    return opts.id;
+  } catch {
+    return opts.id;
+  }
+}
+
+function toAppSession(session: DemoAuthSession, id: string, source: AppSession["source"]): AppSession {
   return {
     user: {
+      id,
       name: session.user.name,
       email: session.user.email,
       role: session.user.role,
@@ -46,7 +84,8 @@ export async function getAppSession(): Promise<AppSession | null> {
       return null;
     }
 
-    return toAppSession(demoSession, "demo");
+    const dbUserId = await resolveDbUserId(demoSession.user.email);
+    return toAppSession(demoSession, dbUserId ?? demoSession.user.email, "demo");
   }
 
   try {
@@ -59,11 +98,20 @@ export async function getAppSession(): Promise<AppSession | null> {
       return null;
     }
 
+    const role = resolveRoleForEmail(authSession.user.email);
+    const ppcUserId = await ensurePpcUser({
+      id: authSession.user.id ?? authSession.user.email,
+      name: authSession.user.name,
+      email: authSession.user.email,
+      role,
+    });
+
     return {
       user: {
+        id: ppcUserId,
         name: authSession.user.name,
         email: authSession.user.email,
-        role: resolveRoleForEmail(authSession.user.email),
+        role,
       },
       source: "better-auth",
     };

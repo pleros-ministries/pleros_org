@@ -9,7 +9,7 @@ type StatCardProps = {
 
 export function StatCard({ label, value, hint, icon: Icon }: StatCardProps) {
   return (
-    <article className="rounded border border-zinc-200 bg-white p-3">
+    <article className="rounded-sm border border-zinc-200 bg-white p-3">
       <div className="flex items-center justify-between">
         <p className="text-xs font-medium text-zinc-500">{label}</p>
         {Icon && <Icon className="size-3.5 text-zinc-400" />}

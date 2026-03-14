@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 
 import type { AppSession } from "@/lib/app-session";
+import { authClient } from "@/lib/auth/auth-client";
 import { resolvePpcHref } from "@/lib/ppc-navigation";
 import {
   parseSidebarCollapsedState,
@@ -232,7 +233,7 @@ export function PpcShell({ children, session }: PpcShellProps) {
               <button
                 type="button"
                 onClick={() => setIsMobileNavOpen(true)}
-                className="inline-flex size-9 items-center justify-center rounded-md border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-100 lg:hidden"
+                className="inline-flex size-9 items-center justify-center rounded-sm border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-100 lg:hidden"
                 aria-label="Open sidebar"
               >
                 <Menu className="size-4" />
@@ -240,7 +241,7 @@ export function PpcShell({ children, session }: PpcShellProps) {
               <button
                 type="button"
                 onClick={() => setIsSidebarCollapsed((current) => !current)}
-                className="hidden size-9 items-center justify-center rounded-md border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-100 lg:inline-flex"
+                className="hidden size-9 items-center justify-center rounded-sm border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-100 lg:inline-flex"
                 aria-label={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
                 title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
               >
@@ -258,10 +259,18 @@ export function PpcShell({ children, session }: PpcShellProps) {
               <div className="rounded-full border border-zinc-300 bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-700">
                 {session.user.name} ({session.user.role})
               </div>
-              <form method="post" action="/api/ppc/demo-auth/logout">
+              <form method="post" action="/api/ppc/demo-auth/logout" onSubmit={
+                session.source === "better-auth"
+                  ? async (e) => {
+                      e.preventDefault();
+                      await authClient.signOut();
+                      window.location.href = "/ppc/sign-in";
+                    }
+                  : undefined
+              }>
                 <button
                   type="submit"
-                  className="inline-flex h-8 items-center gap-1 rounded-md border border-zinc-300 bg-white px-2.5 text-xs font-medium text-zinc-700 hover:bg-zinc-100"
+                  className="inline-flex h-8 items-center gap-1 rounded-sm border border-zinc-300 bg-white px-2.5 text-xs font-medium text-zinc-700 hover:bg-zinc-100"
                 >
                   <LogOut className="size-3.5" />
                   Sign out

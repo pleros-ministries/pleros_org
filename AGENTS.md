@@ -57,3 +57,28 @@ Deliverables:
 - app shell implemented
 - style-demo page implemented
 - brief summary of files added/changed
+
+## Cursor Cloud specific instructions
+
+### Services
+
+| Service | Command | Notes |
+|---------|---------|-------|
+| Next.js dev server | `npm run dev` | Port 3000. PPC platform requires `DATABASE_URL` env var pointing to Neon Postgres. `/ppc/sign-in` works without DB. |
+
+### Key commands
+
+- **Lint**: `npm run lint` (ESLint 9, 0 errors expected)
+- **Test**: `npm test` (Vitest, 7 files / 30 pure-logic tests, no DB needed)
+- **Dev**: `npm run dev` (Turbopack, hot reload)
+- **Build**: `npm run build` (21 routes, all compile)
+
+### Gotchas
+
+- Both `package-lock.json` and `pnpm-lock.yaml` exist; use **npm** (`package-lock.json` is canonical).
+- The Suisse Int'l font files live in `app/fonts/suisse-intl/`; committed to repo.
+- PPC routes (`/ppc/*`) require `DATABASE_URL` for DB pages. `/ppc/sign-in` works without DB (demo auth defaults enabled).
+- Homepage (`/`) redirects to `/ppc/sign-in`.
+- Demo auth creates base64url cookie with name/email/role. `resolveDbUserId()` in `app-session.ts` maps email to DB user ID.
+- Server actions use `revalidatePath("/ppc", "layout")` after all mutations.
+- DB seed: `npx tsx lib/db/seed.ts` (requires `DATABASE_URL_UNPOOLED`). Schema push: `npx drizzle-kit push --force`.

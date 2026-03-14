@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import {
   createLesson,
   updateLesson,
@@ -23,59 +24,59 @@ export async function createNewLesson(data: {
   notesContent?: string;
 }) {
   const lesson = await createLesson(data);
-  return { success: true, lesson };
+  revalidatePath("/ppc", "layout");
+  return lesson;
 }
 
-export async function editLesson(
+export async function updateLessonContent(
   lessonId: number,
-  data: {
-    title?: string;
-    audioUrl?: string | null;
-    notesContent?: string | null;
-  },
+  data: { title?: string; audioUrl?: string | null; notesContent?: string | null },
 ) {
   const lesson = await updateLesson(lessonId, data);
-  return { success: true, lesson };
+  revalidatePath("/ppc", "layout");
+  return lesson;
 }
 
-export async function removeLesson(lessonId: number) {
+export async function removeLessonAction(lessonId: number) {
   await deleteLesson(lessonId);
-  return { success: true };
+  revalidatePath("/ppc", "layout");
 }
 
-export async function togglePublish(lessonId: number, publish: boolean) {
-  const lesson = publish
-    ? await publishLesson(lessonId)
-    : await unpublishLesson(lessonId);
-  return { success: true, lesson };
+export async function publishLessonAction(lessonId: number) {
+  const lesson = await publishLesson(lessonId);
+  revalidatePath("/ppc", "layout");
+  return lesson;
+}
+
+export async function unpublishLessonAction(lessonId: number) {
+  const lesson = await unpublishLesson(lessonId);
+  revalidatePath("/ppc", "layout");
+  return lesson;
 }
 
 export async function addQuizQuestion(data: {
   lessonId: number;
   questionType: "multiple_choice" | "short_text";
   questionText: string;
-  options?: string[];
-  correctAnswer?: string;
-  sortOrder: number;
+  options?: string[] | null;
+  correctAnswer?: string | null;
+  sortOrder?: number;
 }) {
   const question = await createQuizQuestion(data);
-  return { success: true, question };
+  revalidatePath("/ppc", "layout");
+  return question;
 }
 
 export async function editQuizQuestion(
-  questionId: number,
-  data: {
-    questionText?: string;
-    options?: string[];
-    correctAnswer?: string;
-    sortOrder?: number;
-  },
+  id: number,
+  data: { questionText?: string; options?: string[] | null; correctAnswer?: string | null; sortOrder?: number },
 ) {
-  const question = await updateQuizQuestion(questionId, data);
-  return { success: true, question };
+  const question = await updateQuizQuestion(id, data);
+  revalidatePath("/ppc", "layout");
+  return question;
 }
 
-export async function removeQuizQuestion(questionId: number) {
-  await deleteQuizQuestion(questionId);
-  return { success: true };
+export async function removeQuizQuestion(id: number) {
+  await deleteQuizQuestion(id);
+  revalidatePath("/ppc", "layout");
 }

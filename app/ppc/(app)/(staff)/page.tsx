@@ -1,136 +1,73 @@
-import { Activity, Clock3, Layers2, MessageCircle, NotebookText } from "lucide-react";
+import { redirect } from "next/navigation";
+import { headers } from "next/headers";
+import Link from "next/link";
+import { Activity, Clock3, Layers2, MessageCircle } from "lucide-react";
 
-import {
-  buildDashboardStats,
-  DEMO_QA_THREADS,
-  DEMO_REVIEW_QUEUE,
-  DEMO_STUDENTS,
-  formatRelativeDay,
-} from "@/lib/ppc-demo";
+import { getAppSession } from "@/lib/app-session";
+import { toExternalPpcPath } from "@/lib/ppc-access";
+import { getDashboardStats } from "@/lib/db/queries/students";
+import { getReviewQueue } from "@/lib/db/queries/submissions";
+import { getAllThreads } from "@/lib/db/queries/qa";
+import { PageHeader } from "@/components/ppc/page-header";
+import { StatCard } from "@/components/ppc/stat-card";
 
-const stats = buildDashboardStats(DEMO_STUDENTS);
+export default async function StaffDashboardPage() {
+  const session = await getAppSession();
+  if (!session) {
+    const h = await headers();
+    redirect(toExternalPpcPath(h.get("host"), "/sign-in"));
+  }
 
-const metricCards = [
-  {
-    label: "Active students",
-    value: String(stats.activeStudents),
-    hint: "Currently active",
-    icon: Activity,
-  },
-  {
-    label: "Avg. progress",
-    value: `${stats.averageProgress}%`,
-    hint: "Across demo cohort",
-    icon: Layers2,
-  },
-  {
-    label: "Pending reviews",
-    value: String(stats.pendingReviews),
-    hint: "Short-text + written",
-    icon: Clock3,
-  },
-  {
-    label: "Open Q&A",
-    value: String(stats.pendingQa),
-    hint: "Private student threads",
-    icon: MessageCircle,
-  },
-];
+  const stats = await getDashboardStats();
+  const reviewQueue = await getReviewQueue();
+  const openThreads = await getAllThreads("open");
 
-export default function PpcDashboardPage() {
   return (
     <div className="grid gap-6">
-      <section className="rounded-md border border-zinc-200 bg-white p-5 sm:p-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-500">
-          Perfecting Courses Platform
-        </p>
-        <h2 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-950 sm:text-3xl">
-          Operations Dashboard
-        </h2>
-        <p className="mt-2 max-w-3xl text-sm text-zinc-600">
-          Demo state with realistic values for student progress, review load, and
-          intervention points.
-        </p>
+      <PageHeader title="Dashboard" description="Course operations overview" />
+
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard label="Active students" value={stats.activeStudents} icon={Activity} hint="Currently enrolled" />
+        <StatCard label="Avg. progress" value={`${stats.averageProgress}%`} icon={Layers2} hint="Across cohort" />
+        <StatCard label="Pending reviews" value={stats.pendingReviews} icon={Clock3} hint="Awaiting grading" />
+        <StatCard label="Open Q&A" value={stats.openQa} icon={MessageCircle} hint="Student threads" />
       </section>
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {metricCards.map((metric) => {
-          const Icon = metric.icon;
-
-          return (
-            <article
-              key={metric.label}
-              className="rounded-sm border border-zinc-200 bg-white p-4"
-            >
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-medium text-zinc-600">{metric.label}</p>
-                <Icon className="size-4 text-zinc-500" />
-              </div>
-              <p className="mt-3 text-2xl font-semibold tracking-tight text-zinc-900">
-                {metric.value}
-              </p>
-              <p className="mt-1 text-xs text-zinc-500">{metric.hint}</p>
-            </article>
-          );
-        })}
-      </section>
-
-      <section className="grid gap-4 xl:grid-cols-[1.2fr_1fr]">
+      <section className="grid gap-4 xl:grid-cols-2">
         <article className="rounded-sm border border-zinc-200 bg-white p-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-base font-semibold text-zinc-900">Review queue</h3>
-            <span className="text-xs font-medium uppercase tracking-[0.08em] text-zinc-500">
-              {DEMO_REVIEW_QUEUE.length} items
-            </span>
+            <h3 className="text-sm font-semibold text-zinc-900">Review queue</h3>
+            <Link href="/ppc/review" className="text-[11px] font-medium text-zinc-500 hover:text-zinc-900">View all</Link>
           </div>
           <div className="mt-3 grid gap-2">
-            {DEMO_REVIEW_QUEUE.slice(0, 4).map((item) => (
-              <div
-                key={item.id}
-                className="rounded border border-zinc-200 bg-zinc-50 px-3 py-2"
-              >
-                <p className="text-sm font-medium text-zinc-900">
-                  {item.studentName} - L{item.level} {item.lesson}
-                </p>
-                <p className="mt-1 text-xs text-zinc-600">
-                  {item.type === "short_text" ? "Short text" : "Written response"} - {" "}
-                  {item.status.replace("_", " ")}
-                </p>
+            {reviewQueue.slice(0, 5).map((item) => (
+              <div key={item.id} className="flex items-center justify-between rounded-sm border border-zinc-100 px-3 py-2">
+                <div>
+                  <p className="text-xs font-medium text-zinc-900">{item.studentName}</p>
+                  <p className="text-[11px] text-zinc-500">L{item.levelId}.{item.lessonNumber} — {item.lessonTitle}</p>
+                </div>
+                <span className="text-[10px] capitalize text-zinc-400">{item.status.replace(/_/g, " ")}</span>
               </div>
             ))}
+            {reviewQueue.length === 0 && <p className="text-xs text-zinc-400">No submissions to review</p>}
           </div>
         </article>
 
         <article className="rounded-sm border border-zinc-200 bg-white p-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-base font-semibold text-zinc-900">Recent activity</h3>
-            <NotebookText className="size-4 text-zinc-500" />
+            <h3 className="text-sm font-semibold text-zinc-900">Open Q&A threads</h3>
+            <Link href="/ppc/qa" className="text-[11px] font-medium text-zinc-500 hover:text-zinc-900">View all</Link>
           </div>
           <div className="mt-3 grid gap-2">
-            {DEMO_STUDENTS.slice(0, 5).map((student) => (
-              <div key={student.id} className="rounded border border-zinc-200 px-3 py-2">
-                <p className="text-sm font-medium text-zinc-900">{student.name}</p>
-                <p className="mt-1 text-xs text-zinc-600">
-                  {student.currentLesson} - {formatRelativeDay(student.lastActivity)}
-                </p>
+            {openThreads.slice(0, 5).map((thread) => (
+              <div key={thread.id} className="rounded-sm border border-zinc-100 px-3 py-2">
+                <p className="text-xs font-medium text-zinc-900">{thread.subject}</p>
+                <p className="text-[11px] text-zinc-500">{thread.studentName} — L{thread.levelId}.{thread.lessonNumber}</p>
               </div>
             ))}
+            {openThreads.length === 0 && <p className="text-xs text-zinc-400">No open threads</p>}
           </div>
         </article>
-      </section>
-
-      <section className="rounded-sm border border-zinc-200 bg-white p-4">
-        <h3 className="text-base font-semibold text-zinc-900">Open Q&A threads</h3>
-        <div className="mt-3 grid gap-2 md:grid-cols-2">
-          {DEMO_QA_THREADS.map((thread) => (
-            <div key={thread.id} className="rounded border border-zinc-200 bg-zinc-50 px-3 py-2">
-              <p className="text-sm font-medium text-zinc-900">{thread.subject}</p>
-              <p className="mt-1 text-xs text-zinc-600">
-                {thread.studentName} - L{thread.level} - {thread.status}
-              </p>
-            </div>
-          ))}
-        </div>
       </section>
     </div>
   );

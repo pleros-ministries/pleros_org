@@ -1,5 +1,9 @@
 import { betterAuth } from "better-auth";
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
+import { twoFactor } from "better-auth/plugins/two-factor";
+
+import { db } from "@/lib/db";
 
 const googleConfigured =
   typeof process.env.GOOGLE_CLIENT_ID === "string" &&
@@ -13,6 +17,7 @@ export const betterAuthServer = betterAuth({
   secret:
     process.env.BETTER_AUTH_SECRET ??
     "demo-only-better-auth-secret-change-in-production-12345",
+  database: drizzleAdapter(db, { provider: "pg" }),
   emailAndPassword: {
     enabled: true,
   },
@@ -25,5 +30,8 @@ export const betterAuthServer = betterAuth({
       }
     : {},
   trustedOrigins: ["http://localhost:3000", "https://ppc.pleros.org"],
-  plugins: [nextCookies()],
+  plugins: [
+    nextCookies(),
+    twoFactor({ issuer: "Pleros PPC" }),
+  ],
 });

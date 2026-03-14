@@ -22,7 +22,7 @@ export function ThreadView({ messages }: ThreadViewProps) {
           <div
             key={msg.id}
             className={cn(
-              "rounded border px-3 py-2",
+              "rounded-sm border px-3 py-2",
               isStaff
                 ? "border-zinc-200 bg-zinc-50"
                 : "border-zinc-200 bg-white",
