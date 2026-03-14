@@ -2,6 +2,26 @@
 
 import { revalidatePath } from "next/cache";
 import { checkGraduationReadiness, graduateStudent } from "@/lib/db/queries/graduations";
+import { sendGraduationCongratulations } from "@/lib/email/send";
+import { db } from "@/lib/db";
+import { getLevels } from "@/lib/db/queries/lessons";
+
+async function notifyGraduation(userId: string, levelId: number) {
+  try {
+    const student = await db.query.users.findFirst({ where: (u, { eq }) => eq(u.id, userId) });
+    if (!student) return;
+    const allLevels = await getLevels();
+    const level = allLevels.find((l) => l.id === levelId);
+    const nextLevel = allLevels.find((l) => l.sortOrder === (level?.sortOrder ?? 0) + 1);
+    await sendGraduationCongratulations({
+      to: student.email,
+      studentName: student.name,
+      levelTitle: level?.title ?? `Level ${levelId}`,
+      nextLevelTitle: nextLevel?.title,
+      dashboardUrl: `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/ppc/student`,
+    });
+  } catch { /* email is best-effort */ }
+}
 
 export async function markGraduation(userId: string, levelId: number, graduatedBy: string) {
   const readiness = await checkGraduationReadiness(userId, levelId);
@@ -11,11 +31,13 @@ export async function markGraduation(userId: string, levelId: number, graduatedB
 
   const grad = await graduateStudent(userId, levelId, graduatedBy);
   revalidatePath("/ppc", "layout");
+  await notifyGraduation(userId, levelId);
   return { success: true, graduation: grad };
 }
 
 export async function overrideGraduation(userId: string, levelId: number, graduatedBy: string) {
   const grad = await graduateStudent(userId, levelId, graduatedBy, true);
   revalidatePath("/ppc", "layout");
+  await notifyGraduation(userId, levelId);
   return { success: true, graduation: grad };
 }
