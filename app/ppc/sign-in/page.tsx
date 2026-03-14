@@ -1,10 +1,12 @@
 import Link from "next/link";
 
 import { isDemoAuthEnabled } from "@/lib/demo-auth-session";
+import { SignInForm } from "./sign-in-form";
 
 type SignInPageProps = {
   searchParams: Promise<{
     returnTo?: string;
+    error?: string;
   }>;
 };
 
@@ -19,6 +21,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
   const params = await searchParams;
   const returnTo = params.returnTo?.startsWith("/") ? params.returnTo : "/";
   const demoMode = isDemoAuthEnabled();
+  const error = params.error;
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-md items-center px-5 py-10">
@@ -29,6 +32,13 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
         <h1 className="mt-2 text-xl font-semibold tracking-tight text-zinc-950">
           Sign in
         </h1>
+
+        {error && (
+          <div className="mt-3 rounded-sm border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
+            {error === "invalid" ? "Invalid email or password." : error}
+          </div>
+        )}
+
         {demoMode ? (
           <>
             <p className="mt-1 text-xs text-zinc-500">
@@ -98,7 +108,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
                 </label>
                 <button
                   type="submit"
-                  className="mt-1 h-8 rounded bg-zinc-900 px-3 text-xs font-semibold text-white hover:bg-zinc-800"
+                  className="mt-1 h-8 rounded-sm bg-zinc-900 px-3 text-xs font-semibold text-white hover:bg-zinc-800"
                 >
                   Continue
                 </button>
@@ -106,12 +116,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
             </details>
           </>
         ) : (
-          <div className="mt-5 grid gap-3 rounded-sm border border-zinc-200 bg-zinc-50 p-4 text-xs text-zinc-700">
-            <p>
-              Better Auth mode is enabled. Use configured auth endpoints under
-              <code className="ml-1 rounded bg-zinc-200 px-1.5 py-0.5 text-[10px]">/api/auth</code>.
-            </p>
-          </div>
+          <SignInForm returnTo={returnTo} />
         )}
 
         <p className="mt-4 text-[11px] text-zinc-400">

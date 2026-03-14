@@ -31,6 +31,30 @@ async function resolveDbUserId(email: string): Promise<string | null> {
   }
 }
 
+async function ensurePpcUser(opts: {
+  id: string;
+  name: string;
+  email: string;
+  role: AppRole;
+}): Promise<string> {
+  const existing = await resolveDbUserId(opts.email);
+  if (existing) return existing;
+
+  try {
+    const { users } = await import("@/lib/db/schema");
+    const { eq } = await import("drizzle-orm");
+    await db.insert(users).values({
+      id: opts.id,
+      name: opts.name,
+      email: opts.email.toLowerCase(),
+      role: opts.role,
+    }).onConflictDoNothing();
+    return opts.id;
+  } catch {
+    return opts.id;
+  }
+}
+
 function toAppSession(session: DemoAuthSession, id: string, source: AppSession["source"]): AppSession {
   return {
     user: {
@@ -74,13 +98,20 @@ export async function getAppSession(): Promise<AppSession | null> {
       return null;
     }
 
-    const dbUserId = await resolveDbUserId(authSession.user.email);
+    const role = resolveRoleForEmail(authSession.user.email);
+    const ppcUserId = await ensurePpcUser({
+      id: authSession.user.id ?? authSession.user.email,
+      name: authSession.user.name,
+      email: authSession.user.email,
+      role,
+    });
+
     return {
       user: {
-        id: dbUserId ?? authSession.user.id ?? authSession.user.email,
+        id: ppcUserId,
         name: authSession.user.name,
         email: authSession.user.email,
-        role: resolveRoleForEmail(authSession.user.email),
+        role,
       },
       source: "better-auth",
     };
