@@ -61,7 +61,7 @@ export default async function QuizPage({
           description="The quiz for this lesson hasn't been set up yet."
         />
       ) : (
-        <div className="rounded border border-zinc-200 bg-white p-4">
+        <div className="rounded-sm border border-zinc-200 bg-white p-4">
           <QuizFlow
             userId={userId}
             lessonId={lessonId}

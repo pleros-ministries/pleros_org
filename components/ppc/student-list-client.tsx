@@ -108,7 +108,7 @@ export function StudentListClient({ students }: StudentListClientProps) {
             placeholder="Search by name or email…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="h-8 w-full rounded-md border border-zinc-200 bg-white pl-7 pr-3 text-xs text-zinc-700 outline-none placeholder:text-zinc-400 focus:border-zinc-400 focus:ring-1 focus:ring-zinc-200"
+            className="h-8 w-full rounded-sm border border-zinc-200 bg-white pl-7 pr-3 text-xs text-zinc-700 outline-none placeholder:text-zinc-400 focus:border-zinc-400 focus:ring-1 focus:ring-zinc-200"
           />
         </div>
 
@@ -117,7 +117,7 @@ export function StudentListClient({ students }: StudentListClientProps) {
             value={levelFilter}
             onChange={(e) => setLevelFilter(e.target.value)}
             className={cn(
-              "h-8 appearance-none rounded-md border border-zinc-200 bg-white pl-3 pr-7 text-xs text-zinc-700 outline-none",
+              "h-8 appearance-none rounded-sm border border-zinc-200 bg-white pl-3 pr-7 text-xs text-zinc-700 outline-none",
               "focus:border-zinc-400 focus:ring-1 focus:ring-zinc-200",
             )}
           >

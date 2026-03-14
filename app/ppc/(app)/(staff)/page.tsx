@@ -34,14 +34,14 @@ export default async function StaffDashboardPage() {
       </section>
 
       <section className="grid gap-4 xl:grid-cols-2">
-        <article className="rounded border border-zinc-200 bg-white p-4">
+        <article className="rounded-sm border border-zinc-200 bg-white p-4">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold text-zinc-900">Review queue</h3>
             <Link href="/ppc/review" className="text-[11px] font-medium text-zinc-500 hover:text-zinc-900">View all</Link>
           </div>
           <div className="mt-3 grid gap-2">
             {reviewQueue.slice(0, 5).map((item) => (
-              <div key={item.id} className="flex items-center justify-between rounded border border-zinc-100 px-3 py-2">
+              <div key={item.id} className="flex items-center justify-between rounded-sm border border-zinc-100 px-3 py-2">
                 <div>
                   <p className="text-xs font-medium text-zinc-900">{item.studentName}</p>
                   <p className="text-[11px] text-zinc-500">L{item.levelId}.{item.lessonNumber} — {item.lessonTitle}</p>
@@ -53,14 +53,14 @@ export default async function StaffDashboardPage() {
           </div>
         </article>
 
-        <article className="rounded border border-zinc-200 bg-white p-4">
+        <article className="rounded-sm border border-zinc-200 bg-white p-4">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold text-zinc-900">Open Q&A threads</h3>
             <Link href="/ppc/qa" className="text-[11px] font-medium text-zinc-500 hover:text-zinc-900">View all</Link>
           </div>
           <div className="mt-3 grid gap-2">
             {openThreads.slice(0, 5).map((thread) => (
-              <div key={thread.id} className="rounded border border-zinc-100 px-3 py-2">
+              <div key={thread.id} className="rounded-sm border border-zinc-100 px-3 py-2">
                 <p className="text-xs font-medium text-zinc-900">{thread.subject}</p>
                 <p className="text-[11px] text-zinc-500">{thread.studentName} — L{thread.levelId}.{thread.lessonNumber}</p>
               </div>

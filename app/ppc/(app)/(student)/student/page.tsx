@@ -59,7 +59,7 @@ export default async function StudentDashboardPage() {
             <Link
               key={level.id}
               href={locked ? "#" : `/ppc/student/level/${level.id}`}
-              className={`rounded-lg border p-3 transition ${
+              className={`rounded border p-3 transition ${
                 isCurrent
                   ? "border-zinc-900 bg-zinc-900"
                   : graduated
@@ -80,7 +80,7 @@ export default async function StudentDashboardPage() {
       </section>
 
       <section className="grid gap-4 lg:grid-cols-[2fr_1fr]">
-        <div className="rounded-lg border border-zinc-200 bg-white p-4">
+        <div className="rounded border border-zinc-200 bg-white p-4">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold text-zinc-900">Level {currentLevel} progress</h3>
             <span className="text-xs text-zinc-500">{progressPercent}%</span>
@@ -90,14 +90,14 @@ export default async function StudentDashboardPage() {
           {nextLesson && (
             <Link
               href={`/ppc/student/level/${currentLevel}/lesson/${nextLesson.lesson.id}`}
-              className="mt-4 inline-flex h-8 items-center rounded-md bg-zinc-900 px-3 text-xs font-medium text-white hover:bg-zinc-800"
+              className="mt-4 inline-flex h-8 items-center rounded-sm bg-zinc-900 px-3 text-xs font-medium text-white hover:bg-zinc-800"
             >
               Continue learning — L{currentLevel}.{nextLesson.lesson.lessonNumber}
             </Link>
           )}
         </div>
 
-        <div className="rounded-lg border border-zinc-200 bg-white p-4">
+        <div className="rounded border border-zinc-200 bg-white p-4">
           <h3 className="text-sm font-semibold text-zinc-900">Quick stats</h3>
           <div className="mt-3 grid gap-2 text-xs">
             <div className="flex justify-between">

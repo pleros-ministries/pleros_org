@@ -238,7 +238,7 @@ export function ContentCmsClient({
               key={lesson.id}
               onClick={() => selectLesson(lesson)}
               className={cn(
-                "flex items-center gap-2 rounded border px-2 py-1.5 text-left transition-colors",
+                "flex items-center gap-2 rounded-sm border px-2 py-1.5 text-left transition-colors",
                 selectedLessonId === lesson.id
                   ? "border-zinc-400 bg-zinc-50"
                   : "border-zinc-200 bg-white hover:bg-zinc-50",
@@ -264,13 +264,13 @@ export function ContentCmsClient({
 
         {/* Edit panel */}
         {selectedLesson == null ? (
-          <div className="flex items-center justify-center rounded border border-zinc-200 bg-white py-12 text-xs text-zinc-400">
+          <div className="flex items-center justify-center rounded-sm border border-zinc-200 bg-white py-12 text-xs text-zinc-400">
             Select a lesson to edit
           </div>
         ) : (
           <div className="grid gap-3">
             {/* Lesson fields */}
-            <div className="rounded border border-zinc-200 bg-white p-3">
+            <div className="rounded-sm border border-zinc-200 bg-white p-3">
               <div className="mb-2 flex items-center justify-between">
                 <p className="text-[11px] font-medium uppercase tracking-wider text-zinc-400">
                   Lesson details
@@ -294,7 +294,7 @@ export function ContentCmsClient({
                     type="text"
                     value={editTitle}
                     onChange={(e) => setEditTitle(e.target.value)}
-                    className="h-8 w-full rounded-md border border-zinc-200 px-2 text-xs outline-none focus:border-zinc-400"
+                    className="h-8 w-full rounded-sm border border-zinc-200 px-2 text-xs outline-none focus:border-zinc-400"
                   />
                 </div>
                 <div>
@@ -306,7 +306,7 @@ export function ContentCmsClient({
                     value={editAudioUrl}
                     onChange={(e) => setEditAudioUrl(e.target.value)}
                     placeholder="https://…"
-                    className="h-8 w-full rounded-md border border-zinc-200 px-2 text-xs outline-none placeholder:text-zinc-300 focus:border-zinc-400"
+                    className="h-8 w-full rounded-sm border border-zinc-200 px-2 text-xs outline-none placeholder:text-zinc-300 focus:border-zinc-400"
                   />
                 </div>
                 <div>
@@ -317,7 +317,7 @@ export function ContentCmsClient({
                     value={editNotes}
                     onChange={(e) => setEditNotes(e.target.value)}
                     rows={5}
-                    className="w-full rounded-md border border-zinc-200 px-2 py-1.5 text-xs outline-none placeholder:text-zinc-300 focus:border-zinc-400"
+                    className="w-full rounded-sm border border-zinc-200 px-2 py-1.5 text-xs outline-none placeholder:text-zinc-300 focus:border-zinc-400"
                   />
                 </div>
 
@@ -325,7 +325,7 @@ export function ContentCmsClient({
                   <button
                     onClick={handleSaveLesson}
                     disabled={isPending}
-                    className="flex h-7 items-center gap-1.5 rounded-md bg-zinc-900 px-3 text-xs font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
+                    className="flex h-7 items-center gap-1.5 rounded-sm bg-zinc-900 px-3 text-xs font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
                   >
                     <Save className="size-3" />
                     Save
@@ -334,7 +334,7 @@ export function ContentCmsClient({
                     onClick={handlePublishToggle}
                     disabled={isPending}
                     className={cn(
-                      "flex h-7 items-center gap-1.5 rounded-md border px-3 text-xs font-medium disabled:opacity-50",
+                      "flex h-7 items-center gap-1.5 rounded-sm border px-3 text-xs font-medium disabled:opacity-50",
                       selectedLesson.status === "published"
                         ? "border-zinc-200 text-zinc-600 hover:bg-zinc-50"
                         : "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100",
@@ -357,7 +357,7 @@ export function ContentCmsClient({
             </div>
 
             {/* Quiz editor */}
-            <div className="rounded border border-zinc-200 bg-white p-3">
+            <div className="rounded-sm border border-zinc-200 bg-white p-3">
               <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-zinc-400">
                 Quiz questions
               </p>
@@ -367,7 +367,7 @@ export function ContentCmsClient({
                 {lessonQuestions.map((q, i) => (
                   <div
                     key={q.id}
-                    className="rounded border border-zinc-100 px-2 py-1.5"
+                    className="rounded-sm border border-zinc-100 px-2 py-1.5"
                   >
                     {editingQId === q.id ? (
                       <div className="grid gap-1.5">
@@ -375,7 +375,7 @@ export function ContentCmsClient({
                           type="text"
                           value={editQText}
                           onChange={(e) => setEditQText(e.target.value)}
-                          className="h-7 w-full rounded border border-zinc-200 px-2 text-xs outline-none"
+                          className="h-7 w-full rounded-sm border border-zinc-200 px-2 text-xs outline-none"
                         />
                         {q.questionType === "multiple_choice" && (
                           <input
@@ -383,7 +383,7 @@ export function ContentCmsClient({
                             value={editQOptions}
                             onChange={(e) => setEditQOptions(e.target.value)}
                             placeholder="Options (comma-separated)"
-                            className="h-7 w-full rounded border border-zinc-200 px-2 text-xs outline-none placeholder:text-zinc-300"
+                            className="h-7 w-full rounded-sm border border-zinc-200 px-2 text-xs outline-none placeholder:text-zinc-300"
                           />
                         )}
                         <input
@@ -391,7 +391,7 @@ export function ContentCmsClient({
                           value={editQAnswer}
                           onChange={(e) => setEditQAnswer(e.target.value)}
                           placeholder="Correct answer"
-                          className="h-7 w-full rounded border border-zinc-200 px-2 text-xs outline-none placeholder:text-zinc-300"
+                          className="h-7 w-full rounded-sm border border-zinc-200 px-2 text-xs outline-none placeholder:text-zinc-300"
                         />
                         <div className="flex gap-1.5">
                           <button
@@ -403,7 +403,7 @@ export function ContentCmsClient({
                           </button>
                           <button
                             onClick={() => setEditingQId(null)}
-                            className="h-6 rounded border border-zinc-200 px-2 text-[10px] text-zinc-600"
+                            className="h-6 rounded-sm border border-zinc-200 px-2 text-[10px] text-zinc-600"
                           >
                             Cancel
                           </button>
@@ -440,14 +440,14 @@ export function ContentCmsClient({
                         <div className="flex gap-1">
                           <button
                             onClick={() => handleEditQuestion(q.id)}
-                            className="flex h-6 items-center gap-1 rounded border border-zinc-200 px-1.5 text-[10px] text-zinc-500 hover:bg-zinc-50"
+                            className="flex h-6 items-center gap-1 rounded-sm border border-zinc-200 px-1.5 text-[10px] text-zinc-500 hover:bg-zinc-50"
                           >
                             <PencilLine className="size-2.5" />
                           </button>
                           <button
                             onClick={() => handleDeleteQuestion(q.id)}
                             disabled={isPending}
-                            className="flex h-6 items-center gap-1 rounded border border-red-200 px-1.5 text-[10px] text-red-500 hover:bg-red-50 disabled:opacity-50"
+                            className="flex h-6 items-center gap-1 rounded-sm border border-red-200 px-1.5 text-[10px] text-red-500 hover:bg-red-50 disabled:opacity-50"
                           >
                             <Trash2 className="size-2.5" />
                           </button>
@@ -459,7 +459,7 @@ export function ContentCmsClient({
               </div>
 
               {/* Add question */}
-              <div className="rounded border border-dashed border-zinc-200 p-2">
+              <div className="rounded-sm border border-dashed border-zinc-200 p-2">
                 <p className="mb-1.5 flex items-center gap-1 text-[10px] font-medium text-zinc-400">
                   <Plus className="size-3" />
                   Add question
@@ -473,7 +473,7 @@ export function ContentCmsClient({
                           e.target.value as "multiple_choice" | "short_text",
                         )
                       }
-                      className="h-7 w-full appearance-none rounded border border-zinc-200 pl-2 pr-6 text-xs outline-none"
+                      className="h-7 w-full appearance-none rounded-sm border border-zinc-200 pl-2 pr-6 text-xs outline-none"
                     >
                       <option value="multiple_choice">Multiple choice</option>
                       <option value="short_text">Short text</option>
@@ -485,7 +485,7 @@ export function ContentCmsClient({
                     value={newQText}
                     onChange={(e) => setNewQText(e.target.value)}
                     placeholder="Question text"
-                    className="h-7 w-full rounded border border-zinc-200 px-2 text-xs outline-none placeholder:text-zinc-300"
+                    className="h-7 w-full rounded-sm border border-zinc-200 px-2 text-xs outline-none placeholder:text-zinc-300"
                   />
                   {newQType === "multiple_choice" && (
                     <input
@@ -493,7 +493,7 @@ export function ContentCmsClient({
                       value={newQOptions}
                       onChange={(e) => setNewQOptions(e.target.value)}
                       placeholder="Options (comma-separated)"
-                      className="h-7 w-full rounded border border-zinc-200 px-2 text-xs outline-none placeholder:text-zinc-300"
+                      className="h-7 w-full rounded-sm border border-zinc-200 px-2 text-xs outline-none placeholder:text-zinc-300"
                     />
                   )}
                   <input
@@ -501,12 +501,12 @@ export function ContentCmsClient({
                     value={newQAnswer}
                     onChange={(e) => setNewQAnswer(e.target.value)}
                     placeholder="Correct answer"
-                    className="h-7 w-full rounded border border-zinc-200 px-2 text-xs outline-none placeholder:text-zinc-300"
+                    className="h-7 w-full rounded-sm border border-zinc-200 px-2 text-xs outline-none placeholder:text-zinc-300"
                   />
                   <button
                     onClick={handleAddQuestion}
                     disabled={isPending || !newQText.trim()}
-                    className="flex h-7 w-fit items-center gap-1.5 rounded-md bg-zinc-900 px-3 text-xs font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
+                    className="flex h-7 w-fit items-center gap-1.5 rounded-sm bg-zinc-900 px-3 text-xs font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
                   >
                     <Plus className="size-3" />
                     Add

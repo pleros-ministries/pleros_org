@@ -121,7 +121,7 @@ export function AdminControlsClient({
         ].map((stat) => (
           <div
             key={stat.label}
-            className="flex items-center gap-2 rounded border border-zinc-200 bg-white px-3 py-2"
+            className="flex items-center gap-2 rounded-sm border border-zinc-200 bg-white px-3 py-2"
           >
             <stat.icon className="size-4 text-zinc-400" />
             <div>
@@ -133,7 +133,7 @@ export function AdminControlsClient({
       </div>
 
       {/* Student override section */}
-      <div className="rounded border border-zinc-200 bg-white p-3">
+      <div className="rounded-sm border border-zinc-200 bg-white p-3">
         <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-zinc-400">
           Student override
         </p>
@@ -147,7 +147,7 @@ export function AdminControlsClient({
               placeholder="Search students…"
               value={studentSearch}
               onChange={(e) => setStudentSearch(e.target.value)}
-              className="h-8 w-full rounded-md border border-zinc-200 bg-white pl-7 pr-3 text-xs text-zinc-700 outline-none placeholder:text-zinc-400 focus:border-zinc-400 focus:ring-1 focus:ring-zinc-200"
+              className="h-8 w-full rounded-sm border border-zinc-200 bg-white pl-7 pr-3 text-xs text-zinc-700 outline-none placeholder:text-zinc-400 focus:border-zinc-400 focus:ring-1 focus:ring-zinc-200"
             />
           </div>
 
@@ -157,7 +157,7 @@ export function AdminControlsClient({
               value={selectedStudentId}
               onChange={(e) => setSelectedStudentId(e.target.value)}
               className={cn(
-                "h-8 w-full appearance-none rounded-md border border-zinc-200 bg-white pl-3 pr-7 text-xs text-zinc-700 outline-none",
+                "h-8 w-full appearance-none rounded-sm border border-zinc-200 bg-white pl-3 pr-7 text-xs text-zinc-700 outline-none",
                 "focus:border-zinc-400 focus:ring-1 focus:ring-zinc-200",
               )}
             >
@@ -172,7 +172,7 @@ export function AdminControlsClient({
           </div>
 
           {selectedStudent && (
-            <div className="grid gap-2 rounded border border-zinc-100 p-2">
+            <div className="grid gap-2 rounded-sm border border-zinc-100 p-2">
               <div className="flex items-center gap-2 text-xs text-zinc-600">
                 <span className="font-medium">{selectedStudent.name}</span>
                 <LevelBadge level={selectedStudent.currentLevel} />
@@ -184,7 +184,7 @@ export function AdminControlsClient({
                 <select
                   value={overrideLevel}
                   onChange={(e) => setOverrideLevel(e.target.value)}
-                  className="h-7 rounded-md border border-zinc-200 px-2 text-xs outline-none"
+                  className="h-7 rounded-sm border border-zinc-200 px-2 text-xs outline-none"
                 >
                   {[1, 2, 3, 4, 5].map((l) => (
                     <option key={l} value={String(l)}>
@@ -195,7 +195,7 @@ export function AdminControlsClient({
                 <button
                   onClick={handleOverrideLevel}
                   disabled={isPending}
-                  className="h-7 rounded-md bg-zinc-900 px-3 text-xs font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
+                  className="h-7 rounded-sm bg-zinc-900 px-3 text-xs font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
                 >
                   Set
                 </button>
@@ -206,7 +206,7 @@ export function AdminControlsClient({
                 {confirmReset !== selectedStudent.id ? (
                   <button
                     onClick={() => setConfirmReset(selectedStudent.id)}
-                    className="flex h-7 items-center gap-1.5 rounded-md border border-red-200 bg-red-50 px-3 text-xs font-medium text-red-700 hover:bg-red-100"
+                    className="flex h-7 items-center gap-1.5 rounded-sm border border-red-200 bg-red-50 px-3 text-xs font-medium text-red-700 hover:bg-red-100"
                   >
                     <RotateCcw className="size-3" />
                     Reset progress
@@ -220,13 +220,13 @@ export function AdminControlsClient({
                     <button
                       onClick={() => handleResetProgress(selectedStudent.id)}
                       disabled={isPending}
-                      className="h-7 rounded-md bg-red-600 px-3 text-xs font-medium text-white hover:bg-red-700 disabled:opacity-50"
+                      className="h-7 rounded-sm bg-red-600 px-3 text-xs font-medium text-white hover:bg-red-700 disabled:opacity-50"
                     >
                       Confirm
                     </button>
                     <button
                       onClick={() => setConfirmReset(null)}
-                      className="h-7 rounded-md border border-zinc-200 px-3 text-xs text-zinc-600 hover:bg-zinc-50"
+                      className="h-7 rounded-sm border border-zinc-200 px-3 text-xs text-zinc-600 hover:bg-zinc-50"
                     >
                       Cancel
                     </button>
@@ -239,7 +239,7 @@ export function AdminControlsClient({
       </div>
 
       {/* Reviewer assignments */}
-      <div className="rounded border border-zinc-200 bg-white p-3">
+      <div className="rounded-sm border border-zinc-200 bg-white p-3">
         <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-zinc-400">
           Reviewer assignments
         </p>
@@ -281,7 +281,7 @@ export function AdminControlsClient({
                           handleRemoveAssignment(ra.userId, ra.levelId)
                         }
                         disabled={isPending}
-                        className="flex h-6 items-center gap-1 rounded border border-red-200 bg-red-50 px-2 text-[10px] font-medium text-red-600 hover:bg-red-100 disabled:opacity-50"
+                        className="flex h-6 items-center gap-1 rounded-sm border border-red-200 bg-red-50 px-2 text-[10px] font-medium text-red-600 hover:bg-red-100 disabled:opacity-50"
                       >
                         <Trash2 className="size-2.5" />
                         Remove
@@ -295,13 +295,13 @@ export function AdminControlsClient({
         )}
 
         {/* Add reviewer */}
-        <div className="flex flex-wrap items-center gap-2 rounded border border-zinc-100 p-2">
+        <div className="flex flex-wrap items-center gap-2 rounded-sm border border-zinc-100 p-2">
           <UserPlus className="size-3.5 text-zinc-400" />
           <div className="relative flex-1 min-w-[140px]">
             <select
               value={newReviewerUserId}
               onChange={(e) => setNewReviewerUserId(e.target.value)}
-              className="h-7 w-full appearance-none rounded-md border border-zinc-200 pl-2 pr-6 text-xs outline-none"
+              className="h-7 w-full appearance-none rounded-sm border border-zinc-200 pl-2 pr-6 text-xs outline-none"
             >
               <option value="">Select instructor…</option>
               {instructors.map((inst) => (
@@ -316,7 +316,7 @@ export function AdminControlsClient({
             <select
               value={newReviewerLevel}
               onChange={(e) => setNewReviewerLevel(e.target.value)}
-              className="h-7 appearance-none rounded-md border border-zinc-200 pl-2 pr-6 text-xs outline-none"
+              className="h-7 appearance-none rounded-sm border border-zinc-200 pl-2 pr-6 text-xs outline-none"
             >
               {[1, 2, 3, 4, 5].map((l) => (
                 <option key={l} value={String(l)}>
@@ -329,7 +329,7 @@ export function AdminControlsClient({
           <button
             onClick={handleAssignReviewer}
             disabled={isPending || !newReviewerUserId}
-            className="h-7 rounded-md bg-zinc-900 px-3 text-xs font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
+            className="h-7 rounded-sm bg-zinc-900 px-3 text-xs font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
           >
             Assign
           </button>

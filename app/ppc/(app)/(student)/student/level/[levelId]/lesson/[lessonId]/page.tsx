@@ -96,7 +96,7 @@ export default async function LessonDetailPage({
               <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
                 Notes
               </h3>
-              <div className="prose prose-sm max-w-none rounded border border-zinc-200 bg-white p-4 text-zinc-700">
+              <div className="prose prose-sm max-w-none rounded-sm border border-zinc-200 bg-white p-4 text-zinc-700">
                 <div dangerouslySetInnerHTML={{ __html: lesson.notesContent }} />
               </div>
             </section>
@@ -113,7 +113,7 @@ export default async function LessonDetailPage({
             {prevLesson ? (
               <Link
                 href={`/ppc/student/level/${levelId}/lesson/${prevLesson.id}`}
-                className="inline-flex h-7 items-center gap-1 rounded-md border border-zinc-200 bg-white px-2 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-50"
+                className="inline-flex h-7 items-center gap-1 rounded-sm border border-zinc-200 bg-white px-2 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-50"
               >
                 <ChevronLeft className="size-3.5" />
                 L{levelId}.{prevLesson.lessonNumber}
@@ -124,7 +124,7 @@ export default async function LessonDetailPage({
             {nextLesson ? (
               <Link
                 href={`/ppc/student/level/${levelId}/lesson/${nextLesson.id}`}
-                className="inline-flex h-7 items-center gap-1 rounded-md border border-zinc-200 bg-white px-2 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-50"
+                className="inline-flex h-7 items-center gap-1 rounded-sm border border-zinc-200 bg-white px-2 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-50"
               >
                 L{levelId}.{nextLesson.lessonNumber}
                 <ChevronRight className="size-3.5" />
@@ -138,7 +138,7 @@ export default async function LessonDetailPage({
         <aside className="space-y-3">
           <Link
             href={`/ppc/student/level/${levelId}/lesson/${lessonId}/quiz`}
-            className="flex items-center gap-3 rounded border border-zinc-200 bg-white p-3 transition-colors hover:border-zinc-300"
+            className="flex items-center gap-3 rounded-sm border border-zinc-200 bg-white p-3 transition-colors hover:border-zinc-300"
           >
             <HelpCircle className="size-4 shrink-0 text-zinc-400" />
             <div className="min-w-0">
@@ -155,7 +155,7 @@ export default async function LessonDetailPage({
 
           <Link
             href={`/ppc/student/level/${levelId}/lesson/${lessonId}/response`}
-            className="flex items-center gap-3 rounded border border-zinc-200 bg-white p-3 transition-colors hover:border-zinc-300"
+            className="flex items-center gap-3 rounded-sm border border-zinc-200 bg-white p-3 transition-colors hover:border-zinc-300"
           >
             <PenLine className="size-4 shrink-0 text-zinc-400" />
             <div className="min-w-0">
@@ -174,7 +174,7 @@ export default async function LessonDetailPage({
 
           <Link
             href={`/ppc/student/level/${levelId}/lesson/${lessonId}/qa`}
-            className="flex items-center gap-3 rounded border border-zinc-200 bg-white p-3 transition-colors hover:border-zinc-300"
+            className="flex items-center gap-3 rounded-sm border border-zinc-200 bg-white p-3 transition-colors hover:border-zinc-300"
           >
             <MessageSquare className="size-4 shrink-0 text-zinc-400" />
             <div className="min-w-0">

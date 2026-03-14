@@ -44,7 +44,7 @@ export function LessonHubClient({
         onClick={handleAudio}
         disabled={audioPending || audioListened}
         className={cn(
-          "inline-flex h-7 items-center gap-1.5 rounded-md border px-2 text-xs font-medium transition-colors",
+          "inline-flex h-7 items-center gap-1.5 rounded-sm border px-2 text-xs font-medium transition-colors",
           audioListened
             ? "border-emerald-200 bg-emerald-50 text-emerald-700"
             : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50",
@@ -60,7 +60,7 @@ export function LessonHubClient({
         onClick={handleNotes}
         disabled={notesPending || notesRead}
         className={cn(
-          "inline-flex h-7 items-center gap-1.5 rounded-md border px-2 text-xs font-medium transition-colors",
+          "inline-flex h-7 items-center gap-1.5 rounded-sm border px-2 text-xs font-medium transition-colors",
           notesRead
             ? "border-emerald-200 bg-emerald-50 text-emerald-700"
             : "border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50",

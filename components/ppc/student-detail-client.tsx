@@ -126,7 +126,7 @@ export function StudentDetailClient({
   return (
     <div className="grid gap-4">
       {/* Student header */}
-      <div className="rounded border border-zinc-200 bg-white px-4 py-3">
+      <div className="rounded-sm border border-zinc-200 bg-white px-4 py-3">
         <p className="text-sm font-medium text-zinc-900">{student.name}</p>
         <p className="text-xs text-zinc-500">{student.email}</p>
         <div className="mt-1 flex flex-wrap gap-2 text-[10px] text-zinc-400">
@@ -162,7 +162,7 @@ export function StudentDetailClient({
 
       {/* Completion matrix */}
       {currentLP && (
-        <div className="rounded border border-zinc-200 bg-white p-3">
+        <div className="rounded-sm border border-zinc-200 bg-white p-3">
           <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-zinc-400">
             Lesson progress
           </p>
@@ -174,7 +174,7 @@ export function StudentDetailClient({
               return (
                 <div
                   key={lesson.id}
-                  className="flex items-center gap-3 rounded border border-zinc-100 px-2 py-1.5"
+                  className="flex items-center gap-3 rounded-sm border border-zinc-100 px-2 py-1.5"
                 >
                   <span className="min-w-[20px] text-[10px] text-zinc-400">
                     #{lesson.lessonNumber}
@@ -198,7 +198,7 @@ export function StudentDetailClient({
 
       {/* Submissions */}
       {levelSubs.length > 0 && (
-        <div className="rounded border border-zinc-200 bg-white p-3">
+        <div className="rounded-sm border border-zinc-200 bg-white p-3">
           <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-zinc-400">
             Written submissions
           </p>
@@ -212,7 +212,7 @@ export function StudentDetailClient({
                     ? "warning"
                     : "default";
               return (
-                <div key={sub.id} className="border border-zinc-100 rounded">
+                <div key={sub.id} className="border border-zinc-100 rounded-sm">
                   <button
                     onClick={() =>
                       setExpandedSub(isExpanded ? null : sub.id)
@@ -244,7 +244,7 @@ export function StudentDetailClient({
                           <button
                             onClick={() => handleApprove(sub.id)}
                             disabled={isPending}
-                            className="h-7 rounded-md bg-emerald-600 px-3 text-xs font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
+                            className="h-7 rounded-sm bg-emerald-600 px-3 text-xs font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
                           >
                             {isPending ? "…" : "Approve"}
                           </button>
@@ -259,7 +259,7 @@ export function StudentDetailClient({
                                   [sub.id]: e.target.value,
                                 }))
                               }
-                              className="h-7 flex-1 rounded-md border border-zinc-200 px-2 text-xs outline-none focus:border-zinc-400"
+                              className="h-7 flex-1 rounded-sm border border-zinc-200 px-2 text-xs outline-none focus:border-zinc-400"
                             />
                             <button
                               onClick={() => handleRequestRevision(sub.id)}
@@ -267,7 +267,7 @@ export function StudentDetailClient({
                                 isPending ||
                                 !revisionNotes[sub.id]?.trim()
                               }
-                              className="h-7 rounded-md border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-50"
+                              className="h-7 rounded-sm border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-50"
                             >
                               Request revision
                             </button>
@@ -285,7 +285,7 @@ export function StudentDetailClient({
 
       {/* Q&A threads */}
       {threads.length > 0 && (
-        <div className="rounded border border-zinc-200 bg-white p-3">
+        <div className="rounded-sm border border-zinc-200 bg-white p-3">
           <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-zinc-400">
             Q&A threads
           </p>
@@ -293,7 +293,7 @@ export function StudentDetailClient({
             {threads.map((t) => (
               <div
                 key={t.id}
-                className="flex items-center gap-2 rounded border border-zinc-100 px-2 py-1.5"
+                className="flex items-center gap-2 rounded-sm border border-zinc-100 px-2 py-1.5"
               >
                 <span className="flex-1 text-xs text-zinc-700 truncate">
                   {t.subject}
@@ -313,7 +313,7 @@ export function StudentDetailClient({
 
       {/* Admin section */}
       {isAdmin && (
-        <div className="rounded border border-zinc-200 bg-white p-3">
+        <div className="rounded-sm border border-zinc-200 bg-white p-3">
           <div className="mb-2 flex items-center gap-1.5">
             <Shield className="size-3.5 text-zinc-400" />
             <p className="text-[11px] font-medium uppercase tracking-wider text-zinc-400">
@@ -328,7 +328,7 @@ export function StudentDetailClient({
               <select
                 value={overrideLevel}
                 onChange={(e) => setOverrideLevel(e.target.value)}
-                className="h-7 rounded-md border border-zinc-200 px-2 text-xs outline-none"
+                className="h-7 rounded-sm border border-zinc-200 px-2 text-xs outline-none"
               >
                 {[1, 2, 3, 4, 5].map((l) => (
                   <option key={l} value={String(l)}>
@@ -339,7 +339,7 @@ export function StudentDetailClient({
               <button
                 onClick={handleOverrideLevel}
                 disabled={isPending}
-                className="h-7 rounded-md bg-zinc-900 px-3 text-xs font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
+                className="h-7 rounded-sm bg-zinc-900 px-3 text-xs font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
               >
                 Set
               </button>
@@ -350,7 +350,7 @@ export function StudentDetailClient({
               {!confirmReset ? (
                 <button
                   onClick={() => setConfirmReset(true)}
-                  className="flex h-7 items-center gap-1.5 rounded-md border border-red-200 bg-red-50 px-3 text-xs font-medium text-red-700 hover:bg-red-100"
+                  className="flex h-7 items-center gap-1.5 rounded-sm border border-red-200 bg-red-50 px-3 text-xs font-medium text-red-700 hover:bg-red-100"
                 >
                   <RotateCcw className="size-3" />
                   Reset progress
@@ -364,13 +364,13 @@ export function StudentDetailClient({
                   <button
                     onClick={handleResetProgress}
                     disabled={isPending}
-                    className="h-7 rounded-md bg-red-600 px-3 text-xs font-medium text-white hover:bg-red-700 disabled:opacity-50"
+                    className="h-7 rounded-sm bg-red-600 px-3 text-xs font-medium text-white hover:bg-red-700 disabled:opacity-50"
                   >
                     Confirm reset
                   </button>
                   <button
                     onClick={() => setConfirmReset(false)}
-                    className="h-7 rounded-md border border-zinc-200 px-3 text-xs text-zinc-600 hover:bg-zinc-50"
+                    className="h-7 rounded-sm border border-zinc-200 px-3 text-xs text-zinc-600 hover:bg-zinc-50"
                   >
                     Cancel
                   </button>
@@ -383,7 +383,7 @@ export function StudentDetailClient({
               <button
                 onClick={handleGraduationOverride}
                 disabled={isPending}
-                className="flex h-7 items-center gap-1.5 rounded-md bg-emerald-600 px-3 text-xs font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
+                className="flex h-7 items-center gap-1.5 rounded-sm bg-emerald-600 px-3 text-xs font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
               >
                 <GraduationCap className="size-3" />
                 Graduate L{activeLevel} (override)

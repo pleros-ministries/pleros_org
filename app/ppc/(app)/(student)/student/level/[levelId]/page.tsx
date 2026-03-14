@@ -52,7 +52,7 @@ export default async function LevelDetailPage({
         description={level.description ?? undefined}
       />
 
-      <div className="rounded border border-zinc-200 bg-white p-3">
+      <div className="rounded-sm border border-zinc-200 bg-white p-3">
         <div className="mb-1.5 flex items-center justify-between text-xs text-zinc-500">
           <span>Level progress</span>
           <span className="font-medium text-zinc-900">
@@ -63,11 +63,11 @@ export default async function LevelDetailPage({
       </div>
 
       {graduated ? (
-        <div className="rounded border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-700">
+        <div className="rounded-sm border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-700">
           You have graduated from this level.
         </div>
       ) : readiness.ready ? (
-        <div className="rounded border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
+        <div className="rounded-sm border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
           All lessons complete. Awaiting staff graduation review.
         </div>
       ) : null}
@@ -77,7 +77,7 @@ export default async function LevelDetailPage({
           <Link
             key={lesson.id}
             href={`/ppc/student/level/${levelId}/lesson/${lesson.id}`}
-            className="flex items-center justify-between gap-3 rounded border border-zinc-200 bg-white px-3 py-2.5 transition-colors hover:border-zinc-300"
+            className="flex items-center justify-between gap-3 rounded-sm border border-zinc-200 bg-white px-3 py-2.5 transition-colors hover:border-zinc-300"
           >
             <div className="flex min-w-0 items-center gap-3">
               <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-[10px] font-semibold text-zinc-600">

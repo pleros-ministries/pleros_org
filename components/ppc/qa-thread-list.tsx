@@ -145,7 +145,7 @@ export function QaThreadList({
             onKeyDown={handleReplyKeyDown}
             rows={3}
             placeholder="Write a reply… (Cmd+Enter to send)"
-            className="w-full resize-y rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400/50 transition-colors"
+            className="w-full resize-y rounded-sm border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400/50 transition-colors"
           />
           <div className="flex justify-end">
             <button
@@ -153,7 +153,7 @@ export function QaThreadList({
               onClick={handleReply}
               disabled={isReplying || !replyText.trim()}
               className={cn(
-                "inline-flex h-8 items-center gap-1.5 rounded-md bg-zinc-900 px-3 text-xs font-medium text-white transition-colors hover:bg-zinc-800",
+                "inline-flex h-8 items-center gap-1.5 rounded-sm bg-zinc-900 px-3 text-xs font-medium text-white transition-colors hover:bg-zinc-800",
                 (isReplying || !replyText.trim()) && "opacity-50 cursor-not-allowed",
               )}
             >
@@ -173,7 +173,7 @@ export function QaThreadList({
         <button
           type="button"
           onClick={() => setShowNewForm(!showNewForm)}
-          className="inline-flex h-7 items-center gap-1 rounded-md border border-zinc-200 bg-white px-2 text-xs font-medium text-zinc-700 hover:bg-zinc-50 transition-colors"
+          className="inline-flex h-7 items-center gap-1 rounded-sm border border-zinc-200 bg-white px-2 text-xs font-medium text-zinc-700 hover:bg-zinc-50 transition-colors"
         >
           <Plus className="size-3" />
           New question
@@ -181,20 +181,20 @@ export function QaThreadList({
       </div>
 
       {showNewForm && (
-        <div className="space-y-2 rounded-md border border-zinc-200 bg-zinc-50 p-3">
+        <div className="space-y-2 rounded-sm border border-zinc-200 bg-zinc-50 p-3">
           <input
             type="text"
             value={newSubject}
             onChange={(e) => setNewSubject(e.target.value)}
             placeholder="Subject"
-            className="w-full rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400/50 transition-colors"
+            className="w-full rounded-sm border border-zinc-200 bg-white px-3 py-1.5 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400/50 transition-colors"
           />
           <textarea
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             rows={3}
             placeholder="Your question…"
-            className="w-full resize-y rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400/50 transition-colors"
+            className="w-full resize-y rounded-sm border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400/50 transition-colors"
           />
           <div className="flex justify-end gap-2">
             <button
@@ -204,7 +204,7 @@ export function QaThreadList({
                 setNewSubject("");
                 setNewMessage("");
               }}
-              className="inline-flex h-7 items-center rounded-md border border-zinc-200 bg-white px-2 text-xs text-zinc-600 hover:bg-zinc-50 transition-colors"
+              className="inline-flex h-7 items-center rounded-sm border border-zinc-200 bg-white px-2 text-xs text-zinc-600 hover:bg-zinc-50 transition-colors"
             >
               Cancel
             </button>
@@ -213,7 +213,7 @@ export function QaThreadList({
               onClick={handleCreateThread}
               disabled={isCreating || !newSubject.trim() || !newMessage.trim()}
               className={cn(
-                "inline-flex h-7 items-center gap-1 rounded-md bg-zinc-900 px-2 text-xs font-medium text-white transition-colors hover:bg-zinc-800",
+                "inline-flex h-7 items-center gap-1 rounded-sm bg-zinc-900 px-2 text-xs font-medium text-white transition-colors hover:bg-zinc-800",
                 (isCreating || !newSubject.trim() || !newMessage.trim()) &&
                   "opacity-50 cursor-not-allowed",
               )}
@@ -237,7 +237,7 @@ export function QaThreadList({
               key={thread.id}
               type="button"
               onClick={() => openThread(thread.id)}
-              className="flex items-center justify-between gap-2 rounded-md border border-zinc-200 bg-white px-3 py-2 text-left hover:bg-zinc-50 transition-colors"
+              className="flex items-center justify-between gap-2 rounded-sm border border-zinc-200 bg-white px-3 py-2 text-left hover:bg-zinc-50 transition-colors"
             >
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium text-zinc-900">{thread.subject}</p>

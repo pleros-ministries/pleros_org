@@ -232,7 +232,7 @@ export function PpcShell({ children, session }: PpcShellProps) {
               <button
                 type="button"
                 onClick={() => setIsMobileNavOpen(true)}
-                className="inline-flex size-9 items-center justify-center rounded-md border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-100 lg:hidden"
+                className="inline-flex size-9 items-center justify-center rounded-sm border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-100 lg:hidden"
                 aria-label="Open sidebar"
               >
                 <Menu className="size-4" />
@@ -240,7 +240,7 @@ export function PpcShell({ children, session }: PpcShellProps) {
               <button
                 type="button"
                 onClick={() => setIsSidebarCollapsed((current) => !current)}
-                className="hidden size-9 items-center justify-center rounded-md border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-100 lg:inline-flex"
+                className="hidden size-9 items-center justify-center rounded-sm border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-100 lg:inline-flex"
                 aria-label={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
                 title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
               >
@@ -261,7 +261,7 @@ export function PpcShell({ children, session }: PpcShellProps) {
               <form method="post" action="/api/ppc/demo-auth/logout">
                 <button
                   type="submit"
-                  className="inline-flex h-8 items-center gap-1 rounded-md border border-zinc-300 bg-white px-2.5 text-xs font-medium text-zinc-700 hover:bg-zinc-100"
+                  className="inline-flex h-8 items-center gap-1 rounded-sm border border-zinc-300 bg-white px-2.5 text-xs font-medium text-zinc-700 hover:bg-zinc-100"
                 >
                   <LogOut className="size-3.5" />
                   Sign out

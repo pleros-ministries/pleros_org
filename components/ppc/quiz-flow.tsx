@@ -83,7 +83,7 @@ export function QuizFlow({ userId, lessonId, questions, bestScore }: QuizFlowPro
           <button
             type="button"
             onClick={handleRetry}
-            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 hover:bg-zinc-50 transition-colors"
+            className="inline-flex h-8 items-center gap-1.5 rounded-sm border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 hover:bg-zinc-50 transition-colors"
           >
             Retry quiz
           </button>
@@ -143,7 +143,7 @@ export function QuizFlow({ userId, lessonId, questions, bestScore }: QuizFlowPro
           onClick={() => setCurrentIndex((i) => i - 1)}
           disabled={currentIndex === 0}
           className={cn(
-            "inline-flex h-8 items-center gap-1 rounded-md border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 transition-colors",
+            "inline-flex h-8 items-center gap-1 rounded-sm border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 transition-colors",
             currentIndex === 0
               ? "cursor-not-allowed opacity-40"
               : "hover:bg-zinc-50",
@@ -159,7 +159,7 @@ export function QuizFlow({ userId, lessonId, questions, bestScore }: QuizFlowPro
             onClick={handleSubmit}
             disabled={isPending}
             className={cn(
-              "inline-flex h-8 items-center gap-1.5 rounded-md bg-zinc-900 px-3 text-xs font-medium text-white transition-colors hover:bg-zinc-800",
+              "inline-flex h-8 items-center gap-1.5 rounded-sm bg-zinc-900 px-3 text-xs font-medium text-white transition-colors hover:bg-zinc-800",
               isPending && "opacity-50",
             )}
           >
@@ -170,7 +170,7 @@ export function QuizFlow({ userId, lessonId, questions, bestScore }: QuizFlowPro
           <button
             type="button"
             onClick={() => setCurrentIndex((i) => i + 1)}
-            className="inline-flex h-8 items-center gap-1 rounded-md border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 hover:bg-zinc-50 transition-colors"
+            className="inline-flex h-8 items-center gap-1 rounded-sm border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 hover:bg-zinc-50 transition-colors"
           >
             Next
             <ChevronRight className="size-3.5" />

@@ -64,7 +64,7 @@ export function AudioPlayer({ src, title, onListened }: AudioPlayerProps) {
   };
 
   return (
-    <div className="flex items-center gap-3 rounded border border-zinc-200 bg-white px-3 py-2">
+    <div className="flex items-center gap-3 rounded-sm border border-zinc-200 bg-white px-3 py-2">
       <audio ref={audioRef} src={src} preload="metadata" />
       <button
         type="button"
@@ -91,7 +91,7 @@ export function AudioPlayer({ src, title, onListened }: AudioPlayerProps) {
       <a
         href={src}
         download
-        className="flex size-7 shrink-0 items-center justify-center rounded-md border border-zinc-200 text-zinc-500 hover:bg-zinc-50 transition-colors"
+        className="flex size-7 shrink-0 items-center justify-center rounded-sm border border-zinc-200 text-zinc-500 hover:bg-zinc-50 transition-colors"
         title="Download"
       >
         <Download className="size-3.5" />

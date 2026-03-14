@@ -62,7 +62,7 @@ export default async function WrittenResponsePage({
         description={lesson.title}
       />
 
-      <div className="rounded border border-zinc-200 bg-white p-4">
+      <div className="rounded-sm border border-zinc-200 bg-white p-4">
         <WrittenResponseEditor
           userId={userId}
           lessonId={lessonId}

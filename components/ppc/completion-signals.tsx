@@ -29,7 +29,7 @@ export function CompletionSignals({ audioListened, notesRead, quizPassed, writte
             key={s.key}
             title={`${s.label}: ${done ? "Complete" : "Incomplete"}`}
             className={cn(
-              "flex items-center gap-1 rounded-md border px-1.5 py-0.5",
+              "flex items-center gap-1 rounded-sm border px-1.5 py-0.5",
               compact ? "text-[10px]" : "text-xs",
               done
                 ? "border-emerald-200 bg-emerald-50 text-emerald-700"

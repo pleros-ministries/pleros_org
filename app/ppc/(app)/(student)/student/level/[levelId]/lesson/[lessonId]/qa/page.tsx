@@ -60,7 +60,7 @@ export default async function QaPage({
         description={lesson.title}
       />
 
-      <div className="rounded border border-zinc-200 bg-white p-4">
+      <div className="rounded-sm border border-zinc-200 bg-white p-4">
         <QaThreadList
           userId={userId}
           lessonId={lessonId}

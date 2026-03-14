@@ -22,7 +22,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-md items-center px-5 py-10">
-      <section className="w-full rounded-md border border-zinc-200 bg-white p-6 shadow-sm">
+      <section className="w-full rounded-sm border border-zinc-200 bg-white p-6 shadow-sm">
         <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-zinc-500">
           PPC Platform
         </p>
@@ -44,7 +44,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
                   <input type="hidden" name="role" value={account.role} />
                   <button
                     type="submit"
-                    className="flex w-full items-center justify-between rounded-md border border-zinc-200 bg-white px-3 py-2 text-left text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-50"
+                    className="flex w-full items-center justify-between rounded-sm border border-zinc-200 bg-white px-3 py-2 text-left text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-50"
                   >
                     <span>{account.label}</span>
                     <span className="text-[10px] text-zinc-400">{account.email}</span>
@@ -67,7 +67,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
                     name="name"
                     required
                     defaultValue="Demo User"
-                    className="h-8 rounded border border-zinc-300 px-2.5 text-xs outline-none focus:border-zinc-700"
+                    className="h-8 rounded-sm border border-zinc-300 px-2.5 text-xs outline-none focus:border-zinc-700"
                   />
                 </label>
                 <label className="grid gap-1">
@@ -79,7 +79,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
                     type="email"
                     required
                     defaultValue="demo@pleros.test"
-                    className="h-8 rounded border border-zinc-300 px-2.5 text-xs outline-none focus:border-zinc-700"
+                    className="h-8 rounded-sm border border-zinc-300 px-2.5 text-xs outline-none focus:border-zinc-700"
                   />
                 </label>
                 <label className="grid gap-1">
@@ -89,7 +89,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
                   <select
                     name="role"
                     defaultValue="admin"
-                    className="h-8 rounded border border-zinc-300 px-2.5 text-xs outline-none focus:border-zinc-700"
+                    className="h-8 rounded-sm border border-zinc-300 px-2.5 text-xs outline-none focus:border-zinc-700"
                   >
                     <option value="admin">Admin</option>
                     <option value="instructor">Instructor</option>
@@ -106,7 +106,7 @@ export default async function SignInPage({ searchParams }: SignInPageProps) {
             </details>
           </>
         ) : (
-          <div className="mt-5 grid gap-3 rounded border border-zinc-200 bg-zinc-50 p-4 text-xs text-zinc-700">
+          <div className="mt-5 grid gap-3 rounded-sm border border-zinc-200 bg-zinc-50 p-4 text-xs text-zinc-700">
             <p>
               Better Auth mode is enabled. Use configured auth endpoints under
               <code className="ml-1 rounded bg-zinc-200 px-1.5 py-0.5 text-[10px]">/api/auth</code>.

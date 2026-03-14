@@ -100,7 +100,7 @@ export function WrittenResponseEditor({
       </div>
 
       {status === "needs_revision" && reviewerNote && (
-        <div className="flex gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2">
+        <div className="flex gap-2 rounded-sm border border-amber-200 bg-amber-50 px-3 py-2">
           <AlertTriangle className="mt-0.5 size-3.5 shrink-0 text-amber-600" />
           <div className="space-y-0.5">
             <p className="text-xs font-medium text-amber-800">Revision requested</p>
@@ -116,7 +116,7 @@ export function WrittenResponseEditor({
         rows={10}
         placeholder="Write your response…"
         className={cn(
-          "w-full resize-y rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400/50 transition-colors",
+          "w-full resize-y rounded-sm border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-400 focus:outline-none focus:ring-1 focus:ring-zinc-400/50 transition-colors",
           !canEdit && "cursor-not-allowed bg-zinc-50 text-zinc-500",
         )}
       />
@@ -128,7 +128,7 @@ export function WrittenResponseEditor({
             onClick={handleSaveDraft}
             disabled={isSaving}
             className={cn(
-              "inline-flex h-8 items-center gap-1.5 rounded-md border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 hover:bg-zinc-50 transition-colors",
+              "inline-flex h-8 items-center gap-1.5 rounded-sm border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 hover:bg-zinc-50 transition-colors",
               isSaving && "opacity-50",
             )}
           >
@@ -141,7 +141,7 @@ export function WrittenResponseEditor({
             onClick={handleSubmit}
             disabled={!canSubmit || isSubmitting}
             className={cn(
-              "inline-flex h-8 items-center gap-1.5 rounded-md bg-zinc-900 px-3 text-xs font-medium text-white transition-colors hover:bg-zinc-800",
+              "inline-flex h-8 items-center gap-1.5 rounded-sm bg-zinc-900 px-3 text-xs font-medium text-white transition-colors hover:bg-zinc-800",
               (!canSubmit || isSubmitting) && "opacity-50 cursor-not-allowed",
             )}
           >

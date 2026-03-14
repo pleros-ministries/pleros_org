@@ -116,7 +116,7 @@ export function ReviewQueueClient({
 
       {/* List */}
       {filtered.length === 0 ? (
-        <div className="rounded border border-zinc-200 bg-white px-4 py-8 text-center text-xs text-zinc-400">
+        <div className="rounded-sm border border-zinc-200 bg-white px-4 py-8 text-center text-xs text-zinc-400">
           No submissions in this category
         </div>
       ) : (
@@ -133,7 +133,7 @@ export function ReviewQueueClient({
             return (
               <div
                 key={sub.id}
-                className="rounded border border-zinc-200 bg-white"
+                className="rounded-sm border border-zinc-200 bg-white"
               >
                 <button
                   onClick={() => setExpandedId(isExpanded ? null : sub.id)}
@@ -180,7 +180,7 @@ export function ReviewQueueClient({
                         <button
                           onClick={() => handleApprove(sub.id)}
                           disabled={isPending}
-                          className="flex h-7 items-center gap-1.5 rounded-md bg-emerald-600 px-3 text-xs font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
+                          className="flex h-7 items-center gap-1.5 rounded-sm bg-emerald-600 px-3 text-xs font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
                         >
                           <CheckCircle2 className="size-3" />
                           Approve
@@ -196,14 +196,14 @@ export function ReviewQueueClient({
                                 [sub.id]: e.target.value,
                               }))
                             }
-                            className="h-7 flex-1 rounded-md border border-zinc-200 px-2 text-xs outline-none focus:border-zinc-400"
+                            className="h-7 flex-1 rounded-sm border border-zinc-200 px-2 text-xs outline-none focus:border-zinc-400"
                           />
                           <button
                             onClick={() => handleRevision(sub.id)}
                             disabled={
                               isPending || !revisionNotes[sub.id]?.trim()
                             }
-                            className="h-7 rounded-md border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-50"
+                            className="h-7 rounded-sm border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-50"
                           >
                             Request revision
                           </button>
