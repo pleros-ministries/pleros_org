@@ -29,7 +29,11 @@ export const betterAuthServer = betterAuth({
         },
       }
     : {},
-  trustedOrigins: ["http://localhost:3000", "https://ppc.pleros.org"],
+  trustedOrigins: [
+    process.env.BETTER_AUTH_URL ?? "",
+    "https://ppc.pleros.org",
+    "https://pleros-org.vercel.app",
+  ].filter(Boolean),
   plugins: [
     nextCookies(),
     twoFactor({ issuer: "Pleros PPC" }),
