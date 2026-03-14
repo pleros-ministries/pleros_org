@@ -78,46 +78,13 @@ async function seed() {
   console.log(`  ✓ ${totalLessons} lessons`);
 
   // ─── Quiz questions ───────────────────────────────────────────────────────
+  // Quiz questions are managed by admins via the Content CMS (/ppc/admin/content).
+  // No quiz questions are seeded — admins add them manually.
+
   const l1l2Lessons = await db.query.lessons.findMany({
     where: (l, { inArray }) => inArray(l.levelId, [1, 2]),
     orderBy: (l, { asc }) => [asc(l.levelId), asc(l.lessonNumber)],
   });
-
-  let totalQuestions = 0;
-  for (const lesson of l1l2Lessons) {
-    const questions = [
-      {
-        lessonId: lesson.id,
-        questionType: "multiple_choice" as const,
-        questionText: `What is the main theme of "${lesson.title}"?`,
-        options: ["Option A: The primary concept", "Option B: A secondary idea", "Option C: An unrelated topic", "Option D: None of the above"],
-        correctAnswer: "Option A: The primary concept",
-        sortOrder: 1,
-      },
-      {
-        lessonId: lesson.id,
-        questionType: "multiple_choice" as const,
-        questionText: `Which Scripture passage is most relevant to "${lesson.title}"?`,
-        options: ["John 3:16", "Romans 8:28", "Psalm 23:1", "Matthew 28:19"],
-        correctAnswer: "John 3:16",
-        sortOrder: 2,
-      },
-      {
-        lessonId: lesson.id,
-        questionType: "short_text" as const,
-        questionText: `In your own words, explain the key takeaway from "${lesson.title}".`,
-        options: null,
-        correctAnswer: null,
-        sortOrder: 3,
-      },
-    ];
-
-    for (const q of questions) {
-      await db.insert(schema.quizQuestions).values(q).onConflictDoNothing();
-      totalQuestions++;
-    }
-  }
-  console.log(`  ✓ ${totalQuestions} quiz questions`);
 
   // ─── Student progress ─────────────────────────────────────────────────────
   // Ada: graduated L1, on L2 lesson 4
