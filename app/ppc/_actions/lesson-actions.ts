@@ -3,8 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
+import { requireAuth } from "@/lib/auth/require-role";
 
 export async function markAudioListened(userId: string, lessonId: number) {
+  await requireAuth();
   await db
     .insert(schema.studentProgress)
     .values({ userId, lessonId, audioListened: true })
@@ -16,6 +18,7 @@ export async function markAudioListened(userId: string, lessonId: number) {
 }
 
 export async function markNotesRead(userId: string, lessonId: number) {
+  await requireAuth();
   await db
     .insert(schema.studentProgress)
     .values({ userId, lessonId, notesRead: true })

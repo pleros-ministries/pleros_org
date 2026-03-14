@@ -4,8 +4,10 @@ import { eq, and } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
+import { requireAdmin } from "@/lib/auth/require-role";
 
 export async function overrideStudentLevel(userId: string, newLevel: number) {
+  await requireAdmin();
   const currentGrads = await db
     .select()
     .from(schema.levelGraduations)
@@ -25,6 +27,7 @@ export async function overrideStudentLevel(userId: string, newLevel: number) {
 }
 
 export async function resetStudentProgress(userId: string) {
+  await requireAdmin();
   await db.delete(schema.studentProgress).where(eq(schema.studentProgress.userId, userId));
   await db.delete(schema.quizAttempts).where(eq(schema.quizAttempts.userId, userId));
   await db.delete(schema.writtenSubmissions).where(eq(schema.writtenSubmissions.userId, userId));
@@ -34,6 +37,7 @@ export async function resetStudentProgress(userId: string) {
 }
 
 export async function assignReviewer(userId: string, levelId: number) {
+  await requireAdmin();
   await db
     .insert(schema.reviewerAssignments)
     .values({ userId, levelId })
@@ -42,6 +46,7 @@ export async function assignReviewer(userId: string, levelId: number) {
 }
 
 export async function removeReviewerAssignment(userId: string, levelId: number) {
+  await requireAdmin();
   await db
     .delete(schema.reviewerAssignments)
     .where(
@@ -54,6 +59,7 @@ export async function removeReviewerAssignment(userId: string, levelId: number) 
 }
 
 export async function getReviewerAssignments() {
+  await requireAdmin();
   return db
     .select({
       id: schema.reviewerAssignments.id,

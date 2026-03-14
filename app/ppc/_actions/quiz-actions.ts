@@ -2,8 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { getQuizQuestions, submitQuizAttempt, getAttemptCount } from "@/lib/db/queries/quizzes";
+import { requireAuth } from "@/lib/auth/require-role";
 
 export async function submitQuiz(userId: string, lessonId: number, answers: Record<string, string>) {
+  await requireAuth();
   const questions = await getQuizQuestions(lessonId);
   const mcQuestions = questions.filter((q) => q.questionType === "multiple_choice");
 
