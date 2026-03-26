@@ -17,7 +17,6 @@ type Question = {
 };
 
 type QuizFlowProps = {
-  userId: string;
   lessonId: number;
   questions: Question[];
   bestScore: number | null;
@@ -29,7 +28,7 @@ type QuizResult = {
   attemptNumber: number;
 };
 
-export function QuizFlow({ userId, lessonId, questions, bestScore }: QuizFlowProps) {
+export function QuizFlow({ lessonId, questions, bestScore }: QuizFlowProps) {
   const router = useRouter();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -46,7 +45,7 @@ export function QuizFlow({ userId, lessonId, questions, bestScore }: QuizFlowPro
 
   const handleSubmit = () => {
     startTransition(async () => {
-      const res = await submitQuiz(userId, lessonId, answers);
+      const res = await submitQuiz(lessonId, answers);
       setResult(res);
       router.refresh();
     });

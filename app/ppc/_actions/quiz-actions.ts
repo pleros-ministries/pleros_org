@@ -3,9 +3,11 @@
 import { revalidatePath } from "next/cache";
 import { getQuizQuestions, submitQuizAttempt, getAttemptCount } from "@/lib/db/queries/quizzes";
 import { requireAuth } from "@/lib/auth/require-role";
+import { getStudentSelfActor } from "@/lib/auth/action-actor";
 
-export async function submitQuiz(userId: string, lessonId: number, answers: Record<string, string>) {
-  await requireAuth();
+export async function submitQuiz(lessonId: number, answers: Record<string, string>) {
+  const session = await requireAuth();
+  const { userId } = getStudentSelfActor(session);
   const questions = await getQuizQuestions(lessonId);
   const mcQuestions = questions.filter((q) => q.questionType === "multiple_choice");
 

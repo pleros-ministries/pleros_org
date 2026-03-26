@@ -62,7 +62,6 @@ export default async function QaPage({
 
       <div className="rounded-sm border border-zinc-200 bg-white p-4">
         <QaThreadList
-          userId={userId}
           lessonId={lessonId}
           userRole={session.user.role as "student" | "instructor" | "admin"}
           initialThreads={serializedThreads}

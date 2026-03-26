@@ -12,6 +12,13 @@ const sheetSideVariants = cva(
   "fixed z-50 flex flex-col gap-4 border border-[var(--color-line)] bg-[var(--page-surface-raised)] p-5 shadow-[var(--shadow-lg)] transition-[opacity,transform] duration-200 ease-out",
   {
     variants: {
+      tone: {
+        default: "bg-[var(--page-surface-raised)] text-[var(--color-text)]",
+        muted: "bg-[var(--page-accent-surface)] text-[var(--color-text)]",
+        questions: "theme-questions bg-[var(--page-accent-surface)] text-[var(--color-text)]",
+        purpose: "theme-purpose bg-[var(--page-accent-surface)] text-[var(--color-text)]",
+        fulfil: "theme-fulfil bg-[var(--page-accent-surface)] text-[var(--color-text)]",
+      },
       side: {
         top: "inset-x-0 top-0 rounded-b-[var(--radius-lg)] data-open:translate-y-0 data-closed:-translate-y-8 data-open:opacity-100 data-closed:opacity-0",
         right:
@@ -23,6 +30,7 @@ const sheetSideVariants = cva(
       },
     },
     defaultVariants: {
+      tone: "default",
       side: "right",
     },
   },
@@ -60,6 +68,7 @@ function SheetOverlay({ className, ...props }: SheetPrimitive.Backdrop.Props) {
 function SheetContent({
   className,
   children,
+  tone,
   side,
   showCloseButton = true,
   ...props
@@ -72,7 +81,7 @@ function SheetContent({
       <SheetOverlay />
       <SheetPrimitive.Popup
         data-slot="sheet-content"
-        className={cn(sheetSideVariants({ side, className }))}
+        className={cn(sheetSideVariants({ side, tone, className }))}
         {...props}
       >
         {children}

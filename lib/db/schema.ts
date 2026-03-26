@@ -87,6 +87,10 @@ export const lessons = pgTable(
     lessonNumber: integer("lesson_number").notNull(),
     title: text("title").notNull(),
     audioUrl: text("audio_url"),
+    audioUploadKey: text("audio_upload_key"),
+    audioFileName: text("audio_file_name"),
+    audioFileSize: integer("audio_file_size"),
+    audioUploadedAt: timestamp("audio_uploaded_at", { withTimezone: true }),
     notesContent: text("notes_content"),
     status: lessonStatusEnum("status").notNull().default("draft"),
     createdAt: timestamp("created_at", { withTimezone: true })

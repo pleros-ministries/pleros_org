@@ -7,16 +7,21 @@ describe("getPpcRewritePath", () => {
     expect(getPpcRewritePath("ppc.pleros.org", "/")).toBe("/ppc");
   });
 
-  test("rewrites nested requests on ppc host", () => {
-    expect(getPpcRewritePath("ppc.pleros.org", "/admin/students")).toBe(
-      "/ppc/admin/students",
+  test("rewrites nested student requests on ppc host", () => {
+    expect(getPpcRewritePath("ppc.pleros.org", "/student/level/2")).toBe(
+      "/ppc/student/level/2",
     );
   });
 
   test("supports ppc host with port", () => {
-    expect(getPpcRewritePath("ppc.pleros.org:3000", "/review")).toBe(
-      "/ppc/review",
+    expect(getPpcRewritePath("ppc.pleros.org:3000", "/student")).toBe(
+      "/ppc/student",
     );
+  });
+
+  test("does not rewrite admin namespace requests on ppc host", () => {
+    expect(getPpcRewritePath("ppc.pleros.org", "/admin")).toBeNull();
+    expect(getPpcRewritePath("ppc.pleros.org", "/admin/students")).toBeNull();
   });
 
   test("does not rewrite non-ppc hosts", () => {

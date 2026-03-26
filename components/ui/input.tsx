@@ -11,6 +11,12 @@ const inputVariants = cva(
       variant: {
         default: "",
         muted: "bg-[var(--color-surface-muted)]",
+        questions:
+          "theme-questions border-[var(--page-accent-ring)] bg-[var(--page-accent-surface)] focus-visible:border-[var(--page-accent)] focus-visible:ring-[var(--page-accent-ring)]",
+        purpose:
+          "theme-purpose border-[var(--page-accent-ring)] bg-[var(--page-accent-surface)] focus-visible:border-[var(--page-accent)] focus-visible:ring-[var(--page-accent-ring)]",
+        fulfil:
+          "theme-fulfil border-[var(--page-accent-ring)] bg-[var(--page-accent-surface)] focus-visible:border-[var(--page-accent)] focus-visible:ring-[var(--page-accent-ring)]",
       },
       size: {
         default: "",
@@ -25,7 +31,7 @@ const inputVariants = cva(
   },
 );
 
-type InputProps = React.ComponentProps<"input"> &
+type InputProps = Omit<React.ComponentProps<"input">, "size"> &
   VariantProps<typeof inputVariants>;
 
 function Input({

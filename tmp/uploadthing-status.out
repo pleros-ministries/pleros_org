@@ -1,0 +1,17 @@
+timestamp=2026-03-26T03:39:07.964Z level=WARN fiber=#8 message="Executing an Effect versioned 3.18.4 with a Runtime of version 3.17.7, you may want to dedupe the effect dependencies, you can use the language service plugin to detect this at compile time: https://github.com/Effect-TS/language-service"
+timestamp=2026-03-26T03:39:07.966Z level=WARN fiber=#8 message="Executing an Effect versioned 3.18.4 with a Runtime of version 3.17.7, you may want to dedupe the effect dependencies, you can use the language service plugin to detect this at compile time: https://github.com/Effect-TS/language-service"
+timestamp=2026-03-26T03:39:07.966Z level=WARN fiber=#8 message="Executing an Effect versioned 3.18.4 with a Runtime of version 3.17.7, you may want to dedupe the effect dependencies, you can use the language service plugin to detect this at compile time: https://github.com/Effect-TS/language-service"
+timestamp=2026-03-26T03:39:07.966Z level=WARN fiber=#8 message="Executing an Effect versioned 3.18.4 with a Runtime of version 3.17.7, you may want to dedupe the effect dependencies, you can use the language service plugin to detect this at compile time: https://github.com/Effect-TS/language-service"
+timestamp=2026-03-26T03:39:07.966Z level=WARN fiber=#8 message="Executing an Effect versioned 3.18.4 with a Runtime of version 3.17.7, you may want to dedupe the effect dependencies, you can use the language service plugin to detect this at compile time: https://github.com/Effect-TS/language-service"
+timestamp=2026-03-26T03:39:07.966Z level=WARN fiber=#8 message="Executing an Effect versioned 3.18.4 with a Runtime of version 3.17.7, you may want to dedupe the effect dependencies, you can use the language service plugin to detect this at compile time: https://github.com/Effect-TS/language-service"
+timestamp=2026-03-26T03:39:07.966Z level=WARN fiber=#8 message="Executing an Effect versioned 3.18.4 with a Runtime of version 3.17.7, you may want to dedupe the effect dependencies, you can use the language service plugin to detect this at compile time: https://github.com/Effect-TS/language-service"
+timestamp=2026-03-26T03:39:07.966Z level=WARN fiber=#8 message="Executing an Effect versioned 3.18.4 with a Runtime of version 3.17.7, you may want to dedupe the effect dependencies, you can use the language service plugin to detect this at compile time: https://github.com/Effect-TS/language-service"
+{
+  "id": "13734430-664e-49f7-bbdc-511b86a07e63",
+  "customId": "pathway-videos/questions/most-important-questions-series/most-important-questions-1",
+  "key": "3pDCanj1aBdfta6XuYhFFL76Gq3MOQHCESRrgtDzuyhNbK5e",
+  "name": "The Most Important Question.mp4",
+  "size": 706865213,
+  "status": "Uploading",
+  "uploadedAt": 1774496146000
+}

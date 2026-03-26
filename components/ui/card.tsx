@@ -40,6 +40,7 @@ function Card({ className, tone, size, interactive, ...props }: CardProps) {
   return (
     <div
       data-slot="card"
+      data-tone={tone ?? "default"}
       className={cn(cardVariants({ tone, size, interactive, className }))}
       {...props}
     />

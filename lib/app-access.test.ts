@@ -21,9 +21,9 @@ describe("app access", () => {
   });
 
   test("default role home path is stable", () => {
-    expect(getRoleDefaultPath("admin")).toBe("/");
-    expect(getRoleDefaultPath("instructor")).toBe("/");
-    expect(getRoleDefaultPath("student")).toBe("/student");
+    expect(getRoleDefaultPath("admin")).toBe("/admin");
+    expect(getRoleDefaultPath("instructor")).toBe("/admin");
+    expect(getRoleDefaultPath("student")).toBe("/ppc");
   });
 
   test("access area union stays stable", () => {

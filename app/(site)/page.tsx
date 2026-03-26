@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import { HomepageView } from "../../components/home/homepage-view";
 
 export default function Home() {
-  redirect("/ppc/sign-in");
+  return <HomepageView />;
 }

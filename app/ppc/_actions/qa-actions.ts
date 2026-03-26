@@ -5,43 +5,77 @@ import {
   createThread,
   addMessage,
   closeThread,
+  getThreadById,
   getThreadMessages,
+  reopenThread,
 } from "@/lib/db/queries/qa";
-import { requireAuth, requireStaff } from "@/lib/auth/require-role";
+import { requireAuth, requireStaff, requireStudent } from "@/lib/auth/require-role";
+import { getSignedInActor, getStudentSelfActor } from "@/lib/auth/action-actor";
+import { assertCanAccessQaThread } from "@/lib/auth/qa-access";
+
+function revalidateQaSurfaces() {
+  revalidatePath("/ppc", "layout");
+  revalidatePath("/admin", "layout");
+}
 
 export async function createQaThread(data: {
-  userId: string;
   lessonId: number;
   subject: string;
   message: string;
-  authorRole: "student" | "instructor" | "admin";
 }) {
-  await requireAuth();
-  const thread = await createThread(data);
-  revalidatePath("/ppc", "layout");
+  const session = await requireStudent();
+  const { userId, authorRole } = getStudentSelfActor(session);
+  const thread = await createThread({
+    userId,
+    lessonId: data.lessonId,
+    subject: data.subject,
+    message: data.message,
+    authorRole,
+  });
+  revalidateQaSurfaces();
   return thread;
 }
 
 export async function replyToThread(data: {
   threadId: number;
-  authorId: string;
-  authorRole: "student" | "instructor" | "admin";
   content: string;
 }) {
-  await requireAuth();
-  const message = await addMessage(data);
-  revalidatePath("/ppc", "layout");
+  const session = await requireAuth();
+  const thread = await getThreadById(data.threadId);
+  if (!thread) {
+    throw new Error("Thread not found");
+  }
+  assertCanAccessQaThread(session, thread);
+  const { authorId, authorRole } = getSignedInActor(session);
+  const message = await addMessage({
+    threadId: data.threadId,
+    authorId,
+    authorRole,
+    content: data.content,
+  });
+  revalidateQaSurfaces();
   return message;
 }
 
 export async function closeQaThread(threadId: number) {
   await requireStaff();
   await closeThread(threadId);
-  revalidatePath("/ppc", "layout");
+  revalidateQaSurfaces();
+}
+
+export async function reopenQaThread(threadId: number) {
+  await requireStaff();
+  await reopenThread(threadId);
+  revalidateQaSurfaces();
 }
 
 export async function fetchThreadMessages(threadId: number) {
-  await requireAuth();
+  const session = await requireAuth();
+  const thread = await getThreadById(threadId);
+  if (!thread) {
+    throw new Error("Thread not found");
+  }
+  assertCanAccessQaThread(session, thread);
   const messages = await getThreadMessages(threadId);
   return messages.map((m) => ({
     ...m,

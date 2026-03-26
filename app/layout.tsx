@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Be_Vietnam_Pro, Sen } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 
@@ -36,6 +37,20 @@ const suisseIntl = localFont({
   fallback: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
 });
 
+const sen = Sen({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-sen",
+  display: "swap",
+});
+
+const beVietnamPro = Be_Vietnam_Pro({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-be-vietnam-pro",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Pleros",
   description: "Pleros website foundations",
@@ -47,7 +62,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={suisseIntl.variable}>
+    <html
+      lang="en"
+      className={`${suisseIntl.variable} ${sen.variable} ${beVietnamPro.variable}`}
+    >
       <body className="page-shell antialiased">{children}</body>
     </html>
   );

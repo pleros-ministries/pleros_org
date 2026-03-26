@@ -18,6 +18,8 @@ const badgeVariants = cva(
           "theme-purpose border-transparent bg-[var(--page-accent-soft)] text-[var(--page-accent)]",
         fulfil:
           "theme-fulfil border-transparent bg-[var(--page-accent-soft)] text-[var(--page-accent)]",
+        dark:
+          "border-white/10 bg-white/10 text-[var(--color-text-on-dark)] backdrop-blur-sm",
       },
     },
     defaultVariants: {

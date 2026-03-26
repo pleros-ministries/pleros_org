@@ -15,13 +15,11 @@ type Submission = {
 };
 
 type WrittenResponseEditorProps = {
-  userId: string;
   lessonId: number;
   existingSubmission: Submission | null;
 };
 
 export function WrittenResponseEditor({
-  userId,
   lessonId,
   existingSubmission,
 }: WrittenResponseEditorProps) {
@@ -38,11 +36,11 @@ export function WrittenResponseEditor({
       if (debounceRef.current) clearTimeout(debounceRef.current);
       debounceRef.current = setTimeout(() => {
         startSaveTransition(async () => {
-          await saveDraft(userId, lessonId, value);
+          await saveDraft(lessonId, value);
         });
       }, 2000);
     },
-    [userId, lessonId],
+    [lessonId],
   );
 
   useEffect(() => {
@@ -61,14 +59,14 @@ export function WrittenResponseEditor({
   const handleSaveDraft = () => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
     startSaveTransition(async () => {
-      await saveDraft(userId, lessonId, content);
+      await saveDraft(lessonId, content);
       router.refresh();
     });
   };
 
   const handleSubmit = () => {
     startSubmitTransition(async () => {
-      await submitWrittenResponse(userId, lessonId);
+      await submitWrittenResponse(lessonId);
       setStatus("submitted");
       router.refresh();
     });

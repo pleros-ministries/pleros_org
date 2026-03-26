@@ -64,7 +64,6 @@ export default async function WrittenResponsePage({
 
       <div className="rounded-sm border border-zinc-200 bg-white p-4">
         <WrittenResponseEditor
-          userId={userId}
           lessonId={lessonId}
           existingSubmission={serialized}
         />

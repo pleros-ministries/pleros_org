@@ -14,14 +14,11 @@ export default async function StudentAreaLayout({
 
   if (!session) {
     const requestHeaders = await headers();
-    redirect(toExternalPpcPath(requestHeaders.get("host"), "/sign-in"));
+    redirect(toExternalPpcPath(requestHeaders.get("host"), "/"));
   }
 
   if (!canAccessArea(session.user.role, "student")) {
-    const requestHeaders = await headers();
-    redirect(
-      toExternalPpcPath(requestHeaders.get("host"), getRoleDefaultPath(session.user.role)),
-    );
+    redirect(getRoleDefaultPath(session.user.role));
   }
 
   return children;

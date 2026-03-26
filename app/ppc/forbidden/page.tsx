@@ -22,7 +22,7 @@ export default function ForbiddenPage() {
             Back to PPC
           </Link>
           <Link
-            href="/ppc/sign-in"
+            href="/admin"
             className="inline-flex h-10 items-center rounded-sm border border-zinc-300 px-4 text-sm font-semibold text-zinc-800 hover:bg-zinc-100"
           >
             Switch account

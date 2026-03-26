@@ -16,8 +16,8 @@ export function canAccessArea(role: AppRole, area: AccessArea): boolean {
 
 export function getRoleDefaultPath(role: AppRole): string {
   if (role === "student") {
-    return "/student";
+    return "/ppc";
   }
 
-  return "/";
+  return "/admin";
 }

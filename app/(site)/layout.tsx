@@ -1,3 +1,3 @@
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return <div className="site-font-theme">{children}</div>;
 }

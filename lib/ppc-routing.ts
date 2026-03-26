@@ -1,6 +1,6 @@
 const PPC_HOST = "ppc.pleros.org";
 
-const EXCLUDED_PREFIXES = ["/_next", "/api", "/ppc"];
+const EXCLUDED_PREFIXES = ["/_next", "/api", "/ppc", "/admin"];
 
 const EXCLUDED_EXACT_PATHS = [
   "/favicon.ico",

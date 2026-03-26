@@ -9,26 +9,33 @@ import {
 } from "@/lib/db/queries/submissions";
 import { sendSubmissionReviewed } from "@/lib/email/send";
 import { db } from "@/lib/db";
-import { users, lessons } from "@/lib/db/schema";
-import { eq } from "drizzle-orm";
 import { requireAuth, requireStaff } from "@/lib/auth/require-role";
+import { getStaffActor, getStudentSelfActor } from "@/lib/auth/action-actor";
 
-export async function saveDraft(userId: string, lessonId: number, content: string) {
-  await requireAuth();
+function revalidateSubmissionSurfaces() {
+  revalidatePath("/ppc", "layout");
+  revalidatePath("/admin", "layout");
+}
+
+export async function saveDraft(lessonId: number, content: string) {
+  const session = await requireAuth();
+  const { userId } = getStudentSelfActor(session);
   await upsertDraft(userId, lessonId, content);
-  revalidatePath("/ppc", "layout");
+  revalidateSubmissionSurfaces();
 }
 
-export async function submitWrittenResponse(userId: string, lessonId: number) {
-  await requireAuth();
+export async function submitWrittenResponse(lessonId: number) {
+  const session = await requireAuth();
+  const { userId } = getStudentSelfActor(session);
   await submitForReview(userId, lessonId);
-  revalidatePath("/ppc", "layout");
+  revalidateSubmissionSurfaces();
 }
 
-export async function approveWrittenSubmission(submissionId: number, reviewerId: string) {
-  await requireStaff();
+export async function approveWrittenSubmission(submissionId: number) {
+  const session = await requireStaff();
+  const { reviewerId } = getStaffActor(session);
   const updated = await approveSubmission(submissionId, reviewerId);
-  revalidatePath("/ppc", "layout");
+  revalidateSubmissionSurfaces();
 
   if (updated) {
     try {
@@ -47,10 +54,11 @@ export async function approveWrittenSubmission(submissionId: number, reviewerId:
   }
 }
 
-export async function requestSubmissionRevision(submissionId: number, reviewerId: string, note: string) {
-  await requireStaff();
+export async function requestSubmissionRevision(submissionId: number, note: string) {
+  const session = await requireStaff();
+  const { reviewerId } = getStaffActor(session);
   const updated = await requestRevision(submissionId, reviewerId, note);
-  revalidatePath("/ppc", "layout");
+  revalidateSubmissionSurfaces();
 
   if (updated) {
     try {

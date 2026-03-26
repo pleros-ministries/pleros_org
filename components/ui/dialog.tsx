@@ -15,6 +15,9 @@ const dialogContentVariants = cva(
       tone: {
         default: "bg-[var(--page-surface-raised)] text-[var(--color-text)]",
         muted: "bg-[var(--page-accent-surface)] text-[var(--color-text)]",
+        questions: "theme-questions bg-[var(--page-accent-surface)] text-[var(--color-text)]",
+        purpose: "theme-purpose bg-[var(--page-accent-surface)] text-[var(--color-text)]",
+        fulfil: "theme-fulfil bg-[var(--page-accent-surface)] text-[var(--color-text)]",
       },
     },
     defaultVariants: {

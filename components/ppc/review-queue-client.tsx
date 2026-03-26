@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useMemo, useTransition } from "react";
+import Link from "next/link";
+import { useEffect, useState, useMemo, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown, ChevronRight, CheckCircle2, RotateCcw } from "lucide-react";
+import { ChevronDown, ChevronRight, CheckCircle2, RotateCcw, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/ppc/status-badge";
 import { LevelBadge } from "@/components/ppc/level-badge";
@@ -10,6 +11,10 @@ import {
   approveWrittenSubmission,
   requestSubmissionRevision,
 } from "@/app/ppc/_actions/submission-actions";
+import {
+  filterReviewQueue,
+  getReviewQueueCounts,
+} from "@/lib/ppc-staff-workflows";
 
 type Submission = {
   id: number;
@@ -29,7 +34,6 @@ type Submission = {
 
 type ReviewQueueClientProps = {
   submissions: Submission[];
-  reviewerId: string;
 };
 
 type TabKey = "all" | "pending_review" | "approved" | "needs_revision";
@@ -43,33 +47,56 @@ const tabs: { key: TabKey; label: string }[] = [
 
 export function ReviewQueueClient({
   submissions,
-  reviewerId,
 }: ReviewQueueClientProps) {
   const router = useRouter();
+  const [submissionRecords, setSubmissionRecords] = useState(submissions);
   const [activeTab, setActiveTab] = useState<TabKey>("all");
+  const [levelFilter, setLevelFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [revisionNotes, setRevisionNotes] = useState<Record<number, string>>({});
   const [isPending, startTransition] = useTransition();
 
-  const counts = useMemo(() => {
-    const c: Record<string, number> = { all: submissions.length };
-    for (const s of submissions) {
-      c[s.status] = (c[s.status] ?? 0) + 1;
-    }
-    return c;
+  useEffect(() => {
+    setSubmissionRecords(submissions);
   }, [submissions]);
+
+  const counts = useMemo(
+    () => getReviewQueueCounts(submissionRecords),
+    [submissionRecords],
+  );
+
+  const levelOptions = useMemo(
+    () =>
+      Array.from(new Set(submissionRecords.map((submission) => submission.levelId)))
+        .sort((left, right) => left - right),
+    [submissionRecords],
+  );
 
   const filtered = useMemo(
     () =>
-      activeTab === "all"
-        ? submissions
-        : submissions.filter((s) => s.status === activeTab),
-    [submissions, activeTab],
+      filterReviewQueue(submissionRecords, {
+        activeTab,
+        levelId: levelFilter,
+        query: searchQuery,
+      }),
+    [submissionRecords, activeTab, levelFilter, searchQuery],
   );
 
   const handleApprove = (id: number) => {
     startTransition(async () => {
-      await approveWrittenSubmission(id, reviewerId);
+      await approveWrittenSubmission(id);
+      setSubmissionRecords((prev) =>
+        prev.map((submission) =>
+          submission.id === id
+            ? {
+                ...submission,
+                status: "approved",
+                reviewedAt: new Date().toISOString(),
+              }
+            : submission,
+        ),
+      );
       router.refresh();
     });
   };
@@ -78,15 +105,26 @@ export function ReviewQueueClient({
     const note = revisionNotes[id]?.trim();
     if (!note) return;
     startTransition(async () => {
-      await requestSubmissionRevision(id, reviewerId, note);
+      await requestSubmissionRevision(id, note);
       setRevisionNotes((prev) => ({ ...prev, [id]: "" }));
+      setSubmissionRecords((prev) =>
+        prev.map((submission) =>
+          submission.id === id
+            ? {
+                ...submission,
+                status: "needs_revision",
+                reviewerNote: note,
+                reviewedAt: new Date().toISOString(),
+              }
+            : submission,
+        ),
+      );
       router.refresh();
     });
   };
 
   return (
     <div className="grid gap-3">
-      {/* Tabs */}
       <div className="flex gap-1 border-b border-zinc-200">
         {tabs.map((tab) => (
           <button
@@ -114,10 +152,34 @@ export function ReviewQueueClient({
         ))}
       </div>
 
-      {/* List */}
+      <div className="grid gap-2 rounded-sm border border-zinc-200 bg-white p-3 lg:grid-cols-[minmax(0,1fr)_120px]">
+        <label className="relative block">
+          <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-zinc-400" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder="Search by student, lesson, or response"
+            className="h-8 w-full rounded-sm border border-zinc-200 bg-zinc-50 pl-8 pr-2 text-xs outline-none placeholder:text-zinc-300 focus:border-zinc-400"
+          />
+        </label>
+        <select
+          value={levelFilter}
+          onChange={(event) => setLevelFilter(event.target.value)}
+          className="h-8 rounded-sm border border-zinc-200 bg-zinc-50 px-2 text-xs outline-none focus:border-zinc-400"
+        >
+          <option value="all">All levels</option>
+          {levelOptions.map((levelId) => (
+            <option key={levelId} value={String(levelId)}>
+              Level {levelId}
+            </option>
+          ))}
+        </select>
+      </div>
+
       {filtered.length === 0 ? (
         <div className="rounded-sm border border-zinc-200 bg-white px-4 py-8 text-center text-xs text-zinc-400">
-          No submissions in this category
+          No submissions match this queue view
         </div>
       ) : (
         <div className="grid gap-1">
@@ -158,11 +220,22 @@ export function ReviewQueueClient({
 
                 {isExpanded && (
                   <div className="border-t border-zinc-100 px-3 py-3">
-                    <div className="mb-2 text-[10px] text-zinc-400">
-                      {sub.studentEmail}
-                      {sub.submittedAt && (
-                        <> · Submitted {new Date(sub.submittedAt).toLocaleDateString()}</>
-                      )}
+                    <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-[10px] text-zinc-400">
+                      <div>
+                        {sub.studentEmail}
+                        {sub.submittedAt && (
+                          <> · Submitted {new Date(sub.submittedAt).toLocaleDateString()}</>
+                        )}
+                        {sub.reviewedAt && sub.status !== "pending_review" ? (
+                          <> · Reviewed {new Date(sub.reviewedAt).toLocaleDateString()}</>
+                        ) : null}
+                      </div>
+                      <Link
+                        href={`/admin/students/${sub.userId}`}
+                        className="text-zinc-500 hover:text-zinc-700"
+                      >
+                        Open student record
+                      </Link>
                     </div>
                     <p className="whitespace-pre-wrap text-xs text-zinc-600 leading-relaxed">
                       {sub.content}

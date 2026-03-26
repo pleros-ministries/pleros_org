@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 
-import { PpcShell } from "@/components/ppc/ppc-shell";
+import { PpcAppFrame } from "@/components/ppc/ppc-app-frame";
 import { getAppSession } from "@/lib/app-session";
 import { toExternalPpcPath } from "@/lib/ppc-access";
 
@@ -14,8 +14,8 @@ export default async function PpcAppLayout({
 
   if (!session) {
     const requestHeaders = await headers();
-    redirect(toExternalPpcPath(requestHeaders.get("host"), "/sign-in"));
+    redirect(toExternalPpcPath(requestHeaders.get("host"), "/"));
   }
 
-  return <PpcShell session={session}>{children}</PpcShell>;
+  return <PpcAppFrame session={session}>{children}</PpcAppFrame>;
 }

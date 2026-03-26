@@ -6,6 +6,7 @@ import { sendGraduationCongratulations } from "@/lib/email/send";
 import { db } from "@/lib/db";
 import { getLevels } from "@/lib/db/queries/lessons";
 import { requireStaff } from "@/lib/auth/require-role";
+import { getStaffActor } from "@/lib/auth/action-actor";
 
 async function notifyGraduation(userId: string, levelId: number) {
   try {
@@ -24,22 +25,24 @@ async function notifyGraduation(userId: string, levelId: number) {
   } catch { /* email is best-effort */ }
 }
 
-export async function markGraduation(userId: string, levelId: number, graduatedBy: string) {
-  await requireStaff();
+export async function markGraduation(userId: string, levelId: number) {
+  const session = await requireStaff();
+  const { reviewerId } = getStaffActor(session);
   const readiness = await checkGraduationReadiness(userId, levelId);
   if (!readiness.ready) {
     return { error: `Not ready: ${readiness.completed}/${readiness.total} lessons completed` };
   }
 
-  const grad = await graduateStudent(userId, levelId, graduatedBy);
+  const grad = await graduateStudent(userId, levelId, reviewerId);
   revalidatePath("/ppc", "layout");
   await notifyGraduation(userId, levelId);
   return { success: true, graduation: grad };
 }
 
-export async function overrideGraduation(userId: string, levelId: number, graduatedBy: string) {
-  await requireStaff();
-  const grad = await graduateStudent(userId, levelId, graduatedBy, true);
+export async function overrideGraduation(userId: string, levelId: number) {
+  const session = await requireStaff();
+  const { reviewerId } = getStaffActor(session);
+  const grad = await graduateStudent(userId, levelId, reviewerId, true);
   revalidatePath("/ppc", "layout");
   await notifyGraduation(userId, levelId);
   return { success: true, graduation: grad };

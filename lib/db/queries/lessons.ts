@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import * as schema from "../schema";
 
@@ -12,6 +12,32 @@ export async function getLevelById(id: number) {
   return db.query.levels.findFirst({
     where: (l, { eq: eq2 }) => eq2(l.id, id),
   }) ?? null;
+}
+
+export async function updateLevel(id: number, data: Partial<{
+  title: string;
+  description: string | null;
+  sortOrder: number;
+}>) {
+  const [level] = await db
+    .update(schema.levels)
+    .set(data)
+    .where(eq(schema.levels.id, id))
+    .returning();
+  return level;
+}
+
+export async function createLevel(data: {
+  title: string;
+  description?: string | null;
+  sortOrder: number;
+}) {
+  const [level] = await db.insert(schema.levels).values(data).returning();
+  return level;
+}
+
+export async function deleteLevel(id: number) {
+  await db.delete(schema.levels).where(eq(schema.levels.id, id));
 }
 
 export async function getLessonsByLevel(levelId: number) {
@@ -67,7 +93,11 @@ export async function createLesson(data: {
   levelId: number;
   lessonNumber: number;
   title: string;
-  audioUrl?: string;
+  audioUrl?: string | null;
+  audioUploadKey?: string | null;
+  audioFileName?: string | null;
+  audioFileSize?: number | null;
+  audioUploadedAt?: Date | null;
   notesContent?: string;
   status?: "draft" | "published";
 }) {
@@ -78,6 +108,10 @@ export async function createLesson(data: {
 export async function updateLesson(id: number, data: Partial<{
   title: string;
   audioUrl: string | null;
+  audioUploadKey: string | null;
+  audioFileName: string | null;
+  audioFileSize: number | null;
+  audioUploadedAt: Date | null;
   notesContent: string | null;
   status: "draft" | "published";
   lessonNumber: number;
@@ -92,4 +126,38 @@ export async function updateLesson(id: number, data: Partial<{
 
 export async function deleteLesson(id: number) {
   await db.delete(schema.lessons).where(eq(schema.lessons.id, id));
+}
+
+export async function renumberLessonsInLevel(
+  levelId: number,
+  lessonUpdates: Array<{ id: number; lessonNumber: number }>,
+) {
+  for (const [index, lesson] of lessonUpdates.entries()) {
+    await db
+      .update(schema.lessons)
+      .set({ lessonNumber: -(index + 1), updatedAt: new Date() })
+      .where(
+        and(eq(schema.lessons.id, lesson.id), eq(schema.lessons.levelId, levelId)),
+      );
+  }
+
+  for (const lesson of lessonUpdates) {
+    await db
+      .update(schema.lessons)
+      .set({ lessonNumber: lesson.lessonNumber, updatedAt: new Date() })
+      .where(
+        and(eq(schema.lessons.id, lesson.id), eq(schema.lessons.levelId, levelId)),
+      );
+  }
+}
+
+export async function renumberLevels(
+  levelUpdates: Array<{ id: number; sortOrder: number }>,
+) {
+  for (const level of levelUpdates) {
+    await db
+      .update(schema.levels)
+      .set({ sortOrder: level.sortOrder })
+      .where(eq(schema.levels.id, level.id));
+  }
 }

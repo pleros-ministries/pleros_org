@@ -5,6 +5,7 @@ import { twoFactor } from "better-auth/plugins/two-factor";
 
 import { db } from "@/lib/db";
 import * as authSchema from "@/lib/db/auth-schema";
+import { buildTrustedOrigins, resolveAuthBaseUrl } from "@/lib/auth/auth-env";
 
 const googleConfigured =
   typeof process.env.GOOGLE_CLIENT_ID === "string" &&
@@ -14,7 +15,7 @@ const googleConfigured =
 
 export const betterAuthServer = betterAuth({
   appName: "Pleros PPC",
-  baseURL: process.env.BETTER_AUTH_URL,
+  baseURL: resolveAuthBaseUrl(process.env),
   secret:
     process.env.BETTER_AUTH_SECRET ??
     "demo-only-better-auth-secret-change-in-production-12345",
@@ -33,11 +34,7 @@ export const betterAuthServer = betterAuth({
         },
       }
     : {},
-  trustedOrigins: [
-    process.env.BETTER_AUTH_URL ?? "",
-    "https://ppc.pleros.org",
-    "https://pleros-org.vercel.app",
-  ].filter(Boolean),
+  trustedOrigins: buildTrustedOrigins(process.env),
   plugins: [
     nextCookies(),
     twoFactor({ issuer: "Pleros PPC" }),

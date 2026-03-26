@@ -7,14 +7,12 @@ import { cn } from "@/lib/utils";
 import { markAudioListened, markNotesRead } from "@/app/ppc/_actions/lesson-actions";
 
 type LessonHubClientProps = {
-  userId: string;
   lessonId: number;
   audioListened: boolean;
   notesRead: boolean;
 };
 
 export function LessonHubClient({
-  userId,
   lessonId,
   audioListened,
   notesRead,
@@ -25,14 +23,14 @@ export function LessonHubClient({
 
   const handleAudio = () => {
     startAudioTransition(async () => {
-      await markAudioListened(userId, lessonId);
+      await markAudioListened(lessonId);
       router.refresh();
     });
   };
 
   const handleNotes = () => {
     startNotesTransition(async () => {
-      await markNotesRead(userId, lessonId);
+      await markNotesRead(lessonId);
       router.refresh();
     });
   };

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useTransition, useCallback } from "react";
+import { useState, useTransition, useCallback, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Send, XCircle, MessageSquare, Loader2 } from "lucide-react";
+import { Send, XCircle, MessageSquare, Loader2, Search, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/ppc/status-badge";
 import { LevelBadge } from "@/components/ppc/level-badge";
@@ -10,8 +10,14 @@ import { ThreadView } from "@/components/ppc/thread-view";
 import {
   replyToThread,
   closeQaThread,
+  reopenQaThread,
   fetchThreadMessages,
 } from "@/app/ppc/_actions/qa-actions";
+import {
+  filterQaInbox,
+  getQaInboxCounts,
+  resolveNextSelectedThreadId,
+} from "@/lib/ppc-staff-workflows";
 
 type Thread = {
   id: number;
@@ -37,15 +43,14 @@ type Message = {
 
 type QaInboxClientProps = {
   threads: Thread[];
-  reviewerId: string;
-  reviewerRole: "admin" | "instructor";
 };
 
-type TabKey = "open" | "answered" | "all";
+type TabKey = "open" | "answered" | "closed" | "all";
 
 const tabDefs: { key: TabKey; label: string }[] = [
   { key: "open", label: "Open" },
   { key: "answered", label: "Answered" },
+  { key: "closed", label: "Closed" },
   { key: "all", label: "All" },
 ];
 
@@ -63,48 +68,103 @@ function parseMessages(
 
 export function QaInboxClient({
   threads,
-  reviewerId,
-  reviewerRole,
 }: QaInboxClientProps) {
   const router = useRouter();
+  const [threadRecords, setThreadRecords] = useState(threads);
   const [activeTab, setActiveTab] = useState<TabKey>("open");
+  const [levelFilter, setLevelFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [replyText, setReplyText] = useState("");
+  const [feedback, setFeedback] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  const filtered =
-    activeTab === "all"
-      ? threads
-      : threads.filter((t) =>
-          activeTab === "open"
-            ? t.status === "open"
-            : t.status === "answered" || t.status === "closed",
-        );
+  useEffect(() => {
+    setThreadRecords(threads);
+  }, [threads]);
 
-  const selectedThread = threads.find((t) => t.id === selectedId);
+  const counts = useMemo(() => getQaInboxCounts(threadRecords), [threadRecords]);
+
+  const levelOptions = useMemo(
+    () =>
+      Array.from(new Set(threadRecords.map((thread) => thread.levelId))).sort(
+        (left, right) => left - right,
+      ),
+    [threadRecords],
+  );
+
+  const filtered = useMemo(
+    () =>
+      filterQaInbox(threadRecords, {
+        activeTab,
+        levelId: levelFilter,
+        query: searchQuery,
+      }),
+    [threadRecords, activeTab, levelFilter, searchQuery],
+  );
+
+  const selectedThread = threadRecords.find((t) => t.id === selectedId);
+
+  useEffect(() => {
+    const nextSelectedId = resolveNextSelectedThreadId(filtered, selectedId);
+    if (nextSelectedId !== selectedId) {
+      setSelectedId(nextSelectedId);
+      setReplyText("");
+      setFeedback(null);
+    }
+  }, [filtered, selectedId]);
 
   const selectThread = useCallback((threadId: number) => {
     setSelectedId(threadId);
+    setReplyText("");
+    setFeedback(null);
+  }, []);
+
+  useEffect(() => {
+    if (selectedId == null) {
+      setMessages([]);
+      setLoadingMessages(false);
+      return;
+    }
+
+    let isCancelled = false;
     setMessages([]);
     setLoadingMessages(true);
-    fetchThreadMessages(threadId).then((msgs) => {
+
+    fetchThreadMessages(selectedId).then((msgs) => {
+      if (isCancelled) {
+        return;
+      }
       setMessages(parseMessages(msgs));
       setLoadingMessages(false);
     });
-  }, []);
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [selectedId]);
 
   const handleReply = () => {
     if (!replyText.trim() || selectedId == null) return;
     startTransition(async () => {
       await replyToThread({
         threadId: selectedId,
-        authorId: reviewerId,
-        authorRole: reviewerRole,
         content: replyText.trim(),
       });
+      setThreadRecords((prev) =>
+        prev.map((thread) =>
+          thread.id === selectedId
+            ? {
+                ...thread,
+                status: "answered",
+              }
+            : thread,
+        ),
+      );
       setReplyText("");
+      setFeedback("Reply sent.");
       const msgs = await fetchThreadMessages(selectedId);
       setMessages(parseMessages(msgs));
       router.refresh();
@@ -115,23 +175,45 @@ export function QaInboxClient({
     if (selectedId == null) return;
     startTransition(async () => {
       await closeQaThread(selectedId);
+      setThreadRecords((prev) =>
+        prev.map((thread) =>
+          thread.id === selectedId
+            ? {
+                ...thread,
+                status: "closed",
+              }
+            : thread,
+        ),
+      );
+      setFeedback("Thread closed.");
+      setReplyText("");
+      router.refresh();
+    });
+  };
+
+  const handleReopen = () => {
+    if (selectedId == null) return;
+    startTransition(async () => {
+      await reopenQaThread(selectedId);
+      setThreadRecords((prev) =>
+        prev.map((thread) =>
+          thread.id === selectedId
+            ? {
+                ...thread,
+                status: "open",
+              }
+            : thread,
+        ),
+      );
+      setFeedback("Thread reopened.");
       router.refresh();
     });
   };
 
   return (
     <div className="grid gap-3">
-      {/* Tabs */}
       <div className="flex gap-1 border-b border-zinc-200">
         {tabDefs.map((tab) => {
-          const count =
-            tab.key === "all"
-              ? threads.length
-              : threads.filter((t) =>
-                  tab.key === "open"
-                    ? t.status === "open"
-                    : t.status === "answered" || t.status === "closed",
-                ).length;
           return (
             <button
               key={tab.key}
@@ -152,20 +234,43 @@ export function QaInboxClient({
                     : "bg-zinc-100 text-zinc-500",
                 )}
               >
-                {count}
+                {counts[tab.key] ?? 0}
               </span>
             </button>
           );
         })}
       </div>
 
-      {/* Split layout */}
+      <div className="grid gap-2 rounded-sm border border-zinc-200 bg-white p-3 lg:grid-cols-[minmax(0,1fr)_120px]">
+        <label className="relative block">
+          <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-zinc-400" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder="Search by subject, student, or lesson"
+            className="h-8 w-full rounded-sm border border-zinc-200 bg-zinc-50 pl-8 pr-2 text-xs outline-none placeholder:text-zinc-300 focus:border-zinc-400"
+          />
+        </label>
+        <select
+          value={levelFilter}
+          onChange={(event) => setLevelFilter(event.target.value)}
+          className="h-8 rounded-sm border border-zinc-200 bg-zinc-50 px-2 text-xs outline-none focus:border-zinc-400"
+        >
+          <option value="all">All levels</option>
+          {levelOptions.map((levelId) => (
+            <option key={levelId} value={String(levelId)}>
+              Level {levelId}
+            </option>
+          ))}
+        </select>
+      </div>
+
       <div className="grid gap-3 lg:grid-cols-[minmax(240px,1fr)_2fr]">
-        {/* Thread list */}
         <div className="grid content-start gap-1 max-h-[600px] overflow-y-auto">
           {filtered.length === 0 ? (
             <div className="rounded-sm border border-zinc-200 bg-white px-4 py-8 text-center text-xs text-zinc-400">
-              No threads
+              No threads match this inbox view
             </div>
           ) : (
             filtered.map((t) => (
@@ -198,7 +303,6 @@ export function QaInboxClient({
           )}
         </div>
 
-        {/* Detail panel */}
         <div className="rounded-sm border border-zinc-200 bg-white p-3">
           {selectedThread == null ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
@@ -222,6 +326,12 @@ export function QaInboxClient({
                 </div>
               </div>
 
+              {feedback ? (
+                <div className="rounded-sm border border-zinc-200 bg-zinc-50 px-2.5 py-2 text-[11px] text-zinc-600">
+                  {feedback}
+                </div>
+              ) : null}
+
               {loadingMessages ? (
                 <div className="flex items-center justify-center py-6">
                   <Loader2 className="size-4 animate-spin text-zinc-400" />
@@ -230,7 +340,7 @@ export function QaInboxClient({
                 <ThreadView messages={messages} />
               )}
 
-              {selectedThread.status === "open" && (
+              {selectedThread.status !== "closed" ? (
                 <div className="grid gap-2">
                   <textarea
                     placeholder="Write a reply…"
@@ -255,6 +365,22 @@ export function QaInboxClient({
                     >
                       <XCircle className="size-3" />
                       Close thread
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid gap-2">
+                  <p className="text-[11px] text-zinc-500">
+                    This thread is closed. Reopen it to continue the conversation.
+                  </p>
+                  <div>
+                    <button
+                      onClick={handleReopen}
+                      disabled={isPending}
+                      className="flex h-7 items-center gap-1.5 rounded-sm border border-zinc-200 px-3 text-xs font-medium text-zinc-600 hover:bg-zinc-50 disabled:opacity-50"
+                    >
+                      <RotateCcw className="size-3" />
+                      Reopen thread
                     </button>
                   </div>
                 </div>

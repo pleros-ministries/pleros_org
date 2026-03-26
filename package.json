@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest run"
+    "test": "vitest run",
+    "migrate:pathway-videos": "tsx scripts/migrate-pathway-videos.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.2.0",

@@ -11,6 +11,7 @@
 :root {
   /* Typography */
   --font-sans: var(--font-suisse-intl), "Suisse Int'l", Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-sans);
 
   --text-display: clamp(2.4rem, 5vw, 4.8rem);
   --text-h1: clamp(2rem, 4vw, 3.4rem);
@@ -226,6 +227,7 @@
   /* Base typography */
 
   .display {
+    font-family: var(--font-heading);
     font-size: var(--text-display);
     line-height: var(--leading-tight);
     font-weight: var(--weight-semibold);
@@ -233,6 +235,7 @@
   }
 
   .h1 {
+    font-family: var(--font-heading);
     font-size: var(--text-h1);
     line-height: var(--leading-tight);
     font-weight: var(--weight-semibold);
@@ -240,6 +243,7 @@
   }
 
   .h2 {
+    font-family: var(--font-heading);
     font-size: var(--text-h2);
     line-height: var(--leading-snug);
     font-weight: var(--weight-semibold);
@@ -247,6 +251,7 @@
   }
 
   .h3 {
+    font-family: var(--font-heading);
     font-size: var(--text-h3);
     line-height: 1.24;
     font-weight: var(--weight-semibold);
@@ -301,6 +306,313 @@
 
   .section-shell-tight {
     padding-block: clamp(2rem, 4vw, 3.5rem);
+  }
+
+  .site-font-theme {
+    --font-sans: var(--font-be-vietnam-pro), "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
+    --font-heading: var(--font-sen), "Sen", var(--font-sans);
+    --font-display: var(--font-heading);
+
+    /* Public site typography extracted from Figma mobile homepage */
+    --text-display: clamp(2.125rem, 5.8vw, 3rem); /* restrained public display */
+    --text-h1: clamp(2.25rem, 6.2vw, 3.15rem); /* restrained hero question */
+    --text-h2: clamp(2rem, 5.4vw, 2.65rem); /* restrained section heading utility */
+    --text-h3: 1.2426rem; /* 19.88px card title */
+    --text-body-lg: 1.125rem; /* 18px intro copy */
+    --text-body: 1rem; /* 16px body copy */
+    --text-sm: 1rem; /* 16px buttons / dense UI */
+    --text-xs: 0.6875rem; /* 11px micro copy */
+    --text-eyebrow: 0.640625rem; /* 10.25px hero label */
+    --text-nav: 1.5rem; /* 24px footer/nav links */
+    --text-label: 0.875rem; /* 14px small labels */
+
+    --leading-tight: 1;
+    --leading-snug: 1;
+    --leading-ui: 1.15;
+    --leading-copy: 1.4;
+
+    --weight-regular: 400;
+    --weight-medium: 500;
+    --weight-semibold: 600;
+    --weight-bold: 700;
+
+    /* Public site layout / radius */
+    --radius-sm: 0.6875rem; /* 11px */
+    --radius-md: 0.875rem; /* 14px */
+    --radius-lg: 1rem; /* 16px */
+    --radius-xl: 1.25rem; /* 20px */
+    --radius-2xl: 1.5rem; /* 24px */
+    --radius-pill: 999px;
+
+    /* Public site colors extracted from Figma mobile homepage */
+    --color-brand-blue: #051480;
+    --color-brand-blue-hover: #031067;
+    --color-brand-indigo: #27176c;
+    --color-brand-sky: #d2f1ff;
+    --color-brand-sky-soft: #e0f3ff;
+    --color-brand-lime: #e9ed01;
+    --color-brand-purple-soft: #d8b1ff;
+
+    --color-bg: #ffffff;
+    --color-surface: #ffffff;
+    --color-surface-muted: #f4f9ff;
+
+    --color-text: #061056;
+    --color-text-strong: #061056;
+    --color-text-muted: rgba(6, 16, 86, 0.76);
+    --color-text-on-dark: #ffffff;
+    --color-text-on-dark-muted: rgba(255, 255, 255, 0.8);
+
+    --color-line: rgba(6, 16, 86, 0.12);
+    --color-line-strong: rgba(6, 16, 86, 0.2);
+    --color-link: var(--color-brand-blue);
+    --color-primary: var(--color-brand-blue);
+    --color-primary-hover: var(--color-brand-blue-hover);
+    --color-focus: rgba(5, 20, 128, 0.18);
+
+    --shadow-sm: 0 10px 20px rgba(6, 16, 86, 0.06);
+    --shadow-md: 0 18px 36px rgba(6, 16, 86, 0.1);
+    --shadow-lg: 0 24px 48px rgba(6, 16, 86, 0.14);
+
+    /* shadcn bridge */
+    --background: var(--color-bg);
+    --foreground: var(--color-text);
+    --card: var(--color-surface);
+    --card-foreground: var(--color-text);
+    --popover: var(--color-surface);
+    --popover-foreground: var(--color-text);
+    --primary: var(--color-primary);
+    --primary-foreground: #ffffff;
+    --secondary: var(--color-brand-sky-soft);
+    --secondary-foreground: var(--color-text);
+    --muted: #edf6ff;
+    --muted-foreground: var(--color-text-muted);
+    --accent: var(--color-brand-sky);
+    --accent-foreground: var(--color-text-strong);
+    --destructive: #b42318;
+    --destructive-foreground: #ffffff;
+    --border: var(--color-line);
+    --input: var(--color-line-strong);
+    --ring: var(--color-focus);
+
+    /* Homepage section + pathway colors */
+    --questions-surface: #ffe4bb;
+    --questions-surface-strong: #b40735;
+    --questions-accent: #b40735;
+    --questions-accent-soft: rgba(180, 7, 53, 0.14);
+    --questions-ring: rgba(180, 7, 53, 0.22);
+    --shadow-glow-questions:
+      0 0 0 4px var(--questions-ring),
+      0 18px 36px rgba(180, 7, 53, 0.14);
+
+    --purpose-surface: #e8d1ff;
+    --purpose-surface-strong: #68369b;
+    --purpose-accent: #68369b;
+    --purpose-accent-soft: rgba(104, 54, 155, 0.14);
+    --purpose-ring: rgba(104, 54, 155, 0.22);
+    --shadow-glow-purpose:
+      0 0 0 4px var(--purpose-ring),
+      0 18px 36px rgba(104, 54, 155, 0.14);
+
+    --fulfil-surface: #daffb5;
+    --fulfil-surface-strong: #1a4a4d;
+    --fulfil-accent: #1a4a4d;
+    --fulfil-accent-soft: rgba(26, 74, 77, 0.14);
+    --fulfil-ring: rgba(26, 74, 77, 0.22);
+    --shadow-glow-fulfil:
+      0 0 0 4px var(--fulfil-ring),
+      0 18px 36px rgba(26, 74, 77, 0.14);
+
+    --page-surface: var(--color-bg);
+    --page-surface-raised: var(--color-surface);
+    --page-accent-surface: var(--color-surface-muted);
+    --page-accent: var(--color-brand-blue);
+    --page-accent-soft: rgba(5, 20, 128, 0.08);
+    --page-accent-ring: rgba(5, 20, 128, 0.18);
+    --page-accent-glow: var(--shadow-md);
+
+    font-family: var(--font-sans);
+  }
+
+  .site-shell-bg {
+    background:
+      radial-gradient(circle at top left, rgba(112, 210, 11, 0.12), transparent 26rem),
+      radial-gradient(circle at top right, rgba(1, 21, 133, 0.08), transparent 34rem),
+      linear-gradient(180deg, var(--color-cream-50) 0%, var(--color-bg) 40%, var(--color-bg) 100%);
+  }
+
+  .site-font-theme .display,
+  .site-font-theme .h1,
+  .site-font-theme .h2 {
+    font-family: var(--font-display);
+    font-weight: var(--weight-semibold);
+    line-height: 1;
+    letter-spacing: -0.05em;
+    color: var(--color-text-strong);
+  }
+
+  .site-font-theme .h3 {
+    font-family: var(--font-display);
+    font-weight: var(--weight-semibold);
+    line-height: 1;
+    letter-spacing: -0.01em;
+    color: var(--color-text-strong);
+  }
+
+  .site-font-theme .body-lg,
+  .site-font-theme .body,
+  .site-font-theme .text-sm,
+  .site-font-theme .text-xs {
+    font-family: var(--font-sans);
+    color: var(--color-text);
+  }
+
+  .site-font-theme .body-lg,
+  .site-font-theme .body {
+    letter-spacing: -0.02em;
+  }
+
+  .site-font-theme .eyebrow {
+    font-family: var(--font-sans);
+    font-size: var(--text-eyebrow);
+    font-weight: var(--weight-bold);
+    letter-spacing: 0.36em;
+    color: var(--color-brand-indigo);
+  }
+
+  .site-font-theme .site-section-heading {
+    font-family: var(--font-sen), "Sen", var(--font-heading);
+    font-size: var(--text-h2);
+    font-weight: var(--weight-semibold);
+    line-height: 1;
+    letter-spacing: -0.05em;
+    color: var(--color-text-strong);
+  }
+
+  .site-font-theme .site-hero-eyebrow {
+    font-family: var(--font-sen), "Sen", var(--font-heading) !important;
+    font-size: var(--text-eyebrow);
+    font-weight: var(--weight-bold);
+    letter-spacing: 0.36em;
+    text-transform: uppercase;
+    color: var(--color-brand-indigo);
+  }
+
+  .site-font-theme .site-hero-heading {
+    font-family: var(--font-sen), "Sen", var(--font-heading) !important;
+    font-size: var(--text-h1);
+    font-weight: var(--weight-semibold);
+    line-height: 1;
+    letter-spacing: -0.05em;
+    color: var(--color-text-strong);
+  }
+
+  .site-font-theme .site-pathway-title {
+    font-family: var(--font-sen), "Sen", var(--font-heading) !important;
+    font-size: var(--text-h3);
+    font-weight: var(--weight-semibold);
+    line-height: 1;
+    letter-spacing: -0.01em;
+  }
+
+  .site-font-theme .site-podcast-card-label {
+    font-size: 0.625rem;
+    font-weight: var(--weight-medium);
+    line-height: 1;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.78);
+  }
+
+  .site-font-theme .site-podcast-card-title {
+    font-family: var(--font-sen), "Sen", var(--font-heading) !important;
+    font-size: 1.55rem;
+    font-weight: var(--weight-semibold);
+    line-height: 0.96;
+    letter-spacing: -0.035em;
+    color: var(--color-text-on-dark);
+  }
+
+  .site-font-theme .site-podcast-card-date {
+    font-size: 0.75rem;
+    font-weight: var(--weight-medium);
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    color: rgba(255, 255, 255, 0.72);
+  }
+
+  .site-font-theme .site-social-post-title {
+    font-family: var(--font-sen), "Sen", var(--font-heading) !important;
+    font-size: 1rem;
+    font-weight: var(--weight-semibold);
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+    color: var(--color-text-strong);
+  }
+
+  .site-font-theme .site-mobile-menu-title {
+    font-family: var(--font-sen), "Sen", var(--font-heading) !important;
+    font-size: 0.8125rem;
+    font-weight: var(--weight-semibold);
+    line-height: 1;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .site-font-theme .site-mobile-menu-link {
+    font-family: var(--font-sans), "Be Vietnam Pro", sans-serif !important;
+    font-size: 1rem;
+    font-weight: var(--weight-medium);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+
+  .site-font-theme .site-button-text {
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+  }
+
+  .site-font-theme .site-dashboard-hero-heading {
+    font-family: var(--font-sen), "Sen", var(--font-heading) !important;
+    font-weight: var(--weight-semibold);
+    line-height: 0.93;
+    letter-spacing: -0.065em;
+    color: var(--color-brand-blue);
+  }
+
+  .site-font-theme .site-dashboard-section-heading {
+    font-family: var(--font-sen), "Sen", var(--font-heading) !important;
+    font-weight: var(--weight-semibold);
+    line-height: 0.98;
+    letter-spacing: -0.05em;
+    color: var(--color-brand-blue);
+  }
+
+  .site-font-theme .site-dashboard-card-title {
+    font-family: var(--font-sen), "Sen", var(--font-heading) !important;
+    font-weight: var(--weight-semibold);
+    line-height: 0.95;
+    letter-spacing: -0.04em;
+  }
+
+  .site-font-theme .site-dashboard-body {
+    font-family: var(--font-sans), "Be Vietnam Pro", sans-serif !important;
+    line-height: 1.45;
+    letter-spacing: -0.02em;
+  }
+
+  .site-font-theme .site-dashboard-card-body {
+    font-family: var(--font-sans), "Be Vietnam Pro", sans-serif !important;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+  }
+
+  .site-grid {
+    background-image:
+      linear-gradient(rgba(15, 23, 40, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(15, 23, 40, 0.04) 1px, transparent 1px);
+    background-size: 2rem 2rem;
+    background-position: center top;
   }
 
   /* Surface system */
@@ -435,6 +747,17 @@
     line-height: 1;
   }
 
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: var(--text-xs);
+    font-weight: var(--weight-semibold);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
   /* Theme utilities */
 
   .theme-questions {
@@ -443,6 +766,13 @@
     --page-accent-soft: var(--questions-accent-soft);
     --page-accent-ring: var(--questions-ring);
     --page-accent-glow: var(--shadow-glow-questions);
+    --pathway-card-bg: linear-gradient(160deg, #f3c099 0%, #ea9d6f 56%, #db7e52 100%);
+    --pathway-card-border: rgba(132, 63, 29, 0.14);
+    --pathway-card-shadow: 0 16px 38px rgba(183, 99, 49, 0.18);
+    --pathway-card-glow: 0 22px 50px rgba(183, 99, 49, 0.26);
+    --pathway-card-title: #241410;
+    --pathway-card-copy: rgba(60, 33, 22, 0.78);
+    --pathway-card-cue: rgba(60, 33, 22, 0.56);
   }
 
   .theme-purpose {
@@ -451,6 +781,13 @@
     --page-accent-soft: var(--purpose-accent-soft);
     --page-accent-ring: var(--purpose-ring);
     --page-accent-glow: var(--shadow-glow-purpose);
+    --pathway-card-bg: linear-gradient(160deg, #d9cffb 0%, #b6a4f0 58%, #9281dd 100%);
+    --pathway-card-border: rgba(102, 81, 177, 0.15);
+    --pathway-card-shadow: 0 16px 38px rgba(108, 86, 186, 0.17);
+    --pathway-card-glow: 0 22px 50px rgba(108, 86, 186, 0.24);
+    --pathway-card-title: #19142d;
+    --pathway-card-copy: rgba(39, 31, 72, 0.78);
+    --pathway-card-cue: rgba(39, 31, 72, 0.56);
   }
 
   .theme-fulfil {
@@ -459,12 +796,20 @@
     --page-accent-soft: var(--fulfil-accent-soft);
     --page-accent-ring: var(--fulfil-ring);
     --page-accent-glow: var(--shadow-glow-fulfil);
+    --pathway-card-bg: linear-gradient(160deg, #d8e6cf 0%, #b3cda7 58%, #88ac78 100%);
+    --pathway-card-border: rgba(70, 102, 60, 0.14);
+    --pathway-card-shadow: 0 16px 38px rgba(87, 123, 76, 0.16);
+    --pathway-card-glow: 0 22px 50px rgba(87, 123, 76, 0.22);
+    --pathway-card-title: #162015;
+    --pathway-card-copy: rgba(33, 48, 30, 0.76);
+    --pathway-card-cue: rgba(33, 48, 30, 0.54);
   }
 
   /* Pleros content cards */
 
   .pleros-pathway-card {
     position: relative;
+    isolation: isolate;
     overflow: hidden;
     display: flex;
     min-height: 16rem;
@@ -472,25 +817,215 @@
     justify-content: space-between;
     gap: 1rem;
     padding: 1.1rem;
-    border: 1px solid rgba(15, 23, 40, 0.08);
+    border: 1px solid var(--pathway-card-border, rgba(15, 23, 40, 0.08));
     border-radius: var(--radius-xl);
-    background: var(--page-accent-surface);
-    box-shadow: var(--shadow-sm);
+    background: var(--pathway-card-bg, var(--page-accent-surface));
+    box-shadow:
+      var(--pathway-card-shadow, var(--shadow-sm)),
+      inset 0 1px 0 rgba(255, 255, 255, 0.24);
     transition:
       transform 180ms ease,
       box-shadow 180ms ease,
       border-color 180ms ease;
   }
 
+  .pleros-pathway-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(circle at 16% 14%, rgba(255, 255, 255, 0.28), transparent 32%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.04) 48%, transparent 100%);
+  }
+
+  .pleros-pathway-card::after {
+    content: "";
+    position: absolute;
+    inset: auto -8% -32% 24%;
+    z-index: 0;
+    height: 60%;
+    pointer-events: none;
+    border-radius: 999px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.18), transparent 72%);
+  }
+
   .pleros-pathway-card:hover {
     transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
+    box-shadow:
+      0 18px 42px rgba(15, 23, 40, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.24);
   }
 
   .pleros-pathway-card.is-active {
     transform: translateY(-2px);
-    box-shadow: var(--page-accent-glow);
-    border-color: var(--page-accent-ring);
+    box-shadow:
+      var(--pathway-card-glow, var(--page-accent-glow)),
+      inset 0 1px 0 rgba(255, 255, 255, 0.24);
+    border-color: rgba(255, 255, 255, 0.34);
+  }
+
+  .pathway-card__title {
+    color: var(--pathway-card-title);
+  }
+
+  .pathway-card__copy {
+    color: var(--pathway-card-copy);
+  }
+
+  .pathway-card__cue {
+    color: var(--pathway-card-cue);
+    transition:
+      transform 180ms ease,
+      color 180ms ease,
+      opacity 180ms ease;
+  }
+
+  .pleros-pathway-card:hover .pathway-card__cue,
+  .pleros-pathway-card.is-active .pathway-card__cue {
+    transform: translate3d(1px, -1px, 0);
+    color: var(--pathway-card-title);
+  }
+
+  .pathway-art {
+    position: relative;
+    min-height: 5.85rem;
+    width: 6.15rem;
+    flex-shrink: 0;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    border-radius: calc(var(--radius-md) - 1px);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.08));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.26);
+  }
+
+  .pathway-art__wash,
+  .pathway-art__shape {
+    position: absolute;
+    pointer-events: none;
+  }
+
+  .pathway-art__wash {
+    inset: 0;
+    background:
+      radial-gradient(circle at 20% 18%, rgba(255, 255, 255, 0.38), transparent 30%),
+      linear-gradient(145deg, rgba(255, 255, 255, 0.18), transparent 48%);
+  }
+
+  .pathway-art__shape {
+    border-radius: 999px;
+    opacity: 0.95;
+  }
+
+  .pathway-art--questions .pathway-art__shape--a {
+    left: -12%;
+    bottom: -20%;
+    width: 62%;
+    height: 74%;
+    background: rgba(195, 103, 55, 0.92);
+  }
+
+  .pathway-art--questions .pathway-art__shape--b {
+    right: 8%;
+    top: 10%;
+    width: 40%;
+    height: 28%;
+    border-radius: 1rem;
+    background: rgba(255, 240, 223, 0.8);
+  }
+
+  .pathway-art--questions .pathway-art__shape--c {
+    right: 16%;
+    bottom: -8%;
+    width: 28%;
+    height: 60%;
+    transform: rotate(24deg);
+    background: rgba(235, 156, 110, 0.92);
+  }
+
+  .pathway-art--questions .pathway-art__shape--d {
+    left: -8%;
+    top: 43%;
+    width: 118%;
+    height: 14%;
+    transform: rotate(-8deg);
+    background: rgba(105, 49, 25, 0.14);
+  }
+
+  .pathway-art--purpose .pathway-art__shape--a {
+    right: -8%;
+    top: -8%;
+    width: 64%;
+    height: 64%;
+    background: rgba(141, 125, 224, 0.96);
+  }
+
+  .pathway-art--purpose .pathway-art__shape--b {
+    left: -12%;
+    bottom: -14%;
+    width: 54%;
+    height: 54%;
+    background: rgba(228, 221, 255, 0.94);
+  }
+
+  .pathway-art--purpose .pathway-art__shape--c {
+    left: 23%;
+    top: 18%;
+    width: 22%;
+    height: 70%;
+    transform: rotate(24deg);
+    background: rgba(248, 246, 255, 0.66);
+  }
+
+  .pathway-art--purpose .pathway-art__shape--d {
+    left: -4%;
+    top: 49%;
+    width: 110%;
+    height: 12%;
+    transform: rotate(12deg);
+    background: rgba(90, 71, 170, 0.16);
+  }
+
+  .pathway-art--fulfil .pathway-art__shape--a {
+    left: -8%;
+    top: -10%;
+    width: 60%;
+    height: 60%;
+    background: rgba(121, 160, 106, 0.96);
+  }
+
+  .pathway-art--fulfil .pathway-art__shape--b {
+    right: -10%;
+    bottom: -16%;
+    width: 56%;
+    height: 56%;
+    background: rgba(212, 229, 202, 0.96);
+  }
+
+  .pathway-art--fulfil .pathway-art__shape--c {
+    left: 20%;
+    top: 15%;
+    width: 24%;
+    height: 76%;
+    transform: rotate(18deg);
+    background: rgba(248, 252, 244, 0.66);
+  }
+
+  .pathway-art--fulfil .pathway-art__shape--d {
+    left: -5%;
+    bottom: 16%;
+    width: 110%;
+    height: 13%;
+    transform: rotate(-12deg);
+    background: rgba(67, 97, 58, 0.14);
+  }
+
+  @media (min-width: 48rem) {
+    .pathway-art {
+      min-height: 9.8rem;
+      width: 100%;
+    }
   }
 
   .pleros-media-card {
@@ -544,6 +1079,26 @@
   .pleros-footer {
     border-top: 1px solid var(--color-line);
     background: var(--color-cream-100);
+  }
+
+  [data-slot="card"][data-tone="dark"] [data-slot="card-title"] {
+    color: var(--color-text-on-dark);
+  }
+
+  [data-slot="card"][data-tone="dark"] [data-slot="card-description"] {
+    color: var(--color-text-on-dark-muted);
+  }
+
+  [data-slot="card"][data-tone="dark"] [data-slot="card-footer"] {
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+
+  [data-slot="accordion-item"].surface-dark [data-slot="accordion-trigger"] {
+    color: var(--color-text-on-dark);
+  }
+
+  [data-slot="accordion-item"].surface-dark [data-slot="accordion-content"] {
+    color: var(--color-text-on-dark-muted);
   }
 }
 

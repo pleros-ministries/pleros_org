@@ -62,7 +62,6 @@ type StudentDetailClientProps = {
     lessonTitle: string;
   }>;
   isAdmin: boolean;
-  reviewerId: string;
 };
 
 export function StudentDetailClient({
@@ -71,7 +70,6 @@ export function StudentDetailClient({
   submissions,
   threads,
   isAdmin,
-  reviewerId,
 }: StudentDetailClientProps) {
   const router = useRouter();
   const [activeLevel, setActiveLevel] = useState(1);
@@ -86,7 +84,7 @@ export function StudentDetailClient({
 
   const handleApprove = (submissionId: number) => {
     startTransition(async () => {
-      await approveWrittenSubmission(submissionId, reviewerId);
+      await approveWrittenSubmission(submissionId);
       router.refresh();
     });
   };
@@ -95,7 +93,7 @@ export function StudentDetailClient({
     const note = revisionNotes[submissionId]?.trim();
     if (!note) return;
     startTransition(async () => {
-      await requestSubmissionRevision(submissionId, reviewerId, note);
+      await requestSubmissionRevision(submissionId, note);
       setRevisionNotes((prev) => ({ ...prev, [submissionId]: "" }));
       router.refresh();
     });
@@ -118,7 +116,7 @@ export function StudentDetailClient({
 
   const handleGraduationOverride = () => {
     startTransition(async () => {
-      await overrideGraduation(student.id, activeLevel, reviewerId);
+      await overrideGraduation(student.id, activeLevel);
       router.refresh();
     });
   };

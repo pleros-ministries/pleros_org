@@ -63,7 +63,6 @@ export default async function QuizPage({
       ) : (
         <div className="rounded-sm border border-zinc-200 bg-white p-4">
           <QuizFlow
-            userId={userId}
             lessonId={lessonId}
             questions={questions}
             bestScore={bestScore}

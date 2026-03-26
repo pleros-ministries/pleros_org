@@ -25,9 +25,13 @@ type Student = {
 
 type StudentListClientProps = {
   students: Student[];
+  basePath?: string;
 };
 
-export function StudentListClient({ students }: StudentListClientProps) {
+export function StudentListClient({
+  students,
+  basePath = "/ppc",
+}: StudentListClientProps) {
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [levelFilter, setLevelFilter] = useState<string>("all");
@@ -52,7 +56,7 @@ export function StudentListClient({ students }: StudentListClientProps) {
         <button
           onClick={(e) => {
             e.stopPropagation();
-            router.push(`/ppc/students/${row.id}`);
+            router.push(`${basePath}/students/${row.id}`);
           }}
           className="text-xs font-medium text-zinc-900 underline-offset-2 hover:underline"
         >
@@ -135,7 +139,7 @@ export function StudentListClient({ students }: StudentListClientProps) {
       <DataTable<Student>
         columns={columns}
         data={filtered as (Student & Record<string, unknown>)[]}
-        onRowClick={(row) => router.push(`/ppc/students/${row.id}`)}
+        onRowClick={(row) => router.push(`${basePath}/students/${row.id}`)}
         emptyMessage="No students found"
         getRowKey={(row) => row.id}
       />

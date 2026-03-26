@@ -103,7 +103,6 @@ export default async function LessonDetailPage({
           )}
 
           <LessonHubClient
-            userId={userId}
             lessonId={lessonId}
             audioListened={audioListened}
             notesRead={notesRead}

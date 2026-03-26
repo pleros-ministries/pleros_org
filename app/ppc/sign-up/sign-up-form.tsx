@@ -7,12 +7,18 @@ import { authClient } from "@/lib/auth/auth-client";
 
 type SignUpFormProps = {
   returnTo: string;
+  initialEmail?: string;
+  lockEmail?: boolean;
 };
 
-export function SignUpForm({ returnTo }: SignUpFormProps) {
+export function SignUpForm({
+  returnTo,
+  initialEmail = "",
+  lockEmail = false,
+}: SignUpFormProps) {
   const router = useRouter();
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -46,7 +52,9 @@ export function SignUpForm({ returnTo }: SignUpFormProps) {
   return (
     <>
       <p className="mt-1 text-xs text-zinc-500">
-        Create your student account.
+        {lockEmail
+          ? "Create your student account. We already carried your email over from the welcome dashboard."
+          : "Create your student account."}
       </p>
 
       <form onSubmit={handleSignUp} className="mt-4 grid gap-3">
@@ -80,6 +88,7 @@ export function SignUpForm({ returnTo }: SignUpFormProps) {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
+            readOnly={lockEmail}
             className="h-8 rounded-sm border border-zinc-300 px-2.5 text-xs outline-none focus:border-zinc-700"
           />
         </label>
@@ -111,10 +120,10 @@ export function SignUpForm({ returnTo }: SignUpFormProps) {
       <p className="mt-4 text-center text-[11px] text-zinc-500">
         Already have an account?{" "}
         <Link
-          href={`/ppc/sign-in${returnTo !== "/" ? `?returnTo=${encodeURIComponent(returnTo)}` : ""}`}
+          href="/ppc"
           className="font-medium text-zinc-900 underline-offset-2 hover:underline"
         >
-          Sign in
+          Login
         </Link>
       </p>
     </>

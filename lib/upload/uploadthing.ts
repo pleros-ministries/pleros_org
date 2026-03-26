@@ -14,8 +14,14 @@ export const uploadRouter = {
       }
       return { userId: session.user.id };
     })
-    .onUploadComplete(({ metadata, file }) => {
-      return { url: file.ufsUrl };
+    .onUploadComplete(({ file }) => {
+      return {
+        url: file.ufsUrl,
+        uploadKey: file.key,
+        fileName: file.name,
+        fileSize: file.size,
+        uploadedAt: new Date().toISOString(),
+      };
     }),
 } satisfies FileRouter;
 

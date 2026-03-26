@@ -81,6 +81,12 @@ export async function getThreadMessages(threadId: number) {
     .orderBy(schema.qaMessages.createdAt);
 }
 
+export async function getThreadById(threadId: number) {
+  return db.query.qaThreads.findFirst({
+    where: (thread, { eq: eq2 }) => eq2(thread.id, threadId),
+  });
+}
+
 export async function createThread(data: {
   userId: string;
   lessonId: number;
@@ -133,5 +139,12 @@ export async function closeThread(threadId: number) {
   await db
     .update(schema.qaThreads)
     .set({ status: "closed" })
+    .where(eq(schema.qaThreads.id, threadId));
+}
+
+export async function reopenThread(threadId: number) {
+  await db
+    .update(schema.qaThreads)
+    .set({ status: "open" })
     .where(eq(schema.qaThreads.id, threadId));
 }

@@ -28,14 +28,12 @@ type Message = {
 };
 
 type QaThreadListProps = {
-  userId: string;
   lessonId: number;
   userRole: "student" | "instructor" | "admin";
   initialThreads: Thread[];
 };
 
 export function QaThreadList({
-  userId,
   lessonId,
   userRole,
   initialThreads,
@@ -58,11 +56,9 @@ export function QaThreadList({
     if (!newSubject.trim() || !newMessage.trim()) return;
     startCreateTransition(async () => {
       await createQaThread({
-        userId,
         lessonId,
         subject: newSubject.trim(),
         message: newMessage.trim(),
-        authorRole: userRole,
       });
       setNewSubject("");
       setNewMessage("");
@@ -87,8 +83,6 @@ export function QaThreadList({
     startReplyTransition(async () => {
       await replyToThread({
         threadId: activeThreadId,
-        authorId: userId,
-        authorRole: userRole,
         content: replyText.trim(),
       });
       setReplyText("");

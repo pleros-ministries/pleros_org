@@ -2,18 +2,6 @@ import type { AppRole } from "./app-role";
 import { getRoleDefaultPath } from "./app-access";
 import { isPpcHost } from "./ppc-routing";
 
-const ADMIN_PATH_PREFIXES = [
-  "/",
-  "/admin",
-  "/students",
-  "/review",
-  "/qa",
-  "/notifications",
-  "/student",
-];
-
-const INSTRUCTOR_PATH_PREFIXES = ["/", "/students", "/review", "/qa", "/notifications"];
-
 const STUDENT_PATH_PREFIXES = ["/student"];
 
 function normalizeLogicalPath(path: string): string {
@@ -41,7 +29,7 @@ function matchesPrefix(pathname: string, prefixes: string[]): boolean {
 export function isPublicPpcPath(path: string): boolean {
   const pathname = normalizeLogicalPath(path);
 
-  return pathname === "/sign-in" || pathname === "/forbidden";
+  return pathname === "/" || pathname === "/sign-in" || pathname === "/sign-up" || pathname === "/forbidden";
 }
 
 export function getRoleHomePath(role: AppRole): string {
@@ -55,15 +43,7 @@ export function canAccessPpcPath(role: AppRole, path: string): boolean {
     return true;
   }
 
-  if (role === "admin") {
-    return matchesPrefix(pathname, ADMIN_PATH_PREFIXES);
-  }
-
-  if (role === "instructor") {
-    return matchesPrefix(pathname, INSTRUCTOR_PATH_PREFIXES);
-  }
-
-  return matchesPrefix(pathname, STUDENT_PATH_PREFIXES);
+  return role === "student" && matchesPrefix(pathname, STUDENT_PATH_PREFIXES);
 }
 
 export function toExternalPpcPath(host: string | null, logicalPath: string): string {

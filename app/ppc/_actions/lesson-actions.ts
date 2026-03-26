@@ -4,9 +4,11 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
 import { requireAuth } from "@/lib/auth/require-role";
+import { getStudentSelfActor } from "@/lib/auth/action-actor";
 
-export async function markAudioListened(userId: string, lessonId: number) {
-  await requireAuth();
+export async function markAudioListened(lessonId: number) {
+  const session = await requireAuth();
+  const { userId } = getStudentSelfActor(session);
   await db
     .insert(schema.studentProgress)
     .values({ userId, lessonId, audioListened: true })
@@ -17,8 +19,9 @@ export async function markAudioListened(userId: string, lessonId: number) {
   revalidatePath("/ppc", "layout");
 }
 
-export async function markNotesRead(userId: string, lessonId: number) {
-  await requireAuth();
+export async function markNotesRead(lessonId: number) {
+  const session = await requireAuth();
+  const { userId } = getStudentSelfActor(session);
   await db
     .insert(schema.studentProgress)
     .values({ userId, lessonId, notesRead: true })
