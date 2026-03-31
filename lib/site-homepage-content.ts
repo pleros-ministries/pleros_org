@@ -21,6 +21,15 @@ export type HomeSocialLink = {
   iconSrc: string;
 };
 
+export type HomeInstagramReel = {
+  id: string;
+  title: string;
+  href: string;
+  imageUrl: string;
+  profileImageUrl: string | null;
+  takenAt: number;
+};
+
 export const homeNavLinks: HomeNavLink[] = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/questions", label: "Questions" },
@@ -106,12 +115,57 @@ export const footerSocialLinks: HomeSocialLink[] = [
 export const homePodcastUrl = "https://pod.link/1870111674";
 export const homeYoutubeChannelUrl = homePodcastUrl;
 export const homeInstagramProfileUrl = "https://instagram.com/pleros_org";
-export const homeInstagramEmbedUrls = [
-  "https://www.instagram.com/pleros_org/reel/DV8IeiFDD5c/",
-  "https://www.instagram.com/pleros_org/reel/DWPAQOmjDtW/",
-  "https://www.instagram.com/pleros_org/reel/DWPP8ArDBA4/",
-  "https://www.instagram.com/pleros_org/reel/DWOjwWbjOs4/",
-  "https://www.instagram.com/pleros_org/reel/DWBG50ADMHa/",
-] as const;
+export const homeInstagramReels: HomeInstagramReel[] = [
+  {
+    id: "3864819336682960006",
+    title:
+      "Our spiritual growth as believers is very important because that's how we fulfill God...",
+    href: "https://www.instagram.com/reel/DWimLXEDHSG/",
+    imageUrl:
+      "https://instagram.fiba2-2.fna.fbcdn.net/v/t51.71878-15/656824516_1478971880598829_7034558870681660349_n.jpg?stp=c0.249.640.640a_dst-jpg_e15_tt6&_nc_ht=instagram.fiba2-2.fna.fbcdn.net&_nc_cat=101&_nc_sid=8b3546",
+    profileImageUrl: null,
+    takenAt: 1774942566,
+  },
+  {
+    id: "3864779098459796839",
+    title:
+      "Welcome to Episode 92 of the Pleros Podcast! We continue our study on The Newness of...",
+    href: "https://www.instagram.com/reel/DWidB0TDPVn/",
+    imageUrl:
+      "https://instagram.fiba2-3.fna.fbcdn.net/v/t51.71878-15/657662153_1887912575192454_1320796026549632909_n.jpg?stp=dst-jpg_e15_tt6&_nc_ht=instagram.fiba2-3.fna.fbcdn.net&_nc_cat=106&_nc_sid=8b3546",
+    profileImageUrl: null,
+    takenAt: 1774937604,
+  },
+  {
+    id: "3864370578467858966",
+    title:
+      "We are discussing Gospel Answers Nominal Christianity. What is Nominal Christianity?...",
+    href: "https://www.instagram.com/reel/DWhAJEaDCoW/",
+    imageUrl:
+      "https://instagram.fiba2-3.fna.fbcdn.net/v/t51.71878-15/657340330_1668439484490063_3400575312744568395_n.jpg?stp=c0.249.640.640a_dst-jpg_e15_tt6&_nc_ht=instagram.fiba2-3.fna.fbcdn.net&_nc_cat=103&_nc_sid=8b3546",
+    profileImageUrl: null,
+    takenAt: 1774889048,
+  },
+  {
+    id: "3864106288292842711",
+    title:
+      "By faith, we're saved, and by faith we grow. There's a distinction between faith at s...",
+    href: "https://www.instagram.com/reel/DWgEDJADEzX/",
+    imageUrl:
+      "https://instagram.fiba2-3.fna.fbcdn.net/v/t51.71878-15/658378256_1641081483444488_2558696469704588022_n.jpg?stp=c0.249.640.640a_dst-jpg_e15_tt6&_nc_ht=instagram.fiba2-3.fna.fbcdn.net&_nc_cat=108&_nc_sid=8b3546",
+    profileImageUrl: null,
+    takenAt: 1774857682,
+  },
+  {
+    id: "3864063738026665278",
+    title:
+      "Welcome to Episode 91 of the Pleros Podcast! To be in God's Purpose is to have a new...",
+    href: "https://www.instagram.com/reel/DWf6X8-jCU-/",
+    imageUrl:
+      "https://instagram.fiba2-3.fna.fbcdn.net/v/t51.71878-15/658778650_932374646323847_5304357245724573247_n.jpg?stp=dst-jpg_e15_tt6&_nc_ht=instagram.fiba2-3.fna.fbcdn.net&_nc_cat=111&_nc_sid=8b3546",
+    profileImageUrl: null,
+    takenAt: 1774852325,
+  },
+];
 export const homeWhatsappChannelUrl =
   "https://whatsapp.com/channel/0029VbBLp0ZF6smtyjjzf72L";

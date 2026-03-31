@@ -1,51 +1,16 @@
-"use client";
-
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 
-import type { InstagramPost } from "../../lib/homepage-feed";
-import { homeInstagramProfileUrl } from "../../lib/site-homepage-content";
+import {
+  homeInstagramProfileUrl,
+  type HomeInstagramReel,
+} from "../../lib/site-homepage-content";
 
 type HomepageSocialSectionProps = {
-  posts: InstagramPost[];
+  posts: HomeInstagramReel[];
 };
 
 export function HomepageSocialSection({ posts }: HomepageSocialSectionProps) {
-  const [livePosts, setLivePosts] = useState(posts);
-
-  useEffect(() => {
-    setLivePosts(posts);
-  }, [posts]);
-
-  useEffect(() => {
-    if (posts.length) {
-      return;
-    }
-
-    let isActive = true;
-
-    void fetch("/api/social/instagram", { cache: "no-store" })
-      .then(async (response) => {
-        if (!response.ok) {
-          return { posts: [] as InstagramPost[] };
-        }
-
-        return (await response.json()) as { posts?: InstagramPost[] };
-      })
-      .then((payload) => {
-        if (!isActive || !Array.isArray(payload.posts) || !payload.posts.length) {
-          return;
-        }
-
-        setLivePosts(payload.posts);
-      })
-      .catch(() => undefined);
-
-    return () => {
-      isActive = false;
-    };
-  }, [posts]);
 
   return (
     <section
@@ -67,9 +32,9 @@ export function HomepageSocialSection({ posts }: HomepageSocialSectionProps) {
           </Link>
         </div>
 
-        {livePosts.length ? (
+        {posts.length ? (
           <div className="-mx-[1px] flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {livePosts.map((post) => (
+            {posts.map((post) => (
               <Link
                 key={post.id}
                 href={post.href}

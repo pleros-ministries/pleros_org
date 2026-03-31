@@ -131,7 +131,7 @@ describe("site home page", () => {
     expect(sectionSource).toContain('className="h-auto w-full object-cover object-top"');
   });
 
-  test("uses custom instagram-style cards for the curated social section", () => {
+  test("uses repo-backed Instagram reel cards for the curated social section", () => {
     const socialSource = readFileSync(
       join(process.cwd(), "components", "home", "homepage-social-section.tsx"),
       "utf8",
@@ -140,30 +140,28 @@ describe("site home page", () => {
       join(process.cwd(), "components", "home", "homepage-view.tsx"),
       "utf8",
     );
-    const routeSource = readFileSync(
-      join(process.cwd(), "app", "api", "social", "instagram", "route.ts"),
-      "utf8",
-    );
     const contentSource = readFileSync(
       join(process.cwd(), "lib", "site-homepage-content.ts"),
       "utf8",
     );
 
-    expect(socialSource).toContain('"use client"');
-    expect(socialSource).toContain("useEffect");
-    expect(socialSource).toContain('fetch("/api/social/instagram"');
     expect(socialSource).toContain("HomepageSocialSection({ posts }");
     expect(socialSource).toContain("site-social-post-title");
     expect(socialSource).toContain("@pleros_org");
+    expect(socialSource).not.toContain("useEffect");
+    expect(socialSource).not.toContain('fetch("/api/social/instagram"');
     expect(socialSource).not.toContain("<iframe");
     expect(socialSource).not.toContain("SafeInstagramEmbed");
     expect(socialSource).not.toContain("react-social-media-embed");
-    expect(viewSource).toContain("getLatestInstagramPosts");
-    expect(viewSource).toContain("<HomepageSocialSection posts={instagramPosts} />");
-    expect(routeSource).toContain("getLatestInstagramPosts");
-    expect(routeSource).toContain("NextResponse.json");
-    expect(routeSource).toContain('"Cache-Control": "no-store"');
+    expect(viewSource).toContain("homeInstagramReels");
+    expect(viewSource).toContain("<HomepageSocialSection posts={homeInstagramReels} />");
+    expect(viewSource).not.toContain("getLatestInstagramPosts");
     expect(contentSource).toContain('export const homeInstagramProfileUrl = "https://instagram.com/pleros_org";');
+    expect(contentSource).toContain("https://www.instagram.com/reel/DWimLXEDHSG/");
+    expect(contentSource).toContain("https://www.instagram.com/reel/DWidB0TDPVn/");
+    expect(contentSource).toContain("https://www.instagram.com/reel/DWhAJEaDCoW/");
+    expect(contentSource).toContain("https://www.instagram.com/reel/DWgEDJADEzX/");
+    expect(contentSource).toContain("https://www.instagram.com/reel/DWf6X8-jCU-/");
     expect(viewSource).not.toContain("getInstagramReelPreviews");
   });
 
