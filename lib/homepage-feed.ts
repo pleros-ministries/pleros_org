@@ -32,6 +32,35 @@ export type InstagramReelPreview = {
   excerpt: string;
 };
 
+export type InstagramFeedDiagnostics = {
+  ok: boolean;
+  status: number | null;
+  contentType: string | null;
+  payloadUser: boolean;
+  edgeCount: number;
+  reelCount: number;
+  postsCount: number;
+  error: string | null;
+  bodyPreview: string | null;
+};
+
+function createInstagramFeedDiagnostics(
+  overrides: Partial<InstagramFeedDiagnostics> = {},
+): InstagramFeedDiagnostics {
+  return {
+    ok: false,
+    status: null,
+    contentType: null,
+    payloadUser: false,
+    edgeCount: 0,
+    reelCount: 0,
+    postsCount: 0,
+    error: null,
+    bodyPreview: null,
+    ...overrides,
+  };
+}
+
 function decodeXmlValue(value: string) {
   return value
     .replaceAll("&amp;", "&")
@@ -301,7 +330,10 @@ export function mapInstagramProfileEdgesToPosts(
   });
 }
 
-export async function getLatestInstagramPosts(): Promise<InstagramPost[]> {
+export async function getLatestInstagramPostsWithDiagnostics(): Promise<{
+  posts: InstagramPost[];
+  diagnostics: InstagramFeedDiagnostics;
+}> {
   try {
     const response = await fetch(INSTAGRAM_PROFILE_URL, {
       cache: "no-store",
@@ -313,11 +345,23 @@ export async function getLatestInstagramPosts(): Promise<InstagramPost[]> {
       },
     });
 
+    const contentType = response.headers.get("content-type");
+    const rawBody = await response.text();
+
     if (!response.ok) {
-      return [];
+      return {
+        posts: [],
+        diagnostics: createInstagramFeedDiagnostics({
+          ok: false,
+          status: response.status,
+          contentType,
+          error: "non_ok_response",
+          bodyPreview: rawBody.slice(0, 240),
+        }),
+      };
     }
 
-    const payload = (await response.json()) as {
+    const payload = JSON.parse(rawBody) as {
       data?: {
         user?: {
           profile_pic_url?: string;
@@ -332,9 +376,32 @@ export async function getLatestInstagramPosts(): Promise<InstagramPost[]> {
     const user = payload.data?.user;
     const edges = user?.edge_owner_to_timeline_media?.edges ?? [];
     const profileImageUrl = user?.profile_pic_url_hd ?? user?.profile_pic_url ?? null;
+    const posts = mapInstagramProfileEdgesToPosts(edges, profileImageUrl).slice(0, 5);
+    const reelCount = edges.filter((edge) => edge.node?.__typename === "GraphVideo").length;
 
-    return mapInstagramProfileEdgesToPosts(edges, profileImageUrl).slice(0, 5);
-  } catch {
-    return [];
+    return {
+      posts,
+      diagnostics: createInstagramFeedDiagnostics({
+        ok: true,
+        status: response.status,
+        contentType,
+        payloadUser: Boolean(user),
+        edgeCount: edges.length,
+        reelCount,
+        postsCount: posts.length,
+      }),
+    };
+  } catch (error) {
+    return {
+      posts: [],
+      diagnostics: createInstagramFeedDiagnostics({
+        error: error instanceof Error ? error.message : "unknown_error",
+      }),
+    };
   }
+}
+
+export async function getLatestInstagramPosts(): Promise<InstagramPost[]> {
+  const result = await getLatestInstagramPostsWithDiagnostics();
+  return result.posts;
 }
