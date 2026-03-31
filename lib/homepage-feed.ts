@@ -304,7 +304,7 @@ export function mapInstagramProfileEdgesToPosts(
 export async function getLatestInstagramPosts(): Promise<InstagramPost[]> {
   try {
     const response = await fetch(INSTAGRAM_PROFILE_URL, {
-      next: { revalidate: 1800 },
+      cache: "no-store",
       headers: {
         "user-agent": "Mozilla/5.0",
         "x-ig-app-id": "936619743392459",

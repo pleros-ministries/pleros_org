@@ -128,11 +128,18 @@ describe("site home page", () => {
       join(process.cwd(), "components", "home", "homepage-view.tsx"),
       "utf8",
     );
+    const routeSource = readFileSync(
+      join(process.cwd(), "app", "api", "social", "instagram", "route.ts"),
+      "utf8",
+    );
     const contentSource = readFileSync(
       join(process.cwd(), "lib", "site-homepage-content.ts"),
       "utf8",
     );
 
+    expect(socialSource).toContain('"use client"');
+    expect(socialSource).toContain("useEffect");
+    expect(socialSource).toContain('fetch("/api/social/instagram"');
     expect(socialSource).toContain("HomepageSocialSection({ posts }");
     expect(socialSource).toContain("site-social-post-title");
     expect(socialSource).toContain("@pleros_org");
@@ -141,6 +148,9 @@ describe("site home page", () => {
     expect(socialSource).not.toContain("react-social-media-embed");
     expect(viewSource).toContain("getLatestInstagramPosts");
     expect(viewSource).toContain("<HomepageSocialSection posts={instagramPosts} />");
+    expect(routeSource).toContain("getLatestInstagramPosts");
+    expect(routeSource).toContain("NextResponse.json");
+    expect(routeSource).toContain('"Cache-Control": "no-store"');
     expect(contentSource).toContain('export const homeInstagramProfileUrl = "https://instagram.com/pleros_org";');
     expect(viewSource).not.toContain("getInstagramReelPreviews");
   });

@@ -1,8 +1,15 @@
-import { describe, expect, test } from "vitest";
+import { afterEach, describe, expect, test, vi } from "vitest";
 
-import { mapInstagramProfileEdgesToPosts } from "./homepage-feed";
+import {
+  getLatestInstagramPosts,
+  mapInstagramProfileEdgesToPosts,
+} from "./homepage-feed";
 
 describe("homepage feed", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   test("keeps only reels when mapping instagram profile media", () => {
     const posts = mapInstagramProfileEdgesToPosts([
       {
@@ -61,5 +68,32 @@ describe("homepage feed", () => {
         takenAt: 300,
       },
     ]);
+  });
+
+  test("requests Instagram profile data without reusing stale cached responses", async () => {
+    const fetchSpy = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          data: {
+            user: {
+              profile_pic_url: null,
+              edge_owner_to_timeline_media: {
+                edges: [],
+              },
+            },
+          },
+        }),
+      } as Response);
+
+    await getLatestInstagramPosts();
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      "https://www.instagram.com/api/v1/users/web_profile_info/?username=pleros_org",
+      expect.objectContaining({
+        cache: "no-store",
+      }),
+    );
   });
 });
