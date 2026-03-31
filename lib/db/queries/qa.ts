@@ -29,6 +29,7 @@ export async function getAllThreads(status?: "open" | "answered" | "closed") {
           userId: schema.qaThreads.userId,
           lessonId: schema.qaThreads.lessonId,
           subject: schema.qaThreads.subject,
+          assignedToId: schema.qaThreads.assignedTo,
           status: schema.qaThreads.status,
           createdAt: schema.qaThreads.createdAt,
           studentName: schema.users.name,
@@ -48,6 +49,7 @@ export async function getAllThreads(status?: "open" | "answered" | "closed") {
           userId: schema.qaThreads.userId,
           lessonId: schema.qaThreads.lessonId,
           subject: schema.qaThreads.subject,
+          assignedToId: schema.qaThreads.assignedTo,
           status: schema.qaThreads.status,
           createdAt: schema.qaThreads.createdAt,
           studentName: schema.users.name,
@@ -129,10 +131,30 @@ export async function addMessage(data: {
   const newStatus = data.authorRole === "student" ? "open" : "answered";
   await db
     .update(schema.qaThreads)
-    .set({ status: newStatus })
+    .set({
+      status: newStatus,
+      assignedTo: data.authorRole === "student" ? undefined : data.authorId,
+      assignedAt: data.authorRole === "student" ? undefined : new Date(),
+    })
     .where(eq(schema.qaThreads.id, data.threadId));
 
   return message;
+}
+
+export async function setThreadAssignment(
+  threadId: number,
+  assignedToId: string | null,
+) {
+  const [updated] = await db
+    .update(schema.qaThreads)
+    .set({
+      assignedTo: assignedToId,
+      assignedAt: assignedToId ? new Date() : null,
+    })
+    .where(eq(schema.qaThreads.id, threadId))
+    .returning();
+
+  return updated ?? null;
 }
 
 export async function closeThread(threadId: number) {

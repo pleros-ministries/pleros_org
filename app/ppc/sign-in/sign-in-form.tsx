@@ -4,6 +4,12 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { authClient } from "@/lib/auth/auth-client";
+import { previewPortalAccess } from "@/app/ppc/_actions/auth-entry-actions";
+import {
+  formatAuthErrorMessage,
+  getPortalAccessNotice,
+  getPostAuthRedirectPath,
+} from "@/lib/auth-entry";
 
 type SignInFormProps = {
   returnTo: string;
@@ -14,36 +20,71 @@ export function SignInForm({ returnTo }: SignInFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [portalNotice, setPortalNotice] = useState<{
+    tone: "default" | "info" | "warning";
+    message: string;
+  } | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const googleEnabled =
     typeof process.env.NEXT_PUBLIC_GOOGLE_AUTH_ENABLED !== "undefined";
+
+  const handleEmailBlur = () => {
+    if (!email.trim()) {
+      setPortalNotice(null);
+      return;
+    }
+
+    startTransition(async () => {
+      const access = await previewPortalAccess(email);
+      if (!access) {
+        setPortalNotice(null);
+        return;
+      }
+
+      setPortalNotice(
+        getPortalAccessNotice("student", access.role) as
+          | { tone: "default" | "info" | "warning"; message: string }
+          | null,
+      );
+    });
+  };
 
   const handleEmailSignIn = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
     startTransition(async () => {
+      const access = await previewPortalAccess(email);
       const result = await authClient.signIn.email({
         email,
         password,
       });
 
       if (result.error) {
-        setError(result.error.message ?? "Sign in failed");
+        setError(formatAuthErrorMessage(result.error.message, "sign_in"));
         return;
       }
 
-      router.push(returnTo.startsWith("/ppc") ? returnTo : "/ppc");
+      router.push(
+        getPostAuthRedirectPath({
+          resolvedRole: access?.role ?? "student",
+          returnTo,
+        }),
+      );
       router.refresh();
     });
   };
 
   const handleGoogleSignIn = () => {
     startTransition(async () => {
+      const access = await previewPortalAccess(email);
       await authClient.signIn.social({
         provider: "google",
-        callbackURL: returnTo.startsWith("/ppc") ? returnTo : "/ppc",
+        callbackURL: getPostAuthRedirectPath({
+          resolvedRole: access?.role ?? "student",
+          returnTo,
+        }),
       });
     });
   };
@@ -70,10 +111,23 @@ export function SignInForm({ returnTo }: SignInFormProps) {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            onBlur={handleEmailBlur}
             placeholder="you@example.com"
             className="h-8 rounded-sm border border-zinc-300 px-2.5 text-xs outline-none focus:border-zinc-700"
           />
         </label>
+
+        {portalNotice ? (
+          <div
+            className={
+              portalNotice.tone === "warning"
+                ? "rounded-sm border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700"
+                : "rounded-sm border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs text-zinc-600"
+            }
+          >
+            {portalNotice.message}
+          </div>
+        ) : null}
 
         <label className="grid gap-1">
           <span className="text-[11px] font-medium uppercase tracking-[0.08em] text-zinc-500">
@@ -143,6 +197,14 @@ export function SignInForm({ returnTo }: SignInFormProps) {
         >
           Sign up
         </Link>
+      </p>
+
+      <p className="mt-2 text-center text-[11px] text-zinc-400">
+        Staff access uses{" "}
+        <Link href="/admin" className="underline underline-offset-2">
+          /admin
+        </Link>
+        .
       </p>
     </>
   );

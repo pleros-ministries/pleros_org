@@ -3,6 +3,7 @@ import {
   inactivityReminderHtml,
   submissionReviewedHtml,
   graduationCongratulationsHtml,
+  staffAssignmentHtml,
 } from "./templates";
 
 const FROM = process.env.EMAIL_FROM ?? "PPC <noreply@pleros.org>";
@@ -58,5 +59,30 @@ export async function sendGraduationCongratulations(opts: {
     to: opts.to,
     subject: `Congratulations on graduating ${opts.levelTitle}!`,
     html: graduationCongratulationsHtml(opts),
+  });
+}
+
+export async function sendStaffAssignmentNotification(opts: {
+  to: string;
+  staffName: string;
+  subject: string;
+  itemLabel: string;
+  detail: string;
+  url: string;
+  ctaLabel: string;
+}) {
+  if (!isEmailEnabled() || !resend) return null;
+
+  return resend.emails.send({
+    from: FROM,
+    to: opts.to,
+    subject: opts.subject,
+    html: staffAssignmentHtml({
+      staffName: opts.staffName,
+      itemLabel: opts.itemLabel,
+      detail: opts.detail,
+      url: opts.url,
+      ctaLabel: opts.ctaLabel,
+    }),
   });
 }

@@ -9,6 +9,12 @@ export async function getSubmission(userId: string, lessonId: number) {
   }) ?? null;
 }
 
+export async function getSubmissionById(submissionId: number) {
+  return db.query.writtenSubmissions.findFirst({
+    where: (submission, { eq }) => eq(submission.id, submissionId),
+  }) ?? null;
+}
+
 export async function upsertDraft(userId: string, lessonId: number, content: string) {
   const existing = await getSubmission(userId, lessonId);
 
@@ -40,10 +46,28 @@ export async function submitForReview(userId: string, lessonId: number) {
   return updated;
 }
 
+export async function setSubmissionAssignment(
+  submissionId: number,
+  assignedToId: string | null,
+) {
+  const [updated] = await db
+    .update(schema.writtenSubmissions)
+    .set({
+      assignedTo: assignedToId,
+      assignedAt: assignedToId ? new Date() : null,
+    })
+    .where(eq(schema.writtenSubmissions.id, submissionId))
+    .returning();
+
+  return updated ?? null;
+}
+
 export async function approveSubmission(submissionId: number, reviewerId: string) {
   const [updated] = await db
     .update(schema.writtenSubmissions)
     .set({
+      assignedTo: reviewerId,
+      assignedAt: new Date(),
       status: "approved",
       reviewedBy: reviewerId,
       reviewedAt: new Date(),
@@ -72,6 +96,8 @@ export async function requestRevision(submissionId: number, reviewerId: string, 
   const [updated] = await db
     .update(schema.writtenSubmissions)
     .set({
+      assignedTo: reviewerId,
+      assignedAt: new Date(),
       status: "needs_revision",
       reviewedBy: reviewerId,
       reviewerNote: note,
@@ -98,6 +124,7 @@ export async function getReviewQueue() {
       content: schema.writtenSubmissions.content,
       status: schema.writtenSubmissions.status,
       reviewerNote: schema.writtenSubmissions.reviewerNote,
+      assignedToId: schema.writtenSubmissions.assignedTo,
       submittedAt: schema.writtenSubmissions.submittedAt,
       reviewedAt: schema.writtenSubmissions.reviewedAt,
       studentName: schema.users.name,

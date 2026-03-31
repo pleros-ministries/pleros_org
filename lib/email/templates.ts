@@ -101,3 +101,38 @@ export function graduationCongratulationsHtml({
 </body>
 </html>`.trim();
 }
+
+type StaffAssignmentProps = {
+  staffName: string;
+  itemLabel: string;
+  detail: string;
+  url: string;
+  ctaLabel: string;
+};
+
+export function staffAssignmentHtml({
+  staffName,
+  itemLabel,
+  detail,
+  url,
+  ctaLabel,
+}: StaffAssignmentProps): string {
+  return `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8" /></head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #142033; max-width: 520px; margin: 0 auto; padding: 32px 16px;">
+  <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #58657a;">Pleros Perfecting Courses</p>
+  <h1 style="font-size: 20px; margin: 12px 0 0;">New assignment for ${staffName}</h1>
+  <p style="font-size: 14px; color: #58657a; line-height: 1.6;">
+    ${itemLabel}
+  </p>
+  <div style="margin: 16px 0; padding: 12px; background: #fafafa; border: 1px solid #e4e4e7; border-radius: 4px; font-size: 13px; color: #3f3f46;">
+    ${detail}
+  </div>
+  <a href="${url}" style="display: inline-block; margin-top: 12px; padding: 10px 20px; background: #18181b; color: #fff; border-radius: 4px; font-size: 13px; font-weight: 600; text-decoration: none;">
+    ${ctaLabel}
+  </a>
+</body>
+</html>`.trim();
+}

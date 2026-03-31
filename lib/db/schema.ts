@@ -188,6 +188,8 @@ export const writtenSubmissions = pgTable(
     content: text("content").notNull().default(""),
     status: submissionStatusEnum("status").notNull().default("draft"),
     reviewerNote: text("reviewer_note"),
+    assignedTo: text("assigned_to").references(() => users.id),
+    assignedAt: timestamp("assigned_at", { withTimezone: true }),
     reviewedBy: text("reviewed_by").references(() => users.id),
     submittedAt: timestamp("submitted_at", { withTimezone: true }),
     reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
@@ -198,6 +200,7 @@ export const writtenSubmissions = pgTable(
   (t) => [
     index("written_submissions_user_lesson_idx").on(t.userId, t.lessonId),
     index("written_submissions_status_idx").on(t.status),
+    index("written_submissions_assigned_to_idx").on(t.assignedTo),
   ],
 );
 
@@ -237,6 +240,8 @@ export const qaThreads = pgTable(
       .notNull()
       .references(() => lessons.id, { onDelete: "cascade" }),
     subject: text("subject").notNull(),
+    assignedTo: text("assigned_to").references(() => users.id),
+    assignedAt: timestamp("assigned_at", { withTimezone: true }),
     status: qaStatusEnum("status").notNull().default("open"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
@@ -246,6 +251,7 @@ export const qaThreads = pgTable(
     index("qa_threads_user_idx").on(t.userId),
     index("qa_threads_lesson_idx").on(t.lessonId),
     index("qa_threads_status_idx").on(t.status),
+    index("qa_threads_assigned_to_idx").on(t.assignedTo),
   ],
 );
 

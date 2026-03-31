@@ -1,6 +1,6 @@
 # PPC Platform Handover - 2026-03-14
 
-Updated 2026-03-16 to match the current repo state.
+Updated 2026-03-26 to match the current repo state.
 
 ## Product overview
 
@@ -18,8 +18,8 @@ Students must complete all lessons in a level and receive staff graduation appro
 | Role | Access | Default path |
 |------|--------|--------------|
 | **Student** | Own learning dashboard, lesson pages, quiz, written response, Q&A | `/ppc/student` |
-| **Instructor** | Dashboard, student list, review queue, Q&A inbox, notifications | `/ppc` |
-| **Admin** | Everything instructor has plus admin controls and content CMS | `/ppc` |
+| **Instructor** | Staff dashboard, student list, review queue, Q&A inbox, notifications | `/admin` |
+| **Admin** | Everything instructor has plus platform controls and content CMS | `/admin` |
 
 ### Seeded PPC users
 
@@ -36,8 +36,9 @@ The original 2026-03-14 handover was written before later auth hardening landed.
 Current repo truth:
 - Demo auth has been removed.
 - PPC now uses Better Auth only.
+- `/ppc` is the student entrypoint and `/admin` is the staff entrypoint.
 - Role assignment is derived from env-list email mapping.
-- Action-level role guards are implemented across PPC server actions.
+- Action-level role guards and session-derived actor ownership are implemented across the main PPC mutation flows.
 
 This matches the later agent conversation more closely than the original handover did.
 
@@ -67,9 +68,11 @@ This matches the later agent conversation more closely than the original handove
 
 - **Branch**: `main`
 - **Lockfile**: `package-lock.json` is canonical; do not recreate `pnpm-lock.yaml`
-- **Build**: `npm run build` passes; current build output shows 25 app routes total, including `/style-demo`
-- **Lint**: `npm run lint` returns 0 errors and 17 warnings, mostly unused variables in PPC/API files
-- **Tests**: `npm test` passes with 7 files / 30 tests
+- **Build**: `npm run build` passes; current build output shows 44 app routes, including `/admin/*`, `/ppc/*`, and `/style-demo`
+- **Lint**: `npm run lint` returns 0 errors and 11 warnings, mostly unused variables in PPC/API files
+- **Tests**:
+  - focused PPC suites are green
+  - `npm test` currently has 36 files / 163 tests with 1 failing non-PPC public-site expectation in `lib/public-site-pages.test.ts`
 - **Deploy**: Vercel at `https://pleros-org.vercel.app`
 
 ---
@@ -79,35 +82,37 @@ This matches the later agent conversation more closely than the original handove
 ### Route protection chain
 
 ```text
-app/ppc/layout.tsx
-  -> Inter font + PPC metadata
-
-app/ppc/(app)/layout.tsx
-  -> getAppSession()
-  -> redirect to /ppc/sign-in if null
-  -> wraps authenticated pages with PpcShell
-
-app/ppc/(app)/(staff)/layout.tsx
-  -> canAccessArea(role, "staff")
-  -> blocks students
-
 app/ppc/(app)/(student)/layout.tsx
+  -> getAppSession()
+  -> redirect to /ppc if null
   -> canAccessArea(role, "student")
   -> blocks staff
 
-app/ppc/(app)/(staff)/(admin-only)/layout.tsx
+app/admin/(app)/layout.tsx
+  -> getAppSession()
+  -> redirect to /admin if null
+  -> blocks students
+  -> wraps authenticated staff pages with PpcAppFrame
+
+app/admin/(app)/(admin-only)/layout.tsx
   -> canAccessArea(role, "admin")
-  -> blocks instructors with /ppc/forbidden
+  -> blocks instructors with /admin/forbidden
 ```
 
-Every page inside `app/ppc/(app)` is session-gated. Public PPC pages are `/ppc/sign-in`, `/ppc/sign-up`, and `/ppc/forbidden`.
+Primary public auth entrypoints are:
+- `/ppc` for students
+- `/admin` for instructors/admins
+- `/ppc/sign-up` for student account creation
+
+Legacy PPC staff routes still exist under `app/ppc/(app)/(staff)`, but they now redirect into the `/admin/*` namespace.
 
 ### Auth model
 
 PPC is now **Better Auth only**.
 
-- Everyone signs in through `/ppc/sign-in`
-- New accounts are created through `/ppc/sign-up`
+- Students enter through `/ppc`
+- Staff enter through `/admin`
+- New self-serve account creation happens through `/ppc/sign-up`
 - Email/password is always enabled
 - Google sign-in is available when Google env vars are configured
 - `app/api/auth/[...all]/route.ts` is the live Better Auth handler
@@ -116,10 +121,18 @@ Runtime session resolution happens in `lib/app-session.ts`:
 
 1. Read the Better Auth session from request headers
 2. Resolve the runtime role from `PPC_ADMIN_EMAILS` and `PPC_INSTRUCTOR_EMAILS`
-3. Ensure a matching PPC `users` row exists via `ensurePpcUser()`
+3. Ensure a matching PPC `users` row exists via `ensureAppUserRecord()`
 4. Return `{ id, name, email, role }` to the app shell and layouts
 
 Important nuance: the runtime role comes from env-list email mapping, not from the seeded role stored in the PPC `users` table.
+
+### Auth UX model
+
+- Student auth components live in `app/ppc/sign-in/sign-in-form.tsx` and `app/ppc/sign-up/sign-up-form.tsx`
+- Staff auth UI lives in `components/ppc/staff-login-panel.tsx`
+- Auth-entry helpers in `lib/auth-entry.ts` now normalize error copy, resolve post-auth redirects, and preview whether an email is configured for student or staff access
+- If a staff-listed email is used in the student portal, the UI warns that the account will land in `/admin`
+- If a non-staff email is used in the staff portal, the UI warns that the account will land in `/ppc`
 
 ### Authorization layers
 
@@ -136,9 +149,15 @@ PPC now enforces scoping in 3 places:
    - `lib/auth/require-role.ts` exposes `requireAuth()`, `requireStaff()`, `requireAdmin()`, and `requireStudent()`
    - PPC action files call these guards before mutating data
 
-#### Current caveat
+#### Ownership hardening status
 
-The earlier "no action guards" gap is closed, but there is still a narrower ownership caveat: several authenticated actions still accept caller-supplied `userId` or `authorId` parameters instead of deriving identity from session. That means caller role is checked, but resource ownership is not fully proven in every action yet. This is most relevant in student-authenticated actions such as lesson progress, quiz submission, and some Q&A or submission flows.
+The earlier "actions trust layout access only" gap is closed, and the most important ownership work has now landed:
+
+- student-authenticated actions derive the acting user from session via `lib/auth/action-actor.ts`
+- staff review and graduation actions derive reviewer identity from session
+- Q&A thread reads/replies are fenced by `lib/auth/qa-access.ts`
+
+This removes the prior high-priority trust gap around student self-service mutations.
 
 ### Sidebar navigation
 
@@ -146,22 +165,27 @@ The earlier "no action guards" gap is closed, but there is still a narrower owne
 
 | Item | Path | Roles |
 |------|------|-------|
-| Dashboard | `/` | admin, instructor |
-| Admin | `/admin` | admin |
+| Dashboard | `/admin` | admin, instructor |
+| Platform | `/admin/platform` | admin |
 | Content | `/admin/content` | admin |
-| Students | `/students` | admin, instructor |
-| Review Queue | `/review` | admin, instructor |
-| Q&A Inbox | `/qa` | admin, instructor |
-| Notifications | `/notifications` | admin, instructor |
-| My Learning | `/student` | student |
+| Students | `/admin/students` | admin, instructor |
+| Review Queue | `/admin/review` | admin, instructor |
+| Q&A Inbox | `/admin/qa` | admin, instructor |
+| Notifications | `/admin/notifications` | admin, instructor |
+| My Learning | `/ppc/student` | student |
 
 Sidebar collapse state is stored in localStorage under `ppc.sidebar.collapsed`. Mobile navigation uses the shared `Sheet` primitive.
+
+Student navigation is now data-driven:
+- the student sidebar includes level links beneath `My learning`
+- locked levels stay visible with padlock styling
+- current/completed/locked state is derived from live level and graduation data
 
 ### Student learning flow
 
 ```text
 1. /ppc/student
-   -> student dashboard with levels, graduations, progress, and continue CTA
+   -> student dashboard with progress summary and continue CTA
 
 2. /ppc/student/level/[levelId]
    -> level detail page with lesson timeline and completion state
@@ -175,8 +199,8 @@ Sidebar collapse state is stored in localStorage under `ppc.sidebar.collapsed`. 
 5. /ppc/student/level/[levelId]/lesson/[lessonId]/response
    -> WrittenResponseEditor autosaves and submits written work
 
-6. /ppc/review
-   -> staff review queue approves or requests revision
+6. /admin/review
+   -> staff review queue with search, level filters, and inline approval / revision
 
 7. Graduation
    -> markGraduation() checks readiness, records graduation, and sends email
@@ -185,20 +209,20 @@ Sidebar collapse state is stored in localStorage under `ppc.sidebar.collapsed`. 
 ### Staff flow
 
 ```text
-1. /ppc
-   -> dashboard stats, review preview, and open Q&A
+1. /admin
+   -> dashboard stats, quick actions, content watchlist, and platform snapshot
 
-2. /ppc/review
-   -> review queue with inline approval / revision workflow
+2. /admin/review
+   -> review queue with inline approval / revision workflow, search, and level filters
 
-3. /ppc/qa
-   -> Q&A inbox with thread list and detail pane
+3. /admin/qa
+   -> Q&A inbox with thread list/detail pane, search, level filters, closed bucket, and reopen flow
 
-4. /ppc/students/[studentId]
+4. /admin/students/[studentId]
    -> student detail, level tabs, submissions, Q&A, admin actions
 
-5. /ppc/admin/content
-   -> lesson editor and quiz question CRUD
+5. /admin/content
+   -> level/lesson authoring, managed audio upload, quiz authoring, publish gating, and lifecycle controls
 ```
 
 ---
@@ -209,8 +233,22 @@ Sidebar collapse state is stored in localStorage under `ppc.sidebar.collapsed`. 
 app/
 ├── (site)/
 │   ├── layout.tsx
-│   ├── page.tsx                    # redirects to /ppc/sign-in
+│   ├── page.tsx                    # public website homepage
 │   └── (shell)/style-demo/page.tsx # temporary site design reference
+├── admin/
+│   ├── page.tsx                    # staff entrypoint / login shell or dashboard
+│   ├── forbidden/page.tsx
+│   └── (app)/
+│       ├── layout.tsx
+│       ├── review/page.tsx
+│       ├── qa/page.tsx
+│       ├── notifications/page.tsx
+│       ├── students/page.tsx
+│       ├── students/[studentId]/page.tsx
+│       └── (admin-only)/
+│           ├── layout.tsx
+│           ├── content/page.tsx
+│           └── platform/page.tsx
 ├── api/
 │   ├── auth/[...all]/route.ts      # Better Auth Next.js handler
 │   ├── ppc/
@@ -219,15 +257,17 @@ app/
 │   │   └── certificate/[levelId]/route.ts
 │   └── uploadthing/route.ts
 └── ppc/
+    ├── page.tsx                    # student entrypoint / login shell
     ├── layout.tsx
     ├── sign-in/
-    │   ├── page.tsx                # Better Auth sign-in page
-    │   └── sign-in-form.tsx        # email/password + optional Google
+    │   ├── page.tsx                # legacy direct sign-in page
+    │   └── sign-in-form.tsx
     ├── sign-up/
-    │   ├── page.tsx                # account creation page
+    │   ├── page.tsx                # student account creation
     │   └── sign-up-form.tsx
     ├── forbidden/page.tsx
     ├── _actions/
+    │   ├── auth-entry-actions.ts
     │   ├── content-actions.ts
     │   ├── graduation-actions.ts
     │   ├── lesson-actions.ts
@@ -236,35 +276,29 @@ app/
     │   ├── student-actions.ts
     │   └── submission-actions.ts
     └── (app)/
-        ├── layout.tsx
-        ├── (staff)/
-        │   ├── layout.tsx
-        │   ├── page.tsx
-        │   ├── students/page.tsx
-        │   ├── students/[studentId]/page.tsx
-        │   ├── review/page.tsx
-        │   ├── qa/page.tsx
-        │   ├── notifications/page.tsx
-        │   └── (admin-only)/admin/
-        │       ├── page.tsx
-        │       └── content/page.tsx
+        ├── (staff)/                # legacy redirects into /admin/*
         └── (student)/
             ├── layout.tsx
             └── student/
                 ├── page.tsx
-                └── level/[levelId]/lesson/[lessonId]/
+                └── level/[levelId]/
                     ├── page.tsx
-                    ├── quiz/page.tsx
-                    ├── response/page.tsx
-                    └── qa/page.tsx
+                    └── lesson/[lessonId]/
+                        ├── page.tsx
+                        ├── quiz/page.tsx
+                        ├── response/page.tsx
+                        └── qa/page.tsx
 
 lib/
 ├── app-access.ts
 ├── app-role.ts
 ├── app-session.ts
+├── auth-entry.ts
 ├── auth/
+│   ├── action-actor.ts
 │   ├── auth-client.ts
 │   ├── better-auth.ts
+│   ├── qa-access.ts
 │   └── require-role.ts
 ├── db/
 │   ├── auth-schema.ts
@@ -279,6 +313,7 @@ lib/
 ├── ppc-access.ts
 ├── ppc-navigation.ts
 ├── ppc-routing.ts
+├── ppc-staff-workflows.ts
 ├── ppc-shell-state.ts
 └── utils.ts
 ```
@@ -306,23 +341,42 @@ PPC currently uses 12 core domain tables:
 
 Better Auth uses separate auth tables through `lib/db/auth-schema.ts`.
 
+### Current authoring state
+
+The admin CMS at `/admin/content` is significantly more capable than the original handover described.
+
+Implemented now:
+- level editing for title, description, and sort order
+- level creation plus guarded deletion for empty levels
+- lesson creation and lesson-number renumbering inside a level
+- managed lesson audio upload via UploadThing with stored metadata and cleanup
+- quiz question CRUD plus question reordering
+- hard publish gating enforced in both UI and server actions
+- lesson lifecycle controls including guarded delete flow for draft lessons
+
+Still not implemented:
+- moving lessons between levels
+- archive-style lifecycle beyond hard delete / draft / published
+- richer media library management beyond lesson audio
+
 ---
 
 ## Server actions
 
-There are 7 PPC action modules under `app/ppc/_actions/`.
+There are 8 PPC action modules under `app/ppc/_actions/`.
 
 | File | Key actions | Guard |
 |------|-------------|-------|
+| `auth-entry-actions.ts` | `previewPortalAccess` | none; read-only helper for auth UX |
 | `lesson-actions.ts` | `markAudioListened`, `markNotesRead` | `requireAuth()` |
 | `quiz-actions.ts` | `submitQuiz` | `requireAuth()` |
 | `submission-actions.ts` | `saveDraft`, `submitWrittenResponse`, `approveWrittenSubmission`, `requestSubmissionRevision` | `requireAuth()` / `requireStaff()` |
 | `graduation-actions.ts` | `markGraduation`, `overrideGraduation` | `requireStaff()` |
-| `qa-actions.ts` | `createQaThread`, `replyToThread`, `closeQaThread`, `fetchThreadMessages` | `requireAuth()` / `requireStaff()` |
-| `content-actions.ts` | lesson CRUD, publish/unpublish, quiz question CRUD | `requireAdmin()` |
+| `qa-actions.ts` | `createQaThread`, `replyToThread`, `closeQaThread`, `reopenQaThread`, `fetchThreadMessages` | `requireAuth()` / `requireStaff()` |
+| `content-actions.ts` | level CRUD-lite, lesson CRUD, publish/unpublish, quiz question CRUD/reorder | `requireAdmin()` |
 | `student-actions.ts` | `overrideStudentLevel`, `resetStudentProgress`, `assignReviewer`, `removeReviewerAssignment`, `getReviewerAssignments` | `requireAdmin()` |
 
-All mutating actions revalidate `"/ppc"` at layout scope with `revalidatePath("/ppc", "layout")`.
+Most mutating actions now revalidate both `"/ppc"` and `"/admin"` at layout scope so student and staff surfaces stay in sync after changes.
 
 ---
 
@@ -377,6 +431,13 @@ PPC intentionally uses a compact operational UI, distinct from the marketing sit
 
 Do **not** import the public site visual language into PPC unless the platform is being intentionally restyled. The current PPC style is closer to an admin/product console than a branded landing page.
 
+Recent shell changes now in repo:
+- desktop shell uses a more modern floating-rail pattern
+- desktop collapse control lives inside the sidebar, not beside the page title
+- sidebar footer carries account actions
+- staff and student route context is shown in a lighter top bar
+- student sidebar includes level links with locked/current/completed state
+
 ### Tailwind v4 gotcha
 
 Custom CSS in `app/globals.css` should stay inside `@layer base` or `@layer components`; otherwise it can unexpectedly outrank Tailwind utilities under the CSS Layers model.
@@ -404,3 +465,34 @@ DATABASE_URL_UNPOOLED=... npx tsx lib/db/seed.ts
 ```
 
 Better Auth manages its own auth tables through the configured Drizzle adapter and auth schema.
+
+---
+
+## Current queue
+
+### Strong next candidates
+
+1. **Notifications v1**
+   - make `/admin/notifications` a real settings/status surface
+   - show actual push state, browser subscription state, and reminder policy clearly
+
+2. **Student journey cleanup**
+   - reduce duplication now that student levels live in the sidebar
+   - tighten dashboard vs lesson-path responsibilities
+
+3. **Admin dashboard depth**
+   - surface stale content, publish blockers, review pressure, and Q&A pressure more directly
+
+4. **Repo hygiene**
+   - clear the remaining lint warnings
+   - fix the current non-PPC failing public-site test
+
+### Recently completed
+
+- route split between `/ppc` and `/admin`
+- shell/sidebar modernization
+- ownership hardening for main student/staff mutations
+- admin dashboard first pass
+- CMS authoring expansion
+- review queue and Q&A workflow polish
+- auth UX polish for the split entry model

@@ -14,6 +14,16 @@ import { PageHeader } from "@/components/ppc/page-header";
 import { StaffLoginPanel } from "@/components/ppc/staff-login-panel";
 import { StatCard } from "@/components/ppc/stat-card";
 import {
+  QaInboxPreview,
+  ReviewQueuePreview,
+} from "@/components/ppc/admin-dashboard-previews";
+import {
+  getAssignmentOwnershipSummary,
+  getContentWatchlistSummary,
+  prioritizeOwnershipRows,
+  getQueuePressureSummary,
+} from "@/lib/admin-dashboard";
+import {
   Activity,
   ArrowRight,
   Clock3,
@@ -65,11 +75,27 @@ export default async function AdminEntryPage() {
     .select({ count: count() })
     .from(schema.lessons)
     .where(eq(schema.lessons.status, "published"));
-  const draftLessons = contentOverview.reduce(
-    (total, level) => total + level.draftCount,
-    0,
+  const contentWatchlist = getContentWatchlistSummary(contentOverview);
+  const reviewPressure = getQueuePressureSummary(reviewQueue, "submittedAt");
+  const qaPressure = getQueuePressureSummary(openThreads, "createdAt");
+  const reviewOwnership = getAssignmentOwnershipSummary(
+    reviewQueue,
+    session.user.id,
+    "submittedAt",
   );
-  const levelsWithDrafts = contentOverview.filter((level) => level.draftCount > 0);
+  const qaOwnership = getAssignmentOwnershipSummary(
+    openThreads,
+    session.user.id,
+    "createdAt",
+  );
+  const prioritizedReviewQueue = prioritizeOwnershipRows(
+    reviewQueue,
+    session.user.id,
+  );
+  const prioritizedOpenThreads = prioritizeOwnershipRows(
+    openThreads,
+    session.user.id,
+  );
 
   return (
     <PpcAppFrame session={session}>
@@ -96,13 +122,13 @@ export default async function AdminEntryPage() {
             label="Pending reviews"
             value={stats.pendingReviews}
             icon={Clock3}
-            hint="Awaiting grading"
+            hint={`${reviewOwnership.mine} yours · ${reviewOwnership.unassigned} unassigned`}
           />
           <StatCard
             label="Open Q&A"
             value={stats.openQa}
             icon={MessageCircle}
-            hint="Student threads"
+            hint={`${qaOwnership.mine} yours · ${qaOwnership.unassigned} unassigned`}
           />
         </section>
 
@@ -132,7 +158,9 @@ export default async function AdminEntryPage() {
                   Review queue
                 </p>
                 <p className="mt-1 text-[11px] text-zinc-500">
-                  {reviewQueue.length} submissions across the queue
+                  {reviewOwnership.mine > 0
+                    ? `${reviewOwnership.mine} assigned to you · ${reviewOwnership.unassigned} waiting for pickup`
+                    : `${reviewOwnership.unassigned} waiting for pickup · ${reviewPressure.hint.toLowerCase()}`}
                 </p>
               </Link>
 
@@ -148,7 +176,9 @@ export default async function AdminEntryPage() {
                   Q&amp;A inbox
                 </p>
                 <p className="mt-1 text-[11px] text-zinc-500">
-                  {openThreads.length} open student threads
+                  {qaOwnership.mine > 0
+                    ? `${qaOwnership.mine} assigned to you · ${qaOwnership.unassigned} waiting for pickup`
+                    : `${qaOwnership.unassigned} waiting for pickup · ${qaPressure.hint.toLowerCase()}`}
                 </p>
               </Link>
 
@@ -191,7 +221,7 @@ export default async function AdminEntryPage() {
                 </p>
                 <p className="mt-1 text-[11px] text-zinc-500">
                   {session.user.role === "admin"
-                    ? `${draftLessons} draft lessons waiting for review`
+                    ? `${contentWatchlist.draftLessons} draft lessons waiting for review`
                     : "Monitor reminder policy and delivery channels"}
                 </p>
               </Link>
@@ -240,23 +270,37 @@ export default async function AdminEntryPage() {
                   Draft lessons
                 </p>
                 <p className="mt-1 text-lg font-semibold text-zinc-950">
-                  {draftLessons}
+                  {contentWatchlist.draftLessons}
+                </p>
+              </div>
+              <div className="rounded-sm border border-zinc-100 bg-zinc-50 px-3 py-3">
+                <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-400">
+                  Levels at risk
+                </p>
+                <p className="mt-1 text-lg font-semibold text-zinc-950">
+                  {contentWatchlist.emptyPublishedLevels}
                 </p>
               </div>
               <div className="rounded-sm border border-zinc-100 bg-zinc-50 px-3 py-3 sm:col-span-2">
                 <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-400">
                   Content watchlist
                 </p>
-                {levelsWithDrafts.length ? (
-                  <div className="mt-2 flex flex-wrap gap-1.5">
-                    {levelsWithDrafts.map((level) => (
-                      <span
-                        key={level.id}
-                        className="rounded-sm border border-zinc-200 bg-white px-2 py-1 text-[10px] text-zinc-600"
+                {contentWatchlist.watchItems.length ? (
+                  <div className="mt-2 grid gap-1.5">
+                    {contentWatchlist.watchItems.map((item) => (
+                      <div
+                        key={item.id}
+                        className={`rounded-sm border px-2.5 py-2 text-[11px] ${
+                          item.tone === "warning"
+                            ? "border-amber-200 bg-amber-50 text-amber-800"
+                            : "border-zinc-200 bg-white text-zinc-600"
+                        }`}
                       >
-                        {level.title}: {level.draftCount} draft
-                        {level.draftCount === 1 ? "" : "s"}
-                      </span>
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="font-medium">{item.title}</span>
+                          <span>{item.detail}</span>
+                        </div>
+                      </div>
                     ))}
                   </div>
                 ) : (
@@ -264,6 +308,73 @@ export default async function AdminEntryPage() {
                     No draft lessons waiting on admin action.
                   </p>
                 )}
+              </div>
+            </div>
+          </article>
+
+          <article className="rounded-sm border border-zinc-200 bg-white p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-semibold text-zinc-900">
+                  Assignment snapshot
+                </h3>
+                <p className="text-[11px] text-zinc-500">
+                  What is yours now and what still needs pickup
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-3 grid gap-2">
+              <div className="rounded-sm border border-zinc-100 bg-zinc-50 px-3 py-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-400">
+                      Review queue
+                    </p>
+                    <p className="mt-1 text-lg font-semibold text-zinc-950">
+                      {reviewOwnership.mine} mine
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-400">
+                      Unassigned
+                    </p>
+                    <p className="mt-1 text-lg font-semibold text-zinc-950">
+                      {reviewOwnership.unassigned}
+                    </p>
+                  </div>
+                </div>
+                <p className="mt-2 text-[11px] text-zinc-500">
+                  {reviewOwnership.mine > 0
+                    ? reviewOwnership.mineHint
+                    : reviewOwnership.unassignedHint}
+                </p>
+              </div>
+
+              <div className="rounded-sm border border-zinc-100 bg-zinc-50 px-3 py-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-400">
+                      Q&amp;A inbox
+                    </p>
+                    <p className="mt-1 text-lg font-semibold text-zinc-950">
+                      {qaOwnership.mine} mine
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-400">
+                      Unassigned
+                    </p>
+                    <p className="mt-1 text-lg font-semibold text-zinc-950">
+                      {qaOwnership.unassigned}
+                    </p>
+                  </div>
+                </div>
+                <p className="mt-2 text-[11px] text-zinc-500">
+                  {qaOwnership.mine > 0
+                    ? qaOwnership.mineHint
+                    : qaOwnership.unassignedHint}
+                </p>
               </div>
             </div>
           </article>
@@ -280,30 +391,14 @@ export default async function AdminEntryPage() {
                 View all
               </Link>
             </div>
+            <p className="mt-1 text-[11px] text-zinc-500">
+              Prioritized to show your assigned work first, then unassigned items.
+            </p>
             <div className="mt-3 grid gap-2">
-              {reviewQueue.slice(0, 5).map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-center justify-between rounded-sm border border-zinc-100 px-3 py-2"
-                >
-                  <div>
-                    <p className="text-xs font-medium text-zinc-900">
-                      {item.studentName}
-                    </p>
-                    <p className="text-[11px] text-zinc-500">
-                      L{item.levelId}.{item.lessonNumber} - {item.lessonTitle}
-                    </p>
-                  </div>
-                  <span className="text-[10px] capitalize text-zinc-400">
-                    {item.status.replace(/_/g, " ")}
-                  </span>
-                </div>
-              ))}
-              {reviewQueue.length === 0 ? (
-                <p className="text-xs text-zinc-400">
-                  No submissions to review
-                </p>
-              ) : null}
+              <ReviewQueuePreview
+                rows={prioritizedReviewQueue.slice(0, 5)}
+                currentStaffId={session.user.id}
+              />
             </div>
           </article>
 
@@ -319,25 +414,14 @@ export default async function AdminEntryPage() {
                 View all
               </Link>
             </div>
-            <div className="mt-3 grid gap-2 md:grid-cols-2">
-              {openThreads.slice(0, 6).map((thread) => (
-                <div
-                  key={thread.id}
-                  className="rounded-sm border border-zinc-100 px-3 py-2"
-                >
-                  <p className="text-xs font-medium text-zinc-900">
-                    {thread.subject}
-                  </p>
-                  <p className="text-[11px] text-zinc-500">
-                    {thread.studentName} - L{thread.levelId}.{thread.lessonNumber}
-                  </p>
-                </div>
-              ))}
-              {openThreads.length === 0 ? (
-                <p className="text-xs text-zinc-400">
-                  No open threads
-                </p>
-              ) : null}
+            <p className="mt-1 text-[11px] text-zinc-500">
+              Prioritized to show your assigned threads first, then unassigned threads.
+            </p>
+            <div className="mt-3">
+              <QaInboxPreview
+                rows={prioritizedOpenThreads.slice(0, 6)}
+                currentStaffId={session.user.id}
+              />
             </div>
           </article>
         </section>

@@ -1,9 +1,11 @@
 type ReviewStatus = "all" | "pending_review" | "approved" | "needs_revision";
 type QaStatus = "all" | "open" | "answered" | "closed";
+export type AssignmentScope = "all" | "mine" | "unassigned";
 
 type ReviewSubmission = {
   id: number;
   status: string;
+  assignedToId: string | null;
   studentName: string;
   studentEmail: string;
   lessonTitle: string;
@@ -15,6 +17,7 @@ type ReviewSubmission = {
 type QaThread = {
   id: number;
   status: string;
+  assignedToId: string | null;
   subject: string;
   studentName: string;
   studentEmail: string;
@@ -33,6 +36,22 @@ function matchesLevel(levelId: number, filterValue: string) {
   }
 
   return levelId === Number.parseInt(filterValue, 10);
+}
+
+function matchesAssignment(
+  assignedToId: string | null,
+  assignmentScope: AssignmentScope,
+  currentStaffId: string,
+) {
+  if (assignmentScope === "all") {
+    return true;
+  }
+
+  if (assignmentScope === "mine") {
+    return assignedToId === currentStaffId;
+  }
+
+  return assignedToId == null;
 }
 
 export function getReviewQueueCounts(submissions: Pick<ReviewSubmission, "status">[]) {
@@ -56,6 +75,8 @@ export function filterReviewQueue<T extends ReviewSubmission>(
   submissions: T[],
   filters: {
     activeTab: ReviewStatus;
+    assignmentScope: AssignmentScope;
+    currentStaffId: string;
     levelId: string;
     query: string;
   },
@@ -71,6 +92,16 @@ export function filterReviewQueue<T extends ReviewSubmission>(
     }
 
     if (!matchesLevel(submission.levelId, filters.levelId)) {
+      return false;
+    }
+
+    if (
+      !matchesAssignment(
+        submission.assignedToId,
+        filters.assignmentScope,
+        filters.currentStaffId,
+      )
+    ) {
       return false;
     }
 
@@ -113,6 +144,8 @@ export function filterQaInbox<T extends QaThread>(
   threads: T[],
   filters: {
     activeTab: QaStatus;
+    assignmentScope: AssignmentScope;
+    currentStaffId: string;
     levelId: string;
     query: string;
   },
@@ -125,6 +158,16 @@ export function filterQaInbox<T extends QaThread>(
     }
 
     if (!matchesLevel(thread.levelId, filters.levelId)) {
+      return false;
+    }
+
+    if (
+      !matchesAssignment(
+        thread.assignedToId,
+        filters.assignmentScope,
+        filters.currentStaffId,
+      )
+    ) {
       return false;
     }
 
@@ -155,4 +198,17 @@ export function resolveNextSelectedThreadId<T extends Pick<QaThread, "id">>(
   }
 
   return threads[0]?.id ?? null;
+}
+
+export function resolveNextSelectedSubmissionId<
+  T extends Pick<ReviewSubmission, "id">,
+>(submissions: T[], selectedId: number | null) {
+  if (
+    selectedId != null &&
+    submissions.some((submission) => submission.id === selectedId)
+  ) {
+    return selectedId;
+  }
+
+  return submissions[0]?.id ?? null;
 }

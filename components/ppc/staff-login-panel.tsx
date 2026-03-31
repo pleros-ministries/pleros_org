@@ -2,8 +2,15 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
+import { previewPortalAccess } from "@/app/ppc/_actions/auth-entry-actions";
 import { authClient } from "@/lib/auth/auth-client";
+import {
+  formatAuthErrorMessage,
+  getPortalAccessNotice,
+  getPostAuthRedirectPath,
+} from "@/lib/auth-entry";
 import { cn } from "@/lib/utils";
 
 type StaffRoleTab = "admin" | "instructor";
@@ -28,36 +35,69 @@ export function StaffLoginPanel() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [portalNotice, setPortalNotice] = useState<{
+    tone: "default" | "info" | "warning";
+    message: string;
+  } | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const googleEnabled =
     typeof process.env.NEXT_PUBLIC_GOOGLE_AUTH_ENABLED !== "undefined";
+
+  const handleEmailBlur = () => {
+    if (!email.trim()) {
+      setPortalNotice(null);
+      return;
+    }
+
+    startTransition(async () => {
+      const access = await previewPortalAccess(email);
+      if (!access) {
+        setPortalNotice(null);
+        return;
+      }
+
+      setPortalNotice(
+        getPortalAccessNotice("staff", access.role) as
+          | { tone: "default" | "info" | "warning"; message: string }
+          | null,
+      );
+    });
+  };
 
   const handleEmailSignIn = (event: React.FormEvent) => {
     event.preventDefault();
     setError(null);
 
     startTransition(async () => {
+      const access = await previewPortalAccess(email);
       const result = await authClient.signIn.email({
         email,
         password,
       });
 
       if (result.error) {
-        setError(result.error.message ?? "Login failed");
+        setError(formatAuthErrorMessage(result.error.message, "sign_in"));
         return;
       }
 
-      router.push("/admin");
+      router.push(
+        getPostAuthRedirectPath({
+          resolvedRole: access?.role ?? "admin",
+        }),
+      );
       router.refresh();
     });
   };
 
   const handleGoogleSignIn = () => {
     startTransition(async () => {
+      const access = await previewPortalAccess(email);
       await authClient.signIn.social({
         provider: "google",
-        callbackURL: "/admin",
+        callbackURL: getPostAuthRedirectPath({
+          resolvedRole: access?.role ?? "admin",
+        }),
       });
     });
   };
@@ -109,10 +149,28 @@ export function StaffLoginPanel() {
             required
             value={email}
             onChange={(event) => setEmail(event.target.value)}
+            onBlur={handleEmailBlur}
             placeholder="you@example.com"
             className="h-8 rounded-sm border border-zinc-300 px-2.5 text-xs outline-none focus:border-zinc-700"
           />
         </label>
+
+        {portalNotice ? (
+          <div
+            className={
+              portalNotice.tone === "warning"
+                ? "rounded-sm border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700"
+                : "rounded-sm border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs text-zinc-600"
+            }
+          >
+            {portalNotice.message}
+          </div>
+        ) : (
+          <div className="rounded-sm border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs text-zinc-600">
+            Staff access is assigned from the configured admin and instructor
+            email lists.
+          </div>
+        )}
 
         <label className="grid gap-1">
           <span className="text-[11px] font-medium uppercase tracking-[0.08em] text-zinc-500">
@@ -173,6 +231,17 @@ export function StaffLoginPanel() {
           </button>
         </>
       ) : null}
+
+      <p className="mt-4 text-center text-[11px] text-zinc-500">
+        Student access belongs in{" "}
+        <Link
+          href="/ppc"
+          className="font-medium text-zinc-900 underline-offset-2 hover:underline"
+        >
+          /ppc
+        </Link>
+        .
+      </p>
     </>
   );
 }

@@ -18,6 +18,7 @@ import { PageHeader } from "@/components/ppc/page-header";
 import { AudioPlayer } from "@/components/ppc/audio-player";
 import { CompletionSignals } from "@/components/ppc/completion-signals";
 import { LessonHubClient } from "@/components/ppc/lesson-hub-client";
+import { StatusBadge } from "@/components/ppc/status-badge";
 
 export default async function LessonDetailPage({
   params,
@@ -57,6 +58,8 @@ export default async function LessonDetailPage({
   const notesRead = progress?.notesRead ?? false;
   const quizPassed = progress?.quizPassed ?? false;
   const writtenApproved = progress?.writtenApproved ?? false;
+  const lessonCompleted =
+    audioListened && notesRead && quizPassed && writtenApproved;
 
   return (
     <div className="space-y-4">
@@ -73,12 +76,55 @@ export default async function LessonDetailPage({
         description={`Level ${levelId} · Lesson ${lesson.lessonNumber}`}
       />
 
-      <CompletionSignals
-        audioListened={audioListened}
-        notesRead={notesRead}
-        quizPassed={quizPassed}
-        writtenApproved={writtenApproved}
-      />
+      <div className="grid gap-3 lg:grid-cols-[minmax(0,1.2fr)_240px]">
+        <div className="rounded-sm border border-zinc-200 bg-white p-3">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-[11px] font-medium uppercase tracking-wider text-zinc-400">
+                Lesson progress
+              </p>
+              <p className="mt-1 text-sm font-medium text-zinc-900">
+                Stay with this lesson until all four steps are complete.
+              </p>
+            </div>
+            <StatusBadge
+              status={lessonCompleted ? "complete" : "in progress"}
+              variant={lessonCompleted ? "success" : "warning"}
+            />
+          </div>
+          <div className="mt-3">
+            <CompletionSignals
+              audioListened={audioListened}
+              notesRead={notesRead}
+              quizPassed={quizPassed}
+              writtenApproved={writtenApproved}
+            />
+          </div>
+        </div>
+
+        <div className="rounded-sm border border-zinc-200 bg-white p-3">
+          <p className="text-[11px] font-medium uppercase tracking-wider text-zinc-400">
+            Level context
+          </p>
+          <p className="mt-2 text-sm font-medium text-zinc-900">
+            Lesson {lesson.lessonNumber} of {allLessons.length}
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Link
+              href={`/ppc/student/level/${levelId}`}
+              className="inline-flex h-7 items-center rounded-sm border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
+            >
+              Back to level
+            </Link>
+            <Link
+              href="/ppc/student"
+              className="inline-flex h-7 items-center rounded-sm border border-zinc-200 bg-zinc-50 px-3 text-xs text-zinc-600 hover:bg-zinc-100"
+            >
+              Dashboard
+            </Link>
+          </div>
+        </div>
+      </div>
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_280px]">
         <div className="space-y-4">
@@ -150,6 +196,7 @@ export default async function LessonDetailPage({
                     : "Not attempted"}
               </p>
             </div>
+            {quizPassed ? <StatusBadge status="ready" variant="success" /> : null}
           </Link>
 
           <Link
@@ -169,6 +216,9 @@ export default async function LessonDetailPage({
                     : "Not started"}
               </p>
             </div>
+            {writtenApproved ? (
+              <StatusBadge status="ready" variant="success" />
+            ) : null}
           </Link>
 
           <Link
@@ -185,6 +235,17 @@ export default async function LessonDetailPage({
               </p>
             </div>
           </Link>
+
+          <div className="rounded-sm border border-zinc-200 bg-zinc-50 p-3">
+            <p className="text-[11px] font-medium uppercase tracking-wider text-zinc-400">
+              After this lesson
+            </p>
+            <p className="mt-2 text-xs text-zinc-600">
+              {nextLesson
+                ? `Move on to lesson ${nextLesson.lessonNumber} once this one is complete.`
+                : "This is the last lesson in the level. Graduation review follows once everything is complete."}
+            </p>
+          </div>
         </aside>
       </div>
     </div>

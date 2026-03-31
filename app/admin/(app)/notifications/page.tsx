@@ -56,6 +56,9 @@ export default function AdminNotificationsPage() {
             </h4>
             <ul className="mt-2 grid gap-1.5 text-xs text-zinc-600">
               <li className="rounded-sm border border-zinc-100 px-3 py-1.5">
+                Review and Q&amp;A assignment alerts
+              </li>
+              <li className="rounded-sm border border-zinc-100 px-3 py-1.5">
                 Submission reviewed (approved / needs revision)
               </li>
               <li className="rounded-sm border border-zinc-100 px-3 py-1.5">
