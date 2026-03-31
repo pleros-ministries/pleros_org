@@ -51,7 +51,7 @@ function buildDriveThumbnailSrc(fileId: string): string {
 const mostImportantQuestionsVideos: QuestionsPathwayVideoItem[] = [
   {
     id: "most-important-questions-1",
-    title: "Most Important Question",
+    title: "The Most Important Question",
     description: sharedSeriesDescription,
     thumbnailSrc: buildDriveThumbnailSrc("1jVbUwpPqsdS7vPuK9bxDHymu_dDNB2Vm"),
     playIconSrc: sharedPlayIconSrc,

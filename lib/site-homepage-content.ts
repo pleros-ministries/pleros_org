@@ -69,9 +69,9 @@ export const homePathwayCards: HomePathwayCard[] = [
     headerClassName: "bg-[#DAFFB5]",
   },
   {
-    title: "Fullness of Christ Church",
-    description: "Our Church Ministry",
-    mobileDescription: "Our Church Ministry",
+    title: "Our Church Ministry",
+    description: "Fellowship with us at any our branches nationwide",
+    mobileDescription: "Fellowship with us at any our branches nationwide",
     href: "/about",
     wordmarkImageSrc: "/site/home/assets/pleros-wordmark.png",
     arrowImageSrc: "/site/home/assets/card-arrows/church-card-arrow.svg",

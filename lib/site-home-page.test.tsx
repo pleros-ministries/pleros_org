@@ -89,6 +89,18 @@ describe("site home page", () => {
     expect(contentSource).toContain('mobileDescription: "Want to grow and be trained to fulfil purpose?"');
   });
 
+  test("keeps the dashboard menu link pointed to /dashboard and updates the church pathway copy", () => {
+    const contentSource = readFileSync(
+      join(process.cwd(), "lib", "site-homepage-content.ts"),
+      "utf8",
+    );
+
+    expect(contentSource).toContain('{ href: "/dashboard", label: "Dashboard" }');
+    expect(contentSource).toContain('title: "Our Church Ministry"');
+    expect(contentSource).toContain('description: "Fellowship with us at any our branches nationwide"');
+    expect(contentSource).toContain('mobileDescription: "Fellowship with us at any our branches nationwide"');
+  });
+
   test("uses a refined hierarchy for the featured podcast card", () => {
     const globalsSource = readFileSync(
       join(process.cwd(), "app", "globals.css"),

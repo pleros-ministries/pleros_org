@@ -87,7 +87,7 @@ describe("questions pathway content", () => {
       ),
     ).toEqual([
       {
-        title: "Most Important Question",
+        title: "The Most Important Question",
         href: "https://drive.google.com/file/d/1jVbUwpPqsdS7vPuK9bxDHymu_dDNB2Vm/preview",
         thumbnailSrc:
           "https://lh3.googleusercontent.com/d/1jVbUwpPqsdS7vPuK9bxDHymu_dDNB2Vm=w1200",
