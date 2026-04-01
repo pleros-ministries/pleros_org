@@ -4,6 +4,7 @@ import {
   submissionReviewedHtml,
   graduationCongratulationsHtml,
   staffAssignmentHtml,
+  welcomePackAccessHtml,
 } from "./templates";
 
 const FROM = process.env.EMAIL_FROM ?? "PPC <noreply@pleros.org>";
@@ -83,6 +84,26 @@ export async function sendStaffAssignmentNotification(opts: {
       detail: opts.detail,
       url: opts.url,
       ctaLabel: opts.ctaLabel,
+    }),
+  });
+}
+
+export async function sendWelcomePackAccessEmail(opts: {
+  to: string;
+  name: string;
+  dashboardUrl: string;
+}) {
+  if (!isEmailEnabled() || !resend) return null;
+
+  const PLEROS_FROM = process.env.EMAIL_FROM_PLEROS ?? "Pleros <noreply@pleros.org>";
+
+  return resend.emails.send({
+    from: PLEROS_FROM,
+    to: opts.to,
+    subject: "Your Pleros Welcome Pack Access",
+    html: welcomePackAccessHtml({
+      name: opts.name,
+      dashboardUrl: opts.dashboardUrl,
     }),
   });
 }

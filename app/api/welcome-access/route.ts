@@ -10,6 +10,7 @@ import {
   WELCOME_ACCESS_MAX_AGE,
 } from "@/lib/welcome-access";
 import { provisionWelcomeSession } from "@/lib/welcome-session";
+import { sendWelcomePackAccessEmail } from "@/lib/email/send";
 
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as
@@ -32,7 +33,8 @@ export async function POST(request: Request) {
       name,
       requestHeaders: request.headers,
     });
-  } catch {
+  } catch (error) {
+    console.error("Welcome Access Session Provision Error:", error);
     return NextResponse.json(
       {
         error:
@@ -57,6 +59,16 @@ export async function POST(request: Request) {
     secure: process.env.NODE_ENV === "production",
     path: "/",
     maxAge: WELCOME_ACCESS_MAX_AGE,
+  });
+
+  const dashboardUrl = new URL("/dashboard", request.url).toString();
+
+  void sendWelcomePackAccessEmail({
+    to: email,
+    name,
+    dashboardUrl,
+  }).catch((err) => {
+    console.error("Failed to send welcome pack email:", err);
   });
 
   return NextResponse.json({ redirectTo: "/dashboard" });
