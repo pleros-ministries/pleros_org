@@ -14,6 +14,7 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
+  SheetTrigger,
 } from "@/components/ui/sheet";
 import {
   WELCOME_PACK_STORAGE_KEY,
@@ -24,10 +25,20 @@ import { validateEmail } from "@/lib/welcome-flow";
 
 type HomepageGiftDrawerProps = {
   hasWelcomeAccess: boolean;
+  autoOpen?: boolean;
+  redirectTo?: string;
+  triggerLabel?: string;
+  submitLabel?: string;
+  pendingLabel?: string;
 };
 
 export function HomepageGiftDrawer({
   hasWelcomeAccess,
+  autoOpen = true,
+  redirectTo = "/dashboard",
+  triggerLabel,
+  submitLabel = "access welcome pck",
+  pendingLabel = "Opening your dashboard",
 }: HomepageGiftDrawerProps) {
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
@@ -37,7 +48,7 @@ export function HomepageGiftDrawer({
   const normalizedEmail = useMemo(() => email.trim().toLowerCase(), [email]);
 
   useEffect(() => {
-    if (hasWelcomeAccess) {
+    if (!autoOpen || hasWelcomeAccess) {
       return undefined;
     }
 
@@ -52,7 +63,7 @@ export function HomepageGiftDrawer({
     }, 0);
 
     return () => window.clearTimeout(openTimer);
-  }, [hasWelcomeAccess]);
+  }, [autoOpen, hasWelcomeAccess]);
 
   const persistDismissedState = () => {
     if (hasCompletedRef.current) {
@@ -92,7 +103,7 @@ export function HomepageGiftDrawer({
         headers: {
           "content-type": "application/json",
         },
-        body: JSON.stringify({ email: normalizedEmail }),
+        body: JSON.stringify({ email: normalizedEmail, returnTo: redirectTo }),
       });
 
       const payload = (await response.json().catch(() => null)) as
@@ -121,6 +132,18 @@ export function HomepageGiftDrawer({
 
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
+      {triggerLabel ? (
+        <SheetTrigger
+          render={
+            <button
+              type="button"
+              className="site-button-text inline-flex min-h-[2.875rem] items-center justify-center rounded-full bg-[var(--color-brand-blue)] px-7 py-2.5 text-[0.875rem] leading-none font-semibold text-white shadow-[0_14px_28px_rgba(5,20,128,0.22)] transition-transform duration-150 hover:-translate-y-px hover:text-white focus-visible:text-white"
+            />
+          }
+        >
+          {triggerLabel}
+        </SheetTrigger>
+      ) : null}
       <SheetContent
         side="bottom"
         showCloseButton={false}
@@ -204,7 +227,7 @@ export function HomepageGiftDrawer({
               disabled={isPending}
               className="site-button-text min-h-[2.875rem] w-full rounded-full px-6 py-2.5 text-[0.875rem] text-white shadow-[0_14px_28px_rgba(5,20,128,0.22)] hover:text-white focus-visible:text-white"
             >
-              {isPending ? "Opening your dashboard" : "access welcome pck"}
+              {isPending ? pendingLabel : submitLabel}
             </Button>
           </form>
         </div>
