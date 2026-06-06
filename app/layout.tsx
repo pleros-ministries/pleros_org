@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Be_Vietnam_Pro, Sen } from "next/font/google";
+import { Be_Vietnam_Pro, DM_Sans, Figtree, Sen } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 
@@ -51,6 +51,21 @@ const beVietnamPro = Be_Vietnam_Pro({
   display: "swap",
 });
 
+const figtree = Figtree({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "800"],
+  variable: "--font-figtree",
+  display: "swap",
+});
+
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  style: ["italic"],
+  weight: ["300", "400", "500"],
+  variable: "--font-dm-sans",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Pleros",
   description: "Pleros website foundations",
@@ -64,7 +79,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${suisseIntl.variable} ${sen.variable} ${beVietnamPro.variable}`}
+      className={`${suisseIntl.variable} ${sen.variable} ${beVietnamPro.variable} ${figtree.variable} ${dmSans.variable}`}
     >
       <body className="page-shell antialiased">{children}</body>
     </html>
