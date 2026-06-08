@@ -16,7 +16,7 @@ describe("purpose pathway content", () => {
     );
   });
 
-  test("provides the recovered purpose series list with numbering 01 to 06 and Drive-backed thumbnails", () => {
+  test("provides the purpose series list with numbering 01 to 07 and UploadThing-backed playback urls", () => {
     expect(
       purposePathwayVideos.map(({ title, thumbnailSrc, playIconSrc, href }) => ({
         title,
@@ -31,7 +31,7 @@ describe("purpose pathway content", () => {
           "https://lh3.googleusercontent.com/d/1t3Q2A73kPwmo6azHNXImYCjCKTjhnA54=w1200",
         playIconSrc:
           "/site/home/assets/questions-pathway/video-circle-icon.png",
-        href: "https://drive.google.com/file/d/1t3Q2A73kPwmo6azHNXImYCjCKTjhnA54/preview",
+        href: "https://jqhxdgo3h8.ufs.sh/f/3pDCanj1aBdfre0q9MBt0SwW8Jhfc1YqsjZEAzHnGivQD5po",
       },
       {
         title: "What is God's Purpose? (Part 2)",
@@ -39,7 +39,7 @@ describe("purpose pathway content", () => {
           "https://lh3.googleusercontent.com/d/1YQDScqhn7CLszSwSNX5L3oMqIjJVehv4=w1200",
         playIconSrc:
           "/site/home/assets/questions-pathway/video-circle-icon.png",
-        href: "https://drive.google.com/file/d/1YQDScqhn7CLszSwSNX5L3oMqIjJVehv4/preview",
+        href: "https://jqhxdgo3h8.ufs.sh/f/3pDCanj1aBdfKdzAFmtrd2xJU9QLNTm65YMRqw3cOiAhp4fB",
       },
       {
         title: "What is God's Purpose? (Part 3)",
@@ -47,7 +47,7 @@ describe("purpose pathway content", () => {
           "https://lh3.googleusercontent.com/d/1jyF70_5Iap2QGQFKhhoAXAqts8r3vZ2a=w1200",
         playIconSrc:
           "/site/home/assets/questions-pathway/video-circle-icon.png",
-        href: "https://drive.google.com/file/d/1jyF70_5Iap2QGQFKhhoAXAqts8r3vZ2a/preview",
+        href: "https://jqhxdgo3h8.ufs.sh/f/3pDCanj1aBdfaTaCZD6FEzZxA49tLVybfpnrmaPeBYD256dw",
       },
       {
         title: "What is God's Purpose? (Part 4)",
@@ -55,7 +55,7 @@ describe("purpose pathway content", () => {
           "https://lh3.googleusercontent.com/d/1zJl9EMAekmK0NQi2S5q4n7B4dWCSaguB=w1200",
         playIconSrc:
           "/site/home/assets/questions-pathway/video-circle-icon.png",
-        href: "https://drive.google.com/file/d/1zJl9EMAekmK0NQi2S5q4n7B4dWCSaguB/preview",
+        href: "https://jqhxdgo3h8.ufs.sh/f/3pDCanj1aBdfqQHseHVaVf0zYIgnd8AkUqlRHSXEvW3wK1rQ",
       },
       {
         title: "What is God's Purpose? (Part 5)",
@@ -63,7 +63,7 @@ describe("purpose pathway content", () => {
           "https://lh3.googleusercontent.com/d/1yFtmqVUiw2j5ck-DmhX5-CJkOhaCnsIL=w1200",
         playIconSrc:
           "/site/home/assets/questions-pathway/video-circle-icon.png",
-        href: "https://drive.google.com/file/d/1yFtmqVUiw2j5ck-DmhX5-CJkOhaCnsIL/preview",
+        href: "https://jqhxdgo3h8.ufs.sh/f/3pDCanj1aBdfM8UBAyZNzEjyqYasUGDrxkQeP0n28iWJl1hb",
       },
       {
         title: "What is God's Purpose? (Part 6)",
@@ -71,7 +71,15 @@ describe("purpose pathway content", () => {
           "https://lh3.googleusercontent.com/d/1ByY9J8Yk29zal7KXi23hopyCejZR9Grk=w1200",
         playIconSrc:
           "/site/home/assets/questions-pathway/video-circle-icon.png",
-        href: "https://drive.google.com/file/d/1ByY9J8Yk29zal7KXi23hopyCejZR9Grk/preview",
+        href: "https://jqhxdgo3h8.ufs.sh/f/3pDCanj1aBdfZLHRs0SAkQWloJGzabH2rgNULZvI9hB1cfpK",
+      },
+      {
+        title: "What is God's Purpose? (Part 7)",
+        thumbnailSrc:
+          "https://lh3.googleusercontent.com/d/1ByY9J8Yk29zal7KXi23hopyCejZR9Grk=w1200",
+        playIconSrc:
+          "/site/home/assets/questions-pathway/video-circle-icon.png",
+        href: "https://jqhxdgo3h8.ufs.sh/f/3pDCanj1aBdfhXTG1e8MbI2mgJarcYuFdAHfLs5wi1ZjKhGU",
       },
     ]);
   });

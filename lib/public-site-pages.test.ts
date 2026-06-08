@@ -10,6 +10,10 @@ describe("public site pages", () => {
       "fulfil",
       "podcast",
       "library",
+      "about",
+      "partner",
+      "contact",
+      "vision-and-mission",
     ]);
   });
 

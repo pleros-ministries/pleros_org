@@ -33,3 +33,139 @@
 - Always serialize Date objects to ISO strings before passing to client components
 - Use `onConflictDoUpdate` for student progress upserts
 - Check `getAppSession()` at top of every page, redirect to sign-in if null
+
+## [2026-05-07] Pathway media wiring
+
+### Mistake
+- Assumed newly uploaded UploadThing files were ready to wire before checking their actual upload status.
+
+### Correction
+- Verify UploadThing file status first and only swap production URLs for assets that are actually `Uploaded`.
+
+### Lesson
+- For media migrations, treat filename matching and file readiness as separate checks.
+
+### Preference
+- Use descriptive text slugs for public pathway videos instead of numeric-only ids when the subject is known.
+
+### Action Rule
+- Before replacing an existing media URL, confirm the replacement asset is live; if not, keep the existing source and report the blocker explicitly.
+
+## [2026-05-07] Public site campaign pages
+
+### Mistake
+- None in this task.
+
+### Correction
+- User emphasized that new UI must remain consistent with the public-facing pages.
+
+### Lesson
+- New public pages should reuse the existing public shell, Sen/Be Vietnam Pro typography classes, brand-blue CTAs, and mobile-width constrained layout.
+
+### Preference
+- Ads and referral pages should feel like part of the public Pleros site, not the PPC dashboard.
+
+### Action Rule
+- For public-facing additions, start from `HomepageNav`, `HomepageFooter`, `.site-font-theme`, and current public tokens before introducing any new visual pattern.
+
+## [2026-06-08] Thread scope
+
+### Mistake
+- Mixed public-site video migration work into a thread the user wanted reserved for PPC work.
+
+### Correction
+- Keep this thread strictly focused on PPC features and operations.
+
+### Lesson
+- When a thread has an explicit scope boundary, do not continue adjacent work even if it is in the same repo.
+
+### Preference
+- This chat should be strictly for PPC work.
+
+### Action Rule
+- In this thread, redirect or defer any non-PPC work and keep recommendations limited to PPC surfaces.
+
+## [2026-06-08] Public placeholder replacement
+
+### Mistake
+- Generic public placeholder routes can linger too long and diverge from the real public-site design language.
+
+### Correction
+- Replace real public destinations with dedicated `app/(site)/<slug>/page.tsx` routes plus matching `components/home/*-page-view.tsx` and `lib/*-content.ts` files.
+
+### Lesson
+- For public Pleros pages, the stable pattern is route + home page-view + content module + focused file-based tests, all using the existing homepage shell.
+
+### Preference
+- Public pages must stay in the same homepage/theme system and must not borrow PPC or admin dashboard styling.
+
+### Action Rule
+- When upgrading a placeholder public page into a real page, add a dedicated route and content/view/test trio instead of extending the generic `[slug]` placeholder template.
+
+## [2026-06-08] Public podcast page refinement
+
+### Mistake
+- Started the podcast landing page with a broader marketing-style hero and generic theme cards instead of matching the tighter public pathway-page structure.
+
+### Correction
+- User wanted the hero patterned after `/questions` and `/purpose`, no hero subtitle or CTA cluster, and the real podcast sub-series wired to their starting episodes.
+
+### Lesson
+- For public Pleros landing pages, prefer the existing pathway-page hero proportions and swap abstract category cards for ministry-specific content when the source structure is known.
+
+### Preference
+- Public podcast links should use the provided canonical playlist/source link, and card titles in pathway surfaces should skew bolder.
+
+### Action Rule
+- When a public page represents a real teaching series, use the actual series list and source-backed episode links rather than descriptive placeholder topic cards.
+
+## [2026-06-08] Embedded podcast playback
+
+### Mistake
+- Built the podcast series links by appending a second `v` parameter onto the playlist URL, which made the embedded player resolve the wrong starting episode.
+
+### Correction
+- Give each playable series item its own canonical watch URL and keep the playlist link separate for subscribe/open actions.
+
+### Lesson
+- Embedded YouTube playback should be modeled from the exact video URL that will be played, not by mutating a playlist URL in-place.
+
+### Preference
+- Podcast playback should happen in-page in the Pleros site before sending people out to YouTube.
+
+### Action Rule
+- For future media galleries, store a direct per-item playback URL and use external platform links only for subscribe or full-library CTAs.
+
+## [2026-06-08] Public podcast series presentation
+
+### Mistake
+- Presented the podcast sub-series as repeated pastel cards with generic CTA pills and a modal player, which felt too template-like for a long-form teaching archive.
+
+### Correction
+- User wanted softer list separation, inline playback, proper primary typography, and richer row content with subhead descriptions plus a play icon at the far right.
+
+### Lesson
+- When a public page is presenting a sequence of teachings, a divided editorial list with inline expansion reads better than a repeated stack of equal cards.
+
+### Preference
+- Avoid repetitive card grids for public teaching archives; prefer softer horizontal dividers, left-aligned copy, and in-place playback.
+
+### Action Rule
+- For future public media series sections, start from a line-separated list pattern with inline player expansion before considering modal playback or repeated CTA-card layouts.
+
+## [2026-06-08] Source-backed teaching copy
+
+### Mistake
+- Replaced official episode-description language with editorial summaries on the podcast series list.
+
+### Correction
+- User wanted the sub-series rows to use the official description copy from the starting episode description boxes.
+
+### Lesson
+- When the user asks for official ministry/media copy, treat the source text as the content system of record and avoid rewriting it into fresher marketing language.
+
+### Preference
+- Keep public teaching surfaces close to the source wording when that wording is already available on the episode itself.
+
+### Action Rule
+- For future public series pages, pull description copy from the canonical episode/page source first; summarize only when the user asks for a rewrite.

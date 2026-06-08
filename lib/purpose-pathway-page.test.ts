@@ -41,7 +41,7 @@ describe("purpose pathway page", () => {
     expect(source).toContain("right-[-2.15rem]");
   });
 
-  test("uses the shared in-page modal playback pattern for purpose videos", () => {
+  test("uses the shared in-page modal playback pattern for purpose videos with a direct video player", () => {
     const viewSource = readFileSync(
       join(process.cwd(), "components", "home", "purpose-pathway-view.tsx"),
       "utf8",
@@ -54,8 +54,9 @@ describe("purpose pathway page", () => {
     expect(viewSource).toContain("PurposeVideoGallery");
     expect(gallerySource).toContain('from "@/components/ui/dialog"');
     expect(gallerySource).toContain("videos.map");
-    expect(gallerySource).toContain("<iframe");
+    expect(gallerySource).toContain("<video");
     expect(gallerySource).toContain("Loading player...");
+    expect(gallerySource).toContain("controls");
     expect(gallerySource).not.toContain(
       "This teaching opens on the original Pleros page.",
     );

@@ -126,15 +126,16 @@ export function PurposeVideoGallery({
             <div className="grid gap-3">
               <div className="overflow-hidden rounded-[var(--radius-md)] bg-black shadow-[var(--shadow-sm)]">
                 <div className="relative aspect-video w-full">
-                  <iframe
+                  <video
                     src={selectedVideo.href}
                     title={selectedVideo.title}
-                    className={`h-full w-full border-0 transition-opacity duration-200 ${
+                    className={`h-full w-full transition-opacity duration-200 ${
                       isPlayerReady ? "opacity-100" : "pointer-events-none opacity-0"
                     }`}
-                    allow="autoplay; fullscreen"
-                    allowFullScreen
-                    onLoad={() => setIsPlayerReady(true)}
+                    controls
+                    playsInline
+                    preload="metadata"
+                    onLoadedData={() => setIsPlayerReady(true)}
                   />
 
                   {!isPlayerReady ? (

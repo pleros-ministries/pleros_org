@@ -83,36 +83,41 @@ describe("questions pathway content", () => {
     );
     expect(
       getQuestionsSeriesPage("most-important-questions-series")?.videos.map(
-        ({ title, href, thumbnailSrc }) => ({ title, href, thumbnailSrc }),
+        ({ id, title, href, thumbnailSrc }) => ({ id, title, href, thumbnailSrc }),
       ),
     ).toEqual([
       {
+        id: "most-important-questions-the-most-important-question",
         title: "The Most Important Question",
-        href: "https://drive.google.com/file/d/1jVbUwpPqsdS7vPuK9bxDHymu_dDNB2Vm/preview",
+        href: "https://jqhxdgo3h8.ufs.sh/f/3pDCanj1aBdfta6XuYhFFL76Gq3MOQHCESRrgtDzuyhNbK5e",
         thumbnailSrc:
           "https://lh3.googleusercontent.com/d/1jVbUwpPqsdS7vPuK9bxDHymu_dDNB2Vm=w1200",
       },
       {
+        id: "most-important-questions-baptism-of-the-holy-ghost",
         title: "Baptism of the Holy Ghost",
-        href: "https://drive.google.com/file/d/1XMNOYIeoM2zrdU8de0Hya9jUSCJbH-5P/preview",
+        href: "https://jqhxdgo3h8.ufs.sh/f/3pDCanj1aBdfuZScfHmQzaCIkhDQEen5XpA3wrS7H2tcmqVN",
         thumbnailSrc:
           "https://lh3.googleusercontent.com/d/1XMNOYIeoM2zrdU8de0Hya9jUSCJbH-5P=w1200",
       },
       {
+        id: "most-important-questions-healing",
         title: "Healing",
-        href: "https://drive.google.com/file/d/1TM2HYuYZi8ktffPxKh6dMfprJX1LgdJC/preview",
+        href: "https://jqhxdgo3h8.ufs.sh/f/3pDCanj1aBdfKwy4WGtrd2xJU9QLNTm65YMRqw3cOiAhp4fB",
         thumbnailSrc:
           "https://lh3.googleusercontent.com/d/1TM2HYuYZi8ktffPxKh6dMfprJX1LgdJC=w1200",
       },
       {
+        id: "most-important-questions-local-church",
         title: "Local Church",
-        href: "https://drive.google.com/file/d/113AZNjAi1ljK2vlWExEHcYASWhGokcrF/preview",
+        href: "https://jqhxdgo3h8.ufs.sh/f/3pDCanj1aBdfWwAauEIfjIcB25NqgLY6upabUDOvQ4TwdCt7",
         thumbnailSrc:
           "https://lh3.googleusercontent.com/d/113AZNjAi1ljK2vlWExEHcYASWhGokcrF=w1200",
       },
       {
+        id: "most-important-questions-salvation",
         title: "Salvation",
-        href: "https://drive.google.com/file/d/1YJZKpT6vDrikezN3eexDYTjKTtpaPB-W/preview",
+        href: "https://jqhxdgo3h8.ufs.sh/f/3pDCanj1aBdftSn3y8FFL76Gq3MOQHCESRrgtDzuyhNbK5eP",
         thumbnailSrc:
           "https://lh3.googleusercontent.com/d/1YJZKpT6vDrikezN3eexDYTjKTtpaPB-W=w1200",
       },
