@@ -16,6 +16,10 @@ import type {
   QuestionsSeriesPage,
 } from "@/lib/questions-pathway-content";
 
+function isDirectVideoHref(href: string): boolean {
+  return href.includes(".ufs.sh/f/") || href.match(/\.(mp4|webm|ogg)(\?|$)/i) !== null;
+}
+
 function QuestionsVideoCard({
   title,
   description,
@@ -78,6 +82,9 @@ export function QuestionsSeriesVideoGallery({
     () => series.videos.find((video) => video.id === selectedVideoId) ?? null,
     [selectedVideoId, series.videos],
   );
+  const selectedVideoUsesDirectPlayback = selectedVideo
+    ? isDirectVideoHref(selectedVideo.href)
+    : false;
 
   return (
     <>
@@ -131,16 +138,31 @@ export function QuestionsSeriesVideoGallery({
             <div className="grid gap-3">
               <div className="overflow-hidden rounded-[var(--radius-md)] bg-black shadow-[var(--shadow-sm)]">
                 <div className="relative aspect-video w-full">
-                  <iframe
-                    src={selectedVideo.href}
-                    title={selectedVideo.title}
-                    className={`h-full w-full border-0 transition-opacity duration-200 ${
-                      isPlayerReady ? "opacity-100" : "pointer-events-none opacity-0"
-                    }`}
-                    allow="autoplay; fullscreen"
-                    allowFullScreen
-                    onLoad={() => setIsPlayerReady(true)}
-                  />
+                  {selectedVideoUsesDirectPlayback ? (
+                    <video
+                      src={selectedVideo.href}
+                      title={selectedVideo.title}
+                      className={`h-full w-full transition-opacity duration-200 ${
+                        isPlayerReady ? "opacity-100" : "pointer-events-none opacity-0"
+                      }`}
+                      controls
+                      autoPlay
+                      playsInline
+                      preload="metadata"
+                      onLoadedData={() => setIsPlayerReady(true)}
+                    />
+                  ) : (
+                    <iframe
+                      src={selectedVideo.href}
+                      title={selectedVideo.title}
+                      className={`h-full w-full border-0 transition-opacity duration-200 ${
+                        isPlayerReady ? "opacity-100" : "pointer-events-none opacity-0"
+                      }`}
+                      allow="autoplay; fullscreen"
+                      allowFullScreen
+                      onLoad={() => setIsPlayerReady(true)}
+                    />
+                  )}
 
                   {!isPlayerReady ? (
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-[rgba(5,20,128,0.12)] text-white">

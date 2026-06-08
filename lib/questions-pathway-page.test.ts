@@ -90,9 +90,11 @@ describe("questions pathway page", () => {
     expect(viewSource).toContain("px-[1.5rem]");
     expect(gallerySource).toContain('from "@/components/ui/dialog"');
     expect(gallerySource).toContain("series.videos.map");
+    expect(gallerySource).toContain("function isDirectVideoHref");
     expect(gallerySource).toContain("<iframe");
+    expect(gallerySource).toContain("<video");
     expect(gallerySource).toContain("Loading player...");
-    expect(gallerySource).toContain("onLoad={() => setIsPlayerReady(true)}");
+    expect(gallerySource).toContain("onLoadedData={() => setIsPlayerReady(true)}");
     expect(gallerySource).not.toContain('target="_blank"');
   });
 });
