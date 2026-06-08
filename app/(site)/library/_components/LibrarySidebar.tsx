@@ -61,21 +61,6 @@ export function LibrarySidebar({ teachings, sortMode, setSortMode }: Props) {
       className="sticky top-[4.25rem] hidden h-[calc(100vh-4.25rem)] w-[248px] shrink-0 flex-col gap-5 overflow-y-auto border-r border-[#e8e8ee] bg-white px-5 py-5 md:flex"
       style={{ fontFamily: "var(--font-figtree, sans-serif)" }}
     >
-      {/* ── Overview ── */}
-      <div>
-        <p className="mb-3 text-[10px] font-[700] uppercase tracking-[1.5px] text-[#8888a0]">
-          Overview
-        </p>
-        <div className="grid grid-cols-2 gap-2">
-          <StatCard label="Teachings" value={stats.total} />
-          <StatCard label="Series" value={stats.seriesCount} />
-          <StatCard label="In 2025" value={stats.in2025} />
-          <StatCard label="In 2024" value={stats.in2024} />
-        </div>
-      </div>
-
-      <div className="h-px bg-[#e8e8ee]" />
-
       {/* ── Sort by ── */}
       <div>
         <p className="mb-2 text-[10px] font-[700] uppercase tracking-[1.5px] text-[#8888a0]">
