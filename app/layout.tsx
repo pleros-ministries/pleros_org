@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { GoogleAnalytics } from "@/components/google-analytics";
 import { Be_Vietnam_Pro, DM_Sans, Figtree, Sen } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
@@ -81,7 +82,10 @@ export default function RootLayout({
       lang="en"
       className={`${suisseIntl.variable} ${sen.variable} ${beVietnamPro.variable} ${figtree.variable} ${dmSans.variable}`}
     >
-      <body className="page-shell antialiased">{children}</body>
+      <body className="page-shell antialiased">
+        <GoogleAnalytics />
+        {children}
+      </body>
     </html>
   );
 }
