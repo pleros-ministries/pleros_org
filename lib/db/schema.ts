@@ -294,6 +294,20 @@ export const reviewerAssignments = pgTable(
   ],
 );
 
+// ─── Teachings ───────────────────────────────────────────────────────────────
+
+export const teachings = pgTable("teachings", {
+  id: serial("id").primaryKey(),
+  sn: integer("sn").notNull(),
+  title: text("title").notNull(),
+  series: text("series").notNull(),
+  date: text("date"),
+  audioUrl: text("audio_url").notNull(),
+  fileKey: text("file_key").notNull(),
+  duration: integer("duration"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 // ─── Push subscriptions ─────────────────────────────────────────────────────
 
 export const pushSubscriptions = pgTable(
