@@ -32,11 +32,12 @@ export type HomeInstagramReel = {
 
 export const homeNavLinks: HomeNavLink[] = [
   { href: "/dashboard", label: "Dashboard" },
+  { href: "/podcast", label: "Pleros Podcast" },
   { href: "/questions", label: "Questions" },
   { href: "/purpose", label: "Discover Purpose" },
   { href: "/ppc", label: "Pleros Perfecting Course" },
   { href: "/partner", label: "Partner" },
-  { href: "/library", label: "Library" },
+  { href: "/library", label: "Teachings Library" },
   { href: "/about", label: "About" },
   { href: "/vision-and-mission", label: "Vision and Mission" },
   { href: "/contact", label: "Contact" },
@@ -67,11 +68,11 @@ export const homePathwayCards: HomePathwayCard[] = [
     headerClassName: "bg-[#E8D1FF]",
   },
   {
-    title: "Fulfil Purpose",
+    title: "Fulfill Purpose",
     description:
       "Tailored for those who want to grow and be transformed spiritually to fulfill God’s purpose",
-    mobileDescription: "Want to grow and be trained to fulfil purpose?",
-    href: "/ppc",
+    mobileDescription: "Want to grow and be trained to fulfill purpose?",
+    href: "/fulfill",
     headerImageSrc: "/site/home/assets/fulfil-pathway--card-header.png",
     arrowImageSrc: "/site/home/assets/card-arrows/fulfil-card-arrow.svg",
     surfaceClassName: "bg-[#1A4A4D] text-white",

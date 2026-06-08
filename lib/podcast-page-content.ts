@@ -81,7 +81,7 @@ export const podcastSeries = [
     id: "developing-the-inner-man",
     title: "Developing the Inner Man",
     description:
-      "We have seen at the core that what affects our fulfilment of God's Purpose is the state of our Hidden Man. Join us in this new series where we study how to develop the Hidden Man.",
+      "We have seen at the core that what affects our fulfillment of God's Purpose is the state of our Hidden Man. Join us in this new series where we study how to develop the Hidden Man.",
     href: buildPodcastEpisodeUrl("L4ENdc91y3o"),
   },
   {
@@ -152,11 +152,11 @@ export const podcastJourneySteps = [
     tone: "purpose",
   },
   {
-    eyebrow: "Fulfil",
+    eyebrow: "Fulfill",
     title: "Keep growing through PPC",
     description:
-      "If you are ready for structure, accountability, and sustained formation, PPC is the next step into fulfilment.",
-    href: "/ppc",
+      "If you are ready for structure, accountability, and sustained formation, PPC is the next step into fulfillment.",
+    href: "/fulfill",
     ctaLabel: "Enter PPC",
     tone: "fulfil",
   },

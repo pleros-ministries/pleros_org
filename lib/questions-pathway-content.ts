@@ -42,7 +42,7 @@ const sharedPlayIconSrc =
   "/site/home/assets/questions-pathway/video-circle-icon.png";
 
 const sharedSeriesDescription =
-  "Your daily dose of God's Word helping you fulfil God's purpose";
+  "Your daily dose of God's Word helping you fulfill God's purpose";
 
 function buildDriveThumbnailSrc(fileId: string): string {
   return `https://lh3.googleusercontent.com/d/${fileId}=w1200`;

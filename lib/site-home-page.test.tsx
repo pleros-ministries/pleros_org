@@ -86,7 +86,7 @@ describe("site home page", () => {
     expect(cardSource).toContain("px-3 pb-3.5 pt-3");
     expect(cardSource).toContain("font-medium");
     expect(contentSource).toContain('title: "Find Purpose"');
-    expect(contentSource).toContain('mobileDescription: "Want to grow and be trained to fulfil purpose?"');
+    expect(contentSource).toContain('mobileDescription: "Want to grow and be trained to fulfill purpose?"');
   });
 
   test("keeps the dashboard menu link pointed to /dashboard and updates the church pathway copy", () => {

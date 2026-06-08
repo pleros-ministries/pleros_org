@@ -33,7 +33,7 @@ export const themeSurfaceItems = [
   },
   {
     id: "fulfil",
-    label: "Fulfil",
+    label: "Fulfill",
     tone: "fulfil",
     badgeVariant: "fulfil",
     eyebrow: "Action and growth",

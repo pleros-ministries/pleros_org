@@ -35,9 +35,9 @@ export const publicSitePages: PublicSitePage[] = [
     toneClass: "theme-purpose",
   },
   {
-    slug: "fulfil",
-    eyebrow: "Fulfil",
-    title: "Fulfil Purpose",
+    slug: "fulfill",
+    eyebrow: "Fulfill",
+    title: "Fulfill Purpose",
     description:
       "A public overview for people ready to grow in consistency, maturity, and practical obedience to God's call.",
     bullets: [

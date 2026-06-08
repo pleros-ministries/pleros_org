@@ -71,7 +71,7 @@ const buttonShowcase = [
   { label: "Secondary", variant: "secondary" as const },
   { label: "Questions", variant: "questions" as const },
   { label: "Purpose", variant: "purpose" as const },
-  { label: "Fulfil", variant: "fulfil" as const },
+  { label: "Fulfill", variant: "fulfil" as const },
   { label: "Outline", variant: "outline" as const },
 ] as const;
 
@@ -136,7 +136,7 @@ export function StyleDemo() {
                   </div>
                   <div className="flex items-center gap-3 rounded-[var(--radius-sm)] border border-white/10 bg-white/6 px-3 py-3">
                     <Layers2Icon className="size-4 text-[var(--color-brand-green)]" />
-                    Token-led surfaces for questions, purpose, and fulfil.
+                    Token-led surfaces for questions, purpose, and fulfill.
                   </div>
                 </CardContent>
               </Card>
@@ -257,7 +257,7 @@ export function StyleDemo() {
                 <Badge variant="outline">Outline badge</Badge>
                 <Badge variant="questions">Questions badge</Badge>
                 <Badge variant="purpose">Purpose badge</Badge>
-                <Badge variant="fulfil">Fulfil badge</Badge>
+                <Badge variant="fulfil">Fulfill badge</Badge>
                 <Badge variant="dark">Dark badge</Badge>
               </div>
             </CardContent>
@@ -290,7 +290,7 @@ export function StyleDemo() {
               <div className="grid gap-3 sm:grid-cols-3">
                 <Input variant="questions" placeholder="Questions" />
                 <Input variant="purpose" placeholder="Purpose" />
-                <Input variant="fulfil" placeholder="Fulfil" />
+                <Input variant="fulfil" placeholder="Fulfill" />
               </div>
             </CardContent>
           </Card>
@@ -364,7 +364,7 @@ export function StyleDemo() {
               Neutral and themed cards live in the same family.
             </h2>
             <p className="body-lg max-w-2xl text-[var(--color-text-muted)]">
-              Questions, purpose, and fulfil keep their own voices while borrowing the
+              Questions, purpose, and fulfill keep their own voices while borrowing the
               same spacing, radius, and shadow structure.
             </p>
           </div>

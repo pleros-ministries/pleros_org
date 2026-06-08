@@ -218,5 +218,22 @@
 ### Preference
 - Preserve the current Pleros Podcast page presentation unless asked for a specific implementation fix.
 
+## [2026-06-08] Fulfill route spelling
+
+### Mistake
+- Left the public PPC entry page on `/fulfil` and let some public-facing copy keep the old spelling.
+
+### Correction
+- The canonical public route should be `/fulfill`, and the visible public-site wording should match that spelling.
+
+### Lesson
+- Route naming and public labels need to stay aligned; path spelling is part of the product language, not just an implementation detail.
+
+### Preference
+- Keep the internal theme token names stable, but use `fulfill`/`fulfillment` in public routes and visible copy.
+
+### Action Rule
+- When this pathway is touched again, keep `/fulfill` as the canonical public URL, preserve a redirect from `/fulfil`, and use the shared Sen heading classes for major public headings.
+
 ### Action Rule
 - For `/podcast`, limit feedback to functional blockers, tests, responsiveness, or explicit requested polish; do not suggest design-direction changes.

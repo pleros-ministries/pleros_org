@@ -34,7 +34,7 @@ export function HomepagePodcastSection({
             Stay Full of God&apos;s Word with the Pleros Podcast
           </h2>
           <p className="max-w-[24.1875rem] text-[1.125rem] leading-[1.3] tracking-[-0.02em] text-[var(--color-text)]">
-            Your 15 minute dose of truth helping you fulfil God&apos;s Purpose.
+            Your 15 minute dose of truth helping you fulfill God&apos;s Purpose.
             Available wherever you get your podcasts.
           </p>
           <Link
