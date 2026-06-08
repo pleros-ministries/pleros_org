@@ -1,72 +1,136 @@
 export const fulfilPageHero = {
   eyebrow: "Fulfil purpose",
-  title: "Grow into the life God is calling you to live",
-  description:
-    "Fulfil Purpose is the next step for people who already want more than inspiration. It is about staying with the Word, growing in prayer, and becoming consistent in obedience.",
-  artworkSrc: "/site/home/assets/fulfil-pathway--card-header.png",
-  primaryCtaLabel: "Enter PPC",
-  primaryCtaHref: "/ppc",
-  secondaryCtaLabel: "Discover purpose",
-  secondaryCtaHref: "/purpose",
+  title: "The Pleros Perfecting Course",
 } as const;
 
-export const fulfilPageLeadLines = [
-  "Purpose becomes clearer",
-  "as you keep walking with God.",
-] as const;
+export const fulfilPageIntro = {
+  title: "PPC is the course platform for growth.",
+  description:
+    "It helps you stay with sound teaching, move through doctrine carefully, and keep growing with structure. When you start PPC, you do not just watch content. You move through the course and grow through it.",
+} as const;
 
-export const fulfilPageIntro =
-  "Fulfil Purpose is for people who do not want to stop at knowing what is true. It is for those ready to grow in spiritual habits, deepen discipleship, and keep following through with what God is showing them." as const;
-
-export const fulfilPagePathwaySteps = [
+export const fulfilPageStudentJourney = [
   {
     step: "01",
-    title: "Be grounded in the Word",
+    title: "Listen to the teaching",
     description:
-      "Return to sound teaching regularly so conviction is built on truth and not just emotion or momentum.",
+      "Each lesson begins with the teaching so you can stay with the Word carefully and in order.",
   },
   {
     step: "02",
-    title: "Build a prayerful life",
+    title: "Read the lesson notes",
     description:
-      "Learn how to stay engaged with God daily so direction, strength, and spiritual sensitivity keep increasing.",
+      "The notes help you follow the doctrine clearly and return to the truth again as you grow.",
   },
   {
     step: "03",
-    title: "Practice what you are learning",
+    title: "Take the quiz and written response",
     description:
-      "Move from hearing into response through simple obedience, reflection, and consistent follow-through.",
+      "You do not move casually through PPC. You respond to what you are learning and show that you are staying with it.",
   },
   {
     step: "04",
-    title: "Stay in accountable growth",
+    title: "Continue level by level",
     description:
-      "Keep growing with structure instead of trying to sustain your walk alone or only in scattered moments.",
+      "PPC keeps your growth ordered. You complete lessons, move through levels, and keep going in God's purpose.",
   },
 ] as const;
 
-export const fulfilPagePpcBenefits = [
+export const fulfilPageLevels = [
   {
-    title: "Structured teaching",
+    level: "Level 1",
+    title: "Foundations",
     description:
-      "PPC gives you a clearer pathway for learning, responding, and staying with each stage of growth.",
+      "Level 1 lays the foundation for life in the Gospel and the fulfilment of God's purpose.",
+    modules: [
+      "Gospel: The Word of Truth",
+      "God's Purpose: Why We Exist",
+      "The New Creation: Who You are in Christ",
+      "Faith Stand: How to Grow in Christ",
+      "Commitment: How to Fulfil Purpose",
+    ],
   },
   {
-    title: "A real next step",
+    level: "Level 2",
+    title: "Growth",
     description:
-      "It is the place to move when you want more than casual content and are ready for intentional formation.",
+      "Level 2 helps you grow in doctrine, Scripture, and understanding as you stay with the course more deliberately.",
+    modules: [
+      "Introduction to Doctrinal Summaries",
+      "Bibliology",
+      "God and His Eternal Purpose",
+      "Biblical Origin and Ontology",
+      "Sin and its Implication",
+      "God's Wisdom Towards Redemption",
+      "Christology",
+      "Redemption",
+      "Church and its Mission",
+      "Eschatology",
+      "The New Creation",
+    ],
   },
   {
-    title: "Steady spiritual rhythm",
+    level: "Level 3",
+    title: "Ministry",
     description:
-      "The goal is not pressure. It is helping you keep a faithful rhythm of truth, prayer, and maturity.",
+      "Level 3 turns growth outward into ministry, service, care, and discipleship.",
+    modules: [
+      "The Truth on Morality",
+      "Roadmap of God's Purpose",
+      "Baptism of the Holy Ghost",
+      "Discipleship — The Path for Growth",
+      "Your Place in the Local Church",
+      "The Forgiveness of Sins",
+      "The Newness of Life",
+      "The Life of Prayer",
+      "Bible Interpretation",
+      "Healing in the Newness of Life",
+      "Believer’s Authority",
+      "The Righteousness of God in Christ",
+      "The Love Nature",
+      "The Walk of Faith",
+      "Natural Assignment in the Newness of Life",
+      "Spiritual Assignment in the Newness of Life",
+      "Eschatology",
+      "Supernatural in the Newness of Life",
+      "True Worship",
+      "Relationship in the Newness of Life",
+      "Discipline — The Drive of the Spirit",
+      "Leading in the Newness of Life",
+      "Giving and Financial Stewardship",
+      "Devotion — Fellowship with the Father",
+      "Satan & Demons",
+      "Angels",
+      "The Hidden Man",
+      "Faith for Natural Life",
+      "Leadership in the Body of Christ",
+      "Spiritual Warfare",
+    ],
+  },
+] as const;
+
+export const fulfilPageReasons = [
+  {
+    title: "It gives structure to your growth",
+    description:
+      "PPC helps you stay in order instead of growing in scattered moments.",
+  },
+  {
+    title: "It keeps you with sound doctrine",
+    description:
+      "The course is built to help you stay with the truth carefully and grow in understanding.",
+  },
+  {
+    title: "It moves you from learning into response",
+    description:
+      "Through lessons, quizzes, and written responses, PPC helps you engage what you are receiving.",
   },
 ] as const;
 
 export const fulfilPageCta = {
-  title: "Ready to keep growing?",
+  title: "Ready to start PPC?",
   description:
-    "Enter PPC when you want a more deliberate pathway for spiritual growth, discipleship, and fulfilment of God's purpose.",
+    "Enter the Pleros Perfecting Course and begin moving through the levels.",
   ctaLabel: "Enter PPC",
   ctaHref: "/ppc",
 } as const;

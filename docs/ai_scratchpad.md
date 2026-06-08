@@ -169,3 +169,54 @@
 
 ### Action Rule
 - For future public series pages, pull description copy from the canonical episode/page source first; summarize only when the user asks for a rewrite.
+
+## [2026-06-08] Ministry voice on public pathway pages
+
+### Mistake
+- Wrote `/fulfil` in a generic spiritual-growth voice instead of the tighter ministry voice already established across the public Pleros pages.
+
+### Correction
+- The page needed to speak directly about PPC as the Pleros Perfecting Course, in the same internal frame the ministry already uses elsewhere.
+
+### Lesson
+- Public pathway pages should not sound like an outsider describing the ministry; they should use the repo's own ministry concepts, naming, and progression.
+
+### Preference
+- `/fulfil` should function as the public entry point into PPC, with PPC-specific language, levels, and growth structure.
+
+### Action Rule
+- Before writing public page copy for a ministry pathway, inspect the linked destination product or course in the repo and write from that internal structure rather than from generic category language.
+
+## [2026-06-08] Concurrent page edits
+
+### Mistake
+- None in this task.
+
+### Correction
+- User indicated they are actively working on the Fulfil page while asking for review/next-step guidance.
+
+### Lesson
+- When the user is editing a page concurrently, avoid touching that route's component/content files and keep feedback at the coordination level unless explicitly asked to implement.
+
+### Preference
+- Do not overlap edits on `/fulfil` while the user is working there.
+
+### Action Rule
+- Treat `components/home/fulfil-page-view.tsx` and `lib/fulfil-page-content.ts` as user-owned until they ask for implementation help.
+
+## [2026-06-08] Podcast page intent
+
+### Mistake
+- Treated some podcast page presentation choices as possible critique targets while the user considered them deliberate.
+
+### Correction
+- User clarified that everything currently visible on the Pleros Podcast page is intentional.
+
+### Lesson
+- Do not second-guess intentional public-page design decisions after the user has approved the direction.
+
+### Preference
+- Preserve the current Pleros Podcast page presentation unless asked for a specific implementation fix.
+
+### Action Rule
+- For `/podcast`, limit feedback to functional blockers, tests, responsiveness, or explicit requested polish; do not suggest design-direction changes.
