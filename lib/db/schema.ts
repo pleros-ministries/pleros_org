@@ -53,6 +53,32 @@ export const contactSubmissionStatusEnum = pgEnum("contact_submission_status", [
   "resolved",
 ]);
 
+// ─── Welcome pack leads ─────────────────────────────────────────────────────
+
+export const welcomePackLeads = pgTable(
+  "welcome_pack_leads",
+  {
+    id: serial("id").primaryKey(),
+    email: text("email").notNull(),
+    name: text("name"),
+    source: text("source").notNull().default("welcome"),
+    mainAccessGranted: boolean("main_access_granted").notNull().default(true),
+    extraGiftsUnlocked: boolean("extra_gifts_unlocked").notNull().default(false),
+    sharedConfirmedAt: timestamp("shared_confirmed_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("welcome_pack_leads_email_idx").on(t.email),
+    index("welcome_pack_leads_created_at_idx").on(t.createdAt),
+    index("welcome_pack_leads_extra_gifts_idx").on(t.extraGiftsUnlocked),
+  ],
+);
+
 // ─── Users ──────────────────────────────────────────────────────────────────
 
 export const users = pgTable(

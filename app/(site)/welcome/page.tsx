@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 import { WelcomeLandingPage } from "@/components/home/welcome-landing-page";
 import {
@@ -12,6 +13,10 @@ export default async function WelcomePage() {
     cookieStore.get(WELCOME_ACCESS_COOKIE_NAME)?.value,
     process.env,
   );
+
+  if (welcomeAccess) {
+    redirect("/dashboard");
+  }
 
   return <WelcomeLandingPage hasWelcomeAccess={Boolean(welcomeAccess)} />;
 }

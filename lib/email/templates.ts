@@ -151,6 +151,11 @@ export type WelcomePackAccessProps = {
   dashboardUrl: string;
 };
 
+export type WelcomePackExtrasUnlockedProps = {
+  name: string;
+  dashboardUrl: string;
+};
+
 export type ContactSubmissionNotificationProps = {
   fullName: string;
   email: string;
@@ -165,6 +170,9 @@ export function welcomePackAccessHtml({
   name,
   dashboardUrl,
 }: WelcomePackAccessProps): string {
+  const safeName = escapeHtml(name);
+  const safeDashboardUrl = escapeHtml(dashboardUrl);
+
   return `
 <!DOCTYPE html>
 <html>
@@ -179,13 +187,13 @@ export function welcomePackAccessHtml({
 
   
     <div style="padding: 40px 32px;">
-      <h1 style="font-size: 24px; font-weight: 600; color: #0d1726; margin: 0 0 16px; letter-spacing: -0.024em;">Your Pleros Welcome Pack</h1>
+      <h1 style="font-size: 24px; font-weight: 600; color: #0d1726; margin: 0 0 16px; letter-spacing: -0.024em;">Your main gift is ready</h1>
       <p style="font-size: 16px; color: #142033; line-height: 1.6; margin: 0 0 32px; letter-spacing: -0.02em;">
-        Welcome, ${name}! We're thrilled to have you. Your personal Pleros dashboard access is ready, giving you full access to everything you need to get started. 
+        Welcome, ${safeName}! Your main Pleros welcome gift is ready in your dashboard. You can also unlock two extra gifts by sharing the free gift with someone who may be blessed by it.
       </p>
       
      
-      <a href="${dashboardUrl}" style="display: inline-block; padding: 14px 28px; background-color: #011585; color: #ffffff; border-radius: 999px; font-size: 16px; font-weight: 500; text-decoration: none; text-align: center; box-shadow: 0 4px 14px rgba(15, 23, 40, 0.05); line-height: 1;">
+      <a href="${safeDashboardUrl}" style="display: inline-block; padding: 14px 28px; background-color: #011585; color: #ffffff; border-radius: 999px; font-size: 16px; font-weight: 500; text-decoration: none; text-align: center; box-shadow: 0 4px 14px rgba(15, 23, 40, 0.05); line-height: 1;">
         Access your Welcome Pack
       </a>
 
@@ -195,6 +203,38 @@ export function welcomePackAccessHtml({
       <p style="font-size: 13px; color: #58657a; margin: 0; line-height: 1.5;">
         You're receiving this email because you recently signed up for Pleros. If this was a mistake, you can simply ignore it.
       </p>
+    </div>
+  </div>
+</body>
+</html>`.trim();
+}
+
+export function welcomePackExtrasUnlockedHtml({
+  name,
+  dashboardUrl,
+}: WelcomePackExtrasUnlockedProps): string {
+  const safeName = escapeHtml(name);
+  const safeDashboardUrl = escapeHtml(dashboardUrl);
+
+  return `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8" /></head>
+<body style="font-family: 'Suisse Int\\'l', Inter, ui-sans-serif, system-ui, sans-serif; background-color: #fdfdfc; margin: 0; padding: 40px 16px;">
+  <div style="max-width: 520px; margin: 0 auto; background: #ffffff; border: 1px solid rgba(15, 23, 40, 0.08); border-radius: 20px; box-shadow: 0 10px 30px rgba(15, 23, 40, 0.08); overflow: hidden;">
+    <div style="background-color: #011585; padding: 40px 32px; text-align: center;">
+      <img src="https://pleros-org.vercel.app/brand/white-logotype.png" alt="Pleros" width="120" style="display: block; margin: 0 auto;" />
+    </div>
+
+    <div style="padding: 40px 32px;">
+      <h1 style="font-size: 24px; font-weight: 600; color: #0d1726; margin: 0 0 16px; letter-spacing: -0.024em;">Your extra gifts are unlocked</h1>
+      <p style="font-size: 16px; color: #142033; line-height: 1.6; margin: 0 0 32px; letter-spacing: -0.02em;">
+        Thank you, ${safeName}. Your two extra Pleros welcome gifts are now available in your dashboard.
+      </p>
+
+      <a href="${safeDashboardUrl}" style="display: inline-block; padding: 14px 28px; background-color: #011585; color: #ffffff; border-radius: 999px; font-size: 16px; font-weight: 500; text-decoration: none; text-align: center; box-shadow: 0 4px 14px rgba(15, 23, 40, 0.05); line-height: 1;">
+        Open your unlocked gifts
+      </a>
     </div>
   </div>
 </body>

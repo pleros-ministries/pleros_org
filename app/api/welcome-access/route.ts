@@ -10,6 +10,7 @@ import {
   WELCOME_ACCESS_MAX_AGE,
 } from "@/lib/welcome-access";
 import { sendWelcomePackAccessEmail } from "@/lib/email/send";
+import { upsertWelcomePackLead } from "@/lib/db/queries/welcome-pack-leads";
 import {
   normalizeWelcomeReturnTo,
   provisionWelcomeSession,
@@ -17,9 +18,10 @@ import {
 
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as
-    | { email?: string; returnTo?: string }
+    | { email?: string; returnTo?: string; source?: string }
     | null;
   const email = body?.email?.trim().toLowerCase() ?? "";
+  const source = body?.source?.trim() || "welcome";
   const returnTo = normalizeWelcomeReturnTo(body?.returnTo, "/dashboard");
 
   if (!validateEmail(email)) {
@@ -65,7 +67,13 @@ export async function POST(request: Request) {
     maxAge: WELCOME_ACCESS_MAX_AGE,
   });
 
-  const dashboardUrl = new URL("/dashboard", request.url).toString();
+  await upsertWelcomePackLead({
+    email,
+    name,
+    source,
+  });
+
+  const dashboardUrl = new URL("/dashboard/welcomepack", request.url).toString();
 
   void sendWelcomePackAccessEmail({
     to: email,

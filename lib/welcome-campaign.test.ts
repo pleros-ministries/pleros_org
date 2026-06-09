@@ -23,6 +23,7 @@ describe("welcome campaign pages", () => {
     );
 
     expect(pageSource).toContain("WelcomeLandingPage");
+    expect(pageSource).toContain('redirect("/dashboard")');
     expect(viewSource).toContain("Get your free book");
     expect(viewSource).toContain('redirectTo="/thankyou"');
     expect(viewSource).toContain("autoOpen={false}");
@@ -65,9 +66,9 @@ describe("welcome campaign helpers", () => {
     expect(
       resolvePublicSiteUrl({
         NEXT_PUBLIC_APP_URL: "https://example.com/path",
-      } as NodeJS.ProcessEnv),
+      } as unknown as NodeJS.ProcessEnv),
     ).toBe("https://example.com");
-    expect(resolvePublicSiteUrl({} as NodeJS.ProcessEnv)).toBe(
+    expect(resolvePublicSiteUrl({} as unknown as NodeJS.ProcessEnv)).toBe(
       "https://pleros-org.vercel.app",
     );
   });

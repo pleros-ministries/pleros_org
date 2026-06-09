@@ -30,6 +30,7 @@ type HomepageGiftDrawerProps = {
   triggerLabel?: string;
   submitLabel?: string;
   pendingLabel?: string;
+  source?: string;
 };
 
 export function HomepageGiftDrawer({
@@ -39,6 +40,7 @@ export function HomepageGiftDrawer({
   triggerLabel,
   submitLabel = "access welcome pck",
   pendingLabel = "Opening your dashboard",
+  source = "welcome",
 }: HomepageGiftDrawerProps) {
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
@@ -103,7 +105,11 @@ export function HomepageGiftDrawer({
         headers: {
           "content-type": "application/json",
         },
-        body: JSON.stringify({ email: normalizedEmail, returnTo: redirectTo }),
+        body: JSON.stringify({
+          email: normalizedEmail,
+          returnTo: redirectTo,
+          source,
+        }),
       });
 
       const payload = (await response.json().catch(() => null)) as
@@ -151,7 +157,6 @@ export function HomepageGiftDrawer({
       >
         <div className="mx-auto grid w-full max-w-[36.1875rem] gap-5 px-5 pb-6 pt-4">
           <div className="relative overflow-hidden rounded-[1.5rem] bg-[var(--color-brand-blue)] px-4 pb-5 pt-4 text-white shadow-[0_18px_40px_rgba(6,16,86,0.2)]">
-
             <SheetHeader className="relative gap-4 border-none pb-0 pr-0">
               <div className="flex items-start justify-between gap-4">
                 <div className="inline-flex w-fit items-center gap-2 rounded-full border border-white/14 bg-white/10 px-3 py-1.5 text-[0.7rem] font-semibold tracking-[0.08em] text-white/92 uppercase">

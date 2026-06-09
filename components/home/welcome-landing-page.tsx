@@ -49,6 +49,7 @@ export function WelcomeLandingPage({
                     triggerLabel="Get your free book"
                     submitLabel="Get your free book"
                     pendingLabel="Opening your gift"
+                    source="welcome"
                   />
                 )}
 
