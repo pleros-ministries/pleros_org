@@ -21,7 +21,7 @@ export const welcomeDashboardSections: WelcomeDashboardSection[] = [
         id: "welcome-pack",
         title: "Your Welcome Pack",
         description:
-          "Your daily dose of God's Word helping you fulfil God's purpose",
+          "Your daily dose of God's Word helping you fulfill God's purpose",
         href: "/dashboard/welcomepack",
         accent: "orange",
       },
@@ -41,14 +41,14 @@ export const welcomeDashboardSections: WelcomeDashboardSection[] = [
         id: "podcast",
         title: "The Pleros Podcast",
         description:
-          "Your daily dose of God's Word helping you fulfil God's purpose",
+          "Your daily dose of God's Word helping you fulfill God's purpose",
         accent: "orange",
       },
       {
         id: "prayer-watch-devotion",
         title: "Prayer Watch",
         description:
-          "Be trained to walk in and fulfil God's purpose for your life.",
+          "Be trained to walk in and fulfill God's purpose for your life.",
         accent: "blue",
       },
     ],
@@ -61,14 +61,14 @@ export const welcomeDashboardSections: WelcomeDashboardSection[] = [
         id: "perfecting-course",
         title: "Pleros Perfecting Course",
         description:
-          "Your daily dose of God's Word helping you fulfil God's purpose",
+          "Your daily dose of God's Word helping you fulfill God's purpose",
         accent: "orange",
       },
       {
         id: "school-of-purpose",
         title: "School of God's Purpose",
         description:
-          "Be trained to walk in and fulfil God's purpose for your life.",
+          "Be trained to walk in and fulfill God's purpose for your life.",
         accent: "blue",
       },
     ],
@@ -81,14 +81,14 @@ export const welcomeDashboardSections: WelcomeDashboardSection[] = [
         id: "assignments",
         title: "Assignments",
         description:
-          "Your daily dose of God's Word helping you fulfil God's purpose",
+          "Your daily dose of God's Word helping you fulfill God's purpose",
         accent: "orange",
       },
       {
         id: "partnership",
         title: "Partnership",
         description:
-          "Be trained to walk in and fulfil God's purpose for your life.",
+          "Be trained to walk in and fulfill God's purpose for your life.",
         accent: "blue",
       },
     ],

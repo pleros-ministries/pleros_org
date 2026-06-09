@@ -7,6 +7,7 @@ export type PpcShellIcon =
   | "students"
   | "review"
   | "qa"
+  | "contact"
   | "notifications"
   | "learning";
 
@@ -71,6 +72,12 @@ export const PPC_SHELL_NAV_ITEMS: PpcShellNavItem[] = [
     label: "Q&A inbox",
     path: "/qa",
     icon: "qa",
+    roles: ["admin", "instructor"],
+  },
+  {
+    label: "Contact",
+    path: "/contact",
+    icon: "contact",
     roles: ["admin", "instructor"],
   },
   {
@@ -264,6 +271,13 @@ export function getPpcShellContext(pathname: string): PpcShellContext {
     return {
       label: "Q&A inbox",
       description: "Student threads and staff replies",
+    };
+  }
+
+  if (logicalPath === "/contact") {
+    return {
+      label: "Contact submissions",
+      description: "Public leads, messages, and follow-up status",
     };
   }
 

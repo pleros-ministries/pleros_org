@@ -126,7 +126,9 @@ function TeachingRow({
             aria-label={isThisPlaying ? "Pause" : "Play"}
             onClick={(e) => {
               e.stopPropagation();
-              canPlay && onPlay();
+              if (canPlay) {
+                onPlay();
+              }
             }}
             disabled={!canPlay}
             className={`row-play flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-all ${isActive
@@ -291,22 +293,16 @@ export function LibraryTable({ teachings }: Props) {
     <>
       <LibrarySidebar teachings={teachings} sortMode={sortMode} setSortMode={setSortMode} />
 
-      <div
-        className="min-w-0 flex-1 pb-32"
-        style={{ fontFamily: "var(--font-figtree, sans-serif)" }}
-      >
+      <div className="min-w-0 flex-1 pb-32 font-[var(--font-be-vietnam-pro)]">
         {/* ── Page header ── */}
         <div className="border-b border-[#e8e8ee] bg-white px-9 pb-5 pt-9">
           <div className="mb-2 text-[11px] font-[700] uppercase tracking-[2px] text-[#2563eb]">
             Teaching Library
           </div>
-          <h1 className="text-[32px] font-[800] leading-tight tracking-tight text-[#0d1b5e]">
+          <h1 className="font-[var(--font-sen)] text-[32px] font-[800] leading-tight tracking-tight text-[#0d1b5e]">
             The Pleros Library
           </h1>
-          <p
-            className="mt-1.5 text-[14px] font-[400] text-[#8888a0]"
-            style={{ fontFamily: "var(--font-dm-sans, sans-serif)", fontStyle: "italic" }}
-          >
+          <p className="mt-1.5 text-[14px] font-[400] italic text-[#8888a0]">
             Teachings on faith, purpose, redemption, and the new creation.
             Click any teaching to play it, or download for offline listening.
           </p>

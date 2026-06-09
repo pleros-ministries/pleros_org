@@ -10,6 +10,7 @@ import {
   index,
   pgEnum,
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 
 export const userRoleEnum = pgEnum("user_role", [
   "admin",
@@ -44,6 +45,12 @@ export const qaAuthorRoleEnum = pgEnum("qa_author_role", [
   "student",
   "instructor",
   "admin",
+]);
+
+export const contactSubmissionStatusEnum = pgEnum("contact_submission_status", [
+  "new",
+  "read",
+  "resolved",
 ]);
 
 // ─── Users ──────────────────────────────────────────────────────────────────
@@ -327,5 +334,43 @@ export const pushSubscriptions = pgTable(
   (t) => [
     index("push_subscriptions_user_idx").on(t.userId),
     uniqueIndex("push_subscriptions_endpoint_idx").on(t.endpoint),
+  ],
+);
+
+// ─── Contact submissions ────────────────────────────────────────────────────
+
+export const contactSubmissions = pgTable(
+  "contact_submissions",
+  {
+    id: serial("id").primaryKey(),
+    fullName: text("full_name").notNull(),
+    email: text("email").notNull(),
+    phone: text("phone").notNull(),
+    location: text("location"),
+    message: text("message").notNull(),
+    status: contactSubmissionStatusEnum("status").notNull().default("new"),
+    isSpam: boolean("is_spam").notNull().default(false),
+    spamReasons: jsonb("spam_reasons")
+      .notNull()
+      .$type<string[]>()
+      .default(sql`'[]'::jsonb`),
+    honeypotValue: text("honeypot_value"),
+    formStartedAt: timestamp("form_started_at", { withTimezone: true }),
+    submitDurationMs: integer("submit_duration_ms"),
+    notificationSentAt: timestamp("notification_sent_at", { withTimezone: true }),
+    notificationFailure: text("notification_failure"),
+    readAt: timestamp("read_at", { withTimezone: true }),
+    resolvedAt: timestamp("resolved_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index("contact_submissions_status_idx").on(t.status),
+    index("contact_submissions_is_spam_idx").on(t.isSpam),
+    index("contact_submissions_created_at_idx").on(t.createdAt),
   ],
 );

@@ -10,6 +10,7 @@ export function HomepagePathwayCard({
   mobileDescription,
   href,
   headerImageSrc,
+  headerImageClassName,
   wordmarkImageSrc,
   surfaceClassName,
   headerClassName,
@@ -25,7 +26,7 @@ export function HomepagePathwayCard({
               src={headerImageSrc}
               alt=""
               fill
-              className="object-cover"
+              className={headerImageClassName ?? "object-cover"}
               sizes="(max-width: 767px) 50vw, 249px"
             />
           ) : null}

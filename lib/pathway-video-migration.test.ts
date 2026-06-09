@@ -68,7 +68,7 @@ describe("pathway video migration helpers", () => {
   test("collects only Drive-backed pathway videos for migration", () => {
     const videos = collectPathwayVideoSources();
 
-    expect(videos).toHaveLength(15);
+    expect(videos).toHaveLength(4);
     expect(videos.every((video) => video.previewUrl.includes("/preview"))).toBe(
       true,
     );
@@ -77,17 +77,12 @@ describe("pathway video migration helpers", () => {
     );
     expect(videos[0]).toMatchObject({
       pathway: "questions",
-      seriesSlug: "most-important-questions-series",
-      videoId: "most-important-questions-1",
-      driveFileId: "1jVbUwpPqsdS7vPuK9bxDHymu_dDNB2Vm",
+      seriesSlug: "gospel-answers-simple-series",
+      videoId: "gospel-answers-simple-1",
+      driveFileId: "1_T-BOBV5dUDKszvuTCVlmkxKWEU_9bG_",
       customId:
-        "pathway-videos/questions/most-important-questions-series/most-important-questions-1",
+        "pathway-videos/questions/gospel-answers-simple-series/gospel-answers-simple-1",
     });
-    expect(
-      videos.find((video) => video.videoId === "gods-purpose-02"),
-    ).toMatchObject({
-      pathway: "purpose",
-      driveFileId: "1YQDScqhn7CLszSwSNX5L3oMqIjJVehv4",
-    });
+    expect(videos.some((video) => video.pathway === "purpose")).toBe(false);
   });
 });

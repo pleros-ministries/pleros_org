@@ -22,6 +22,7 @@ describe("contact page", () => {
     const contentSource = readFileSync(contentPath, "utf8");
 
     expect(routeSource).toContain("ContactPageView");
+    expect(routeSource).toContain('dynamic = "force-dynamic"');
     expect(contentSource).toContain("Contact Us");
     expect(contentSource).toContain("Reach out to us.");
     expect(contentSource).toContain("Full Name");
@@ -30,6 +31,7 @@ describe("contact page", () => {
     expect(contentSource).toContain("Location");
     expect(contentSource).toContain("Write your Message");
     expect(contentSource).toContain("SEND MESSAGE");
+    expect(viewSource).toContain("ContactForm");
     expect(viewSource).toContain("HomepageCommunitySection");
     expect(viewSource).toContain("HomepageFooter");
   });

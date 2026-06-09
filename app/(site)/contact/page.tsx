@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 
 import { ContactPageView } from "../../../components/home/contact-page-view";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Contact Us | Pleros",
   description:

@@ -9,13 +9,18 @@ import {
   WELCOME_ACCESS_COOKIE_NAME,
   WELCOME_ACCESS_MAX_AGE,
 } from "@/lib/welcome-access";
-import { provisionWelcomeSession } from "@/lib/welcome-session";
+import { sendWelcomePackAccessEmail } from "@/lib/email/send";
+import {
+  normalizeWelcomeReturnTo,
+  provisionWelcomeSession,
+} from "@/lib/welcome-session";
 
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as
-    | { email?: string }
+    | { email?: string; returnTo?: string }
     | null;
   const email = body?.email?.trim().toLowerCase() ?? "";
+  const returnTo = normalizeWelcomeReturnTo(body?.returnTo, "/dashboard");
 
   if (!validateEmail(email)) {
     return NextResponse.json(
@@ -32,7 +37,8 @@ export async function POST(request: Request) {
       name,
       requestHeaders: request.headers,
     });
-  } catch {
+  } catch (error) {
+    console.error("Welcome Access Session Provision Error:", error);
     return NextResponse.json(
       {
         error:
@@ -59,5 +65,15 @@ export async function POST(request: Request) {
     maxAge: WELCOME_ACCESS_MAX_AGE,
   });
 
-  return NextResponse.json({ redirectTo: "/dashboard" });
+  const dashboardUrl = new URL("/dashboard", request.url).toString();
+
+  void sendWelcomePackAccessEmail({
+    to: email,
+    name,
+    dashboardUrl,
+  }).catch((err) => {
+    console.error("Failed to send welcome pack email:", err);
+  });
+
+  return NextResponse.json({ redirectTo: returnTo });
 }

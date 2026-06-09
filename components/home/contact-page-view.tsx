@@ -1,14 +1,10 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
-  contactFormFields,
-  contactMessagePlaceholder,
   contactPageHero,
   contactPageIntro,
   contactPageLeadLines,
-  contactSubmitLabel,
 } from "@/lib/contact-page-content";
 
+import { ContactForm } from "./contact-form";
 import { HomepageCommunitySection } from "./homepage-community-section";
 import { HomepageFooter } from "./homepage-footer";
 import { HomepageNav } from "./homepage-nav";
@@ -48,35 +44,7 @@ export function ContactPageView() {
                 {contactPageIntro}
               </p>
             </div>
-
-            <form className="grid gap-3.5" action="#">
-              {contactFormFields.map((field) => (
-                <Input
-                  key={field.id}
-                  id={field.id}
-                  type={field.type}
-                  placeholder={field.placeholder}
-                  aria-label={field.placeholder}
-                  className="h-[2.6875rem] rounded-[0.75rem] border-[rgba(6,16,86,0.12)] px-4 text-[0.875rem] text-[var(--color-text-strong)] placeholder:text-[rgba(6,16,86,0.55)]"
-                />
-              ))}
-
-              <textarea
-                id="message"
-                name="message"
-                placeholder={contactMessagePlaceholder}
-                aria-label={contactMessagePlaceholder}
-                className="min-h-[6.875rem] w-full rounded-[0.75rem] border border-[rgba(6,16,86,0.12)] bg-white px-4 py-3 text-[0.875rem] text-[var(--color-text-strong)] outline-none transition-[border-color,box-shadow] duration-150 ease-out placeholder:text-[rgba(6,16,86,0.55)] focus-visible:border-[var(--color-brand-blue)] focus-visible:ring-4 focus-visible:ring-[var(--color-focus)] md:min-h-[8rem]"
-              />
-
-              <Button
-                type="button"
-                size="lg"
-                className="mt-1 min-h-[2.875rem] w-full rounded-full px-6 text-[0.875rem] font-semibold tracking-[0.02em]"
-              >
-                {contactSubmitLabel}
-              </Button>
-            </form>
+            <ContactForm />
           </div>
         </section>
 

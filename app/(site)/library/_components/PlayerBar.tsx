@@ -38,11 +38,10 @@ export function PlayerBar() {
     <div
       role="region"
       aria-label="Audio player"
-      className="fixed bottom-0 left-0 right-0 z-[200] flex flex-col border-t border-[#e8e8ee] bg-white transition-transform duration-[350ms] [transition-timing-function:cubic-bezier(0.34,1.4,0.64,1)]"
+      className="fixed bottom-0 left-0 right-0 z-[200] flex items-center gap-6 border-t border-[#e8e8ee] bg-white px-7 font-[var(--font-be-vietnam-pro)] transition-transform duration-[350ms] [cubic-bezier(0.34,1.4,0.64,1)] [transition-timing-function:cubic-bezier(0.34,1.4,0.64,1)]"
       style={{
         boxShadow: "0 -8px 32px rgba(0,0,0,0.08)",
         transform: isVisible ? "translateY(0)" : "translateY(100%)",
-        fontFamily: "var(--font-figtree, sans-serif)",
       }}
     >
       {/* ── Progress strip — mobile only ─────────────────────────── */}

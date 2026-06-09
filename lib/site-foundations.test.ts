@@ -48,7 +48,7 @@ describe("site foundations", () => {
       },
       {
         id: "fulfil",
-        label: "Fulfil",
+        label: "Fulfill",
         tone: "fulfil",
         badgeVariant: "fulfil",
       },
