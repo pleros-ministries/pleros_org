@@ -237,3 +237,20 @@
 
 ### Action Rule
 - For `/podcast`, limit feedback to functional blockers, tests, responsiveness, or explicit requested polish; do not suggest design-direction changes.
+
+## [2026-06-08] Public contact flow boundaries
+
+### Mistake
+- None in this task.
+
+### Correction
+- User clarified that public contact submissions must redirect to `/welcome` without creating welcome-pack access or carrying data into the welcome flow.
+
+### Lesson
+- Treat lead capture and welcome-access onboarding as separate workflows unless the user explicitly asks to connect them.
+
+### Preference
+- Public contact flows should stay in the public-site theme while remaining operationally separate from welcome access.
+
+### Action Rule
+- For future public lead forms in this repo, do not mint welcome tokens, auto-provision access, or prefill welcome dashboards unless that coupling is explicitly requested.

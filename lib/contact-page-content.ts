@@ -13,10 +13,10 @@ export const contactPageIntro =
   "We are a Christ-centered church committed to raising believers who truly know God, understand His Word, and walk boldly in His purpose for their lives. Our focus is simple: to disciple, to build, and to equip men and women to live out the life God has designed for them." as const;
 
 export const contactFormFields = [
-  { id: "full-name", placeholder: "Full Name", type: "text" },
-  { id: "email-address", placeholder: "Email Address", type: "email" },
-  { id: "phone-number", placeholder: "Phone Number", type: "tel" },
-  { id: "location", placeholder: "Location", type: "text" },
+  { id: "full-name", name: "fullName", placeholder: "Full Name", type: "text" },
+  { id: "email-address", name: "email", placeholder: "Email Address", type: "email" },
+  { id: "phone-number", name: "phone", placeholder: "Phone Number", type: "tel" },
+  { id: "location", name: "location", placeholder: "Location", type: "text" },
 ] as const;
 
 export const contactMessagePlaceholder = "Write your Message";

@@ -14,6 +14,7 @@ import {
   Menu,
   LogOut,
   LayoutDashboard,
+  Mail,
   MessageSquareText,
   NotebookPen,
   PanelLeftClose,
@@ -64,6 +65,7 @@ const iconMap: Record<PpcShellIcon, React.ComponentType<{ className?: string }>>
   students: Users,
   review: ClipboardCheck,
   qa: MessageSquareText,
+  contact: Mail,
   notifications: BellRing,
   learning: NotebookPen,
 };

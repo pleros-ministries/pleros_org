@@ -30,6 +30,7 @@ describe("contact page", () => {
     expect(contentSource).toContain("Location");
     expect(contentSource).toContain("Write your Message");
     expect(contentSource).toContain("SEND MESSAGE");
+    expect(viewSource).toContain("ContactForm");
     expect(viewSource).toContain("HomepageCommunitySection");
     expect(viewSource).toContain("HomepageFooter");
   });

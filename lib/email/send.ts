@@ -1,5 +1,6 @@
 import { resend, isEmailEnabled } from "./resend";
 import {
+  contactSubmissionNotificationHtml,
   inactivityReminderHtml,
   submissionReviewedHtml,
   graduationCongratulationsHtml,
@@ -106,4 +107,47 @@ export async function sendWelcomePackAccessEmail(opts: {
       dashboardUrl: opts.dashboardUrl,
     }),
   });
+}
+
+export async function sendContactSubmissionNotification(opts: {
+  fullName: string;
+  email: string;
+  phone: string;
+  location: string | null;
+  message: string;
+  submittedAt: string;
+  adminUrl: string;
+}) {
+  const to = process.env.CONTACT_INBOX_EMAIL?.trim();
+
+  if (!to) {
+    return {
+      ok: false as const,
+      reason: "missing_contact_inbox" as const,
+    };
+  }
+
+  if (!isEmailEnabled() || !resend) {
+    return {
+      ok: false as const,
+      reason: "email_unavailable" as const,
+    };
+  }
+
+  try {
+    await resend.emails.send({
+      from: process.env.EMAIL_FROM_PLEROS ?? FROM,
+      to,
+      replyTo: opts.email,
+      subject: `New contact submission from ${opts.fullName}`,
+      html: contactSubmissionNotificationHtml(opts),
+    });
+
+    return { ok: true as const };
+  } catch {
+    return {
+      ok: false as const,
+      reason: "send_failed" as const,
+    };
+  }
 }

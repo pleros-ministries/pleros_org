@@ -56,6 +56,12 @@ describe("ppc shell helpers", () => {
         roles: ["admin", "instructor"],
       },
       {
+        label: "Contact",
+        path: "/contact",
+        icon: "contact",
+        roles: ["admin", "instructor"],
+      },
+      {
         label: "Notifications",
         path: "/notifications",
         icon: "notifications",
@@ -78,11 +84,12 @@ describe("ppc shell helpers", () => {
       "/students",
       "/review",
       "/qa",
+      "/contact",
       "/notifications",
     ]);
     expect(
       getVisiblePpcShellNavItems("instructor").map((item) => item.path),
-    ).toEqual(["/", "/students", "/review", "/qa", "/notifications"]);
+    ).toEqual(["/", "/students", "/review", "/qa", "/contact", "/notifications"]);
     expect(getVisiblePpcShellNavItems("student").map((item) => item.path)).toEqual([
       "/student",
     ]);
@@ -115,6 +122,10 @@ describe("ppc shell helpers", () => {
     expect(getPpcShellContext("/qa")).toEqual({
       label: "Q&A inbox",
       description: "Student threads and staff replies",
+    });
+    expect(getPpcShellContext("/contact")).toEqual({
+      label: "Contact submissions",
+      description: "Public leads, messages, and follow-up status",
     });
     expect(getPpcShellContext("/notifications")).toEqual({
       label: "Notifications",
