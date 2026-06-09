@@ -72,7 +72,7 @@ export function PlayerBar() {
             />
           </div>
           <div className="min-w-0">
-            <p className="truncate text-[13px] font-[700] text-[#0d1b5e]">
+            <p className="truncate font-[var(--font-sen)] text-[13px] font-[700] text-[#0d1b5e]">
               {currentTrack?.title ?? ""}
             </p>
             <p className="truncate text-[11px] font-[500] text-[#8888a0]">

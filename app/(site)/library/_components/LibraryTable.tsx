@@ -151,7 +151,7 @@ function TeachingRow({
             )}
           </button>
           <span
-            className={`text-[13px] font-[600] leading-snug ${isActive ? "text-white" : "text-[#111118]"
+            className={`font-[var(--font-sen)] text-[13px] font-[600] leading-snug ${isActive ? "text-white" : "text-[#111118]"
               }`}
           >
             {teaching.title}
@@ -296,7 +296,7 @@ export function LibraryTable({ teachings }: Props) {
       <div className="min-w-0 flex-1 pb-32 font-[var(--font-be-vietnam-pro)]">
         {/* ── Page header ── */}
         <div className="border-b border-[#e8e8ee] bg-white px-9 pb-5 pt-9">
-          <div className="mb-2 text-[11px] font-[700] uppercase tracking-[2px] text-[#2563eb]">
+          <div className="font-[var(--font-sen)] mb-2 text-[11px] font-[700] uppercase tracking-[2px] text-[#2563eb]">
             Teaching Library
           </div>
           <h1 className="font-[var(--font-sen)] text-[32px] font-[800] leading-tight tracking-tight text-[#0d1b5e]">
@@ -379,7 +379,7 @@ export function LibraryTable({ teachings }: Props) {
                 ].map(({ label, cls }, i) => (
                   <th
                     key={i}
-                    className={`bg-[#f9f9fb] px-3 py-3.5 text-[10px] font-[700] uppercase tracking-[1.5px] text-[#8888a0] ${cls}`}
+                    className={`bg-[#f9f9fb] px-3 py-3.5 font-[var(--font-sen)] text-[10px] font-[700] uppercase tracking-[1.5px] text-[#8888a0] ${cls}`}
                   >
                     {label}
                   </th>
@@ -400,7 +400,7 @@ export function LibraryTable({ teachings }: Props) {
                     <tr className="border-b border-[#e8e8ee] border-t-2 border-t-[#d4d4de]">
                       <td
                         colSpan={6}
-                        className="bg-[#f9f9fb] px-3 py-2.5 text-[10px] font-[800] uppercase tracking-[2px] text-[#0d1b5e]"
+                        className="bg-[#f9f9fb] px-3 py-2.5 font-[var(--font-sen)] text-[10px] font-[800] uppercase tracking-[2px] text-[#0d1b5e]"
                       >
                         {getSeriesEmoji(series)} {series}
                         <span className="ml-2 rounded-full bg-[#e8e8ee] px-1.5 py-[1px] text-[10px] font-[600] normal-case tracking-normal text-[#8888a0]">

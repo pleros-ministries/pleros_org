@@ -18,7 +18,7 @@ type Props = {
 function StatCard({ label, value }: { label: string; value: number }) {
   return (
     <div className="rounded-xl border border-[#e8e8ee] bg-[#f1f1f5] p-3">
-      <div className="text-[22px] font-[800] leading-none tracking-tight text-[#0d1b5e]">
+      <div className="font-[var(--font-sen)] text-[22px] font-[800] leading-none tracking-tight text-[#0d1b5e]">
         {value}
       </div>
       <div className="mt-1 text-[10px] font-[500] uppercase tracking-[0.5px] text-[#8888a0]">
@@ -60,7 +60,7 @@ export function LibrarySidebar({ teachings, sortMode, setSortMode }: Props) {
     <aside className="sticky top-[4.25rem] hidden h-[calc(100vh-4.25rem)] w-[248px] shrink-0 flex-col gap-5 overflow-y-auto border-r border-[#e8e8ee] bg-white px-5 py-5 font-[var(--font-be-vietnam-pro)] md:flex">
       {/* ── Overview ── */}
       <div>
-        <p className="mb-3 text-[10px] font-[700] uppercase tracking-[1.5px] text-[#8888a0]">
+        <p className="mb-3 font-[var(--font-sen)] text-[10px] font-[700] uppercase tracking-[1.5px] text-[#8888a0]">
           Overview
         </p>
         <div className="grid grid-cols-2 gap-2">
@@ -75,7 +75,7 @@ export function LibrarySidebar({ teachings, sortMode, setSortMode }: Props) {
 
       {/* ── Sort by ── */}
       <div>
-        <p className="mb-2 text-[10px] font-[700] uppercase tracking-[1.5px] text-[#8888a0]">
+        <p className="mb-2 font-[var(--font-sen)] text-[10px] font-[700] uppercase tracking-[1.5px] text-[#8888a0]">
           Sort by
         </p>
         <div className="flex flex-col gap-0.5">
@@ -86,7 +86,7 @@ export function LibrarySidebar({ teachings, sortMode, setSortMode }: Props) {
                 key={mode}
                 type="button"
                 onClick={() => setSortMode(mode)}
-                className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] font-[500] transition-colors ${
+                className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 font-[var(--font-sen)] text-[13px] font-[500] transition-colors ${
                   active
                     ? "bg-[#eff4ff] text-[#2563eb]"
                     : "text-[#444450] hover:bg-[#f1f1f5]"
@@ -110,7 +110,7 @@ export function LibrarySidebar({ teachings, sortMode, setSortMode }: Props) {
 
       {/* ── Recently Added ── */}
       <div className="min-h-0 flex-1">
-        <p className="mb-2 text-[10px] font-[700] uppercase tracking-[1.5px] text-[#8888a0]">
+        <p className="mb-2 font-[var(--font-sen)] text-[10px] font-[700] uppercase tracking-[1.5px] text-[#8888a0]">
           Recently Added
         </p>
         <div className="flex flex-col gap-0.5">
@@ -138,7 +138,7 @@ export function LibrarySidebar({ teachings, sortMode, setSortMode }: Props) {
                 </span>
                 <span className="min-w-0">
                   <span
-                    className={`block truncate text-[12px] font-[600] ${
+                    className={`block truncate font-[var(--font-sen)] text-[12px] font-[600] ${
                       active ? "text-white" : "text-[#111118]"
                     }`}
                   >

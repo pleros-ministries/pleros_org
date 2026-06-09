@@ -150,15 +150,7 @@ export function HomepageGiftDrawer({
         className="site-font-theme gap-0 rounded-t-[1.75rem] border-x-0 border-b-0 bg-[linear-gradient(180deg,#f7faff_0%,#ffffff_48%)] px-0 pb-0 pt-0 text-[var(--color-text)] shadow-[0_-28px_64px_rgba(6,16,86,0.18)]"
       >
         <div className="mx-auto grid w-full max-w-[36.1875rem] gap-5 px-5 pb-6 pt-4">
-          <div className="relative overflow-hidden rounded-[1.5rem] bg-[linear-gradient(145deg,#061894_0%,#1426ad_52%,#0a1786_100%)] px-4 pb-5 pt-4 text-white shadow-[0_18px_40px_rgba(6,16,86,0.2)]">
-            <div
-              aria-hidden="true"
-              className="absolute inset-0 opacity-90"
-              style={{
-                background:
-                  "radial-gradient(circle at top right, rgba(233,237,1,0.3), transparent 10rem), radial-gradient(circle at 10% 15%, rgba(255,255,255,0.14), transparent 7rem)",
-              }}
-            />
+          <div className="relative overflow-hidden rounded-[1.5rem] bg-[var(--color-brand-blue)] px-4 pb-5 pt-4 text-white shadow-[0_18px_40px_rgba(6,16,86,0.2)]">
 
             <SheetHeader className="relative gap-4 border-none pb-0 pr-0">
               <div className="flex items-start justify-between gap-4">
@@ -196,15 +188,6 @@ export function HomepageGiftDrawer({
             onSubmit={handleSubmit}
             className="grid gap-3 rounded-[1.35rem] border border-[rgba(6,16,86,0.08)] bg-white px-4 py-4 shadow-[0_16px_34px_rgba(6,16,86,0.08)]"
           >
-            <div className="grid gap-1">
-              <p className="font-[var(--font-sen)] text-[1.05rem] font-semibold leading-[1] tracking-[-0.03em] text-[var(--color-text-strong)]">
-                Open your dashboard
-              </p>
-              <p className="font-[var(--font-be-vietnam-pro)] text-[0.86rem] leading-[1.35] tracking-[-0.02em] text-[var(--color-text-muted)]">
-                Enter your email to create your access and unlock the welcome pack.
-              </p>
-            </div>
-
             <Input
               type="email"
               inputMode="email"
