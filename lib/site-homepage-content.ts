@@ -9,6 +9,7 @@ export type HomePathwayCard = {
   mobileDescription?: string;
   href: string;
   headerImageSrc?: string;
+  headerImageClassName?: string;
   wordmarkImageSrc?: string;
   arrowImageSrc: string;
   surfaceClassName: string;
@@ -83,10 +84,11 @@ export const homePathwayCards: HomePathwayCard[] = [
     description: "Fellowship with us at any our branches nationwide",
     mobileDescription: "Fellowship with us at any our branches nationwide",
     href: "/about",
-    wordmarkImageSrc: "/site/home/assets/pleros-wordmark.png",
+    headerImageSrc: "/site/home/assets/church-pathway/church-logo-card.png",
+    headerImageClassName: "object-contain",
     arrowImageSrc: "/site/home/assets/card-arrows/church-card-arrow.svg",
     surfaceClassName: "bg-[#3744A5] text-white",
-    headerClassName: "bg-[#D9D9D9]",
+    headerClassName: "bg-[#15349B]",
   },
 ];
 

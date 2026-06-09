@@ -101,6 +101,24 @@ describe("site home page", () => {
     expect(contentSource).toContain('mobileDescription: "Fellowship with us at any our branches nationwide"');
   });
 
+  test("uses the dedicated church logo asset for the church pathway card header", () => {
+    const contentSource = readFileSync(
+      join(process.cwd(), "lib", "site-homepage-content.ts"),
+      "utf8",
+    );
+    const cardSource = readFileSync(
+      join(process.cwd(), "components", "home", "homepage-pathway-card.tsx"),
+      "utf8",
+    );
+
+    expect(contentSource).toContain(
+      'headerImageSrc: "/site/home/assets/church-pathway/church-logo-card.png"',
+    );
+    expect(contentSource).toContain('headerImageClassName: "object-contain"');
+    expect(contentSource).toContain('headerClassName: "bg-[#15349B]"');
+    expect(cardSource).toContain("headerImageClassName ?? \"object-cover\"");
+  });
+
   test("uses a refined hierarchy for the featured podcast card", () => {
     const globalsSource = readFileSync(
       join(process.cwd(), "app", "globals.css"),
