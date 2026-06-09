@@ -26,14 +26,14 @@ export function HomepagePodcastSection({
   return (
     <section
       id="podcast"
-      className="bg-[var(--color-brand-sky-soft)] px-[1.625rem] pb-16 pt-10"
+      className="bg-[var(--color-brand-sky-soft)] px-[1.625rem] pb-16 pt-10 lg:px-16 lg:py-20"
     >
-      <div className="grid gap-6">
-        <div className="grid justify-items-center gap-[0.62rem] text-center">
-          <h2 className="site-section-heading max-w-[30.9375rem]">
+      <div className="grid gap-6 lg:grid-cols-2 lg:items-center lg:gap-16">
+        <div className="grid justify-items-center gap-[0.62rem] text-center lg:justify-items-start lg:text-left">
+          <h2 className="site-section-heading max-w-[30.9375rem] lg:max-w-none">
             Stay Full of God&apos;s Word with the Pleros Podcast
           </h2>
-          <p className="max-w-[24.1875rem] text-[1.125rem] leading-[1.3] tracking-[-0.02em] text-[var(--color-text)]">
+          <p className="max-w-[24.1875rem] text-[1.125rem] leading-[1.3] tracking-[-0.02em] text-[var(--color-text)] lg:max-w-none">
             Your 15 minute dose of truth helping you fulfil God&apos;s Purpose.
             Available wherever you get your podcasts.
           </p>

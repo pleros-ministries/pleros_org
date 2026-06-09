@@ -15,11 +15,11 @@ export function HomepageSocialSection({ posts }: HomepageSocialSectionProps) {
   return (
     <section
       id="socials"
-      className="bg-[#EDFFEB] px-[1.5625rem] pb-[6.25rem] pt-[4.9375rem]"
+      className="bg-[#EDFFEB] px-[1.5625rem] pb-[6.25rem] pt-[4.9375rem] lg:px-16 lg:py-20"
     >
       <div className="grid gap-[1.8125rem]">
-        <div className="grid justify-items-center gap-[0.94rem] text-center">
-          <h2 className="site-section-heading max-w-[30.9375rem]">
+        <div className="grid justify-items-center gap-[0.94rem] text-center lg:justify-items-start lg:text-left">
+          <h2 className="site-section-heading max-w-[30.9375rem] lg:max-w-none">
             Follow for Daily Videos on Purpose and Gospel Answers
           </h2>
           <Link
@@ -33,14 +33,14 @@ export function HomepageSocialSection({ posts }: HomepageSocialSectionProps) {
         </div>
 
         {posts.length ? (
-          <div className="-mx-[1px] flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="-mx-[1px] flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:grid lg:grid-cols-5 lg:overflow-visible lg:pb-0 lg:snap-none">
             {posts.map((post) => (
               <Link
                 key={post.id}
                 href={post.href}
                 target="_blank"
                 rel="noreferrer"
-                className="group w-[20.5rem] shrink-0 snap-start overflow-hidden rounded-[1.125rem] border border-[rgba(6,16,86,0.1)] bg-white shadow-[0_14px_34px_rgba(6,16,86,0.08)]"
+                className="group w-[20.5rem] shrink-0 snap-start overflow-hidden rounded-[1.125rem] border border-[rgba(6,16,86,0.1)] bg-white shadow-[0_14px_34px_rgba(6,16,86,0.08)] lg:w-auto lg:shrink"
               >
                 <div className="flex items-center gap-3 px-3.5 py-3">
                   <div className="flex size-9 items-center justify-center rounded-full bg-[linear-gradient(135deg,#F58529,#DD2A7B,#8134AF)] p-[1.5px]">
