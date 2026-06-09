@@ -39,6 +39,24 @@ describe("contact submission email", () => {
     expect(html).toContain("/admin/contact?submission=18");
   });
 
+  test("escapes public submission fields before rendering html", () => {
+    const html = contactSubmissionNotificationHtml({
+      adminUrl: "https://pleros-org.vercel.app/admin/contact?submission=18",
+      email: 'ada@example.com"><script>alert(1)</script>',
+      fullName: "<b>Ada</b>",
+      location: "<Lagos>",
+      message: 'Hello <img src=x onerror="alert(1)">',
+      phone: '"+234"',
+      submittedAt: "2026-06-08T12:30:00.000Z",
+    });
+
+    expect(html).toContain("&lt;b&gt;Ada&lt;/b&gt;");
+    expect(html).toContain("&lt;Lagos&gt;");
+    expect(html).toContain("Hello &lt;img src=x onerror=&quot;alert(1)&quot;&gt;");
+    expect(html).toContain("&quot;+234&quot;");
+    expect(html).not.toContain("<script>alert(1)</script>");
+  });
+
   test("returns a clear result when the contact inbox is missing", async () => {
     isEmailEnabled.mockReturnValue(true);
     const { sendContactSubmissionNotification } = await import("./send");

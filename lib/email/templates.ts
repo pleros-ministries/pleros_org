@@ -6,6 +6,15 @@ type InactivityReminderProps = {
   resumeUrl: string;
 };
 
+function escapeHtml(value: string): string {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
 export function inactivityReminderHtml({
   studentName,
   currentLevel,
@@ -201,7 +210,12 @@ export function contactSubmissionNotificationHtml({
   submittedAt,
   adminUrl,
 }: ContactSubmissionNotificationProps): string {
-  const safeLocation = location ?? "Not provided";
+  const safeFullName = escapeHtml(fullName);
+  const safeEmail = escapeHtml(email);
+  const safePhone = escapeHtml(phone);
+  const safeLocation = escapeHtml(location ?? "Not provided");
+  const safeMessage = escapeHtml(message);
+  const safeSubmittedAt = escapeHtml(submittedAt);
 
   return `
 <!DOCTYPE html>
@@ -211,15 +225,15 @@ export function contactSubmissionNotificationHtml({
   <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #58657a;">Pleros website contact</p>
   <h1 style="font-size: 20px; margin: 12px 0 0;">New contact submission</h1>
   <p style="font-size: 14px; color: #58657a; line-height: 1.6;">
-    A new public contact message was submitted on ${submittedAt}.
+    A new public contact message was submitted on ${safeSubmittedAt}.
   </p>
 
   <div style="margin: 20px 0; border: 1px solid #e4e4e7; border-radius: 8px; overflow: hidden;">
     <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
       <tbody>
-        <tr><td style="padding: 10px 12px; background: #fafafa; width: 140px; color: #58657a;">Full name</td><td style="padding: 10px 12px;">${fullName}</td></tr>
-        <tr><td style="padding: 10px 12px; background: #fafafa; width: 140px; color: #58657a;">Email</td><td style="padding: 10px 12px;">${email}</td></tr>
-        <tr><td style="padding: 10px 12px; background: #fafafa; width: 140px; color: #58657a;">Phone</td><td style="padding: 10px 12px;">${phone}</td></tr>
+        <tr><td style="padding: 10px 12px; background: #fafafa; width: 140px; color: #58657a;">Full name</td><td style="padding: 10px 12px;">${safeFullName}</td></tr>
+        <tr><td style="padding: 10px 12px; background: #fafafa; width: 140px; color: #58657a;">Email</td><td style="padding: 10px 12px;">${safeEmail}</td></tr>
+        <tr><td style="padding: 10px 12px; background: #fafafa; width: 140px; color: #58657a;">Phone</td><td style="padding: 10px 12px;">${safePhone}</td></tr>
         <tr><td style="padding: 10px 12px; background: #fafafa; width: 140px; color: #58657a;">Location</td><td style="padding: 10px 12px;">${safeLocation}</td></tr>
       </tbody>
     </table>
@@ -227,7 +241,7 @@ export function contactSubmissionNotificationHtml({
 
   <div style="margin: 18px 0; padding: 14px; background: #fafafa; border: 1px solid #e4e4e7; border-radius: 8px;">
     <p style="margin: 0 0 8px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #58657a;">Message</p>
-    <p style="margin: 0; font-size: 14px; line-height: 1.7; white-space: pre-wrap;">${message}</p>
+    <p style="margin: 0; font-size: 14px; line-height: 1.7; white-space: pre-wrap;">${safeMessage}</p>
   </div>
 
   <a href="${adminUrl}" style="display: inline-block; margin-top: 12px; padding: 10px 20px; background: #18181b; color: #fff; border-radius: 6px; font-size: 13px; font-weight: 600; text-decoration: none;">

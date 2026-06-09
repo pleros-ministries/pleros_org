@@ -254,3 +254,34 @@
 
 ### Action Rule
 - For future public lead forms in this repo, do not mint welcome tokens, auto-provision access, or prefill welcome dashboards unless that coupling is explicitly requested.
+
+## [2026-06-09] Public email templating
+
+### Mistake
+- Interpolated public contact-form fields directly into the staff notification HTML email.
+
+### Correction
+- Escape user-provided values before rendering any operational email markup.
+
+### Lesson
+- Public form submissions should be treated as untrusted input even when the destination is an internal staff inbox.
+
+### Preference
+- Keep operational notifications plain and safe rather than rich and permissive.
+
+### Action Rule
+- For all future HTML email templates fed by public or semi-public input, apply HTML escaping before interpolation and add a regression test for injected markup.
+
+## [2026-06-09] Contact-flow deployment check
+
+### Mistake
+- Tried to smoke-test the contact submit flow before confirming the `contact_submissions` table existed in the target database.
+
+### Correction
+- Apply the Drizzle schema change first, then run the real submit test.
+
+### Lesson
+- New form features that persist data are not actually testable end to end until their schema migration is live in the database being exercised.
+
+### Action Rule
+- Before future end-to-end checks on new persistence-backed features, verify the target DB has the new table/indexes or run the documented schema push first.
