@@ -48,6 +48,14 @@ function buildDriveThumbnailSrc(fileId: string): string {
   return `https://lh3.googleusercontent.com/d/${fileId}=w1200`;
 }
 
+function buildYoutubeThumbnailSrc(videoId: string): string {
+  return `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+}
+
+function buildYoutubeEmbedSrc(videoId: string): string {
+  return `https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1`;
+}
+
 const mostImportantQuestionsVideos: QuestionsPathwayVideoItem[] = [
   {
     id: "most-important-questions-the-most-important-question",
@@ -96,33 +104,97 @@ const gospelAnswersSimpleVideos: QuestionsPathwayVideoItem[] = [
     id: "gospel-answers-simple-1",
     title: "Gospel Answers Series 1",
     description: sharedSeriesDescription,
-    thumbnailSrc: buildDriveThumbnailSrc("1_T-BOBV5dUDKszvuTCVlmkxKWEU_9bG_"),
+    thumbnailSrc: buildYoutubeThumbnailSrc("8iZGdhWZr-s"),
     playIconSrc: sharedPlayIconSrc,
-    href: "https://drive.google.com/file/d/1_T-BOBV5dUDKszvuTCVlmkxKWEU_9bG_/preview",
+    href: buildYoutubeEmbedSrc("8iZGdhWZr-s"),
   },
   {
     id: "gospel-answers-simple-2",
     title: "Gospel Answers Series 2",
     description: sharedSeriesDescription,
-    thumbnailSrc: buildDriveThumbnailSrc("1QrHO7kV0bJeZWkMAf7wXYLWP-T-5q3U5"),
+    thumbnailSrc: buildYoutubeThumbnailSrc("Bv52zyEpz5o"),
     playIconSrc: sharedPlayIconSrc,
-    href: "https://drive.google.com/file/d/1QrHO7kV0bJeZWkMAf7wXYLWP-T-5q3U5/preview",
+    href: buildYoutubeEmbedSrc("Bv52zyEpz5o"),
   },
   {
     id: "gospel-answers-simple-3",
     title: "Gospel Answers Series 3",
     description: sharedSeriesDescription,
-    thumbnailSrc: buildDriveThumbnailSrc("1DjEVKJJ90iMKPW3AW7U6cLoqaNx3NozJ"),
+    thumbnailSrc: buildYoutubeThumbnailSrc("ENjNA5TOspw"),
     playIconSrc: sharedPlayIconSrc,
-    href: "https://drive.google.com/file/d/1DjEVKJJ90iMKPW3AW7U6cLoqaNx3NozJ/preview",
+    href: buildYoutubeEmbedSrc("ENjNA5TOspw"),
   },
   {
     id: "gospel-answers-simple-4",
     title: "Gospel Answers Series 4",
     description: sharedSeriesDescription,
-    thumbnailSrc: buildDriveThumbnailSrc("1vnC3dObvaJ90o3IZp0LXKth1K7krvZ7n"),
+    thumbnailSrc: buildYoutubeThumbnailSrc("o6Vpc6-RcBs"),
     playIconSrc: sharedPlayIconSrc,
-    href: "https://drive.google.com/file/d/1vnC3dObvaJ90o3IZp0LXKth1K7krvZ7n/preview",
+    href: buildYoutubeEmbedSrc("o6Vpc6-RcBs"),
+  },
+  {
+    id: "gospel-answers-simple-5",
+    title: "Gospel Answers Series 5",
+    description: sharedSeriesDescription,
+    thumbnailSrc: buildYoutubeThumbnailSrc("17XTOWErqYs"),
+    playIconSrc: sharedPlayIconSrc,
+    href: buildYoutubeEmbedSrc("17XTOWErqYs"),
+  },
+  {
+    id: "gospel-answers-simple-6",
+    title: "Gospel Answers Series 6",
+    description: sharedSeriesDescription,
+    thumbnailSrc: buildYoutubeThumbnailSrc("ZiRJKjiLP3o"),
+    playIconSrc: sharedPlayIconSrc,
+    href: buildYoutubeEmbedSrc("ZiRJKjiLP3o"),
+  },
+  {
+    id: "gospel-answers-simple-7",
+    title: "Gospel Answers Series 7",
+    description: sharedSeriesDescription,
+    thumbnailSrc: buildYoutubeThumbnailSrc("2vpU7QwCmkk"),
+    playIconSrc: sharedPlayIconSrc,
+    href: buildYoutubeEmbedSrc("2vpU7QwCmkk"),
+  },
+  {
+    id: "gospel-answers-simple-8",
+    title: "Gospel Answers Series 8",
+    description: sharedSeriesDescription,
+    thumbnailSrc: buildYoutubeThumbnailSrc("qeAvE4pVLpU"),
+    playIconSrc: sharedPlayIconSrc,
+    href: buildYoutubeEmbedSrc("qeAvE4pVLpU"),
+  },
+  {
+    id: "gospel-answers-simple-9",
+    title: "Gospel Answers Series 9",
+    description: sharedSeriesDescription,
+    thumbnailSrc: buildYoutubeThumbnailSrc("6qzseFmF-HQ"),
+    playIconSrc: sharedPlayIconSrc,
+    href: buildYoutubeEmbedSrc("6qzseFmF-HQ"),
+  },
+  {
+    id: "gospel-answers-simple-10",
+    title: "Gospel Answers Series 10",
+    description: sharedSeriesDescription,
+    thumbnailSrc: buildYoutubeThumbnailSrc("0pQ_hFOlOXM"),
+    playIconSrc: sharedPlayIconSrc,
+    href: buildYoutubeEmbedSrc("0pQ_hFOlOXM"),
+  },
+  {
+    id: "gospel-answers-simple-11",
+    title: "Gospel Answers Series 11",
+    description: sharedSeriesDescription,
+    thumbnailSrc: buildYoutubeThumbnailSrc("oj_orHsQtb0"),
+    playIconSrc: sharedPlayIconSrc,
+    href: buildYoutubeEmbedSrc("oj_orHsQtb0"),
+  },
+  {
+    id: "gospel-answers-simple-12",
+    title: "Gospel Answers Series 12",
+    description: sharedSeriesDescription,
+    thumbnailSrc: buildYoutubeThumbnailSrc("lkxPTiPVIBo"),
+    playIconSrc: sharedPlayIconSrc,
+    href: buildYoutubeEmbedSrc("lkxPTiPVIBo"),
   },
 ];
 

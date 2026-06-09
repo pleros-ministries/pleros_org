@@ -17,7 +17,7 @@ export function HomepageCommunitySection() {
         <div className="absolute inset-0 bg-black/42" />
       </div>
 
-      <div className="relative px-[1.3125rem] py-[4.5625rem] text-center text-white">
+      <div className="relative px-[1.3125rem] py-[4.5625rem] text-center text-white lg:px-16 lg:py-24">
         <div className="grid gap-[3.8125rem]">
           <div className="grid justify-items-center gap-[0.8125rem]">
             <h2 className="site-section-heading max-w-[33.5625rem] text-white">

@@ -21,8 +21,8 @@ export async function HomepageView() {
   const episode = await getLatestYoutubeEpisode();
 
   return (
-    <div className="bg-[#f3f7fb] px-0 md:px-6 md:py-6">
-      <div className="mx-auto w-full max-w-[36.1875rem] overflow-hidden bg-[var(--color-bg)]">
+    <div className="bg-[#f3f7fb] px-0 md:px-0  md:py-0">
+      <div className="mx-auto w-full max-w-none bg-[var(--color-bg)]">
         <HomepageGiftDrawer hasWelcomeAccess={Boolean(welcomeAccess)} />
         <HomepageNav />
         <HomepageHero />
