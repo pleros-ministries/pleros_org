@@ -57,10 +57,7 @@ export function LibrarySidebar({ teachings, sortMode, setSortMode }: Props) {
     .slice(0, 6);
 
   return (
-    <aside
-      className="sticky top-[4.25rem] hidden h-[calc(100vh-4.25rem)] w-[248px] shrink-0 flex-col gap-5 overflow-y-auto border-r border-[#e8e8ee] bg-white px-5 py-5 md:flex"
-      style={{ fontFamily: "var(--font-figtree, sans-serif)" }}
-    >
+    <aside className="sticky top-[4.25rem] hidden h-[calc(100vh-4.25rem)] w-[248px] shrink-0 flex-col gap-5 overflow-y-auto border-r border-[#e8e8ee] bg-white px-5 py-5 font-[var(--font-be-vietnam-pro)] md:flex">
       {/* ── Overview ── */}
       <div>
         <p className="mb-3 text-[10px] font-[700] uppercase tracking-[1.5px] text-[#8888a0]">
