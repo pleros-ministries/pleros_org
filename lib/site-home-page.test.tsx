@@ -183,6 +183,28 @@ describe("site home page", () => {
     expect(viewSource).not.toContain("getInstagramReelPreviews");
   });
 
+  test("uses a full-width public page shell so desktop nav is not clipped", () => {
+    const shellSource = readFileSync(
+      join(process.cwd(), "components", "home", "public-site-page-shell.tsx"),
+      "utf8",
+    );
+    const contactSource = readFileSync(
+      join(process.cwd(), "components", "home", "contact-page-view.tsx"),
+      "utf8",
+    );
+    const librarySource = readFileSync(
+      join(process.cwd(), "app", "(site)", "library", "page.tsx"),
+      "utf8",
+    );
+
+    expect(shellSource).toContain("max-w-none");
+    expect(shellSource).toContain("md:px-0");
+    expect(shellSource).not.toContain("md:px-6");
+    expect(contactSource).toContain("PublicSitePageShell");
+    expect(contactSource).not.toContain("max-w-[36.1875rem]");
+    expect(librarySource).toContain("PublicSitePageShell");
+  });
+
   test("defines public site shell tokens and bar utilities for desktop expansion", () => {
     const globalsSource = readFileSync(join(process.cwd(), "app", "globals.css"), "utf8");
     const navSource = readFileSync(
@@ -199,8 +221,10 @@ describe("site home page", () => {
     );
 
     expect(globalsSource).toContain("--site-mobile-max: 36.1875rem");
+    expect(globalsSource).toContain("--site-shell-padding-x-md: 1.5rem");
     expect(globalsSource).toContain("--site-shell-padding-x-lg: 2.5rem");
     expect(globalsSource).toContain(".site-font-theme .site-shell-bar-inner");
+    expect(globalsSource).toContain("min-width: 48rem");
     expect(globalsSource).toContain(".site-font-theme .site-shell-page");
     expect(globalsSource).toContain(".site-font-theme .site-footer-link");
     expect(navSource).toContain("site-shell-bar-inner");
@@ -273,7 +297,7 @@ describe("site home page", () => {
     expect(navSource).toContain("site-mobile-menu-link");
     expect(navSource).toContain("className=\"site-font-theme border-l border-white/8");
     expect(navSource).toContain("aria-label=\"Close menu\"");
-    expect(navSource).toContain("inline-flex h-10 w-10 items-center justify-center text-white transition-opacity duration-150 hover:opacity-80");
+    expect(navSource).toContain("inline-flex h-9 w-9 items-center justify-center text-white transition-opacity duration-150 hover:opacity-80 md:h-10 md:w-10");
     expect(navSource).toContain("border-b border-white/10 py-3 font-medium text-white/94");
     expect(globalsSource).toContain(".site-font-theme .site-mobile-menu-title");
     expect(globalsSource).toContain(".site-font-theme .site-mobile-menu-link");

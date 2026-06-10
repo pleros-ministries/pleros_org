@@ -11,6 +11,21 @@ describe("welcome dashboard content", () => {
     expect(welcomeDashboardSections[0]?.cards[0]?.title).toBe("Your Welcome Pack");
     expect(welcomeDashboardSections[0]?.cards[0]?.href).toBe("/dashboard/welcomepack");
     expect(welcomeDashboardSections[0]?.cards[1]?.title).toBe("Join Online Community");
+    expect(welcomeDashboardSections[0]?.cards[1]?.href).toBe(
+      "https://whatsapp.com/channel/0029VbBLp0ZF6smtyjjzf72L",
+    );
+  });
+
+  test("links devotion and training cards to their destinations", () => {
+    const devotion = welcomeDashboardSections.find((section) => section.id === "devotion");
+    const training = welcomeDashboardSections.find((section) => section.id === "training");
+    const commitment = welcomeDashboardSections.find((section) => section.id === "commitment");
+
+    expect(devotion?.cards[0]?.href).toBe("/podcast");
+    expect(devotion?.cards[1]?.href).toBe("https://youtube.com/@PlerosLive");
+    expect(training?.cards[0]?.href).toBe("/ppc");
+    expect(training?.cards[1]?.href).toBeUndefined();
+    expect(commitment?.cards.every((card) => card.href === undefined)).toBe(true);
   });
 
   test("defines four two-card dashboard sections matching the mobile frame", () => {

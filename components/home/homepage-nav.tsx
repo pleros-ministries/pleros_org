@@ -25,14 +25,14 @@ export function HomepageNav() {
 
   return (
     <header className="site-font-theme bg-[var(--color-brand-blue)] text-white">
-      <div className="site-shell-bar-inner flex h-[4.25rem] items-center justify-between gap-4">
+      <div className="site-shell-bar-inner flex h-14 items-center justify-between gap-3 md:h-[3.75rem] lg:h-[4.25rem] lg:gap-4">
         <Link href="/" aria-label="Pleros home" className="inline-flex shrink-0 items-center">
           <Image
             src="/site/home/assets/white-pleros-logomark.png"
             alt="Pleros"
             width={2067}
             height={1016}
-            className="h-[2.1rem] w-auto lg:h-[2.25rem]"
+            className="h-[1.85rem] w-auto md:h-[2rem] lg:h-[2.25rem]"
             priority
           />
         </Link>
@@ -62,11 +62,11 @@ export function HomepageNav() {
                 <button
                   type="button"
                   aria-label="Open menu"
-                  className="inline-flex h-10 w-10 items-center justify-center text-white transition-opacity duration-150 hover:opacity-80"
+                  className="inline-flex h-9 w-9 items-center justify-center text-white transition-opacity duration-150 hover:opacity-80 md:h-10 md:w-10"
                 />
               }
             >
-              <MenuIcon className="size-[1.65rem] stroke-[2.2]" />
+              <MenuIcon className="size-6 stroke-[2.2] md:size-[1.65rem]" />
             </SheetTrigger>
 
             <SheetContent
@@ -84,7 +84,7 @@ export function HomepageNav() {
                       <button
                         type="button"
                         aria-label="Close menu"
-                        className="inline-flex h-10 w-10 items-center justify-center text-white transition-opacity duration-150 hover:opacity-80"
+                        className="inline-flex h-9 w-9 items-center justify-center text-white transition-opacity duration-150 hover:opacity-80 md:h-10 md:w-10"
                       />
                     }
                   >

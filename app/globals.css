@@ -350,6 +350,7 @@
     --site-page-max-xl: 67rem;
     --site-shell-max: var(--container-xl);
     --site-shell-padding-x: 1.25rem; /* 20px */
+    --site-shell-padding-x-md: 1.5rem; /* 24px tablet */
     --site-shell-padding-x-lg: 2.5rem; /* 40px */
     --site-shell-padding-x-xl: 3rem; /* 48px */
     --text-footer-link: 1rem;
@@ -625,6 +626,13 @@
     max-width: var(--site-mobile-max);
     margin-inline: auto;
     padding-inline: var(--site-shell-padding-x);
+  }
+
+  @media (min-width: 48rem) {
+    .site-font-theme .site-shell-bar-inner {
+      max-width: none;
+      padding-inline: var(--site-shell-padding-x-md);
+    }
   }
 
   @media (min-width: 64rem) {

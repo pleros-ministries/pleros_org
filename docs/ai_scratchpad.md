@@ -78,6 +78,7 @@
 
 ### Action Rule
 - Desktop public padding: `--site-shell-padding-x` (20px) → `--site-shell-padding-x-lg` (40px) → `--site-shell-padding-x-xl` (48px). Roll page views to `.site-shell-page` instead of repeating max-w utilities.
+- Use `PublicSitePageShell` (`max-w-none`) for nav/footer; never nest `HomepageNav` inside `max-w-[36.1875rem]` columns or desktop dropdowns clip.
 
 ## [2026-06-08] Thread scope
 
@@ -466,6 +467,57 @@
 
 ### Action Rule
 - For future public nav dropdown work, make the popup a real menu panel with stacked full-width links, left-aligned text, and enough width/padding to scan quickly.
+
+## [2026-06-10] PPC publish completeness
+
+### Mistake
+- Added lesson-level written response fields to PPC authoring and review flows without folding them into publish-readiness checks.
+
+### Correction
+- PPC lesson publish gating must account for `responsePrompt` and `responseMarkingGuide`, and the CMS should visibly flag published lessons that still have content gaps.
+
+### Lesson
+- In PPC, lesson completeness is the full student/reviewer workflow: audio, notes, quiz, written prompt, and admin marking guide.
+
+### Preference
+- Authoring views should expose incomplete published lessons as debt instead of presenting them as fully healthy content.
+
+### Action Rule
+- When extending PPC lesson authoring, update schema, editor UI, review surfaces, publish gating, and completeness indicators together.
+
+## [2026-06-10] PPC roadmap priority
+
+### Mistake
+- Treated `/admin/notifications` as the next likely PPC slice without weighting the user’s stronger interest in admin operations visibility.
+
+### Correction
+- When choosing between staff-facing PPC backlog items, prioritize the admin dashboard and operational views ahead of notification settings unless the user explicitly asks for notifications.
+
+### Lesson
+- In PPC, operational clarity for admins is a higher-value next step than polishing placeholder settings pages.
+
+### Preference
+- Admin view is more important than notifications.
+
+### Action Rule
+- For near-term PPC roadmap choices in this thread, prefer admin dashboard/content visibility work before `/admin/notifications`.
+
+## [2026-06-10] Welcome dashboard access
+
+### Mistake
+- Let `/dashboard` depend on the welcome cookie as the permanent gate, which could lock valid users out after cookie expiry.
+
+### Correction
+- Better Auth should be the long-term dashboard gate; the welcome cookie is a bootstrap token and safety net.
+
+### Lesson
+- Visitor funnels can mint temporary access tokens, but account-like dashboards should prefer real auth sessions once provisioned.
+
+### Preference
+- Welcome access cookies should last 100 days and refresh on dashboard visits.
+
+### Action Rule
+- For future `/dashboard` changes, allow access with either Better Auth or a valid welcome cookie, redirect unauthenticated users to `/welcome`, and refresh the welcome cookie from middleware/proxy when present.
 
 ## [2026-06-10] Welcome email idempotency
 

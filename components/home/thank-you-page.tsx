@@ -13,6 +13,7 @@ import {
 
 import { HomepageFooter } from "./homepage-footer";
 import { HomepageNav } from "./homepage-nav";
+import { PublicSitePageShell } from "./public-site-page-shell";
 
 type ThankYouPageProps = {
   extraGiftsUnlocked: boolean;
@@ -22,8 +23,7 @@ export function ThankYouPage({ extraGiftsUnlocked }: ThankYouPageProps) {
   const shareUrl = buildWelcomeShareIntentUrl(resolvePublicSiteUrl(process.env));
 
   return (
-    <div className="bg-[#f3f7fb] px-0 md:px-6 md:py-6">
-      <div className="mx-auto min-h-screen w-full max-w-[36.1875rem] overflow-hidden bg-[var(--color-bg)]">
+    <PublicSitePageShell minHeight>
         <HomepageNav />
 
         <main>
@@ -111,7 +111,6 @@ export function ThankYouPage({ extraGiftsUnlocked }: ThankYouPageProps) {
         </main>
 
         <HomepageFooter />
-      </div>
-    </div>
+    </PublicSitePageShell>
   );
 }

@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 
-import { HomepageNav } from "@/components/home/homepage-nav";
 import { HomepageFooter } from "@/components/home/homepage-footer";
+import { HomepageNav } from "@/components/home/homepage-nav";
+import { PublicSitePageShell } from "@/components/home/public-site-page-shell";
 import { getAllTeachings } from "@/lib/db/queries/teachings";
 import { PlayerProvider } from "./_components/PlayerContext";
 import { LibraryTable } from "./_components/LibraryTable";
@@ -24,7 +25,7 @@ export default async function LibraryPage() {
   }));
 
   return (
-    <>
+    <PublicSitePageShell>
       <HomepageNav />
       <PlayerProvider>
         <main className="site-font-theme flex min-h-screen w-full bg-[#f9f9fb]">
@@ -32,6 +33,6 @@ export default async function LibraryPage() {
         </main>
       </PlayerProvider>
       <HomepageFooter />
-    </>
+    </PublicSitePageShell>
   );
 }

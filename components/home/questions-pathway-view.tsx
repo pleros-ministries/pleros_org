@@ -4,6 +4,7 @@ import Link from "next/link";
 import { HomepageCommunitySection } from "./homepage-community-section";
 import { HomepageFooter } from "./homepage-footer";
 import { HomepageNav } from "./homepage-nav";
+import { PublicSitePageShell } from "./public-site-page-shell";
 import {
   type QuestionsPathwaySeriesItem,
   questionsPathwayHero,
@@ -76,8 +77,7 @@ function QuestionsSeriesCard({
 
 export function QuestionsPathwayView() {
   return (
-    <div className="bg-[#f3f7fb] px-0 md:px-6 md:py-6">
-      <div className="mx-auto w-full max-w-[36.1875rem] overflow-hidden bg-[var(--color-bg)] md:max-w-[48rem] xl:max-w-[67rem]">
+    <PublicSitePageShell>
         <HomepageNav />
 
         <section className="relative overflow-hidden bg-[var(--color-brand-lime)]">
@@ -116,7 +116,6 @@ export function QuestionsPathwayView() {
 
         <HomepageCommunitySection />
         <HomepageFooter />
-      </div>
-    </div>
+    </PublicSitePageShell>
   );
 }

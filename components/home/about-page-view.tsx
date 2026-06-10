@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { HomepageCommunitySection } from "./homepage-community-section";
 import { HomepageFooter } from "./homepage-footer";
 import { HomepageNav } from "./homepage-nav";
+import { PublicSitePageShell } from "./public-site-page-shell";
 import {
   aboutPageBody,
   aboutPageHero,
@@ -16,8 +17,7 @@ const aboutPageLeadIcons = [UsersRoundIcon, CompassIcon, FlameIcon] as const;
 
 export function AboutPageView() {
   return (
-    <div className="bg-[#f3f7fb] px-0 md:px-6 md:py-6">
-      <div className="mx-auto w-full max-w-[36.1875rem] overflow-hidden bg-[var(--color-bg)] md:max-w-[48rem] xl:max-w-[67rem]">
+    <PublicSitePageShell>
         <HomepageNav />
 
         <section className="bg-[#d2f1ff] px-[1.25rem] pb-[1.9rem] pt-[7rem] md:px-8 md:pb-10 md:pt-[8.5rem] xl:px-10 xl:pb-12">
@@ -90,7 +90,6 @@ export function AboutPageView() {
 
         <HomepageCommunitySection />
         <HomepageFooter />
-      </div>
-    </div>
+    </PublicSitePageShell>
   );
 }
