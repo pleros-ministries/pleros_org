@@ -23,6 +23,8 @@ describe("welcome campaign pages", () => {
     );
 
     expect(pageSource).toContain("WelcomeLandingPage");
+    expect(pageSource).toContain("getAppSession");
+    expect(pageSource).toContain("appSession || welcomeAccess");
     expect(pageSource).toContain('redirect("/dashboard")');
     expect(viewSource).toContain("Get your free book");
     expect(viewSource).toContain('redirectTo="/thankyou"');
@@ -48,6 +50,17 @@ describe("welcome campaign pages", () => {
     expect(viewSource).toContain("We have 2 more gifts for you but we need your help to share");
     expect(viewSource).toContain("Claim Free Gifts");
     expect(viewSource).toContain("buildWelcomeShareIntentUrl");
+  });
+
+  test("uses the welcome session route only as a cookie bootstrap", () => {
+    const routeSource = readFileSync(
+      join(process.cwd(), "app", "api", "welcome-access", "session", "route.ts"),
+      "utf8",
+    );
+
+    expect(routeSource).toContain('new URL("/welcome", request.url)');
+    expect(routeSource).toContain("getWelcomeAccessCookieOptions");
+    expect(routeSource).toContain("response.cookies.set");
   });
 });
 

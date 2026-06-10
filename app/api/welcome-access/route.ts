@@ -5,9 +5,9 @@ import { validateEmail } from "@/lib/welcome-flow";
 import {
   createWelcomeAccessToken,
   getWelcomeAccessSecret,
+  getWelcomeAccessCookieOptions,
   resolveWelcomeAccessName,
   WELCOME_ACCESS_COOKIE_NAME,
-  WELCOME_ACCESS_MAX_AGE,
 } from "@/lib/welcome-access";
 import { sendWelcomePackAccessEmail } from "@/lib/email/send";
 import { upsertWelcomePackLead } from "@/lib/db/queries/welcome-pack-leads";
@@ -59,13 +59,11 @@ export async function POST(request: Request) {
   );
 
   const cookieStore = await cookies();
-  cookieStore.set(WELCOME_ACCESS_COOKIE_NAME, token, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: WELCOME_ACCESS_MAX_AGE,
-  });
+  cookieStore.set(
+    WELCOME_ACCESS_COOKIE_NAME,
+    token,
+    getWelcomeAccessCookieOptions(),
+  );
 
   await upsertWelcomePackLead({
     email,
