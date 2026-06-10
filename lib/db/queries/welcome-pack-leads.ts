@@ -17,21 +17,30 @@ export async function upsertWelcomePackLead(input: {
   const values = buildWelcomeLeadUpsertValues(input);
   const now = new Date();
 
-  const [lead] = await db
+  const [insertedLead] = await db
     .insert(schema.welcomePackLeads)
     .values(values)
-    .onConflictDoUpdate({
+    .onConflictDoNothing({
       target: schema.welcomePackLeads.email,
-      set: {
-        name: values.name,
-        source: values.source,
-        mainAccessGranted: true,
-        updatedAt: now,
-      },
     })
     .returning();
 
-  return lead;
+  if (insertedLead) {
+    return { lead: insertedLead, created: true };
+  }
+
+  const [lead] = await db
+    .update(schema.welcomePackLeads)
+    .set({
+      name: values.name,
+      source: values.source,
+      mainAccessGranted: true,
+      updatedAt: now,
+    })
+    .where(eq(schema.welcomePackLeads.email, values.email))
+    .returning();
+
+  return { lead, created: false };
 }
 
 export async function getWelcomePackLeadByEmail(email: string) {

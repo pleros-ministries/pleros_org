@@ -46,6 +46,8 @@ export function HomepageGiftDrawer({
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const hasCompletedRef = useRef(false);
+  const isSubmittingRef = useRef(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPending, startTransition] = useTransition();
   const normalizedEmail = useMemo(() => email.trim().toLowerCase(), [email]);
 
@@ -92,47 +94,61 @@ export function HomepageGiftDrawer({
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
+    if (isSubmittingRef.current) {
+      return;
+    }
+
     if (!validateEmail(normalizedEmail)) {
       setError("Enter a valid email address.");
       return;
     }
 
     setError(null);
+    isSubmittingRef.current = true;
+    setIsSubmitting(true);
 
     startTransition(async () => {
-      const response = await fetch("/api/welcome-access", {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({
-          email: normalizedEmail,
-          returnTo: redirectTo,
-          source,
-        }),
-      });
+      try {
+        const response = await fetch("/api/welcome-access", {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+          },
+          body: JSON.stringify({
+            email: normalizedEmail,
+            returnTo: redirectTo,
+            source,
+          }),
+        });
 
-      const payload = (await response.json().catch(() => null)) as
-        | { error?: string; redirectTo?: string }
-        | null;
+        const payload = (await response.json().catch(() => null)) as
+          | { error?: string; redirectTo?: string }
+          | null;
 
-      if (!response.ok || !payload?.redirectTo) {
-        setError(payload?.error ?? "Something went wrong. Please try again.");
-        return;
+        if (!response.ok || !payload?.redirectTo) {
+          setError(payload?.error ?? "Something went wrong. Please try again.");
+          isSubmittingRef.current = false;
+          setIsSubmitting(false);
+          return;
+        }
+
+        window.localStorage.setItem(
+          WELCOME_PACK_STORAGE_KEY,
+          serializeWelcomePackState({
+            status: "completed",
+            email: normalizedEmail,
+            updatedAt: new Date().toISOString(),
+          }),
+        );
+
+        hasCompletedRef.current = true;
+        setOpen(false);
+        window.location.href = payload.redirectTo;
+      } catch {
+        setError("Something went wrong. Please try again.");
+        isSubmittingRef.current = false;
+        setIsSubmitting(false);
       }
-
-      window.localStorage.setItem(
-        WELCOME_PACK_STORAGE_KEY,
-        serializeWelcomePackState({
-          status: "completed",
-          email: normalizedEmail,
-          updatedAt: new Date().toISOString(),
-        }),
-      );
-
-      hasCompletedRef.current = true;
-      setOpen(false);
-      window.location.href = payload.redirectTo;
     });
   };
 
@@ -209,10 +225,10 @@ export function HomepageGiftDrawer({
             <Button
               type="submit"
               variant="primary"
-              disabled={isPending}
+              disabled={isSubmitting || isPending}
               className="site-button-text min-h-[2.875rem] w-full rounded-full px-6 py-2.5 text-[0.875rem] text-white shadow-[0_14px_28px_rgba(5,20,128,0.22)] hover:text-white focus-visible:text-white"
             >
-              {isPending ? pendingLabel : submitLabel}
+              {isSubmitting || isPending ? pendingLabel : submitLabel}
             </Button>
           </form>
         </div>

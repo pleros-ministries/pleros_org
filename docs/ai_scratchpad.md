@@ -466,3 +466,20 @@
 
 ### Action Rule
 - For future public nav dropdown work, make the popup a real menu panel with stacked full-width links, left-aligned text, and enough width/padding to scan quickly.
+
+## [2026-06-10] Welcome email idempotency
+
+### Mistake
+- Tied the welcome-pack access email to every successful access POST, so repeated submits or retries could send duplicate emails.
+
+### Correction
+- Email sending should be gated by durable lead state and only happen when the lead is newly created.
+
+### Lesson
+- Client-side disabling reduces accidental duplicate requests, but server-side idempotency is the real protection for funnel emails.
+
+### Preference
+- Welcome-pack form submissions should not send multiple copies of the same email.
+
+### Action Rule
+- For future funnel email work, make the database state determine whether an email should send, and add client in-flight guards as secondary protection.

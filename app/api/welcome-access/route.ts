@@ -65,7 +65,7 @@ export async function POST(request: Request) {
     getWelcomeAccessCookieOptions(),
   );
 
-  await upsertWelcomePackLead({
+  const leadResult = await upsertWelcomePackLead({
     email,
     name,
     source,
@@ -73,13 +73,15 @@ export async function POST(request: Request) {
 
   const dashboardUrl = new URL("/dashboard/welcomepack", request.url).toString();
 
-  void sendWelcomePackAccessEmail({
-    to: email,
-    name,
-    dashboardUrl,
-  }).catch((err) => {
-    console.error("Failed to send welcome pack email:", err);
-  });
+  if (leadResult.created) {
+    void sendWelcomePackAccessEmail({
+      to: email,
+      name,
+      dashboardUrl,
+    }).catch((err) => {
+      console.error("Failed to send welcome pack email:", err);
+    });
+  }
 
   return NextResponse.json({ redirectTo: returnTo });
 }

@@ -21,12 +21,25 @@ describe("welcome pack completion wiring", () => {
 
   test("signup persists lead state and sends non-blocking welcome access email", () => {
     const apiSource = source("app", "api", "welcome-access", "route.ts");
+    const querySource = source("lib", "db", "queries", "welcome-pack-leads.ts");
 
     expect(apiSource).toContain("upsertWelcomePackLead");
     expect(apiSource).toContain("source");
     expect(apiSource).toContain("sendWelcomePackAccessEmail");
+    expect(apiSource).toContain("leadResult.created");
+    expect(querySource).toContain("onConflictDoNothing");
     expect(apiSource).toContain("catch((err)");
     expect(apiSource).toContain("return NextResponse.json({ redirectTo: returnTo })");
+  });
+
+  test("welcome forms prevent duplicate in-flight submissions", () => {
+    const drawerSource = source("components", "home", "homepage-gift-drawer.tsx");
+    const modalSource = source("components", "home", "welcome-pack-modal.tsx");
+
+    expect(drawerSource).toContain("isSubmittingRef.current");
+    expect(drawerSource).toContain("disabled={isSubmitting || isPending}");
+    expect(modalSource).toContain("isSubmittingRef.current");
+    expect(modalSource).toContain("disabled={isSubmitting || isPending}");
   });
 
   test("thank-you page prioritizes the share unlock block before the main gift block", () => {
