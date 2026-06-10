@@ -193,6 +193,10 @@ describe("site home page", () => {
       join(process.cwd(), "components", "home", "homepage-footer.tsx"),
       "utf8",
     );
+    const contentSource = readFileSync(
+      join(process.cwd(), "lib", "site-homepage-content.ts"),
+      "utf8",
+    );
 
     expect(globalsSource).toContain("--site-mobile-max: 36.1875rem");
     expect(globalsSource).toContain("--site-shell-padding-x-lg: 2.5rem");
@@ -201,11 +205,13 @@ describe("site home page", () => {
     expect(globalsSource).toContain(".site-font-theme .site-footer-link");
     expect(navSource).toContain("site-shell-bar-inner");
     expect(footerSource).toContain("site-shell-bar-inner");
-    expect(footerSource).toContain("lg:grid-cols-[minmax(9rem,12rem)_minmax(0,1fr)_minmax(7rem,10rem)]");
-    expect(footerSource).toContain("lg:grid-cols-2");
+    expect(footerSource).toContain("homeFooterNavGroups");
+    expect(footerSource).toContain("FooterNavGroup");
     expect(footerSource).toContain("xl:grid-cols-3");
+    expect(contentSource).toContain('label: "Your Dashboard"');
     expect(footerSource).toContain("site-footer-copy");
-    expect(footerSource).toContain("link.desktopLabel ?? link.label");
+    expect(footerSource).toContain("{link.label}");
+    expect(contentSource).toContain('label: "Find Answers"');
     expect(globalsSource).toContain("font-size: 0.875rem");
   });
 

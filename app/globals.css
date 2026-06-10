@@ -352,7 +352,7 @@
     --site-shell-padding-x: 1.25rem; /* 20px */
     --site-shell-padding-x-lg: 2.5rem; /* 40px */
     --site-shell-padding-x-xl: 3rem; /* 48px */
-    --text-footer-link: var(--text-nav);
+    --text-footer-link: 1rem;
 
     /* Public site colors extracted from Figma mobile homepage */
     --color-brand-blue: #051480;
@@ -660,10 +660,10 @@
 
   .site-font-theme .site-footer-heading {
     font-family: var(--font-sen), "Sen", var(--font-heading) !important;
-    font-size: 0.8125rem;
+    font-size: 0.6875rem;
     font-weight: var(--weight-semibold);
     line-height: 1;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
     color: #ecf9ff;
   }
@@ -671,7 +671,7 @@
   .site-font-theme .site-footer-link {
     font-family: var(--font-sans), "Be Vietnam Pro", sans-serif !important;
     font-size: var(--text-footer-link);
-    line-height: 1.85;
+    line-height: 1.35;
     letter-spacing: -0.02em;
     color: #ffffff;
     transition: color 150ms ease-out;
@@ -690,15 +690,16 @@
     color: rgba(255, 255, 255, 0.88);
   }
 
-  @media (min-width: 64rem) {
-    .site-font-theme .site-footer-heading {
-      font-size: 0.6875rem;
-      letter-spacing: 0.14em;
+  @media (min-width: 48rem) {
+    .site-font-theme .site-footer-link {
+      font-size: 0.9375rem;
     }
+  }
 
+  @media (min-width: 64rem) {
     .site-font-theme .site-footer-link {
       font-size: 0.875rem;
-      line-height: 1.45;
+      line-height: 1.3;
     }
 
     .site-font-theme .site-footer-copy {

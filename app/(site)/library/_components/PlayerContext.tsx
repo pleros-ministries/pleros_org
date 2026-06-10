@@ -18,7 +18,6 @@ type PlayerContextType = {
   currentTime: number;
   duration: number;
   volume: number;
-  flatList: Teaching[];
   audioRef: React.RefObject<HTMLAudioElement | null>;
   setFlatList: (list: Teaching[]) => void;
   playTeaching: (teaching: Teaching) => void;
@@ -37,13 +36,13 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolumeState] = useState(1);
-  const [flatList, setFlatList] = useState<Teaching[]>([]);
-
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Always-current refs (read during callbacks without stale closure issues)
   const flatListRef = useRef<Teaching[]>([]);
-  flatListRef.current = flatList;
+  const setFlatList = useCallback((list: Teaching[]) => {
+    flatListRef.current = list;
+  }, []);
   const currentTrackRef = useRef<Teaching | null>(null);
   currentTrackRef.current = currentTrack;
 
@@ -149,7 +148,6 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       currentTime,
       duration,
       volume,
-      flatList,
       audioRef,
       setFlatList,
       playTeaching,
@@ -165,7 +163,7 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
       currentTime,
       duration,
       volume,
-      flatList,
+      setFlatList,
       playTeaching,
       togglePlay,
       playNext,

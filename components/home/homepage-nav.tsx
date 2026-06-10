@@ -28,10 +28,10 @@ export function HomepageNav() {
       <div className="site-shell-bar-inner flex h-[4.25rem] items-center justify-between gap-4">
         <Link href="/" aria-label="Pleros home" className="inline-flex shrink-0 items-center">
           <Image
-            src="/site/home/assets/pleros-wordmark.png"
+            src="/site/home/assets/white-pleros-logomark.png"
             alt="Pleros"
-            width={95}
-            height={46}
+            width={2067}
+            height={1016}
             className="h-[2.1rem] w-auto lg:h-[2.25rem]"
             priority
           />

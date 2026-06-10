@@ -16,32 +16,49 @@ function QuestionsSeriesCard({
   thumbnailSrc,
   playIconSrc,
   href,
+  comingSoon,
 }: QuestionsPathwaySeriesItem) {
   return (
     <Link
       href={href}
       className="group grid gap-4"
-      aria-label={`Open ${title}`}
+      aria-label={comingSoon ? `${title} — coming soon` : `Open ${title}`}
     >
       <div className="relative aspect-[256/263] overflow-hidden rounded-[11px] bg-[#d98d54] shadow-[var(--shadow-sm)]">
         <Image
           src={thumbnailSrc}
           alt=""
           fill
-          className="object-cover transition-transform duration-200 group-hover:scale-[1.015]"
+          className={
+            comingSoon
+              ? "object-cover grayscale opacity-50"
+              : "object-cover transition-transform duration-200 group-hover:scale-[1.015]"
+          }
           sizes="(max-width: 419px) calc(100vw - 3.25rem), (max-width: 1279px) 16rem, 20rem"
         />
-        <div className="absolute inset-0 bg-black/12 transition-colors duration-200 group-hover:bg-black/20" />
+        <div
+          className={
+            comingSoon
+              ? "absolute inset-0 bg-white/40"
+              : "absolute inset-0 bg-black/12 transition-colors duration-200 group-hover:bg-black/20"
+          }
+        />
         <div className="absolute inset-0 flex items-center justify-center">
-          <div className="rounded-full bg-white/12 p-1 backdrop-blur-[1px]">
-            <Image
-              src={playIconSrc}
-              alt=""
-              width={84}
-              height={84}
-              className="h-[5rem] w-[5rem] transition-transform duration-200 group-hover:scale-[1.03]"
-            />
-          </div>
+          {comingSoon ? (
+            <span className="rounded-full bg-white/85 px-3.5 py-1.5 text-[0.6875rem] font-semibold uppercase tracking-[0.14em] text-[var(--color-brand-indigo)] shadow-[var(--shadow-sm)]">
+              Coming soon
+            </span>
+          ) : (
+            <div className="rounded-full bg-white/12 p-1 backdrop-blur-[1px]">
+              <Image
+                src={playIconSrc}
+                alt=""
+                width={84}
+                height={84}
+                className="h-[5rem] w-[5rem] transition-transform duration-200 group-hover:scale-[1.03]"
+              />
+            </div>
+          )}
         </div>
       </div>
 

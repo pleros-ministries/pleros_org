@@ -52,6 +52,8 @@ describe("purpose pathway page", () => {
     );
 
     expect(viewSource).toContain("PurposeVideoGallery");
+    expect(gallerySource).toContain('preload="metadata"');
+    expect(gallerySource).toContain("#t=0.1");
     expect(gallerySource).toContain('from "@/components/ui/dialog"');
     expect(gallerySource).toContain("videos.map");
     expect(gallerySource).toContain("<video");

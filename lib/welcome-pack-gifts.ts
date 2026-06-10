@@ -31,7 +31,7 @@ export const mainGifts: WelcomePackGift[] = [
 export const extraGifts: WelcomePackGift[] = [
   {
     id: "prayer-rhythm",
-    title: "Prayer rhythm starter",
+    title: "Why have I not changed?",
     description:
       "A practical guide for building steady prayer and Word habits.",
     imageSrc: "/site/home/assets/welcome-pack-cards/purpose-welcome-card.svg",
@@ -40,7 +40,7 @@ export const extraGifts: WelcomePackGift[] = [
   },
   {
     id: "growth-map",
-    title: "Spiritual growth map",
+    title: "Should I be Afraid of Hell?",
     description:
       "A simple map for moving from questions into purpose and discipleship.",
     imageSrc: "/site/home/assets/welcome-pack-cards/ga-welcome-card.svg",

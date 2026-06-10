@@ -1,7 +1,7 @@
 export const contactPageHero = {
   title: "Contact Us",
   description:
-    "Discover who you were created to be. Step into spiritual growth, true fellowship, and a deeper walk with Christ.",
+    "Have a question or want to connect? Ask us anything — we'd love to hear from you.",
 } as const;
 
 export const contactPageLeadLines = [
@@ -10,7 +10,7 @@ export const contactPageLeadLines = [
 ] as const;
 
 export const contactPageIntro =
-  "We are a Christ-centered church committed to raising believers who truly know God, understand His Word, and walk boldly in His purpose for their lives. Our focus is simple: to disciple, to build, and to equip men and women to live out the life God has designed for them." as const;
+  "We're a ministry committed to helping you fulfil God's purpose. We are open to all your questions and inquiries. Get in touch!" as const;
 
 export const contactFormFields = [
   { id: "full-name", name: "fullName", placeholder: "Full Name", type: "text" },

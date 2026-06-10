@@ -67,7 +67,7 @@ export const homeDesktopNavGroups: HomeNavGroup[] = [
       {
         href: "/ppc",
         label: "Pleros Perfecting Course",
-        desktopLabel: "Pleros Perfecting Course",
+        desktopLabel: "PPC",
       },
     ],
   },
@@ -92,6 +92,23 @@ export const homeDesktopNavGroups: HomeNavGroup[] = [
     ],
   },
 ];
+
+export const homeFooterNavGroups: HomeNavGroup[] = homeDesktopNavGroups.map(
+  (group) =>
+    group.label === "Pathways"
+      ? {
+          ...group,
+          links: [
+            { href: "/dashboard", label: "Your Dashboard" },
+            ...group.links.map((link) =>
+              link.href === "/questions"
+                ? { ...link, label: "Find Answers" }
+                : link,
+            ),
+          ],
+        }
+      : group,
+);
 
 export const homePathwayCards: HomePathwayCard[] = [
   {

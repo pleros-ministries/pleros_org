@@ -27,7 +27,7 @@ export default async function LibraryPage() {
     <>
       <HomepageNav />
       <PlayerProvider>
-        <main className="flex min-h-screen w-full bg-[#f9f9fb]">
+        <main className="site-font-theme flex min-h-screen w-full bg-[#f9f9fb]">
           <LibraryTable teachings={serialised} />
         </main>
       </PlayerProvider>

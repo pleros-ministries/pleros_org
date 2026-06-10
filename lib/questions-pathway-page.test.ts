@@ -46,6 +46,8 @@ describe("questions pathway page", () => {
     expect(source).toContain("justify-end");
     expect(source).toContain("bottom-[-0.5rem]");
     expect(source).toContain("right-[-1.5rem]");
+    expect(source).toContain("comingSoon");
+    expect(source).toContain("Coming soon");
   });
 
   test("creates a reusable sub-page route for each questions series", () => {
@@ -90,6 +92,8 @@ describe("questions pathway page", () => {
     expect(viewSource).toContain("px-[1.5rem]");
     expect(gallerySource).toContain('from "@/components/ui/dialog"');
     expect(gallerySource).toContain("series.videos.map");
+    expect(gallerySource).toContain("QuestionsSeriesComingSoon");
+    expect(gallerySource).toContain("series.comingSoon");
     expect(gallerySource).toContain("function isDirectVideoHref");
     expect(gallerySource).toContain("<iframe");
     expect(gallerySource).toContain("<video");

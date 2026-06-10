@@ -38,7 +38,7 @@ export function PlayerBar() {
     <div
       role="region"
       aria-label="Audio player"
-      className="fixed bottom-0 left-0 right-0 z-[200] flex items-center gap-6 border-t border-[#e8e8ee] bg-white px-7 font-[var(--font-be-vietnam-pro)] transition-transform duration-[350ms] [cubic-bezier(0.34,1.4,0.64,1)] [transition-timing-function:cubic-bezier(0.34,1.4,0.64,1)]"
+      className="fixed bottom-0 left-0 right-0 z-[200] flex w-full max-w-[100vw] flex-col overflow-hidden border-t border-[#e8e8ee] bg-white font-[var(--font-be-vietnam-pro)] transition-transform duration-[350ms] [cubic-bezier(0.34,1.4,0.64,1)] [transition-timing-function:cubic-bezier(0.34,1.4,0.64,1)]"
       style={{
         boxShadow: "0 -8px 32px rgba(0,0,0,0.08)",
         transform: isVisible ? "translateY(0)" : "translateY(100%)",
@@ -46,7 +46,7 @@ export function PlayerBar() {
     >
       {/* ── Progress strip — mobile only ─────────────────────────── */}
       <div
-        className="h-[3px] w-full cursor-pointer bg-[#f1f1f5] md:hidden"
+        className="h-[3px] w-full shrink-0 cursor-pointer bg-[#f1f1f5] md:hidden"
         onClick={handleProgressClick}
         role="slider"
         aria-label="Seek"
@@ -58,10 +58,13 @@ export function PlayerBar() {
       </div>
 
       {/* ── Main row ─────────────────────────────────────────────── */}
-      <div className="flex items-center gap-3 px-4 md:gap-6 md:px-7" style={{ height: 72 }}>
+      <div
+        className="flex w-full min-w-0 items-center gap-2 px-3 sm:gap-3 sm:px-4 md:gap-6 md:px-7"
+        style={{ height: 72 }}
+      >
 
         {/* Left: thumbnail + title (flex-1 on mobile, fixed on desktop) */}
-        <div className="flex min-w-0 flex-1 items-center gap-3 md:w-[240px] md:flex-none md:shrink-0">
+        <div className="flex min-w-0 flex-1 items-center gap-2.5 sm:gap-3 md:w-[240px] md:flex-none md:shrink-0">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#011585] p-2">
             <Image
               src="/site/home/assets/pleros-wordmark.png"
@@ -82,7 +85,7 @@ export function PlayerBar() {
         </div>
 
         {/* Mobile controls — prev/play/next only, no scrubber */}
-        <div className="flex shrink-0 items-center gap-1 md:hidden">
+        <div className="flex shrink-0 items-center gap-0.5 sm:gap-1 md:hidden">
           <button
             type="button"
             onClick={playPrev}

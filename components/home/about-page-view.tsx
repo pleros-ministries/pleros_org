@@ -1,3 +1,4 @@
+import { CompassIcon, FlameIcon, UsersRoundIcon } from "lucide-react";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
@@ -11,14 +12,16 @@ import {
   aboutPageLeadLines,
 } from "../../lib/about-page-content";
 
+const aboutPageLeadIcons = [UsersRoundIcon, CompassIcon, FlameIcon] as const;
+
 export function AboutPageView() {
   return (
     <div className="bg-[#f3f7fb] px-0 md:px-6 md:py-6">
       <div className="mx-auto w-full max-w-[36.1875rem] overflow-hidden bg-[var(--color-bg)] md:max-w-[48rem] xl:max-w-[67rem]">
         <HomepageNav />
 
-        <section className="bg-[#d2f1ff] px-[1rem] pb-[1.75rem] pt-[7rem] md:px-6 md:pb-10 md:pt-[8.5rem] xl:px-8 xl:pb-12">
-          <div className="max-w-[18rem]">
+        <section className="bg-[#d2f1ff] px-[1.25rem] pb-[1.9rem] pt-[7rem] md:px-8 md:pb-10 md:pt-[8.5rem] xl:px-10 xl:pb-12">
+          <div className="max-w-[24rem] md:max-w-[30rem]">
             <h1 className="site-hero-heading text-[2.55rem] text-[var(--color-text-strong)] md:text-[3.2rem] xl:text-[3.9rem]">
               {aboutPageHero.title}
             </h1>
@@ -28,36 +31,50 @@ export function AboutPageView() {
           </div>
         </section>
 
-        <section className="bg-white px-[1.75rem] pb-[5.75rem] pt-[3rem] md:px-8 md:pb-20 md:pt-14 xl:px-10">
-          <div className="mx-auto grid max-w-[31rem] gap-8 text-center md:max-w-[35rem]">
-            <div className="grid gap-0.5 text-[var(--color-text-strong)]">
-              {aboutPageLeadLines.map((line) => (
-                <h2
-                  key={line}
-                  className="font-[var(--font-sen)] text-[2rem] font-semibold leading-[1.02] tracking-[-0.05em] md:text-[2.7rem]"
-                >
-                  {line}
-                </h2>
-              ))}
-            </div>
+        <section className="bg-white px-5 pb-[4.75rem] pt-[2.75rem] md:px-8 md:pb-20 md:pt-10 xl:px-10">
+          <div className="mx-auto grid max-w-[57rem] gap-8 md:gap-10">
+            <ol className="mx-auto grid w-full max-w-[40rem] list-none gap-0 border-y border-[var(--color-line-strong)]">
+              {aboutPageLeadLines.map((line, index) => {
+                const Icon = aboutPageLeadIcons[index];
 
-            <div className="grid gap-6 text-[0.95rem] leading-[1.45] tracking-[-0.02em] text-[var(--color-text-strong)] md:text-[1.125rem]">
+                return (
+                  <li
+                    key={line}
+                    className="grid grid-cols-[1.5rem_minmax(0,1fr)] items-start gap-x-4 border-b border-[var(--color-line)] py-4 last:border-b-0 md:gap-x-5 md:py-5"
+                  >
+                    <Icon
+                      className="mt-1 size-[1.125rem] shrink-0 text-[var(--color-brand-blue)]"
+                      aria-hidden
+                    />
+                    <p className="font-[var(--font-sen)] text-[1.55rem] font-semibold leading-[1.1] tracking-[-0.04em] text-[var(--color-brand-blue)] md:text-[1.75rem]">
+                      {line}
+                    </p>
+                  </li>
+                );
+              })}
+            </ol>
+
+            <div className="mx-auto grid w-full max-w-[40rem] gap-6 text-left text-[0.9375rem] leading-[1.5] tracking-[-0.02em] text-[var(--color-text-strong)] md:text-[1.0625rem]">
               <p>{aboutPageBody[0]}</p>
-              <p>
-                <span>{'The word "'}</span>
-                <strong className="font-semibold">Pleros</strong>
-                <span>{'" is a coinage from the Greek words: '}</span>
-                <strong className="font-semibold">Pleroma</strong>
-                <span>{" (Fullness), "}</span>
-                <strong className="font-semibold">Pleres</strong>
-                <span>{" (full), "}</span>
-                <strong className="font-semibold">Pleroo</strong>
-                <span>{" (fulfill)."}</span>
-              </p>
+
+              <div className="rounded-[1rem] bg-[var(--color-brand-sky-soft)] px-5 py-5 md:px-6 md:py-6">
+                <p className="text-[var(--color-brand-blue)]">
+                  <span>{'The word "'}</span>
+                  <strong className="font-semibold">Pleros</strong>
+                  <span>{'" is a coinage from the Greek words: '}</span>
+                  <strong className="font-semibold">Pleroma</strong>
+                  <span>{" (Fullness), "}</span>
+                  <strong className="font-semibold">Pleres</strong>
+                  <span>{" (full), "}</span>
+                  <strong className="font-semibold">Pleroo</strong>
+                  <span>{" (fulfill)."}</span>
+                </p>
+              </div>
+
               <p>{aboutPageBody[2]}</p>
             </div>
 
-            <div className="flex justify-center pt-2">
+            <div className="flex justify-center pt-1">
               <Button
                 size="lg"
                 render={
