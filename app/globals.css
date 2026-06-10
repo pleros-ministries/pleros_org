@@ -353,7 +353,7 @@
     --site-shell-padding-x-md: 1.5rem; /* 24px tablet */
     --site-shell-padding-x-lg: 2.5rem; /* 40px */
     --site-shell-padding-x-xl: 3rem; /* 48px */
-    --text-footer-link: 1rem;
+    --text-footer-link: 0.8125rem;
 
     /* Public site colors extracted from Figma mobile homepage */
     --color-brand-blue: #051480;
@@ -698,15 +698,15 @@
     color: rgba(255, 255, 255, 0.88);
   }
 
-  @media (min-width: 48rem) {
+  @media (min-width: 40rem) {
     .site-font-theme .site-footer-link {
-      font-size: 0.9375rem;
+      font-size: 0.875rem;
     }
   }
 
   @media (min-width: 64rem) {
     .site-font-theme .site-footer-link {
-      font-size: 0.875rem;
+      font-size: 0.9375rem;
       line-height: 1.3;
     }
 
