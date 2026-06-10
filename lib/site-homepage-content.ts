@@ -1,6 +1,12 @@
 export type HomeNavLink = {
   href: string;
   label: string;
+  desktopLabel?: string;
+};
+
+export type HomeNavGroup = {
+  label: string;
+  links: HomeNavLink[];
 };
 
 export type HomePathwayCard = {
@@ -33,15 +39,58 @@ export type HomeInstagramReel = {
 
 export const homeNavLinks: HomeNavLink[] = [
   { href: "/dashboard", label: "Dashboard" },
-  { href: "/podcast", label: "Pleros Podcast" },
+  { href: "/podcast", label: "Pleros Podcast", desktopLabel: "Podcast" },
   { href: "/questions", label: "Questions" },
-  { href: "/purpose", label: "Discover Purpose" },
-  { href: "/ppc", label: "Pleros Perfecting Course" },
+  { href: "/purpose", label: "Discover Purpose", desktopLabel: "Purpose" },
+  { href: "/ppc", label: "Pleros Perfecting Course", desktopLabel: "PPC" },
   { href: "/partner", label: "Partner" },
-  { href: "/library", label: "Teachings Library" },
+  { href: "/library", label: "Teachings Library", desktopLabel: "Library" },
   { href: "/about", label: "About" },
-  { href: "/vision-and-mission", label: "Vision and Mission" },
+  {
+    href: "/vision-and-mission",
+    label: "Vision and Mission",
+    desktopLabel: "Vision",
+  },
   { href: "/contact", label: "Contact" },
+];
+
+export const homeDesktopNavStandaloneLinks: HomeNavLink[] = [
+  { href: "/dashboard", label: "Dashboard" },
+];
+
+export const homeDesktopNavGroups: HomeNavGroup[] = [
+  {
+    label: "Pathways",
+    links: [
+      { href: "/questions", label: "Questions" },
+      { href: "/purpose", label: "Discover Purpose", desktopLabel: "Purpose" },
+      {
+        href: "/ppc",
+        label: "Pleros Perfecting Course",
+        desktopLabel: "Pleros Perfecting Course",
+      },
+    ],
+  },
+  {
+    label: "Resources",
+    links: [
+      { href: "/podcast", label: "Pleros Podcast", desktopLabel: "Podcast" },
+      { href: "/partner", label: "Partner" },
+      { href: "/library", label: "Teachings Library", desktopLabel: "Library" },
+    ],
+  },
+  {
+    label: "About",
+    links: [
+      {
+        href: "/vision-and-mission",
+        label: "Vision and Mission",
+        desktopLabel: "Vision",
+      },
+      { href: "/contact", label: "Contact" },
+      { href: "/about", label: "About", desktopLabel: "About us" },
+    ],
+  },
 ];
 
 export const homePathwayCards: HomePathwayCard[] = [

@@ -183,6 +183,76 @@ describe("site home page", () => {
     expect(viewSource).not.toContain("getInstagramReelPreviews");
   });
 
+  test("defines public site shell tokens and bar utilities for desktop expansion", () => {
+    const globalsSource = readFileSync(join(process.cwd(), "app", "globals.css"), "utf8");
+    const navSource = readFileSync(
+      join(process.cwd(), "components", "home", "homepage-nav.tsx"),
+      "utf8",
+    );
+    const footerSource = readFileSync(
+      join(process.cwd(), "components", "home", "homepage-footer.tsx"),
+      "utf8",
+    );
+
+    expect(globalsSource).toContain("--site-mobile-max: 36.1875rem");
+    expect(globalsSource).toContain("--site-shell-padding-x-lg: 2.5rem");
+    expect(globalsSource).toContain(".site-font-theme .site-shell-bar-inner");
+    expect(globalsSource).toContain(".site-font-theme .site-shell-page");
+    expect(globalsSource).toContain(".site-font-theme .site-footer-link");
+    expect(navSource).toContain("site-shell-bar-inner");
+    expect(footerSource).toContain("site-shell-bar-inner");
+    expect(footerSource).toContain("lg:grid-cols-[minmax(9rem,12rem)_minmax(0,1fr)_minmax(7rem,10rem)]");
+    expect(footerSource).toContain("lg:grid-cols-2");
+    expect(footerSource).toContain("xl:grid-cols-3");
+    expect(footerSource).toContain("site-footer-copy");
+    expect(footerSource).toContain("link.desktopLabel ?? link.label");
+    expect(globalsSource).toContain("font-size: 0.875rem");
+  });
+
+  test("shows a horizontal desktop nav and keeps the mobile sheet menu below lg", () => {
+    const navSource = readFileSync(
+      join(process.cwd(), "components", "home", "homepage-nav.tsx"),
+      "utf8",
+    );
+    const contentSource = readFileSync(
+      join(process.cwd(), "lib", "site-homepage-content.ts"),
+      "utf8",
+    );
+
+    expect(navSource).toContain('aria-label="Main"');
+    expect(navSource).toContain("site-desktop-nav-link");
+    expect(navSource).toContain("HomepageNavDropdown");
+    expect(navSource).toContain("homeDesktopNavGroups");
+    expect(navSource).toContain("homeDesktopNavStandaloneLinks");
+    expect(navSource).toContain("hidden min-w-0 flex-1 items-center justify-end gap-0.5 lg:flex");
+    expect(navSource).toContain('<div className="lg:hidden">');
+    expect(navSource).toContain("site-shell-bar-inner");
+    expect(contentSource).toContain("desktopLabel?: string");
+    expect(contentSource).toContain('label: "Resources"');
+    expect(contentSource).toContain('label: "Pathways"');
+    expect(contentSource).toContain('desktopLabel: "About us"');
+  });
+
+  test("styles desktop nav dropdowns as stacked menu lists", () => {
+    const dropdownSource = readFileSync(
+      join(process.cwd(), "components", "home", "homepage-nav-dropdown.tsx"),
+      "utf8",
+    );
+    const globalsSource = readFileSync(
+      join(process.cwd(), "app", "globals.css"),
+      "utf8",
+    );
+
+    expect(dropdownSource).toContain('className="site-desktop-nav-menu');
+    expect(dropdownSource).toContain("w-[15rem]");
+    expect(dropdownSource).toContain("grid gap-0.5");
+    expect(dropdownSource).toContain('className="site-desktop-nav-menu-link"');
+    expect(globalsSource).toMatch(/^\s*\.site-desktop-nav-menu\s*\{/m);
+    expect(globalsSource).toMatch(/^\s*\.site-desktop-nav-menu-link\s*\{/m);
+    expect(globalsSource).toContain("width: 100%");
+    expect(globalsSource).toContain("text-align: left");
+  });
+
   test("styles the mobile menu with site typography and a visible white close control", () => {
     const navSource = readFileSync(
       join(process.cwd(), "components", "home", "homepage-nav.tsx"),
@@ -204,7 +274,7 @@ describe("site home page", () => {
     expect(globalsSource).toContain('font-family: var(--font-sen), "Sen", var(--font-heading) !important;');
   });
 
-  test("wires a homepage-only free gift drawer using the shared bottom sheet pattern", () => {
+  test("wires a homepage-only free gift drawer as bottom sheet on mobile and centered modal on desktop", () => {
     const viewSource = readFileSync(
       join(process.cwd(), "components", "home", "homepage-view.tsx"),
       "utf8",
@@ -217,11 +287,15 @@ describe("site home page", () => {
     expect(viewSource).toContain("HomepageGiftDrawer");
     expect(viewSource).toContain("<HomepageGiftDrawer hasWelcomeAccess={Boolean(welcomeAccess)} />");
     expect(drawerSource).toContain('side="bottom"');
+    expect(drawerSource).toContain("md:top-1/2");
+    expect(drawerSource).toContain("md:left-1/2");
+    expect(drawerSource).toContain("md:data-open:-translate-x-1/2");
+    expect(drawerSource).toContain("md:data-open:-translate-y-1/2");
     expect(drawerSource).toContain("Get your free welcome pack");
     expect(drawerSource).toContain("The first resources you need to begin your Pleros journey");
     expect(drawerSource).toContain('placeholder="Email address"');
-    expect(drawerSource).toContain("access welcome pck");
-    expect(drawerSource).toContain("rounded-t-[1.75rem]");
+    expect(drawerSource).toContain("access welcome pack");
+    expect(drawerSource).toContain("rounded-t-[var(--radius-xl)]");
     expect(drawerSource).not.toContain("Instant dashboard access");
     expect(drawerSource).not.toContain("Private welcome pack");
     expect(drawerSource).not.toContain("We&apos;ll take you straight into your dashboard after submit.");
