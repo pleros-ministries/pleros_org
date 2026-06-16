@@ -17,26 +17,16 @@ describe("site home page", () => {
     );
   });
 
-  test("keeps the hero CTA scaled down while preserving a clear button shape", () => {
+  test("keeps the hero compact without a separate CTA above the pathway cards", () => {
     const source = readFileSync(
       join(process.cwd(), "components", "home", "homepage-hero.tsx"),
       "utf8",
     );
 
-    expect(source).toContain("min-h-[2.875rem]");
-    expect(source).toContain("rounded-full");
-    expect(source).toContain("px-6");
-    expect(source).toContain("text-[0.875rem]");
-  });
-
-  test("keeps the pathway cards visually separated from the hero sky field", () => {
-    const source = readFileSync(
-      join(process.cwd(), "components", "home", "homepage-hero.tsx"),
-      "utf8",
-    );
-
-    expect(source).toContain('<section className="bg-[var(--color-brand-sky)]');
-    expect(source).toContain('<section id="pathways" className="bg-white');
+    expect(source).not.toContain("Start Here");
+    expect(source).not.toContain('href="#pathways"');
+    expect(source).toContain('id="pathways"');
+    expect(source).toContain("bg-white");
   });
 
   test("uses Sen explicitly for pathway card titles", () => {
@@ -79,11 +69,13 @@ describe("site home page", () => {
       "utf8",
     );
 
-    expect(heroSource).toContain('className="bg-white px-2 pb-[5rem] pt-5 sm:px-5"');
-    expect(heroSource).toContain('className="grid grid-cols-2 gap-2 sm:gap-5"');
+    expect(heroSource).toContain('className="bg-white px-2 pb-[5rem] pt-3 sm:px-5');
+    expect(heroSource).toContain('className="grid grid-cols-2 gap-2 sm:gap-5 md:grid-cols-4"');
     expect(cardSource).toContain("h-[13.75rem]");
-    expect(cardSource).toContain("h-[6.6rem]");
-    expect(cardSource).toContain("px-3 pb-3.5 pt-3");
+    expect(cardSource).toContain("h-[45%]");
+    expect(cardSource).toContain("headerPrompt");
+    expect(contentSource).toContain('headerPrompt: "Is there really God?"');
+    expect(cardSource).toContain("px-3 pb-3.5 pt-2.5");
     expect(cardSource).toContain("font-medium");
     expect(contentSource).toContain('title: "Find Purpose"');
     expect(contentSource).toContain('mobileDescription: "Want to grow and be trained to fulfill purpose?"');
@@ -114,7 +106,7 @@ describe("site home page", () => {
     expect(contentSource).toContain(
       'headerImageSrc: "/site/home/assets/church-pathway/church-logo-card.png"',
     );
-    expect(contentSource).toContain('headerImageClassName: "object-contain"');
+    expect(contentSource).toContain('headerImageClassName: "object-cover object-center"');
     expect(contentSource).toContain('headerClassName: "bg-[#15349B]"');
     expect(cardSource).toContain("headerImageClassName ?? \"object-cover\"");
   });
@@ -295,6 +287,8 @@ describe("site home page", () => {
 
     expect(navSource).toContain("site-mobile-menu-title");
     expect(navSource).toContain("site-mobile-menu-link");
+    expect(navSource).toContain("homeFooterNavGroups");
+    expect(navSource).toContain("site-footer-heading");
     expect(navSource).toContain("className=\"site-font-theme border-l border-white/8");
     expect(navSource).toContain("aria-label=\"Close menu\"");
     expect(navSource).toContain("inline-flex h-9 w-9 items-center justify-center text-white transition-opacity duration-150 hover:opacity-80 md:h-10 md:w-10");
@@ -321,7 +315,7 @@ describe("site home page", () => {
     expect(drawerSource).toContain("md:left-1/2");
     expect(drawerSource).toContain("md:data-open:-translate-x-1/2");
     expect(drawerSource).toContain("md:data-open:-translate-y-1/2");
-    expect(drawerSource).toContain("Get your free welcome pack");
+    expect(drawerSource).toContain("welcomePackModalCopy.headline");
     expect(drawerSource).toContain("The first resources you need to begin your Pleros journey");
     expect(drawerSource).toContain('placeholder="Email address"');
     expect(drawerSource).toContain("access welcome pack");

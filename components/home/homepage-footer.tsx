@@ -46,7 +46,7 @@ export function HomepageFooter() {
 
           <div className="grid content-start gap-2 self-start">
             <p className="site-footer-heading">Follow</p>
-            <div className="flex items-center gap-[0.875rem]">
+            <div className="flex items-center gap-2.5">
               {footerSocialLinks.map((link) => (
                 <Link
                   key={link.label}
@@ -59,9 +59,9 @@ export function HomepageFooter() {
                   <Image
                     src={link.iconSrc}
                     alt=""
-                    width={27}
-                    height={27}
-                    className="h-[1.68rem] w-[1.68rem] lg:h-6 lg:w-6"
+                    width={20}
+                    height={20}
+                    className="h-5 w-5"
                   />
                 </Link>
               ))}

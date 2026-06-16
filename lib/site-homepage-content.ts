@@ -14,6 +14,8 @@ export type HomePathwayCard = {
   description: string;
   mobileDescription?: string;
   href: string;
+  headerPrompt?: string;
+  headerPromptHighlightClassName?: string;
   headerImageSrc?: string;
   headerImageClassName?: string;
   wordmarkImageSrc?: string;
@@ -45,7 +47,7 @@ export const homeNavLinks: HomeNavLink[] = [
   { href: "/ppc", label: "Pleros Perfecting Course", desktopLabel: "PPC" },
   { href: "/partner", label: "Partner" },
   { href: "/library", label: "Teachings Library", desktopLabel: "Library" },
-  { href: "/about", label: "About" },
+  { href: "/about", label: "About Pleros" },
   {
     href: "/vision-and-mission",
     label: "Vision and Mission",
@@ -88,7 +90,7 @@ export const homeDesktopNavGroups: HomeNavGroup[] = [
         desktopLabel: "Vision",
       },
       { href: "/contact", label: "Contact" },
-      { href: "/about", label: "About", desktopLabel: "About us" },
+      { href: "/about", label: "About Pleros", desktopLabel: "About us" },
     ],
   },
 ];
@@ -114,10 +116,11 @@ export const homePathwayCards: HomePathwayCard[] = [
   {
     title: "Questions",
     description:
-      "Begin here if you have questions or doubts about God or the Gospel",
-    mobileDescription: "Begin here if you have questions or doubts about God or the Gospel",
+      "If you have questions or doubts about God or the Gospel",
+    mobileDescription: "If you have questions or doubts about God or the Gospel",
     href: "/questions",
-    headerImageSrc: "/site/home/assets/question-pathway--card-header.png",
+    headerPrompt: "Is there really God?",
+    headerPromptHighlightClassName: "bg-[#F2D9B8]",
     arrowImageSrc: "/site/home/assets/card-arrows/question-card-arrow.svg",
     surfaceClassName: "bg-[#B40735] text-white",
     headerClassName: "bg-[#FFE4BB]",
@@ -129,7 +132,8 @@ export const homePathwayCards: HomePathwayCard[] = [
     mobileDescription:
       "Want to find out very clearly what your purpose is?",
     href: "/purpose",
-    headerImageSrc: "/site/home/assets/discover-pathway--card-header.png",
+    headerPrompt: "What am I here for?",
+    headerPromptHighlightClassName: "bg-[#FFE566]",
     arrowImageSrc: "/site/home/assets/card-arrows/discover-card-arrow.svg",
     surfaceClassName: "bg-[#68369B] text-white",
     headerClassName: "bg-[#E8D1FF]",
@@ -140,7 +144,8 @@ export const homePathwayCards: HomePathwayCard[] = [
       "Tailored for those who want to grow and be transformed spiritually to fulfill God’s purpose",
     mobileDescription: "Want to grow and be trained to fulfill purpose?",
     href: "/fulfill",
-    headerImageSrc: "/site/home/assets/fulfil-pathway--card-header.png",
+    headerPrompt: "How do I fulfil purpose?",
+    headerPromptHighlightClassName: "bg-[#C8E89A]",
     arrowImageSrc: "/site/home/assets/card-arrows/fulfil-card-arrow.svg",
     surfaceClassName: "bg-[#1A4A4D] text-white",
     headerClassName: "bg-[#DAFFB5]",
@@ -151,7 +156,7 @@ export const homePathwayCards: HomePathwayCard[] = [
     mobileDescription: "Fellowship with us at any our branches nationwide",
     href: "/about",
     headerImageSrc: "/site/home/assets/church-pathway/church-logo-card.png",
-    headerImageClassName: "object-contain",
+    headerImageClassName: "object-cover object-center",
     arrowImageSrc: "/site/home/assets/card-arrows/church-card-arrow.svg",
     surfaceClassName: "bg-[#3744A5] text-white",
     headerClassName: "bg-[#15349B]",

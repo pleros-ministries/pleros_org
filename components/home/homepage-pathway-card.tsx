@@ -3,12 +3,15 @@ import Link from "next/link";
 
 import type { HomePathwayCard } from "../../lib/site-homepage-content";
 import { Card, CardContent } from "../ui/card";
+import { cn } from "../../lib/utils";
 
 export function HomepagePathwayCard({
   title,
   description,
   mobileDescription,
   href,
+  headerPrompt,
+  headerPromptHighlightClassName,
   headerImageSrc,
   headerImageClassName,
   wordmarkImageSrc,
@@ -18,9 +21,29 @@ export function HomepagePathwayCard({
   return (
     <Link href={href} className="group block min-w-0">
       <Card
-        className={`relative h-[13.75rem] gap-0 overflow-hidden rounded-[10.6px] border-0 p-0 shadow-none ${surfaceClassName}`}
+        className={cn(
+          "relative flex h-[13.75rem] flex-col gap-0 overflow-hidden rounded-[10.6px] border-0 p-0 shadow-none",
+          surfaceClassName,
+        )}
       >
-        <div className={`relative h-[6.6rem] overflow-hidden ${headerClassName}`}>
+        <div
+          className={cn(
+            "relative flex h-[45%] shrink-0 items-center justify-center",
+            headerImageSrc && !headerPrompt ? "px-0" : "px-2.5",
+            headerClassName,
+          )}
+        >
+          {headerPrompt ? (
+            <span
+              className={cn(
+                "max-w-full px-2 py-1.5 text-center font-[var(--font-sen)] text-[0.58rem] font-bold uppercase leading-[1.08] tracking-[0.03em] text-[var(--color-brand-blue)] sm:text-[0.62rem]",
+                headerPromptHighlightClassName,
+              )}
+            >
+              {headerPrompt}
+            </span>
+          ) : null}
+
           {headerImageSrc ? (
             <Image
               src={headerImageSrc}
@@ -44,7 +67,7 @@ export function HomepagePathwayCard({
           ) : null}
         </div>
 
-        <CardContent className="flex flex-1 flex-col justify-between gap-2 px-3 pb-3.5 pt-3 text-white sm:p-4">
+        <CardContent className="flex flex-1 flex-col justify-center gap-2 px-3 pb-3.5 pt-2.5 text-white sm:p-4 sm:pt-3">
           <div className="grid gap-1.5">
             <h2 className="site-pathway-title">{title}</h2>
             <p className="text-[0.76rem] leading-[1.1] font-medium tracking-[-0.018em] text-white/96">
