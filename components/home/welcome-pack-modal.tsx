@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { validateEmail } from "@/lib/welcome-flow";
+import { welcomePackModalCopy } from "@/lib/welcome-pack-modal-copy";
 
 type WelcomePackModalProps = {
   openRequest: number;
@@ -101,13 +102,12 @@ export function WelcomePackModal({ openRequest }: WelcomePackModalProps) {
         />
 
         <DialogHeader className="relative gap-3">
-          <div className="eyebrow">Welcome pack access</div>
+          <div className="eyebrow">Welcome gift</div>
           <DialogTitle className="max-w-[18ch] text-balance">
-            Enter your email to unlock the Pleros welcome pack
+            {welcomePackModalCopy.headline}
           </DialogTitle>
-          <DialogDescription className="max-w-[46ch]">
-            We&apos;ll take you into a private welcome dashboard where your pack and
-            next steps are organised in one place.
+          <DialogDescription className="site-section-intro max-w-[46ch]">
+            {welcomePackModalCopy.subheadline}
           </DialogDescription>
         </DialogHeader>
 

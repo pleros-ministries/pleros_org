@@ -18,8 +18,7 @@ export async function isLevelGraduated(userId: string, levelId: number) {
 
 export async function checkGraduationReadiness(userId: string, levelId: number) {
   const lessons = await db.query.lessons.findMany({
-    where: (l, { eq: eq2, and: and2 }) =>
-      and2(eq2(l.levelId, levelId), eq2(l.status, "published")),
+    where: (l, { eq: eq2 }) => eq2(l.levelId, levelId),
   });
 
   const progress = await db

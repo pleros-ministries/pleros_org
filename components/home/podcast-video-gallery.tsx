@@ -135,7 +135,7 @@ export function PodcastVideoGallery({
         <div className="grid gap-2">
           <p className="site-hero-eyebrow">Series</p>
           <h3 className="site-section-heading max-w-[28rem]">
-            Start each teaching journey from the beginning
+            Jump to any of the series on the podcast
           </h3>
         </div>
 

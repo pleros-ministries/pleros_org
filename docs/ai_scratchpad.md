@@ -535,3 +535,88 @@
 
 ### Action Rule
 - For future funnel email work, make the database state determine whether an email should send, and add client in-flight guards as secondary protection.
+
+## [2026-06-10] PPC staff access model
+
+### Mistake
+- PPC staff access was still partially described and implemented around admin/instructor env email lists.
+
+### Correction
+- Staff access should be invite-based: `super_admin` manages admin/instructor invites, and the bootstrap super admin email is `fccibadan@gmail.com`.
+
+### Lesson
+- Role resolution should come from persisted PPC users and invite acceptance, not mutable env lists.
+
+### Preference
+- Admins should enter at `/admin`, students at `/ppc`, and staff onboarding should happen through invite links/password setup.
+
+### Action Rule
+- For PPC auth changes, treat `super_admin` as the only staff-management role, treat `admin` as content/platform admin, and keep instructors as lower-level staff.
+
+## [2026-06-10] PPC lesson release scope
+
+### Mistake
+- Treating uploaded lesson audio as equivalent to student release readiness can accidentally unlock lessons whose questions, notes, or SAQs are not complete.
+
+### Correction
+- PPC release scope must be explicit: level 1 is released, level 2.1-2.2 are released, and level 2.3-2.11 plus level 3 remain draft/locked until the remaining data is supplied.
+
+### Lesson
+- Media sync and lesson publication are separate operations even when they run from the same script.
+
+### Preference
+- Keep incomplete PPC lessons visible to admins but locked from students.
+
+### Action Rule
+- For PPC content syncs, wire media broadly when available but enforce published/draft status from an explicit release-scope map.
+
+## [2026-06-10] PPC import readiness
+
+### Mistake
+- Letting the import-readiness report parse incomplete tracks with strict import parsers caused the report to abort before it could say what was missing.
+
+### Correction
+- Readiness reporting should parse each track independently, tolerate missing/malformed sections, and report missing parts instead of failing the whole import.
+
+### Lesson
+- Strict parsing belongs in the mutation/import path; readiness reporting should be diagnostic and resilient.
+
+### Preference
+- When remaining PPC lesson data is incomplete, report exactly which tracks are missing MCQs, SAQs, notes, or audio.
+
+### Action Rule
+- For PPC import tooling, keep mutation strict but make preflight/reporting fault-tolerant per track.
+
+## [2026-06-11] PPC dashboard content debt
+
+### Mistake
+- None in this slice.
+
+### Correction
+- Admin dashboard content health should use the same publish-readiness logic as the CMS, not only raw draft counts.
+
+### Lesson
+- “Draft” is not enough context; admins need to know whether a draft is ready to publish or still missing required content.
+
+### Preference
+- Operational admin views should separate incomplete drafts, ready drafts, and published lessons with gaps.
+
+### Action Rule
+- For PPC dashboard content summaries, derive debt from `getLessonPublishReadiness()` so dashboard and CMS stay consistent.
+
+## [2026-06-11] PPC CMS publishing UX
+
+### Mistake
+- None in this task.
+
+### Correction
+- Publish gating should be represented as pure helper logic first, then consumed by the CMS UI.
+
+### Lesson
+- Keep PPC authoring workflow copy and button state derived from the same readiness model that blocks publishing.
+
+### Preference
+- Admin CMS should explain why publishing is blocked without adding a heavier workflow or changing the existing compact zinc UI.
+
+### Action Rule
+- For PPC CMS state summaries, add tested pure helpers in `lib/ppc-content-cms.ts` before wiring JSX copy or disabled states.

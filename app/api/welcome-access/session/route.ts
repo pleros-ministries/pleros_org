@@ -32,7 +32,7 @@ export async function GET(request: Request) {
     });
   } catch {
     return NextResponse.redirect(
-      new URL("/ppc/sign-up?returnTo=%2Fppc%2Fstudent", request.url),
+      new URL("/ppc/signup?returnTo=%2Fppc%2Fstudent", request.url),
     );
   }
 

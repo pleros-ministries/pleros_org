@@ -5,6 +5,7 @@ import {
   submissionReviewedHtml,
   graduationCongratulationsHtml,
   staffAssignmentHtml,
+  staffInviteHtml,
   welcomePackAccessHtml,
   welcomePackExtrasUnlockedHtml,
 } from "./templates";
@@ -86,6 +87,24 @@ export async function sendStaffAssignmentNotification(opts: {
       detail: opts.detail,
       url: opts.url,
       ctaLabel: opts.ctaLabel,
+    }),
+  });
+}
+
+export async function sendStaffInvite(opts: {
+  to: string;
+  role: "admin" | "instructor";
+  inviteUrl: string;
+}) {
+  if (!isEmailEnabled() || !resend) return null;
+
+  return resend.emails.send({
+    from: FROM,
+    to: opts.to,
+    subject: "Set up your PPC admin access",
+    html: staffInviteHtml({
+      role: opts.role,
+      inviteUrl: opts.inviteUrl,
     }),
   });
 }

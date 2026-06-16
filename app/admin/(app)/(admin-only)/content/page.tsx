@@ -22,6 +22,8 @@ export default async function AdminContentPage() {
       audioFileSize: lesson.audioFileSize,
       audioUploadedAt: lesson.audioUploadedAt?.toISOString() ?? null,
       notesContent: lesson.notesContent,
+      responsePrompt: lesson.responsePrompt,
+      responseMarkingGuide: lesson.responseMarkingGuide,
     })),
     publishedCount: level.publishedCount,
     draftCount: level.draftCount,

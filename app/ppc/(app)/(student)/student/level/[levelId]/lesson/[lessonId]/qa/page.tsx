@@ -21,7 +21,7 @@ export default async function QaPage({
   const session = await getAppSession();
   if (!session) {
     const h = await headers();
-    redirect(toExternalPpcPath(h.get("host"), "/sign-in"));
+    redirect(toExternalPpcPath(h.get("host"), "/login"));
   }
 
   const userId = session.user.id;
@@ -31,6 +31,9 @@ export default async function QaPage({
 
   const lesson = await getLessonById(lessonId);
   if (!lesson || lesson.levelId !== levelId) notFound();
+  if (lesson.status !== "published") {
+    redirect(`/ppc/student/level/${levelId}`);
+  }
 
   const threads = await getThreadsByLesson(lessonId, userId);
 

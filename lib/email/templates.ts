@@ -119,6 +119,11 @@ type StaffAssignmentProps = {
   ctaLabel: string;
 };
 
+export type StaffInviteProps = {
+  role: "admin" | "instructor";
+  inviteUrl: string;
+};
+
 export function staffAssignmentHtml({
   staffName,
   itemLabel,
@@ -142,6 +147,33 @@ export function staffAssignmentHtml({
   <a href="${url}" style="display: inline-block; margin-top: 12px; padding: 10px 20px; background: #18181b; color: #fff; border-radius: 4px; font-size: 13px; font-weight: 600; text-decoration: none;">
     ${ctaLabel}
   </a>
+</body>
+</html>`.trim();
+}
+
+export function staffInviteHtml({
+  role,
+  inviteUrl,
+}: StaffInviteProps): string {
+  const safeRole = escapeHtml(role === "admin" ? "admin" : "instructor");
+  const safeInviteUrl = escapeHtml(inviteUrl);
+
+  return `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8" /></head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #142033; max-width: 520px; margin: 0 auto; padding: 32px 16px;">
+  <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #58657a;">Pleros Perfecting Courses</p>
+  <h1 style="font-size: 20px; margin: 12px 0 0;">You have been invited to PPC admin</h1>
+  <p style="font-size: 14px; color: #58657a; line-height: 1.6;">
+    You have been invited as a <strong>${safeRole}</strong>. Use the link below to set your password and activate your staff access.
+  </p>
+  <a href="${safeInviteUrl}" style="display: inline-block; margin-top: 16px; padding: 10px 20px; background: #18181b; color: #fff; border-radius: 4px; font-size: 13px; font-weight: 600; text-decoration: none;">
+    Set password
+  </a>
+  <p style="font-size: 11px; color: #9ca3af; margin-top: 24px;">
+    This invite expires in 7 days. If you were not expecting this, you can ignore this email.
+  </p>
 </body>
 </html>`.trim();
 }

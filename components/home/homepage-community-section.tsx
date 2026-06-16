@@ -11,10 +11,10 @@ export function HomepageCommunitySection() {
           src="/site/home/assets/pleros-community-background.png"
           alt=""
           fill
-          className="object-cover"
-          sizes="(max-width: 768px) 100vw, 579px"
+          className="object-cover grayscale"
+          sizes="100vw"
         />
-        <div className="absolute inset-0 bg-black/42" />
+        <div className="absolute inset-0 bg-black/62" />
       </div>
 
       <div className="relative px-[1.3125rem] py-[4.5625rem] text-center text-white lg:px-16 lg:py-24">
@@ -23,7 +23,7 @@ export function HomepageCommunitySection() {
             <h2 className="site-section-heading max-w-[33.5625rem] text-white">
               Join the Pleros Community Channel on WhatsApp
             </h2>
-            <p className="max-w-[28.125rem] text-[1.3125rem] leading-[1.3] tracking-[-0.02em] text-white/94">
+            <p className="site-section-intro max-w-[28.125rem] text-white/90">
               Set your prayer life on fire as you join other accountable
               believers to pray daily
             </p>

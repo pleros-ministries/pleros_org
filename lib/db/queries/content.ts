@@ -14,12 +14,25 @@ export async function getContentOverview() {
         orderBy: (l, { asc }) => [asc(l.lessonNumber)],
       });
 
+      const lessonsWithQuestions = await Promise.all(
+        lessons.map(async (lesson) => {
+          const questions = await db.query.quizQuestions.findMany({
+            where: (q, { eq: eq2 }) => eq2(q.lessonId, lesson.id),
+            orderBy: (q, { asc }) => [asc(q.sortOrder)],
+          });
+
+          return {
+            ...lesson,
+            questions,
+          };
+        }),
+      );
       const publishedCount = lessons.filter((l) => l.status === "published").length;
       const draftCount = lessons.filter((l) => l.status === "draft").length;
 
       return {
         ...level,
-        lessons,
+        lessons: lessonsWithQuestions,
         publishedCount,
         draftCount,
         totalLessons: lessons.length,

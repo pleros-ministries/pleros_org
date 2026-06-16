@@ -77,7 +77,7 @@ export function WelcomeLandingPage({
               <h2 className="site-section-heading text-[2rem] text-[var(--color-brand-blue)]">
                 A focused first step
               </h2>
-              <p className="max-w-[32ch] font-[var(--font-be-vietnam-pro)] text-[0.96rem] leading-[1.45] tracking-[-0.02em] text-[var(--color-text-muted)]">
+              <p className="site-section-intro max-w-[32ch] text-[var(--color-text-muted)]">
                 This gift is designed to help you begin with clarity before you
                 move deeper into questions, purpose, and spiritual growth.
               </p>

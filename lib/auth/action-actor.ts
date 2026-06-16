@@ -1,4 +1,5 @@
 import type { AppSession } from "@/lib/app-session";
+import { isStaffRole } from "../app-role";
 
 export function getStudentSelfActor(session: AppSession) {
   if (session.user.role !== "student") {
@@ -20,7 +21,7 @@ export function getSignedInActor(session: AppSession) {
 }
 
 export function getStaffActor(session: AppSession) {
-  if (session.user.role !== "admin" && session.user.role !== "instructor") {
+  if (!isStaffRole(session.user.role)) {
     throw new Error("Forbidden: only staff can perform this action");
   }
 

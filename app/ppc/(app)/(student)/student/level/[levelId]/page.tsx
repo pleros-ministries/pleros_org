@@ -1,9 +1,14 @@
 import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
 import { headers } from "next/headers";
+import { Lock } from "lucide-react";
 import { getAppSession } from "@/lib/app-session";
 import { toExternalPpcPath } from "@/lib/ppc-access";
-import { getLevelById, getStudentLevelProgress } from "@/lib/db/queries/lessons";
+import {
+  getAllLessonsByLevel,
+  getLevelById,
+  getStudentLevelProgress,
+} from "@/lib/db/queries/lessons";
 import { isLevelGraduated, checkGraduationReadiness } from "@/lib/db/queries/graduations";
 import { Breadcrumb } from "@/components/ppc/breadcrumb";
 import { PageHeader } from "@/components/ppc/page-header";
@@ -23,16 +28,26 @@ export default async function LevelDetailPage({
   const session = await getAppSession();
   if (!session) {
     const h = await headers();
-    redirect(toExternalPpcPath(h.get("host"), "/sign-in"));
+    redirect(toExternalPpcPath(h.get("host"), "/login"));
   }
 
   const userId = session.user.id;
   const level = await getLevelById(levelId);
   if (!level) notFound();
 
-  const graduated = await isLevelGraduated(userId, levelId);
-  const readiness = await checkGraduationReadiness(userId, levelId);
-  const lessonProgress = await getStudentLevelProgress(userId, levelId);
+  const [graduated, readiness, lessonProgress, allLessons] = await Promise.all([
+    isLevelGraduated(userId, levelId),
+    checkGraduationReadiness(userId, levelId),
+    getStudentLevelProgress(userId, levelId),
+    getAllLessonsByLevel(levelId),
+  ]);
+
+  const progressByLessonId = new Map(
+    lessonProgress.map((item) => [item.lesson.id, item] as const),
+  );
+  const lockedLessonCount = allLessons.filter(
+    (lesson) => lesson.status !== "published",
+  ).length;
 
   const progressPercent =
     readiness.total > 0
@@ -87,6 +102,8 @@ export default async function LevelDetailPage({
           <p className="mt-2 text-sm font-medium text-zinc-900">
             {nextLesson
               ? `Lesson ${nextLesson.lesson.lessonNumber}`
+              : lockedLessonCount > 0
+                ? "Locked lessons remain"
               : graduated
                 ? "Graduated"
                 : "Graduation review"}
@@ -94,6 +111,8 @@ export default async function LevelDetailPage({
           <p className="mt-1 text-[11px] text-zinc-500">
             {nextLesson
               ? nextLesson.lesson.title
+              : lockedLessonCount > 0
+                ? `${lockedLessonCount} lesson${lockedLessonCount === 1 ? "" : "s"} in this level will unlock after content is ready.`
               : graduated
                 ? "This level is complete."
                 : "All lessons are done. Staff review is the next step."}
@@ -105,6 +124,10 @@ export default async function LevelDetailPage({
         <div className="rounded-sm border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-700">
           You have graduated from this level.
         </div>
+      ) : lockedLessonCount > 0 ? (
+        <div className="rounded-sm border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
+          {lockedLessonCount} lesson{lockedLessonCount === 1 ? "" : "s"} in this level are still locked while content is being prepared.
+        </div>
       ) : readiness.ready ? (
         <div className="rounded-sm border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
           All lessons complete. Awaiting staff graduation review.
@@ -112,7 +135,37 @@ export default async function LevelDetailPage({
       ) : null}
 
       <div className="space-y-2">
-        {lessonProgress.map(({ lesson, progress }) => {
+        {allLessons.map((lesson) => {
+          const lessonEntry = progressByLessonId.get(lesson.id);
+          const progress = lessonEntry?.progress ?? null;
+
+          if (lesson.status !== "published") {
+            return (
+              <div
+                key={lesson.id}
+                className="flex items-center justify-between gap-3 rounded-sm border border-zinc-200 bg-zinc-50 px-3 py-2.5"
+              >
+                <div className="flex min-w-0 items-center gap-3">
+                  <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-zinc-200 text-[10px] font-semibold text-zinc-600">
+                    {lesson.lessonNumber}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-zinc-700">
+                      {lesson.title}
+                    </p>
+                    <p className="mt-1 text-[11px] text-zinc-500">
+                      Locked until content is ready
+                    </p>
+                  </div>
+                </div>
+                <div className="flex shrink-0 items-center gap-2">
+                  <Lock className="size-3.5 text-zinc-400" />
+                  <StatusBadge status="locked" />
+                </div>
+              </div>
+            );
+          }
+
           const completionState = getLessonCompletionState({
             audioListened: progress?.audioListened ?? false,
             notesRead: progress?.notesRead ?? false,

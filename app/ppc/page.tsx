@@ -1,14 +1,15 @@
-import Link from "next/link";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { getAppSession } from "@/lib/app-session";
+import { isStaffRole } from "@/lib/app-role";
 import { toExternalPpcPath } from "@/lib/ppc-access";
 import {
   readWelcomeAccessToken,
   WELCOME_ACCESS_COOKIE_NAME,
 } from "@/lib/welcome-access";
 import { SignInForm } from "./sign-in/sign-in-form";
+import { PpcAuthShell } from "@/components/ppc/ppc-auth-shell";
 
 export default async function PpcEntryPage() {
   const session = await getAppSession();
@@ -17,7 +18,7 @@ export default async function PpcEntryPage() {
     redirect("/ppc/student");
   }
 
-  if (session?.user.role === "admin" || session?.user.role === "instructor") {
+  if (session && isStaffRole(session.user.role)) {
     redirect("/admin");
   }
 
@@ -36,7 +37,7 @@ export default async function PpcEntryPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-md items-center px-5 py-10">
+    <PpcAuthShell>
       <section className="w-full rounded-sm border border-zinc-200 bg-white p-6 shadow-sm">
         <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-zinc-500">
           Student portal
@@ -46,15 +47,7 @@ export default async function PpcEntryPage() {
         </h1>
 
         <SignInForm returnTo={returnTo} />
-
-        <p className="mt-4 text-[11px] text-zinc-400">
-          Website front-end remains at{" "}
-          <Link href="/" className="underline">
-            home
-          </Link>
-          .
-        </p>
       </section>
-    </main>
+    </PpcAuthShell>
   );
 }

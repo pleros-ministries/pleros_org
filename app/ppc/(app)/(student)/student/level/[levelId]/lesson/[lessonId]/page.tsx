@@ -32,7 +32,7 @@ export default async function LessonDetailPage({
   const session = await getAppSession();
   if (!session) {
     const h = await headers();
-    redirect(toExternalPpcPath(h.get("host"), "/sign-in"));
+    redirect(toExternalPpcPath(h.get("host"), "/login"));
   }
 
   const userId = session.user.id;
@@ -44,6 +44,9 @@ export default async function LessonDetailPage({
 
   const { lesson, progress } = result;
   if (lesson.levelId !== levelId) notFound();
+  if (lesson.status !== "published") {
+    redirect(`/ppc/student/level/${levelId}`);
+  }
 
   const allLessons = await getLessonsByLevel(levelId);
   const currentIdx = allLessons.findIndex((l) => l.id === lessonId);

@@ -167,8 +167,15 @@ export function StaffLoginPanel() {
           </div>
         ) : (
           <div className="rounded-sm border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs text-zinc-600">
-            Staff access is assigned from the configured admin and instructor
-            email lists.
+            Staff access is invite-only. The first super admin can be created
+            once at{" "}
+            <Link
+              href="/admin/setup"
+              className="font-medium text-zinc-900 underline-offset-2 hover:underline"
+            >
+              /admin/setup
+            </Link>
+            .
           </div>
         )}
 

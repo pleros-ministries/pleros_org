@@ -13,6 +13,7 @@ import {
 import { sql } from "drizzle-orm";
 
 export const userRoleEnum = pgEnum("user_role", [
+  "super_admin",
   "admin",
   "instructor",
   "student",
@@ -45,6 +46,7 @@ export const qaAuthorRoleEnum = pgEnum("qa_author_role", [
   "student",
   "instructor",
   "admin",
+  "super_admin",
 ]);
 
 export const contactSubmissionStatusEnum = pgEnum("contact_submission_status", [
@@ -98,6 +100,36 @@ export const users = pgTable(
   (t) => [uniqueIndex("users_email_idx").on(t.email)],
 );
 
+// ─── Staff invites ──────────────────────────────────────────────────────────
+
+export const staffInvites = pgTable(
+  "staff_invites",
+  {
+    id: serial("id").primaryKey(),
+    email: text("email").notNull(),
+    role: userRoleEnum("role").notNull(),
+    tokenHash: text("token_hash").notNull(),
+    invitedBy: text("invited_by")
+      .notNull()
+      .references(() => users.id),
+    acceptedBy: text("accepted_by").references(() => users.id),
+    acceptedAt: timestamp("accepted_at", { withTimezone: true }),
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index("staff_invites_email_idx").on(t.email),
+    uniqueIndex("staff_invites_token_hash_idx").on(t.tokenHash),
+    index("staff_invites_invited_by_idx").on(t.invitedBy),
+  ],
+);
+
 // ─── Levels ─────────────────────────────────────────────────────────────────
 
 export const levels = pgTable("levels", {
@@ -125,6 +157,8 @@ export const lessons = pgTable(
     audioFileSize: integer("audio_file_size"),
     audioUploadedAt: timestamp("audio_uploaded_at", { withTimezone: true }),
     notesContent: text("notes_content"),
+    responsePrompt: text("response_prompt"),
+    responseMarkingGuide: text("response_marking_guide"),
     status: lessonStatusEnum("status").notNull().default("draft"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()

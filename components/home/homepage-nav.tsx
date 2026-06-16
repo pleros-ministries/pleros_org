@@ -8,7 +8,7 @@ import { useState } from "react";
 import {
   homeDesktopNavGroups,
   homeDesktopNavStandaloneLinks,
-  homeNavLinks,
+  homeFooterNavGroups,
 } from "../../lib/site-homepage-content";
 import {
   Sheet,
@@ -93,16 +93,23 @@ export function HomepageNav() {
                 </div>
               </SheetHeader>
 
-              <nav className="grid gap-0.5">
-                {homeNavLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setOpen(false)}
-                    className="site-mobile-menu-link border-b border-white/10 py-3 font-medium text-white/94 transition-colors duration-150 hover:text-white"
-                  >
-                    {link.label}
-                  </Link>
+              <nav className="grid gap-6">
+                {homeFooterNavGroups.map((group) => (
+                  <div key={group.label} className="grid gap-2">
+                    <p className="site-footer-heading">{group.label}</p>
+                    <div className="grid gap-0.5">
+                      {group.links.map((link) => (
+                        <Link
+                          key={link.href}
+                          href={link.href}
+                          onClick={() => setOpen(false)}
+                          className="site-mobile-menu-link border-b border-white/10 py-3 font-medium text-white/94 transition-colors duration-150 hover:text-white"
+                        >
+                          {link.label}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
                 ))}
               </nav>
             </SheetContent>

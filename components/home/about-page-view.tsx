@@ -25,7 +25,7 @@ export function AboutPageView() {
             <h1 className="site-hero-heading text-[2.55rem] text-[var(--color-text-strong)] md:text-[3.2rem] xl:text-[3.9rem]">
               {aboutPageHero.title}
             </h1>
-            <p className="mt-2.5 text-[1rem] leading-[1.08] tracking-[-0.02em] text-[var(--color-brand-blue)] md:text-[1.15rem]">
+            <p className="site-hero-intro mt-2.5 text-[var(--color-brand-blue)]">
               {aboutPageHero.description}
             </p>
           </div>

@@ -33,6 +33,8 @@ type Submission = {
   lessonTitle: string;
   lessonNumber: number;
   levelId: number;
+  responsePrompt: string | null;
+  responseMarkingGuide: string | null;
 };
 
 type ReviewQueueClientProps = {
@@ -503,6 +505,32 @@ export function ReviewQueueClient({
                 </div>
 
                 <div className="rounded-sm border border-zinc-100 bg-zinc-50 px-3 py-3">
+                  {selectedSubmission.responsePrompt ? (
+                    <div className="mb-3 rounded-sm border border-zinc-200 bg-white px-3 py-2">
+                      <p className="mb-1 text-[11px] font-medium text-zinc-700">
+                        Written prompt
+                      </p>
+                      <div
+                        className="prose prose-sm max-w-none text-zinc-600"
+                        dangerouslySetInnerHTML={{
+                          __html: selectedSubmission.responsePrompt,
+                        }}
+                      />
+                    </div>
+                  ) : null}
+                  {selectedSubmission.responseMarkingGuide ? (
+                    <div className="mb-3 rounded-sm border border-amber-200 bg-amber-50 px-3 py-2">
+                      <p className="mb-1 text-[11px] font-medium text-amber-800">
+                        Marking guide
+                      </p>
+                      <div
+                        className="prose prose-sm max-w-none text-amber-900"
+                        dangerouslySetInnerHTML={{
+                          __html: selectedSubmission.responseMarkingGuide,
+                        }}
+                      />
+                    </div>
+                  ) : null}
                   <p className="whitespace-pre-wrap text-xs leading-relaxed text-zinc-600">
                     {selectedSubmission.content}
                   </p>

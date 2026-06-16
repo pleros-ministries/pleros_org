@@ -99,6 +99,8 @@ export async function createLesson(data: {
   audioFileSize?: number | null;
   audioUploadedAt?: Date | null;
   notesContent?: string;
+  responsePrompt?: string | null;
+  responseMarkingGuide?: string | null;
   status?: "draft" | "published";
 }) {
   const [lesson] = await db.insert(schema.lessons).values(data).returning();
@@ -113,6 +115,8 @@ export async function updateLesson(id: number, data: Partial<{
   audioFileSize: number | null;
   audioUploadedAt: Date | null;
   notesContent: string | null;
+  responsePrompt: string | null;
+  responseMarkingGuide: string | null;
   status: "draft" | "published";
   lessonNumber: number;
 }>) {

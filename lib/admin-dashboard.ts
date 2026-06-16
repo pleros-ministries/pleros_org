@@ -1,9 +1,42 @@
+import { getLessonPublishReadiness } from "./ppc-content-cms";
+
 type ContentOverviewItem = {
   id: number;
   title: string;
   draftCount: number;
   publishedCount: number;
   totalLessons: number;
+};
+
+type ContentDebtLesson = {
+  id: number;
+  lessonNumber: number;
+  title: string;
+  status: string;
+  audioUrl: string | null;
+  notesContent: string | null;
+  responsePrompt: string | null;
+  responseMarkingGuide: string | null;
+  questions: Array<{
+    questionType: string;
+    questionText: string;
+    options: string[] | null;
+    correctAnswer: string | null;
+  }>;
+};
+
+type ContentDebtLevel = {
+  id: number;
+  title: string;
+  lessons: ContentDebtLesson[];
+};
+
+type StaffAccessUser = {
+  role: string;
+};
+
+type StaffAccessInvite = {
+  status: string;
 };
 
 export function formatDashboardAge(
@@ -130,7 +163,7 @@ export function getContentWatchlistSummary(levels: ContentOverviewItem[]) {
       detail:
         level.publishedCount === 0
           ? `${level.draftCount} draft${level.draftCount === 1 ? "" : "s"} · nothing published yet`
-          : `${level.draftCount} draft${level.draftCount === 1 ? "" : "s"} · ${level.publishedCount} published`,
+          : `${level.draftCount} locked draft${level.draftCount === 1 ? "" : "s"} · ${level.publishedCount} released`,
       tone: (level.publishedCount === 0 ? "warning" : "default") as
         | "warning"
         | "default",
@@ -139,9 +172,147 @@ export function getContentWatchlistSummary(levels: ContentOverviewItem[]) {
   return {
     draftLessons: levels.reduce((total, level) => total + level.draftCount, 0),
     levelsWithDrafts: watchItems.length,
+    releaseRiskLevels: watchItems.length,
     emptyPublishedLevels: levels.filter(
       (level) => level.totalLessons > 0 && level.publishedCount === 0,
     ).length,
     watchItems,
+  };
+}
+
+function formatContentDebtDetail(input: {
+  readyDrafts: number;
+  incompleteDrafts: number;
+  publishedWithGaps: number;
+}) {
+  return [
+    input.incompleteDrafts > 0
+      ? `${input.incompleteDrafts} incomplete draft${input.incompleteDrafts === 1 ? "" : "s"}`
+      : null,
+    input.publishedWithGaps > 0
+      ? `${input.publishedWithGaps} published with gaps`
+      : null,
+    input.readyDrafts > 0
+      ? `${input.readyDrafts} ready draft${input.readyDrafts === 1 ? "" : "s"}`
+      : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+}
+
+export function getContentDebtSummary(levels: ContentDebtLevel[]) {
+  const levelItems = levels
+    .map((level) => {
+      const counts = level.lessons.reduce(
+        (summary, lesson) => {
+          const readiness = getLessonPublishReadiness({
+            title: lesson.title,
+            audioUrl: lesson.audioUrl,
+            notesContent: lesson.notesContent,
+            responsePrompt: lesson.responsePrompt,
+            responseMarkingGuide: lesson.responseMarkingGuide,
+            questions: lesson.questions,
+          });
+
+          if (lesson.status === "published") {
+            if (!readiness.isReady) {
+              summary.publishedWithGaps += 1;
+            }
+            return summary;
+          }
+
+          if (readiness.isReady) {
+            summary.readyDrafts += 1;
+          } else {
+            summary.incompleteDrafts += 1;
+          }
+
+          return summary;
+        },
+        {
+          readyDrafts: 0,
+          incompleteDrafts: 0,
+          publishedWithGaps: 0,
+        },
+      );
+
+      return {
+        id: level.id,
+        title: level.title,
+        ...counts,
+        detail: formatContentDebtDetail(counts),
+        tone:
+          counts.incompleteDrafts > 0 || counts.publishedWithGaps > 0
+            ? "warning"
+            : "default",
+      };
+    })
+    .filter((level) => level.detail.length > 0)
+    .sort((left, right) => {
+      const leftDebt = left.incompleteDrafts + left.publishedWithGaps;
+      const rightDebt = right.incompleteDrafts + right.publishedWithGaps;
+
+      if (rightDebt !== leftDebt) {
+        return rightDebt - leftDebt;
+      }
+
+      return right.readyDrafts - left.readyDrafts;
+    });
+
+  const readyDraftLessons = levelItems.reduce(
+    (total, level) => total + level.readyDrafts,
+    0,
+  );
+  const incompleteDraftLessons = levelItems.reduce(
+    (total, level) => total + level.incompleteDrafts,
+    0,
+  );
+  const publishedWithGaps = levelItems.reduce(
+    (total, level) => total + level.publishedWithGaps,
+    0,
+  );
+
+  return {
+    readyDraftLessons,
+    incompleteDraftLessons,
+    publishedWithGaps,
+    totalDebt: incompleteDraftLessons + publishedWithGaps,
+    topItems: levelItems.slice(0, 4).map((level) => ({
+      id: level.id,
+      title: level.title,
+      detail: level.detail,
+      tone: level.tone as "warning" | "default",
+    })),
+  };
+}
+
+export function getStaffAccessSummary(
+  users: StaffAccessUser[],
+  invites: StaffAccessInvite[],
+) {
+  const superAdmins = users.filter((user) => user.role === "super_admin").length;
+  const admins = users.filter((user) => user.role === "admin").length;
+  const instructors = users.filter((user) => user.role === "instructor").length;
+  const pendingInvites = invites.filter((invite) => invite.status === "pending").length;
+  const expiredInvites = invites.filter((invite) => invite.status === "expired").length;
+  const acceptedInvites = invites.filter((invite) => invite.status === "accepted").length;
+  const revokedInvites = invites.filter((invite) => invite.status === "revoked").length;
+  const hintParts = [
+    `${pendingInvites} pending invite${pendingInvites === 1 ? "" : "s"}`,
+    expiredInvites > 0
+      ? `${expiredInvites} expired`
+      : `${acceptedInvites} accepted`,
+  ];
+
+  return {
+    totalStaff: superAdmins + admins + instructors,
+    superAdmins,
+    admins,
+    instructors,
+    pendingInvites,
+    expiredInvites,
+    acceptedInvites,
+    revokedInvites,
+    hint: hintParts.join(" · "),
   };
 }

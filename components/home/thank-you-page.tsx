@@ -50,7 +50,7 @@ export function ThankYouPage({ extraGiftsUnlocked }: ThankYouPageProps) {
                 <h2 className="site-section-heading text-[2rem] text-[var(--color-brand-blue)]">
                   We have 2 more gifts for you but we need your help to share...
                 </h2>
-                <p className="max-w-[31ch] font-[var(--font-be-vietnam-pro)] text-[0.96rem] leading-[1.45] tracking-[-0.02em] text-[var(--color-text-muted)]">
+                <p className="site-section-intro max-w-[31ch] text-[var(--color-text-muted)]">
                   Tap the WhatsApp button to share the free gift. After sharing,
                   confirm here and we&apos;ll unlock the two extra resources.
                 </p>
@@ -93,7 +93,7 @@ export function ThankYouPage({ extraGiftsUnlocked }: ThankYouPageProps) {
                 <h2 className="site-section-heading text-[1.75rem] text-[var(--color-brand-blue)]">
                   Your main gift is already ready
                 </h2>
-                <p className="max-w-[31ch] font-[var(--font-be-vietnam-pro)] text-[0.96rem] leading-[1.45] tracking-[-0.02em] text-[var(--color-text-muted)]">
+                <p className="site-section-intro max-w-[31ch] text-[var(--color-text-muted)]">
                   Access your free gift on your dashboard whenever you&apos;re
                   ready.
                 </p>

@@ -9,6 +9,10 @@ import { getDashboardStats } from "@/lib/db/queries/students";
 import { getReviewQueue } from "@/lib/db/queries/submissions";
 import { getAllThreads } from "@/lib/db/queries/qa";
 import { getContentOverview } from "@/lib/db/queries/content";
+import {
+  listStaffInvites,
+  listStaffUsers,
+} from "@/lib/db/queries/staff-invites";
 import { PpcAppFrame } from "@/components/ppc/ppc-app-frame";
 import { PageHeader } from "@/components/ppc/page-header";
 import { StaffLoginPanel } from "@/components/ppc/staff-login-panel";
@@ -19,10 +23,12 @@ import {
 } from "@/components/ppc/admin-dashboard-previews";
 import {
   getAssignmentOwnershipSummary,
-  getContentWatchlistSummary,
+  getContentDebtSummary,
+  getStaffAccessSummary,
   prioritizeOwnershipRows,
   getQueuePressureSummary,
 } from "@/lib/admin-dashboard";
+import { hasAdminAccess } from "@/lib/app-role";
 import {
   Activity,
   ArrowRight,
@@ -66,16 +72,43 @@ export default async function AdminEntryPage() {
     redirect("/ppc");
   }
 
+  const canManageContent = hasAdminAccess(session.user.role);
+
   const stats = await getDashboardStats();
   const reviewQueue = await getReviewQueue();
   const openThreads = await getAllThreads("open");
   const contentOverview = await getContentOverview();
+  const contentDebt = getContentDebtSummary(
+    contentOverview.map((level) => ({
+      id: level.id,
+      title: level.title,
+      lessons: level.lessons.map((lesson) => ({
+        id: lesson.id,
+        lessonNumber: lesson.lessonNumber,
+        title: lesson.title,
+        status: lesson.status,
+        audioUrl: lesson.audioUrl,
+        notesContent: lesson.notesContent,
+        responsePrompt: lesson.responsePrompt,
+        responseMarkingGuide: lesson.responseMarkingGuide,
+        questions: lesson.questions.map((question) => ({
+          questionType: question.questionType,
+          questionText: question.questionText,
+          options: question.options as string[] | null,
+          correctAnswer: question.correctAnswer,
+        })),
+      })),
+    })),
+  );
+  const staffAccessSummary =
+    session.user.role === "super_admin"
+      ? getStaffAccessSummary(await listStaffUsers(), await listStaffInvites())
+      : null;
   const [userCount] = await db.select({ count: count() }).from(schema.users);
   const [lessonCount] = await db
     .select({ count: count() })
     .from(schema.lessons)
     .where(eq(schema.lessons.status, "published"));
-  const contentWatchlist = getContentWatchlistSummary(contentOverview);
   const reviewPressure = getQueuePressureSummary(reviewQueue, "submittedAt");
   const qaPressure = getQueuePressureSummary(openThreads, "createdAt");
   const reviewOwnership = getAssignmentOwnershipSummary(
@@ -198,16 +231,35 @@ export default async function AdminEntryPage() {
                 </p>
               </Link>
 
+              {staffAccessSummary ? (
+                <Link
+                  href="/admin/staff"
+                  className="rounded-sm border border-zinc-200 bg-zinc-50 px-3 py-3 transition-colors hover:border-zinc-300 hover:bg-white"
+                >
+                  <div className="flex items-center justify-between">
+                    <Users className="size-4 text-zinc-500" />
+                    <ArrowRight className="size-3.5 text-zinc-300" />
+                  </div>
+                  <p className="mt-3 text-xs font-medium text-zinc-900">
+                    Staff access
+                  </p>
+                  <p className="mt-1 text-[11px] text-zinc-500">
+                    {staffAccessSummary.totalStaff} staff accounts ·{" "}
+                    {staffAccessSummary.hint}
+                  </p>
+                </Link>
+              ) : null}
+
               <Link
                 href={
-                  session.user.role === "admin"
+                  canManageContent
                     ? "/admin/content"
                     : "/admin/notifications"
                 }
                 className="rounded-sm border border-zinc-200 bg-zinc-50 px-3 py-3 transition-colors hover:border-zinc-300 hover:bg-white"
               >
                 <div className="flex items-center justify-between">
-                  {session.user.role === "admin" ? (
+                  {canManageContent ? (
                     <FolderKanban className="size-4 text-zinc-500" />
                   ) : (
                     <Settings2 className="size-4 text-zinc-500" />
@@ -215,13 +267,11 @@ export default async function AdminEntryPage() {
                   <ArrowRight className="size-3.5 text-zinc-300" />
                 </div>
                 <p className="mt-3 text-xs font-medium text-zinc-900">
-                  {session.user.role === "admin"
-                    ? "Content authoring"
-                    : "Notification settings"}
+                  {canManageContent ? "Content authoring" : "Notification settings"}
                 </p>
                 <p className="mt-1 text-[11px] text-zinc-500">
-                  {session.user.role === "admin"
-                    ? `${contentWatchlist.draftLessons} draft lessons waiting for review`
+                  {canManageContent
+                    ? `${contentDebt.incompleteDraftLessons} incomplete · ${contentDebt.readyDraftLessons} ready`
                     : "Monitor reminder policy and delivery channels"}
                 </p>
               </Link>
@@ -238,7 +288,7 @@ export default async function AdminEntryPage() {
                   Current platform totals and publishing state
                 </p>
               </div>
-              {session.user.role === "admin" ? (
+              {canManageContent ? (
                 <Link
                   href="/admin/platform"
                   className="text-[11px] font-medium text-zinc-500 hover:text-zinc-900"
@@ -267,27 +317,61 @@ export default async function AdminEntryPage() {
               </div>
               <div className="rounded-sm border border-zinc-100 bg-zinc-50 px-3 py-3">
                 <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-400">
-                  Draft lessons
+                  Incomplete drafts
                 </p>
                 <p className="mt-1 text-lg font-semibold text-zinc-950">
-                  {contentWatchlist.draftLessons}
+                  {contentDebt.incompleteDraftLessons}
+                </p>
+                <p className="mt-1 text-[11px] text-zinc-500">
+                  {contentDebt.readyDraftLessons} ready to publish
                 </p>
               </div>
               <div className="rounded-sm border border-zinc-100 bg-zinc-50 px-3 py-3">
                 <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-400">
-                  Levels at risk
+                  Published gaps
                 </p>
                 <p className="mt-1 text-lg font-semibold text-zinc-950">
-                  {contentWatchlist.emptyPublishedLevels}
+                  {contentDebt.publishedWithGaps}
+                </p>
+                <p className="mt-1 text-[11px] text-zinc-500">
+                  {contentDebt.totalDebt} total content debt
                 </p>
               </div>
+              {staffAccessSummary ? (
+                <>
+                  <div className="rounded-sm border border-zinc-100 bg-zinc-50 px-3 py-3">
+                    <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-400">
+                      Staff accounts
+                    </p>
+                    <p className="mt-1 text-lg font-semibold text-zinc-950">
+                      {staffAccessSummary.totalStaff}
+                    </p>
+                    <p className="mt-1 text-[11px] text-zinc-500">
+                      {staffAccessSummary.admins} admins ·{" "}
+                      {staffAccessSummary.instructors} instructors
+                    </p>
+                  </div>
+                  <div className="rounded-sm border border-zinc-100 bg-zinc-50 px-3 py-3">
+                    <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-400">
+                      Staff invites
+                    </p>
+                    <p className="mt-1 text-lg font-semibold text-zinc-950">
+                      {staffAccessSummary.pendingInvites}
+                    </p>
+                    <p className="mt-1 text-[11px] text-zinc-500">
+                      {staffAccessSummary.expiredInvites} expired ·{" "}
+                      {staffAccessSummary.acceptedInvites} accepted
+                    </p>
+                  </div>
+                </>
+              ) : null}
               <div className="rounded-sm border border-zinc-100 bg-zinc-50 px-3 py-3 sm:col-span-2">
                 <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-400">
                   Content watchlist
                 </p>
-                {contentWatchlist.watchItems.length ? (
+                {contentDebt.topItems.length ? (
                   <div className="mt-2 grid gap-1.5">
-                    {contentWatchlist.watchItems.map((item) => (
+                    {contentDebt.topItems.map((item) => (
                       <div
                         key={item.id}
                         className={`rounded-sm border px-2.5 py-2 text-[11px] ${

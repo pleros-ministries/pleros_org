@@ -5,7 +5,11 @@ import { ArrowRight, BookOpen, GraduationCap, Lock } from "lucide-react";
 
 import { getAppSession } from "@/lib/app-session";
 import { toExternalPpcPath } from "@/lib/ppc-access";
-import { getLevels, getLessonsByLevel } from "@/lib/db/queries/lessons";
+import {
+  getAllLessonsByLevel,
+  getLevels,
+  getLessonsByLevel,
+} from "@/lib/db/queries/lessons";
 import { getGraduations } from "@/lib/db/queries/graduations";
 import { PageHeader } from "@/components/ppc/page-header";
 import { LevelBadge } from "@/components/ppc/level-badge";
@@ -23,7 +27,7 @@ export default async function StudentDashboardPage() {
   const session = await getAppSession();
   if (!session) {
     const h = await headers();
-    redirect(toExternalPpcPath(h.get("host"), "/sign-in"));
+    redirect(toExternalPpcPath(h.get("host"), "/login"));
   }
 
   const userId = session.user.id;
@@ -36,7 +40,10 @@ export default async function StudentDashboardPage() {
     levels.length,
   );
 
-  const currentLessons = await getLessonsByLevel(currentLevel);
+  const [allCurrentLessons, currentLessons] = await Promise.all([
+    getAllLessonsByLevel(currentLevel),
+    getLessonsByLevel(currentLevel),
+  ]);
   const progress = await db
     .select()
     .from(studentProgress)
@@ -48,15 +55,17 @@ export default async function StudentDashboardPage() {
   });
 
   const completedCount = currentProgress.filter((p) => p.completed).length;
+  const lockedLessonCount = Math.max(allCurrentLessons.length - currentLessons.length, 0);
   const progressPercent =
-    currentLessons.length > 0
-      ? Math.round((completedCount / currentLessons.length) * 100)
+    allCurrentLessons.length > 0
+      ? Math.round((completedCount / allCurrentLessons.length) * 100)
       : 0;
   const nextLesson = currentProgress.find((p) => !p.completed);
   const dashboardFocus = getDashboardFocus({
     currentLevelId: currentLevel,
     completedLessons: completedCount,
-    totalLessons: currentLessons.length,
+    totalLessons: allCurrentLessons.length,
+    lockedLessons: lockedLessonCount,
     nextLesson: nextLesson
       ? {
           id: nextLesson.lesson.id,
@@ -66,7 +75,7 @@ export default async function StudentDashboardPage() {
       : null,
   });
   const pathwayRows = getLevelJourneyRows(levels, graduatedIds, currentLevel);
-  const lessonsRemaining = Math.max(currentLessons.length - completedCount, 0);
+  const lessonsRemaining = Math.max(allCurrentLessons.length - completedCount, 0);
 
   return (
     <div className="grid gap-6">
@@ -102,7 +111,13 @@ export default async function StudentDashboardPage() {
               <span className="text-zinc-300">•</span>
               <span>{lessonsRemaining} remaining</span>
               <span className="text-zinc-300">•</span>
-              <span>{currentLessons.length} total lessons</span>
+              <span>{allCurrentLessons.length} total lessons</span>
+              {lockedLessonCount > 0 ? (
+                <>
+                  <span className="text-zinc-300">•</span>
+                  <span>{lockedLessonCount} locked</span>
+                </>
+              ) : null}
             </div>
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
@@ -135,8 +150,16 @@ export default async function StudentDashboardPage() {
             </div>
             <div className="flex justify-between">
               <span className="text-zinc-500">Lessons completed</span>
-              <span className="font-medium text-zinc-900">{completedCount}/{currentLessons.length}</span>
+              <span className="font-medium text-zinc-900">
+                {completedCount}/{allCurrentLessons.length}
+              </span>
             </div>
+            {lockedLessonCount > 0 ? (
+              <div className="flex justify-between">
+                <span className="text-zinc-500">Locked in this level</span>
+                <span className="font-medium text-zinc-900">{lockedLessonCount}</span>
+              </div>
+            ) : null}
           </div>
         </div>
       </section>

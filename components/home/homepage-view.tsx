@@ -26,10 +26,10 @@ export async function HomepageView() {
         <HomepageGiftDrawer hasWelcomeAccess={Boolean(welcomeAccess)} />
         <HomepageNav />
         <HomepageHero />
+        <HomepageCommunitySection />
         <HomepagePodcastSection episode={episode} />
         <HomepageSocialSection posts={homeInstagramReels} />
         {/* <HomepageLibrarySection /> */}
-        <HomepageCommunitySection />
         <HomepageFooter />
       </div>
     </div>

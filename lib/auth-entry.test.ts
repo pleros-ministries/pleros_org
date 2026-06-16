@@ -19,6 +19,13 @@ describe("auth entry helpers", () => {
   test("routes staff roles to admin regardless of requested return path", () => {
     expect(
       getPostAuthRedirectPath({
+        resolvedRole: "super_admin",
+        returnTo: "/ppc/student",
+      }),
+    ).toBe("/admin");
+
+    expect(
+      getPostAuthRedirectPath({
         resolvedRole: "admin",
         returnTo: "/ppc/student",
       }),
@@ -33,10 +40,19 @@ describe("auth entry helpers", () => {
   });
 
   test("describes when a staff email is used from the student portal", () => {
-    expect(getPortalAccessNotice("student", "admin")).toEqual({
-      tone: "info",
-      message:
-        "This email is configured for staff access. After login, you'll be sent to /admin.",
+    for (const role of ["super_admin", "admin", "instructor"] as const) {
+      expect(getPortalAccessNotice("student", role)).toEqual({
+        tone: "info",
+        message:
+          "This email is configured for staff access. After login, you'll be sent to /admin.",
+      });
+    }
+  });
+
+  test("labels super admin staff access explicitly", () => {
+    expect(getPortalAccessNotice("staff", "super_admin")).toEqual({
+      tone: "default",
+      message: "This email is configured for super admin access.",
     });
   });
 

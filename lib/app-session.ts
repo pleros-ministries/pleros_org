@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 
 import type { AppRole } from "@/lib/app-role";
-import { ensureAppUserRecord, resolveRoleForEmail } from "@/lib/app-user";
+import { ensureAppUserRecord, resolvePersistedRoleForEmail } from "@/lib/app-user";
 import { betterAuthServer } from "@/lib/auth/better-auth";
 
 export type AppSession = {
@@ -24,7 +24,7 @@ export async function getAppSession(): Promise<AppSession | null> {
       return null;
     }
 
-    const role = resolveRoleForEmail(authSession.user.email);
+    const role = await resolvePersistedRoleForEmail(authSession.user.email);
     const ppcUserId = await ensureAppUserRecord({
       id: authSession.user.id ?? authSession.user.email,
       name: authSession.user.name,

@@ -21,6 +21,7 @@ import {
   serializeWelcomePackState,
   shouldShowWelcomePackModal,
 } from "@/lib/homepage-logic";
+import { welcomePackModalCopy } from "@/lib/welcome-pack-modal-copy";
 import { validateEmail } from "@/lib/welcome-flow";
 
 type HomepageGiftDrawerProps = {
@@ -195,11 +196,10 @@ export function HomepageGiftDrawer({
 
               <div className="grid gap-2">
                 <SheetTitle className="font-[var(--font-sen)] text-[1.9rem] font-semibold leading-[0.92] tracking-[-0.05em] text-[var(--color-brand-blue)]">
-                  Get your free welcome pack
+                  {welcomePackModalCopy.headline}
                 </SheetTitle>
-                <p className="max-w-[32ch] font-[var(--font-be-vietnam-pro)] text-[0.95rem] leading-[1.35] tracking-[-0.02em] text-[rgba(6,16,86,0.72)] md:max-w-[38ch]">
-                  The first resources you need to begin your Pleros journey are
-                  waiting inside your dashboard.
+                <p className="site-section-intro max-w-[32ch] text-[rgba(6,16,86,0.72)] md:max-w-[38ch]">
+                  {welcomePackModalCopy.subheadline}
                 </p>
               </div>
             </SheetHeader>

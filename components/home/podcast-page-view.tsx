@@ -57,8 +57,13 @@ export async function PodcastPageView() {
           <div className="relative flex min-h-[17.8125rem] flex-col justify-end px-[1.25rem] pb-[2.125rem] pt-10 md:min-h-[22rem] md:px-8 md:pb-[2.625rem] md:pt-12 xl:min-h-[25rem] xl:px-10 xl:pb-[3rem] xl:pt-14">
             <div className="relative z-10 grid max-w-[18rem] gap-3 md:max-w-[20rem] md:gap-4 xl:max-w-[24rem]">
               <p className="site-hero-eyebrow">{podcastPageHero.eyebrow}</p>
-              <h1 className="site-hero-heading max-w-[14rem] text-[2.8rem] text-[var(--color-brand-indigo)] md:max-w-[16rem] md:text-[3.6rem] xl:max-w-[19rem] xl:text-[4.15rem]">
-                {podcastPageHero.title}
+              <h1 className="site-hero-heading max-w-[16rem] text-balance text-[2.8rem] leading-[0.98] text-[var(--color-brand-indigo)] md:max-w-[16rem] md:text-[3.6rem] md:leading-none xl:max-w-[19rem] xl:text-[4.15rem]">
+                <span className="md:hidden">
+                  {podcastPageHero.mobileTitleLines[0]}
+                  <br />
+                  {podcastPageHero.mobileTitleLines[1]}
+                </span>
+                <span className="hidden md:inline">{podcastPageHero.title}</span>
               </h1>
             </div>
           </div>
@@ -71,7 +76,7 @@ export async function PodcastPageView() {
               <h2 className="site-section-heading max-w-[25rem]">
                 {podcastFeaturedSection.title}
               </h2>
-              <p className="max-w-[34rem] text-[1rem] leading-[1.45] tracking-[-0.02em] text-[var(--color-text-muted)] md:text-[1.0625rem]">
+              <p className="site-section-intro max-w-[34rem] text-[var(--color-text-muted)]">
                 {podcastFeaturedSection.description}
               </p>
             </div>

@@ -20,7 +20,7 @@ export function ContactPageView() {
             <h1 className="site-hero-heading text-[2.55rem] text-[var(--color-text-strong)] md:text-[3.2rem] xl:text-[4rem]">
               {contactPageHero.title}
             </h1>
-            <p className="mt-2.5 max-w-[34rem] text-[1rem] leading-[1.08] tracking-[-0.02em] text-[var(--color-brand-blue)] md:text-[1.15rem]">
+            <p className="site-hero-intro mt-2.5 max-w-[34rem] text-[var(--color-brand-blue)]">
               {contactPageHero.description}
             </p>
           </div>

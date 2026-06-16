@@ -38,8 +38,10 @@ import {
 } from "@/app/ppc/_actions/content-actions";
 import {
   getLevelDeletionState,
+  getLevelReleaseSummary,
   hasLevelDraftChanges,
   getLessonDeletionState,
+  getLessonPublishGuidance,
   getLessonPublishReadiness,
   getLessonAudioDraftSummary,
   getLessonAudioAssetLabel,
@@ -65,6 +67,8 @@ type Lesson = {
   audioFileSize: number | null;
   audioUploadedAt: string | null;
   notesContent: string | null;
+  responsePrompt: string | null;
+  responseMarkingGuide: string | null;
 };
 
 type Level = {
@@ -152,6 +156,8 @@ export function ContentCmsClient({
   const [newLessonUploadedAudio, setNewLessonUploadedAudio] =
     useState<UploadedLessonAudioAsset | null>(null);
   const [newLessonNotes, setNewLessonNotes] = useState("");
+  const [newLessonResponsePrompt, setNewLessonResponsePrompt] = useState("");
+  const [newLessonMarkingGuide, setNewLessonMarkingGuide] = useState("");
   const [newLessonError, setNewLessonError] = useState<string | null>(null);
   const [workspaceFeedback, setWorkspaceFeedback] = useState<string | null>(null);
   const [workspaceFeedbackTone, setWorkspaceFeedbackTone] = useState<
@@ -173,6 +179,8 @@ export function ContentCmsClient({
   const [editUploadedAudio, setEditUploadedAudio] =
     useState<UploadedLessonAudioAsset | null>(null);
   const [editNotes, setEditNotes] = useState("");
+  const [editResponsePrompt, setEditResponsePrompt] = useState("");
+  const [editMarkingGuide, setEditMarkingGuide] = useState("");
   const [audioUploadState, setAudioUploadState] = useState<{
     target: AudioUploadTarget | null;
     fileName: string | null;
@@ -234,6 +242,8 @@ export function ContentCmsClient({
         audioUrl: editAudioUrl,
         audioUploadKey: editUploadedAudio?.uploadKey ?? null,
         notesContent: editNotes,
+        responsePrompt: editResponsePrompt,
+        responseMarkingGuide: editMarkingGuide,
       })
     : false;
   const selectedLessonAudioDraft = resolveManagedLessonAudioDraft({
@@ -258,6 +268,8 @@ export function ContentCmsClient({
     title: editTitle,
     audioUrl: selectedLessonAudioDraft.audioUrl,
     notesContent: editNotes,
+    responsePrompt: editResponsePrompt,
+    responseMarkingGuide: editMarkingGuide,
     questions: lessonQuestions.map((question) => ({
       questionType: question.questionType,
       questionText: question.questionText,
@@ -269,11 +281,39 @@ export function ContentCmsClient({
     isUploading && audioUploadState.target === "create";
   const isUploadingSelectedLesson =
     isUploading && audioUploadState.target === "edit";
+  const publishGuidance = selectedLesson
+    ? getLessonPublishGuidance({
+        status: selectedLesson.status as "draft" | "published",
+        hasUnsavedChanges: hasLessonChanges || isUploadingSelectedLesson,
+        isReady: publishReadiness.isReady,
+        unmetRequirements: publishReadiness.requirements.filter(
+          (requirement) => !requirement.met,
+        ),
+      })
+    : null;
   const deletionState = selectedLesson
     ? getLessonDeletionState(selectedLesson.status as "draft" | "published")
     : null;
   const levelDeletionState = activeLevel
     ? getLevelDeletionState(activeLevel.totalLessons)
+    : null;
+  const activeLevelReleaseSummary = activeLevel
+    ? getLevelReleaseSummary(
+        activeLevel.lessons.map((lesson) => ({
+          status: lesson.status as "draft" | "published",
+          title: lesson.title,
+          audioUrl: lesson.audioUrl,
+          notesContent: lesson.notesContent,
+          responsePrompt: lesson.responsePrompt,
+          responseMarkingGuide: lesson.responseMarkingGuide,
+          questions: (questions[lesson.id] ?? []).map((question) => ({
+            questionType: question.questionType,
+            questionText: question.questionText,
+            options: question.options,
+            correctAnswer: question.correctAnswer,
+          })),
+        })),
+      )
     : null;
   const hasLevelChanges = activeLevel
     ? hasLevelDraftChanges(activeLevel, {
@@ -324,6 +364,8 @@ export function ContentCmsClient({
     setEditAudioUrl("");
     setEditUploadedAudio(null);
     setEditNotes("");
+    setEditResponsePrompt("");
+    setEditMarkingGuide("");
     setEditingQId(null);
     setDeleteConfirmLessonId(null);
     setLessonFeedback(null);
@@ -354,6 +396,8 @@ export function ContentCmsClient({
         : null,
     );
     setEditNotes(lesson.notesContent ?? "");
+    setEditResponsePrompt(lesson.responsePrompt ?? "");
+    setEditMarkingGuide(lesson.responseMarkingGuide ?? "");
     setEditingQId(null);
     setDeleteConfirmLessonId(null);
     setLessonFeedback(null);
@@ -506,6 +550,8 @@ export function ContentCmsClient({
         title: editTitle.trim(),
         ...selectedLessonAudioDraft,
         notesContent: editNotes.trim() || null,
+        responsePrompt: editResponsePrompt.trim() || null,
+        responseMarkingGuide: editMarkingGuide.trim() || null,
       });
       if (savedLesson) {
         const lesson = normalizeLessonRecord(savedLesson);
@@ -535,6 +581,8 @@ export function ContentCmsClient({
                             audioFileSize: lesson.audioFileSize,
                             audioUploadedAt: lesson.audioUploadedAt,
                             notesContent: lesson.notesContent,
+                            responsePrompt: lesson.responsePrompt,
+                            responseMarkingGuide: lesson.responseMarkingGuide,
                           }
                         : item,
                     )
@@ -550,6 +598,8 @@ export function ContentCmsClient({
                             audioFileSize: lesson.audioFileSize,
                             audioUploadedAt: lesson.audioUploadedAt,
                             notesContent: lesson.notesContent,
+                            responsePrompt: lesson.responsePrompt,
+                            responseMarkingGuide: lesson.responseMarkingGuide,
                           }
                         : item,
                     ),
@@ -567,6 +617,8 @@ export function ContentCmsClient({
           audioFileSize: lesson.audioFileSize,
           audioUploadedAt: lesson.audioUploadedAt,
           notesContent: lesson.notesContent,
+          responsePrompt: lesson.responsePrompt,
+          responseMarkingGuide: lesson.responseMarkingGuide,
         });
         setLessonFeedback("Lesson details saved.");
         setLessonFeedbackTone("default");
@@ -767,6 +819,8 @@ export function ContentCmsClient({
         title: newLessonTitle.trim(),
         ...newLessonAudioDraft,
         notesContent: newLessonNotes.trim() || undefined,
+        responsePrompt: newLessonResponsePrompt.trim() || null,
+        responseMarkingGuide: newLessonMarkingGuide.trim() || null,
       });
 
       if (createdLesson) {
@@ -788,6 +842,8 @@ export function ContentCmsClient({
         setNewLessonAudioUrl("");
         setNewLessonUploadedAudio(null);
         setNewLessonNotes("");
+        setNewLessonResponsePrompt("");
+        setNewLessonMarkingGuide("");
         setNewLessonError(null);
         setIsCreateLessonOpen(false);
         selectLesson({
@@ -801,6 +857,8 @@ export function ContentCmsClient({
           audioFileSize: lesson.audioFileSize,
           audioUploadedAt: lesson.audioUploadedAt,
           notesContent: lesson.notesContent,
+          responsePrompt: lesson.responsePrompt,
+          responseMarkingGuide: lesson.responseMarkingGuide,
         });
         setLessonFeedback("New lesson created.");
         setLessonFeedbackTone("default");
@@ -1032,6 +1090,8 @@ export function ContentCmsClient({
           setEditAudioUrl("");
           setEditUploadedAudio(null);
           setEditNotes("");
+          setEditResponsePrompt("");
+          setEditMarkingGuide("");
           setDeleteConfirmLessonId(null);
           setLessonFeedback(null);
           setLessonFeedbackTone("default");
@@ -1070,6 +1130,8 @@ export function ContentCmsClient({
                 setEditAudioUrl("");
                 setEditUploadedAudio(null);
                 setEditNotes("");
+                setEditResponsePrompt("");
+                setEditMarkingGuide("");
                 setDeleteConfirmLessonId(null);
                 resetAudioUploadState();
               }
@@ -1115,6 +1177,11 @@ export function ContentCmsClient({
                   {activeLevel?.totalLessons ?? 0} lessons with{" "}
                   {activeLevel?.publishedCount ?? 0} published
                 </p>
+                {activeLevelReleaseSummary ? (
+                  <p className="mt-1 text-[11px] text-zinc-500">
+                    {activeLevelReleaseSummary.label}
+                  </p>
+                ) : null}
               </div>
               <div className="flex flex-wrap gap-2">
                 <button
@@ -1453,6 +1520,20 @@ export function ContentCmsClient({
                   placeholder="Starter notes (optional)"
                   className="rounded-sm border border-zinc-200 bg-white px-2 py-1.5 text-xs outline-none placeholder:text-zinc-300 focus:border-zinc-400"
                 />
+                <textarea
+                  value={newLessonResponsePrompt}
+                  onChange={(event) => setNewLessonResponsePrompt(event.target.value)}
+                  rows={4}
+                  placeholder="Written response prompt (optional)"
+                  className="rounded-sm border border-zinc-200 bg-white px-2 py-1.5 text-xs outline-none placeholder:text-zinc-300 focus:border-zinc-400"
+                />
+                <textarea
+                  value={newLessonMarkingGuide}
+                  onChange={(event) => setNewLessonMarkingGuide(event.target.value)}
+                  rows={4}
+                  placeholder="Admin marking guide (optional)"
+                  className="rounded-sm border border-zinc-200 bg-white px-2 py-1.5 text-xs outline-none placeholder:text-zinc-300 focus:border-zinc-400"
+                />
                 <div className="flex gap-2">
                   <button
                     onClick={handleCreateLesson}
@@ -1477,38 +1558,70 @@ export function ContentCmsClient({
             <div className="grid content-start gap-1 rounded-sm border border-zinc-200 bg-white p-2">
               {activeLevel?.lessons.length ? (
                 activeLevel.lessons.map((lesson) => (
-                  <button
-                    key={lesson.id}
-                    onClick={() => selectLesson(lesson)}
-                    className={cn(
-                      "flex items-center gap-2 rounded-sm border px-2 py-2 text-left transition-colors",
-                      selectedLessonId === lesson.id
-                        ? "border-zinc-400 bg-zinc-50"
-                        : "border-zinc-200 bg-white hover:bg-zinc-50",
-                    )}
-                  >
-                    <div className="grid shrink-0 justify-items-center gap-1">
-                      <span className="text-[10px] text-zinc-400">
-                        {lesson.lessonNumber}
-                      </span>
-                      <span
+                  (() => {
+                    const lessonReadiness = getLessonPublishReadiness({
+                      title: lesson.title,
+                      audioUrl: lesson.audioUrl,
+                      notesContent: lesson.notesContent,
+                      responsePrompt: lesson.responsePrompt,
+                      responseMarkingGuide: lesson.responseMarkingGuide,
+                      questions: (questions[lesson.id] ?? []).map((question) => ({
+                        questionType: question.questionType,
+                        questionText: question.questionText,
+                        options: question.options,
+                        correctAnswer: question.correctAnswer,
+                      })),
+                    });
+                    const lessonMeta =
+                      lesson.status === "published"
+                        ? lessonReadiness.isReady
+                          ? "Published"
+                          : "Published with gaps"
+                        : lessonReadiness.isReady
+                          ? "Ready to publish"
+                          : "Incomplete draft";
+
+                    return (
+                      <button
+                        key={lesson.id}
+                        onClick={() => selectLesson(lesson)}
                         className={cn(
-                          "size-1.5 rounded-full",
-                          lesson.status === "published"
-                            ? "bg-emerald-500"
-                            : "bg-zinc-300",
+                          "flex items-center gap-2 rounded-sm border px-2 py-2 text-left transition-colors",
+                          selectedLessonId === lesson.id
+                            ? "border-zinc-400 bg-zinc-50"
+                            : "border-zinc-200 bg-white hover:bg-zinc-50",
                         )}
-                      />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-xs font-medium text-zinc-700">
-                        {lesson.title}
-                      </p>
-                      <p className="text-[10px] text-zinc-400">
-                        {(questions[lesson.id] ?? []).length} questions
-                      </p>
-                    </div>
-                  </button>
+                      >
+                        <div className="grid shrink-0 justify-items-center gap-1">
+                          <span className="text-[10px] text-zinc-400">
+                            {lesson.lessonNumber}
+                          </span>
+                          <span
+                            className={cn(
+                              "size-1.5 rounded-full",
+                              lesson.status === "published" &&
+                                lessonReadiness.isReady
+                                ? "bg-emerald-500"
+                                : lesson.status === "published" ||
+                                    lessonReadiness.isReady
+                                  ? "bg-amber-500"
+                                  : "bg-zinc-300",
+                            )}
+                          />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-xs font-medium text-zinc-700">
+                            {lesson.title}
+                          </p>
+                          <p className="text-[10px] text-zinc-400">
+                            {(questions[lesson.id] ?? []).length} questions
+                            {" · "}
+                            {lessonMeta}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })()
                 ))
               ) : (
                 <div className="rounded-sm border border-dashed border-zinc-200 px-3 py-6 text-center text-xs text-zinc-400">
@@ -1720,6 +1833,57 @@ export function ContentCmsClient({
                         className="w-full rounded-sm border border-zinc-200 px-2 py-1.5 text-xs outline-none placeholder:text-zinc-300 focus:border-zinc-400"
                       />
                     </div>
+                    <div>
+                      <label className="mb-0.5 block text-[10px] text-zinc-400">
+                        Written response prompt
+                      </label>
+                      <textarea
+                        value={editResponsePrompt}
+                        onChange={(event) => setEditResponsePrompt(event.target.value)}
+                        rows={5}
+                        className="w-full rounded-sm border border-zinc-200 px-2 py-1.5 text-xs outline-none placeholder:text-zinc-300 focus:border-zinc-400"
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-0.5 block text-[10px] text-zinc-400">
+                        Admin marking guide
+                      </label>
+                      <textarea
+                        value={editMarkingGuide}
+                        onChange={(event) => setEditMarkingGuide(event.target.value)}
+                        rows={5}
+                        className="w-full rounded-sm border border-zinc-200 px-2 py-1.5 text-xs outline-none placeholder:text-zinc-300 focus:border-zinc-400"
+                      />
+                    </div>
+
+                    {publishGuidance ? (
+                      <div
+                        className={cn(
+                          "rounded-sm border px-3 py-2",
+                          publishGuidance.tone === "success"
+                            ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+                            : publishGuidance.tone === "warning"
+                              ? "border-amber-200 bg-amber-50 text-amber-900"
+                              : "border-zinc-200 bg-zinc-50 text-zinc-700",
+                        )}
+                      >
+                        <p className="text-xs font-medium">
+                          {publishGuidance.title}
+                        </p>
+                        <p
+                          className={cn(
+                            "mt-1 text-[11px]",
+                            publishGuidance.tone === "success"
+                              ? "text-emerald-700"
+                              : publishGuidance.tone === "warning"
+                                ? "text-amber-800"
+                                : "text-zinc-500",
+                          )}
+                        >
+                          {publishGuidance.description}
+                        </p>
+                      </div>
+                    ) : null}
 
                     <div className="flex flex-wrap gap-2">
                       <button
@@ -1737,9 +1901,7 @@ export function ContentCmsClient({
                         disabled={
                           isPending ||
                           (selectedLesson.status !== "published" &&
-                            (!publishReadiness.isReady ||
-                              hasLessonChanges ||
-                              isUploadingSelectedLesson))
+                            !publishGuidance?.canPublish)
                         }
                         className={cn(
                           "flex h-7 items-center gap-1.5 rounded-sm border px-3 text-xs font-medium disabled:opacity-50",
@@ -1751,12 +1913,12 @@ export function ContentCmsClient({
                         {selectedLesson.status === "published" ? (
                           <>
                             <EyeOff className="size-3" />
-                            Unpublish
+                            {publishGuidance?.actionLabel ?? "Unpublish"}
                           </>
                         ) : (
                           <>
                             <Eye className="size-3" />
-                            Publish
+                            {publishGuidance?.actionLabel ?? "Publish lesson"}
                           </>
                         )}
                       </button>
@@ -2018,6 +2180,21 @@ export function ContentCmsClient({
                   {lessonQuestions.length}
                 </p>
               </div>
+              {activeLevelReleaseSummary ? (
+                <div className="rounded-sm border border-zinc-100 bg-zinc-50 px-3 py-2">
+                  <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-400">
+                    Level release state
+                  </p>
+                  <p className="mt-1 text-sm font-medium text-zinc-900">
+                    {activeLevelReleaseSummary.published}/
+                    {activeLevelReleaseSummary.totalLessons} published
+                  </p>
+                  <p className="mt-1 text-[11px] text-zinc-500">
+                    {activeLevelReleaseSummary.readyDrafts} ready ·{" "}
+                    {activeLevelReleaseSummary.incompleteDrafts} incomplete
+                  </p>
+                </div>
+              ) : null}
             </div>
           </div>
 

@@ -107,6 +107,8 @@ export async function createNewLesson(data: {
   audioFileSize?: number | null;
   audioUploadedAt?: string | null;
   notesContent?: string;
+  responsePrompt?: string | null;
+  responseMarkingGuide?: string | null;
 }) {
   await requireAdmin();
   const lesson = await createLesson({
@@ -114,6 +116,8 @@ export async function createNewLesson(data: {
     lessonNumber: data.lessonNumber,
     title: data.title,
     notesContent: data.notesContent,
+    responsePrompt: data.responsePrompt ?? null,
+    responseMarkingGuide: data.responseMarkingGuide ?? null,
     ...normalizeLessonAudioFields(data),
   });
   revalidateContentSurfaces();
@@ -230,6 +234,8 @@ export async function updateLessonContent(
     audioFileSize?: number | null;
     audioUploadedAt?: string | null;
     notesContent?: string | null;
+    responsePrompt?: string | null;
+    responseMarkingGuide?: string | null;
     lessonNumber?: number;
   },
 ) {
@@ -250,6 +256,8 @@ export async function updateLessonContent(
   const lesson = await updateLesson(lessonId, {
     title: data.title,
     notesContent: data.notesContent,
+    responsePrompt: data.responsePrompt,
+    responseMarkingGuide: data.responseMarkingGuide,
     ...normalizedAudio,
   });
 
@@ -304,6 +312,8 @@ export async function publishLessonAction(lessonId: number) {
     title: lessonData.lesson.title,
     audioUrl: lessonData.lesson.audioUrl,
     notesContent: lessonData.lesson.notesContent,
+    responsePrompt: lessonData.lesson.responsePrompt,
+    responseMarkingGuide: lessonData.lesson.responseMarkingGuide,
     questions: lessonData.questions.map((question) => ({
       questionType: question.questionType,
       questionText: question.questionText,

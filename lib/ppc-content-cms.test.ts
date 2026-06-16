@@ -2,6 +2,8 @@ import { describe, expect, test } from "vitest";
 
 import {
   getLevelDeletionState,
+  getLevelReleaseSummary,
+  getLessonPublishGuidance,
   hasLevelDraftChanges,
   getLessonDeletionState,
   getLessonPublishReadiness,
@@ -275,6 +277,8 @@ describe("ppc content cms helpers", () => {
       title: "Lesson 1",
       audioUrl: "https://cdn.example.com/lesson-1.mp3",
       notesContent: "Lesson notes",
+      responsePrompt: "<ol><li>Explain the lesson.</li></ol>",
+      responseMarkingGuide: "<ol><li>Look for clear explanation.</li></ol>",
       questions: [
         {
           questionType: "multiple_choice",
@@ -296,11 +300,14 @@ describe("ppc content cms helpers", () => {
       title: "   ",
       audioUrl: "",
       notesContent: "",
+      responsePrompt: "",
+      responseMarkingGuide: "",
       questions: [],
     });
 
     expect(readiness.isReady).toBe(false);
     expect(readiness.requirements.map((requirement) => requirement.met)).toEqual([
+      false,
       false,
       false,
       false,
@@ -313,6 +320,8 @@ describe("ppc content cms helpers", () => {
       title: "Lesson 2",
       audioUrl: "https://cdn.example.com/lesson-2.mp3",
       notesContent: "Lesson notes",
+      responsePrompt: "<p>Respond to the lesson.</p>",
+      responseMarkingGuide: "<p>Check doctrinal accuracy.</p>",
       questions: [
         {
           questionType: "multiple_choice",
@@ -329,6 +338,149 @@ describe("ppc content cms helpers", () => {
       label: "Quiz answers match the configured options.",
       met: false,
       detail: "Question 1 needs at least two multiple choice options.",
+    });
+  });
+
+  test("blocks publishing when the written response setup is missing", () => {
+    const readiness = getLessonPublishReadiness({
+      title: "Lesson 3",
+      audioUrl: "https://cdn.example.com/lesson-3.mp3",
+      notesContent: "Lesson notes",
+      responsePrompt: "<p>Summarize the teaching.</p>",
+      responseMarkingGuide: "",
+      questions: [
+        {
+          questionType: "multiple_choice",
+          questionText: "What is true?",
+          options: ["Grace", "Works"],
+          correctAnswer: "Grace",
+        },
+      ],
+    });
+
+    expect(readiness.isReady).toBe(false);
+    expect(readiness.requirements.find((requirement) => requirement.id === "written_response"))
+      .toEqual({
+        id: "written_response",
+        label: "Written response prompt and admin marking guide are ready.",
+        met: false,
+        detail: "Add an admin marking guide before publishing.",
+      });
+  });
+
+  test("summarizes level release state for admin authoring", () => {
+    expect(
+      getLevelReleaseSummary([
+        {
+          status: "published",
+          title: "Lesson 1",
+          audioUrl: "https://cdn.example.com/1.mp3",
+          notesContent: "Notes",
+          responsePrompt: "<ol><li>Answer.</li></ol>",
+          responseMarkingGuide: "<ol><li>Mark.</li></ol>",
+          questions: [
+            {
+              questionType: "multiple_choice",
+              questionText: "Pick one",
+              options: ["A", "B"],
+              correctAnswer: "A",
+            },
+          ],
+        },
+        {
+          status: "draft",
+          title: "Lesson 2",
+          audioUrl: "https://cdn.example.com/2.mp3",
+          notesContent: "Notes",
+          responsePrompt: "<ol><li>Answer.</li></ol>",
+          responseMarkingGuide: "<ol><li>Mark.</li></ol>",
+          questions: [
+            {
+              questionType: "multiple_choice",
+              questionText: "Pick one",
+              options: ["A", "B"],
+              correctAnswer: "A",
+            },
+          ],
+        },
+        {
+          status: "draft",
+          title: "Lesson 3",
+          audioUrl: "https://cdn.example.com/3.mp3",
+          notesContent: "",
+          responsePrompt: "",
+          responseMarkingGuide: "",
+          questions: [],
+        },
+      ]),
+    ).toEqual({
+      totalLessons: 3,
+      published: 1,
+      readyDrafts: 1,
+      incompleteDrafts: 1,
+      label: "1 published · 1 ready draft · 1 incomplete draft",
+    });
+  });
+
+  test("guides the publish action for ready drafts and blocked drafts", () => {
+    expect(
+      getLessonPublishGuidance({
+        status: "draft",
+        hasUnsavedChanges: false,
+        isReady: true,
+        unmetRequirements: [],
+      }),
+    ).toEqual({
+      tone: "success",
+      title: "Ready to publish",
+      description: "This draft meets every publishing requirement.",
+      actionLabel: "Publish lesson",
+      canPublish: true,
+    });
+
+    expect(
+      getLessonPublishGuidance({
+        status: "draft",
+        hasUnsavedChanges: false,
+        isReady: false,
+        unmetRequirements: [
+          {
+            id: "written_response",
+            label: "Written response prompt and admin marking guide are ready.",
+            met: false,
+            detail: "Add an admin marking guide before publishing.",
+          },
+          {
+            id: "questions_present",
+            label: "At least one quiz question is configured.",
+            met: false,
+          },
+        ],
+      }),
+    ).toEqual({
+      tone: "warning",
+      title: "Publishing blocked",
+      description:
+        "Add an admin marking guide before publishing. Also fix: At least one quiz question is configured.",
+      actionLabel: "Resolve blockers",
+      canPublish: false,
+    });
+  });
+
+  test("blocks publishing guidance when a ready draft has unsaved changes", () => {
+    expect(
+      getLessonPublishGuidance({
+        status: "draft",
+        hasUnsavedChanges: true,
+        isReady: true,
+        unmetRequirements: [],
+      }),
+    ).toEqual({
+      tone: "warning",
+      title: "Save changes first",
+      description: "This lesson is ready, but pending edits must be saved before publishing.",
+      actionLabel: "Save before publishing",
+      canPublish: false,
     });
   });
 

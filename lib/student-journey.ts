@@ -13,6 +13,7 @@ type DashboardFocusInput = {
   currentLevelId: number;
   completedLessons: number;
   totalLessons: number;
+  lockedLessons?: number;
   nextLesson: NextLessonSummary | null;
 };
 
@@ -75,6 +76,19 @@ export function getDashboardFocus(input: DashboardFocusInput) {
       description: input.nextLesson.title,
       ctaLabel: "Continue learning",
       ctaHref: `/ppc/student/level/${input.currentLevelId}/lesson/${input.nextLesson.id}`,
+    };
+  }
+
+  if ((input.lockedLessons ?? 0) > 0) {
+    return {
+      eyebrow: "Current focus",
+      title: "More lessons are locked",
+      description:
+        input.lockedLessons === 1
+          ? "1 lesson in this level is still being prepared."
+          : `${input.lockedLessons} lessons in this level are still being prepared.`,
+      ctaLabel: "Open current level",
+      ctaHref: `/ppc/student/level/${input.currentLevelId}`,
     };
   }
 

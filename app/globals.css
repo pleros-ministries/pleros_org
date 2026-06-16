@@ -320,6 +320,7 @@
     --text-h3: 1.2426rem; /* 19.88px card title */
     --text-body-lg: 1.125rem; /* 18px intro copy */
     --text-body: 1rem; /* 16px body copy */
+    --text-section-intro: 0.9375rem; /* 15px section subcopy */
     --text-sm: 1rem; /* 16px buttons / dense UI */
     --text-xs: 0.6875rem; /* 11px micro copy */
     --text-eyebrow: 0.640625rem; /* 10.25px hero label */
@@ -492,7 +493,7 @@
   }
 
   .site-font-theme .site-section-heading {
-    font-family: var(--font-sen), "Sen", var(--font-heading);
+    font-family: var(--font-sen), "Sen", sans-serif !important;
     font-size: var(--text-h2);
     font-weight: var(--weight-semibold);
     line-height: 1;
@@ -500,17 +501,32 @@
     color: var(--color-text-strong);
   }
 
+  .site-font-theme .site-section-intro,
+  .site-font-theme .site-hero-intro {
+    font-family: var(--font-sans), "Be Vietnam Pro", sans-serif !important;
+    font-size: var(--text-section-intro);
+    line-height: 1.35;
+    letter-spacing: -0.02em;
+  }
+
+  @media (min-width: 48rem) {
+    .site-font-theme .site-section-intro,
+    .site-font-theme .site-hero-intro {
+      font-size: 1rem;
+    }
+  }
+
   .site-font-theme .site-hero-eyebrow {
     font-family: var(--font-sen), "Sen", var(--font-heading) !important;
     font-size: var(--text-eyebrow);
     font-weight: var(--weight-bold);
-    letter-spacing: 0.36em;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
     color: var(--color-brand-indigo);
   }
 
   .site-font-theme .site-hero-heading {
-    font-family: var(--font-sen), "Sen", var(--font-heading) !important;
+    font-family: var(--font-sen), "Sen", sans-serif !important;
     font-size: var(--text-h1);
     font-weight: var(--weight-semibold);
     line-height: 1;
@@ -519,7 +535,7 @@
   }
 
   .site-font-theme .site-pathway-title {
-    font-family: var(--font-sen), "Sen", var(--font-heading) !important;
+    font-family: var(--font-sen), "Sen", sans-serif !important;
     font-size: var(--text-h3);
     font-weight: var(--weight-semibold);
     line-height: 1;
@@ -1266,6 +1282,13 @@
 }
 
 /* Motion safety */
+
+/* Public display headings: unlayered so Tailwind utilities cannot drop Sen */
+.site-font-theme .site-hero-heading,
+.site-font-theme .site-section-heading,
+.site-font-theme .site-pathway-title {
+  font-family: var(--font-sen), "Sen", sans-serif !important;
+}
 
 @media (prefers-reduced-motion: reduce) {
   html {

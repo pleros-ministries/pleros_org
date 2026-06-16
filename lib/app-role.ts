@@ -1,7 +1,22 @@
-export type AppRole = "admin" | "instructor" | "student";
+export type AppRole = "super_admin" | "admin" | "instructor" | "student";
+
+export type StaffInviteRole = "admin" | "instructor";
 
 export function isAppRole(value: string): value is AppRole {
-  return value === "admin" || value === "instructor" || value === "student";
+  return (
+    value === "super_admin" ||
+    value === "admin" ||
+    value === "instructor" ||
+    value === "student"
+  );
+}
+
+export function isStaffRole(role: AppRole): boolean {
+  return role === "super_admin" || role === "admin" || role === "instructor";
+}
+
+export function hasAdminAccess(role: AppRole): boolean {
+  return role === "super_admin" || role === "admin";
 }
 
 export function normalizeEmailList(value: string | undefined): string[] {

@@ -1,7 +1,7 @@
 "use server";
 
 import { getRoleDefaultPath } from "@/lib/app-access";
-import { resolveRoleForEmail } from "@/lib/app-user";
+import { resolvePersistedRoleForEmail } from "@/lib/app-user";
 
 export async function previewPortalAccess(email: string) {
   const normalizedEmail = email.trim().toLowerCase();
@@ -10,7 +10,7 @@ export async function previewPortalAccess(email: string) {
     return null;
   }
 
-  const role = resolveRoleForEmail(normalizedEmail);
+  const role = await resolvePersistedRoleForEmail(normalizedEmail);
 
   return {
     role,

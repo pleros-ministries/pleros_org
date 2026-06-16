@@ -26,22 +26,21 @@ export function HomepagePodcastSection({
   return (
     <section
       id="podcast"
-      className="bg-[var(--color-brand-sky-soft)] px-[1.625rem] pb-16 pt-10 lg:px-16 lg:py-20"
+      className="bg-[var(--color-brand-sky-soft)] px-[1.625rem] py-[4.25rem] lg:px-16 lg:py-20"
     >
-      <div className="grid gap-6 lg:grid-cols-2 lg:items-center lg:gap-16">
-        <div className="grid justify-items-center gap-[0.62rem] text-center lg:justify-items-start lg:text-left">
+      <div className="grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-16">
+        <div className="grid justify-items-center gap-4 text-center lg:justify-items-start lg:gap-5 lg:text-left">
           <h2 className="site-section-heading max-w-[30.9375rem] lg:max-w-none">
             Stay Full of God&apos;s Word with the Pleros Podcast
           </h2>
-          <p className="max-w-[24.1875rem] text-[1.125rem] leading-[1.3] tracking-[-0.02em] text-[var(--color-text)]">
-            Your 15 minute dose of truth helping you fulfill God&apos;s Purpose.
-            Available wherever you get your podcasts.
+          <p className="site-section-intro max-w-[24.1875rem] text-[var(--color-text)]">
+            Your 15-minute dose of truth—wherever you listen.
           </p>
           <Link
             href={homePodcastUrl}
             target="_blank"
             rel="noreferrer"
-            className="site-button-text mt-1 inline-flex min-h-[2.875rem] items-center justify-center rounded-full bg-[var(--color-brand-blue)] px-6 py-2.5 text-[0.875rem] leading-none font-semibold text-white"
+            className="site-button-text inline-flex min-h-[2.875rem] items-center justify-center rounded-full bg-[var(--color-brand-blue)] px-6 py-2.5 text-[0.875rem] leading-none font-semibold text-white"
           >
             Listen Now
           </Link>
@@ -66,7 +65,7 @@ export function HomepagePodcastSection({
                 />
               </div>
 
-              <div className="grid min-h-[11.5rem] content-between bg-[var(--color-brand-blue)] px-[1.625rem] pb-7 pt-[1.4rem] text-white">
+              <div className="grid min-h-[11.5rem] content-between bg-[var(--color-brand-blue)] px-6 pb-8 pt-6 text-white">
                 <div className="grid gap-[0.72rem]">
                   <p className="site-podcast-card-label">
                     Latest episode
