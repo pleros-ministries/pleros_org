@@ -81,7 +81,7 @@ export function HomepageSocialSection({ posts }: HomepageSocialSectionProps) {
 
                 <div className="grid gap-3 px-3.5 pb-4 pt-3.5">
                   <div className="flex items-center justify-between gap-3 text-[0.6875rem] leading-none font-medium tracking-[0.01em] text-[rgba(6,16,86,0.62)]">
-                    <span>Latest from YouTube</span>
+                    {/* <span>Latest from YouTube</span> */}
                     <span className="uppercase">Watch short</span>
                   </div>
 
