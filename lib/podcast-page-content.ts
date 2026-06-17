@@ -9,7 +9,7 @@ function buildPodcastEpisodeUrl(videoId: string) {
 
 export const podcastPageHero = {
   eyebrow: "Podcast",
-  title: "Follow the Pleros podcast",
+  title: "Pleros Podcast",
   mobileTitleLines: ["Follow the Pleros", "podcast"] as const,
   illustrationSrc: "/assets/home/podcast-poster.png",
 } as const;
@@ -157,7 +157,7 @@ export const podcastJourneySteps = [
     title: "Keep growing through PPC",
     description:
       "If you are ready for structure, accountability, and structured discipleship, PPC helps you take the next step into fulfilling God's purpose.",
-    href: "/fulfill",
+    href: "/ppc",
     ctaLabel: "Enter PPC",
     tone: "fulfil",
   },
