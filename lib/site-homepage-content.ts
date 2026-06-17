@@ -135,8 +135,8 @@ export const homePathwayCards: HomePathwayCard[] = [
     headerPrompt: "What am I here for?",
     headerPromptHighlightClassName: "bg-[#FFE566]",
     arrowImageSrc: "/site/home/assets/card-arrows/discover-card-arrow.svg",
-    surfaceClassName: "bg-[#68369B] text-white",
-    headerClassName: "bg-[#E8D1FF]",
+    surfaceClassName: "bg-[#B45309] text-white",
+    headerClassName: "bg-[#FFE9BF]",
   },
   {
     title: "Fulfill Purpose",

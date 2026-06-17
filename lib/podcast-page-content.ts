@@ -68,7 +68,7 @@ export const podcastSeries = [
     id: "faith-stand",
     title: "Faith Stand",
     description:
-      "The hidden workings of the mind behind our faith stand.",
+      'The ultimate answer to the question "How do I change?"',
     href: buildPodcastEpisodeUrl("t7sP_X1y3rA"),
   },
   {
@@ -96,14 +96,14 @@ export const podcastSeries = [
     id: "healing-in-the-newness-of-life",
     title: "Healing in the Newness of Life",
     description:
-      "Health and healing available to the new creation.",
+      "Health and healing available to the New Creation.",
     href: buildPodcastEpisodeUrl("ji8qta1WzK8"),
   },
   {
     id: "preservation-in-the-newness-of-life",
     title: "Preservation in the Newness of Life",
     description:
-      "Preservation for life in the new creation.",
+      "Preservation for life in the New Creation.",
     href: buildPodcastEpisodeUrl("15UQNBv-Kbo"),
   },
   {

@@ -59,10 +59,10 @@ export function PodcastVideoGallery({
     <div className="grid gap-8">
       {featured ? (
         <div className="grid gap-4">
-          <div className="grid overflow-hidden rounded-[1.25rem] bg-[var(--color-brand-blue)] md:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
-            <div className="relative min-h-[14rem] overflow-hidden bg-[var(--color-brand-blue)] md:min-h-full">
+          <div className="grid overflow-hidden rounded-[1.25rem] bg-[var(--color-brand-blue)] md:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] md:items-center">
+            <div className="relative aspect-video w-full overflow-hidden bg-[var(--color-brand-blue)]">
               {selectedVideo?.id === featured.id ? (
-                <div className="relative aspect-video h-full min-h-[14rem] w-full">
+                <div className="relative aspect-video w-full">
                   <iframe
                     src={toYoutubeEmbedUrl(featured.href)}
                     title={featured.title}
@@ -90,7 +90,7 @@ export function PodcastVideoGallery({
                     src={featured.thumbnailSrc}
                     alt=""
                     fill
-                    className="object-cover object-top"
+                    className="scale-[1.28] object-cover object-center"
                     sizes="(max-width: 767px) 100vw, 29rem"
                   />
                   <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(5,20,128,0.08)_0%,rgba(5,20,128,0.22)_100%)]" />
