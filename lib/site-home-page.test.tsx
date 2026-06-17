@@ -41,7 +41,7 @@ describe("site home page", () => {
 
     expect(globalsSource).toContain(".site-font-theme .site-pathway-title");
     expect(globalsSource).toContain('font-family: var(--font-sen), "Sen", var(--font-heading) !important;');
-    expect(cardSource).toContain('className="site-pathway-title"');
+    expect(cardSource).toContain("site-pathway-title");
   });
 
   test("builds pathway cards on top of the shared card primitive", () => {
@@ -73,9 +73,11 @@ describe("site home page", () => {
     expect(heroSource).toContain('className="grid grid-cols-2 gap-2 sm:gap-5 md:grid-cols-4"');
     expect(cardSource).toContain("h-[13.75rem]");
     expect(cardSource).toContain("h-[45%]");
-    expect(cardSource).toContain("headerPrompt");
-    expect(contentSource).toContain('headerPrompt: "Is there really God?"');
-    expect(cardSource).toContain("px-3 pb-3.5 pt-2.5");
+    expect(cardSource).toContain("headerImageSrc");
+    expect(contentSource).toContain(
+      'headerImageSrc: "/site/home/assets/pathway-card-headers/questions-thumbnail.png"',
+    );
+    expect(cardSource).toContain("px-2.5 pb-3 pt-2");
     expect(cardSource).toContain("font-medium");
     expect(contentSource).toContain('title: "Find Purpose"');
     expect(contentSource).toContain('mobileDescription: "Want to grow and be trained to fulfill purpose?"');
@@ -316,7 +318,7 @@ describe("site home page", () => {
     expect(drawerSource).toContain("md:data-open:-translate-x-1/2");
     expect(drawerSource).toContain("md:data-open:-translate-y-1/2");
     expect(drawerSource).toContain("welcomePackModalCopy.headline");
-    expect(drawerSource).toContain("The first resources you need to begin your Pleros journey");
+    expect(drawerSource).toContain("welcomePackModalCopy.subheadline");
     expect(drawerSource).toContain('placeholder="Email address"');
     expect(drawerSource).toContain("access welcome pack");
     expect(drawerSource).toContain("rounded-t-[var(--radius-xl)]");

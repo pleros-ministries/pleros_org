@@ -67,10 +67,12 @@ export function HomepagePathwayCard({
           ) : null}
         </div>
 
-        <CardContent className="flex flex-1 flex-col justify-center gap-2 px-3 pb-3.5 pt-2.5 text-white sm:p-4 sm:pt-3">
-          <div className="grid gap-1.5">
-            <h2 className="site-pathway-title">{title}</h2>
-            <p className="text-[0.76rem] leading-[1.1] font-medium tracking-[-0.018em] text-white/96">
+        <CardContent className="flex flex-1 flex-col justify-center gap-2 px-2.5 pb-3 pt-2 text-white sm:p-4 sm:pt-3">
+          <div className="grid gap-1">
+            <h2 className="site-pathway-title text-[1.05rem] leading-[0.98] tracking-[-0.02em] sm:text-[1.15rem]">
+              {title}
+            </h2>
+            <p className="text-[0.72rem] leading-[1.2] font-medium tracking-[-0.018em] text-white/92 sm:text-[0.8rem]">
               {mobileDescription ?? description}
             </p>
           </div>
