@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import {
-  homeInstagramProfileUrl,
+  homeYoutubeChannelUrl,
   type HomeInstagramReel,
 } from "../../lib/site-homepage-content";
 
@@ -20,15 +20,15 @@ export function HomepageSocialSection({ posts }: HomepageSocialSectionProps) {
       <div className="grid gap-[1.8125rem]">
         <div className="grid justify-items-center gap-[0.94rem] text-center lg:justify-items-start lg:text-left">
           <h2 className="site-section-heading max-w-[30.9375rem] lg:max-w-none">
-            Follow for Daily Videos on Purpose and Gospel Answers
+            Watch Our Latest Shorts on Purpose and Gospel Answers
           </h2>
           <Link
-            href={homeInstagramProfileUrl}
+            href={homeYoutubeChannelUrl}
             target="_blank"
             rel="noreferrer"
             className="site-button-text inline-flex min-h-[2.875rem] items-center justify-center rounded-full bg-[var(--color-brand-blue)] px-6 py-2.5 text-[0.875rem] leading-none font-semibold text-white"
           >
-            Follow Us
+            Subscribe
           </Link>
         </div>
 
@@ -43,33 +43,21 @@ export function HomepageSocialSection({ posts }: HomepageSocialSectionProps) {
                 className="group w-[20.5rem] shrink-0 snap-start overflow-hidden rounded-[1.125rem] border border-[rgba(6,16,86,0.1)] bg-white shadow-[0_14px_34px_rgba(6,16,86,0.08)] lg:w-auto lg:shrink"
               >
                 <div className="flex items-center gap-3 px-3.5 py-3">
-                  <div className="flex size-9 items-center justify-center rounded-full bg-[linear-gradient(135deg,#F58529,#DD2A7B,#8134AF)] p-[1.5px]">
-                    {post.profileImageUrl ? (
-                      <div className="relative size-full overflow-hidden rounded-full bg-white">
-                        <Image
-                          src={post.profileImageUrl}
-                          alt="Pleros Ministries profile photo"
-                          fill
-                          className="object-cover"
-                          sizes="36px"
-                        />
-                      </div>
-                    ) : (
-                      <div className="flex size-full items-center justify-center rounded-full bg-white">
-                        <Image
-                          src="/site/home/assets/social-media-icons/instagram-icon.svg"
-                          alt=""
-                          width={16}
-                          height={16}
-                          className="size-4"
-                        />
-                      </div>
-                    )}
+                  <div className="flex size-9 items-center justify-center rounded-full bg-[#FF0000] p-[1.5px]">
+                    <div className="flex size-full items-center justify-center rounded-full bg-white">
+                      <Image
+                        src="/site/home/assets/social-media-icons/youtube-icon.svg"
+                        alt=""
+                        width={16}
+                        height={16}
+                        className="size-4"
+                      />
+                    </div>
                   </div>
 
                   <div className="min-w-0">
                     <p className="truncate text-[0.875rem] leading-none font-semibold tracking-[-0.02em] text-[var(--color-text-strong)]">
-                      @pleros_org
+                      Pleros Ministries
                     </p>
                     <p className="mt-1 text-[0.6875rem] leading-none font-medium tracking-[0.01em] text-[rgba(6,16,86,0.62)]">
                       {new Intl.DateTimeFormat("en-US", {
@@ -93,8 +81,8 @@ export function HomepageSocialSection({ posts }: HomepageSocialSectionProps) {
 
                 <div className="grid gap-3 px-3.5 pb-4 pt-3.5">
                   <div className="flex items-center justify-between gap-3 text-[0.6875rem] leading-none font-medium tracking-[0.01em] text-[rgba(6,16,86,0.62)]">
-                    <span>Latest from Instagram</span>
-                    <span className="uppercase">Watch reel</span>
+                    <span>Latest from YouTube</span>
+                    <span className="uppercase">Watch short</span>
                   </div>
 
                   <div className="grid gap-1.5">

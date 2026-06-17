@@ -224,6 +224,148 @@ export async function getInstagramReelPreviews(
   return previews.flatMap((preview) => (preview ? [preview] : []));
 }
 
+// Channel uploads playlist: replace "UC" prefix with "UU"
+const YOUTUBE_UPLOADS_PLAYLIST_ID = "UUamQ1mD2w-TOwliMk88CuwA";
+const YOUTUBE_API_BASE = "https://www.googleapis.com/youtube/v3";
+
+function parseDuration(iso: string): number {
+  const match = iso.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+  if (!match) return 0;
+  return (
+    parseInt(match[1] ?? "0") * 3600 +
+    parseInt(match[2] ?? "0") * 60 +
+    parseInt(match[3] ?? "0")
+  );
+}
+
+type YtPlaylistItem = {
+  snippet: {
+    title: string;
+    publishedAt: string;
+    resourceId: { videoId: string };
+    thumbnails: { high?: { url: string }; default?: { url: string } };
+  };
+};
+
+type YtVideoDetail = {
+  id: string;
+  snippet: {
+    title: string;
+    publishedAt: string;
+    thumbnails: { high?: { url: string }; default?: { url: string } };
+  };
+  contentDetails: { duration: string };
+};
+
+export async function getLatestYoutubeVideos(limit = 5): Promise<YoutubeEpisode[]> {
+  const apiKey = process.env.YOUTUBE_API_KEY;
+
+  if (!apiKey) {
+    // Fallback: RSS-based (limited to 15 items)
+    return getLatestYoutubeVideosFallback(limit);
+  }
+
+  try {
+    // Step 1: Fetch 50 most recent uploads from the channel playlist
+    const playlistUrl =
+      `${YOUTUBE_API_BASE}/playlistItems` +
+      `?part=snippet&playlistId=${YOUTUBE_UPLOADS_PLAYLIST_ID}` +
+      `&maxResults=50&key=${apiKey}`;
+
+    const playlistRes = await fetch(playlistUrl, { next: { revalidate: 1800 } });
+    if (!playlistRes.ok) return [];
+
+    const playlistData = (await playlistRes.json()) as { items?: YtPlaylistItem[] };
+    const items = playlistData.items ?? [];
+    if (!items.length) return [];
+
+    const videoIds = items
+      .map((item) => item.snippet.resourceId.videoId)
+      .join(",");
+
+    // Step 2: Batch fetch video durations to identify Shorts (≤ 60 seconds)
+    const videosUrl =
+      `${YOUTUBE_API_BASE}/videos` +
+      `?part=contentDetails,snippet&id=${videoIds}&key=${apiKey}`;
+
+    const videosRes = await fetch(videosUrl, { next: { revalidate: 1800 } });
+    if (!videosRes.ok) return [];
+
+    const videosData = (await videosRes.json()) as { items?: YtVideoDetail[] };
+    // Re-sort details to match the playlist order (API returns in arbitrary order)
+    const detailsMap = new Map((videosData.items ?? []).map((v) => [v.id, v]));
+    const details = items
+      .map((item) => detailsMap.get(item.snippet.resourceId.videoId))
+      .filter((v): v is YtVideoDetail => v !== undefined);
+
+    const shorts: YoutubeEpisode[] = [];
+
+    for (const video of details) {
+      if (shorts.length >= limit) break;
+
+      const seconds = parseDuration(video.contentDetails.duration);
+      if (seconds > 180) continue; // not a Short (Shorts are ≤ 3 minutes)
+
+      const id = video.id;
+      const thumbnailUrl =
+        video.snippet.thumbnails.high?.url ??
+        video.snippet.thumbnails.default?.url ??
+        `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+
+      shorts.push({
+        id,
+        title: video.snippet.title,
+        href: `https://www.youtube.com/shorts/${id}`,
+        thumbnailUrl,
+        publishedAt: video.snippet.publishedAt,
+      });
+    }
+
+    return shorts;
+  } catch {
+    return [];
+  }
+}
+
+async function getLatestYoutubeVideosFallback(limit: number): Promise<YoutubeEpisode[]> {
+  try {
+    const response = await fetch(YOUTUBE_CHANNEL_RSS_URL, {
+      next: { revalidate: 1800 },
+      headers: { "user-agent": "Mozilla/5.0" },
+    });
+
+    if (!response.ok) return [];
+
+    const xml = await response.text();
+    const entries = [...xml.matchAll(/<entry>([\s\S]*?)<\/entry>/g)];
+    const videos: YoutubeEpisode[] = [];
+
+    for (const entry of entries) {
+      if (videos.length >= limit) break;
+
+      const block = entry[1];
+      if (!block) continue;
+
+      const href = extractXmlValue(block, /<link rel="alternate" href="([^"]+)"/);
+      if (!href || !href.includes("/shorts/")) continue;
+
+      const id = extractXmlValue(block, /<yt:videoId>([^<]+)<\/yt:videoId>/);
+      const title = extractXmlValue(block, /<title>([^<]+)<\/title>/);
+      const publishedAt = extractXmlValue(block, /<published>([^<]+)<\/published>/);
+      const thumbnailUrl = extractXmlValue(block, /<media:thumbnail url="([^"]+)"/);
+
+      if (!id || !title || !publishedAt || !thumbnailUrl) continue;
+
+      videos.push({ id, title, href, thumbnailUrl, publishedAt });
+    }
+
+    return videos;
+  } catch {
+    return [];
+  }
+}
+
+
 export async function getLatestYoutubeEpisode(): Promise<YoutubeEpisode | null> {
   try {
     const response = await fetch(YOUTUBE_CHANNEL_RSS_URL, {
@@ -249,7 +391,7 @@ export async function getLatestYoutubeEpisode(): Promise<YoutubeEpisode | null> 
 
       const href = extractXmlValue(block, /<link rel="alternate" href="([^"]+)"/);
 
-      if (!href || href.includes("/shorts/")) {
+      if (!href) {
         continue;
       }
 
