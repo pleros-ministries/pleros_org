@@ -579,7 +579,7 @@
 
   .site-font-theme .site-mobile-menu-title {
     font-family: var(--font-sen), "Sen", var(--font-heading) !important;
-    font-size: 0.8125rem;
+    font-size: 0.75rem;
     font-weight: var(--weight-semibold);
     line-height: 1;
     letter-spacing: 0.12em;
@@ -588,10 +588,20 @@
 
   .site-font-theme .site-mobile-menu-link {
     font-family: var(--font-sans), "Be Vietnam Pro", sans-serif !important;
-    font-size: 1rem;
+    font-size: 0.875rem;
     font-weight: var(--weight-medium);
     line-height: 1.15;
     letter-spacing: -0.02em;
+  }
+
+  .site-font-theme .site-mobile-menu-group-label {
+    font-family: var(--font-sen), "Sen", var(--font-heading) !important;
+    font-size: 0.625rem;
+    font-weight: var(--weight-semibold);
+    line-height: 1;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.72);
   }
 
   .site-font-theme .site-desktop-nav-link {

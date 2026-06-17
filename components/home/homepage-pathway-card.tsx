@@ -22,7 +22,7 @@ export function HomepagePathwayCard({
     <Link href={href} className="group block min-w-0">
       <Card
         className={cn(
-          "relative flex h-[13.75rem] flex-col gap-0 overflow-hidden rounded-[10.6px] border-0 p-0 shadow-none",
+          "relative flex h-[12rem] flex-col gap-0 overflow-hidden rounded-[10.6px] border-0 p-0 shadow-none",
           surfaceClassName,
         )}
       >
@@ -45,13 +45,19 @@ export function HomepagePathwayCard({
           ) : null}
 
           {headerImageSrc ? (
-            <Image
-              src={headerImageSrc}
-              alt=""
-              fill
-              className={headerImageClassName ?? "object-cover"}
-              sizes="(max-width: 767px) 50vw, 249px"
-            />
+            <>
+              <Image
+                src={headerImageSrc}
+                alt=""
+                fill
+                className={headerImageClassName ?? "object-cover"}
+                sizes="(max-width: 767px) 50vw, 249px"
+              />
+              <div
+                className="pointer-events-none absolute inset-0 bg-black/12"
+                aria-hidden="true"
+              />
+            </>
           ) : null}
 
           {wordmarkImageSrc ? (
@@ -67,7 +73,7 @@ export function HomepagePathwayCard({
           ) : null}
         </div>
 
-        <CardContent className="flex flex-1 flex-col justify-center gap-2 px-2.5 pb-3 pt-2 text-white sm:p-4 sm:pt-3">
+        <CardContent className="flex flex-1 flex-col justify-center gap-1 px-2 pb-1.5 pt-1 text-white sm:px-3 sm:pb-2 sm:pt-1.5">
           <div className="grid gap-1">
             <h2 className="site-pathway-title text-[1.05rem] leading-[0.98] tracking-[-0.02em] sm:text-[1.15rem]">
               {title}

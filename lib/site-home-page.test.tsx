@@ -69,15 +69,15 @@ describe("site home page", () => {
       "utf8",
     );
 
-    expect(heroSource).toContain('className="bg-white px-2 pb-[5rem] pt-3 sm:px-5');
+    expect(heroSource).toContain('className="bg-white px-2 pb-10 pt-3 sm:px-5');
     expect(heroSource).toContain('className="grid grid-cols-2 gap-2 sm:gap-5 md:grid-cols-4"');
-    expect(cardSource).toContain("h-[13.75rem]");
+    expect(cardSource).toContain("h-[12rem]");
     expect(cardSource).toContain("h-[45%]");
     expect(cardSource).toContain("headerImageSrc");
     expect(contentSource).toContain(
       'headerImageSrc: "/site/home/assets/pathway-card-headers/questions-thumbnail.png"',
     );
-    expect(cardSource).toContain("px-2.5 pb-3 pt-2");
+    expect(cardSource).toContain("px-2 pb-1.5 pt-1");
     expect(cardSource).toContain("font-medium");
     expect(contentSource).toContain('title: "Find Purpose"');
     expect(contentSource).toContain('mobileDescription: "Want to grow and be trained to fulfill purpose?"');
@@ -290,13 +290,14 @@ describe("site home page", () => {
     expect(navSource).toContain("site-mobile-menu-title");
     expect(navSource).toContain("site-mobile-menu-link");
     expect(navSource).toContain("homeFooterNavGroups");
-    expect(navSource).toContain("site-footer-heading");
+    expect(navSource).toContain("site-mobile-menu-group-label");
     expect(navSource).toContain("className=\"site-font-theme border-l border-white/8");
     expect(navSource).toContain("aria-label=\"Close menu\"");
     expect(navSource).toContain("inline-flex h-9 w-9 items-center justify-center text-white transition-opacity duration-150 hover:opacity-80 md:h-10 md:w-10");
-    expect(navSource).toContain("border-b border-white/10 py-3 font-medium text-white/94");
+    expect(navSource).toContain("border-b border-white/10 py-2.5 font-medium text-white/94");
     expect(globalsSource).toContain(".site-font-theme .site-mobile-menu-title");
     expect(globalsSource).toContain(".site-font-theme .site-mobile-menu-link");
+    expect(globalsSource).toContain(".site-font-theme .site-mobile-menu-group-label");
     expect(globalsSource).toContain('font-family: var(--font-sen), "Sen", var(--font-heading) !important;');
   });
 

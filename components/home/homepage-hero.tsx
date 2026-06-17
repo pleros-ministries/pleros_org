@@ -3,7 +3,7 @@ import { homePathwayCards } from "../../lib/site-homepage-content";
 
 export function HomepageHero() {
   return (
-    <section id="pathways" className="bg-white px-2 pb-[5rem] pt-3 sm:px-5 lg:px-16 lg:pt-8 lg:pb-24">
+    <section id="pathways" className="bg-white px-2 pb-10 pt-3 sm:px-5 lg:px-16 lg:pt-8 lg:pb-16">
       <div className="grid justify-items-center gap-2 px-4 pb-5 text-center sm:pb-6 lg:gap-3 lg:pb-8">
         <p className="site-hero-eyebrow">
           Pleros ministries &amp; missions

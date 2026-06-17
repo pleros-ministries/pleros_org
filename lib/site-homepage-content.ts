@@ -158,7 +158,7 @@ export const homePathwayCards: HomePathwayCard[] = [
     headerImageSrc: "/site/home/assets/church-pathway/church-logo-card.png",
     headerImageClassName: "object-cover object-center",
     arrowImageSrc: "/site/home/assets/card-arrows/church-card-arrow.svg",
-    surfaceClassName: "bg-[#3744A5] text-white",
+    surfaceClassName: "bg-[#223583] text-white",
     headerClassName: "bg-[#15349B]",
   },
 ];
