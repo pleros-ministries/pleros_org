@@ -187,7 +187,7 @@ export const footerSocialLinks: HomeSocialLink[] = [
 ];
 
 export const homePodcastUrl = "https://pod.link/1870111674";
-export const homeYoutubeChannelUrl = homePodcastUrl;
+export const homeYoutubeChannelUrl = "https://www.youtube.com/channel/UCamQ1mD2w-TOwliMk88CuwA";
 export const homeInstagramProfileUrl = "https://instagram.com/pleros_org";
 export const homeInstagramReels: HomeInstagramReel[] = [
   {

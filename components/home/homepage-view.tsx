@@ -9,8 +9,8 @@ import { HomepageHero } from "./homepage-hero";
 import { HomepageNav } from "./homepage-nav";
 import { HomepagePodcastSection } from "./homepage-podcast-section";
 import { HomepageSocialSection } from "./homepage-social-section";
-import { getLatestYoutubeEpisode } from "../../lib/homepage-feed";
-import { homeInstagramReels } from "../../lib/site-homepage-content";
+import { getLatestYoutubeEpisode, getLatestYoutubeVideos } from "../../lib/homepage-feed";
+import type { HomeInstagramReel } from "../../lib/site-homepage-content";
 
 export async function HomepageView() {
   const cookieStore = await cookies();
@@ -18,7 +18,20 @@ export async function HomepageView() {
     cookieStore.get(WELCOME_ACCESS_COOKIE_NAME)?.value,
     process.env,
   );
-  const episode = await getLatestYoutubeEpisode();
+
+  const [episode, youtubeVideos] = await Promise.all([
+    getLatestYoutubeEpisode(),
+    getLatestYoutubeVideos(5),
+  ]);
+
+  const posts: HomeInstagramReel[] = youtubeVideos.map((v) => ({
+    id: v.id,
+    title: v.title,
+    href: v.href,
+    imageUrl: v.thumbnailUrl,
+    profileImageUrl: null,
+    takenAt: Math.floor(new Date(v.publishedAt).getTime() / 1000),
+  }));
 
   return (
     <div className="bg-[#f3f7fb] px-0 md:px-0  md:py-0">
@@ -28,7 +41,7 @@ export async function HomepageView() {
         <HomepageHero />
         <HomepageCommunitySection />
         <HomepagePodcastSection episode={episode} />
-        <HomepageSocialSection posts={homeInstagramReels} />
+        <HomepageSocialSection posts={posts} />
         {/* <HomepageLibrarySection /> */}
         <HomepageFooter />
       </div>
