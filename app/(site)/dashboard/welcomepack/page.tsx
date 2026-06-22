@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { WelcomePackPage } from "@/components/dashboard/welcome-pack-page";
 import { getAppSession } from "@/lib/app-session";
+import { getWelcomePackLeadByEmail } from "@/lib/db/queries/welcome-pack-leads";
 import {
   readWelcomeAccessToken,
   WELCOME_ACCESS_COOKIE_NAME,
@@ -16,13 +17,19 @@ export default async function DashboardWelcomePackPage() {
     process.env,
   );
 
-  if (!welcomeSession) {
-    redirect("/");
-  }
-
-  if (!appSession) {
+  if (!appSession && welcomeSession) {
     redirect("/api/welcome-access/session?returnTo=%2Fdashboard%2Fwelcomepack");
   }
 
-  return <WelcomePackPage />;
+  if (!appSession) {
+    redirect("/welcome");
+  }
+
+  const welcomeEmail = appSession?.user.email ?? welcomeSession?.email;
+  const lead = welcomeEmail
+    ? await getWelcomePackLeadByEmail(welcomeEmail)
+    : null;
+  const extraGiftsUnlocked = lead?.extraGiftsUnlocked ?? false;
+
+  return <WelcomePackPage extraGiftsUnlocked={extraGiftsUnlocked} />;
 }

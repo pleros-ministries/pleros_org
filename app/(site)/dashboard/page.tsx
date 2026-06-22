@@ -16,12 +16,12 @@ export default async function WelcomeDashboardPage() {
     process.env,
   );
 
-  if (!welcomeSession) {
-    redirect("/");
+  if (!appSession && welcomeSession) {
+    redirect("/api/welcome-access/session?returnTo=%2Fdashboard");
   }
 
   if (!appSession) {
-    redirect("/api/welcome-access/session?returnTo=%2Fdashboard");
+    redirect("/welcome");
   }
 
   return <WelcomeDashboardView />;

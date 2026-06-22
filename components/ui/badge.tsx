@@ -13,11 +13,11 @@ const badgeVariants = cva(
         outline:
           "border-[var(--color-line-strong)] bg-white/80 text-[var(--color-text)]",
         questions:
-          "theme-questions border-transparent bg-[var(--page-accent-soft)] text-[var(--page-accent)]",
+          "theme-questions border border-[var(--page-accent)]/30 bg-white text-[var(--page-accent)] shadow-[0_1px_2px_rgba(15,23,40,0.06)]",
         purpose:
-          "theme-purpose border-transparent bg-[var(--page-accent-soft)] text-[var(--page-accent)]",
+          "theme-purpose border border-[var(--page-accent)]/30 bg-white text-[var(--page-accent)] shadow-[0_1px_2px_rgba(15,23,40,0.06)]",
         fulfil:
-          "theme-fulfil border-transparent bg-[var(--page-accent-soft)] text-[var(--page-accent)]",
+          "theme-fulfil border border-[var(--page-accent)]/30 bg-white text-[var(--page-accent)] shadow-[0_1px_2px_rgba(15,23,40,0.06)]",
         dark:
           "border-white/10 bg-white/10 text-[var(--color-text-on-dark)] backdrop-blur-sm",
       },

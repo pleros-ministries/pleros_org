@@ -320,6 +320,7 @@
     --text-h3: 1.2426rem; /* 19.88px card title */
     --text-body-lg: 1.125rem; /* 18px intro copy */
     --text-body: 1rem; /* 16px body copy */
+    --text-section-intro: 0.9375rem; /* 15px section subcopy */
     --text-sm: 1rem; /* 16px buttons / dense UI */
     --text-xs: 0.6875rem; /* 11px micro copy */
     --text-eyebrow: 0.640625rem; /* 10.25px hero label */
@@ -343,6 +344,17 @@
     --radius-xl: 1.25rem; /* 20px */
     --radius-2xl: 1.5rem; /* 24px */
     --radius-pill: 999px;
+
+    /* Public site shell — mobile-first page frame + desktop expansion */
+    --site-mobile-max: 36.1875rem; /* 579px primary mobile column */
+    --site-page-max-md: 48rem;
+    --site-page-max-xl: 67rem;
+    --site-shell-max: var(--container-xl);
+    --site-shell-padding-x: 1.25rem; /* 20px */
+    --site-shell-padding-x-md: 1.5rem; /* 24px tablet */
+    --site-shell-padding-x-lg: 2.5rem; /* 40px */
+    --site-shell-padding-x-xl: 3rem; /* 48px */
+    --text-footer-link: 0.8125rem;
 
     /* Public site colors extracted from Figma mobile homepage */
     --color-brand-blue: #051480;
@@ -481,7 +493,7 @@
   }
 
   .site-font-theme .site-section-heading {
-    font-family: var(--font-sen), "Sen", var(--font-heading);
+    font-family: var(--font-sen), "Sen", sans-serif !important;
     font-size: var(--text-h2);
     font-weight: var(--weight-semibold);
     line-height: 1;
@@ -489,17 +501,32 @@
     color: var(--color-text-strong);
   }
 
+  .site-font-theme .site-section-intro,
+  .site-font-theme .site-hero-intro {
+    font-family: var(--font-sans), "Be Vietnam Pro", sans-serif !important;
+    font-size: var(--text-section-intro);
+    line-height: 1.35;
+    letter-spacing: -0.02em;
+  }
+
+  @media (min-width: 48rem) {
+    .site-font-theme .site-section-intro,
+    .site-font-theme .site-hero-intro {
+      font-size: 1rem;
+    }
+  }
+
   .site-font-theme .site-hero-eyebrow {
     font-family: var(--font-sen), "Sen", var(--font-heading) !important;
     font-size: var(--text-eyebrow);
     font-weight: var(--weight-bold);
-    letter-spacing: 0.36em;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
     color: var(--color-brand-indigo);
   }
 
   .site-font-theme .site-hero-heading {
-    font-family: var(--font-sen), "Sen", var(--font-heading) !important;
+    font-family: var(--font-sen), "Sen", sans-serif !important;
     font-size: var(--text-h1);
     font-weight: var(--weight-semibold);
     line-height: 1;
@@ -508,7 +535,7 @@
   }
 
   .site-font-theme .site-pathway-title {
-    font-family: var(--font-sen), "Sen", var(--font-heading) !important;
+    font-family: var(--font-sen), "Sen", sans-serif !important;
     font-size: var(--text-h3);
     font-weight: var(--weight-semibold);
     line-height: 1;
@@ -552,7 +579,7 @@
 
   .site-font-theme .site-mobile-menu-title {
     font-family: var(--font-sen), "Sen", var(--font-heading) !important;
-    font-size: 0.8125rem;
+    font-size: 0.75rem;
     font-weight: var(--weight-semibold);
     line-height: 1;
     letter-spacing: 0.12em;
@@ -561,10 +588,157 @@
 
   .site-font-theme .site-mobile-menu-link {
     font-family: var(--font-sans), "Be Vietnam Pro", sans-serif !important;
-    font-size: 1rem;
+    font-size: 0.875rem;
     font-weight: var(--weight-medium);
     line-height: 1.15;
     letter-spacing: -0.02em;
+  }
+
+  .site-font-theme .site-mobile-menu-group-label {
+    font-family: var(--font-sen), "Sen", var(--font-heading) !important;
+    font-size: 0.625rem;
+    font-weight: var(--weight-semibold);
+    line-height: 1;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.72);
+  }
+
+  .site-font-theme .site-desktop-nav-link {
+    font-family: var(--font-sans), "Be Vietnam Pro", sans-serif !important;
+    font-weight: var(--weight-medium);
+    line-height: 1;
+    letter-spacing: -0.01em;
+  }
+
+  .site-font-theme .site-desktop-nav-trigger {
+    cursor: pointer;
+    border: 0;
+    background: transparent;
+  }
+
+  .site-desktop-nav-menu {
+    border: 1px solid rgba(6, 16, 86, 0.08);
+    background: #ffffff;
+    padding: 0.375rem;
+    box-shadow: 0 18px 40px rgba(6, 16, 86, 0.18);
+    font-family: var(--font-sans), "Be Vietnam Pro", sans-serif;
+  }
+
+  .site-desktop-nav-menu-link {
+    display: block;
+    width: 100%;
+    border-radius: calc(var(--radius-md) - 4px);
+    padding: 0.5rem 0.75rem;
+    font-family: var(--font-sans), "Be Vietnam Pro", sans-serif;
+    font-size: 0.8125rem;
+    font-weight: var(--weight-medium);
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    color: var(--color-brand-blue);
+    text-align: left;
+    text-decoration: none;
+    transition: background-color 150ms ease-out, color 150ms ease-out;
+  }
+
+  .site-desktop-nav-menu-link:hover,
+  .site-desktop-nav-menu-link[data-highlighted] {
+    background: var(--color-brand-sky-soft, rgba(1, 21, 133, 0.07));
+    color: var(--color-brand-blue);
+  }
+
+  .site-font-theme .site-shell-bar-inner {
+    width: 100%;
+    max-width: var(--site-mobile-max);
+    margin-inline: auto;
+    padding-inline: var(--site-shell-padding-x);
+  }
+
+  @media (min-width: 48rem) {
+    .site-font-theme .site-shell-bar-inner {
+      max-width: none;
+      padding-inline: var(--site-shell-padding-x-md);
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .site-font-theme .site-shell-bar-inner {
+      max-width: var(--site-shell-max);
+      padding-inline: var(--site-shell-padding-x-lg);
+    }
+  }
+
+  @media (min-width: 80rem) {
+    .site-font-theme .site-shell-bar-inner {
+      padding-inline: var(--site-shell-padding-x-xl);
+    }
+  }
+
+  .site-font-theme .site-shell-page {
+    width: 100%;
+    max-width: var(--site-mobile-max);
+    margin-inline: auto;
+  }
+
+  @media (min-width: 48rem) {
+    .site-font-theme .site-shell-page {
+      max-width: var(--site-page-max-md);
+    }
+  }
+
+  @media (min-width: 80rem) {
+    .site-font-theme .site-shell-page {
+      max-width: var(--site-page-max-xl);
+    }
+  }
+
+  .site-font-theme .site-footer-heading {
+    font-family: var(--font-sen), "Sen", var(--font-heading) !important;
+    font-size: 0.6875rem;
+    font-weight: var(--weight-semibold);
+    line-height: 1;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #ecf9ff;
+  }
+
+  .site-font-theme .site-footer-link {
+    font-family: var(--font-sans), "Be Vietnam Pro", sans-serif !important;
+    font-size: var(--text-footer-link);
+    line-height: 1.35;
+    letter-spacing: -0.02em;
+    color: #ffffff;
+    transition: color 150ms ease-out;
+  }
+
+  .site-font-theme .site-footer-link:hover {
+    color: #ffffff;
+    opacity: 0.88;
+  }
+
+  .site-font-theme .site-footer-copy {
+    font-family: var(--font-sans), "Be Vietnam Pro", sans-serif !important;
+    font-size: var(--text-body);
+    line-height: 1.4;
+    letter-spacing: -0.02em;
+    color: rgba(255, 255, 255, 0.88);
+  }
+
+  @media (min-width: 40rem) {
+    .site-font-theme .site-footer-link {
+      font-size: 0.875rem;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .site-font-theme .site-footer-link {
+      font-size: 0.9375rem;
+      line-height: 1.3;
+    }
+
+    .site-font-theme .site-footer-copy {
+      font-size: 0.8125rem;
+    }
   }
 
   .site-font-theme .site-button-text {
@@ -1118,6 +1292,13 @@
 }
 
 /* Motion safety */
+
+/* Public display headings: unlayered so Tailwind utilities cannot drop Sen */
+.site-font-theme .site-hero-heading,
+.site-font-theme .site-section-heading,
+.site-font-theme .site-pathway-title {
+  font-family: var(--font-sen), "Sen", sans-serif !important;
+}
 
 @media (prefers-reduced-motion: reduce) {
   html {

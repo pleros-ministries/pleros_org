@@ -32,7 +32,7 @@ describe("app role resolution", () => {
   });
 
   test("role union stays stable", () => {
-    const roles: AppRole[] = ["admin", "instructor", "student"];
-    expect(roles).toHaveLength(3);
+    const roles: AppRole[] = ["super_admin", "admin", "instructor", "student"];
+    expect(roles).toHaveLength(4);
   });
 });

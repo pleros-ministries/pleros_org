@@ -26,7 +26,7 @@ describe("about page", () => {
     expect(source).toContain("<HomepageFooter />");
   });
 
-  test("uses a pale blue hero and centered manifesto block", () => {
+  test("uses a pale blue hero and icon-led manifest block", () => {
     const source = readFileSync(
       join(process.cwd(), "components", "home", "about-page-view.tsx"),
       "utf8",
@@ -34,6 +34,9 @@ describe("about page", () => {
 
     expect(source).toContain("bg-[#d2f1ff]");
     expect(source).toContain("aboutPageLeadLines.map");
-    expect(source).toContain("text-center");
+    expect(source).toContain("aboutPageLeadIcons");
+    expect(source).toContain("border-y border-[var(--color-line-strong)]");
+    expect(source).toContain("bg-[var(--color-brand-sky-soft)]");
+    expect(source).toContain("text-left");
   });
 });

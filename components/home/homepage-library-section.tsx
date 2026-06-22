@@ -6,7 +6,7 @@ export function HomepageLibrarySection() {
           <h2 className="site-section-heading">
             Browse the Library
           </h2>
-          <p className="max-w-[27.8125rem] text-[var(--text-body)] leading-[1.25] tracking-[-0.02em] text-[var(--color-text)]">
+          <p className="site-section-intro max-w-[27.8125rem] text-[var(--color-text)]">
             For light in God&apos;s Word and clarity on subject matters like The
             New Creation, Redemption, God&apos;s Purpose.
           </p>

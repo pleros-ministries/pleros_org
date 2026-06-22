@@ -20,28 +20,38 @@ describe("questions pathway content", () => {
 
   test("surfaces the three featured question series in the figma order", () => {
     expect(
-      questionsPathwaySeries.map(({ title, thumbnailSrc, playIconSrc, href }) => ({
-        title,
-        thumbnailSrc,
-        playIconSrc,
-        href,
-      })),
+      questionsPathwaySeries.map(
+        ({ title, thumbnailSrc, playIconSrc, href, comingSoon, description }) => ({
+          title,
+          thumbnailSrc,
+          playIconSrc,
+          href,
+          comingSoon,
+          description,
+        }),
+      ),
     ).toEqual([
       {
         title: "Most Important Questions Series",
+        description:
+          "Five short teachings on Salvation, the Holy Spirit, Healing, and the Local Church",
         thumbnailSrc:
           "/site/home/assets/questions-pathway/thumbnails/most-important-questions-series.png",
         playIconSrc:
           "/site/home/assets/questions-pathway/video-circle-icon.png",
         href: "/questions/most-important-questions-series",
+        comingSoon: undefined,
       },
       {
         title: "Gospel Answers Series (Simple Version)",
+        description:
+          "Twelve simple videos with clear answers to common Gospel questions",
         thumbnailSrc:
           "/site/home/assets/questions-pathway/thumbnails/gospel-answers-simple-series.png",
         playIconSrc:
           "/site/home/assets/questions-pathway/video-circle-icon.png",
         href: "/questions/gospel-answers-simple-series",
+        comingSoon: undefined,
       },
       {
         title: "Gospel Answers Series (Critical Version)",
@@ -50,6 +60,8 @@ describe("questions pathway content", () => {
         playIconSrc:
           "/site/home/assets/questions-pathway/video-circle-icon.png",
         href: "/questions/gospel-answers-critical-series",
+        comingSoon: true,
+        description: "Coming soon",
       },
     ]);
   });
@@ -70,14 +82,18 @@ describe("questions pathway content", () => {
       {
         slug: "gospel-answers-simple-series",
         title: "Gospel Answers Series (Simple Version)",
-        videoCount: 4,
+        videoCount: 12,
       },
       {
         slug: "gospel-answers-critical-series",
         title: "Gospel Answers Series (Critical Version)",
-        videoCount: 2,
+        videoCount: 0,
       },
     ]);
+    expect(getQuestionsSeriesPage("gospel-answers-critical-series")).toMatchObject({
+      comingSoon: true,
+      videos: [],
+    });
     expect(getQuestionsSeriesPage("most-important-questions-series")?.title).toBe(
       "Most Important Questions Series",
     );
@@ -122,36 +138,16 @@ describe("questions pathway content", () => {
           "https://lh3.googleusercontent.com/d/1YJZKpT6vDrikezN3eexDYTjKTtpaPB-W=w1200",
       },
     ]);
+    const simpleSeriesVideos =
+      getQuestionsSeriesPage("gospel-answers-simple-series")?.videos ?? [];
+    expect(simpleSeriesVideos).toHaveLength(12);
+    expect(simpleSeriesVideos[0]?.title).toBe("Gospel Answers Series 1");
+    expect(simpleSeriesVideos.every((video) => video.href.includes("youtube.com/embed"))).toBe(
+      true,
+    );
     expect(
-      getQuestionsSeriesPage("gospel-answers-simple-series")?.videos.map(
-        ({ title, href, thumbnailSrc }) => ({ title, href, thumbnailSrc }),
-      ),
-    ).toEqual([
-      {
-        title: "Gospel Answers Series 1",
-        href: "https://drive.google.com/file/d/1_T-BOBV5dUDKszvuTCVlmkxKWEU_9bG_/preview",
-        thumbnailSrc:
-          "https://lh3.googleusercontent.com/d/1_T-BOBV5dUDKszvuTCVlmkxKWEU_9bG_=w1200",
-      },
-      {
-        title: "Gospel Answers Series 2",
-        href: "https://drive.google.com/file/d/1QrHO7kV0bJeZWkMAf7wXYLWP-T-5q3U5/preview",
-        thumbnailSrc:
-          "https://lh3.googleusercontent.com/d/1QrHO7kV0bJeZWkMAf7wXYLWP-T-5q3U5=w1200",
-      },
-      {
-        title: "Gospel Answers Series 3",
-        href: "https://drive.google.com/file/d/1DjEVKJJ90iMKPW3AW7U6cLoqaNx3NozJ/preview",
-        thumbnailSrc:
-          "https://lh3.googleusercontent.com/d/1DjEVKJJ90iMKPW3AW7U6cLoqaNx3NozJ=w1200",
-      },
-      {
-        title: "Gospel Answers Series 4",
-        href: "https://drive.google.com/file/d/1vnC3dObvaJ90o3IZp0LXKth1K7krvZ7n/preview",
-        thumbnailSrc:
-          "https://lh3.googleusercontent.com/d/1vnC3dObvaJ90o3IZp0LXKth1K7krvZ7n=w1200",
-      },
-    ]);
+      simpleSeriesVideos.every((video) => video.thumbnailSrc.includes("i.ytimg.com")),
+    ).toBe(true);
     expect(getQuestionsSeriesPage("missing-series")).toBeNull();
   });
 });

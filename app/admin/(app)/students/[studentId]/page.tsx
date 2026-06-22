@@ -9,6 +9,7 @@ import { PageHeader } from "@/components/ppc/page-header";
 import { Breadcrumb } from "@/components/ppc/breadcrumb";
 import { StudentDetailClient } from "@/components/ppc/student-detail-client";
 import { getAppSession } from "@/lib/app-session";
+import { hasAdminAccess } from "@/lib/app-role";
 
 type StudentDetailPageProps = {
   params: Promise<{ studentId: string }>;
@@ -103,7 +104,7 @@ export default async function AdminStudentDetailPage({
         levelProgress={levelProgress}
         submissions={studentSubmissions}
         threads={threads}
-        isAdmin={session.user.role === "admin"}
+        isAdmin={hasAdminAccess(session.user.role)}
       />
     </div>
   );

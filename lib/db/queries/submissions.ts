@@ -132,6 +132,8 @@ export async function getReviewQueue() {
       lessonTitle: schema.lessons.title,
       lessonNumber: schema.lessons.lessonNumber,
       levelId: schema.lessons.levelId,
+      responsePrompt: schema.lessons.responsePrompt,
+      responseMarkingGuide: schema.lessons.responseMarkingGuide,
     })
     .from(schema.writtenSubmissions)
     .innerJoin(schema.users, eq(schema.writtenSubmissions.userId, schema.users.id))

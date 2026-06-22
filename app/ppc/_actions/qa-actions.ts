@@ -15,6 +15,7 @@ import { getSignedInActor, getStudentSelfActor } from "@/lib/auth/action-actor";
 import { assertCanAccessQaThread } from "@/lib/auth/qa-access";
 import { db } from "@/lib/db";
 import { notifyQaAssignment } from "@/lib/notifications/staff-assignment";
+import { hasAdminAccess, isStaffRole, type AppRole } from "@/lib/app-role";
 
 function revalidateQaSurfaces() {
   revalidatePath("/ppc", "layout");
@@ -105,7 +106,7 @@ export async function updateQaThreadAssignment(
         id: string;
         name: string;
         email: string;
-        role: "admin" | "instructor" | "student";
+        role: AppRole;
       }
     | null = null;
 
@@ -115,15 +116,12 @@ export async function updateQaThreadAssignment(
         where: (user, { eq }) => eq(user.id, assignedToId),
       })) ?? null;
 
-    if (
-      !assignee ||
-      (assignee.role !== "admin" && assignee.role !== "instructor")
-    ) {
+    if (!assignee || !isStaffRole(assignee.role)) {
       throw new Error("Assignee must be a staff member");
     }
   }
 
-  if (actingRole !== "admin") {
+  if (!hasAdminAccess(actingRole)) {
     if (assignedToId && assignedToId !== actingUserId) {
       throw new Error("Forbidden: instructors can only assign threads to themselves");
     }

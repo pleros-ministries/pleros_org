@@ -4,6 +4,7 @@ import {
   createWelcomeAccessToken,
   parseWelcomeAccessToken,
   resolveWelcomeAccessName,
+  WELCOME_ACCESS_MAX_AGE,
 } from "./welcome-access";
 
 describe("welcome access", () => {
@@ -44,5 +45,9 @@ describe("welcome access", () => {
       "Grace And Peace",
     );
     expect(resolveWelcomeAccessName("@pleros.org")).toBe("Pleros Guest");
+  });
+
+  test("keeps welcome access available for one hundred days", () => {
+    expect(WELCOME_ACCESS_MAX_AGE).toBe(60 * 60 * 24 * 100);
   });
 });

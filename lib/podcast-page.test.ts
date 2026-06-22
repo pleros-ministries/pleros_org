@@ -34,7 +34,7 @@ describe("podcast page", () => {
     expect(viewSource).toContain("PodcastVideoGallery");
     expect(gallerySource).toContain("<iframe");
     expect(gallerySource).not.toContain("DialogContent");
-    expect(gallerySource).toContain("Start each teaching journey from the beginning");
+    expect(gallerySource).toContain("Jump to any of the series on the podcast");
     expect(gallerySource).toContain(">Series<");
     expect(viewSource).toContain('id="journey"');
     expect(viewSource).toContain("Why this podcast helps");
@@ -45,7 +45,7 @@ describe("podcast page", () => {
     expect(contentSource).toContain("Subscribe on YouTube");
     expect(contentSource).toContain("The Place of the Gospel in Your Life");
     expect(contentSource).toContain(
-      "Is this Gospel just about your salvation? Is that all there is to it?",
+      "Is the Gospel only about salvation, or is there more to it?",
     );
     expect(contentSource).toContain("Favour in the Newness of Life");
     expect(contentSource).toContain("PLeX3pQHW9Ln6OrlldW4z22pJ6ptUQ-UwQ");

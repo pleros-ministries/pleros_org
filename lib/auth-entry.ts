@@ -42,11 +42,20 @@ export function getPortalAccessNotice(
 
   return {
     tone: "default" as const,
-    message:
-      resolvedRole === "admin"
-        ? "This email is configured for administrator access."
-        : "This email is configured for instructor access.",
+    message: getStaffAccessMessage(resolvedRole),
   };
+}
+
+function getStaffAccessMessage(role: Exclude<AppRole, "student">) {
+  if (role === "super_admin") {
+    return "This email is configured for super admin access.";
+  }
+
+  if (role === "admin") {
+    return "This email is configured for administrator access.";
+  }
+
+  return "This email is configured for instructor access.";
 }
 
 export function formatAuthErrorMessage(

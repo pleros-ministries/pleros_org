@@ -54,6 +54,14 @@ function DashboardCard({
     return <div className={className}>{content}</div>;
   }
 
+  if (href.startsWith("http")) {
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer" className={className}>
+        {content}
+      </a>
+    );
+  }
+
   return (
     <Link href={href} className={className}>
       {content}

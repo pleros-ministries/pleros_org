@@ -1,6 +1,6 @@
 # PPC Platform Handover - 2026-03-14
 
-Updated 2026-03-26 to match the current repo state.
+Updated 2026-06-10 to match the current repo state.
 
 ## Product overview
 
@@ -17,9 +17,10 @@ Students must complete all lessons in a level and receive staff graduation appro
 
 | Role | Access | Default path |
 |------|--------|--------------|
-| **Student** | Own learning dashboard, lesson pages, quiz, written response, Q&A | `/ppc/student` |
+| **Super admin** | Everything admin has plus staff invite and account access management | `/admin` |
+| **Admin** | Content CMS, platform controls, staff dashboard, student list, review queue, Q&A inbox, notifications | `/admin` |
 | **Instructor** | Staff dashboard, student list, review queue, Q&A inbox, notifications | `/admin` |
-| **Admin** | Everything instructor has plus platform controls and content CMS | `/admin` |
+| **Student** | Own learning dashboard, lesson pages, quiz, written response, Q&A | `/ppc/student` |
 
 ### Seeded PPC users
 
@@ -37,7 +38,10 @@ Current repo truth:
 - Demo auth has been removed.
 - PPC now uses Better Auth only.
 - `/ppc` is the student entrypoint and `/admin` is the staff entrypoint.
-- Role assignment is derived from env-list email mapping.
+- Student signup is self-serve through `/ppc/signup`; staff access is invite-based.
+- The first `super_admin` is bootstrapped at `/admin/setup` for `fccibadan@gmail.com`.
+- `super_admin` users invite admins/instructors through `/admin/staff`; invite links lead staff to set their own password.
+- Runtime role assignment is derived from persisted PPC users and invite acceptance, not env-list email mapping.
 - Action-level role guards and session-derived actor ownership are implemented across the main PPC mutation flows.
 
 This matches the later agent conversation more closely than the original handover did.
@@ -97,12 +101,20 @@ app/admin/(app)/layout.tsx
 app/admin/(app)/(admin-only)/layout.tsx
   -> canAccessArea(role, "admin")
   -> blocks instructors with /admin/forbidden
+
+app/admin/(app)/(super-admin-only)/layout.tsx
+  -> requires role === "super_admin"
+  -> blocks admins/instructors with /admin/forbidden
 ```
 
 Primary public auth entrypoints are:
 - `/ppc` for students
-- `/admin` for instructors/admins
-- `/ppc/sign-up` for student account creation
+- `/admin` for staff login
+- `/admin/setup` for first-super-admin bootstrap only
+- `/admin/staff` for super-admin staff invites
+- `/admin/invite/[token]` for invited staff password setup
+- `/ppc/signup` for student account creation
+- `/ppc/login` as the conventional student login alias; `/ppc/sign-in` and `/ppc/sign-up` remain compatibility redirects
 
 Legacy PPC staff routes still exist under `app/ppc/(app)/(staff)`, but they now redirect into the `/admin/*` namespace.
 
@@ -112,26 +124,31 @@ PPC is now **Better Auth only**.
 
 - Students enter through `/ppc`
 - Staff enter through `/admin`
-- New self-serve account creation happens through `/ppc/sign-up`
+- New student self-serve account creation happens through `/ppc/signup`
+- New staff account creation happens only from invite links at `/admin/invite/[token]`
 - Email/password is always enabled
 - Google sign-in is available when Google env vars are configured
 - `app/api/auth/[...all]/route.ts` is the live Better Auth handler
+- `fccibadan@gmail.com` can become the first `super_admin` through `/admin/setup` while no super admin exists
 
 Runtime session resolution happens in `lib/app-session.ts`:
 
 1. Read the Better Auth session from request headers
-2. Resolve the runtime role from `PPC_ADMIN_EMAILS` and `PPC_INSTRUCTOR_EMAILS`
+2. Resolve the runtime role from the persisted PPC `users` row
 3. Ensure a matching PPC `users` row exists via `ensureAppUserRecord()`
 4. Return `{ id, name, email, role }` to the app shell and layouts
 
-Important nuance: the runtime role comes from env-list email mapping, not from the seeded role stored in the PPC `users` table.
+Important nuance: if `fccibadan@gmail.com` signs up before any `super_admin` row exists, `resolvePersistedRoleForEmail()` bootstraps that user as `super_admin`. After that, staff roles come from invite acceptance and stored `users.role`.
 
 ### Auth UX model
 
 - Student auth components live in `app/ppc/sign-in/sign-in-form.tsx` and `app/ppc/sign-up/sign-up-form.tsx`
 - Staff auth UI lives in `components/ppc/staff-login-panel.tsx`
+- First super-admin setup UI lives in `components/ppc/super-admin-setup-form.tsx`
+- Staff invite acceptance UI lives in `components/ppc/staff-invite-accept-form.tsx`
+- Staff management UI lives in `components/ppc/staff-management-client.tsx`
 - Auth-entry helpers in `lib/auth-entry.ts` now normalize error copy, resolve post-auth redirects, and preview whether an email is configured for student or staff access
-- If a staff-listed email is used in the student portal, the UI warns that the account will land in `/admin`
+- If a persisted staff email is used in the student portal, the UI warns that the account will land in `/admin`
 - If a non-staff email is used in the staff portal, the UI warns that the account will land in `/ppc`
 
 ### Authorization layers
@@ -165,13 +182,15 @@ This removes the prior high-priority trust gap around student self-service mutat
 
 | Item | Path | Roles |
 |------|------|-------|
-| Dashboard | `/admin` | admin, instructor |
-| Platform | `/admin/platform` | admin |
-| Content | `/admin/content` | admin |
-| Students | `/admin/students` | admin, instructor |
-| Review Queue | `/admin/review` | admin, instructor |
-| Q&A Inbox | `/admin/qa` | admin, instructor |
-| Notifications | `/admin/notifications` | admin, instructor |
+| Dashboard | `/admin` | super_admin, admin, instructor |
+| Platform | `/admin/platform` | super_admin, admin |
+| Content | `/admin/content` | super_admin, admin |
+| Staff | `/admin/staff` | super_admin |
+| Students | `/admin/students` | super_admin, admin, instructor |
+| Review Queue | `/admin/review` | super_admin, admin, instructor |
+| Q&A Inbox | `/admin/qa` | super_admin, admin, instructor |
+| Contact | `/admin/contact` | super_admin, admin, instructor |
+| Notifications | `/admin/notifications` | super_admin, admin, instructor |
 | My Learning | `/ppc/student` | student |
 
 Sidebar collapse state is stored in localStorage under `ppc.sidebar.collapsed`. Mobile navigation uses the shared `Sheet` primitive.
@@ -223,6 +242,9 @@ Student navigation is now data-driven:
 
 5. /admin/content
    -> level/lesson authoring, managed audio upload, quiz authoring, publish gating, and lifecycle controls
+
+6. /admin/staff
+   -> super-admin-only staff account list, admin/instructor invites, and invite revocation
 ```
 
 ---
@@ -238,16 +260,24 @@ app/
 ├── admin/
 │   ├── page.tsx                    # staff entrypoint / login shell or dashboard
 │   ├── forbidden/page.tsx
+│   ├── setup/page.tsx              # first super-admin bootstrap
+│   ├── invite/[token]/page.tsx     # invited staff password setup
 │   └── (app)/
 │       ├── layout.tsx
+│       ├── contact/page.tsx
 │       ├── review/page.tsx
 │       ├── qa/page.tsx
 │       ├── notifications/page.tsx
 │       ├── students/page.tsx
 │       ├── students/[studentId]/page.tsx
+│       ├── (super-admin-only)/
+│       │   ├── layout.tsx
+│       │   └── staff/page.tsx
 │       └── (admin-only)/
 │           ├── layout.tsx
 │           ├── content/page.tsx
+│           ├── library/page.tsx
+│           ├── welcome-pack/page.tsx
 │           └── platform/page.tsx
 ├── api/
 │   ├── auth/[...all]/route.ts      # Better Auth Next.js handler
@@ -259,11 +289,13 @@ app/
 └── ppc/
     ├── page.tsx                    # student entrypoint / login shell
     ├── layout.tsx
+    ├── login/page.tsx              # conventional student login alias
+    ├── signup/page.tsx             # canonical student account creation
     ├── sign-in/
     │   ├── page.tsx                # legacy direct sign-in page
     │   └── sign-in-form.tsx
     ├── sign-up/
-    │   ├── page.tsx                # student account creation
+    │   ├── page.tsx                # legacy redirect to /ppc/signup
     │   └── sign-up-form.tsx
     ├── forbidden/page.tsx
     ├── _actions/
@@ -273,6 +305,7 @@ app/
     │   ├── lesson-actions.ts
     │   ├── qa-actions.ts
     │   ├── quiz-actions.ts
+    │   ├── staff-invite-actions.ts
     │   ├── student-actions.ts
     │   └── submission-actions.ts
     └── (app)/
@@ -322,7 +355,7 @@ lib/
 
 ## Database schema
 
-PPC currently uses 12 core domain tables:
+PPC currently uses 13 core domain tables:
 
 | Table | Purpose |
 |-------|---------|
@@ -338,6 +371,7 @@ PPC currently uses 12 core domain tables:
 | `qa_messages` | Q&A thread messages |
 | `reviewer_assignments` | Instructor-to-level assignment mapping |
 | `push_subscriptions` | Web push endpoints |
+| `staff_invites` | Super-admin-created staff invite tokens, role targets, expiry, revocation, and acceptance |
 
 Better Auth uses separate auth tables through `lib/db/auth-schema.ts`.
 
@@ -363,7 +397,7 @@ Still not implemented:
 
 ## Server actions
 
-There are 8 PPC action modules under `app/ppc/_actions/`.
+There are 9 PPC action modules under `app/ppc/_actions/`.
 
 | File | Key actions | Guard |
 |------|-------------|-------|
@@ -374,6 +408,7 @@ There are 8 PPC action modules under `app/ppc/_actions/`.
 | `graduation-actions.ts` | `markGraduation`, `overrideGraduation` | `requireStaff()` |
 | `qa-actions.ts` | `createQaThread`, `replyToThread`, `closeQaThread`, `reopenQaThread`, `fetchThreadMessages` | `requireAuth()` / `requireStaff()` |
 | `content-actions.ts` | level CRUD-lite, lesson CRUD, publish/unpublish, quiz question CRUD/reorder | `requireAdmin()` |
+| `staff-invite-actions.ts` | `createStaffInviteAction`, `acceptStaffInviteAction`, `revokeStaffInviteAction` | `requireSuperAdmin()` for create/revoke; token validation for accept |
 | `student-actions.ts` | `overrideStudentLevel`, `resetStudentProgress`, `assignReviewer`, `removeReviewerAssignment`, `getReviewerAssignments` | `requireAdmin()` |
 
 Most mutating actions now revalidate both `"/ppc"` and `"/admin"` at layout scope so student and staff surfaces stay in sync after changes.
@@ -402,8 +437,6 @@ Note: `lib/auth/better-auth.ts` contains a fallback demo-style secret for local 
 | Variable | Purpose | Notes |
 |----------|---------|-------|
 | `DATABASE_URL_UNPOOLED` | Direct DB connection for schema push and seed | Not required for app runtime |
-| `PPC_ADMIN_EMAILS` | Comma-separated admin emails | Missing list means no admin role assignment |
-| `PPC_INSTRUCTOR_EMAILS` | Comma-separated instructor emails | Missing list means users default to student |
 | `GOOGLE_CLIENT_ID` | Google OAuth client ID | Enables social provider when paired with secret |
 | `GOOGLE_CLIENT_SECRET` | Google OAuth client secret | Same |
 | `NEXT_PUBLIC_GOOGLE_AUTH_ENABLED` | Shows Google button in UI | UI toggle only; should match actual provider config |
@@ -472,23 +505,25 @@ Better Auth manages its own auth tables through the configured Drizzle adapter a
 
 ### Strong next candidates
 
-1. **Notifications v1**
-   - make `/admin/notifications` a real settings/status surface
-   - show actual push state, browser subscription state, and reminder policy clearly
+1. **Admin dashboard depth**
+   - surface staff access health for `super_admin`
+   - surface stale content, publish blockers, review pressure, and Q&A pressure more directly
 
-2. **Student journey cleanup**
+2. **CMS authoring completion**
+   - tighten level 1-2 lesson completeness and SAQ/marking-scheme visibility
+   - keep level 2.3-2.11 locked until the remaining lesson data is supplied
+
+3. **Student journey cleanup**
    - reduce duplication now that student levels live in the sidebar
    - tighten dashboard vs lesson-path responsibilities
 
-3. **Admin dashboard depth**
-   - surface stale content, publish blockers, review pressure, and Q&A pressure more directly
-
-4. **Repo hygiene**
-   - clear the remaining lint warnings
-   - fix the current non-PPC failing public-site test
+4. **Notifications v1**
+   - make `/admin/notifications` a real settings/status surface
+   - show actual push state, browser subscription state, and reminder policy clearly
 
 ### Recently completed
 
+- `super_admin` role and invite-based staff onboarding
 - route split between `/ppc` and `/admin`
 - shell/sidebar modernization
 - ownership hardening for main student/staff mutations

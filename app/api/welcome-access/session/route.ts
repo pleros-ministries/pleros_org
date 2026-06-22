@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 import {
+  getWelcomeAccessCookieOptions,
   readWelcomeAccessToken,
   WELCOME_ACCESS_COOKIE_NAME,
 } from "@/lib/welcome-access";
@@ -20,7 +21,7 @@ export async function GET(request: Request) {
   );
 
   if (!welcomeSession) {
-    return NextResponse.redirect(new URL("/", request.url));
+    return NextResponse.redirect(new URL("/welcome", request.url));
   }
 
   try {
@@ -31,9 +32,20 @@ export async function GET(request: Request) {
     });
   } catch {
     return NextResponse.redirect(
-      new URL("/ppc/sign-up?returnTo=%2Fppc%2Fstudent", request.url),
+      new URL("/ppc/signup?returnTo=%2Fppc%2Fstudent", request.url),
     );
   }
 
-  return NextResponse.redirect(new URL(returnTo, request.url));
+  const response = NextResponse.redirect(new URL(returnTo, request.url));
+  const token = cookieStore.get(WELCOME_ACCESS_COOKIE_NAME)?.value;
+
+  if (token) {
+    response.cookies.set(
+      WELCOME_ACCESS_COOKIE_NAME,
+      token,
+      getWelcomeAccessCookieOptions(),
+    );
+  }
+
+  return response;
 }

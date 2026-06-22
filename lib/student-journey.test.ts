@@ -77,6 +77,7 @@ describe("student journey helpers", () => {
         currentLevelId: 3,
         completedLessons: 5,
         totalLessons: 5,
+        lockedLessons: 0,
         nextLesson: null,
       }),
     ).toEqual({
@@ -85,6 +86,24 @@ describe("student journey helpers", () => {
       description: "All lessons are finished. Staff graduation review is the next step.",
       ctaLabel: "Review this level",
       ctaHref: "/ppc/student/level/3",
+    });
+  });
+
+  test("summarizes the dashboard focus when released lessons are done but more are locked", () => {
+    expect(
+      getDashboardFocus({
+        currentLevelId: 2,
+        completedLessons: 2,
+        totalLessons: 11,
+        lockedLessons: 9,
+        nextLesson: null,
+      }),
+    ).toEqual({
+      eyebrow: "Current focus",
+      title: "More lessons are locked",
+      description: "9 lessons in this level are still being prepared.",
+      ctaLabel: "Open current level",
+      ctaHref: "/ppc/student/level/2",
     });
   });
 

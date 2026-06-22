@@ -29,6 +29,7 @@ export const welcomeDashboardSections: WelcomeDashboardSection[] = [
         id: "prayer-watch-start",
         title: "Join Online Community",
         description: "Join other accountable believers online to pray daily.",
+        href: "https://whatsapp.com/channel/0029VbBLp0ZF6smtyjjzf72L",
         accent: "blue",
       },
     ],
@@ -42,6 +43,7 @@ export const welcomeDashboardSections: WelcomeDashboardSection[] = [
         title: "The Pleros Podcast",
         description:
           "Your daily dose of God's Word helping you fulfill God's purpose",
+        href: "/podcast",
         accent: "orange",
       },
       {
@@ -49,6 +51,7 @@ export const welcomeDashboardSections: WelcomeDashboardSection[] = [
         title: "Prayer Watch",
         description:
           "Be trained to walk in and fulfill God's purpose for your life.",
+        href: "https://youtube.com/@PlerosLive",
         accent: "blue",
       },
     ],
@@ -62,6 +65,7 @@ export const welcomeDashboardSections: WelcomeDashboardSection[] = [
         title: "Pleros Perfecting Course",
         description:
           "Your daily dose of God's Word helping you fulfill God's purpose",
+        href: "/ppc",
         accent: "orange",
       },
       {

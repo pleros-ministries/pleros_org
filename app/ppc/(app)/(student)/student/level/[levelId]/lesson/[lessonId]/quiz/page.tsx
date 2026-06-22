@@ -22,7 +22,7 @@ export default async function QuizPage({
   const session = await getAppSession();
   if (!session) {
     const h = await headers();
-    redirect(toExternalPpcPath(h.get("host"), "/sign-in"));
+    redirect(toExternalPpcPath(h.get("host"), "/login"));
   }
 
   const userId = session.user.id;
@@ -32,6 +32,9 @@ export default async function QuizPage({
 
   const lesson = await getLessonById(lessonId);
   if (!lesson || lesson.levelId !== levelId) notFound();
+  if (lesson.status !== "published") {
+    redirect(`/ppc/student/level/${levelId}`);
+  }
 
   const questions = await getQuizQuestions(lessonId);
   const bestScore = await getBestQuizScore(userId, lessonId);

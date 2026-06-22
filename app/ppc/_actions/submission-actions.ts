@@ -14,6 +14,7 @@ import { db } from "@/lib/db";
 import { requireAuth, requireStaff } from "@/lib/auth/require-role";
 import { getStaffActor, getStudentSelfActor } from "@/lib/auth/action-actor";
 import { notifyReviewAssignment } from "@/lib/notifications/staff-assignment";
+import { hasAdminAccess, isStaffRole, type AppRole } from "@/lib/app-role";
 
 function revalidateSubmissionSurfaces() {
   revalidatePath("/ppc", "layout");
@@ -100,7 +101,7 @@ export async function updateSubmissionAssignment(
         id: string;
         name: string;
         email: string;
-        role: "admin" | "instructor" | "student";
+        role: AppRole;
       }
     | null = null;
 
@@ -110,15 +111,12 @@ export async function updateSubmissionAssignment(
         where: (user, { eq }) => eq(user.id, assignedToId),
       })) ?? null;
 
-    if (
-      !assignee ||
-      (assignee.role !== "admin" && assignee.role !== "instructor")
-    ) {
+    if (!assignee || !isStaffRole(assignee.role)) {
       throw new Error("Assignee must be a staff member");
     }
   }
 
-  if (actingRole !== "admin") {
+  if (!hasAdminAccess(actingRole)) {
     if (assignedToId && assignedToId !== actingUserId) {
       throw new Error("Forbidden: instructors can only assign submissions to themselves");
     }

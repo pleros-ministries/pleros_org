@@ -68,6 +68,18 @@
 ### Action Rule
 - For public-facing additions, start from `HomepageNav`, `HomepageFooter`, `.site-font-theme`, and current public tokens before introducing any new visual pattern.
 
+## [2026-06-10] Public site desktop shell
+
+### Preference
+- Public site was mobile-first; desktop should expand via shared shell tokens, not one-off padding per component.
+
+### Lesson
+- Use `.site-shell-bar-inner` for full-bleed nav/footer and `.site-shell-page` for page content columns.
+
+### Action Rule
+- Desktop public padding: `--site-shell-padding-x` (20px) → `--site-shell-padding-x-lg` (40px) → `--site-shell-padding-x-xl` (48px). Roll page views to `.site-shell-page` instead of repeating max-w utilities.
+- Use `PublicSitePageShell` (`max-w-none`) for nav/footer; never nest `HomepageNav` inside `max-w-[36.1875rem]` columns or desktop dropdowns clip.
+
 ## [2026-06-08] Thread scope
 
 ### Mistake
@@ -218,6 +230,40 @@
 ### Preference
 - Preserve the current Pleros Podcast page presentation unless asked for a specific implementation fix.
 
+## [2026-06-09] Revert requests
+
+### Mistake
+- None in this task.
+
+### Correction
+- User asked to undo the public-site responsiveness pass entirely.
+
+### Lesson
+- For rollback requests, scope the revert to the exact files changed by the task and confirm the worktree returns to `HEAD`.
+
+### Preference
+- When backing out a UI pass, remove the whole pass cleanly rather than leaving partial responsive scaffolding behind.
+
+### Action Rule
+- If asked to undo recent work, inspect the touched-file set first, restore only those files, remove any added-only files, and verify with `git status --short`.
+
+## [2026-06-09] PPC roadmap awareness
+
+### Mistake
+- Answered a PPC “what is pending” question too narrowly from the immediate file-upload task instead of from the broader PPC roadmap.
+
+### Correction
+- In this PPC thread, pending work must be framed against the active PPC roadmap, not just the current subtask.
+
+### Lesson
+- Tactical implementation context is not enough; roadmap context has to stay live between slices.
+
+### Preference
+- The user expects roadmap-aware answers for PPC, especially when asking what remains or what is next.
+
+### Action Rule
+- Before answering PPC status, pending-work, or next-step questions, re-anchor on the current PPC roadmap/handover and distinguish the current subtask from the broader remaining queue.
+
 ## [2026-06-08] Fulfill route spelling
 
 ### Mistake
@@ -285,3 +331,292 @@
 
 ### Action Rule
 - Before future end-to-end checks on new persistence-backed features, verify the target DB has the new table/indexes or run the documented schema push first.
+
+## [2026-06-09] PPC content imports
+
+### Mistake
+- Started the PPC lesson-content import through the Neon HTTP query path and by parsing the whole source export, even though the Level 2 questions export was only partially complete.
+
+### Correction
+- Use the unpooled DB connection for bulk PPC content scripts and scope parsing/imports only to the explicitly confirmed track numbers.
+
+### Lesson
+- PPC content imports should be conservative: import the MCQs that fit the current quiz model, transform transcript notes into HTML for `notes_content`, and refuse to overwrite unexpected non-MCQ quiz data.
+
+### Preference
+- Keep PPC question imports aligned to the existing app model rather than expanding the schema just to mirror SAQ rubrics.
+
+### Action Rule
+- For future PPC lesson imports, use `DATABASE_URL_UNPOOLED` with `Pool`/`Client`, parse only the requested tracks, and guard against deleting non-MCQ quiz content.
+
+## [2026-06-09] PPC SAQ modeling
+
+### Mistake
+- Treated the presence of `short_text` quiz rendering as if the PPC app already had an end-to-end grading workflow for SAQs.
+
+### Correction
+- The correct existing grading workflow is `written_submissions` plus the admin review queue; quiz short-text answers are not staff-reviewable yet.
+
+### Lesson
+- In PPC, MCQs belong in the quiz flow, while SAQs fit the written-response workflow with student-visible prompts and admin-only marking guides at the lesson level.
+
+### Preference
+- Marking schemes should be visible to admins grading the work, but never to students.
+
+### Action Rule
+- For future PPC question imports, import Section A into `quiz_questions`, import Section B into lesson response prompts, and store Section B marking schemes in an admin-only lesson field surfaced in `/admin/review`.
+
+## [2026-06-09] Welcome pack funnel state
+
+### Mistake
+- None in this task.
+
+### Correction
+- Welcome-pack funnel work must persist lead/unlock state while preserving the public-site visual identity.
+
+### Lesson
+- Treat `/welcome`, `/thankyou`, and `/dashboard/welcomepack` as one stateful public funnel: main access is immediate, extra gifts are trust-unlocked, and email failures should never block access.
+
+### Preference
+- Keep gift content in typed code config for now and use public-site Sen/Be Vietnam Pro styling, not PPC dashboard styling, for visitor-facing surfaces.
+
+### Action Rule
+- For future welcome-pack changes, update lead persistence, gift config, email copy, dashboard lock state, and admin visibility together so the funnel stays coherent.
+
+## [2026-06-09] Public homepage asset swaps
+
+### Mistake
+- None in this task.
+
+### Correction
+- User supplied a specific external church-logo asset and wanted it used directly on the homepage church card.
+
+### Lesson
+- For public-site art swaps, locate the exact card/slot, bring the provided asset into repo-backed public assets, and wire it into the existing component pattern instead of inventing a new visual treatment.
+
+### Preference
+- When a card image is provided explicitly, use that source asset on the live homepage surface.
+
+### Action Rule
+- For future homepage asset updates, import the provided file into `public/site/home/assets/*`, update the data model for the specific card, and verify the rendered result at mobile width before committing.
+
+## [2026-06-09] Public library typography
+
+### Mistake
+- Let the public library page keep hard-coded `Figtree` and `DM Sans` overrides instead of using the shared project fonts.
+
+### Correction
+- `/library` should inherit the project/public-site font system, with project body font for UI copy and the project heading font for the main page title.
+
+### Lesson
+- Public-site routes under the shared site shell should not introduce ad hoc type families unless the user asks for a deliberate exception.
+
+### Preference
+- The library page should use the project fonts, not separate dashboard-style typography.
+
+### Action Rule
+- When touching `/library` again, default to inherited `site-font-theme` typography and remove any local font-family overrides before adding new styles.
+
+## [2026-06-10] PPC auth route canonicals
+
+### Mistake
+- PPC auth entry URLs drifted between `sign-in`/`sign-up` and the newer `login`/`signup` naming the user wanted.
+
+### Correction
+- The canonical student auth URLs are `/ppc/login` and `/ppc/signup`, while the legacy `/ppc/sign-in` and `/ppc/sign-up` paths should remain as redirects.
+
+### Lesson
+- Route renames should preserve backwards compatibility for existing links, welcome-access redirects, and public-path allowlists.
+
+### Preference
+- Use conventional auth naming: `login` and `signup`, not `sign-in` and `sign-up`.
+
+### Action Rule
+- When changing PPC auth paths, update canonical routes, legacy redirects, link targets, guarded-route redirects, and public-path tests together.
+
+## [2026-06-10] PPC account reset scope
+
+### Mistake
+- None in this task.
+
+### Correction
+- A full PPC reset means clearing Better Auth users plus welcome-pack leads, not only the app-level `users` table.
+
+### Lesson
+- “Start from fresh” for PPC accounts spans both auth identity tables and funnel capture tables.
+
+### Preference
+- When asked to reset PPC accounts, include the saved welcome-pack emails in the wipe.
+
+### Action Rule
+- For future fresh-start resets, clear `user`, `session`, `account`, `verification`, `two_factor`, `users`, and `welcome_pack_leads`, then verify row counts are zero.
+
+## [2026-06-10] Public nav dropdown presentation
+
+### Mistake
+- Treated the nav regrouping request as mostly information architecture and under-styled the desktop dropdown menus.
+
+### Correction
+- Desktop dropdowns should read like proper menus: well styled, vertically stacked, one child link per line.
+
+### Lesson
+- When the user asks for grouped nav dropdowns on the public site, the popup presentation matters as much as the grouping itself.
+
+### Preference
+- Public desktop nav dropdown items should be full-width rows, not cramped inline-looking pills.
+
+### Action Rule
+- For future public nav dropdown work, make the popup a real menu panel with stacked full-width links, left-aligned text, and enough width/padding to scan quickly.
+
+## [2026-06-10] PPC publish completeness
+
+### Mistake
+- Added lesson-level written response fields to PPC authoring and review flows without folding them into publish-readiness checks.
+
+### Correction
+- PPC lesson publish gating must account for `responsePrompt` and `responseMarkingGuide`, and the CMS should visibly flag published lessons that still have content gaps.
+
+### Lesson
+- In PPC, lesson completeness is the full student/reviewer workflow: audio, notes, quiz, written prompt, and admin marking guide.
+
+### Preference
+- Authoring views should expose incomplete published lessons as debt instead of presenting them as fully healthy content.
+
+### Action Rule
+- When extending PPC lesson authoring, update schema, editor UI, review surfaces, publish gating, and completeness indicators together.
+
+## [2026-06-10] PPC roadmap priority
+
+### Mistake
+- Treated `/admin/notifications` as the next likely PPC slice without weighting the user’s stronger interest in admin operations visibility.
+
+### Correction
+- When choosing between staff-facing PPC backlog items, prioritize the admin dashboard and operational views ahead of notification settings unless the user explicitly asks for notifications.
+
+### Lesson
+- In PPC, operational clarity for admins is a higher-value next step than polishing placeholder settings pages.
+
+### Preference
+- Admin view is more important than notifications.
+
+### Action Rule
+- For near-term PPC roadmap choices in this thread, prefer admin dashboard/content visibility work before `/admin/notifications`.
+
+## [2026-06-10] Welcome dashboard access
+
+### Mistake
+- Let `/dashboard` depend on the welcome cookie as the permanent gate, which could lock valid users out after cookie expiry.
+
+### Correction
+- Better Auth should be the long-term dashboard gate; the welcome cookie is a bootstrap token and safety net.
+
+### Lesson
+- Visitor funnels can mint temporary access tokens, but account-like dashboards should prefer real auth sessions once provisioned.
+
+### Preference
+- Welcome access cookies should last 100 days and refresh on dashboard visits.
+
+### Action Rule
+- For future `/dashboard` changes, allow access with either Better Auth or a valid welcome cookie, redirect unauthenticated users to `/welcome`, and refresh the welcome cookie from middleware/proxy when present.
+
+## [2026-06-10] Welcome email idempotency
+
+### Mistake
+- Tied the welcome-pack access email to every successful access POST, so repeated submits or retries could send duplicate emails.
+
+### Correction
+- Email sending should be gated by durable lead state and only happen when the lead is newly created.
+
+### Lesson
+- Client-side disabling reduces accidental duplicate requests, but server-side idempotency is the real protection for funnel emails.
+
+### Preference
+- Welcome-pack form submissions should not send multiple copies of the same email.
+
+### Action Rule
+- For future funnel email work, make the database state determine whether an email should send, and add client in-flight guards as secondary protection.
+
+## [2026-06-10] PPC staff access model
+
+### Mistake
+- PPC staff access was still partially described and implemented around admin/instructor env email lists.
+
+### Correction
+- Staff access should be invite-based: `super_admin` manages admin/instructor invites, and the bootstrap super admin email is `fccibadan@gmail.com`.
+
+### Lesson
+- Role resolution should come from persisted PPC users and invite acceptance, not mutable env lists.
+
+### Preference
+- Admins should enter at `/admin`, students at `/ppc`, and staff onboarding should happen through invite links/password setup.
+
+### Action Rule
+- For PPC auth changes, treat `super_admin` as the only staff-management role, treat `admin` as content/platform admin, and keep instructors as lower-level staff.
+
+## [2026-06-10] PPC lesson release scope
+
+### Mistake
+- Treating uploaded lesson audio as equivalent to student release readiness can accidentally unlock lessons whose questions, notes, or SAQs are not complete.
+
+### Correction
+- PPC release scope must be explicit: level 1 is released, level 2.1-2.2 are released, and level 2.3-2.11 plus level 3 remain draft/locked until the remaining data is supplied.
+
+### Lesson
+- Media sync and lesson publication are separate operations even when they run from the same script.
+
+### Preference
+- Keep incomplete PPC lessons visible to admins but locked from students.
+
+### Action Rule
+- For PPC content syncs, wire media broadly when available but enforce published/draft status from an explicit release-scope map.
+
+## [2026-06-10] PPC import readiness
+
+### Mistake
+- Letting the import-readiness report parse incomplete tracks with strict import parsers caused the report to abort before it could say what was missing.
+
+### Correction
+- Readiness reporting should parse each track independently, tolerate missing/malformed sections, and report missing parts instead of failing the whole import.
+
+### Lesson
+- Strict parsing belongs in the mutation/import path; readiness reporting should be diagnostic and resilient.
+
+### Preference
+- When remaining PPC lesson data is incomplete, report exactly which tracks are missing MCQs, SAQs, notes, or audio.
+
+### Action Rule
+- For PPC import tooling, keep mutation strict but make preflight/reporting fault-tolerant per track.
+
+## [2026-06-11] PPC dashboard content debt
+
+### Mistake
+- None in this slice.
+
+### Correction
+- Admin dashboard content health should use the same publish-readiness logic as the CMS, not only raw draft counts.
+
+### Lesson
+- “Draft” is not enough context; admins need to know whether a draft is ready to publish or still missing required content.
+
+### Preference
+- Operational admin views should separate incomplete drafts, ready drafts, and published lessons with gaps.
+
+### Action Rule
+- For PPC dashboard content summaries, derive debt from `getLessonPublishReadiness()` so dashboard and CMS stay consistent.
+
+## [2026-06-11] PPC CMS publishing UX
+
+### Mistake
+- None in this task.
+
+### Correction
+- Publish gating should be represented as pure helper logic first, then consumed by the CMS UI.
+
+### Lesson
+- Keep PPC authoring workflow copy and button state derived from the same readiness model that blocks publishing.
+
+### Preference
+- Admin CMS should explain why publishing is blocked without adding a heavier workflow or changing the existing compact zinc UI.
+
+### Action Rule
+- For PPC CMS state summaries, add tested pure helpers in `lib/ppc-content-cms.ts` before wiring JSX copy or disabled states.

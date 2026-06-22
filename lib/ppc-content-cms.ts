@@ -20,6 +20,8 @@ type LessonSnapshot = {
   audioUrl: string | null;
   audioUploadKey?: string | null;
   notesContent: string | null;
+  responsePrompt?: string | null;
+  responseMarkingGuide?: string | null;
 };
 
 type LessonDraft = {
@@ -28,6 +30,8 @@ type LessonDraft = {
   audioUrl: string;
   audioUploadKey?: string | null;
   notesContent: string;
+  responsePrompt?: string;
+  responseMarkingGuide?: string;
 };
 
 type LessonAudioDraft = {
@@ -72,8 +76,23 @@ type LessonPublishReadinessInput = {
   title: string;
   audioUrl: string | null;
   notesContent: string | null;
+  responsePrompt: string | null;
+  responseMarkingGuide: string | null;
   questions: PublishReadinessQuestion[];
 };
+
+type LessonReleaseSummaryInput = LessonPublishReadinessInput & {
+  status: LessonStatus;
+};
+
+type LessonPublishGuidanceInput = {
+  status: LessonStatus;
+  hasUnsavedChanges: boolean;
+  isReady: boolean;
+  unmetRequirements: LessonPublishRequirement[];
+};
+
+type LessonPublishGuidanceTone = "neutral" | "success" | "warning";
 
 type QuizQuestionDraftInput = {
   questionType: "multiple_choice" | "short_text";
@@ -172,7 +191,10 @@ export function hasLessonDraftChanges(
     original.title !== draft.title.trim() ||
     (original.audioUrl ?? "") !== draft.audioUrl.trim() ||
     (original.audioUploadKey ?? null) !== (draft.audioUploadKey ?? null) ||
-    (original.notesContent ?? "") !== draft.notesContent.trim()
+    (original.notesContent ?? "") !== draft.notesContent.trim() ||
+    (original.responsePrompt ?? "") !== (draft.responsePrompt?.trim() ?? "") ||
+    (original.responseMarkingGuide ?? "") !==
+      (draft.responseMarkingGuide?.trim() ?? "")
   );
 }
 
@@ -343,6 +365,10 @@ export function getLessonPublishReadiness(
   const titleReady = Boolean(input.title.trim());
   const audioReady = Boolean(input.audioUrl?.trim());
   const notesReady = Boolean(input.notesContent?.trim());
+  const responsePromptReady = Boolean(input.responsePrompt?.trim());
+  const responseMarkingGuideReady = Boolean(
+    input.responseMarkingGuide?.trim(),
+  );
   const hasQuestions = input.questions.length > 0;
   const firstQuestionError = input.questions
     .map((question, index) => getQuestionPublishError(question, index))
@@ -368,6 +394,19 @@ export function getLessonPublishReadiness(
               : undefined,
     },
     {
+      id: "written_response",
+      label: "Written response prompt and admin marking guide are ready.",
+      met: responsePromptReady && responseMarkingGuideReady,
+      detail:
+        !responsePromptReady && !responseMarkingGuideReady
+          ? "Add a written response prompt and admin marking guide before publishing."
+          : !responsePromptReady
+            ? "Add a written response prompt before publishing."
+            : !responseMarkingGuideReady
+              ? "Add an admin marking guide before publishing."
+              : undefined,
+    },
+    {
       id: "questions_present",
       label: "At least one quiz question is configured.",
       met: hasQuestions,
@@ -386,6 +425,93 @@ export function getLessonPublishReadiness(
   return {
     isReady: requirements.every((requirement) => requirement.met),
     requirements,
+  };
+}
+
+export function getLessonPublishGuidance(input: LessonPublishGuidanceInput) {
+  if (input.status === "published") {
+    return {
+      tone: input.isReady
+        ? ("neutral" as LessonPublishGuidanceTone)
+        : ("warning" as LessonPublishGuidanceTone),
+      title: input.isReady ? "Published" : "Published with gaps",
+      description: input.isReady
+        ? "This lesson is live for students."
+        : getPublishBlockerDescription(input.unmetRequirements),
+      actionLabel: "Unpublish",
+      canPublish: false,
+    };
+  }
+
+  if (input.hasUnsavedChanges) {
+    return {
+      tone: "warning" as LessonPublishGuidanceTone,
+      title: "Save changes first",
+      description:
+        "This lesson is ready, but pending edits must be saved before publishing.",
+      actionLabel: "Save before publishing",
+      canPublish: false,
+    };
+  }
+
+  if (!input.isReady) {
+    return {
+      tone: "warning" as LessonPublishGuidanceTone,
+      title: "Publishing blocked",
+      description: getPublishBlockerDescription(input.unmetRequirements),
+      actionLabel: "Resolve blockers",
+      canPublish: false,
+    };
+  }
+
+  return {
+    tone: "success" as LessonPublishGuidanceTone,
+    title: "Ready to publish",
+    description: "This draft meets every publishing requirement.",
+    actionLabel: "Publish lesson",
+    canPublish: true,
+  };
+}
+
+function getPublishBlockerDescription(
+  unmetRequirements: LessonPublishRequirement[],
+) {
+  const [firstRequirement, ...otherRequirements] = unmetRequirements;
+  const firstDetail =
+    firstRequirement?.detail ?? firstRequirement?.label ?? "Review publishing requirements.";
+
+  if (otherRequirements.length === 0) {
+    return firstDetail;
+  }
+
+  return `${firstDetail} Also fix: ${otherRequirements
+    .map((requirement) => requirement.detail ?? requirement.label)
+    .join(" ")}`;
+}
+
+export function getLevelReleaseSummary(lessons: LessonReleaseSummaryInput[]) {
+  const published = lessons.filter((lesson) => lesson.status === "published").length;
+  const draftLessons = lessons.filter((lesson) => lesson.status !== "published");
+  const readyDrafts = draftLessons.filter(
+    (lesson) => getLessonPublishReadiness(lesson).isReady,
+  ).length;
+  const incompleteDrafts = draftLessons.length - readyDrafts;
+  const parts = [
+    `${published} published`,
+    readyDrafts > 0
+      ? `${readyDrafts} ready draft${readyDrafts === 1 ? "" : "s"}`
+      : null,
+    incompleteDrafts > 0
+      ? `${incompleteDrafts} incomplete draft${incompleteDrafts === 1 ? "" : "s"}`
+      : null,
+  ].filter(Boolean);
+
+  return {
+    totalLessons: lessons.length,
+    published,
+    readyDrafts,
+    incompleteDrafts,
+    label: parts.length ? parts.join(" · ") : "No lessons yet",
   };
 }
 

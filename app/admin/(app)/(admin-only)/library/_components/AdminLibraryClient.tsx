@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import type { Teaching } from "@/lib/db/queries/teachings";
@@ -67,9 +68,12 @@ export function AdminLibraryClient({ initialTeachings }: Props) {
             <tr>
               <td colSpan={6} className="px-4 py-10 text-center text-[var(--color-text-muted)]">
                 No teachings yet.{" "}
-                <a href="/admin/library/upload" className="text-[var(--color-brand-blue)] underline">
+                <Link
+                  href="/admin/library/upload"
+                  className="text-[var(--color-brand-blue)] underline"
+                >
                   Upload one
-                </a>
+                </Link>
               </td>
             </tr>
           )}

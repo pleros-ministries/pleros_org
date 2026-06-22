@@ -23,6 +23,7 @@ import { HomepageCommunitySection } from "./homepage-community-section";
 import { HomepageFooter } from "./homepage-footer";
 import { HomepageNav } from "./homepage-nav";
 import { PodcastVideoGallery } from "./podcast-video-gallery";
+import { PublicSitePageShell } from "./public-site-page-shell";
 
 function formatEpisodeDate(value: string) {
   try {
@@ -49,16 +50,23 @@ export async function PodcastPageView() {
     : null;
 
   return (
-    <div className="bg-[#f3f7fb] px-0 md:px-6 md:py-6">
-      <div className="mx-auto w-full max-w-[36.1875rem] overflow-hidden bg-[var(--color-bg)] md:max-w-[48rem] xl:max-w-[67rem]">
+    <PublicSitePageShell>
         <HomepageNav />
 
         <section className="relative overflow-hidden bg-[var(--color-brand-sky-soft)]">
           <div className="relative flex min-h-[17.8125rem] flex-col justify-end px-[1.25rem] pb-[2.125rem] pt-10 md:min-h-[22rem] md:px-8 md:pb-[2.625rem] md:pt-12 xl:min-h-[25rem] xl:px-10 xl:pb-[3rem] xl:pt-14">
             <div className="relative z-10 grid max-w-[18rem] gap-3 md:max-w-[20rem] md:gap-4 xl:max-w-[24rem]">
               <p className="site-hero-eyebrow">{podcastPageHero.eyebrow}</p>
-              <h1 className="site-hero-heading max-w-[14rem] text-[2.8rem] text-[var(--color-brand-indigo)] md:max-w-[16rem] md:text-[3.6rem] xl:max-w-[19rem] xl:text-[4.15rem]">
-                {podcastPageHero.title}
+              <h1 className="site-hero-heading text-[var(--color-brand-indigo)] md:max-w-[16rem] md:text-[3.6rem] md:leading-none xl:max-w-[19rem] xl:text-[4.15rem]">
+                <span className="grid gap-0 md:hidden">
+                  <span className="whitespace-nowrap text-[clamp(1.9rem,6.8vw,2.15rem)] leading-[0.98] tracking-[-0.05em]">
+                    {podcastPageHero.mobileTitleLines[0]}
+                  </span>
+                  <span className="whitespace-nowrap text-[clamp(1.9rem,6.8vw,2.15rem)] leading-[0.98] tracking-[-0.05em]">
+                    {podcastPageHero.mobileTitleLines[1]}
+                  </span>
+                </span>
+                <span className="hidden md:inline">{podcastPageHero.title}</span>
               </h1>
             </div>
           </div>
@@ -71,9 +79,6 @@ export async function PodcastPageView() {
               <h2 className="site-section-heading max-w-[25rem]">
                 {podcastFeaturedSection.title}
               </h2>
-              <p className="max-w-[34rem] text-[1rem] leading-[1.45] tracking-[-0.02em] text-[var(--color-text-muted)] md:text-[1.0625rem]">
-                {podcastFeaturedSection.description}
-              </p>
             </div>
 
             {episode ? null : (
@@ -209,7 +214,6 @@ export async function PodcastPageView() {
 
         <HomepageCommunitySection />
         <HomepageFooter />
-      </div>
-    </div>
+    </PublicSitePageShell>
   );
 }

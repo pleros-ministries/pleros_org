@@ -5,6 +5,7 @@ export type PpcShellIcon =
   | "admin"
   | "content"
   | "students"
+  | "staff"
   | "review"
   | "qa"
   | "contact"
@@ -42,49 +43,55 @@ export const PPC_SHELL_NAV_ITEMS: PpcShellNavItem[] = [
     label: "Dashboard",
     path: "/",
     icon: "dashboard",
-    roles: ["admin", "instructor"],
+    roles: ["super_admin", "admin", "instructor"],
   },
   {
     label: "Platform",
     path: "/platform",
     icon: "admin",
-    roles: ["admin"],
+    roles: ["super_admin", "admin"],
   },
   {
     label: "Content",
     path: "/content",
     icon: "content",
-    roles: ["admin"],
+    roles: ["super_admin", "admin"],
+  },
+  {
+    label: "Staff",
+    path: "/staff",
+    icon: "staff",
+    roles: ["super_admin"],
   },
   {
     label: "Students",
     path: "/students",
     icon: "students",
-    roles: ["admin", "instructor"],
+    roles: ["super_admin", "admin", "instructor"],
   },
   {
     label: "Review queue",
     path: "/review",
     icon: "review",
-    roles: ["admin", "instructor"],
+    roles: ["super_admin", "admin", "instructor"],
   },
   {
     label: "Q&A inbox",
     path: "/qa",
     icon: "qa",
-    roles: ["admin", "instructor"],
+    roles: ["super_admin", "admin", "instructor"],
   },
   {
     label: "Contact",
     path: "/contact",
     icon: "contact",
-    roles: ["admin", "instructor"],
+    roles: ["super_admin", "admin", "instructor"],
   },
   {
     label: "Notifications",
     path: "/notifications",
     icon: "notifications",
-    roles: ["admin", "instructor"],
+    roles: ["super_admin", "admin", "instructor"],
   },
   {
     label: "My learning",
@@ -292,6 +299,13 @@ export function getPpcShellContext(pathname: string): PpcShellContext {
     return {
       label: "Content CMS",
       description: "Lessons, notes, audio, and quizzes",
+    };
+  }
+
+  if (logicalPath === "/staff") {
+    return {
+      label: "Staff access",
+      description: "Invites, roles, and account onboarding",
     };
   }
 

@@ -10,6 +10,8 @@ import {
 describe("ppc access rules", () => {
   test("public paths are recognized", () => {
     expect(isPublicPpcPath("/")).toBe(true);
+    expect(isPublicPpcPath("/login")).toBe(true);
+    expect(isPublicPpcPath("/signup")).toBe(true);
     expect(isPublicPpcPath("/sign-in")).toBe(true);
     expect(isPublicPpcPath("/sign-up")).toBe(true);
     expect(isPublicPpcPath("/forbidden")).toBe(true);
@@ -17,15 +19,18 @@ describe("ppc access rules", () => {
   });
 
   test("role home paths are stable", () => {
+    expect(getRoleHomePath("super_admin")).toBe("/admin");
     expect(getRoleHomePath("admin")).toBe("/admin");
     expect(getRoleHomePath("instructor")).toBe("/admin");
     expect(getRoleHomePath("student")).toBe("/ppc");
   });
 
   test("staff is limited to public PPC entry routes", () => {
+    expect(canAccessPpcPath("super_admin", "/")).toBe(true);
+    expect(canAccessPpcPath("super_admin", "/student")).toBe(false);
     expect(canAccessPpcPath("admin", "/")).toBe(true);
     expect(canAccessPpcPath("admin", "/student")).toBe(false);
-    expect(canAccessPpcPath("instructor", "/sign-up")).toBe(true);
+    expect(canAccessPpcPath("instructor", "/signup")).toBe(true);
     expect(canAccessPpcPath("instructor", "/review")).toBe(false);
   });
 

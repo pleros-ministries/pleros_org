@@ -13,11 +13,15 @@ export async function requireRole(...allowed: AppRole[]): Promise<AppSession> {
 }
 
 export async function requireStaff(): Promise<AppSession> {
-  return requireRole("admin", "instructor");
+  return requireRole("super_admin", "admin", "instructor");
 }
 
 export async function requireAdmin(): Promise<AppSession> {
-  return requireRole("admin");
+  return requireRole("super_admin", "admin");
+}
+
+export async function requireSuperAdmin(): Promise<AppSession> {
+  return requireRole("super_admin");
 }
 
 export async function requireStudent(): Promise<AppSession> {
@@ -25,5 +29,5 @@ export async function requireStudent(): Promise<AppSession> {
 }
 
 export async function requireAuth(): Promise<AppSession> {
-  return requireRole("admin", "instructor", "student");
+  return requireRole("super_admin", "admin", "instructor", "student");
 }

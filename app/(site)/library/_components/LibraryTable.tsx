@@ -21,61 +21,12 @@ function hasAudio(t: Teaching) {
   return Boolean(t.audioUrl && t.audioUrl !== "" && !t.audioUrl.startsWith("placeholder"));
 }
 
-// ─── Equalizer bars ───────────────────────────────────────────────────────────
-
-function EqBars() {
+function PauseIcon() {
   return (
-    <span className="eq-bars inline-flex h-[14px] w-[14px] items-end gap-[2px]" aria-hidden>
-      <span className="animate-eq w-[3px] rounded-sm bg-[#60a5fa]" />
-      <span
-        className="animate-eq w-[3px] rounded-sm bg-[#60a5fa]"
-        style={{ animationDelay: "150ms" }}
-      />
-      <span
-        className="animate-eq w-[3px] rounded-sm bg-[#60a5fa]"
-        style={{ animationDelay: "300ms" }}
-      />
-    </span>
-  );
-}
-
-// ─── Progress pips ────────────────────────────────────────────────────────────
-
-function PositionCell({
-  pos,
-  total,
-  isActive,
-}: {
-  pos: number;
-  total: number;
-  isActive: boolean;
-}) {
-  const pipCount = Math.min(total, 10);
-  const filled = Math.round((pos / total) * pipCount);
-  return (
-    <div className="text-center">
-      <div
-        className={`text-[12px] font-[500] tabular-nums ${isActive ? "text-white/50" : "text-[#8888a0]"
-          }`}
-      >
-        {pos}&thinsp;/&thinsp;{total}
-      </div>
-      <div className="mt-1 flex justify-center gap-[3px]">
-        {Array.from({ length: pipCount }, (_, j) => (
-          <span
-            key={j}
-            className={`block h-1 w-1 rounded-full ${j < filled
-                ? isActive
-                  ? "bg-[#60a5fa]"
-                  : "bg-[#2563eb]"
-                : isActive
-                  ? "bg-white/15"
-                  : "bg-[#d4d4de]"
-              }`}
-          />
-        ))}
-      </div>
-    </div>
+    <svg className="size-3.5 fill-white" viewBox="0 0 24 24" aria-hidden>
+      <rect x="6" y="4" width="4" height="16" rx="1" />
+      <rect x="14" y="4" width="4" height="16" rx="1" />
+    </svg>
   );
 }
 
@@ -85,8 +36,6 @@ type RowProps = {
   teaching: Teaching;
   isActive: boolean;
   isThisPlaying: boolean;
-  posInSeries: number;
-  seriesTotal: number;
   onPlay: () => void;
 };
 
@@ -94,8 +43,6 @@ function TeachingRow({
   teaching,
   isActive,
   isThisPlaying,
-  posInSeries,
-  seriesTotal,
   onPlay,
 }: RowProps) {
   const canPlay = hasAudio(teaching);
@@ -139,7 +86,7 @@ function TeachingRow({
               }`}
           >
             {isThisPlaying ? (
-              <EqBars />
+              <PauseIcon />
             ) : (
               <svg
                 className="size-3.5 fill-current"
@@ -151,7 +98,7 @@ function TeachingRow({
             )}
           </button>
           <span
-            className={`text-[13px] font-[600] leading-snug ${isActive ? "text-white" : "text-[#111118]"
+            className={`font-[var(--font-sen)] text-[13px] font-[600] leading-snug ${isActive ? "text-white" : "text-[#111118]"
               }`}
           >
             {teaching.title}
@@ -179,24 +126,23 @@ function TeachingRow({
         {year}
       </td>
 
-      {/* No. in Series — hidden below lg */}
-      <td className="hidden w-[128px] px-3 lg:table-cell">
-        <PositionCell pos={posInSeries} total={seriesTotal} isActive={isActive} />
-      </td>
-
       {/* Download */}
-      <td className="w-[120px] px-3 text-right" onClick={(e) => e.stopPropagation()}>
+      <td
+        className="w-11 px-1.5 text-right md:w-[120px] md:px-3"
+        onClick={(e) => e.stopPropagation()}
+      >
         {canPlay ? (
           <a
             href={teaching.audioUrl}
             download={`${teaching.title}.mp3`}
-            className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-lg border-[1.5px] px-3 py-1.5 text-[11px] font-[600] transition-all ${isActive
+            aria-label={`Download ${teaching.title}`}
+            className={`inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border-[1.5px] p-1.5 text-[11px] font-[600] transition-all md:px-3 md:py-1.5 ${isActive
                 ? "border-white/20 text-white/50 hover:border-[#60a5fa] hover:text-[#60a5fa]"
-                : "border-[#d4d4de] text-[#444450] hover:border-[#2563eb] hover:bg-[#eff4ff] hover:text-[#2563eb]"
+                : "border-[#d4d4de] text-[#444450] hover:border-[var(--color-brand-blue)] hover:bg-[var(--color-brand-sky-soft)] hover:text-[var(--color-brand-blue)]"
               }`}
           >
-            <DownloadIcon className="h-[11px] w-[11px]" />
-            Download
+            <DownloadIcon className="h-[11px] w-[11px] shrink-0" />
+            <span className="hidden md:inline">Download</span>
           </a>
         ) : (
           <span className="text-[11px] text-[#8888a0] opacity-50">Soon</span>
@@ -232,20 +178,6 @@ export function LibraryTable({ teachings }: Props) {
     return m;
   }, [teachings]);
 
-  // Position of each teaching within its series
-  const positionMap = useMemo(() => {
-    const m = new Map<number, number>();
-    const groups = new Map<string, Teaching[]>();
-    for (const t of teachings) {
-      if (!groups.has(t.series)) groups.set(t.series, []);
-      groups.get(t.series)!.push(t);
-    }
-    for (const items of groups.values()) {
-      items.forEach((t, i) => m.set(t.id, i + 1));
-    }
-    return m;
-  }, [teachings]);
-
   // Filter
   const filtered = useMemo(() => {
     const q = searchQuery.toLowerCase();
@@ -278,7 +210,10 @@ export function LibraryTable({ teachings }: Props) {
     return groups;
   }, [sortedFlat, sortMode]);
 
-  const flatFiltered = grouped ? grouped.flatMap((g) => g.items) : sortedFlat;
+  const flatFiltered = useMemo(
+    () => (grouped ? grouped.flatMap((g) => g.items) : sortedFlat),
+    [grouped, sortedFlat],
+  );
 
   // Keep context's flatList in sync for prev/next navigation
   useEffect(() => {
@@ -295,20 +230,23 @@ export function LibraryTable({ teachings }: Props) {
 
       <div className="min-w-0 flex-1 pb-32 font-[var(--font-be-vietnam-pro)]">
         {/* ── Page header ── */}
-        <div className="border-b border-[#e8e8ee] bg-white px-9 pb-5 pt-9">
-          <div className="mb-2 text-[11px] font-[700] uppercase tracking-[2px] text-[#2563eb]">
-            Teaching Library
-          </div>
-          <h1 className="font-[var(--font-sen)] text-[32px] font-[800] leading-tight tracking-tight text-[#0d1b5e]">
+        <div className="border-b border-[#e8e8ee] bg-white px-5 pb-5 pt-8 md:px-9 md:pt-9">
+          <h1 className="site-hero-heading text-[2rem] text-[var(--color-brand-indigo)] sm:text-[2.4rem] md:text-[2.8rem] xl:text-[3.2rem]">
             The Pleros Library
           </h1>
-          <p className="mt-1.5 text-[14px] font-[400] italic text-[#8888a0]">
-            Teachings on faith, purpose, redemption, and the new creation.
-            Click any teaching to play it, or download for offline listening.
+          <p className="mt-3 max-w-[34rem] text-[1rem] leading-[1.45] tracking-[-0.02em] text-[var(--color-text-muted)] md:text-[1.0625rem]">
+            Teachings on Faith, Purpose, Redemption, and New Creation — click any
+            teaching to play it, or download for offline listening.
           </p>
 
           {/* Search + tabs */}
           <div className="mt-5 flex flex-col gap-3">
+            <p className="text-[12px] font-[600] text-[var(--color-text-muted)]">
+              {isFiltered
+                ? `${filteredCount} of ${totalCount} teachings`
+                : `${totalCount} teachings`}
+            </p>
+
             {/* Search */}
             <div className="relative">
               <svg
@@ -331,7 +269,7 @@ export function LibraryTable({ teachings }: Props) {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search teachings or series…"
-                className="h-10 w-full rounded-xl border-[1.5px] border-[#e8e8ee] bg-[#f9f9fb] pl-10 pr-4 text-[13px] text-[#111118] placeholder:text-[#8888a0] outline-none transition-all focus:border-[#2563eb] focus:bg-white focus:shadow-[0_0_0_3px_rgba(37,99,235,0.1)]"
+                className="h-10 w-full rounded-xl border-[1.5px] border-[#e8e8ee] bg-[#f9f9fb] pl-10 pr-4 text-[13px] text-[var(--color-text-strong)] placeholder:text-[var(--color-text-muted)] outline-none transition-all focus:border-[var(--color-brand-blue)] focus:bg-white focus:shadow-[0_0_0_3px_rgba(5,20,128,0.1)]"
               />
             </div>
 
@@ -345,8 +283,8 @@ export function LibraryTable({ teachings }: Props) {
                     type="button"
                     onClick={() => setActiveSeries(s)}
                     className={`h-9 rounded-full border-[1.5px] px-3.5 text-[12px] font-[600] transition-all ${active
-                        ? "border-[#0d1b5e] bg-[#0d1b5e] text-white"
-                        : "border-[#e8e8ee] bg-white text-[#444450] hover:border-[#2563eb] hover:bg-[#eff4ff] hover:text-[#2563eb]"
+                        ? "border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)] text-white"
+                        : "border-[#e8e8ee] bg-white text-[var(--color-text-muted)] hover:border-[var(--color-brand-blue)] hover:bg-[var(--color-brand-sky-soft)] hover:text-[var(--color-brand-blue)]"
                       }`}
                   >
                     {s === "all" ? "All" : s}
@@ -357,16 +295,10 @@ export function LibraryTable({ teachings }: Props) {
           </div>
         </div>
 
-        {/* ── Result count ── */}
-        <div className="px-9 pt-3.5 text-[12px] font-[600] text-[#8888a0]">
-          {isFiltered
-            ? `${filteredCount} of ${totalCount} teachings`
-            : `${totalCount} teachings`}
-        </div>
-
         {/* ── Table ── */}
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse">
+        <div className="px-5 md:px-9">
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
             <thead>
               <tr className="border-b-2 border-[#d4d4de]">
                 {[
@@ -374,12 +306,11 @@ export function LibraryTable({ teachings }: Props) {
                   { label: "Teaching", cls: "" },
                   { label: "Series", cls: "w-40 hidden md:table-cell" },
                   { label: "Year", cls: "w-[68px] text-center hidden md:table-cell" },
-                  { label: "No. in Series", cls: "w-[128px] text-center hidden lg:table-cell" },
-                  { label: "", cls: "w-[120px] text-right" },
+                  { label: "", cls: "w-11 text-right md:w-[120px]" },
                 ].map(({ label, cls }, i) => (
                   <th
                     key={i}
-                    className={`bg-[#f9f9fb] px-3 py-3.5 text-[10px] font-[700] uppercase tracking-[1.5px] text-[#8888a0] ${cls}`}
+                    className={`bg-[#f9f9fb] px-3 py-3.5 font-[var(--font-sen)] text-[10px] font-[700] uppercase tracking-[1.5px] text-[#8888a0] ${cls}`}
                   >
                     {label}
                   </th>
@@ -389,7 +320,7 @@ export function LibraryTable({ teachings }: Props) {
             <tbody>
               {flatFiltered.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-9 py-16 text-center text-[13px] text-[#8888a0]">
+                  <td colSpan={5} className="px-9 py-16 text-center text-[13px] text-[#8888a0]">
                     No teachings found
                   </td>
                 </tr>
@@ -399,8 +330,8 @@ export function LibraryTable({ teachings }: Props) {
                     {/* Series group header */}
                     <tr className="border-b border-[#e8e8ee] border-t-2 border-t-[#d4d4de]">
                       <td
-                        colSpan={6}
-                        className="bg-[#f9f9fb] px-3 py-2.5 text-[10px] font-[800] uppercase tracking-[2px] text-[#0d1b5e]"
+                        colSpan={5}
+                        className="bg-[#f9f9fb] px-3 py-2.5 font-[var(--font-sen)] text-[10px] font-[800] uppercase tracking-[2px] text-[#0d1b5e]"
                       >
                         {getSeriesEmoji(series)} {series}
                         <span className="ml-2 rounded-full bg-[#e8e8ee] px-1.5 py-[1px] text-[10px] font-[600] normal-case tracking-normal text-[#8888a0]">
@@ -415,8 +346,6 @@ export function LibraryTable({ teachings }: Props) {
                         teaching={t}
                         isActive={currentTrack?.id === t.id}
                         isThisPlaying={currentTrack?.id === t.id && isPlaying}
-                        posInSeries={positionMap.get(t.id) ?? 1}
-                        seriesTotal={seriesCounts.get(t.series) ?? 0}
                         onPlay={() => playTeaching(t)}
                       />
                     ))}
@@ -429,14 +358,13 @@ export function LibraryTable({ teachings }: Props) {
                     teaching={t}
                     isActive={currentTrack?.id === t.id}
                     isThisPlaying={currentTrack?.id === t.id && isPlaying}
-                    posInSeries={positionMap.get(t.id) ?? 1}
-                    seriesTotal={seriesCounts.get(t.series) ?? 0}
                     onPlay={() => playTeaching(t)}
                   />
                 ))
               )}
             </tbody>
-          </table>
+            </table>
+          </div>
         </div>
       </div>
 

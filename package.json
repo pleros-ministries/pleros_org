@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "migrate:pathway-videos": "tsx scripts/migrate-pathway-videos.ts"
+    "migrate:pathway-videos": "tsx scripts/migrate-pathway-videos.ts",
+    "sync:ppc-teachings": "tsx scripts/sync-ppc-teachings.ts",
+    "import:ppc-content": "tsx scripts/import-ppc-content.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.2.0",

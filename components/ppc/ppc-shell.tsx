@@ -62,6 +62,7 @@ const iconMap: Record<PpcShellIcon, React.ComponentType<{ className?: string }>>
   dashboard: LayoutDashboard,
   admin: BadgeCheck,
   content: FolderKanban,
+  staff: Users,
   students: Users,
   review: ClipboardCheck,
   qa: MessageSquareText,

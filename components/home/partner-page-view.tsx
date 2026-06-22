@@ -18,6 +18,7 @@ import {
 import { HomepageCommunitySection } from "./homepage-community-section";
 import { HomepageFooter } from "./homepage-footer";
 import { HomepageNav } from "./homepage-nav";
+import { PublicSitePageShell } from "./public-site-page-shell";
 
 function PartnerReasonCard({
   step,
@@ -47,8 +48,7 @@ function PartnerReasonCard({
 
 export function PartnerPageView() {
   return (
-    <div className="bg-[#f3f7fb] px-0 md:px-6 md:py-6">
-      <div className="mx-auto w-full max-w-[36.1875rem] overflow-hidden bg-[var(--color-bg)] md:max-w-[48rem] xl:max-w-[67rem]">
+    <PublicSitePageShell>
         <HomepageNav />
 
         <section className="bg-[var(--color-brand-sky)] px-[1.25rem] pb-[1.65rem] pt-[7rem] md:px-8 md:pb-10 md:pt-[8.5rem] xl:px-10 xl:pb-12">
@@ -56,7 +56,7 @@ export function PartnerPageView() {
             <h1 className="site-hero-heading text-[2.55rem] text-[var(--color-text-strong)] md:text-[3.25rem] xl:text-[4rem]">
               {partnerPageHero.title}
             </h1>
-            <p className="mt-2.5 text-[1rem] leading-[1.08] tracking-[-0.02em] text-[var(--color-brand-blue)] md:text-[1.15rem] xl:text-[1.25rem]">
+            <p className="site-hero-intro mt-2.5 text-[var(--color-brand-blue)]">
               {partnerPageHero.description}
             </p>
           </div>
@@ -87,7 +87,7 @@ export function PartnerPageView() {
                 Partnership
               </p>
               <h2 className="site-section-heading">Why partner with Pleros</h2>
-              <p className="mx-auto max-w-[33rem] text-[0.98rem] leading-[1.5] tracking-[-0.02em] text-[var(--color-text-muted)] md:text-[1.0625rem]">
+              <p className="site-section-intro mx-auto max-w-[33rem] text-[var(--color-text-muted)]">
                 Partnership is a practical way to join the work God is doing
                 through Pleros across teaching, discipleship, outreach, and
                 digital ministry.
@@ -111,7 +111,7 @@ export function PartnerPageView() {
               <h2 className="site-section-heading text-white">
                 What your partnership makes possible
               </h2>
-              <p className="text-[1rem] leading-[1.5] tracking-[-0.02em] text-white/80 md:text-[1.0625rem]">
+              <p className="site-section-intro text-white/80">
                 Every gift helps strengthen real ministry work that reaches
                 people, supports growth, and keeps Gospel resources moving.
               </p>
@@ -148,7 +148,7 @@ export function PartnerPageView() {
               </CardHeader>
 
               <CardContent className="grid gap-6 px-0 pb-0 text-center">
-                <p className="mx-auto max-w-[35rem] text-[1rem] leading-[1.5] tracking-[-0.02em] text-[var(--color-text-strong)] md:text-[1.125rem]">
+                <p className="site-section-intro mx-auto max-w-[35rem] text-[var(--color-text-strong)]">
                   {partnerPageCta.description}
                 </p>
 
@@ -168,7 +168,6 @@ export function PartnerPageView() {
 
         <HomepageCommunitySection />
         <HomepageFooter />
-      </div>
-    </div>
+    </PublicSitePageShell>
   );
 }

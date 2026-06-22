@@ -23,6 +23,9 @@ describe("welcome campaign pages", () => {
     );
 
     expect(pageSource).toContain("WelcomeLandingPage");
+    expect(pageSource).toContain("getAppSession");
+    expect(pageSource).toContain("appSession || welcomeAccess");
+    expect(pageSource).toContain('redirect("/dashboard")');
     expect(viewSource).toContain("Get your free book");
     expect(viewSource).toContain('redirectTo="/thankyou"');
     expect(viewSource).toContain("autoOpen={false}");
@@ -48,6 +51,17 @@ describe("welcome campaign pages", () => {
     expect(viewSource).toContain("Claim Free Gifts");
     expect(viewSource).toContain("buildWelcomeShareIntentUrl");
   });
+
+  test("uses the welcome session route only as a cookie bootstrap", () => {
+    const routeSource = readFileSync(
+      join(process.cwd(), "app", "api", "welcome-access", "session", "route.ts"),
+      "utf8",
+    );
+
+    expect(routeSource).toContain('new URL("/welcome", request.url)');
+    expect(routeSource).toContain("getWelcomeAccessCookieOptions");
+    expect(routeSource).toContain("response.cookies.set");
+  });
 });
 
 describe("welcome campaign helpers", () => {
@@ -65,9 +79,9 @@ describe("welcome campaign helpers", () => {
     expect(
       resolvePublicSiteUrl({
         NEXT_PUBLIC_APP_URL: "https://example.com/path",
-      } as NodeJS.ProcessEnv),
+      } as unknown as NodeJS.ProcessEnv),
     ).toBe("https://example.com");
-    expect(resolvePublicSiteUrl({} as NodeJS.ProcessEnv)).toBe(
+    expect(resolvePublicSiteUrl({} as unknown as NodeJS.ProcessEnv)).toBe(
       "https://pleros-org.vercel.app",
     );
   });

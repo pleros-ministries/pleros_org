@@ -5,7 +5,9 @@ import {
   submissionReviewedHtml,
   graduationCongratulationsHtml,
   staffAssignmentHtml,
+  staffInviteHtml,
   welcomePackAccessHtml,
+  welcomePackExtrasUnlockedHtml,
 } from "./templates";
 
 const FROM = process.env.EMAIL_FROM ?? "PPC <noreply@pleros.org>";
@@ -89,6 +91,24 @@ export async function sendStaffAssignmentNotification(opts: {
   });
 }
 
+export async function sendStaffInvite(opts: {
+  to: string;
+  role: "admin" | "instructor";
+  inviteUrl: string;
+}) {
+  if (!isEmailEnabled() || !resend) return null;
+
+  return resend.emails.send({
+    from: FROM,
+    to: opts.to,
+    subject: "Set up your PPC admin access",
+    html: staffInviteHtml({
+      role: opts.role,
+      inviteUrl: opts.inviteUrl,
+    }),
+  });
+}
+
 export async function sendWelcomePackAccessEmail(opts: {
   to: string;
   name: string;
@@ -101,8 +121,28 @@ export async function sendWelcomePackAccessEmail(opts: {
   return resend.emails.send({
     from: PLEROS_FROM,
     to: opts.to,
-    subject: "Your Pleros Welcome Pack Access",
+    subject: "Your Pleros welcome gift is ready",
     html: welcomePackAccessHtml({
+      name: opts.name,
+      dashboardUrl: opts.dashboardUrl,
+    }),
+  });
+}
+
+export async function sendWelcomePackExtrasUnlockedEmail(opts: {
+  to: string;
+  name: string;
+  dashboardUrl: string;
+}) {
+  if (!isEmailEnabled() || !resend) return null;
+
+  const PLEROS_FROM = process.env.EMAIL_FROM_PLEROS ?? "Pleros <noreply@pleros.org>";
+
+  return resend.emails.send({
+    from: PLEROS_FROM,
+    to: opts.to,
+    subject: "Your extra Pleros gifts are unlocked",
+    html: welcomePackExtrasUnlockedHtml({
       name: opts.name,
       dashboardUrl: opts.dashboardUrl,
     }),

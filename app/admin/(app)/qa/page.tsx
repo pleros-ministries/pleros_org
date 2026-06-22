@@ -5,6 +5,7 @@ import { getAppSession } from "@/lib/app-session";
 import { db } from "@/lib/db";
 import { PageHeader } from "@/components/ppc/page-header";
 import { QaInboxClient } from "@/components/ppc/qa-inbox-client";
+import { hasAdminAccess } from "@/lib/app-role";
 
 function serializeDate(value: Date | string | null | undefined): string | null {
   if (!value) return null;
@@ -19,12 +20,18 @@ export default async function AdminQaPage() {
   if (session.user.role === "student") {
     redirect("/ppc");
   }
-  const currentStaffRole = session.user.role === "admin" ? "admin" : "instructor";
+  const currentStaffRole = hasAdminAccess(session.user.role)
+    ? "admin"
+    : "instructor";
 
   const rawThreads = await getAllThreads();
   const staffUsers = await db.query.users.findMany({
     where: (user, { eq, or }) =>
-      or(eq(user.role, "admin"), eq(user.role, "instructor")),
+      or(
+        eq(user.role, "super_admin"),
+        eq(user.role, "admin"),
+        eq(user.role, "instructor"),
+      ),
   });
 
   const threads = rawThreads.map((thread) => ({

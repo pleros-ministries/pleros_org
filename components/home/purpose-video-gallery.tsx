@@ -15,8 +15,8 @@ import type { PurposePathwayVideoItem } from "@/lib/purpose-pathway-content";
 
 function PurposeVideoCard({
   title,
-  description,
-  thumbnailSrc,
+  description: _description,
+  href,
   playIconSrc,
   onPlay,
 }: PurposePathwayVideoItem & {
@@ -30,12 +30,14 @@ function PurposeVideoCard({
       aria-label={`Play ${title}`}
     >
       <div className="relative aspect-[493/263] overflow-hidden rounded-[0.6875rem] bg-[#d98d54] shadow-[var(--shadow-sm)]">
-        <Image
-          src={thumbnailSrc}
-          alt=""
-          fill
-          className="object-cover transition-transform duration-200 group-hover:scale-[1.015]"
-          sizes="(max-width: 767px) calc(100vw - 5.5rem), (max-width: 1279px) 31rem, 35rem"
+        <video
+          src={`${href}#t=0.1`}
+          preload="metadata"
+          muted
+          playsInline
+          tabIndex={-1}
+          aria-hidden
+          className="absolute inset-0 h-full w-full object-cover transition-transform duration-200 group-hover:scale-[1.015]"
         />
         <div className="absolute inset-0 bg-black/12 transition-colors duration-200 group-hover:bg-black/18" />
         <div className="absolute inset-0 flex items-center justify-center">
@@ -53,9 +55,11 @@ function PurposeVideoCard({
         <h2 className="font-[var(--font-sen)] text-[1.125rem] font-semibold leading-[1.02] tracking-[-0.03em] text-[var(--color-brand-indigo)] md:text-[1.35rem]">
           {title}
         </h2>
+        {/* Subtitle hidden for now — restore when copy is finalized.
         <p className="max-w-[18rem] text-[0.75rem] leading-[1.18] tracking-[-0.02em] text-[var(--color-text-muted)] md:max-w-[22rem] md:text-[0.875rem]">
-          {description}
+          {_description}
         </p>
+        */}
       </div>
     </button>
   );

@@ -1,5 +1,3 @@
-import { homeYoutubeChannelUrl } from "./site-homepage-content";
-
 export type QuestionsPathwayHero = {
   title: string;
   description: string;
@@ -19,9 +17,12 @@ export type QuestionsSeriesPage = {
   slug: string;
   title: string;
   description: string;
+  cardSubtitle?: string;
   thumbnailSrc: string;
   playIconSrc: string;
   videos: QuestionsPathwayVideoItem[];
+  comingSoon?: boolean;
+  comingSoonMessage?: string;
 };
 
 export type QuestionsPathwaySeriesItem = {
@@ -30,6 +31,7 @@ export type QuestionsPathwaySeriesItem = {
   thumbnailSrc: string;
   playIconSrc: string;
   href: string;
+  comingSoon?: boolean;
 };
 
 export const questionsPathwayHero: QuestionsPathwayHero = {
@@ -198,35 +200,13 @@ const gospelAnswersSimpleVideos: QuestionsPathwayVideoItem[] = [
   },
 ];
 
-function buildPlaceholderVideos(
-  seriesKey: string,
-  thumbnailSrc: string,
-): QuestionsPathwayVideoItem[] {
-  return [
-    {
-      id: `${seriesKey}-intro-1`,
-      title: "Introduction to the Series",
-      description: sharedSeriesDescription,
-      thumbnailSrc,
-      playIconSrc: sharedPlayIconSrc,
-      href: homeYoutubeChannelUrl,
-    },
-    {
-      id: `${seriesKey}-intro-2`,
-      title: "Introduction to the Series",
-      description: sharedSeriesDescription,
-      thumbnailSrc,
-      playIconSrc: sharedPlayIconSrc,
-      href: homeYoutubeChannelUrl,
-    },
-  ];
-}
-
 export const questionsSeriesPages: QuestionsSeriesPage[] = [
   {
     slug: "most-important-questions-series",
     title: "Most Important Questions Series",
     description: questionsPathwayHero.description,
+    cardSubtitle:
+      "Five short teachings on Salvation, the Holy Spirit, Healing, and the Local Church",
     thumbnailSrc:
       "/site/home/assets/questions-pathway/thumbnails/most-important-questions-series.png",
     playIconSrc: sharedPlayIconSrc,
@@ -236,6 +216,8 @@ export const questionsSeriesPages: QuestionsSeriesPage[] = [
     slug: "gospel-answers-simple-series",
     title: "Gospel Answers Series (Simple Version)",
     description: questionsPathwayHero.description,
+    cardSubtitle:
+      "Twelve simple videos with clear answers to common Gospel questions",
     thumbnailSrc:
       "/site/home/assets/questions-pathway/thumbnails/gospel-answers-simple-series.png",
     playIconSrc: sharedPlayIconSrc,
@@ -248,21 +230,24 @@ export const questionsSeriesPages: QuestionsSeriesPage[] = [
     thumbnailSrc:
       "/site/home/assets/questions-pathway/thumbnails/gospel-answers-critical-series.png",
     playIconSrc: sharedPlayIconSrc,
-    videos: buildPlaceholderVideos(
-      "gospel-answers-critical-series",
-      "/site/home/assets/questions-pathway/thumbnails/gospel-answers-critical-series.png",
-    ),
+    comingSoon: true,
+    comingSoonMessage:
+      "The critical-version teachings for this series are being prepared. In the meantime, you can follow the simple version.",
+    videos: [],
   },
 ];
 
 export const questionsPathwaySeries: QuestionsPathwaySeriesItem[] =
   questionsSeriesPages.map(
-    ({ slug, title, thumbnailSrc, playIconSrc }) => ({
+    ({ slug, title, thumbnailSrc, playIconSrc, comingSoon, cardSubtitle }) => ({
       title,
-      description: sharedSeriesDescription,
+      description: comingSoon
+        ? "Coming soon"
+        : (cardSubtitle ?? sharedSeriesDescription),
       thumbnailSrc,
       playIconSrc,
       href: `/questions/${slug}`,
+      comingSoon,
     }),
   );
 

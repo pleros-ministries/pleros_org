@@ -1,5 +1,6 @@
 import { eq, and, desc } from "drizzle-orm";
 import { db } from "@/lib/db";
+import type { AppRole } from "@/lib/app-role";
 import * as schema from "../schema";
 
 export async function getThreadsByLesson(lessonId: number, userId?: string) {
@@ -94,7 +95,7 @@ export async function createThread(data: {
   lessonId: number;
   subject: string;
   message: string;
-  authorRole: "student" | "instructor" | "admin";
+  authorRole: AppRole;
 }) {
   const [thread] = await db
     .insert(schema.qaThreads)
@@ -120,7 +121,7 @@ export async function createThread(data: {
 export async function addMessage(data: {
   threadId: number;
   authorId: string;
-  authorRole: "student" | "instructor" | "admin";
+  authorRole: AppRole;
   content: string;
 }) {
   const [message] = await db

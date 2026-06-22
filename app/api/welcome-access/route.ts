@@ -5,11 +5,12 @@ import { validateEmail } from "@/lib/welcome-flow";
 import {
   createWelcomeAccessToken,
   getWelcomeAccessSecret,
+  getWelcomeAccessCookieOptions,
   resolveWelcomeAccessName,
   WELCOME_ACCESS_COOKIE_NAME,
-  WELCOME_ACCESS_MAX_AGE,
 } from "@/lib/welcome-access";
 import { sendWelcomePackAccessEmail } from "@/lib/email/send";
+import { upsertWelcomePackLead } from "@/lib/db/queries/welcome-pack-leads";
 import {
   normalizeWelcomeReturnTo,
   provisionWelcomeSession,
@@ -17,9 +18,10 @@ import {
 
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as
-    | { email?: string; returnTo?: string }
+    | { email?: string; returnTo?: string; source?: string }
     | null;
   const email = body?.email?.trim().toLowerCase() ?? "";
+  const source = body?.source?.trim() || "welcome";
   const returnTo = normalizeWelcomeReturnTo(body?.returnTo, "/dashboard");
 
   if (!validateEmail(email)) {
@@ -57,23 +59,29 @@ export async function POST(request: Request) {
   );
 
   const cookieStore = await cookies();
-  cookieStore.set(WELCOME_ACCESS_COOKIE_NAME, token, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: WELCOME_ACCESS_MAX_AGE,
-  });
+  cookieStore.set(
+    WELCOME_ACCESS_COOKIE_NAME,
+    token,
+    getWelcomeAccessCookieOptions(),
+  );
 
-  const dashboardUrl = new URL("/dashboard", request.url).toString();
-
-  void sendWelcomePackAccessEmail({
-    to: email,
+  const leadResult = await upsertWelcomePackLead({
+    email,
     name,
-    dashboardUrl,
-  }).catch((err) => {
-    console.error("Failed to send welcome pack email:", err);
+    source,
   });
+
+  const dashboardUrl = new URL("/dashboard/welcomepack", request.url).toString();
+
+  if (leadResult.created) {
+    void sendWelcomePackAccessEmail({
+      to: email,
+      name,
+      dashboardUrl,
+    }).catch((err) => {
+      console.error("Failed to send welcome pack email:", err);
+    });
+  }
 
   return NextResponse.json({ redirectTo: returnTo });
 }

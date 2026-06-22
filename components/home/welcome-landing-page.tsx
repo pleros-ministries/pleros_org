@@ -4,6 +4,7 @@ import Link from "next/link";
 import { HomepageFooter } from "./homepage-footer";
 import { HomepageGiftDrawer } from "./homepage-gift-drawer";
 import { HomepageNav } from "./homepage-nav";
+import { PublicSitePageShell } from "./public-site-page-shell";
 
 type WelcomeLandingPageProps = {
   hasWelcomeAccess: boolean;
@@ -13,8 +14,7 @@ export function WelcomeLandingPage({
   hasWelcomeAccess,
 }: WelcomeLandingPageProps) {
   return (
-    <div className="bg-[#f3f7fb] px-0 md:px-6 md:py-6">
-      <div className="mx-auto min-h-screen w-full max-w-[36.1875rem] overflow-hidden bg-[var(--color-bg)]">
+    <PublicSitePageShell minHeight>
         <HomepageNav />
 
         <main>
@@ -49,6 +49,7 @@ export function WelcomeLandingPage({
                     triggerLabel="Get your free book"
                     submitLabel="Get your free book"
                     pendingLabel="Opening your gift"
+                    source="welcome"
                   />
                 )}
 
@@ -165,7 +166,6 @@ export function WelcomeLandingPage({
         </main>
 
         <HomepageFooter />
-      </div>
-    </div>
+    </PublicSitePageShell>
   );
 }

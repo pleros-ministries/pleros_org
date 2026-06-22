@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { validateEmail } from "@/lib/welcome-flow";
+import { welcomePackModalCopy } from "@/lib/welcome-pack-modal-copy";
 
 type WelcomePackModalProps = {
   openRequest: number;
@@ -21,6 +22,8 @@ export function WelcomePackModal({ openRequest }: WelcomePackModalProps) {
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const isSubmittingRef = useRef(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPending, startTransition] = useTransition();
   const normalizedEmail = useMemo(() => email.trim().toLowerCase(), [email]);
 
@@ -47,32 +50,46 @@ export function WelcomePackModal({ openRequest }: WelcomePackModalProps) {
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
+    if (isSubmittingRef.current) {
+      return;
+    }
+
     if (!validateEmail(normalizedEmail)) {
       setError("Enter a valid email address.");
       return;
     }
 
     setError(null);
+    isSubmittingRef.current = true;
+    setIsSubmitting(true);
 
     startTransition(async () => {
-      const response = await fetch("/api/welcome-access", {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({ email: normalizedEmail }),
-      });
+      try {
+        const response = await fetch("/api/welcome-access", {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+          },
+          body: JSON.stringify({ email: normalizedEmail }),
+        });
 
-      const payload = (await response.json().catch(() => null)) as
-        | { error?: string; redirectTo?: string }
-        | null;
+        const payload = (await response.json().catch(() => null)) as
+          | { error?: string; redirectTo?: string }
+          | null;
 
-      if (!response.ok || !payload?.redirectTo) {
-        setError(payload?.error ?? "Something went wrong. Please try again.");
-        return;
+        if (!response.ok || !payload?.redirectTo) {
+          setError(payload?.error ?? "Something went wrong. Please try again.");
+          isSubmittingRef.current = false;
+          setIsSubmitting(false);
+          return;
+        }
+
+        window.location.href = payload.redirectTo;
+      } catch {
+        setError("Something went wrong. Please try again.");
+        isSubmittingRef.current = false;
+        setIsSubmitting(false);
       }
-
-      window.location.href = payload.redirectTo;
     });
   };
 
@@ -85,13 +102,12 @@ export function WelcomePackModal({ openRequest }: WelcomePackModalProps) {
         />
 
         <DialogHeader className="relative gap-3">
-          <div className="eyebrow">Welcome pack access</div>
+          <div className="eyebrow">Welcome gift</div>
           <DialogTitle className="max-w-[18ch] text-balance">
-            Enter your email to unlock the Pleros welcome pack
+            {welcomePackModalCopy.headline}
           </DialogTitle>
-          <DialogDescription className="max-w-[46ch]">
-            We&apos;ll take you into a private welcome dashboard where your pack and
-            next steps are organised in one place.
+          <DialogDescription className="site-section-intro max-w-[46ch]">
+            {welcomePackModalCopy.subheadline}
           </DialogDescription>
         </DialogHeader>
 
@@ -115,8 +131,15 @@ export function WelcomePackModal({ openRequest }: WelcomePackModalProps) {
             </p>
           )}
 
-          <Button type="submit" variant="primary" size="lg" disabled={isPending}>
-            {isPending ? "Opening your dashboard..." : "Access the welcome pack"}
+          <Button
+            type="submit"
+            variant="primary"
+            size="lg"
+            disabled={isSubmitting || isPending}
+          >
+            {isSubmitting || isPending
+              ? "Opening your dashboard..."
+              : "Access the welcome pack"}
           </Button>
         </form>
       </DialogContent>

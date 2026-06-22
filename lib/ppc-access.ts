@@ -29,7 +29,14 @@ function matchesPrefix(pathname: string, prefixes: string[]): boolean {
 export function isPublicPpcPath(path: string): boolean {
   const pathname = normalizeLogicalPath(path);
 
-  return pathname === "/" || pathname === "/sign-in" || pathname === "/sign-up" || pathname === "/forbidden";
+  return (
+    pathname === "/" ||
+    pathname === "/login" ||
+    pathname === "/signup" ||
+    pathname === "/sign-in" ||
+    pathname === "/sign-up" ||
+    pathname === "/forbidden"
+  );
 }
 
 export function getRoleHomePath(role: AppRole): string {

@@ -33,6 +33,15 @@ const adminSession = {
   },
 };
 
+const superAdminSession = {
+  user: {
+    id: "super-admin-1",
+    name: "Super Admin One",
+    email: "super@example.com",
+    role: "super_admin" as const,
+  },
+};
+
 describe("action actor helpers", () => {
   test("derives the current student for self-service actions", () => {
     expect(getStudentSelfActor(studentSession)).toEqual({
@@ -60,9 +69,17 @@ describe("action actor helpers", () => {
       authorId: "instructor-1",
       authorRole: "instructor",
     });
+    expect(getSignedInActor(superAdminSession)).toEqual({
+      authorId: "super-admin-1",
+      authorRole: "super_admin",
+    });
   });
 
   test("derives the current staff actor for review and moderation actions", () => {
+    expect(getStaffActor(superAdminSession)).toEqual({
+      reviewerId: "super-admin-1",
+      reviewerRole: "super_admin",
+    });
     expect(getStaffActor(instructorSession)).toEqual({
       reviewerId: "instructor-1",
       reviewerRole: "instructor",

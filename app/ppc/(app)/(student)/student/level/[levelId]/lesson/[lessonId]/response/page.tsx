@@ -21,7 +21,7 @@ export default async function WrittenResponsePage({
   const session = await getAppSession();
   if (!session) {
     const h = await headers();
-    redirect(toExternalPpcPath(h.get("host"), "/sign-in"));
+    redirect(toExternalPpcPath(h.get("host"), "/login"));
   }
 
   const userId = session.user.id;
@@ -31,6 +31,9 @@ export default async function WrittenResponsePage({
 
   const lesson = await getLessonById(lessonId);
   if (!lesson || lesson.levelId !== levelId) notFound();
+  if (lesson.status !== "published") {
+    redirect(`/ppc/student/level/${levelId}`);
+  }
 
   const submission = await getSubmission(userId, lessonId);
 
@@ -63,6 +66,17 @@ export default async function WrittenResponsePage({
       />
 
       <div className="rounded-sm border border-zinc-200 bg-white p-4">
+        {lesson.responsePrompt ? (
+          <div className="mb-4 rounded-sm border border-zinc-100 bg-zinc-50 p-3">
+            <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-zinc-400">
+              Prompt
+            </p>
+            <div
+              className="prose prose-sm max-w-none text-zinc-700"
+              dangerouslySetInnerHTML={{ __html: lesson.responsePrompt }}
+            />
+          </div>
+        ) : null}
         <WrittenResponseEditor
           lessonId={lessonId}
           existingSubmission={serialized}

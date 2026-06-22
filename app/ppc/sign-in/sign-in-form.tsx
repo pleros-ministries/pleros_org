@@ -192,19 +192,11 @@ export function SignInForm({ returnTo }: SignInFormProps) {
       <p className="mt-4 text-center text-[11px] text-zinc-500">
         No account?{" "}
         <Link
-          href={`/ppc/sign-up${returnTo !== "/" ? `?returnTo=${encodeURIComponent(returnTo)}` : ""}`}
+          href={`/ppc/signup${returnTo !== "/" ? `?returnTo=${encodeURIComponent(returnTo)}` : ""}`}
           className="font-medium text-zinc-900 underline-offset-2 hover:underline"
         >
           Sign up
         </Link>
-      </p>
-
-      <p className="mt-2 text-center text-[11px] text-zinc-400">
-        Staff access uses{" "}
-        <Link href="/admin" className="underline underline-offset-2">
-          /admin
-        </Link>
-        .
       </p>
     </>
   );

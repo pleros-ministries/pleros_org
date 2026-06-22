@@ -21,11 +21,11 @@ import {
 import { HomepageCommunitySection } from "./homepage-community-section";
 import { HomepageFooter } from "./homepage-footer";
 import { HomepageNav } from "./homepage-nav";
+import { PublicSitePageShell } from "./public-site-page-shell";
 
 export function FulfillPageView() {
   return (
-    <div className="bg-[#f3f7fb] px-0 md:px-6 md:py-6">
-      <div className="mx-auto w-full max-w-[36.1875rem] overflow-hidden bg-[var(--color-bg)] md:max-w-[48rem] xl:max-w-[67rem]">
+    <PublicSitePageShell>
         <HomepageNav />
 
         <section className="relative overflow-hidden bg-[var(--fulfil-surface)]">
@@ -45,7 +45,7 @@ export function FulfillPageView() {
               {fulfillPageIntro.title}
             </h2>
 
-            <p className="text-[1rem] leading-[1.48] tracking-[-0.02em] text-[var(--color-text-strong)] md:text-[1.125rem]">
+            <p className="site-section-intro text-[var(--color-text-strong)]">
               {fulfillPageIntro.description}
             </p>
           </div>
@@ -56,7 +56,7 @@ export function FulfillPageView() {
             <div className="grid gap-2 text-center">
               <p className="site-hero-eyebrow justify-center">Start PPC</p>
               <h2 className="site-section-heading">What happens when you start</h2>
-              <p className="mx-auto max-w-[34rem] text-[1rem] leading-[1.48] tracking-[-0.02em] text-[var(--color-text-muted)] md:text-[1.0625rem]">
+              <p className="site-section-intro mx-auto max-w-[34rem] text-[var(--color-text-muted)]">
                 PPC is built for ordered growth through teaching, notes,
                 response, and steady progress.
               </p>
@@ -98,7 +98,7 @@ export function FulfillPageView() {
               <h2 className="site-section-heading">
                 PPC moves through three levels
               </h2>
-              <p className="mx-auto max-w-[34rem] text-[1rem] leading-[1.48] tracking-[-0.02em] text-[var(--color-text-muted)] md:text-[1.0625rem]">
+              <p className="site-section-intro mx-auto max-w-[34rem] text-[var(--color-text-muted)]">
                 Each level carries its own focus and modules, helping you grow
                 with clarity and order.
               </p>
@@ -171,7 +171,7 @@ export function FulfillPageView() {
             <h2 className="site-section-heading text-white">
               {fulfillPageCta.title}
             </h2>
-            <p className="mx-auto max-w-[30rem] text-[1rem] leading-[1.5] tracking-[-0.02em] text-white/84 md:text-[1.125rem]">
+            <p className="site-section-intro mx-auto max-w-[30rem] text-white/84">
               {fulfillPageCta.description}
             </p>
 
@@ -189,7 +189,6 @@ export function FulfillPageView() {
 
         <HomepageCommunitySection />
         <HomepageFooter />
-      </div>
-    </div>
+    </PublicSitePageShell>
   );
 }

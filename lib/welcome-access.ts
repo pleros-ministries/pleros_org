@@ -1,9 +1,11 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
 import { normalizeEmail } from "./welcome-flow";
-
-export const WELCOME_ACCESS_COOKIE_NAME = "pleros_welcome_access";
-export const WELCOME_ACCESS_MAX_AGE = 60 * 60 * 24 * 7;
+export {
+  getWelcomeAccessCookieOptions,
+  WELCOME_ACCESS_COOKIE_NAME,
+  WELCOME_ACCESS_MAX_AGE,
+} from "./welcome-access-cookie";
 
 export type WelcomeAccessPayload = {
   email: string;

@@ -23,49 +23,55 @@ describe("ppc shell helpers", () => {
         label: "Dashboard",
         path: "/",
         icon: "dashboard",
-        roles: ["admin", "instructor"],
+        roles: ["super_admin", "admin", "instructor"],
       },
       {
         label: "Platform",
         path: "/platform",
         icon: "admin",
-        roles: ["admin"],
+        roles: ["super_admin", "admin"],
       },
       {
         label: "Content",
         path: "/content",
         icon: "content",
-        roles: ["admin"],
+        roles: ["super_admin", "admin"],
+      },
+      {
+        label: "Staff",
+        path: "/staff",
+        icon: "staff",
+        roles: ["super_admin"],
       },
       {
         label: "Students",
         path: "/students",
         icon: "students",
-        roles: ["admin", "instructor"],
+        roles: ["super_admin", "admin", "instructor"],
       },
       {
         label: "Review queue",
         path: "/review",
         icon: "review",
-        roles: ["admin", "instructor"],
+        roles: ["super_admin", "admin", "instructor"],
       },
       {
         label: "Q&A inbox",
         path: "/qa",
         icon: "qa",
-        roles: ["admin", "instructor"],
+        roles: ["super_admin", "admin", "instructor"],
       },
       {
         label: "Contact",
         path: "/contact",
         icon: "contact",
-        roles: ["admin", "instructor"],
+        roles: ["super_admin", "admin", "instructor"],
       },
       {
         label: "Notifications",
         path: "/notifications",
         icon: "notifications",
-        roles: ["admin", "instructor"],
+        roles: ["super_admin", "admin", "instructor"],
       },
       {
         label: "My learning",
@@ -77,6 +83,19 @@ describe("ppc shell helpers", () => {
   });
 
   test("filters nav items by role", () => {
+    expect(
+      getVisiblePpcShellNavItems("super_admin").map((item) => item.path),
+    ).toEqual([
+      "/",
+      "/platform",
+      "/content",
+      "/staff",
+      "/students",
+      "/review",
+      "/qa",
+      "/contact",
+      "/notifications",
+    ]);
     expect(getVisiblePpcShellNavItems("admin").map((item) => item.path)).toEqual([
       "/",
       "/platform",
@@ -138,6 +157,10 @@ describe("ppc shell helpers", () => {
     expect(getPpcShellContext("/content")).toEqual({
       label: "Content CMS",
       description: "Lessons, notes, audio, and quizzes",
+    });
+    expect(getPpcShellContext("/staff")).toEqual({
+      label: "Staff access",
+      description: "Invites, roles, and account onboarding",
     });
   });
 
