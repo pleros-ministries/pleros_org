@@ -4,7 +4,6 @@ import Link from "next/link";
 import { HomepageFooter } from "./homepage-footer";
 import { HomepageGiftDrawer } from "./homepage-gift-drawer";
 import { HomepageNav } from "./homepage-nav";
-import { PublicSitePageShell } from "./public-site-page-shell";
 
 type WelcomeLandingPageProps = {
   hasWelcomeAccess: boolean;
@@ -14,17 +13,18 @@ export function WelcomeLandingPage({
   hasWelcomeAccess,
 }: WelcomeLandingPageProps) {
   return (
-    <PublicSitePageShell minHeight>
+    <div className="bg-[#f3f7fb] px-0 md:px-6 md:py-6">
+      <div className="mx-auto min-h-screen w-full max-w-[36.1875rem] overflow-hidden bg-[var(--color-bg)]">
         <HomepageNav />
 
         <main>
           <section className="bg-[var(--color-brand-sky)] px-6 pb-12 pt-10">
             <div className="grid gap-8">
               <div className="grid gap-5">
-                <p className="font-[var(--font-be-vietnam-pro)] text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[var(--color-brand-blue)]">
+                {/* <p className="font-[var(--font-be-vietnam-pro)] text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[var(--color-brand-blue)]">
                   Free Pleros resource
-                </p>
-                <h1 className="site-hero-heading max-w-[10ch] text-[clamp(2.35rem,6vw,3.25rem)] text-[var(--color-brand-blue)]">
+                </p> */}
+                <h1 className="site-hero-heading  text-[clamp(2.35rem,6vw,3.25rem)] text-[var(--color-brand-blue)]">
                   Find the Answer to the Most Important Question of Your Life
                 </h1>
                 <p className="max-w-[30ch] font-[var(--font-be-vietnam-pro)] text-[1rem] leading-[1.42] tracking-[-0.02em] text-[rgba(6,16,86,0.72)]">
@@ -49,35 +49,39 @@ export function WelcomeLandingPage({
                     triggerLabel="Get your free book"
                     submitLabel="Get your free book"
                     pendingLabel="Opening your gift"
-                    source="welcome"
                   />
                 )}
 
 
-                <div className="grid gap-2 border-t border-[rgba(6,16,86,0.14)] pt-5">
-                  <h1 className="site-hero-heading  text-3xl text-[var(--color-brand-blue)]">
-                    Why You Should Get this Book Now:
-                  </h1>
-                  {[
-                    "Clear, Direct, Straightforward and Zero Fluff or Time wasting.",
-                    "Just 15 pages of clarity, conviction and practical insight in God's Word",
-                    "Limited Opportunity to have early access to two material for free (Why You Should not be afraid of Hell and How the Gospel proves itself to be the Truth)",
-                  ].map((item) => (
-                    <div
-                      key={item}
-                      className="flex items-center gap-2 font-[var(--font-be-vietnam-pro)] text-[0.86rem] font-medium leading-[1.3] tracking-[-0.02em] text-[rgba(6,16,86,0.76)]"
-                    >
-                      <CheckCircle2Icon className="size-4 shrink-0 text-[var(--color-brand-blue)]" />
-                      <span>{item}</span>
-                    </div>
-                  ))}
-                </div>
+
               </div>
             </div>
           </section>
 
-          {/* Sneak Peek Section */}
           <section className="bg-white px-6 py-10">
+            <div className="grid gap-2 border-t border-[rgba(6,16,86,0.14)] pt-5">
+              <h1 className="site-hero-heading  text-3xl text-[var(--color-brand-blue)]">
+                Why You Should Get this Book Now:
+              </h1>
+              {[
+                "Clear, Direct, Straightforward and Zero Fluff or Time wasting.",
+                "Just 15 pages of clarity, conviction and practical insight in God's Word",
+                "Limited Opportunity to have early access to two material for free (Why You Should not be afraid of Hell and How the Gospel proves itself to be the Truth)",
+              ].map((item) => (
+                <div
+                  key={item}
+                  className="flex items-center gap-2 font-[var(--font-be-vietnam-pro)] text-[0.86rem] font-medium leading-[1.3] tracking-[-0.02em] text-[rgba(6,16,86,0.76)]"
+                >
+                  <CheckCircle2Icon className="size-4 shrink-0 text-[var(--color-brand-blue)]" />
+                  <span>{item}</span>
+                </div>
+              ))}
+            </div>
+
+          </section>
+
+          {/* Sneak Peek Section */}
+          <section className="bg-[var(--color-brand-sky)] px-6 py-10">
             <div className="grid gap-8">
               <div className="grid gap-2">
                 <p className="font-[var(--font-be-vietnam-pro)] text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[var(--color-brand-blue)]">
@@ -132,6 +136,13 @@ export function WelcomeLandingPage({
               </div>
 
             </div>
+
+
+
+          </section>
+
+          <section className="bg-white px-6 py-10">
+
             <div className="grid gap-5 py-10">
 
               <h1 className="site-hero-heading max-w-[10ch] text-[clamp(2.35rem,6vw,3.25rem)] text-[var(--color-brand-blue)]">
@@ -159,13 +170,12 @@ export function WelcomeLandingPage({
               )}
 
             </div>
-
-
           </section>
 
         </main>
 
         <HomepageFooter />
-    </PublicSitePageShell>
+      </div>
+    </div>
   );
 }
