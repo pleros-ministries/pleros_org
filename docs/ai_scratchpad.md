@@ -620,3 +620,20 @@
 
 ### Action Rule
 - For PPC CMS state summaries, add tested pure helpers in `lib/ppc-content-cms.ts` before wiring JSX copy or disabled states.
+
+## [2026-06-23] Public dashboard access
+
+### Mistake
+- The public `/dashboard` route was still treated as gated by the welcome/book access flow.
+
+### Correction
+- User wanted direct navigation to `/dashboard` to work without first going through `/welcome`.
+
+### Lesson
+- The general dashboard and the welcome-pack gift page have different access needs.
+
+### Preference
+- `/dashboard` should be directly viewable; `/dashboard/welcomepack` can remain session/welcome-cookie aware for gift state.
+
+### Action Rule
+- For future welcome funnel changes, do not add a layout-level `/dashboard` redirect to `/welcome`; gate only the specific pages that need lead/session state.
