@@ -20,7 +20,7 @@ export function HomepageSocialSection({ posts }: HomepageSocialSectionProps) {
       <div className="grid gap-[1.8125rem]">
         <div className="grid justify-items-center gap-[0.94rem] text-center lg:justify-items-start lg:text-left">
           <h2 className="site-section-heading max-w-[30.9375rem] lg:max-w-none">
-            Watch Our Latest Shorts on Purpose and Gospel Answers
+            Watch our latest Shorts on purpose and Gospel answers
           </h2>
           <Link
             href={homeYoutubeChannelUrl}
@@ -97,8 +97,8 @@ export function HomepageSocialSection({ posts }: HomepageSocialSectionProps) {
           </div>
         ) : (
           <div className="rounded-[1.125rem] border border-[rgba(6,16,86,0.08)] bg-[rgba(6,16,86,0.04)] px-4 py-5 text-[0.95rem] leading-[1.45] tracking-[-0.02em] text-[rgba(6,16,86,0.72)]">
-            Instagram posts are temporarily unavailable. Use the button above to
-            open the full profile.
+            Shorts are temporarily unavailable. Use the button above to open
+            the full channel.
           </div>
         )}
       </div>

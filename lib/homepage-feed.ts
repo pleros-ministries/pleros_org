@@ -261,7 +261,7 @@ export async function getLatestYoutubeVideos(limit = 5): Promise<YoutubeEpisode[
   const apiKey = process.env.YOUTUBE_API_KEY;
 
   if (!apiKey) {
-    // Fallback: RSS-based (limited to 15 items)
+    // RSS does not include duration, so do not render ordinary uploads as Shorts.
     return getLatestYoutubeVideosFallback(limit);
   }
 
@@ -283,7 +283,7 @@ export async function getLatestYoutubeVideos(limit = 5): Promise<YoutubeEpisode[
       .map((item) => item.snippet.resourceId.videoId)
       .join(",");
 
-    // Step 2: Batch fetch video durations to identify Shorts (≤ 60 seconds)
+    // Step 2: Batch fetch video durations to identify Shorts.
     const videosUrl =
       `${YOUTUBE_API_BASE}/videos` +
       `?part=contentDetails,snippet&id=${videoIds}&key=${apiKey}`;
@@ -356,7 +356,13 @@ async function getLatestYoutubeVideosFallback(limit: number): Promise<YoutubeEpi
 
       if (!id || !title || !publishedAt || !thumbnailUrl) continue;
 
-      videos.push({ id, title, href, thumbnailUrl, publishedAt });
+      videos.push({
+        id,
+        title,
+        href,
+        thumbnailUrl,
+        publishedAt,
+      });
     }
 
     return videos;

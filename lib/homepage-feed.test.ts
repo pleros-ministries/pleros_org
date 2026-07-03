@@ -3,12 +3,14 @@ import { afterEach, describe, expect, test, vi } from "vitest";
 import {
   getLatestInstagramPosts,
   getLatestInstagramPostsWithDiagnostics,
+  getLatestYoutubeVideos,
   mapInstagramProfileEdgesToPosts,
 } from "./homepage-feed";
 
 describe("homepage feed", () => {
   afterEach(() => {
     vi.restoreAllMocks();
+    vi.unstubAllEnvs();
   });
 
   test("keeps only reels when mapping instagram profile media", () => {
@@ -180,5 +182,86 @@ describe("homepage feed", () => {
         cache: "no-store",
       }),
     );
+  });
+
+  test("filters YouTube API results to short videos only", async () => {
+    vi.stubEnv("YOUTUBE_API_KEY", "test-key");
+    vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          items: [
+            {
+              snippet: {
+                resourceId: { videoId: "short-video" },
+              },
+            },
+            {
+              snippet: {
+                resourceId: { videoId: "long-video" },
+              },
+            },
+          ],
+        }),
+      } as Response)
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          items: [
+            {
+              id: "short-video",
+              snippet: {
+                title: "A short teaching clip",
+                publishedAt: "2026-07-03T05:01:17+00:00",
+                thumbnails: {
+                  high: { url: "https://example.com/short.jpg" },
+                },
+              },
+              contentDetails: { duration: "PT45S" },
+            },
+            {
+              id: "long-video",
+              snippet: {
+                title: "A full teaching episode",
+                publishedAt: "2026-07-02T05:01:17+00:00",
+                thumbnails: {
+                  high: { url: "https://example.com/long.jpg" },
+                },
+              },
+              contentDetails: { duration: "PT22M" },
+            },
+          ],
+        }),
+      } as Response);
+
+    await expect(getLatestYoutubeVideos(5)).resolves.toEqual([
+      {
+        id: "short-video",
+        title: "A short teaching clip",
+        href: "https://www.youtube.com/shorts/short-video",
+        thumbnailUrl: "https://example.com/short.jpg",
+        publishedAt: "2026-07-03T05:01:17+00:00",
+      },
+    ]);
+  });
+
+  test("does not render normal YouTube watch URLs as Shorts in the RSS fallback", async () => {
+    vi.stubEnv("YOUTUBE_API_KEY", "");
+    vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      text: async () => `
+        <feed>
+          <entry>
+            <yt:videoId>deNcj4iR7Ok</yt:videoId>
+            <title>Our Righteous Nature in Christ (Part 17)</title>
+            <link rel="alternate" href="https://www.youtube.com/watch?v=deNcj4iR7Ok"/>
+            <published>2026-07-03T05:01:17+00:00</published>
+            <media:thumbnail url="https://i1.ytimg.com/vi/deNcj4iR7Ok/hqdefault.jpg"/>
+          </entry>
+        </feed>
+      `,
+    } as Response);
+
+    await expect(getLatestYoutubeVideos(5)).resolves.toEqual([]);
   });
 });

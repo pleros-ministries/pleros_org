@@ -230,6 +230,23 @@
 ### Preference
 - Preserve the current Pleros Podcast page presentation unless asked for a specific implementation fix.
 
+## [2026-07-03] Session Note
+
+### Mistake
+- Treated the homepage recent media section as YouTube-ready without catching leftover Instagram empty-state copy and a no-key RSS fallback that filtered out normal YouTube watch links.
+
+### Correction
+- The user showed the empty-state screenshot, revealing that the component still displayed Instagram fallback text even though the section was meant for YouTube videos.
+
+### Lesson
+- When repurposing a feed component across platforms, verify both the data fallback path and the empty/loading copy, not just the happy-path cards.
+
+### Preference (if any)
+- Recent media surfaces should accurately describe YouTube Shorts and avoid stale Instagram wording.
+
+### Action Rule
+- For YouTube Shorts feed work, test the no-API-key RSS path and do not render ordinary uploads as Shorts.
+
 ## [2026-06-09] Revert requests
 
 ### Mistake
