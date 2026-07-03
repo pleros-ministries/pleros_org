@@ -59,14 +59,14 @@ function TeachingRow({
     >
       {/* S/N */}
       <td
-        className={`w-12 px-3 text-center text-[12px] font-[500] tabular-nums ${isActive ? "text-white/40" : "text-[#8888a0]"
+        className={`w-8 px-1.5 text-center text-[12px] font-[500] tabular-nums md:w-12 md:px-3 ${isActive ? "text-white/40" : "text-[#8888a0]"
           }`}
       >
         {teaching.sn}
       </td>
 
       {/* Teaching: play button + title */}
-      <td className="px-3 py-3">
+      <td className="px-2 py-3 md:px-3">
         <div className="flex items-center gap-2.5">
           <button
             type="button"
@@ -79,9 +79,9 @@ function TeachingRow({
             }}
             disabled={!canPlay}
             className={`row-play flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-all ${isActive
-                ? "bg-[#60a5fa] text-white opacity-100"
+                ? "bg-white text-[var(--color-brand-blue)] shadow-[0_0_0_1px_rgba(255,255,255,0.28)]"
                 : canPlay
-                  ? "bg-[#2563eb] text-white opacity-50 group-hover:opacity-100"
+                  ? "bg-[var(--color-brand-blue)] text-white hover:bg-[var(--color-brand-blue-hover)] group-hover:scale-105"
                   : "cursor-not-allowed bg-[#e8e8ee] text-[#8888a0] opacity-30"
               }`}
           >
@@ -98,7 +98,7 @@ function TeachingRow({
             )}
           </button>
           <span
-            className={`font-[var(--font-sen)] text-[13px] font-[600] leading-snug ${isActive ? "text-white" : "text-[#111118]"
+            className={`font-[var(--font-sen)] text-[13px] font-[600] leading-[1.2] ${isActive ? "text-white" : "text-[#111118]"
               }`}
           >
             {teaching.title}
@@ -137,8 +137,8 @@ function TeachingRow({
             download={`${teaching.title}.mp3`}
             aria-label={`Download ${teaching.title}`}
             className={`inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border-[1.5px] p-1.5 text-[11px] font-[600] transition-all md:px-3 md:py-1.5 ${isActive
-                ? "border-white/20 text-white/50 hover:border-[#60a5fa] hover:text-[#60a5fa]"
-                : "border-[#d4d4de] text-[#444450] hover:border-[var(--color-brand-blue)] hover:bg-[var(--color-brand-sky-soft)] hover:text-[var(--color-brand-blue)]"
+                ? "border-white/35 bg-white/10 text-white hover:border-white hover:bg-white/15"
+                : "border-[rgba(1,21,133,0.22)] bg-white text-[var(--color-brand-blue)] hover:border-[var(--color-brand-blue)] hover:bg-[var(--color-brand-sky-soft)]"
               }`}
           >
             <DownloadIcon className="h-[11px] w-[11px] shrink-0" />
@@ -302,15 +302,15 @@ export function LibraryTable({ teachings }: Props) {
             <thead>
               <tr className="border-b-2 border-[#d4d4de]">
                 {[
-                  { label: "#", cls: "w-12 text-center" },
-                  { label: "Teaching", cls: "" },
-                  { label: "Series", cls: "w-40 hidden md:table-cell" },
-                  { label: "Year", cls: "w-[68px] text-center hidden md:table-cell" },
-                  { label: "", cls: "w-11 text-right md:w-[120px]" },
+                  { label: "#", cls: "w-8 px-1.5 text-center md:w-12 md:px-3" },
+                  { label: "Teaching", cls: "px-2 md:px-3" },
+                  { label: "Series", cls: "hidden w-40 px-3 md:table-cell" },
+                  { label: "Year", cls: "hidden w-[68px] px-3 text-center md:table-cell" },
+                  { label: "", cls: "w-11 px-1.5 text-right md:w-[120px] md:px-3" },
                 ].map(({ label, cls }, i) => (
                   <th
                     key={i}
-                    className={`bg-[#f9f9fb] px-3 py-3.5 font-[var(--font-sen)] text-[10px] font-[700] uppercase tracking-[1.5px] text-[#8888a0] ${cls}`}
+                    className={`bg-[#f9f9fb] py-3.5 font-[var(--font-sen)] text-[10px] font-[700] uppercase tracking-[1.5px] text-[#8888a0] ${cls}`}
                   >
                     {label}
                   </th>
