@@ -692,6 +692,42 @@
 ## [2026-07-03] Session Note
 
 ### Mistake
+- Library row action buttons used faded opacity and gray affordances, making available actions look disabled.
+
+### Correction
+- User flagged the Play button color as too faded.
+
+### Lesson
+- Available media controls should use strong brand-color contrast; reserve faded opacity for disabled states only.
+
+### Preference (if any)
+- Library play/download controls should feel clearly actionable, not pale or washed out, and should avoid added shadows.
+
+### Action Rule
+- For public library controls, use solid brand blue for playable actions, avoid decorative shadows, and keep muted styles only for unavailable audio.
+
+## [2026-07-03] Session Note
+
+### Mistake
+- The public library table gave the serial-number column too much horizontal room on mobile.
+
+### Correction
+- User flagged the number column as taking too much horizontal space.
+
+### Lesson
+- On narrow public library layouts, preserve space for the teaching title and controls by keeping utility columns compact.
+
+### Preference (if any)
+- Mobile library rows should prioritize the teaching title; number columns should be tight.
+- Multi-line teaching titles need a little breathing room rather than very tight line-height.
+
+### Action Rule
+- For mobile library tables, keep serial-number headers and cells around `w-8` with minimal horizontal padding, using wider sizing only at desktop breakpoints.
+- Use a slightly open line-height such as `leading-[1.2]` for library teaching titles.
+
+## [2026-07-03] Session Note
+
+### Mistake
 - Treated the church card SVG as if the whole header should inherit the bottom color.
 
 ### Correction
