@@ -13,6 +13,7 @@ import {
   partnerPageCta,
   partnerPageHero,
   partnerReasons,
+  partnerWhatsappHref,
 } from "@/lib/partner-page-content";
 
 import { HomepageCommunitySection } from "./homepage-community-section";
@@ -71,7 +72,12 @@ export function PartnerPageView() {
             <Button
               size="lg"
               render={
-                <Link href="#become-a-partner" className="site-button-text" />
+                <Link
+                  href={partnerWhatsappHref}
+                  className="site-button-text"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                />
               }
               className="min-w-[12.875rem] rounded-full px-7 text-[0.875rem] font-semibold uppercase tracking-[0.02em]"
             >
@@ -155,7 +161,14 @@ export function PartnerPageView() {
                 <div className="flex justify-center">
                   <Button
                     size="lg"
-                    render={<Link href="#" className="site-button-text" />}
+                    render={
+                      <Link
+                        href={partnerWhatsappHref}
+                        className="site-button-text"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      />
+                    }
                     className="min-w-[12.875rem] rounded-full px-7 text-[0.875rem] font-semibold uppercase tracking-[0.02em]"
                   >
                     {partnerPageCta.ctaLabel}

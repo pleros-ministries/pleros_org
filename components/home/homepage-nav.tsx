@@ -62,7 +62,7 @@ export function HomepageNav() {
                 <button
                   type="button"
                   aria-label="Open menu"
-                  className="inline-flex h-9 w-9 items-center justify-center text-white transition-opacity duration-150 hover:opacity-80 md:h-10 md:w-10"
+                  className="-mr-2 inline-flex h-9 w-9 items-center justify-center text-white transition-opacity duration-150 hover:opacity-80 md:-mr-1 md:h-10 md:w-10"
                 />
               }
             >

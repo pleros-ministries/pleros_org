@@ -28,8 +28,10 @@ describe("partner page", () => {
     expect(viewSource).toContain("md:grid-cols-2");
     expect(contentSource).toContain("Advance the Gospel");
     expect(contentSource).toContain("Raise Disciples");
-    expect(contentSource).toContain("Transform Communities");
-    expect(contentSource).toContain("Expand Kingdom Impact");
+    expect(contentSource).toContain("Extend the Influence of Truth");
+    expect(contentSource).not.toContain("Transform Communities");
+    expect(contentSource).not.toContain("Leadership Training");
+    expect(contentSource).toContain("partnerWhatsappHref");
     expect(contentSource).toContain("Become a partner today");
   });
 });
