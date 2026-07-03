@@ -34,7 +34,7 @@ export function HomepagePodcastSection({
             Stay Full of God&apos;s Word with the Pleros Podcast
           </h2>
           <p className="site-section-intro max-w-[24.1875rem] text-[var(--color-text)]">
-            Your 15-minute dose of truth—wherever you listen.
+            Your 15-minute dose of transformation, wherever you listen
           </p>
           <Link
             href={homePodcastUrl}

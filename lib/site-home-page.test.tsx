@@ -29,6 +29,28 @@ describe("site home page", () => {
     expect(source).toContain("bg-white");
   });
 
+  test("keeps homepage carousel autoplay from moving the page scroll position", () => {
+    const source = readFileSync(
+      join(process.cwd(), "components", "home", "homepage-carousel.tsx"),
+      "utf8",
+    );
+
+    expect(source).not.toContain("scrollIntoView");
+    expect(source).not.toContain("scrollTo");
+    expect(source).toContain("translateX(-${activeIndex * 100}%)");
+  });
+
+  test("supports swipe gestures on the homepage carousel", () => {
+    const source = readFileSync(
+      join(process.cwd(), "components", "home", "homepage-carousel.tsx"),
+      "utf8",
+    );
+
+    expect(source).toContain("onTouchStart");
+    expect(source).toContain("onTouchEnd");
+    expect(source).toContain("SWIPE_THRESHOLD_PX");
+  });
+
   test("uses Sen explicitly for pathway card titles", () => {
     const globalsSource = readFileSync(
       join(process.cwd(), "app", "globals.css"),
@@ -75,7 +97,7 @@ describe("site home page", () => {
     expect(cardSource).toContain("h-[45%]");
     expect(cardSource).toContain("headerImageSrc");
     expect(contentSource).toContain(
-      'headerImageSrc: "/site/home/assets/pathway-card-headers/questions-thumbnail.png"',
+      'headerImageSrc: "/site/home/assets/pathway-card-headers/question-card-header.png"',
     );
     expect(cardSource).toContain("px-2 pb-1.5 pt-1");
     expect(cardSource).toContain("font-medium");

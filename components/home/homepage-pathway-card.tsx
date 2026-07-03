@@ -22,13 +22,13 @@ export function HomepagePathwayCard({
     <Link href={href} className="group block min-w-0">
       <Card
         className={cn(
-          "relative flex h-[12rem] flex-col gap-0 overflow-hidden rounded-[10.6px] border-0 p-0 shadow-none",
+          "relative flex h-auto flex-col gap-0 overflow-hidden rounded-[10.6px] border-0 p-0 shadow-none",
           surfaceClassName,
         )}
       >
         <div
           className={cn(
-            "relative flex h-[45%] shrink-0 items-center justify-center",
+            "relative flex aspect-[324/164] w-full shrink-0 items-center justify-center",
             headerImageSrc && !headerPrompt ? "px-0" : "px-2.5",
             headerClassName,
           )}
@@ -45,20 +45,13 @@ export function HomepagePathwayCard({
           ) : null}
 
           {headerImageSrc ? (
-            <>
-              <Image
-                src={headerImageSrc}
-                alt=""
-                fill
-                className={headerImageClassName ?? "p-2"}
-                sizes="(max-width: 767px) 50vw, 249px"
-
-              />
-              <div
-                className="pointer-events-none absolute inset-0 bg-black/12"
-                aria-hidden="true"
-              />
-            </>
+            <Image
+              src={headerImageSrc}
+              alt=""
+              fill
+              className={headerImageClassName ?? "p-2"}
+              sizes="(max-width: 767px) 50vw, 249px"
+            />
           ) : null}
 
           {wordmarkImageSrc ? (
@@ -74,12 +67,12 @@ export function HomepagePathwayCard({
           ) : null}
         </div>
 
-        <CardContent className="flex flex-1 flex-col justify-center gap-1 px-2 pb-1.5 pt-1 text-white sm:px-3 sm:pb-2 sm:pt-1.5">
+        <CardContent className="flex h-[4.65rem] flex-col justify-center px-3 py-1.5 text-white sm:h-[4.9rem] sm:px-3.5">
           <div className="grid gap-1">
-            <h2 className="site-pathway-title text-[1.05rem] leading-[0.98] tracking-[-0.02em] sm:text-[1.15rem]">
+            <h2 className="site-pathway-title text-[0.98rem] leading-[0.96] tracking-[-0.02em] sm:text-[1.08rem]">
               {title}
             </h2>
-            <p className="text-[0.72rem] leading-[1.2] font-medium tracking-[-0.018em] text-white/92 sm:text-[0.8rem]">
+            <p className="text-[0.68rem] leading-[1.15] font-medium tracking-[-0.018em] text-white/92 sm:text-[0.76rem]">
               {mobileDescription ?? description}
             </p>
           </div>

@@ -671,3 +671,20 @@
 
 ### Action Rule
 - For future `/dashboard` changes, keep the layout-level gate and use the welcome cookie only as a bootstrap fallback into a real session.
+
+## [2026-07-03] Carousel autoplay scroll hijack
+
+### Mistake
+- Used `scrollIntoView` for homepage carousel autoplay, which could move the main page scroll position when the slide advanced.
+
+### Correction
+- Carousel autoplay should change slide state/visual position without invoking page-scrolling browser APIs.
+
+### Lesson
+- `scrollIntoView({ block: "nearest" })` can still affect document scroll; use transform/state-driven slide movement for hero autoplay where page position must remain stable.
+
+### Preference
+- Homepage carousel auto-advance must not hijack the visitor's scroll position.
+
+### Action Rule
+- For future carousel work, avoid `scrollIntoView` in autoplay paths and add regression coverage against page-scroll APIs.
