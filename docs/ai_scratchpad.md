@@ -688,3 +688,20 @@
 
 ### Action Rule
 - For future carousel work, avoid `scrollIntoView` in autoplay paths and add regression coverage against page-scroll APIs.
+
+## [2026-07-03] Session Note
+
+### Mistake
+- Treated the church card SVG as if the whole header should inherit the bottom color.
+
+### Correction
+- The SVG logo should be colored, but it should sit inside a white card header.
+
+### Lesson
+- Separate asset foreground color from card header surface color when applying brand colors.
+
+### Preference
+- Card header artwork can be brand-colored while the header background remains white for clarity.
+
+### Action Rule
+- For logo/header asset swaps, preserve the intended card surface and only recolor the SVG foreground paths unless the user explicitly asks to recolor the header background.

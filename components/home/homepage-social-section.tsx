@@ -20,7 +20,7 @@ export function HomepageSocialSection({ posts }: HomepageSocialSectionProps) {
       <div className="grid gap-[1.8125rem]">
         <div className="grid justify-items-center gap-[0.94rem] text-center lg:justify-items-start lg:text-left">
           <h2 className="site-section-heading max-w-[30.9375rem] lg:max-w-none">
-            Watch our latest Shorts on purpose and Gospel answers
+            Watch our latest shorts on Purpose and Gospel answers
           </h2>
           <Link
             href={homeYoutubeChannelUrl}
