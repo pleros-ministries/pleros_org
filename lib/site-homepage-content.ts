@@ -99,16 +99,16 @@ export const homeFooterNavGroups: HomeNavGroup[] = homeDesktopNavGroups.map(
   (group) =>
     group.label === "Pathways"
       ? {
-          ...group,
-          links: [
-            { href: "/dashboard", label: "Your Dashboard" },
-            ...group.links.map((link) =>
-              link.href === "/questions"
-                ? { ...link, label: "Find Answers" }
-                : link,
-            ),
-          ],
-        }
+        ...group,
+        links: [
+          { href: "/dashboard", label: "Your Dashboard" },
+          ...group.links.map((link) =>
+            link.href === "/questions"
+              ? { ...link, label: "Find Answers" }
+              : link,
+          ),
+        ],
+      }
       : group,
 );
 
@@ -155,11 +155,11 @@ export const homePathwayCards: HomePathwayCard[] = [
     description: "Fellowship with us at any our branches nationwide",
     mobileDescription: "Fellowship with us at any our branches nationwide",
     href: "/about",
-    headerImageSrc: "/site/home/assets/church-pathway/church-logo-card.png",
+    headerImageSrc: "/site/home/assets/Blue-Fullness Logo.svg",
     headerImageClassName: "object-cover object-center",
     arrowImageSrc: "/site/home/assets/card-arrows/church-card-arrow.svg",
     surfaceClassName: "bg-[#223583] text-white",
-    headerClassName: "bg-[#15349B]",
+    headerClassName: "bg-white",
   },
 ];
 

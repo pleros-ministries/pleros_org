@@ -21,11 +21,11 @@ export function HomepageCommunitySection() {
         <div className="grid gap-[3.8125rem]">
           <div className="grid justify-items-center gap-[0.8125rem]">
             <h2 className="site-section-heading max-w-[33.5625rem] text-white">
-              Join the Pleros Community Channel on WhatsApp
+              Join Pleros Community Channel
             </h2>
             <p className="site-section-intro max-w-[28.125rem] text-white/90">
-              Set your prayer life on fire as you join other accountable
-              believers to pray daily
+              This is a community open to anyone who desires edification via platforms of the Word and prayer designed to help you walk in and fulfill God's purpose daily.
+
             </p>
           </div>
 

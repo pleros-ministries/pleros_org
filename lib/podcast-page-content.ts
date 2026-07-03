@@ -16,7 +16,7 @@ export const podcastPageHero = {
 
 export const podcastFeaturedSection = {
   eyebrow: "Featured teaching",
-  title: "Start with the latest teaching",
+  title: "Your 15-minute dose of transformation, wherever you listen",
   description:
     "Listen to the most recent episode, then move through the podcast sub-series from their starting teachings.",
   fallbackTitle: "Open the Pleros Podcast to hear the latest episode",

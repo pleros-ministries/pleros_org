@@ -1,5 +1,5 @@
 export const welcomePackModalCopy = {
   headline: "We have a special gift for you",
   subheadline:
-    "Get our free life-changing booklet to discover and fulfill God's purpose for your life.",
+    "Find out precisely what God's purpose for your life is and how to fulfill it",
 } as const;
