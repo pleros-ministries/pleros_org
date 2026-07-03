@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -80,16 +79,11 @@ export function HomepageCarousel({ slides }: HomepageCarouselProps) {
           <Link
             key={slide.id}
             href={slide.href}
-            className="relative aspect-[11/6] w-full shrink-0 snap-center overflow-hidden rounded-[1rem] transition-transform duration-150 hover:-translate-y-px"
+            className="flex w-full shrink-0 snap-center items-center justify-center px-4 text-center transition-transform duration-150 hover:-translate-y-px sm:py-1 lg:py-2"
           >
-            <Image
-              src={slide.imageSrc}
-              alt={slide.alt}
-              fill
-              className="object-cover"
-              sizes="(max-width: 1023px) 100vw, 30vw"
-              priority={false}
-            />
+            <p className="site-hero-heading max-w-[26rem] text-[var(--color-brand-blue)]">
+              {slide.text}
+            </p>
           </Link>
         ))}
       </div>

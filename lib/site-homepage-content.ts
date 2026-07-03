@@ -26,8 +26,7 @@ export type HomePathwayCard = {
 
 export type HomeCarouselSlide = {
   id: string;
-  imageSrc: string;
-  alt: string;
+  text: string;
   href: string;
 };
 
@@ -173,26 +172,22 @@ export const homePathwayCards: HomePathwayCard[] = [
 export const homeCarouselSlides: HomeCarouselSlide[] = [
   {
     id: "how-to-fulfil-gods-purpose",
-    imageSrc: "/site/home/assets/homepage-carousel/how-to-fulfil-gods-purpose.png",
-    alt: "How to Fulfil God's Purpose",
+    text: "How to Fulfil God's Purpose",
     href: "/fulfill",
   },
   {
     id: "who-you-are-in-christ",
-    imageSrc: "/site/home/assets/homepage-carousel/who-you-are-in-christ.png",
-    alt: "Who You Are in Christ",
+    text: "Who You Are in Christ",
     href: "/questions",
   },
   {
     id: "the-truth-of-your-existence",
-    imageSrc: "/site/home/assets/homepage-carousel/the-truth-of-your-existence.png",
-    alt: "The Truth of Your Existence",
+    text: "The Truth of Your Existence",
     href: "/purpose",
   },
   {
     id: "what-gods-purpose-is",
-    imageSrc: "/site/home/assets/homepage-carousel/what-gods-purpose-is.png",
-    alt: "What God's Purpose Is",
+    text: "What God's Purpose Is",
     href: "/purpose",
   },
 ];
