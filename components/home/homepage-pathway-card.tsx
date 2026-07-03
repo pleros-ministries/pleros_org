@@ -50,8 +50,9 @@ export function HomepagePathwayCard({
                 src={headerImageSrc}
                 alt=""
                 fill
-                className={headerImageClassName ?? "object-cover"}
+                className={headerImageClassName ?? "p-2"}
                 sizes="(max-width: 767px) 50vw, 249px"
+
               />
               <div
                 className="pointer-events-none absolute inset-0 bg-black/12"

@@ -162,7 +162,7 @@ export const homePathwayCards: HomePathwayCard[] = [
     mobileDescription: "Fellowship with us at any our branches nationwide",
     href: "/about",
     headerImageSrc: "/site/home/assets/Blue-Fullness Logo.svg",
-    headerImageClassName: "object-scale-down object-center",
+    headerImageClassName: "object-cover object-center p-2",
     arrowImageSrc: "/site/home/assets/card-arrows/church-card-arrow.svg",
     surfaceClassName: "bg-[#223583] text-white",
     headerClassName: "bg-white",
