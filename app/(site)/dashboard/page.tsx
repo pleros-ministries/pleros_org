@@ -20,5 +20,9 @@ export default async function WelcomeDashboardPage() {
     redirect("/api/welcome-access/session?returnTo=%2Fdashboard");
   }
 
+  if (!appSession) {
+    redirect("/welcome");
+  }
+
   return <WelcomeDashboardView />;
 }
