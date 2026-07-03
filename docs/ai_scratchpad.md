@@ -637,3 +637,20 @@
 
 ### Action Rule
 - For future welcome funnel changes, do not add a layout-level `/dashboard` redirect to `/welcome`; gate only the specific pages that need lead/session state.
+
+## [2026-07-03] Welcome-gated dashboard access
+
+### Mistake
+- Reopened `/dashboard` for direct public access after interpreting the dashboard as a general resource hub.
+
+### Correction
+- User clarified the desired behavior: users who have not registered through the welcome modal should not access `/dashboard` directly.
+
+### Lesson
+- The welcome dashboard is part of the welcome funnel, not a fully public page.
+
+### Preference
+- `/dashboard` should require either a valid app session or welcome-access cookie, with unauthenticated visitors redirected to `/welcome`.
+
+### Action Rule
+- For future `/dashboard` changes, keep the layout-level gate and use the welcome cookie only as a bootstrap fallback into a real session.

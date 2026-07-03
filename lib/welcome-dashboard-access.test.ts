@@ -7,22 +7,21 @@ function source(...parts: string[]) {
 }
 
 describe("welcome dashboard access", () => {
-  test("dashboard layout does not gate the dashboard behind welcome access", () => {
+  test("dashboard layout requires either Better Auth session or welcome cookie", () => {
     const layoutSource = source("app", "(site)", "dashboard", "layout.tsx");
 
-    expect(layoutSource).toContain("AppShell");
-    expect(layoutSource).not.toContain("getAppSession");
-    expect(layoutSource).not.toContain("readWelcomeAccessToken");
-    expect(layoutSource).not.toContain('redirect("/welcome")');
+    expect(layoutSource).toContain("getAppSession");
+    expect(layoutSource).toContain("if (!appSession && !welcomeSession)");
+    expect(layoutSource).toContain('redirect("/welcome")');
     expect(layoutSource).not.toContain('redirect("/")');
   });
 
-  test("dashboard page renders publicly and only bootstraps a welcome session when present", () => {
+  test("dashboard page uses welcome cookie only as a session bootstrap fallback", () => {
     const dashboardSource = source("app", "(site)", "dashboard", "page.tsx");
 
     expect(dashboardSource).toContain("if (!appSession && welcomeSession)");
     expect(dashboardSource).toContain("return <WelcomeDashboardView />");
-    expect(dashboardSource).not.toContain('redirect("/welcome")');
+    expect(dashboardSource).toContain('redirect("/welcome")');
   });
 
   test("welcome pack page still requires a session or welcome cookie", () => {
