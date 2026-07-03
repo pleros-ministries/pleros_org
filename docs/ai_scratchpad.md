@@ -741,3 +741,20 @@
 
 ### Action Rule
 - For logo/header asset swaps, preserve the intended card surface and only recolor the SVG foreground paths unless the user explicitly asks to recolor the header background.
+
+## [2026-07-03] Session Note
+
+### Mistake
+- Partner page copy drifted into generic ministry language instead of the exact Pleros vision/mission framing.
+
+### Correction
+- Rewrite partnership copy around reaching people with the word of truth of the Gospel, online and offline, for salvation, establishment, and fulfillment of God's purpose.
+
+### Lesson
+- Public ministry pages should inherit language directly from the Vision and Mission page when explaining why the ministry exists.
+
+### Preference
+- Partner CTAs should open WhatsApp with a prefilled message rather than linking to an internal anchor.
+
+### Action Rule
+- For partner/support surfaces, use the Vision and Mission content as the source of truth and make primary partner actions WhatsApp-first when requested.
