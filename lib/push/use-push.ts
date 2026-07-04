@@ -3,16 +3,22 @@
 import { useCallback, useEffect, useState } from "react";
 
 export function usePushSubscription() {
-  const [isSupported, setIsSupported] = useState(false);
+  const [isSupported] = useState(
+    () =>
+      typeof navigator !== "undefined" &&
+      "serviceWorker" in navigator &&
+      typeof window !== "undefined" &&
+      "PushManager" in window,
+  );
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isPending, setIsPending] = useState(false);
 
-  useEffect(() => {
-    setIsSupported("serviceWorker" in navigator && "PushManager" in window);
-    checkSubscription();
-  }, []);
+  const checkSubscription = useCallback(async () => {
+    if (!isSupported) {
+      setIsSubscribed(false);
+      return;
+    }
 
-  async function checkSubscription() {
     try {
       const reg = await navigator.serviceWorker?.getRegistration();
       const sub = await reg?.pushManager?.getSubscription();
@@ -20,7 +26,11 @@ export function usePushSubscription() {
     } catch {
       setIsSubscribed(false);
     }
-  }
+  }, [isSupported]);
+
+  useEffect(() => {
+    void checkSubscription();
+  }, [checkSubscription]);
 
   const subscribe = useCallback(async () => {
     const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
