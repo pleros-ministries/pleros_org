@@ -8,7 +8,7 @@ import { PlayerProvider } from "./_components/PlayerContext";
 import { LibraryTable } from "./_components/LibraryTable";
 
 export const metadata: Metadata = {
-  title: "Teaching Library | Pleros",
+  title: "Teaching Library",
   description:
     "Browse, search, and listen to the full Pleros teaching archive — Faith & Growth, Gospel & Truth, The New Creation, and more.",
 };

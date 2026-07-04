@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { PartnerPageView } from "../../../components/home/partner-page-view";
 
 export const metadata: Metadata = {
-  title: "Partner with Us | Pleros",
+  title: "Partner with Us",
   description:
     "Learn how to partner with Pleros Ministries and Missions to advance the Gospel.",
 };

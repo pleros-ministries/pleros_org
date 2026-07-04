@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { QuestionsPathwayView } from "../../../components/home/questions-pathway-view";
 
 export const metadata: Metadata = {
-  title: "Questions | Pleros",
+  title: "Questions",
   description:
     "Find answers to honest Gospel questions through the Pleros Questions pathway.",
 };

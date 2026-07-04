@@ -27,12 +27,12 @@ export async function generateMetadata({
 
   if (!series) {
     return {
-      title: "Questions | Pleros",
+      title: "Questions",
     };
   }
 
   return {
-    title: `${series.title} | Pleros`,
+    title: series.title,
     description: series.description,
   };
 }
