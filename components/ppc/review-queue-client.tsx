@@ -16,6 +16,7 @@ import {
 } from "@/app/ppc/_actions/submission-actions";
 import {
   filterReviewQueue,
+  getReviewGradingReadiness,
   getReviewQueueCounts,
   resolveNextSelectedSubmissionId,
 } from "@/lib/ppc-staff-workflows";
@@ -106,6 +107,14 @@ export function ReviewQueueClient({
   );
   const selectedSubmission =
     filtered.find((submission) => submission.id === selectedId) ?? null;
+  const selectedReadiness = selectedSubmission
+    ? getReviewGradingReadiness({
+        status: selectedSubmission.status,
+        content: selectedSubmission.content,
+        responsePrompt: selectedSubmission.responsePrompt,
+        responseMarkingGuide: selectedSubmission.responseMarkingGuide,
+      })
+    : null;
 
   useEffect(() => {
     setSelectedId((current) => resolveNextSelectedSubmissionId(filtered, current));
@@ -506,6 +515,44 @@ export function ReviewQueueClient({
                   </div>
                 </div>
 
+                {selectedReadiness ? (
+                  <div
+                    className={cn(
+                      "rounded-sm border px-3 py-2",
+                      selectedReadiness.canGrade
+                        ? "border-emerald-200 bg-emerald-50"
+                        : selectedSubmission.status === "pending_review"
+                          ? "border-amber-200 bg-amber-50"
+                          : "border-zinc-200 bg-zinc-50",
+                    )}
+                  >
+                    <p
+                      className={cn(
+                        "text-[11px] font-medium",
+                        selectedReadiness.canGrade
+                          ? "text-emerald-800"
+                          : selectedSubmission.status === "pending_review"
+                            ? "text-amber-800"
+                            : "text-zinc-700",
+                      )}
+                    >
+                      {selectedReadiness.label}
+                    </p>
+                    <p
+                      className={cn(
+                        "mt-1 text-[11px]",
+                        selectedReadiness.canGrade
+                          ? "text-emerald-700"
+                          : selectedSubmission.status === "pending_review"
+                            ? "text-amber-700"
+                            : "text-zinc-500",
+                      )}
+                    >
+                      {selectedReadiness.detail}
+                    </p>
+                  </div>
+                ) : null}
+
                 <div className="rounded-sm border border-zinc-100 bg-zinc-50 px-3 py-3">
                   {selectedSubmission.responsePrompt ? (
                     <div className="mb-3 rounded-sm border border-zinc-200 bg-white px-3 py-2">
@@ -519,7 +566,11 @@ export function ReviewQueueClient({
                         }}
                       />
                     </div>
-                  ) : null}
+                  ) : (
+                    <div className="mb-3 rounded-sm border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] text-amber-700">
+                      Written prompt is missing for this lesson.
+                    </div>
+                  )}
                   {selectedSubmission.responseMarkingGuide ? (
                     <div className="mb-3 rounded-sm border border-amber-200 bg-amber-50 px-3 py-2">
                       <p className="mb-1 text-[11px] font-medium text-amber-800">
@@ -532,10 +583,19 @@ export function ReviewQueueClient({
                         }}
                       />
                     </div>
-                  ) : null}
-                  <p className="whitespace-pre-wrap text-xs leading-relaxed text-zinc-600">
-                    {selectedSubmission.content}
-                  </p>
+                  ) : (
+                    <div className="mb-3 rounded-sm border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] text-amber-700">
+                      Admin marking guide is missing for this lesson.
+                    </div>
+                  )}
+                  <div className="rounded-sm border border-zinc-200 bg-white px-3 py-2">
+                    <p className="mb-1 text-[11px] font-medium text-zinc-700">
+                      Student response
+                    </p>
+                    <p className="whitespace-pre-wrap text-xs leading-relaxed text-zinc-600">
+                      {selectedSubmission.content.trim() || "No response content."}
+                    </p>
+                  </div>
                 </div>
 
                 {selectedSubmission.reviewerNote ? (
@@ -550,7 +610,12 @@ export function ReviewQueueClient({
                     <div className="flex flex-wrap gap-2">
                       <button
                         onClick={() => handleApprove(selectedSubmission.id)}
-                        disabled={isPending}
+                        disabled={isPending || !selectedReadiness?.canGrade}
+                        title={
+                          !selectedReadiness?.canGrade
+                            ? "Prompt, marking guide, and response are required before grading."
+                            : undefined
+                        }
                         className="flex h-7 items-center gap-1.5 rounded-sm bg-emerald-600 px-3 text-xs font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
                       >
                         <CheckCircle2 className="size-3" />
@@ -574,7 +639,13 @@ export function ReviewQueueClient({
                         onClick={() => handleRevision(selectedSubmission.id)}
                         disabled={
                           isPending ||
+                          !selectedReadiness?.canGrade ||
                           !revisionNotes[selectedSubmission.id]?.trim()
+                        }
+                        title={
+                          !selectedReadiness?.canGrade
+                            ? "Prompt, marking guide, and response are required before grading."
+                            : undefined
                         }
                         className="h-8 rounded-sm border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-50"
                       >

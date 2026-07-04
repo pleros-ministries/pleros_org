@@ -14,6 +14,15 @@ type ReviewSubmission = {
   content: string;
 };
 
+type ReviewGradingInput = {
+  status: string;
+  content: string;
+  responsePrompt: string | null;
+  responseMarkingGuide: string | null;
+};
+
+type ReviewGradingRequirement = "prompt" | "marking_guide" | "response";
+
 type QaThread = {
   id: number;
   status: string;
@@ -28,6 +37,29 @@ type QaThread = {
 
 function normalizeQuery(value: string) {
   return value.trim().toLowerCase();
+}
+
+function hasText(value: string | null) {
+  return Boolean(value?.trim());
+}
+
+function formatMissingRequirements(missing: ReviewGradingRequirement[]) {
+  const labels: Record<ReviewGradingRequirement, string> = {
+    prompt: "prompt",
+    marking_guide: "marking guide",
+    response: "response",
+  };
+  const readable = missing.map((item) => labels[item]);
+
+  if (readable.length === 1) {
+    return readable[0];
+  }
+
+  if (readable.length === 2) {
+    return `${readable[0]} and ${readable[1]}`;
+  }
+
+  return `${readable.slice(0, -1).join(", ")}, and ${readable.at(-1)}`;
 }
 
 function matchesLevel(levelId: number, filterValue: string) {
@@ -69,6 +101,50 @@ export function getReviewQueueCounts(submissions: Pick<ReviewSubmission, "status
       needs_revision: 0,
     },
   );
+}
+
+export function getReviewGradingReadiness(input: ReviewGradingInput) {
+  const isPendingReview =
+    input.status === "pending_review" || input.status === "submitted";
+
+  if (!isPendingReview) {
+    return {
+      canGrade: false,
+      missing: [] as ReviewGradingRequirement[],
+      label: "Review completed",
+      detail: "This submission is no longer waiting for a grading action.",
+    };
+  }
+
+  const missing: ReviewGradingRequirement[] = [];
+
+  if (!hasText(input.responsePrompt)) {
+    missing.push("prompt");
+  }
+
+  if (!hasText(input.responseMarkingGuide)) {
+    missing.push("marking_guide");
+  }
+
+  if (!hasText(input.content)) {
+    missing.push("response");
+  }
+
+  if (missing.length === 0) {
+    return {
+      canGrade: true,
+      missing,
+      label: "Ready to grade",
+      detail: "Prompt, marking guide, and student response are present.",
+    };
+  }
+
+  return {
+    canGrade: false,
+    missing,
+    label: "Needs setup before grading",
+    detail: `Missing ${formatMissingRequirements(missing)}.`,
+  };
 }
 
 export function filterReviewQueue<T extends ReviewSubmission>(

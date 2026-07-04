@@ -4,6 +4,7 @@ import {
   filterQaInbox,
   filterReviewQueue,
   getQaInboxCounts,
+  getReviewGradingReadiness,
   getReviewQueueCounts,
   resolveNextSelectedSubmissionId,
   resolveNextSelectedThreadId,
@@ -240,5 +241,63 @@ describe("ppc staff workflow helpers", () => {
 
   test("returns null when no review rows remain after filtering", () => {
     expect(resolveNextSelectedSubmissionId([], 1)).toBeNull();
+  });
+
+  test("marks pending review submissions ready only when prompt, guide, and response exist", () => {
+    expect(
+      getReviewGradingReadiness({
+        status: "pending_review",
+        content: "This is my answer.",
+        responsePrompt: "<p>Explain grace.</p>",
+        responseMarkingGuide: "<ul><li>Look for scripture.</li></ul>",
+      }),
+    ).toEqual({
+      canGrade: true,
+      missing: [],
+      label: "Ready to grade",
+      detail: "Prompt, marking guide, and student response are present.",
+    });
+
+    expect(
+      getReviewGradingReadiness({
+        status: "pending_review",
+        content: "   ",
+        responsePrompt: null,
+        responseMarkingGuide: "",
+      }),
+    ).toEqual({
+      canGrade: false,
+      missing: ["prompt", "marking_guide", "response"],
+      label: "Needs setup before grading",
+      detail: "Missing prompt, marking guide, and response.",
+    });
+  });
+
+  test("does not mark already-reviewed submissions as gradeable actions", () => {
+    expect(
+      getReviewGradingReadiness({
+        status: "approved",
+        content: "This is my answer.",
+        responsePrompt: "<p>Explain grace.</p>",
+        responseMarkingGuide: "<ul><li>Look for scripture.</li></ul>",
+      }),
+    ).toMatchObject({
+      canGrade: false,
+      label: "Review completed",
+    });
+  });
+
+  test("treats submitted database status as pending review for grading readiness", () => {
+    expect(
+      getReviewGradingReadiness({
+        status: "submitted",
+        content: "This is my answer.",
+        responsePrompt: "<p>Explain grace.</p>",
+        responseMarkingGuide: "<ul><li>Look for scripture.</li></ul>",
+      }),
+    ).toMatchObject({
+      canGrade: true,
+      label: "Ready to grade",
+    });
   });
 });

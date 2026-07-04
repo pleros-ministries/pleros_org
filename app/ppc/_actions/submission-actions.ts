@@ -16,10 +16,38 @@ import { getStaffActor, getStudentSelfActor } from "@/lib/auth/action-actor";
 import { assertCanAccessPublishedLesson } from "@/lib/auth/student-lesson-access";
 import { notifyReviewAssignment } from "@/lib/notifications/staff-assignment";
 import { hasAdminAccess, isStaffRole, type AppRole } from "@/lib/app-role";
+import { getReviewGradingReadiness } from "@/lib/ppc-staff-workflows";
 
 function revalidateSubmissionSurfaces() {
   revalidatePath("/ppc", "layout");
   revalidatePath("/admin", "layout");
+}
+
+async function assertSubmissionCanBeGraded(submissionId: number) {
+  const submission = await getSubmissionById(submissionId);
+  if (!submission) {
+    throw new Error("Submission not found");
+  }
+
+  const lesson = await db.query.lessons.findFirst({
+    where: (lesson, { eq }) => eq(lesson.id, submission.lessonId),
+  });
+  if (!lesson) {
+    throw new Error("Lesson not found");
+  }
+
+  const readiness = getReviewGradingReadiness({
+    status: submission.status,
+    content: submission.content,
+    responsePrompt: lesson.responsePrompt,
+    responseMarkingGuide: lesson.responseMarkingGuide,
+  });
+
+  if (!readiness.canGrade) {
+    throw new Error(readiness.detail);
+  }
+
+  return { submission, lesson };
 }
 
 export async function saveDraft(lessonId: number, content: string) {
@@ -41,14 +69,14 @@ export async function submitWrittenResponse(lessonId: number) {
 export async function approveWrittenSubmission(submissionId: number) {
   const session = await requireStaff();
   const { reviewerId } = getStaffActor(session);
+  const { lesson } = await assertSubmissionCanBeGraded(submissionId);
   const updated = await approveSubmission(submissionId, reviewerId);
   revalidateSubmissionSurfaces();
 
   if (updated) {
     try {
       const student = await db.query.users.findFirst({ where: (u, { eq: eq2 }) => eq2(u.id, updated.userId) });
-      const lesson = await db.query.lessons.findFirst({ where: (l, { eq: eq2 }) => eq2(l.id, updated.lessonId) });
-      if (student && lesson) {
+      if (student) {
         await sendSubmissionReviewed({
           to: student.email,
           studentName: student.name,
@@ -64,14 +92,14 @@ export async function approveWrittenSubmission(submissionId: number) {
 export async function requestSubmissionRevision(submissionId: number, note: string) {
   const session = await requireStaff();
   const { reviewerId } = getStaffActor(session);
+  const { lesson } = await assertSubmissionCanBeGraded(submissionId);
   const updated = await requestRevision(submissionId, reviewerId, note);
   revalidateSubmissionSurfaces();
 
   if (updated) {
     try {
       const student = await db.query.users.findFirst({ where: (u, { eq: eq2 }) => eq2(u.id, updated.userId) });
-      const lesson = await db.query.lessons.findFirst({ where: (l, { eq: eq2 }) => eq2(l.id, updated.lessonId) });
-      if (student && lesson) {
+      if (student) {
         await sendSubmissionReviewed({
           to: student.email,
           studentName: student.name,
