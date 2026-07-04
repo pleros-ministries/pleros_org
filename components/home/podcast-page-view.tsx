@@ -149,7 +149,7 @@ export async function PodcastPageView() {
               Listen and download every episode
             </h2>
             <p className="font-[var(--font-be-vietnam-pro)] text-[0.93rem] leading-[1.5] tracking-[-0.02em] text-[var(--color-text-muted)]">
-              Stream directly here, download as an MP3, or open on Spotify — no account needed.
+              Stream directly here, download as an MP3, or open on Spotify.
             </p>
           </div>
 
@@ -192,7 +192,7 @@ export async function PodcastPageView() {
           <div className="grid gap-2 text-center">
             <p className="site-hero-eyebrow justify-center">Next steps</p>
             <h2 className="site-section-heading">
-              Let the podcast lead you deeper into the Pleros journey
+              Let the Podcast lead you deeper into the Pleros journey
             </h2>
           </div>
 
@@ -201,12 +201,12 @@ export async function PodcastPageView() {
               <Card
                 key={step.title}
                 tone={step.tone}
-                className="gap-5 rounded-[1.25rem] p-5 shadow-[0_14px_32px_rgba(15,23,40,0.06)]"
+                className="gap-3 rounded-[1.25rem] border-0 p-5 shadow-[0_14px_32px_rgba(15,23,40,0.06)]"
               >
                 <CardHeader className="gap-3 px-0 py-0">
-                  <Badge variant={step.tone} className="w-fit">
+                  <p className="font-[var(--font-be-vietnam-pro)] text-[0.72rem] font-semibold uppercase leading-none tracking-[0.14em] text-[var(--color-brand-indigo)]">
                     {step.eyebrow}
-                  </Badge>
+                  </p>
                   <CardTitle className="font-[var(--font-sen)] text-[1.5rem] font-bold leading-[1] tracking-[-0.045em] text-[var(--color-text-strong)]">
                     {step.title}
                   </CardTitle>
@@ -222,7 +222,7 @@ export async function PodcastPageView() {
                       size="lg"
                       variant="secondary"
                       render={<Link href={step.href} className="site-button-text" />}
-                      className="min-h-[2.75rem] rounded-full px-5 text-[0.8125rem] font-semibold"
+                      className="min-h-[2.75rem] rounded-full border-0 px-5 text-[0.8125rem] font-semibold"
                     >
                       {step.ctaLabel}
                     </Button>

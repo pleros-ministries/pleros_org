@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   DownloadIcon,
   ExternalLinkIcon,
@@ -45,15 +45,19 @@ function formatDuration(raw: string): string {
   return raw;
 }
 
+function getDownloadHref(episode: RssEpisode) {
+  const params = new URLSearchParams({
+    url: episode.audioUrl,
+    title: episode.title,
+  });
+
+  return `/api/podcast/download?${params.toString()}`;
+}
+
 export function PodcastRssList({ episodes }: Props) {
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-
-  useEffect(() => {
-    setCurrentPage(1);
-    setPlayingId(null);
-  }, [searchQuery]);
 
   if (!episodes.length) {
     return (
@@ -85,7 +89,11 @@ export function PodcastRssList({ episodes }: Props) {
           type="search"
           placeholder="Search episodes…"
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            setCurrentPage(1);
+            setPlayingId(null);
+          }}
           className="pl-9"
         />
       </div>
@@ -100,7 +108,7 @@ export function PodcastRssList({ episodes }: Props) {
       ) : null}
 
       {/* Episode list */}
-      <div className="overflow-hidden rounded-[1.25rem] border border-[var(--color-line)] bg-white">
+      <div className="overflow-hidden rounded-[0.75rem] border border-[var(--color-line)] bg-white">
         <div className="divide-y divide-[rgba(6,16,86,0.10)]">
           {paginatedEpisodes.map((ep) => {
             const isPlaying = playingId === ep.guid;
@@ -116,7 +124,7 @@ export function PodcastRssList({ episodes }: Props) {
                         Ep. {ep.episodeNumber}
                       </p>
                     ) : null}
-                    <h3 className="font-[var(--font-sen)] text-[1.05rem] font-semibold leading-[1.2] tracking-[-0.03em] text-[var(--color-brand-indigo)] md:text-[1.15rem]">
+                    <h3 className="font-[var(--font-sen)] text-[0.95rem] font-semibold leading-[1.18] tracking-[-0.025em] text-[var(--color-brand-indigo)] md:text-[1.05rem]">
                       {ep.title}
                     </h3>
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
@@ -152,8 +160,7 @@ export function PodcastRssList({ episodes }: Props) {
 
                     {/* Download */}
                     <a
-                      href={ep.audioUrl}
-                      download
+                      href={getDownloadHref(ep)}
                       aria-label={`Download ${ep.title}`}
                       className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(6,16,86,0.14)] bg-[var(--color-surface-muted)] text-[var(--color-brand-blue)] transition-transform duration-150 hover:-translate-y-px"
                     >

@@ -131,15 +131,15 @@ export function PodcastVideoGallery({
       ) : null}
 
       {series.length ? (
-        <div className="grid gap-3">
-        <div className="grid gap-2">
+        <div className="mt-8 grid gap-3 md:mt-10">
+          <div className="grid gap-2">
           <p className="site-hero-eyebrow">Series</p>
           <h3 className="site-section-heading max-w-[28rem]">
             Jump to any of the series on the podcast
           </h3>
         </div>
 
-        <div className="overflow-hidden rounded-[1.25rem] border border-[var(--color-line)] bg-white">
+        <div className="overflow-hidden rounded-[0.75rem] border border-[var(--color-line)] bg-white">
           <div className="divide-y divide-[rgba(6,16,86,0.12)]">
             {series.map((item) => {
               const isActive = selectedVideo?.id === item.id;
@@ -148,7 +148,7 @@ export function PodcastVideoGallery({
                 <div key={item.id} className="px-5 py-5 md:px-6 md:py-6">
                   <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4 md:gap-6">
                     <div className="grid gap-2 text-left">
-                      <h3 className="font-[var(--font-sen)] text-[1.45rem] font-semibold leading-[0.98] tracking-[-0.045em] text-[var(--color-brand-indigo)] md:text-[1.6rem]">
+                      <h3 className="font-[var(--font-sen)] text-[1.2rem] font-semibold leading-[1.04] tracking-[-0.035em] text-[var(--color-brand-indigo)] md:text-[1.35rem]">
                         {item.title}
                       </h3>
                       {item.description ? (

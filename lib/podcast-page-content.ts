@@ -103,14 +103,14 @@ export const podcastSeries = [
     id: "preservation-in-the-newness-of-life",
     title: "Preservation in the Newness of Life",
     description:
-      "Preservation for life in the New Creation.",
+      "Preservation of life in the New Creation.",
     href: buildPodcastEpisodeUrl("15UQNBv-Kbo"),
   },
   {
     id: "favour-in-the-newness-of-life",
     title: "Favour in the Newness of Life",
     description:
-      "Favour available in the newness of life.",
+      "Favour available in the Newness of life.",
     href: buildPodcastEpisodeUrl("o-uFSxxt1oA"),
   },
 ] as const;
@@ -138,7 +138,7 @@ export const podcastJourneySteps = [
     eyebrow: "Questions",
     title: "Start with honest Gospel answers",
     description:
-      "If the podcast surfaces deeper questions, begin with the Questions pathway for Scripture-rooted clarity.",
+      "Seeking answers to the big questions like Is there really God? Is the gospel true?",
     href: "/questions",
     ctaLabel: "Explore questions",
     tone: "questions",
@@ -147,7 +147,7 @@ export const podcastJourneySteps = [
     eyebrow: "Purpose",
     title: "Move into discovering purpose",
     description:
-      "When the truth is landing, follow it into the Purpose pathway and grow in understanding of God's purpose for your life.",
+      "Have more questions about God's purpose for your life and how to make sense of existence?",
     href: "/purpose",
     ctaLabel: "Discover purpose",
     tone: "purpose",
