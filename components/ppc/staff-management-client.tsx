@@ -122,7 +122,7 @@ export function StaffManagementClient({
 
   return (
     <div className="grid gap-4 xl:grid-cols-[360px_minmax(0,1fr)]">
-      <section className="rounded-sm border border-zinc-200 bg-white p-4">
+      <section className="max-w-md rounded-sm border border-zinc-200 bg-white p-4">
         <div className="flex items-center gap-2">
           <MailPlus className="size-4 text-zinc-500" />
           <h3 className="ppc-heading text-sm font-semibold text-zinc-900">

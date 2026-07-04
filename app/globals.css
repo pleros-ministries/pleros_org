@@ -1291,6 +1291,14 @@
   .ppc-theme {
     --font-sans: var(--font-be-vietnam-pro), "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
     font-family: var(--font-sans);
+
+    /* Dense dashboard radius scale — the public site's --radius-* tokens (14-24px) read
+       as near-pill on 32-40px PPC/admin controls; compress to a Vercel/Linear-style range. */
+    --radius-sm: 0.375rem;  /* 6px */
+    --radius-md: 0.5rem;    /* 8px */
+    --radius-lg: 0.625rem;  /* 10px */
+    --radius-xl: 0.75rem;   /* 12px */
+    --radius-2xl: 1rem;     /* 16px */
   }
 }
 

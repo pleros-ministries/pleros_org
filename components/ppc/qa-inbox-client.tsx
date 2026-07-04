@@ -564,7 +564,7 @@ export function QaInboxClient({
               )}
 
               {selectedThread.status !== "closed" ? (
-                <div className="grid gap-2">
+                <div className="grid max-w-md gap-2">
                   <textarea
                     placeholder="Write a reply…"
                     value={replyText}
@@ -592,7 +592,7 @@ export function QaInboxClient({
                   </div>
                 </div>
               ) : (
-                <div className="grid gap-2">
+                <div className="grid max-w-md gap-2">
                   <p className="text-[11px] text-zinc-500">
                     This thread is closed. Reopen it to continue the conversation.
                   </p>
