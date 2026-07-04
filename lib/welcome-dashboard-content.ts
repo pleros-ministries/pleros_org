@@ -70,8 +70,8 @@ export const welcomeDashboardSections: WelcomeDashboardSection[] = [
       {
         id: "school-of-purpose",
         title: "School of God's Purpose",
-        description:
-          "Be trained to walk in and fulfill God's purpose for your life.",
+        description: "A weekly live teaching series to help you fulfill God's purpose.",
+        href: "/dashboard/school-of-purpose",
         accent: "blue",
       },
     ],

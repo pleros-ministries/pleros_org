@@ -7,6 +7,7 @@ import {
   BadgeCheck,
   BellRing,
   ClipboardCheck,
+  ClipboardList,
   Dot,
   FolderKanban,
   GraduationCap,
@@ -69,6 +70,7 @@ const iconMap: Record<PpcShellIcon, React.ComponentType<{ className?: string }>>
   contact: Mail,
   notifications: BellRing,
   learning: NotebookPen,
+  waitlist: ClipboardList,
 };
 
 function getInitials(name: string): string {

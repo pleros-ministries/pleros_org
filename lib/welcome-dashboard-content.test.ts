@@ -24,7 +24,7 @@ describe("welcome dashboard content", () => {
     expect(devotion?.cards[0]?.href).toBe("/podcast");
     expect(devotion?.cards[1]?.href).toBe("/dashboard/prayer-watch");
     expect(training?.cards[0]?.href).toBe("/ppc");
-    expect(training?.cards[1]?.href).toBeUndefined();
+    expect(training?.cards[1]?.href).toBe("/dashboard/school-of-purpose");
     expect(commitment?.cards.every((card) => card.href === undefined)).toBe(true);
   });
 

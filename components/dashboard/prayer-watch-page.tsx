@@ -46,10 +46,10 @@ function cellClasses(cell: PrayerWatchCalendarCell): string {
   }
 
   if (cell.state === "future") {
-    return "border-transparent bg-zinc-50 text-zinc-300";
+    return "border-transparent bg-[rgba(6,16,86,0.03)] text-[rgba(6,16,86,0.28)]";
   }
 
-  return "border-transparent bg-zinc-100 text-zinc-500 hover:bg-zinc-200";
+  return "border-transparent bg-[rgba(6,16,86,0.06)] text-[var(--color-text-muted)] hover:bg-[rgba(6,16,86,0.1)]";
 }
 
 function ToggleAttendanceButton({ isUndo }: { isUndo: boolean }) {
@@ -135,7 +135,7 @@ export function PrayerWatchPage({
                 onClick={() => setSelectedDateKey(cell.dateKey)}
                 aria-label={`${cell.dateKey}: ${cell.state}`}
                 className={cn(
-                  "flex aspect-square items-center justify-center rounded-[0.5rem] border text-[0.8125rem] font-medium transition-colors disabled:cursor-not-allowed",
+                  "flex aspect-square items-center justify-center rounded-[var(--radius-sm)] border text-[0.8125rem] font-medium transition-colors disabled:cursor-not-allowed",
                   cell.isToday && "ring-2 ring-[var(--color-brand-blue)] ring-offset-1",
                   cellClasses(cell),
                 )}
@@ -151,11 +151,11 @@ export function PrayerWatchPage({
               Attended
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <span className="size-3 rounded-[0.2rem] bg-zinc-100" />
+              <span className="size-3 rounded-[0.2rem] bg-[rgba(6,16,86,0.06)]" />
               Missed
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <span className="size-3 rounded-[0.2rem] bg-zinc-50" />
+              <span className="size-3 rounded-[0.2rem] bg-[rgba(6,16,86,0.03)]" />
               Upcoming
             </span>
           </div>

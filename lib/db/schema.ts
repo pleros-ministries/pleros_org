@@ -458,3 +458,25 @@ export const contactSubmissions = pgTable(
     index("contact_submissions_created_at_idx").on(t.createdAt),
   ],
 );
+
+// ─── School of Purpose waitlist ─────────────────────────────────────────────
+
+export const schoolOfPurposeWaitlist = pgTable(
+  "school_of_purpose_waitlist",
+  {
+    id: serial("id").primaryKey(),
+    name: text("name").notNull(),
+    phone: text("phone").notNull(),
+    email: text("email").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("school_of_purpose_waitlist_email_idx").on(t.email),
+    index("school_of_purpose_waitlist_created_at_idx").on(t.createdAt),
+  ],
+);

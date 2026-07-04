@@ -10,7 +10,8 @@ export type PpcShellIcon =
   | "qa"
   | "contact"
   | "notifications"
-  | "learning";
+  | "learning"
+  | "waitlist";
 
 export type PpcShellNavItem = {
   label: string;
@@ -55,6 +56,12 @@ export const PPC_SHELL_NAV_ITEMS: PpcShellNavItem[] = [
     label: "Content",
     path: "/content",
     icon: "content",
+    roles: ["super_admin", "admin"],
+  },
+  {
+    label: "School of Purpose",
+    path: "/school-of-purpose",
+    icon: "waitlist",
     roles: ["super_admin", "admin"],
   },
   {
@@ -299,6 +306,13 @@ export function getPpcShellContext(pathname: string): PpcShellContext {
     return {
       label: "Content CMS",
       description: "Lessons, notes, audio, and quizzes",
+    };
+  }
+
+  if (logicalPath === "/school-of-purpose") {
+    return {
+      label: "School of Purpose waitlist",
+      description: "Name, WhatsApp number, and signup date",
     };
   }
 
