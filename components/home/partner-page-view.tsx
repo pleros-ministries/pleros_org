@@ -63,7 +63,7 @@ export function PartnerPageView() {
           </div>
         </section>
 
-        <section className="bg-white px-[1.5rem] pb-[4.75rem] pt-[1.75rem] md:px-8 md:pb-16 md:pt-10 xl:px-10">
+        <section className="bg-white px-[1.5rem] pb-[3.25rem] pt-[1.75rem] md:px-8 md:pb-12 md:pt-10 xl:px-10">
           <div className="mx-auto grid max-w-[44rem] justify-items-center gap-7 text-center md:gap-8">
             <p className="text-[1.05rem] leading-[1.42] tracking-[-0.03em] text-[var(--color-text-strong)] md:text-[1.35rem]">
               {partnerPageHero.intro}
