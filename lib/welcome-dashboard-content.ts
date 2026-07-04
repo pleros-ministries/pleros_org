@@ -49,9 +49,8 @@ export const welcomeDashboardSections: WelcomeDashboardSection[] = [
       {
         id: "prayer-watch-devotion",
         title: "Prayer Watch",
-        description:
-          "Be trained to walk in and fulfill God's purpose for your life.",
-        href: "https://youtube.com/@PlerosLive",
+        description: "Log your attendance and catch up on any watch you missed.",
+        href: "/dashboard/prayer-watch",
         accent: "blue",
       },
     ],

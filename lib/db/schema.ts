@@ -9,6 +9,7 @@ import {
   uniqueIndex,
   index,
   pgEnum,
+  date,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
@@ -394,6 +395,29 @@ export const pushSubscriptions = pgTable(
   (t) => [
     index("push_subscriptions_user_idx").on(t.userId),
     uniqueIndex("push_subscriptions_endpoint_idx").on(t.endpoint),
+  ],
+);
+
+// ─── Prayer watch attendance ────────────────────────────────────────────────
+
+export const prayerWatchAttendance = pgTable(
+  "prayer_watch_attendance",
+  {
+    id: serial("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    attendedDate: date("attended_date", { mode: "string" }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("prayer_watch_attendance_user_date_idx").on(
+      t.userId,
+      t.attendedDate,
+    ),
+    index("prayer_watch_attendance_user_idx").on(t.userId),
   ],
 );
 

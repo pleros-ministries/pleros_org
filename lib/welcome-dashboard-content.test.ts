@@ -22,7 +22,7 @@ describe("welcome dashboard content", () => {
     const commitment = welcomeDashboardSections.find((section) => section.id === "commitment");
 
     expect(devotion?.cards[0]?.href).toBe("/podcast");
-    expect(devotion?.cards[1]?.href).toBe("https://youtube.com/@PlerosLive");
+    expect(devotion?.cards[1]?.href).toBe("/dashboard/prayer-watch");
     expect(training?.cards[0]?.href).toBe("/ppc");
     expect(training?.cards[1]?.href).toBeUndefined();
     expect(commitment?.cards.every((card) => card.href === undefined)).toBe(true);
