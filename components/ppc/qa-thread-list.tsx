@@ -147,7 +147,7 @@ export function QaThreadList({
               onClick={handleReply}
               disabled={isReplying || !replyText.trim()}
               className={cn(
-                "inline-flex h-8 items-center gap-1.5 rounded-sm bg-zinc-900 px-3 text-xs font-medium text-white transition-colors hover:bg-zinc-800",
+                "inline-flex h-8 items-center gap-1.5 rounded-sm bg-[var(--color-brand-blue)] px-3 text-xs font-medium text-white transition-colors hover:bg-[var(--color-brand-blue-hover)]",
                 (isReplying || !replyText.trim()) && "opacity-50 cursor-not-allowed",
               )}
             >
@@ -207,7 +207,7 @@ export function QaThreadList({
               onClick={handleCreateThread}
               disabled={isCreating || !newSubject.trim() || !newMessage.trim()}
               className={cn(
-                "inline-flex h-7 items-center gap-1 rounded-sm bg-zinc-900 px-2 text-xs font-medium text-white transition-colors hover:bg-zinc-800",
+                "inline-flex h-7 items-center gap-1 rounded-sm bg-[var(--color-brand-blue)] px-2 text-xs font-medium text-white transition-colors hover:bg-[var(--color-brand-blue-hover)]",
                 (isCreating || !newSubject.trim() || !newMessage.trim()) &&
                   "opacity-50 cursor-not-allowed",
               )}

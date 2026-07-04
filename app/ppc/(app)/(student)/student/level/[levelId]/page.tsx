@@ -85,7 +85,7 @@ export default async function LevelDetailPage({
                   ? `/ppc/student/level/${levelId}/lesson/${nextLesson.lesson.id}`
                   : `/ppc/student`
               }
-              className="inline-flex h-7 items-center rounded-sm bg-zinc-900 px-3 text-xs font-medium text-white hover:bg-zinc-800"
+              className="inline-flex h-7 items-center rounded-sm bg-[var(--color-brand-blue)] px-3 text-xs font-medium text-white hover:bg-[var(--color-brand-blue-hover)]"
             >
               {nextLesson ? "Continue this level" : "Back to dashboard"}
             </Link>

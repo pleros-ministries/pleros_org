@@ -282,7 +282,7 @@ export function QaInboxClient({
               className={cn(
                 "flex items-center gap-1.5 border-b-2 px-3 py-2 text-xs font-medium transition-colors",
                 activeTab === tab.key
-                  ? "border-zinc-900 text-zinc-900"
+                  ? "border-[var(--color-brand-blue)] text-zinc-900"
                   : "border-transparent text-zinc-400 hover:text-zinc-600",
               )}
             >
@@ -291,7 +291,7 @@ export function QaInboxClient({
                 className={cn(
                   "rounded-full px-1.5 py-0.5 text-[10px]",
                   activeTab === tab.key
-                    ? "bg-zinc-900 text-white"
+                    ? "bg-[var(--color-brand-blue)] text-white"
                     : "bg-zinc-100 text-zinc-500",
                 )}
               >
@@ -574,7 +574,7 @@ export function QaInboxClient({
                     <button
                       onClick={handleReply}
                       disabled={isPending || !replyText.trim()}
-                      className="flex h-7 items-center gap-1.5 rounded-sm bg-zinc-900 px-3 text-xs font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
+                      className="flex h-7 items-center gap-1.5 rounded-sm bg-[var(--color-brand-blue)] px-3 text-xs font-medium text-white hover:bg-[var(--color-brand-blue-hover)] disabled:opacity-50"
                     >
                       <Send className="size-3" />
                       Send reply

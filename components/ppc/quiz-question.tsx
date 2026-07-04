@@ -49,7 +49,7 @@ export function MCQuestion({
                   : isWrong
                     ? "border-red-300 bg-red-50 text-red-800"
                     : isSelected
-                      ? "border-zinc-900 bg-zinc-900 text-white"
+                      ? "border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)] text-white"
                       : "border-zinc-200 bg-white text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50",
                 disabled && !showResult && "cursor-not-allowed opacity-60",
               )}

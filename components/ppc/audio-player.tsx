@@ -69,7 +69,7 @@ export function AudioPlayer({ src, title, onListened }: AudioPlayerProps) {
       <button
         type="button"
         onClick={toggle}
-        className="flex size-8 shrink-0 items-center justify-center rounded-full bg-zinc-900 text-white hover:bg-zinc-800 transition-colors"
+        className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[var(--color-brand-blue)] text-white hover:bg-[var(--color-brand-blue-hover)] transition-colors"
       >
         {playing ? <Pause className="size-3.5" /> : <Play className="size-3.5 ml-0.5" />}
       </button>
@@ -81,7 +81,7 @@ export function AudioPlayer({ src, title, onListened }: AudioPlayerProps) {
           max={duration || 0}
           value={progress}
           onChange={seek}
-          className="h-1 w-full cursor-pointer appearance-none rounded-full bg-zinc-200 accent-zinc-900 [&::-webkit-slider-thumb]:size-2.5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-zinc-900"
+          className="h-1 w-full cursor-pointer appearance-none rounded-full bg-zinc-200 accent-[var(--color-brand-blue)] [&::-webkit-slider-thumb]:size-2.5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-[var(--color-brand-blue)]"
         />
         <div className="flex justify-between text-[10px] text-zinc-400">
           <span>{fmt(progress)}</span>

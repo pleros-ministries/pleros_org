@@ -1143,7 +1143,7 @@ export function ContentCmsClient({
             className={cn(
               "flex items-center gap-1.5 border-b-2 px-3 py-2 text-xs font-medium transition-colors",
               activeLevelId === level.id
-                ? "border-zinc-900 text-zinc-900"
+                ? "border-[var(--color-brand-blue)] text-zinc-900"
                 : "border-transparent text-zinc-400 hover:text-zinc-600",
             )}
           >
@@ -1259,7 +1259,7 @@ export function ContentCmsClient({
                   <button
                     onClick={handleCreateLevel}
                     disabled={isPending}
-                    className="flex h-7 items-center gap-1.5 rounded-sm bg-zinc-900 px-3 text-xs font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
+                    className="flex h-7 items-center gap-1.5 rounded-sm bg-[var(--color-brand-blue)] px-3 text-xs font-medium text-white hover:bg-[var(--color-brand-blue-hover)] disabled:opacity-50"
                   >
                     <Plus className="size-3" />
                     Create level
@@ -1331,7 +1331,7 @@ export function ContentCmsClient({
                   <button
                     onClick={handleSaveLevel}
                     disabled={isPending || !hasLevelChanges}
-                    className="flex h-7 items-center gap-1.5 rounded-sm bg-zinc-900 px-3 text-xs font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
+                    className="flex h-7 items-center gap-1.5 rounded-sm bg-[var(--color-brand-blue)] px-3 text-xs font-medium text-white hover:bg-[var(--color-brand-blue-hover)] disabled:opacity-50"
                   >
                     <Save className="size-3" />
                     Save level
@@ -1538,7 +1538,7 @@ export function ContentCmsClient({
                   <button
                     onClick={handleCreateLesson}
                     disabled={isPending || isUploadingCreateLesson}
-                    className="flex h-7 items-center gap-1.5 rounded-sm bg-zinc-900 px-3 text-xs font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
+                    className="flex h-7 items-center gap-1.5 rounded-sm bg-[var(--color-brand-blue)] px-3 text-xs font-medium text-white hover:bg-[var(--color-brand-blue-hover)] disabled:opacity-50"
                   >
                     <Plus className="size-3" />
                     Create lesson
@@ -1891,7 +1891,7 @@ export function ContentCmsClient({
                         disabled={
                           isPending || !hasLessonChanges || isUploadingSelectedLesson
                         }
-                        className="flex h-7 items-center gap-1.5 rounded-sm bg-zinc-900 px-3 text-xs font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
+                        className="flex h-7 items-center gap-1.5 rounded-sm bg-[var(--color-brand-blue)] px-3 text-xs font-medium text-white hover:bg-[var(--color-brand-blue-hover)] disabled:opacity-50"
                       >
                         <Save className="size-3" />
                         Save changes
@@ -1996,7 +1996,7 @@ export function ContentCmsClient({
                                 <button
                                   onClick={handleSaveQuestion}
                                   disabled={isPending}
-                                  className="h-6 rounded bg-zinc-900 px-2 text-[10px] font-medium text-white disabled:opacity-50"
+                                  className="h-6 rounded bg-[var(--color-brand-blue)] px-2 text-[10px] font-medium text-white disabled:opacity-50"
                                 >
                                   Save
                                 </button>
@@ -2137,7 +2137,7 @@ export function ContentCmsClient({
                       <button
                         onClick={handleAddQuestion}
                         disabled={isPending || !newQText.trim()}
-                        className="flex h-7 w-fit items-center gap-1.5 rounded-sm bg-zinc-900 px-3 text-xs font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
+                        className="flex h-7 w-fit items-center gap-1.5 rounded-sm bg-[var(--color-brand-blue)] px-3 text-xs font-medium text-white hover:bg-[var(--color-brand-blue-hover)] disabled:opacity-50"
                       >
                         <Plus className="size-3" />
                         Add question

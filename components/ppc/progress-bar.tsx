@@ -12,7 +12,7 @@ export function ProgressBar({ value, max = 100, size = "sm", className }: Progre
   return (
     <div className={cn("w-full rounded-full bg-zinc-200", size === "sm" ? "h-1.5" : "h-2", className)}>
       <div
-        className="h-full rounded-full bg-zinc-900 transition-all duration-300"
+        className="h-full rounded-full bg-[var(--color-brand-blue)] transition-all duration-300"
         style={{ width: `${pct}%` }}
       />
     </div>

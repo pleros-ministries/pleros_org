@@ -102,7 +102,7 @@ export function QuizFlow({ lessonId, questions, bestScore }: QuizFlowProps) {
             className={cn(
               "flex size-7 items-center justify-center rounded-full text-xs font-medium transition-colors",
               i === currentIndex
-                ? "bg-zinc-900 text-white"
+                ? "bg-[var(--color-brand-blue)] text-white"
                 : answers[String(q.id)]
                   ? "bg-zinc-200 text-zinc-700"
                   : "bg-zinc-100 text-zinc-400 hover:bg-zinc-200",
@@ -158,7 +158,7 @@ export function QuizFlow({ lessonId, questions, bestScore }: QuizFlowProps) {
             onClick={handleSubmit}
             disabled={isPending}
             className={cn(
-              "inline-flex h-8 items-center gap-1.5 rounded-sm bg-zinc-900 px-3 text-xs font-medium text-white transition-colors hover:bg-zinc-800",
+              "inline-flex h-8 items-center gap-1.5 rounded-sm bg-[var(--color-brand-blue)] px-3 text-xs font-medium text-white transition-colors hover:bg-[var(--color-brand-blue-hover)]",
               isPending && "opacity-50",
             )}
           >

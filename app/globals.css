@@ -1274,6 +1274,12 @@
   [data-slot="accordion-item"].surface-dark [data-slot="accordion-content"] {
     color: var(--color-text-on-dark-muted);
   }
+
+  /* PPC platform heading bridge — ties PPC/admin page titles to the public Sen typeface */
+  .ppc-heading {
+    font-family: var(--font-sen), "Sen", sans-serif;
+    letter-spacing: -0.02em;
+  }
 }
 
 /* ─── Teaching Library ──────────────────────────────────────────────────────── */

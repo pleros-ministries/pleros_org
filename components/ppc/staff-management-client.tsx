@@ -182,7 +182,7 @@ export function StaffManagementClient({
           <button
             type="submit"
             disabled={isPending}
-            className="inline-flex h-8 items-center justify-center gap-1.5 rounded-sm bg-zinc-900 px-3 text-xs font-semibold text-white hover:bg-zinc-800 disabled:opacity-50"
+            className="inline-flex h-8 items-center justify-center gap-1.5 rounded-sm bg-[var(--color-brand-blue)] px-3 text-xs font-semibold text-white hover:bg-[var(--color-brand-blue-hover)] disabled:opacity-50"
           >
             <MailPlus className="size-3.5" />
             {isPending ? "Creating..." : "Send invite"}

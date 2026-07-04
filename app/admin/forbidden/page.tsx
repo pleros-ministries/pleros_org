@@ -7,7 +7,7 @@ export default function AdminForbiddenPage() {
         <p className="text-xs font-semibold uppercase tracking-[0.12em] text-zinc-500">
           Access denied
         </p>
-        <h1 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-950">
+        <h1 className="mt-2 ppc-heading text-2xl font-semibold text-zinc-950">
           You do not have permission for this area
         </h1>
         <p className="mt-2 text-sm text-zinc-600">
@@ -17,7 +17,7 @@ export default function AdminForbiddenPage() {
         <div className="mt-5 flex flex-wrap gap-2">
           <Link
             href="/admin"
-            className="inline-flex h-10 items-center rounded bg-zinc-900 px-4 text-sm font-semibold text-white hover:bg-zinc-800"
+            className="inline-flex h-10 items-center rounded bg-[var(--color-brand-blue)] px-4 text-sm font-semibold text-white hover:bg-[var(--color-brand-blue-hover)]"
           >
             Back to admin
           </Link>

@@ -123,7 +123,7 @@ export default async function StudentDashboardPage() {
           <div className="mt-4 flex flex-wrap gap-2">
             <Link
               href={dashboardFocus.ctaHref}
-              className="inline-flex h-8 items-center gap-1.5 rounded-sm bg-zinc-900 px-3 text-xs font-medium text-white hover:bg-zinc-800"
+              className="inline-flex h-8 items-center gap-1.5 rounded-sm bg-[var(--color-brand-blue)] px-3 text-xs font-medium text-white hover:bg-[var(--color-brand-blue-hover)]"
             >
               {dashboardFocus.ctaLabel}
               <ArrowRight className="size-3.5" />

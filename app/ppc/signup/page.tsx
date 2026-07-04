@@ -30,7 +30,7 @@ export default async function SignupPage({ searchParams }: SignUpPageProps) {
         <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-zinc-500">
           PPC Platform
         </p>
-        <h1 className="mt-2 text-xl font-semibold tracking-tight text-zinc-950">
+        <h1 className="mt-2 ppc-heading text-xl font-semibold text-zinc-950">
           Create account
         </h1>
 

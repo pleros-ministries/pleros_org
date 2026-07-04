@@ -12,7 +12,7 @@ export function PpcAuthShell({ children }: PpcAuthShellProps) {
         <div className="mx-auto flex h-12 w-full max-w-md items-center justify-between px-5">
           <Link
             href="/"
-            className="text-sm font-semibold tracking-tight text-zinc-950"
+            className="ppc-heading text-sm font-semibold text-[var(--color-brand-blue)]"
           >
             Pleros
           </Link>

@@ -146,7 +146,7 @@ export function SignInForm({ returnTo }: SignInFormProps) {
         <button
           type="submit"
           disabled={isPending}
-          className="mt-1 h-8 rounded-sm bg-zinc-900 px-3 text-xs font-semibold text-white hover:bg-zinc-800 disabled:opacity-50"
+          className="mt-1 h-8 rounded-sm bg-[var(--color-brand-blue)] px-3 text-xs font-semibold text-white hover:bg-[var(--color-brand-blue-hover)] disabled:opacity-50"
         >
           {isPending ? "Signing in..." : "Sign in"}
         </button>

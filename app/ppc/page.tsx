@@ -42,7 +42,7 @@ export default async function PpcEntryPage() {
         <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-zinc-500">
           Student portal
         </p>
-        <h1 className="mt-2 text-xl font-semibold tracking-tight text-zinc-950">
+        <h1 className="mt-2 ppc-heading text-xl font-semibold text-zinc-950">
           Login
         </h1>
 

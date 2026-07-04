@@ -195,7 +195,7 @@ export function AdminControlsClient({
                 <button
                   onClick={handleOverrideLevel}
                   disabled={isPending}
-                  className="h-7 rounded-sm bg-zinc-900 px-3 text-xs font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
+                  className="h-7 rounded-sm bg-[var(--color-brand-blue)] px-3 text-xs font-medium text-white hover:bg-[var(--color-brand-blue-hover)] disabled:opacity-50"
                 >
                   Set
                 </button>
@@ -329,7 +329,7 @@ export function AdminControlsClient({
           <button
             onClick={handleAssignReviewer}
             disabled={isPending || !newReviewerUserId}
-            className="h-7 rounded-sm bg-zinc-900 px-3 text-xs font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
+            className="h-7 rounded-sm bg-[var(--color-brand-blue)] px-3 text-xs font-medium text-white hover:bg-[var(--color-brand-blue-hover)] disabled:opacity-50"
           >
             Assign
           </button>

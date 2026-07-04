@@ -145,7 +145,7 @@ export function StudentDetailClient({
               className={cn(
                 "flex items-center gap-1.5 border-b-2 px-3 py-2 text-xs font-medium transition-colors",
                 activeLevel === lvl
-                  ? "border-zinc-900 text-zinc-900"
+                  ? "border-[var(--color-brand-blue)] text-zinc-900"
                   : "border-transparent text-zinc-400 hover:text-zinc-600",
               )}
             >
@@ -337,7 +337,7 @@ export function StudentDetailClient({
               <button
                 onClick={handleOverrideLevel}
                 disabled={isPending}
-                className="h-7 rounded-sm bg-zinc-900 px-3 text-xs font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
+                className="h-7 rounded-sm bg-[var(--color-brand-blue)] px-3 text-xs font-medium text-white hover:bg-[var(--color-brand-blue-hover)] disabled:opacity-50"
               >
                 Set
               </button>
