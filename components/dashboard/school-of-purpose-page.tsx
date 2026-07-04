@@ -35,7 +35,7 @@ export function SchoolOfPurposePage({ existingEntry }: SchoolOfPurposePageProps)
             </h2>
             <p className="font-[var(--font-be-vietnam-pro)] text-[0.86rem] leading-[1.35] tracking-[-0.02em] text-[var(--color-text-muted)]">
               Share your name and WhatsApp number and we&apos;ll let you know
-              when the next cohort opens.
+              when we launch.
             </p>
           </div>
 

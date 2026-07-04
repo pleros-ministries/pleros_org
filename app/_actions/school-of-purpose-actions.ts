@@ -7,22 +7,8 @@ import { upsertSchoolOfPurposeWaitlistEntry } from "@/lib/db/queries/school-of-p
 import {
   normalizeSchoolOfPurposeWaitlistInput,
   validateSchoolOfPurposeWaitlistInput,
-  type SchoolOfPurposeWaitlistFieldErrors,
+  type SchoolOfPurposeWaitlistActionState,
 } from "@/lib/school-of-purpose-waitlist";
-
-export type SchoolOfPurposeWaitlistActionState = {
-  values: { name: string; phone: string };
-  errors: SchoolOfPurposeWaitlistFieldErrors;
-  formError: string | null;
-  success: boolean;
-};
-
-export const INITIAL_SCHOOL_OF_PURPOSE_WAITLIST_STATE: SchoolOfPurposeWaitlistActionState = {
-  values: { name: "", phone: "" },
-  errors: {},
-  formError: null,
-  success: false,
-};
 
 function readString(formData: FormData, key: string): string {
   const value = formData.get(key);

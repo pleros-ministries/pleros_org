@@ -4,10 +4,8 @@ import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { CheckCircle2Icon } from "lucide-react";
 
-import {
-  INITIAL_SCHOOL_OF_PURPOSE_WAITLIST_STATE,
-  joinSchoolOfPurposeWaitlistAction,
-} from "@/app/_actions/school-of-purpose-actions";
+import { joinSchoolOfPurposeWaitlistAction } from "@/app/_actions/school-of-purpose-actions";
+import { INITIAL_SCHOOL_OF_PURPOSE_WAITLIST_STATE } from "@/lib/school-of-purpose-waitlist";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 

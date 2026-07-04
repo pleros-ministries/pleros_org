@@ -7,6 +7,20 @@ export type SchoolOfPurposeWaitlistFieldErrors = Partial<
   Record<keyof SchoolOfPurposeWaitlistValues, string>
 >;
 
+export type SchoolOfPurposeWaitlistActionState = {
+  values: SchoolOfPurposeWaitlistValues;
+  errors: SchoolOfPurposeWaitlistFieldErrors;
+  formError: string | null;
+  success: boolean;
+};
+
+export const INITIAL_SCHOOL_OF_PURPOSE_WAITLIST_STATE: SchoolOfPurposeWaitlistActionState = {
+  values: { name: "", phone: "" },
+  errors: {},
+  formError: null,
+  success: false,
+};
+
 const PHONE_PATTERN = /^[+\d][\d\s()-]{6,19}$/;
 
 export function normalizeSchoolOfPurposeWaitlistInput(
