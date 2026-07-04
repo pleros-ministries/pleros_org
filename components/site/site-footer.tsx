@@ -14,9 +14,6 @@ export function SiteFooter() {
         </div>
 
         <div className="flex items-center gap-3 text-sm text-[var(--color-text-muted)]">
-          <Link href="/style-demo" className="hover:text-[var(--color-brand-blue)]">
-            Style demo
-          </Link>
           <Link href="/ppc" className="hover:text-[var(--color-brand-blue)]">
             PPC sign in
           </Link>

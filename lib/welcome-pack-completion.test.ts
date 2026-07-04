@@ -19,6 +19,21 @@ describe("welcome pack completion wiring", () => {
     expect(schemaSource).toContain('uniqueIndex("welcome_pack_leads_email_idx")');
   });
 
+  test("ships a Drizzle migration for welcome pack lead state", () => {
+    const migrationSource = source("drizzle", "0003_welcome_pack_leads.sql");
+    const journalSource = source("drizzle", "meta", "_journal.json");
+
+    expect(migrationSource).toContain('CREATE TABLE "welcome_pack_leads"');
+    expect(migrationSource).toContain('"email" text NOT NULL');
+    expect(migrationSource).toContain('"main_access_granted" boolean DEFAULT true NOT NULL');
+    expect(migrationSource).toContain('"extra_gifts_unlocked" boolean DEFAULT false NOT NULL');
+    expect(migrationSource).toContain('"shared_confirmed_at" timestamp with time zone');
+    expect(migrationSource).toContain('CREATE UNIQUE INDEX "welcome_pack_leads_email_idx"');
+    expect(migrationSource).toContain('CREATE INDEX "welcome_pack_leads_created_at_idx"');
+    expect(migrationSource).toContain('CREATE INDEX "welcome_pack_leads_extra_gifts_idx"');
+    expect(journalSource).toContain('"tag": "0003_welcome_pack_leads"');
+  });
+
   test("signup persists lead state and sends non-blocking welcome access email", () => {
     const apiSource = source("app", "api", "welcome-access", "route.ts");
     const querySource = source("lib", "db", "queries", "welcome-pack-leads.ts");

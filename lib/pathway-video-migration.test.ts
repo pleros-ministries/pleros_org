@@ -65,24 +65,9 @@ describe("pathway video migration helpers", () => {
     );
   });
 
-  test("collects only Drive-backed pathway videos for migration", () => {
+  test("does not collect pathway videos after Drive sources are migrated", () => {
     const videos = collectPathwayVideoSources();
 
-    expect(videos).toHaveLength(4);
-    expect(videos.every((video) => video.previewUrl.includes("/preview"))).toBe(
-      true,
-    );
-    expect(videos.some((video) => video.seriesSlug === "gospel-answers-critical-series")).toBe(
-      false,
-    );
-    expect(videos[0]).toMatchObject({
-      pathway: "questions",
-      seriesSlug: "gospel-answers-simple-series",
-      videoId: "gospel-answers-simple-1",
-      driveFileId: "1_T-BOBV5dUDKszvuTCVlmkxKWEU_9bG_",
-      customId:
-        "pathway-videos/questions/gospel-answers-simple-series/gospel-answers-simple-1",
-    });
-    expect(videos.some((video) => video.pathway === "purpose")).toBe(false);
+    expect(videos).toEqual([]);
   });
 });

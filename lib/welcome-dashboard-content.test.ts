@@ -57,7 +57,7 @@ describe("welcome dashboard content", () => {
       "utf8",
     );
 
-    expect(source).toContain("Access all our resources here and get started right away.");
+    expect(source).toContain("Start with the welcome pack and other resources.");
     expect(source).not.toContain("Your resources are gathered here and tied to");
   });
 });

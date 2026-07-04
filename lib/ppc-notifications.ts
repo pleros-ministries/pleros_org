@@ -29,6 +29,29 @@ type NotificationEventStatus = {
   detail: string;
 };
 
+type PushSubscriptionAudience = "staff" | "student";
+
+type PushSubscriptionCopy = {
+  unavailable: string;
+  subscribed: string;
+  available: string;
+};
+
+const pushSubscriptionCopy: Record<PushSubscriptionAudience, PushSubscriptionCopy> = {
+  staff: {
+    unavailable: "Add VAPID keys before staff can subscribe from this page.",
+    subscribed: "This device can receive PPC assignment alerts.",
+    available: "Subscribe this browser to receive staff assignment push alerts.",
+  },
+  student: {
+    unavailable:
+      "Course reminders are unavailable until push notifications are configured.",
+    subscribed: "This device can receive PPC course reminders.",
+    available:
+      "Subscribe this browser to receive reminders about lessons and course progress.",
+  },
+};
+
 function hasValue(value: string | undefined) {
   return Boolean(value?.trim());
 }
@@ -161,4 +184,10 @@ export function getPpcNotificationStatus(env: NotificationEnvironment) {
     channels,
     events,
   };
+}
+
+export function getPushSubscriptionCopy(
+  audience: PushSubscriptionAudience,
+): PushSubscriptionCopy {
+  return pushSubscriptionCopy[audience];
 }

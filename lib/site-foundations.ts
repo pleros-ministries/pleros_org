@@ -1,6 +1,5 @@
 export const siteNavItems = [
   { href: "/", label: "Home" },
-  { href: "/style-demo", label: "Style demo" },
   { href: "/ppc", label: "PPC login" },
 ] as const;
 

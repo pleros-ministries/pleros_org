@@ -1,6 +1,9 @@
 import { describe, expect, test } from "vitest";
 
-import { getPpcNotificationStatus } from "./ppc-notifications";
+import {
+  getPpcNotificationStatus,
+  getPushSubscriptionCopy,
+} from "./ppc-notifications";
 
 describe("ppc notification status", () => {
   test("marks all notification surfaces ready when required configuration exists", () => {
@@ -110,5 +113,23 @@ describe("ppc notification status", () => {
         detail: "Student lifecycle notifications need Resend email configuration.",
       },
     ]);
+  });
+
+  test("uses role-specific push subscription copy", () => {
+    expect(getPushSubscriptionCopy("staff")).toEqual({
+      unavailable:
+        "Add VAPID keys before staff can subscribe from this page.",
+      subscribed: "This device can receive PPC assignment alerts.",
+      available:
+        "Subscribe this browser to receive staff assignment push alerts.",
+    });
+
+    expect(getPushSubscriptionCopy("student")).toEqual({
+      unavailable:
+        "Course reminders are unavailable until push notifications are configured.",
+      subscribed: "This device can receive PPC course reminders.",
+      available:
+        "Subscribe this browser to receive reminders about lessons and course progress.",
+    });
   });
 });

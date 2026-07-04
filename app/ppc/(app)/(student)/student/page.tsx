@@ -14,9 +14,11 @@ import { getGraduations } from "@/lib/db/queries/graduations";
 import { PageHeader } from "@/components/ppc/page-header";
 import { LevelBadge } from "@/components/ppc/level-badge";
 import { ProgressBar } from "@/components/ppc/progress-bar";
+import { PushSubscriptionPanel } from "@/components/ppc/push-subscription-panel";
 import { db } from "@/lib/db";
 import { studentProgress } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import { getPpcNotificationStatus } from "@/lib/ppc-notifications";
 import {
   getCurrentLevelId,
   getDashboardFocus,
@@ -76,6 +78,19 @@ export default async function StudentDashboardPage() {
   });
   const pathwayRows = getLevelJourneyRows(levels, graduatedIds, currentLevel);
   const lessonsRemaining = Math.max(allCurrentLessons.length - completedCount, 0);
+  const notificationStatus = getPpcNotificationStatus({
+    RESEND_API_KEY: process.env.RESEND_API_KEY,
+    EMAIL_FROM: process.env.EMAIL_FROM,
+    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
+    BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
+    NEXT_PUBLIC_VAPID_PUBLIC_KEY: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+    VAPID_PRIVATE_KEY: process.env.VAPID_PRIVATE_KEY,
+    VAPID_SUBJECT: process.env.VAPID_SUBJECT,
+    CRON_SECRET: process.env.CRON_SECRET,
+  });
+  const pushStatus = notificationStatus.channels.find(
+    (channel) => channel.id === "push",
+  );
 
   return (
     <div className="grid gap-6">
@@ -137,30 +152,37 @@ export default async function StudentDashboardPage() {
           </div>
         </div>
 
-        <div className="rounded-sm border border-zinc-200 bg-white p-4">
-          <h3 className="ppc-heading text-sm font-semibold text-zinc-900">Progress snapshot</h3>
-          <div className="mt-3 grid gap-2 text-xs">
-            <div className="flex justify-between">
-              <span className="text-zinc-500">Graduated levels</span>
-              <span className="font-medium text-zinc-900">{graduatedIds.size}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-zinc-500">Current level</span>
-              <span className="font-medium text-zinc-900">{currentLevel}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-zinc-500">Lessons completed</span>
-              <span className="font-medium text-zinc-900">
-                {completedCount}/{allCurrentLessons.length}
-              </span>
-            </div>
-            {lockedLessonCount > 0 ? (
+        <div className="grid gap-4">
+          <div className="rounded-sm border border-zinc-200 bg-white p-4">
+            <h3 className="ppc-heading text-sm font-semibold text-zinc-900">Progress snapshot</h3>
+            <div className="mt-3 grid gap-2 text-xs">
               <div className="flex justify-between">
-                <span className="text-zinc-500">Locked in this level</span>
-                <span className="font-medium text-zinc-900">{lockedLessonCount}</span>
+                <span className="text-zinc-500">Graduated levels</span>
+                <span className="font-medium text-zinc-900">{graduatedIds.size}</span>
               </div>
-            ) : null}
+              <div className="flex justify-between">
+                <span className="text-zinc-500">Current level</span>
+                <span className="font-medium text-zinc-900">{currentLevel}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-zinc-500">Lessons completed</span>
+                <span className="font-medium text-zinc-900">
+                  {completedCount}/{allCurrentLessons.length}
+                </span>
+              </div>
+              {lockedLessonCount > 0 ? (
+                <div className="flex justify-between">
+                  <span className="text-zinc-500">Locked in this level</span>
+                  <span className="font-medium text-zinc-900">{lockedLessonCount}</span>
+                </div>
+              ) : null}
+            </div>
           </div>
+
+          <PushSubscriptionPanel
+            audience="student"
+            isPushConfigured={pushStatus?.state === "ready"}
+          />
         </div>
       </section>
 

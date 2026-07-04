@@ -91,15 +91,15 @@ describe("site home page", () => {
       "utf8",
     );
 
-    expect(heroSource).toContain('className="bg-white px-2 pb-10 pt-3 sm:px-5');
-    expect(heroSource).toContain('className="grid grid-cols-2 gap-2 sm:gap-5 md:grid-cols-4"');
-    expect(cardSource).toContain("h-[12rem]");
-    expect(cardSource).toContain("h-[45%]");
+    expect(heroSource).toContain('className="bg-white px-2  pt-3 sm:px-5');
+    expect(heroSource).toContain('className="grid grid-cols-2 gap-x-2 gap-y-3.5 pb-2 sm:gap-x-5 sm:gap-y-5 md:grid-cols-4"');
+    expect(cardSource).toContain("aspect-[324/164]");
+    expect(cardSource).toContain('className="flex h-[4.65rem]');
     expect(cardSource).toContain("headerImageSrc");
     expect(contentSource).toContain(
       'headerImageSrc: "/site/home/assets/pathway-card-headers/question-card-header.webp"',
     );
-    expect(cardSource).toContain("px-2 pb-1.5 pt-1");
+    expect(cardSource).toContain("px-3 py-1.5");
     expect(cardSource).toContain("font-medium");
     expect(contentSource).toContain('title: "Find Purpose"');
     expect(contentSource).toContain('mobileDescription: "Want to grow and be trained to fulfill purpose?"');
@@ -128,11 +128,11 @@ describe("site home page", () => {
     );
 
     expect(contentSource).toContain(
-      'headerImageSrc: "/site/home/assets/church-pathway/church-logo-card.png"',
+      'headerImageSrc: "/site/home/assets/pathway-card-headers/church-card-header.svg"',
     );
-    expect(contentSource).toContain('headerImageClassName: "object-cover object-center"');
-    expect(contentSource).toContain('headerClassName: "bg-[#15349B]"');
-    expect(cardSource).toContain("headerImageClassName ?? \"object-cover\"");
+    expect(contentSource).toContain('headerImageClassName: "object-fill"');
+    expect(contentSource).toContain('headerClassName: "bg-white"');
+    expect(cardSource).toContain('headerImageClassName ?? "p-2"');
   });
 
   test("uses a refined hierarchy for the featured podcast card", () => {
@@ -165,7 +165,7 @@ describe("site home page", () => {
     expect(sectionSource).toContain('className="h-auto w-full object-cover object-top"');
   });
 
-  test("uses repo-backed Instagram reel cards for the curated social section", () => {
+  test("uses repo-backed YouTube shorts cards for the curated social section", () => {
     const socialSource = readFileSync(
       join(process.cwd(), "components", "home", "homepage-social-section.tsx"),
       "utf8",
@@ -174,28 +174,18 @@ describe("site home page", () => {
       join(process.cwd(), "components", "home", "homepage-view.tsx"),
       "utf8",
     );
-    const contentSource = readFileSync(
-      join(process.cwd(), "lib", "site-homepage-content.ts"),
-      "utf8",
-    );
-
     expect(socialSource).toContain("HomepageSocialSection({ posts }");
     expect(socialSource).toContain("site-social-post-title");
-    expect(socialSource).toContain("@pleros_org");
+    expect(socialSource).toContain("Pleros Ministries");
+    expect(socialSource).toContain("Watch short");
     expect(socialSource).not.toContain("useEffect");
     expect(socialSource).not.toContain('fetch("/api/social/instagram"');
     expect(socialSource).not.toContain("<iframe");
     expect(socialSource).not.toContain("SafeInstagramEmbed");
     expect(socialSource).not.toContain("react-social-media-embed");
-    expect(viewSource).toContain("homeInstagramReels");
-    expect(viewSource).toContain("<HomepageSocialSection posts={homeInstagramReels} />");
+    expect(viewSource).toContain("getLatestYoutubeVideos(5)");
+    expect(viewSource).toContain("<HomepageSocialSection posts={posts} />");
     expect(viewSource).not.toContain("getLatestInstagramPosts");
-    expect(contentSource).toContain('export const homeInstagramProfileUrl = "https://instagram.com/pleros_org";');
-    expect(contentSource).toContain("https://www.instagram.com/reel/DWimLXEDHSG/");
-    expect(contentSource).toContain("https://www.instagram.com/reel/DWidB0TDPVn/");
-    expect(contentSource).toContain("https://www.instagram.com/reel/DWhAJEaDCoW/");
-    expect(contentSource).toContain("https://www.instagram.com/reel/DWgEDJADEzX/");
-    expect(contentSource).toContain("https://www.instagram.com/reel/DWf6X8-jCU-/");
     expect(viewSource).not.toContain("getInstagramReelPreviews");
   });
 

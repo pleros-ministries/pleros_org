@@ -20,7 +20,6 @@ const navLinks = [
   { href: "/#library", label: "Library" },
   { href: "/#community", label: "Community" },
   { href: "/#socials", label: "Socials" },
-  { href: "/style-demo", label: "Style demo" },
 ] as const;
 
 export function SiteNav() {

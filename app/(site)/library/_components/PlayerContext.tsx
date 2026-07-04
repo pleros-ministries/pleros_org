@@ -44,7 +44,10 @@ export function PlayerProvider({ children }: { children: React.ReactNode }) {
     flatListRef.current = list;
   }, []);
   const currentTrackRef = useRef<Teaching | null>(null);
-  currentTrackRef.current = currentTrack;
+
+  useEffect(() => {
+    currentTrackRef.current = currentTrack;
+  }, [currentTrack]);
 
   // Load + play when track changes (by id)
   useEffect(() => {

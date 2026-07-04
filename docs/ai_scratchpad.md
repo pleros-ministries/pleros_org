@@ -57,6 +57,7 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - Notifications v1 should expose operational readiness before adding delivery complexity.
 - Show configured channels, wired event triggers, browser subscription state, and blocked environment prerequisites.
 - Add tested pure status helpers first, render `/admin/notifications` from that model, and reuse the existing push subscription hook.
+- Do not link this repo to a guessed Vercel account/project. If env values are needed, generate a paste-ready env snippet for the user to add in the correct Vercel account.
 
 ## Public site visual system
 
@@ -116,6 +117,7 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - `/dashboard` should require either a valid app session or welcome-access cookie and redirect unauthenticated visitors to `/welcome`.
 - Welcome access cookies should last 100 days and refresh on dashboard visits when present.
 - Welcome-pack access email should send only when durable lead state says the lead is newly created; client in-flight guards are secondary.
+- When Drizzle migration history is out of sync with existing DB objects, verify the actual tables/indexes/enums first, then repair `drizzle.__drizzle_migrations` only after confirming the objects already exist.
 
 ## Security and operational hygiene
 

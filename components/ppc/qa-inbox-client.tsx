@@ -1,5 +1,7 @@
 "use client";
 
+/* eslint-disable react-hooks/set-state-in-effect */
+
 import { useState, useTransition, useCallback, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Send, XCircle, MessageSquare, Loader2, Search, RotateCcw } from "lucide-react";

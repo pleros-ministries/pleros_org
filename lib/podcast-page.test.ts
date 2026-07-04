@@ -41,7 +41,9 @@ describe("podcast page", () => {
     expect(viewSource).toContain("HomepageCommunitySection");
     expect(viewSource).toContain("HomepageFooter");
     expect(contentSource).toContain('title: "Pleros Podcast"');
-    expect(contentSource).toContain("Start with the latest teaching");
+    expect(contentSource).toContain(
+      "Your 15-minute dose of transformation, wherever you listen",
+    );
     expect(contentSource).toContain("Subscribe on YouTube");
     expect(contentSource).toContain("The Place of the Gospel in Your Life");
     expect(contentSource).toContain(

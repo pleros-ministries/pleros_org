@@ -2,18 +2,22 @@
 
 import { BellRing, CheckCircle2, LoaderCircle, MonitorSmartphone } from "lucide-react";
 
+import { getPushSubscriptionCopy } from "@/lib/ppc-notifications";
 import { usePushSubscription } from "@/lib/push/use-push";
 
 type PushSubscriptionPanelProps = {
   isPushConfigured: boolean;
+  audience?: "staff" | "student";
 };
 
 export function PushSubscriptionPanel({
   isPushConfigured,
+  audience = "staff",
 }: PushSubscriptionPanelProps) {
   const { isSupported, isSubscribed, isPending, subscribe } =
     usePushSubscription();
   const isBlocked = !isPushConfigured || !isSupported;
+  const copy = getPushSubscriptionCopy(audience);
 
   return (
     <article className="rounded-sm border border-zinc-200 bg-white p-4">
@@ -36,12 +40,12 @@ export function PushSubscriptionPanel({
         </p>
         <p className="mt-1 text-[11px] text-zinc-500">
           {!isPushConfigured
-            ? "Add VAPID keys before staff can subscribe from this page."
+            ? copy.unavailable
             : !isSupported
               ? "Use a browser with service worker and Push API support."
               : isSubscribed
-                ? "This device can receive PPC assignment alerts."
-                : "Subscribe this browser to receive staff assignment push alerts."}
+                ? copy.subscribed
+                : copy.available}
         </p>
       </div>
 

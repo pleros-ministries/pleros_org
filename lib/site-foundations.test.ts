@@ -10,7 +10,6 @@ describe("site foundations", () => {
   test("exposes the marketing shell navigation entries", () => {
     expect(siteNavItems).toEqual([
       { href: "/", label: "Home" },
-      { href: "/style-demo", label: "Style demo" },
       { href: "/ppc", label: "PPC login" },
     ]);
   });
