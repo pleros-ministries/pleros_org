@@ -267,6 +267,10 @@ export const writtenSubmissions = pgTable(
   },
   (t) => [
     index("written_submissions_user_lesson_idx").on(t.userId, t.lessonId),
+    uniqueIndex("written_submissions_user_lesson_unique_idx").on(
+      t.userId,
+      t.lessonId,
+    ),
     index("written_submissions_status_idx").on(t.status),
     index("written_submissions_assigned_to_idx").on(t.assignedTo),
   ],

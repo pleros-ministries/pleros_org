@@ -24,6 +24,16 @@ type LessonCompletionInput = {
   writtenApproved: boolean;
 };
 
+type StudentLevelAccessInput = {
+  levelId: number;
+  graduatedLevelIds: number[];
+  totalLevels: number;
+};
+
+type QuizAnswerQuestion = {
+  id: number;
+};
+
 export function getCurrentLevelId(
   graduatedLevelIds: number[],
   totalLevels: number,
@@ -33,6 +43,18 @@ export function getCurrentLevelId(
   }
 
   return Math.min(Math.max(...graduatedLevelIds) + 1, totalLevels);
+}
+
+export function canAccessStudentLevel(input: StudentLevelAccessInput) {
+  const currentLevelId = getCurrentLevelId(
+    input.graduatedLevelIds,
+    input.totalLevels,
+  );
+
+  return (
+    input.graduatedLevelIds.includes(input.levelId) ||
+    input.levelId === currentLevelId
+  );
 }
 
 export function getLevelJourneyRows(
@@ -100,6 +122,15 @@ export function getDashboardFocus(input: DashboardFocusInput) {
     ctaLabel: "Review this level",
     ctaHref: `/ppc/student/level/${input.currentLevelId}`,
   };
+}
+
+export function canSubmitQuizAnswers(
+  questions: QuizAnswerQuestion[],
+  answers: Record<string, string>,
+) {
+  return questions.every((question) =>
+    Boolean(answers[String(question.id)]?.trim()),
+  );
 }
 
 export function getLessonCompletionState(input: LessonCompletionInput) {

@@ -12,6 +12,7 @@ import {
 } from "@/lib/db/queries/qa";
 import { requireAuth, requireStaff, requireStudent } from "@/lib/auth/require-role";
 import { getSignedInActor, getStudentSelfActor } from "@/lib/auth/action-actor";
+import { assertCanAccessPublishedLesson } from "@/lib/auth/student-lesson-access";
 import { assertCanAccessQaThread } from "@/lib/auth/qa-access";
 import { db } from "@/lib/db";
 import { notifyQaAssignment } from "@/lib/notifications/staff-assignment";
@@ -29,6 +30,7 @@ export async function createQaThread(data: {
 }) {
   const session = await requireStudent();
   const { userId, authorRole } = getStudentSelfActor(session);
+  await assertCanAccessPublishedLesson(userId, data.lessonId);
   const thread = await createThread({
     userId,
     lessonId: data.lessonId,

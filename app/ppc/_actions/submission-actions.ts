@@ -13,6 +13,7 @@ import { sendSubmissionReviewed } from "@/lib/email/send";
 import { db } from "@/lib/db";
 import { requireAuth, requireStaff } from "@/lib/auth/require-role";
 import { getStaffActor, getStudentSelfActor } from "@/lib/auth/action-actor";
+import { assertCanAccessPublishedLesson } from "@/lib/auth/student-lesson-access";
 import { notifyReviewAssignment } from "@/lib/notifications/staff-assignment";
 import { hasAdminAccess, isStaffRole, type AppRole } from "@/lib/app-role";
 
@@ -24,6 +25,7 @@ function revalidateSubmissionSurfaces() {
 export async function saveDraft(lessonId: number, content: string) {
   const session = await requireAuth();
   const { userId } = getStudentSelfActor(session);
+  await assertCanAccessPublishedLesson(userId, lessonId);
   await upsertDraft(userId, lessonId, content);
   revalidateSubmissionSurfaces();
 }
@@ -31,6 +33,7 @@ export async function saveDraft(lessonId: number, content: string) {
 export async function submitWrittenResponse(lessonId: number) {
   const session = await requireAuth();
   const { userId } = getStudentSelfActor(session);
+  await assertCanAccessPublishedLesson(userId, lessonId);
   await submitForReview(userId, lessonId);
   revalidateSubmissionSurfaces();
 }

@@ -8,6 +8,7 @@ import { getSubmission } from "@/lib/db/queries/submissions";
 import { Breadcrumb } from "@/components/ppc/breadcrumb";
 import { PageHeader } from "@/components/ppc/page-header";
 import { WrittenResponseEditor } from "@/components/ppc/written-response-editor";
+import { canStudentAccessLevel } from "@/lib/auth/student-lesson-access";
 
 export default async function WrittenResponsePage({
   params,
@@ -31,6 +32,9 @@ export default async function WrittenResponsePage({
 
   const lesson = await getLessonById(lessonId);
   if (!lesson || lesson.levelId !== levelId) notFound();
+  if (!(await canStudentAccessLevel(userId, levelId))) {
+    redirect("/ppc/student");
+  }
   if (lesson.status !== "published") {
     redirect(`/ppc/student/level/${levelId}`);
   }

@@ -16,6 +16,7 @@ import { ProgressBar } from "@/components/ppc/progress-bar";
 import { CompletionSignals } from "@/components/ppc/completion-signals";
 import { StatusBadge } from "@/components/ppc/status-badge";
 import { getLessonCompletionState } from "@/lib/student-journey";
+import { canStudentAccessLevel } from "@/lib/auth/student-lesson-access";
 
 export default async function LevelDetailPage({
   params,
@@ -34,6 +35,10 @@ export default async function LevelDetailPage({
   const userId = session.user.id;
   const level = await getLevelById(levelId);
   if (!level) notFound();
+
+  if (!(await canStudentAccessLevel(userId, levelId))) {
+    redirect("/ppc/student");
+  }
 
   const [graduated, readiness, lessonProgress, allLessons] = await Promise.all([
     isLevelGraduated(userId, levelId),

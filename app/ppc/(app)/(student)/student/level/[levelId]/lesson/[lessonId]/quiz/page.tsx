@@ -9,6 +9,7 @@ import { Breadcrumb } from "@/components/ppc/breadcrumb";
 import { PageHeader } from "@/components/ppc/page-header";
 import { EmptyState } from "@/components/ppc/empty-state";
 import { QuizFlow } from "@/components/ppc/quiz-flow";
+import { canStudentAccessLevel } from "@/lib/auth/student-lesson-access";
 
 export default async function QuizPage({
   params,
@@ -32,6 +33,9 @@ export default async function QuizPage({
 
   const lesson = await getLessonById(lessonId);
   if (!lesson || lesson.levelId !== levelId) notFound();
+  if (!(await canStudentAccessLevel(userId, levelId))) {
+    redirect("/ppc/student");
+  }
   if (lesson.status !== "published") {
     redirect(`/ppc/student/level/${levelId}`);
   }

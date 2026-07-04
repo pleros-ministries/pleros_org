@@ -6,6 +6,7 @@ import { Trophy, X, ChevronLeft, ChevronRight, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MCQuestion, ShortTextQuestion } from "@/components/ppc/quiz-question";
 import { submitQuiz } from "@/app/ppc/_actions/quiz-actions";
+import { canSubmitQuizAnswers } from "@/lib/student-journey";
 
 type Question = {
   id: number;
@@ -38,6 +39,10 @@ export function QuizFlow({ lessonId, questions, bestScore }: QuizFlowProps) {
   const sorted = [...questions].sort((a, b) => a.sortOrder - b.sortOrder);
   const current = sorted[currentIndex];
   const isLast = currentIndex === sorted.length - 1;
+  const canSubmit = canSubmitQuizAnswers(sorted, answers);
+  const answeredCount = sorted.filter((question) =>
+    Boolean(answers[String(question.id)]?.trim()),
+  ).length;
 
   const setAnswer = (questionId: number, value: string) => {
     setAnswers((prev) => ({ ...prev, [String(questionId)]: value }));
@@ -117,6 +122,10 @@ export function QuizFlow({ lessonId, questions, bestScore }: QuizFlowProps) {
         <p className="text-xs text-zinc-400">Best score so far: {bestScore}%</p>
       )}
 
+      <p className="text-xs text-zinc-500">
+        {answeredCount}/{sorted.length} answered
+      </p>
+
       <div>
         {current.questionType === "multiple_choice" && current.options ? (
           <MCQuestion
@@ -156,11 +165,12 @@ export function QuizFlow({ lessonId, questions, bestScore }: QuizFlowProps) {
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={isPending}
+            disabled={isPending || !canSubmit}
             className={cn(
               "inline-flex h-8 items-center gap-1.5 rounded-sm bg-[var(--color-brand-blue)] px-3 text-xs font-medium text-white transition-colors hover:bg-[var(--color-brand-blue-hover)]",
-              isPending && "opacity-50",
+              (isPending || !canSubmit) && "cursor-not-allowed opacity-50",
             )}
+            title={!canSubmit ? "Answer every question before submitting." : undefined}
           >
             <Send className="size-3.5" />
             {isPending ? "Submitting…" : "Submit"}

@@ -1,6 +1,8 @@
 import { describe, expect, test } from "vitest";
 
 import {
+  canAccessStudentLevel,
+  canSubmitQuizAnswers,
   getCurrentLevelId,
   getDashboardFocus,
   getLevelJourneyRows,
@@ -48,6 +50,37 @@ describe("student journey helpers", () => {
         statusLabel: "Locked",
       },
     ]);
+  });
+
+  test("allows students to access graduated and current levels but not future levels", () => {
+    expect(
+      canAccessStudentLevel({
+        levelId: 1,
+        graduatedLevelIds: [],
+        totalLevels: 5,
+      }),
+    ).toBe(true);
+    expect(
+      canAccessStudentLevel({
+        levelId: 2,
+        graduatedLevelIds: [],
+        totalLevels: 5,
+      }),
+    ).toBe(false);
+    expect(
+      canAccessStudentLevel({
+        levelId: 2,
+        graduatedLevelIds: [1],
+        totalLevels: 5,
+      }),
+    ).toBe(true);
+    expect(
+      canAccessStudentLevel({
+        levelId: 1,
+        graduatedLevelIds: [1],
+        totalLevels: 5,
+      }),
+    ).toBe(true);
   });
 
   test("summarizes the current dashboard focus when there is a next lesson", () => {
@@ -143,5 +176,32 @@ describe("student journey helpers", () => {
       label: "Complete",
       variant: "success",
     });
+  });
+
+  test("blocks quiz submission until every question has an answer", () => {
+    const questions = [{ id: 1 }, { id: 2 }, { id: 3 }];
+
+    expect(
+      canSubmitQuizAnswers(questions, {
+        "1": "Grace",
+        "2": "Faith",
+        "3": "Hope",
+      }),
+    ).toBe(true);
+
+    expect(
+      canSubmitQuizAnswers(questions, {
+        "1": "Grace",
+        "2": "   ",
+        "3": "Hope",
+      }),
+    ).toBe(false);
+
+    expect(
+      canSubmitQuizAnswers(questions, {
+        "1": "Grace",
+        "3": "Hope",
+      }),
+    ).toBe(false);
   });
 });

@@ -8,6 +8,7 @@ import { getThreadsByLesson } from "@/lib/db/queries/qa";
 import { Breadcrumb } from "@/components/ppc/breadcrumb";
 import { PageHeader } from "@/components/ppc/page-header";
 import { QaThreadList } from "@/components/ppc/qa-thread-list";
+import { canStudentAccessLevel } from "@/lib/auth/student-lesson-access";
 
 export default async function QaPage({
   params,
@@ -31,6 +32,9 @@ export default async function QaPage({
 
   const lesson = await getLessonById(lessonId);
   if (!lesson || lesson.levelId !== levelId) notFound();
+  if (!(await canStudentAccessLevel(userId, levelId))) {
+    redirect("/ppc/student");
+  }
   if (lesson.status !== "published") {
     redirect(`/ppc/student/level/${levelId}`);
   }

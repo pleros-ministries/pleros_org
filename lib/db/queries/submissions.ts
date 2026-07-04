@@ -16,20 +16,16 @@ export async function getSubmissionById(submissionId: number) {
 }
 
 export async function upsertDraft(userId: string, lessonId: number, content: string) {
-  const existing = await getSubmission(userId, lessonId);
-
-  if (existing) {
-    const [updated] = await db
-      .update(schema.writtenSubmissions)
-      .set({ content })
-      .where(eq(schema.writtenSubmissions.id, existing.id))
-      .returning();
-    return updated;
-  }
-
   const [created] = await db
     .insert(schema.writtenSubmissions)
     .values({ userId, lessonId, content, status: "draft" })
+    .onConflictDoUpdate({
+      target: [
+        schema.writtenSubmissions.userId,
+        schema.writtenSubmissions.lessonId,
+      ],
+      set: { content },
+    })
     .returning();
   return created;
 }

@@ -19,6 +19,7 @@ import { AudioPlayer } from "@/components/ppc/audio-player";
 import { CompletionSignals } from "@/components/ppc/completion-signals";
 import { LessonHubClient } from "@/components/ppc/lesson-hub-client";
 import { StatusBadge } from "@/components/ppc/status-badge";
+import { canStudentAccessLevel } from "@/lib/auth/student-lesson-access";
 
 export default async function LessonDetailPage({
   params,
@@ -44,6 +45,9 @@ export default async function LessonDetailPage({
 
   const { lesson, progress } = result;
   if (lesson.levelId !== levelId) notFound();
+  if (!(await canStudentAccessLevel(userId, levelId))) {
+    redirect("/ppc/student");
+  }
   if (lesson.status !== "published") {
     redirect(`/ppc/student/level/${levelId}`);
   }

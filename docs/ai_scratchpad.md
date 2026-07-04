@@ -10,6 +10,7 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - For UI work, use existing shells, tokens, fonts, and component patterns before introducing new styling.
 - Sentence case is the default copy style.
 - Do not revert unrelated worktree changes. For rollback requests, inspect the touched-file set, restore only the requested files, remove added-only files from that task, and verify with `git status --short`.
+- For PPC work, commit and push completed slices frequently when safe, using explicit path staging so unrelated dirty work is not bundled accidentally.
 
 ## Current project setup
 
@@ -27,6 +28,7 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - Serialize `Date` objects to ISO strings before passing data to client components.
 - Server actions should call `revalidatePath("/ppc", "layout")` after mutations.
 - Use `onConflictDoUpdate` for student progress upserts.
+- Student access is level-gated, not lesson-sequence-gated: students may access any published lesson in graduated/current levels, but not future levels.
 
 ## PPC auth and access
 

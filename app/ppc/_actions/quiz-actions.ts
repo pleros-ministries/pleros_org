@@ -4,11 +4,19 @@ import { revalidatePath } from "next/cache";
 import { getQuizQuestions, submitQuizAttempt, getAttemptCount } from "@/lib/db/queries/quizzes";
 import { requireAuth } from "@/lib/auth/require-role";
 import { getStudentSelfActor } from "@/lib/auth/action-actor";
+import { assertCanAccessPublishedLesson } from "@/lib/auth/student-lesson-access";
+import { canSubmitQuizAnswers } from "@/lib/student-journey";
 
 export async function submitQuiz(lessonId: number, answers: Record<string, string>) {
   const session = await requireAuth();
   const { userId } = getStudentSelfActor(session);
+  await assertCanAccessPublishedLesson(userId, lessonId);
   const questions = await getQuizQuestions(lessonId);
+
+  if (!canSubmitQuizAnswers(questions, answers)) {
+    throw new Error("Answer every question before submitting.");
+  }
+
   const mcQuestions = questions.filter((q) => q.questionType === "multiple_choice");
 
   let correct = 0;

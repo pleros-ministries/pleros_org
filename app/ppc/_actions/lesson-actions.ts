@@ -5,10 +5,12 @@ import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
 import { requireAuth } from "@/lib/auth/require-role";
 import { getStudentSelfActor } from "@/lib/auth/action-actor";
+import { assertCanAccessPublishedLesson } from "@/lib/auth/student-lesson-access";
 
 export async function markAudioListened(lessonId: number) {
   const session = await requireAuth();
   const { userId } = getStudentSelfActor(session);
+  await assertCanAccessPublishedLesson(userId, lessonId);
   await db
     .insert(schema.studentProgress)
     .values({ userId, lessonId, audioListened: true })
@@ -22,6 +24,7 @@ export async function markAudioListened(lessonId: number) {
 export async function markNotesRead(lessonId: number) {
   const session = await requireAuth();
   const { userId } = getStudentSelfActor(session);
+  await assertCanAccessPublishedLesson(userId, lessonId);
   await db
     .insert(schema.studentProgress)
     .values({ userId, lessonId, notesRead: true })
