@@ -25,7 +25,10 @@ describe("welcome dashboard content", () => {
     expect(devotion?.cards[1]?.href).toBe("/dashboard/prayer-watch");
     expect(training?.cards[0]?.href).toBe("/ppc");
     expect(training?.cards[1]?.href).toBe("/dashboard/school-of-purpose");
-    expect(commitment?.cards.every((card) => card.href === undefined)).toBe(true);
+    expect(commitment?.cards.find((card) => card.id === "assignments")?.href).toBeUndefined();
+    expect(commitment?.cards.find((card) => card.id === "partnership")?.href).toBe(
+      "/partner",
+    );
   });
 
   test("defines four two-card dashboard sections matching the mobile frame", () => {

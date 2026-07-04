@@ -92,6 +92,7 @@ export const welcomeDashboardSections: WelcomeDashboardSection[] = [
         title: "Partnership",
         description:
           "Be trained to walk in and fulfill God's purpose for your life.",
+        href: "/partner",
         accent: "blue",
       },
     ],
