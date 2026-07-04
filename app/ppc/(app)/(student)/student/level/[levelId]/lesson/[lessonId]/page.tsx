@@ -133,7 +133,7 @@ export default async function LessonDetailPage({
         <div className="space-y-4">
           {lesson.audioUrl && (
             <section className="space-y-2">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
+              <h3 className="ppc-heading text-xs font-semibold uppercase tracking-wider text-zinc-400">
                 Audio
               </h3>
               <AudioPlayer src={lesson.audioUrl} title={lesson.title} />
@@ -142,7 +142,7 @@ export default async function LessonDetailPage({
 
           {lesson.notesContent && (
             <section className="space-y-2">
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
+              <h3 className="ppc-heading text-xs font-semibold uppercase tracking-wider text-zinc-400">
                 Notes
               </h3>
               <div className="prose prose-sm max-w-none rounded-sm border border-zinc-200 bg-white p-4 text-zinc-700">

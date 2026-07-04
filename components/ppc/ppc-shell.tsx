@@ -11,6 +11,7 @@ import {
   Dot,
   FolderKanban,
   GraduationCap,
+  Globe,
   Lock,
   Menu,
   LogOut,
@@ -271,6 +272,14 @@ function SidebarFooter({ collapsed, session, signOutHref }: SidebarFooterProps) 
           >
             {getInitials(session.user.name)}
           </div>
+          <Link
+            href="/"
+            title="Visit site"
+            className="inline-flex size-10 items-center justify-center rounded-xl border border-zinc-200 bg-white text-zinc-500 transition-colors hover:bg-zinc-50 hover:text-zinc-900"
+          >
+            <Globe className="size-4" />
+            <span className="sr-only">Visit site</span>
+          </Link>
           <button
             type="button"
             title="Sign out"
@@ -299,17 +308,26 @@ function SidebarFooter({ collapsed, session, signOutHref }: SidebarFooterProps) 
               </p>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={async () => {
-              await authClient.signOut();
-              window.location.href = signOutHref;
-            }}
-            className="mt-3 inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-xl border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-100"
-          >
-            <LogOut className="size-3.5" />
-            Sign out
-          </button>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <Link
+              href="/"
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-100"
+            >
+              <Globe className="size-3.5" />
+              Visit site
+            </Link>
+            <button
+              type="button"
+              onClick={async () => {
+                await authClient.signOut();
+                window.location.href = signOutHref;
+              }}
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-100"
+            >
+              <LogOut className="size-3.5" />
+              Sign out
+            </button>
+          </div>
         </div>
       )}
     </div>

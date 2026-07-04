@@ -78,7 +78,7 @@ export default async function AdminContactPage({
       <div className="grid gap-4 xl:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
         <section className="rounded-sm border border-zinc-200 bg-white">
           <div className="border-b border-zinc-100 px-4 py-3">
-            <h2 className="text-sm font-semibold text-zinc-900">Inbox</h2>
+            <h2 className="ppc-heading text-sm font-semibold text-zinc-900">Inbox</h2>
             <p className="mt-0.5 text-xs text-zinc-500">
               Public leads and ministry contact messages
             </p>
@@ -140,7 +140,7 @@ export default async function AdminContactPage({
             <div className="grid gap-6 px-6 py-5">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div className="min-w-0">
-                  <h2 className="text-lg font-semibold text-zinc-950">
+                  <h2 className="ppc-heading text-lg font-semibold text-zinc-950">
                     {selectedSubmission.fullName}
                   </h2>
                   <p className="mt-1 text-sm text-zinc-500">

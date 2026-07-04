@@ -169,7 +169,7 @@ export default async function AdminEntryPage() {
           <article className="rounded-sm border border-zinc-200 bg-white p-4 xl:col-span-2">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-semibold text-zinc-900">
+                <h3 className="ppc-heading text-sm font-semibold text-zinc-900">
                   Quick actions
                 </h3>
                 <p className="text-[11px] text-zinc-500">
@@ -281,7 +281,7 @@ export default async function AdminEntryPage() {
           <article className="rounded-sm border border-zinc-200 bg-white p-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-semibold text-zinc-900">
+                <h3 className="ppc-heading text-sm font-semibold text-zinc-900">
                   Platform snapshot
                 </h3>
                 <p className="text-[11px] text-zinc-500">
@@ -399,7 +399,7 @@ export default async function AdminEntryPage() {
           <article className="rounded-sm border border-zinc-200 bg-white p-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-semibold text-zinc-900">
+                <h3 className="ppc-heading text-sm font-semibold text-zinc-900">
                   Assignment snapshot
                 </h3>
                 <p className="text-[11px] text-zinc-500">
@@ -465,7 +465,7 @@ export default async function AdminEntryPage() {
 
           <article className="rounded-sm border border-zinc-200 bg-white p-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-zinc-900">
+              <h3 className="ppc-heading text-sm font-semibold text-zinc-900">
                 Review queue
               </h3>
               <Link
@@ -488,7 +488,7 @@ export default async function AdminEntryPage() {
 
           <article className="rounded-sm border border-zinc-200 bg-white p-4 xl:col-span-2">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-zinc-900">
+              <h3 className="ppc-heading text-sm font-semibold text-zinc-900">
                 Open Q&A threads
               </h3>
               <Link

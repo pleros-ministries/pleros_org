@@ -91,7 +91,7 @@ export default async function StudentDashboardPage() {
               <p className="text-[11px] font-medium uppercase tracking-wider text-zinc-400">
                 {dashboardFocus.eyebrow}
               </p>
-              <h3 className="mt-1 text-sm font-semibold text-zinc-900">
+              <h3 className="ppc-heading mt-1 text-sm font-semibold text-zinc-900">
                 {dashboardFocus.title}
               </h3>
               <p className="mt-1 text-xs text-zinc-500">
@@ -138,7 +138,7 @@ export default async function StudentDashboardPage() {
         </div>
 
         <div className="rounded-sm border border-zinc-200 bg-white p-4">
-          <h3 className="text-sm font-semibold text-zinc-900">Progress snapshot</h3>
+          <h3 className="ppc-heading text-sm font-semibold text-zinc-900">Progress snapshot</h3>
           <div className="mt-3 grid gap-2 text-xs">
             <div className="flex justify-between">
               <span className="text-zinc-500">Graduated levels</span>
@@ -167,7 +167,7 @@ export default async function StudentDashboardPage() {
       <section className="rounded-sm border border-zinc-200 bg-white p-4">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h3 className="text-sm font-semibold text-zinc-900">
+            <h3 className="ppc-heading text-sm font-semibold text-zinc-900">
               Pathway overview
             </h3>
             <p className="mt-1 text-[11px] text-zinc-500">

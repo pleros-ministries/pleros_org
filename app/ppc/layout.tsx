@@ -6,5 +6,5 @@ export const metadata: Metadata = {
 };
 
 export default function PpcRootLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return <div className="ppc-theme">{children}</div>;
 }

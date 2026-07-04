@@ -118,7 +118,7 @@ export function QaThreadList({
 
         {activeThread && (
           <div className="flex items-center gap-2">
-            <h3 className="text-sm font-medium text-zinc-900">{activeThread.subject}</h3>
+            <h3 className="ppc-heading text-sm font-medium text-zinc-900">{activeThread.subject}</h3>
             <StatusBadge
               status={activeThread.status}
               variant={activeThread.status === "closed" ? "default" : "success"}
@@ -163,7 +163,7 @@ export function QaThreadList({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-medium text-zinc-900">Questions &amp; answers</h3>
+        <h3 className="ppc-heading text-sm font-medium text-zinc-900">Questions &amp; answers</h3>
         <button
           type="button"
           onClick={() => setShowNewForm(!showNewForm)}

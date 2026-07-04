@@ -125,7 +125,7 @@ export function StaffManagementClient({
       <section className="rounded-sm border border-zinc-200 bg-white p-4">
         <div className="flex items-center gap-2">
           <MailPlus className="size-4 text-zinc-500" />
-          <h3 className="text-sm font-semibold text-zinc-900">
+          <h3 className="ppc-heading text-sm font-semibold text-zinc-900">
             Invite staff
           </h3>
         </div>
@@ -194,7 +194,7 @@ export function StaffManagementClient({
         <section className="rounded-sm border border-zinc-200 bg-white p-4">
           <div className="flex items-center gap-2">
             <ShieldCheck className="size-4 text-zinc-500" />
-            <h3 className="text-sm font-semibold text-zinc-900">
+            <h3 className="ppc-heading text-sm font-semibold text-zinc-900">
               Current staff
             </h3>
           </div>
@@ -233,7 +233,7 @@ export function StaffManagementClient({
         <section className="rounded-sm border border-zinc-200 bg-white p-4">
           <div className="flex items-center gap-2">
             <RotateCcw className="size-4 text-zinc-500" />
-            <h3 className="text-sm font-semibold text-zinc-900">
+            <h3 className="ppc-heading text-sm font-semibold text-zinc-900">
               Invites
             </h3>
           </div>

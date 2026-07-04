@@ -22,7 +22,7 @@ export default async function AdminWelcomePackPage() {
 
       <section className="overflow-hidden rounded-sm border border-zinc-200 bg-white">
         <div className="border-b border-zinc-100 px-4 py-3">
-          <h2 className="text-sm font-semibold text-zinc-900">
+          <h2 className="ppc-heading text-sm font-semibold text-zinc-900">
             Lead and unlock state
           </h2>
           <p className="mt-0.5 text-xs text-zinc-500">
