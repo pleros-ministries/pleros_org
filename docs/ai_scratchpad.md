@@ -101,6 +101,7 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 
 - Desktop public nav dropdowns should be real menu panels with vertically stacked full-width links, left-aligned text, and enough width/padding to scan quickly.
 - For homepage/card asset swaps, import explicit source assets into `public/site/home/assets/*`, update the specific card data, and verify mobile rendering.
+- For welcome dashboard card backgrounds, copy the named source image into `public/site/home/assets/dashboard-cards/`, wire it through card data, and verify the rendered preview card image.
 - Separate SVG foreground color from card header surface color; brand-colored logo artwork may still sit on a white card header.
 - Partner/support copy should use the Vision and Mission page as source of truth: reaching people with the word of truth of the Gospel, online and offline, for salvation, establishment, and fulfillment of God's purpose.
 - Partner CTAs should be WhatsApp-first with a prefilled message when requested.
