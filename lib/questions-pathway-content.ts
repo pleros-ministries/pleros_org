@@ -37,11 +37,11 @@ export type QuestionsPathwaySeriesItem = {
 export const questionsPathwayHero: QuestionsPathwayHero = {
   title: "Find Answers",
   description: "Do you have doubts about God and/or the Gospel?",
-  illustrationSrc: "/site/home/assets/questions-pathway/question-header-icon.png",
+  illustrationSrc: "/site/home/assets/questions-pathway/question-header-icon.webp",
 };
 
 const sharedPlayIconSrc =
-  "/site/home/assets/questions-pathway/video-circle-icon.png";
+  "/site/home/assets/questions-pathway/video-circle-icon.webp";
 
 const sharedSeriesDescription =
   "Your daily dose of God's Word helping you fulfill God's purpose";
@@ -208,7 +208,7 @@ export const questionsSeriesPages: QuestionsSeriesPage[] = [
     cardSubtitle:
       "Five short teachings on Salvation, the Holy Spirit, Healing, and the Local Church",
     thumbnailSrc:
-      "/site/home/assets/questions-pathway/thumbnails/most-important-questions-series.png",
+      "/site/home/assets/questions-pathway/thumbnails/most-important-questions-series.webp",
     playIconSrc: sharedPlayIconSrc,
     videos: mostImportantQuestionsVideos,
   },
@@ -219,7 +219,7 @@ export const questionsSeriesPages: QuestionsSeriesPage[] = [
     cardSubtitle:
       "Twelve simple videos with clear answers to common Gospel questions",
     thumbnailSrc:
-      "/site/home/assets/questions-pathway/thumbnails/gospel-answers-simple-series.png",
+      "/site/home/assets/questions-pathway/thumbnails/gospel-answers-simple-series.webp",
     playIconSrc: sharedPlayIconSrc,
     videos: gospelAnswersSimpleVideos,
   },
@@ -228,7 +228,7 @@ export const questionsSeriesPages: QuestionsSeriesPage[] = [
     title: "Gospel Answers Series (Critical Version)",
     description: questionsPathwayHero.description,
     thumbnailSrc:
-      "/site/home/assets/questions-pathway/thumbnails/gospel-answers-critical-series.png",
+      "/site/home/assets/questions-pathway/thumbnails/gospel-answers-critical-series.webp",
     playIconSrc: sharedPlayIconSrc,
     comingSoon: true,
     comingSoonMessage:

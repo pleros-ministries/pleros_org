@@ -92,7 +92,7 @@ export function LibrarySidebar({ teachings, sortMode, setSortMode }: Props) {
                 {/* Teaching thumbnail */}
                 <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-[#011585] p-1.5">
                   <Image
-                    src="/site/home/assets/pleros-wordmark.png"
+                    src="/site/home/assets/pleros-wordmark.webp"
                     alt="Pleros"
                     width={36}
                     height={36}

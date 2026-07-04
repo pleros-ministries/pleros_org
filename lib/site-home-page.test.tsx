@@ -97,7 +97,7 @@ describe("site home page", () => {
     expect(cardSource).toContain("h-[45%]");
     expect(cardSource).toContain("headerImageSrc");
     expect(contentSource).toContain(
-      'headerImageSrc: "/site/home/assets/pathway-card-headers/question-card-header.png"',
+      'headerImageSrc: "/site/home/assets/pathway-card-headers/question-card-header.webp"',
     );
     expect(cardSource).toContain("px-2 pb-1.5 pt-1");
     expect(cardSource).toContain("font-medium");

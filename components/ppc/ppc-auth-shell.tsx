@@ -13,7 +13,7 @@ export function PpcAuthShell({ children }: PpcAuthShellProps) {
         <div className="flex h-12 w-full items-center justify-between gap-3 px-5 md:h-14 lg:h-[3.75rem] lg:px-8">
           <Link href="/" aria-label="Pleros home" className="inline-flex shrink-0 items-center">
             <Image
-              src="/site/home/assets/white-pleros-logomark.png"
+              src="/site/home/assets/white-pleros-logomark.webp"
               alt="Pleros"
               width={2067}
               height={1016}

@@ -30,7 +30,7 @@ export function SiteNav() {
     <div className="container-pleros flex h-[4.25rem] items-center justify-between gap-4">
       <Link href="/" className="inline-flex items-center" aria-label="Pleros home">
         <Image
-          src="/brand/white-logotype.png"
+          src="/brand/white-logotype.webp"
           alt="Pleros Ministries and Missions"
           width={345}
           height={177}

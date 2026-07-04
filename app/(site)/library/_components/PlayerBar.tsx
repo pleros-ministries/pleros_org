@@ -67,7 +67,7 @@ export function PlayerBar() {
         <div className="flex min-w-0 flex-1 items-center gap-2.5 sm:gap-3 md:w-[240px] md:flex-none md:shrink-0">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[#011585] p-2">
             <Image
-              src="/site/home/assets/pleros-wordmark.png"
+              src="/site/home/assets/pleros-wordmark.webp"
               alt="Pleros"
               width={40}
               height={40}

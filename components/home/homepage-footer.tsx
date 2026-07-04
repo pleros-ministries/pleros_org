@@ -31,7 +31,7 @@ export function HomepageFooter() {
       <div className="site-shell-bar-inner pb-8 pt-6 lg:pb-8 lg:pt-8">
         <div className="grid gap-8 xl:grid-cols-[minmax(7.5rem,9rem)_minmax(0,1fr)_auto] xl:items-start xl:gap-x-12 xl:gap-y-0">
           <Image
-            src="/site/home/assets/footer--wordmark.png"
+            src="/site/home/assets/footer--wordmark.webp"
             alt="Pleros"
             width={144}
             height={66}

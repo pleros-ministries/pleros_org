@@ -28,7 +28,7 @@ export function HomepageNav() {
       <div className="site-shell-bar-inner flex h-12 items-center justify-between gap-3 md:h-14 lg:h-[3.75rem] lg:gap-4">
         <Link href="/" aria-label="Pleros home" className="inline-flex shrink-0 items-center">
           <Image
-            src="/site/home/assets/white-pleros-logomark.png"
+            src="/site/home/assets/white-pleros-logomark.webp"
             alt="Pleros"
             width={2067}
             height={1016}

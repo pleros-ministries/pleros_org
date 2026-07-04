@@ -11,7 +11,7 @@ export const podcastPageHero = {
   eyebrow: "Podcast",
   title: "Pleros Podcast",
   mobileTitleLines: ["Follow the Pleros", "podcast"] as const,
-  illustrationSrc: "/assets/home/podcast-poster.png",
+  illustrationSrc: "/assets/home/podcast-poster.webp",
 } as const;
 
 export const podcastFeaturedSection = {

@@ -8,7 +8,7 @@ export function HomepageCommunitySection() {
     <section id="community" className="relative overflow-hidden">
       <div className="absolute inset-0">
         <Image
-          src="/site/home/assets/pleros-community-background.png"
+          src="/site/home/assets/pleros-community-background.webp"
           alt=""
           fill
           className="object-cover grayscale"

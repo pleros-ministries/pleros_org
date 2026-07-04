@@ -14,7 +14,7 @@ describe("questions pathway content", () => {
       "Do you have doubts about God and/or the Gospel?",
     );
     expect(questionsPathwayHero.illustrationSrc).toBe(
-      "/site/home/assets/questions-pathway/question-header-icon.png",
+      "/site/home/assets/questions-pathway/question-header-icon.webp",
     );
   });
 
@@ -36,9 +36,9 @@ describe("questions pathway content", () => {
         description:
           "Five short teachings on Salvation, the Holy Spirit, Healing, and the Local Church",
         thumbnailSrc:
-          "/site/home/assets/questions-pathway/thumbnails/most-important-questions-series.png",
+          "/site/home/assets/questions-pathway/thumbnails/most-important-questions-series.webp",
         playIconSrc:
-          "/site/home/assets/questions-pathway/video-circle-icon.png",
+          "/site/home/assets/questions-pathway/video-circle-icon.webp",
         href: "/questions/most-important-questions-series",
         comingSoon: undefined,
       },
@@ -47,18 +47,18 @@ describe("questions pathway content", () => {
         description:
           "Twelve simple videos with clear answers to common Gospel questions",
         thumbnailSrc:
-          "/site/home/assets/questions-pathway/thumbnails/gospel-answers-simple-series.png",
+          "/site/home/assets/questions-pathway/thumbnails/gospel-answers-simple-series.webp",
         playIconSrc:
-          "/site/home/assets/questions-pathway/video-circle-icon.png",
+          "/site/home/assets/questions-pathway/video-circle-icon.webp",
         href: "/questions/gospel-answers-simple-series",
         comingSoon: undefined,
       },
       {
         title: "Gospel Answers Series (Critical Version)",
         thumbnailSrc:
-          "/site/home/assets/questions-pathway/thumbnails/gospel-answers-critical-series.png",
+          "/site/home/assets/questions-pathway/thumbnails/gospel-answers-critical-series.webp",
         playIconSrc:
-          "/site/home/assets/questions-pathway/video-circle-icon.png",
+          "/site/home/assets/questions-pathway/video-circle-icon.webp",
         href: "/questions/gospel-answers-critical-series",
         comingSoon: true,
         description: "Coming soon",
