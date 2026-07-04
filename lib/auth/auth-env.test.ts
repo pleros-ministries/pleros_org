@@ -43,6 +43,8 @@ describe("auth environment helpers", () => {
     ).toEqual([
       "http://localhost:3000",
       "http://127.0.0.1:3000",
+      "https://pleros.org",
+      "https://www.pleros.org",
       "https://ppc.pleros.org",
       "https://pleros-org.vercel.app",
     ]);

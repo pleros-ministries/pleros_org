@@ -4,6 +4,8 @@ const LOOPBACK_ORIGINS = [
 ] as const;
 
 const KNOWN_PRODUCTION_ORIGINS = [
+  "https://pleros.org",
+  "https://www.pleros.org",
   "https://ppc.pleros.org",
   "https://pleros-org.vercel.app",
 ] as const;
