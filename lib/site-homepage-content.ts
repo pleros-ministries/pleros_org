@@ -122,8 +122,8 @@ export const homePathwayCards: HomePathwayCard[] = [
   {
     title: "Questions",
     description:
-      "If you have questions or doubts about God or the Gospel",
-    mobileDescription: "If you have questions or doubts about God or the Gospel",
+      "If you have questions or doubts about God or the Gospel, click here",
+    mobileDescription: "If you have questions or doubts about God or the Gospel, click here",
     href: "/questions",
     headerImageSrc: "/site/home/assets/pathway-card-headers/question-card-header.webp",
     headerImageClassName: "object-fill",
@@ -134,9 +134,9 @@ export const homePathwayCards: HomePathwayCard[] = [
   {
     title: "Find Purpose",
     description:
-      "Want to find out very clearly and objectively what your purpose is?",
+      "Want to find out exactly what your purpose is?",
     mobileDescription:
-      "Want to find out very clearly what your purpose is?",
+      "Want to find out exactly what your purpose is?",
     href: "/purpose",
     headerImageSrc: "/site/home/assets/pathway-card-headers/purpose-card-header.webp",
     headerImageClassName: "object-fill",
@@ -158,8 +158,8 @@ export const homePathwayCards: HomePathwayCard[] = [
   },
   {
     title: "Our Church Ministry",
-    description: "Fellowship with us at any our branches nationwide",
-    mobileDescription: "Fellowship with us at any our branches nationwide",
+    description: "We are here to help you fulfill God's purpose. Fellowship with us. ",
+    mobileDescription: "We are here to help you fulfill God's purpose. Fellowship with us.",
     href: "/about",
     headerImageSrc: "/site/home/assets/pathway-card-headers/church-card-header.svg",
     headerImageClassName: "object-fill",
