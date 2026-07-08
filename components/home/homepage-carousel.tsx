@@ -104,7 +104,7 @@ export function HomepageCarousel({ slides }: HomepageCarouselProps) {
             onClick={() => goToIndex(activeIndex - 1)}
             aria-label="Previous slide"
             disabled={activeIndex === 0}
-            className="absolute left-1 top-1/2 hidden -translate-y-1/2 items-center justify-center rounded-full bg-white/90 p-2 text-[var(--color-brand-blue)] shadow-md transition-opacity duration-150 disabled:opacity-0 sm:flex"
+            className="absolute left-1 top-1/2  -translate-y-1/2 items-center justify-center rounded-full bg-white/90 p-2 text-[var(--color-brand-blue)] shadow-md transition-opacity duration-150 disabled:opacity-0 sm:flex"
           >
             <ChevronLeftIcon className="size-4.5" />
           </button>
@@ -114,7 +114,7 @@ export function HomepageCarousel({ slides }: HomepageCarouselProps) {
             onClick={() => goToIndex(activeIndex + 1)}
             aria-label="Next slide"
             disabled={activeIndex === slides.length - 1}
-            className="absolute right-1 top-1/2 hidden -translate-y-1/2 items-center justify-center rounded-full bg-white/90 p-2 text-[var(--color-brand-blue)] shadow-md transition-opacity duration-150 disabled:opacity-0 sm:flex"
+            className="absolute right-1 top-1/2  -translate-y-1/2 items-center justify-center rounded-full bg-white/90 p-2 text-[var(--color-brand-blue)] shadow-md transition-opacity duration-150 disabled:opacity-0 sm:flex"
           >
             <ChevronRightIcon className="size-4.5" />
           </button>
