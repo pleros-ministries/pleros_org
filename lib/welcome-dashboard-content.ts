@@ -33,7 +33,7 @@ export const welcomeDashboardSections: WelcomeDashboardSection[] = [
         id: "prayer-watch-start",
         title: "Your Discipleship Journey",
         description:
-          "Let's the join our community invite be at the base of most pages to drive traffic to the community.",
+          "A Word and prayer community to help you walk in God's purpose daily.",
         href: "https://whatsapp.com/channel/0029VbBLp0ZF6smtyjjzf72L",
         accent: "blue",
         backgroundImageSrc: "/site/home/assets/pleros-community-background.webp",
