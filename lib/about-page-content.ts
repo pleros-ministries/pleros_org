@@ -1,12 +1,12 @@
 export const aboutPageHero = {
   title: "About Us",
-  description: "Discover who you were created to be",
+  description: "⁠Helping you fulfill God's purpose for your life.",
 } as const;
 
 export const aboutPageLeadLines = [
-  "Building Disciples.",
-  "Discovering Purpose",
-  "Encountering God.",
+  "Proclaiming the Truth",
+  "Perfecting the Saints",
+  "Perfecting the Saints",
 ] as const;
 
 export const aboutPageBody = [

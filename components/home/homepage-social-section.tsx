@@ -20,7 +20,7 @@ export function HomepageSocialSection({ posts }: HomepageSocialSectionProps) {
       <div className="grid gap-[1.8125rem]">
         <div className="grid justify-items-center gap-[0.94rem] text-center lg:justify-items-start lg:text-left">
           <h2 className="site-section-heading max-w-[30.9375rem] lg:max-w-none">
-            Watch our latest shorts on Purpose and Gospel answers
+            Watch Our Latest Shorts on Purpose and Gospel Answers
           </h2>
           <Link
             href={homeYoutubeChannelUrl}
@@ -81,6 +81,7 @@ export function HomepageSocialSection({ posts }: HomepageSocialSectionProps) {
 
                 <div className="grid gap-3 px-3.5 pb-4 pt-3.5">
                   <div className="flex items-center justify-between gap-3 text-[0.6875rem] leading-none font-medium tracking-[0.01em] text-[rgba(6,16,86,0.62)]">
+
                     {/* <span>Latest from YouTube</span> */}
                     <span className="uppercase">Watch short</span>
                   </div>
@@ -97,8 +98,8 @@ export function HomepageSocialSection({ posts }: HomepageSocialSectionProps) {
           </div>
         ) : (
           <div className="rounded-[1.125rem] border border-[rgba(6,16,86,0.08)] bg-[rgba(6,16,86,0.04)] px-4 py-5 text-[0.95rem] leading-[1.45] tracking-[-0.02em] text-[rgba(6,16,86,0.72)]">
-            Shorts are temporarily unavailable. Use the button above to open
-            the full channel.
+            Instagram posts are temporarily unavailable. Use the button above to
+            open the full profile.
           </div>
         )}
       </div>

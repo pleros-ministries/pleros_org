@@ -8,6 +8,7 @@ import { HomepageGiftDrawer } from "./homepage-gift-drawer";
 import { HomepageHero } from "./homepage-hero";
 import { HomepageNav } from "./homepage-nav";
 import { HomepagePodcastSection } from "./homepage-podcast-section";
+import { HomepagePrayerWatchSection } from "./homepage-prayer-watch-section";
 import { HomepageSocialSection } from "./homepage-social-section";
 import { getLatestYoutubeEpisode, getLatestYoutubeVideos } from "../../lib/homepage-feed";
 import type { HomeInstagramReel } from "../../lib/site-homepage-content";
@@ -41,6 +42,7 @@ export async function HomepageView() {
         <HomepageHero />
         <HomepageCommunitySection />
         <HomepagePodcastSection episode={episode} />
+        <HomepagePrayerWatchSection />
         <HomepageSocialSection posts={posts} />
         {/* <HomepageLibrarySection /> */}
         <HomepageFooter />

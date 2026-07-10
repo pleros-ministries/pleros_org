@@ -189,6 +189,22 @@ describe("site home page", () => {
     expect(viewSource).not.toContain("getInstagramReelPreviews");
   });
 
+  test("pushes homepage visitors to the Prayer Watch YouTube channel", () => {
+    const prayerWatchSectionSource = readFileSync(
+      join(process.cwd(), "components", "home", "homepage-prayer-watch-section.tsx"),
+      "utf8",
+    );
+    const viewSource = readFileSync(
+      join(process.cwd(), "components", "home", "homepage-view.tsx"),
+      "utf8",
+    );
+
+    expect(prayerWatchSectionSource).toContain("PRAYER_WATCH_YOUTUBE_URL");
+    expect(prayerWatchSectionSource).toContain("Subscribe now");
+    expect(prayerWatchSectionSource).not.toContain("homeYoutubeChannelUrl");
+    expect(viewSource).toContain("<HomepagePrayerWatchSection />");
+  });
+
   test("uses a full-width public page shell so desktop nav is not clipped", () => {
     const shellSource = readFileSync(
       join(process.cwd(), "components", "home", "public-site-page-shell.tsx"),

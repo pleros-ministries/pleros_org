@@ -10,7 +10,7 @@ describe("about page content", () => {
   test("keeps the hero copy aligned with the figma frame", () => {
     expect(aboutPageHero.title).toBe("About Us");
     expect(aboutPageHero.description).toBe(
-      "Discover who you were created to be",
+      "⁠Helping you fulfill God's purpose for your life.",
     );
   });
 
