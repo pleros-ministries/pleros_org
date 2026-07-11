@@ -173,7 +173,7 @@ export const homeCarouselSlides: HomeCarouselSlide[] = [
 
   {
     id: "pleros",
-    text: "At PLEROS we are here to help you find answers to...",
+    text: "At PLEROS, you can find answers to...",
     href: "/",
   },
   {
