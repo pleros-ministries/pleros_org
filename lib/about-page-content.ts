@@ -6,7 +6,7 @@ export const aboutPageHero = {
 export const aboutPageLeadLines = [
   "Proclaiming the Truth",
   "Perfecting the Saints",
-  "Perfecting the Saints",
+  "Fufilling God's Purpose",
 ] as const;
 
 export const aboutPageBody = [
