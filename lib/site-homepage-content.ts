@@ -170,11 +170,19 @@ export const homePathwayCards: HomePathwayCard[] = [
 ];
 
 export const homeCarouselSlides: HomeCarouselSlide[] = [
+
+  {
+    id: "pleros",
+    text: "At PLEROS we are here to help you find answers to...",
+    href: "/",
+  },
   {
     id: "how-to-fulfil-gods-purpose",
     text: "How to Fulfil God's Purpose",
     href: "/fulfill",
   },
+
+
   {
     id: "who-you-are-in-christ",
     text: "Who You Are in Christ",
