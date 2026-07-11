@@ -52,6 +52,7 @@ type PpcShellProps = {
   children: React.ReactNode;
   session: AppSession;
   studentLevelNavItems?: PpcStudentLevelNavItem[];
+  pathnameOverride?: string;
 };
 
 type SidebarNavigationProps = {
@@ -441,8 +442,10 @@ export function PpcShell({
   children,
   session,
   studentLevelNavItems,
+  pathnameOverride,
 }: PpcShellProps) {
-  const pathname = usePathname();
+  const currentPathname = usePathname();
+  const pathname = pathnameOverride ?? currentPathname;
   const logicalPathname = getLogicalPpcShellPath(pathname);
   const shellContext = getPpcShellContext(logicalPathname);
   const signOutHref = getSignOutHref(pathname);
