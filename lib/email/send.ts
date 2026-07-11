@@ -113,6 +113,7 @@ export async function sendWelcomePackAccessEmail(opts: {
   to: string;
   name: string;
   dashboardUrl: string;
+  downloadUrl: string;
 }) {
   if (!isEmailEnabled() || !resend) return null;
 
@@ -125,6 +126,7 @@ export async function sendWelcomePackAccessEmail(opts: {
     html: welcomePackAccessHtml({
       name: opts.name,
       dashboardUrl: opts.dashboardUrl,
+      downloadUrl: opts.downloadUrl,
     }),
   });
 }

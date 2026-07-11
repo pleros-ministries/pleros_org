@@ -5,6 +5,7 @@ import {
   parseWelcomeAccessToken,
   resolveWelcomeAccessName,
   WELCOME_ACCESS_MAX_AGE,
+  WELCOME_ACCESS_COOKIE_NAME,
 } from "./welcome-access";
 
 describe("welcome access", () => {
@@ -49,5 +50,9 @@ describe("welcome access", () => {
 
   test("keeps welcome access available for one hundred days", () => {
     expect(WELCOME_ACCESS_MAX_AGE).toBe(60 * 60 * 24 * 100);
+  });
+
+  test("uses the reset welcome access cookie namespace", () => {
+    expect(WELCOME_ACCESS_COOKIE_NAME).toBe("pleros_welcome_access_v2");
   });
 });

@@ -10,10 +10,12 @@ describe("welcome pack emails", () => {
     const html = welcomePackAccessHtml({
       name: "Grace",
       dashboardUrl: "https://pleros.org/dashboard/welcomepack",
+      downloadUrl: "https://pleros.org/api/welcome-pack/download?token=abc",
     });
 
-    expect(html).toContain("Your main gift is ready");
-    expect(html).toContain("two extra gifts");
+    expect(html).toContain("Your welcome pack download is ready");
+    expect(html).toContain("Download your welcome pack");
+    expect(html).toContain("https://pleros.org/api/welcome-pack/download?token=abc");
     expect(html).toContain("https://pleros.org/dashboard/welcomepack");
   });
 

@@ -33,6 +33,14 @@ export function HomepageCarousel({ slides }: HomepageCarouselProps) {
     setActiveIndex(Math.max(0, Math.min(index, slides.length - 1)));
   }
 
+  function goToPrevious() {
+    setActiveIndex((current) => current === 0 ? 0 : current - 1);
+  }
+
+  function goToNext() {
+    setActiveIndex((current) => (current + 1) % slides.length);
+  }
+
   function handleSwipeEnd(clientX: number) {
     if (swipeStartX === null) return;
 
@@ -43,11 +51,11 @@ export function HomepageCarousel({ slides }: HomepageCarouselProps) {
     if (Math.abs(deltaX) < SWIPE_THRESHOLD_PX) return;
 
     if (deltaX < 0) {
-      goToIndex(activeIndex + 1);
+      goToNext();
       return;
     }
 
-    goToIndex(activeIndex - 1);
+    goToPrevious();
   }
 
   if (!slides.length) return null;
@@ -101,7 +109,7 @@ export function HomepageCarousel({ slides }: HomepageCarouselProps) {
         <>
           <button
             type="button"
-            onClick={() => goToIndex(activeIndex - 1)}
+            onClick={goToPrevious}
             aria-label="Previous slide"
             disabled={activeIndex === 0}
             className="absolute left-1 top-1/2  -translate-y-1/2 items-center justify-center rounded-full bg-white/90 p-2 text-[var(--color-brand-blue)] shadow-md transition-opacity duration-150 disabled:opacity-0 sm:flex"
@@ -111,9 +119,8 @@ export function HomepageCarousel({ slides }: HomepageCarouselProps) {
 
           <button
             type="button"
-            onClick={() => goToIndex(activeIndex + 1)}
+            onClick={goToNext}
             aria-label="Next slide"
-            disabled={activeIndex === slides.length - 1}
             className="absolute right-1 top-1/2  -translate-y-1/2 items-center justify-center rounded-full bg-white/90 p-2 text-[var(--color-brand-blue)] shadow-md transition-opacity duration-150 disabled:opacity-0 sm:flex"
           >
             <ChevronRightIcon className="size-4.5" />

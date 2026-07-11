@@ -42,9 +42,11 @@ describe("welcome pack completion wiring", () => {
     expect(apiSource).toContain("source");
     expect(apiSource).toContain("sendWelcomePackAccessEmail");
     expect(apiSource).toContain("leadResult.created");
+    expect(apiSource).toContain("buildWelcomePackDownloadUrl");
+    expect(apiSource).toContain("downloadUrl");
     expect(querySource).toContain("onConflictDoNothing");
     expect(apiSource).toContain("catch((err)");
-    expect(apiSource).toContain("return NextResponse.json({ redirectTo: returnTo })");
+    expect(apiSource).toContain("return NextResponse.json({ redirectTo: returnTo, downloadUrl })");
   });
 
   test("welcome forms prevent duplicate in-flight submissions", () => {
@@ -53,22 +55,39 @@ describe("welcome pack completion wiring", () => {
 
     expect(drawerSource).toContain("isSubmittingRef.current");
     expect(drawerSource).toContain("disabled={isSubmitting || isPending}");
+    expect(drawerSource).toContain("triggerWelcomePackDownload");
+    expect(drawerSource).toContain("redirectAfterDownloadStarts");
     expect(modalSource).toContain("isSubmittingRef.current");
     expect(modalSource).toContain("disabled={isSubmitting || isPending}");
+    expect(modalSource).toContain("triggerWelcomePackDownload");
+    expect(modalSource).toContain("redirectAfterDownloadStarts");
   });
 
-  test("thank-you page prioritizes the share unlock block before the main gift block", () => {
+  test("download route protects the welcome pack file and serves it as an attachment", () => {
+    const routeSource = source("app", "api", "welcome-pack", "download", "route.ts");
+
+    expect(routeSource).toContain("parseWelcomeAccessToken");
+    expect(routeSource).toContain("WELCOME_ACCESS_COOKIE_NAME");
+    expect(routeSource).toContain("getAppSession");
+    expect(routeSource).toContain("resolveWelcomePackDownloadFilePath");
+    expect(routeSource).toContain("Content-Disposition");
+    expect(routeSource).toContain("attachment;");
+  });
+
+  test("thank-you page confirms the download and prioritizes sharing before dashboard access", () => {
     const pageSource = source("components", "home", "thank-you-page.tsx");
 
-    expect(pageSource).toContain("confirmWelcomePackShareAction");
-    expect(pageSource).toContain("I&apos;ve shared");
-    expect(pageSource).toContain("Claim Free Gifts");
-    expect(pageSource.indexOf("We have 2 more gifts for you")).toBeLessThan(
-      pageSource.indexOf("Your main gift is already ready"),
+    expect(pageSource).toContain("Your download has begun");
+    expect(pageSource).toContain("Download welcome pack");
+    expect(pageSource).toContain("also sent the link to your email");
+    expect(pageSource).toContain("Share on WhatsApp");
+    expect(pageSource).not.toContain("confirmWelcomePackShareAction");
+    expect(pageSource.indexOf("Share this free gift with someone")).toBeLessThan(
+      pageSource.indexOf("Continue to your dashboard"),
     );
   });
 
-  test("dashboard welcome pack displays main gifts immediately and locked extras until unlock", () => {
+  test("dashboard welcome pack displays the main gift and marks supplementary packs as pending", () => {
     const routeSource = source("app", "(site)", "dashboard", "welcomepack", "page.tsx");
     const pageSource = source("components", "dashboard", "welcome-pack-page.tsx");
 
@@ -76,8 +95,10 @@ describe("welcome pack completion wiring", () => {
     expect(routeSource).toContain("extraGiftsUnlocked");
     expect(pageSource).toContain("mainGifts");
     expect(pageSource).toContain("extraGifts");
-    expect(pageSource).toContain("Locked until you share");
-    expect(pageSource).toContain("confirmWelcomePackShareAction");
+    expect(pageSource).toContain("More resources are coming");
+    expect(pageSource).toContain("The supplementary packs are not ready yet");
+    expect(pageSource).not.toContain("Locked until you share");
+    expect(pageSource).not.toContain("confirmWelcomePackShareAction");
   });
 
   test("admin welcome-pack page is present under the admin-only route group", () => {

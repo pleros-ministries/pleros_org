@@ -1,8 +1,7 @@
-import { LockIcon, Share2Icon } from "lucide-react";
+import { LockIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { confirmWelcomePackShareAction } from "@/app/_actions/welcome-pack-actions";
 import { extraGifts, mainGifts, type WelcomePackGift } from "@/lib/welcome-pack-gifts";
 
 function GiftCard({
@@ -27,7 +26,7 @@ function GiftCard({
           <div className="absolute inset-0 grid place-items-center bg-[rgba(6,16,86,0.16)]">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 font-[var(--font-be-vietnam-pro)] text-[0.7rem] font-semibold tracking-[-0.01em] text-[var(--color-brand-blue)]">
               <LockIcon className="size-3.5" />
-              Locked until you share
+              Coming soon
             </span>
           </div>
         ) : null}
@@ -41,7 +40,7 @@ function GiftCard({
           {gift.description}
         </p>
         <span className="site-button-text mt-1 inline-flex w-fit items-center rounded-full bg-[var(--color-brand-blue)] px-4 py-2 text-[0.68rem] font-semibold leading-none text-white">
-          {locked ? "Locked" : gift.buttonLabel}
+          {locked ? "Coming soon" : gift.buttonLabel}
         </span>
       </div>
     </article>
@@ -63,6 +62,8 @@ type WelcomePackPageProps = {
 };
 
 export function WelcomePackPage({ extraGiftsUnlocked }: WelcomePackPageProps) {
+  const hasExtraGifts = extraGifts.length > 0;
+
   return (
     <section className="site-font-theme bg-[var(--color-surface)] pb-10 pt-5 sm:pb-12 sm:pt-6">
       <div className="container-pleros grid max-w-[36rem] gap-10">
@@ -71,8 +72,8 @@ export function WelcomePackPage({ extraGiftsUnlocked }: WelcomePackPageProps) {
             Access your Welcome Pack here
           </h1>
           <p className="font-[var(--font-be-vietnam-pro)] max-w-[31ch] text-[0.95rem] leading-[1.42] tracking-[-0.02em] text-[var(--color-text-muted)]">
-            Your main gifts are ready now. Share the free gift to unlock the two
-            extra resources.
+            Your main welcome pack is ready now. We&apos;ll add supplementary
+            resources here once they are prepared.
           </p>
         </div>
 
@@ -93,47 +94,40 @@ export function WelcomePackPage({ extraGiftsUnlocked }: WelcomePackPageProps) {
           </div>
         </section>
 
-        <section className="grid gap-4">
-          <div className="grid gap-1">
-            <h2 className="site-section-heading text-[1.55rem] text-[var(--color-brand-blue)]">
-              Extra gifts
-            </h2>
-            <p className="font-[var(--font-be-vietnam-pro)] text-[0.86rem] leading-[1.35] tracking-[-0.02em] text-[var(--color-text-muted)]">
-              {extraGiftsUnlocked
-                ? "Your extra gifts are unlocked."
-                : "Locked until you share the free gift with someone."}
-            </p>
-          </div>
-
-          {!extraGiftsUnlocked ? (
-            <form
-              action={confirmWelcomePackShareAction}
-              className="rounded-[1.25rem] bg-[var(--color-brand-sky)] px-4 py-4"
-            >
-              <p className="font-[var(--font-be-vietnam-pro)] text-[0.86rem] leading-[1.35] tracking-[-0.02em] text-[var(--color-brand-blue)]">
-                Already shared from the thank-you page? Confirm here to unlock
-                the two extra gifts.
+        {hasExtraGifts ? (
+          <section className="grid gap-4">
+            <div className="grid gap-1">
+              <h2 className="site-section-heading text-[1.55rem] text-[var(--color-brand-blue)]">
+                Extra gifts
+              </h2>
+              <p className="font-[var(--font-be-vietnam-pro)] text-[0.86rem] leading-[1.35] tracking-[-0.02em] text-[var(--color-text-muted)]">
+                {extraGiftsUnlocked
+                  ? "Your extra gifts are unlocked."
+                  : "Supplementary resources are being prepared."}
               </p>
-              <button
-                type="submit"
-                className="site-button-text mt-4 inline-flex min-h-[2.75rem] items-center gap-2 rounded-full bg-[var(--color-brand-blue)] px-6 py-2 text-[0.8125rem] font-semibold leading-none text-white"
-              >
-                <Share2Icon className="size-4" />
-                I&apos;ve shared
-              </button>
-            </form>
-          ) : null}
+            </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            {extraGifts.map((gift) => (
-              <GiftCard
-                key={gift.id}
-                gift={gift}
-                locked={!extraGiftsUnlocked}
-              />
-            ))}
-          </div>
-        </section>
+            <div className="grid grid-cols-2 gap-4">
+              {extraGifts.map((gift) => (
+                <GiftCard
+                  key={gift.id}
+                  gift={gift}
+                  locked={!extraGiftsUnlocked}
+                />
+              ))}
+            </div>
+          </section>
+        ) : (
+          <section className="grid gap-2 rounded-[1.25rem] bg-[var(--color-brand-sky)] px-4 py-4">
+            <h2 className="site-section-heading text-[1.55rem] text-[var(--color-brand-blue)]">
+              More resources are coming
+            </h2>
+            <p className="font-[var(--font-be-vietnam-pro)] text-[0.86rem] leading-[1.35] tracking-[-0.02em] text-[var(--color-brand-blue)]">
+              The supplementary packs are not ready yet. For now, your welcome
+              pack book is available above and in your email.
+            </p>
+          </section>
+        )}
       </div>
     </section>
   );

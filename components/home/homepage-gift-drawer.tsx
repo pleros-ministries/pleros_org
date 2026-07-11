@@ -21,6 +21,10 @@ import {
   serializeWelcomePackState,
   shouldShowWelcomePackModal,
 } from "@/lib/homepage-logic";
+import {
+  redirectAfterDownloadStarts,
+  triggerWelcomePackDownload,
+} from "@/lib/welcome-pack-client";
 import { welcomePackModalCopy } from "@/lib/welcome-pack-modal-copy";
 import { validateEmail } from "@/lib/welcome-flow";
 
@@ -37,10 +41,10 @@ type HomepageGiftDrawerProps = {
 export function HomepageGiftDrawer({
   hasWelcomeAccess,
   autoOpen = true,
-  redirectTo = "/dashboard",
+  redirectTo = "/thankyou",
   triggerLabel,
   submitLabel = "access welcome pack",
-  pendingLabel = "Opening your dashboard",
+  pendingLabel = "Preparing your download",
   source = "welcome",
 }: HomepageGiftDrawerProps) {
   const [open, setOpen] = useState(false);
@@ -123,7 +127,7 @@ export function HomepageGiftDrawer({
         });
 
         const payload = (await response.json().catch(() => null)) as
-          | { error?: string; redirectTo?: string }
+          | { downloadUrl?: string; error?: string; redirectTo?: string }
           | null;
 
         if (!response.ok || !payload?.redirectTo) {
@@ -144,6 +148,13 @@ export function HomepageGiftDrawer({
 
         hasCompletedRef.current = true;
         setOpen(false);
+
+        if (payload.downloadUrl) {
+          triggerWelcomePackDownload(payload.downloadUrl);
+          redirectAfterDownloadStarts(payload.redirectTo);
+          return;
+        }
+
         window.location.href = payload.redirectTo;
       } catch {
         setError("Something went wrong. Please try again.");

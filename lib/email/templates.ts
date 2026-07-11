@@ -181,6 +181,7 @@ export function staffInviteHtml({
 export type WelcomePackAccessProps = {
   name: string;
   dashboardUrl: string;
+  downloadUrl: string;
 };
 
 export type WelcomePackExtrasUnlockedProps = {
@@ -201,9 +202,11 @@ export type ContactSubmissionNotificationProps = {
 export function welcomePackAccessHtml({
   name,
   dashboardUrl,
+  downloadUrl,
 }: WelcomePackAccessProps): string {
   const safeName = escapeHtml(name);
   const safeDashboardUrl = escapeHtml(dashboardUrl);
+  const safeDownloadUrl = escapeHtml(downloadUrl);
 
   return `
 <!DOCTYPE html>
@@ -219,15 +222,20 @@ export function welcomePackAccessHtml({
 
   
     <div style="padding: 40px 32px;">
-      <h1 style="font-size: 24px; font-weight: 600; color: #0d1726; margin: 0 0 16px; letter-spacing: -0.024em;">Your main gift is ready</h1>
+      <h1 style="font-size: 24px; font-weight: 600; color: #0d1726; margin: 0 0 16px; letter-spacing: -0.024em;">Your welcome pack download is ready</h1>
       <p style="font-size: 16px; color: #142033; line-height: 1.6; margin: 0 0 32px; letter-spacing: -0.02em;">
-        Welcome, ${safeName}! Your main Pleros welcome gift is ready in your dashboard. You can also unlock two extra gifts by sharing the free gift with someone who may be blessed by it.
+        Welcome, ${safeName}! Your Pleros welcome pack should have started downloading after you entered your email. If it did not, use the button below to download it directly.
       </p>
       
      
-      <a href="${safeDashboardUrl}" style="display: inline-block; padding: 14px 28px; background-color: #011585; color: #ffffff; border-radius: 999px; font-size: 16px; font-weight: 500; text-decoration: none; text-align: center; box-shadow: 0 4px 14px rgba(15, 23, 40, 0.05); line-height: 1;">
-        Access your Welcome Pack
+      <a href="${safeDownloadUrl}" style="display: inline-block; padding: 14px 28px; background-color: #011585; color: #ffffff; border-radius: 999px; font-size: 16px; font-weight: 500; text-decoration: none; text-align: center; box-shadow: 0 4px 14px rgba(15, 23, 40, 0.05); line-height: 1;">
+        Download your welcome pack
       </a>
+
+      <p style="font-size: 14px; color: #58657a; line-height: 1.6; margin: 24px 0 0; letter-spacing: -0.01em;">
+        You can also visit your welcome dashboard any time here:
+        <a href="${safeDashboardUrl}" style="color: #011585; font-weight: 600;">${safeDashboardUrl}</a>
+      </p>
 
       <hr style="border: none; border-top: 1px solid rgba(15, 23, 40, 0.08); margin: 40px 0 24px;" />
       

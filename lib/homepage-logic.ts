@@ -15,7 +15,7 @@ export type WelcomePackState =
   | WelcomePackDismissedState
   | WelcomePackCompletedState;
 
-export const WELCOME_PACK_STORAGE_KEY = "pleros.welcome-pack.state";
+export const WELCOME_PACK_STORAGE_KEY = "pleros.welcome-pack.state.v2";
 
 export function getNextCarouselIndex(current: number, total: number): number {
   if (total <= 0) {

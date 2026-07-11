@@ -10,7 +10,7 @@ import {
 
 describe("homepage welcome gift logic", () => {
   test("keeps the public homepage storage key stable", () => {
-    expect(WELCOME_PACK_STORAGE_KEY).toBe("pleros.welcome-pack.state");
+    expect(WELCOME_PACK_STORAGE_KEY).toBe("pleros.welcome-pack.state.v2");
   });
 
   test("shows the drawer when there is no stored state", () => {

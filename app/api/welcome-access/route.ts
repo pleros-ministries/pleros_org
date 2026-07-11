@@ -11,6 +11,7 @@ import {
 } from "@/lib/welcome-access";
 import { sendWelcomePackAccessEmail } from "@/lib/email/send";
 import { upsertWelcomePackLead } from "@/lib/db/queries/welcome-pack-leads";
+import { buildWelcomePackDownloadUrl } from "@/lib/welcome-pack-download";
 import {
   normalizeWelcomeReturnTo,
   provisionWelcomeSession,
@@ -22,7 +23,7 @@ export async function POST(request: Request) {
     | null;
   const email = body?.email?.trim().toLowerCase() ?? "";
   const source = body?.source?.trim() || "welcome";
-  const returnTo = normalizeWelcomeReturnTo(body?.returnTo, "/dashboard");
+  const returnTo = normalizeWelcomeReturnTo(body?.returnTo, "/thankyou");
 
   if (!validateEmail(email)) {
     return NextResponse.json(
@@ -72,16 +73,18 @@ export async function POST(request: Request) {
   });
 
   const dashboardUrl = new URL("/dashboard/welcomepack", request.url).toString();
+  const downloadUrl = buildWelcomePackDownloadUrl(request.url, token);
 
   if (leadResult.created) {
     void sendWelcomePackAccessEmail({
       to: email,
       name,
       dashboardUrl,
+      downloadUrl,
     }).catch((err) => {
       console.error("Failed to send welcome pack email:", err);
     });
   }
 
-  return NextResponse.json({ redirectTo: returnTo });
+  return NextResponse.json({ redirectTo: returnTo, downloadUrl });
 }

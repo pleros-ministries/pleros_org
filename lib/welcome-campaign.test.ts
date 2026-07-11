@@ -45,11 +45,15 @@ describe("welcome campaign pages", () => {
     );
 
     expect(pageSource).toContain("ThankYouPage");
-    expect(viewSource).toContain("Access your free gift on your dashboard");
+    expect(pageSource).toContain('downloadUrl="/api/welcome-pack/download"');
+    expect(viewSource).toContain("Your download has begun");
+    expect(viewSource).toContain("Download welcome pack");
+    expect(viewSource).toContain("also sent the link to your email");
     expect(viewSource).toContain("/dashboard/welcomepack");
-    expect(viewSource).toContain("We have 2 more gifts for you but we need your help to share");
-    expect(viewSource).toContain("Claim Free Gifts");
+    expect(viewSource).toContain("Share this free gift with someone");
+    expect(viewSource).toContain("Share on WhatsApp");
     expect(viewSource).toContain("buildWelcomeShareIntentUrl");
+    expect(viewSource).not.toContain("confirmWelcomePackShareAction");
   });
 
   test("uses the welcome session route only as a cookie bootstrap", () => {

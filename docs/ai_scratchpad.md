@@ -99,6 +99,7 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - On mobile library tables, keep serial-number headers/cells tight, around `w-8` with minimal padding; use wider sizing only at desktop breakpoints.
 - Multi-line library teaching titles need breathing room, such as `leading-[1.2]`.
 - Carousel autoplay must not call `scrollIntoView` or any page-scrolling browser API; use state/transform-driven movement and regression coverage.
+- Homepage carousel navigation is asymmetric: previous should stop at the first slide, while next should wrap from the last slide back to the first.
 
 ## Public nav, assets, and partner surfaces
 
@@ -119,6 +120,7 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - `/dashboard` should require either a valid app session or welcome-access cookie and redirect unauthenticated visitors to `/welcome`.
 - Welcome access cookies should last 100 days and refresh on dashboard visits when present.
 - Welcome-pack access email should send only when durable lead state says the lead is newly created; client in-flight guards are secondary.
+- While supplementary welcome packs are not ready, thank-you sharing must not promise unlocks; show the main download fallback and email download link instead.
 - When Drizzle migration history is out of sync with existing DB objects, verify the actual tables/indexes/enums first, then repair `drizzle.__drizzle_migrations` only after confirming the objects already exist.
 
 ## Security and operational hygiene

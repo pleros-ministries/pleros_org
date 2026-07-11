@@ -16,9 +16,9 @@ describe("about page content", () => {
 
   test("preserves the three-line ministry statement and glossary emphasis", () => {
     expect(aboutPageLeadLines).toEqual([
-      "Building Disciples.",
-      "Discovering Purpose",
-      "Encountering God.",
+      "Proclaiming the Truth",
+      "Perfecting the Saints",
+      "Fufilling God's Purpose",
     ]);
 
     expect(aboutPageBody[0]).toContain(

@@ -12,6 +12,10 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { validateEmail } from "@/lib/welcome-flow";
+import {
+  redirectAfterDownloadStarts,
+  triggerWelcomePackDownload,
+} from "@/lib/welcome-pack-client";
 import { welcomePackModalCopy } from "@/lib/welcome-pack-modal-copy";
 
 type WelcomePackModalProps = {
@@ -74,13 +78,19 @@ export function WelcomePackModal({ openRequest }: WelcomePackModalProps) {
         });
 
         const payload = (await response.json().catch(() => null)) as
-          | { error?: string; redirectTo?: string }
+          | { downloadUrl?: string; error?: string; redirectTo?: string }
           | null;
 
         if (!response.ok || !payload?.redirectTo) {
           setError(payload?.error ?? "Something went wrong. Please try again.");
           isSubmittingRef.current = false;
           setIsSubmitting(false);
+          return;
+        }
+
+        if (payload.downloadUrl) {
+          triggerWelcomePackDownload(payload.downloadUrl);
+          redirectAfterDownloadStarts(payload.redirectTo);
           return;
         }
 
@@ -138,7 +148,7 @@ export function WelcomePackModal({ openRequest }: WelcomePackModalProps) {
             disabled={isSubmitting || isPending}
           >
             {isSubmitting || isPending
-              ? "Opening your dashboard..."
+              ? "Preparing your download..."
               : "Access the welcome pack"}
           </Button>
         </form>

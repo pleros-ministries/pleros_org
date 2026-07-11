@@ -51,6 +51,18 @@ describe("site home page", () => {
     expect(source).toContain("SWIPE_THRESHOLD_PX");
   });
 
+  test("keeps carousel previous bounded while next wraps from the last slide", () => {
+    const source = readFileSync(
+      join(process.cwd(), "components", "home", "homepage-carousel.tsx"),
+      "utf8",
+    );
+
+    expect(source).toContain("function goToPrevious()");
+    expect(source).toContain("current === 0 ? 0 : current - 1");
+    expect(source).toContain("(current + 1) % slides.length");
+    expect(source).not.toContain("disabled={activeIndex === slides.length - 1}");
+  });
+
   test("uses Sen explicitly for pathway card titles", () => {
     const globalsSource = readFileSync(
       join(process.cwd(), "app", "globals.css"),
@@ -105,7 +117,7 @@ describe("site home page", () => {
     expect(contentSource).toContain('mobileDescription: "Want to grow and be trained to fulfill purpose?"');
   });
 
-  test("keeps the dashboard menu link pointed to /dashboard and updates the church pathway copy", () => {
+  test("keeps the dashboard menu link pointed to /dashboard and current church pathway copy", () => {
     const contentSource = readFileSync(
       join(process.cwd(), "lib", "site-homepage-content.ts"),
       "utf8",
@@ -113,8 +125,12 @@ describe("site home page", () => {
 
     expect(contentSource).toContain('{ href: "/dashboard", label: "Dashboard" }');
     expect(contentSource).toContain('title: "Our Church Ministry"');
-    expect(contentSource).toContain('description: "Fellowship with us at any our branches nationwide"');
-    expect(contentSource).toContain('mobileDescription: "Fellowship with us at any our branches nationwide"');
+    expect(contentSource).toContain(
+      'description: "We are here to help you fulfill God\'s purpose. Fellowship with us. "',
+    );
+    expect(contentSource).toContain(
+      'mobileDescription: "We are here to help you fulfill God\'s purpose. Fellowship with us."',
+    );
   });
 
   test("uses the dedicated church logo asset for the church pathway card header", () => {

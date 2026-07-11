@@ -3,9 +3,10 @@ import { describe, expect, test } from "vitest";
 import { extraGifts, mainGifts } from "./welcome-pack-gifts";
 
 describe("welcome pack gift config", () => {
-  test("keeps main gifts flexible and extra gifts exactly two for the v1 unlock flow", () => {
+  test("keeps the main gift available while supplementary packs are pending", () => {
     expect(mainGifts.length).toBeGreaterThanOrEqual(1);
-    expect(extraGifts).toHaveLength(2);
+    expect(mainGifts[0]?.href).toBe("/api/welcome-pack/download");
+    expect(extraGifts).toHaveLength(0);
   });
 
   test.each([...mainGifts, ...extraGifts])(

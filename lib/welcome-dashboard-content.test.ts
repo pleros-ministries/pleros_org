@@ -10,9 +10,9 @@ describe("welcome dashboard content", () => {
     expect(welcomeDashboardSections[0]?.cards).toHaveLength(2);
     expect(welcomeDashboardSections[0]?.cards[0]?.title).toBe("Your Welcome Pack");
     expect(welcomeDashboardSections[0]?.cards[0]?.href).toBe("/dashboard/welcomepack");
-    expect(welcomeDashboardSections[0]?.cards[1]?.title).toBe("Join Online Community");
+    expect(welcomeDashboardSections[0]?.cards[1]?.title).toBe("Your Discipleship Journey");
     expect(welcomeDashboardSections[0]?.cards[1]?.href).toBe(
-      "https://whatsapp.com/channel/0029VbBLp0ZF6smtyjjzf72L",
+      "/dashboard/discipleship-journey",
     );
   });
 
