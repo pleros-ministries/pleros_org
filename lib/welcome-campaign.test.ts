@@ -49,7 +49,7 @@ describe("welcome campaign pages", () => {
     expect(viewSource).toContain("Your download has begun");
     expect(viewSource).toContain("Download welcome pack");
     expect(viewSource).toContain("also sent the link to your email");
-    expect(viewSource).toContain("/dashboard/welcomepack");
+    expect(viewSource).toContain('href="/dashboard"');
     expect(viewSource).toContain("Share this free gift with someone");
     expect(viewSource).toContain("Share on WhatsApp");
     expect(viewSource).toContain("buildWelcomeShareIntentUrl");

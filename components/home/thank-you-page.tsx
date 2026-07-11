@@ -84,7 +84,7 @@ export function ThankYouPage({ downloadUrl }: ThankYouPageProps) {
               </div>
 
               <Link
-                href="/dashboard/welcomepack"
+                href="/dashboard"
                 className="site-button-text inline-flex min-h-[2.875rem] w-fit items-center justify-center gap-2 rounded-full bg-[var(--color-brand-blue)] px-7 py-2.5 text-[0.875rem] font-semibold leading-none text-white shadow-[0_14px_28px_rgba(5,20,128,0.22)]"
               >
                 <GiftIcon className="size-4" />
