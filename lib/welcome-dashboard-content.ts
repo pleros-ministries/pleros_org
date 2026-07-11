@@ -34,7 +34,7 @@ export const welcomeDashboardSections: WelcomeDashboardSection[] = [
         title: "Your Discipleship Journey",
         description:
           "A Word and prayer community to help you walk in God's purpose daily.",
-        href: "https://whatsapp.com/channel/0029VbBLp0ZF6smtyjjzf72L",
+        href: "/dashboard/discipleship-journey",
         accent: "blue",
         backgroundImageSrc: "/site/home/assets/pleros-community-background.webp",
         backgroundOverlay: "text-panel",
