@@ -40,4 +40,10 @@ describe("PPC student dashboard preview", () => {
     expect(viewSource).not.toContain("Locked in this level");
     expect(viewSource).not.toContain("primary navigator");
   });
+
+  test("does not render a literal PP brand tile in the shell sidebar", () => {
+    const shellSource = source("components", "ppc", "ppc-shell.tsx");
+
+    expect(shellSource).not.toContain(">PP<");
+  });
 });

@@ -369,14 +369,11 @@ function SidebarShell({
             href={homeHref}
             onClick={onNavigate}
             className={cn(
-              "group flex min-w-0 items-center rounded-sm transition-colors hover:bg-zinc-50",
-              collapsed ? "justify-center p-1.5" : "gap-3 p-1.5",
+              "group flex min-w-0 rounded-sm transition-colors hover:bg-zinc-50",
+              collapsed ? "hidden" : "items-center p-1.5",
             )}
             title={collapsed ? "PPC platform" : undefined}
           >
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-sm border border-zinc-200 bg-[var(--color-brand-blue)] text-[11px] font-semibold uppercase tracking-[0.16em] text-white">
-              PP
-            </span>
             {!collapsed ? (
               <span className="min-w-0">
                 <span className="block text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400">
