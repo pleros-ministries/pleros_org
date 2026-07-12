@@ -167,9 +167,9 @@ function StudentLevelNavigation({
                 item.state === "completed"
                   ? "border-emerald-200 bg-emerald-50 text-emerald-700"
                   : isActive
-                    ? "border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)] text-white"
+                    ? "border-blue-800 bg-blue-800 text-white"
                   : item.state === "current"
-                    ? "border-[var(--ppc-shell-accent)] bg-[var(--ppc-shell-accent)] text-white"
+                    ? "border-blue-800 bg-blue-800 text-white"
                     : "border-zinc-200 bg-zinc-50 text-zinc-400",
               )}
             >
