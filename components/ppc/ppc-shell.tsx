@@ -119,7 +119,7 @@ function SidebarNavigation({
               "group relative flex min-h-11 items-center rounded-sm border text-sm font-medium transition-[background-color,border-color,color,box-shadow,transform] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/70",
               collapsed ? "justify-center px-0" : "gap-3 px-3.5 py-2.5",
               isActive
-                ? "border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)] text-white shadow-sm visited:text-white [&_span]:text-white [&_svg]:text-white"
+                ? "border-[var(--ppc-shell-accent)] bg-[var(--ppc-shell-accent)] text-white shadow-sm visited:text-white [&_span]:text-white [&_svg]:text-white"
                 : "border-transparent text-zinc-500 hover:border-zinc-200 hover:bg-zinc-50 hover:text-zinc-900 active:bg-zinc-100",
             )}
           >
@@ -173,7 +173,7 @@ function StudentLevelNavigation({
                 "flex shrink-0 items-center justify-center rounded-[4px] border text-[10px] font-semibold transition-colors",
                 collapsed ? "size-10" : "size-8",
                 item.state === "current"
-                  ? "border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)] text-white"
+                  ? "border-[var(--ppc-shell-accent)] bg-[var(--ppc-shell-accent)] text-white"
                   : item.state === "completed"
                     ? "border-zinc-200 bg-white text-zinc-700"
                     : "border-zinc-200 bg-zinc-50 text-zinc-400",
@@ -221,7 +221,7 @@ function StudentLevelNavigation({
                 "group relative flex min-h-11 items-center rounded-[4px] border transition-[background-color,border-color,color,box-shadow] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/70",
                 collapsed ? "justify-center px-0" : "gap-3 px-2.5 py-2",
                 isActive
-                  ? "border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)] text-white shadow-sm"
+                  ? "border-[var(--ppc-shell-accent)] bg-[var(--ppc-shell-accent)] text-white shadow-sm"
                   : item.state === "current"
                     ? "border-zinc-200 bg-zinc-50 text-zinc-900 hover:bg-zinc-100"
                     : "border-transparent bg-transparent text-zinc-600 hover:border-zinc-200 hover:bg-zinc-50 hover:text-zinc-900",

@@ -58,4 +58,12 @@ describe("PPC student dashboard preview", () => {
 
     expect(shellSource.match(/rounded-\[4px\]/g)?.length).toBeGreaterThanOrEqual(5);
   });
+
+  test("uses the softer shell accent for sidebar selection states", () => {
+    const shellSource = source("components", "ppc", "ppc-shell.tsx");
+    const globalsSource = source("app", "globals.css");
+
+    expect(globalsSource).toContain("--ppc-shell-accent: #1f4ed8");
+    expect(shellSource.match(/var\(--ppc-shell-accent\)/g)?.length).toBeGreaterThanOrEqual(6);
+  });
 });
