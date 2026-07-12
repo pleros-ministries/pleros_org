@@ -24,6 +24,7 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - This thread has historically been PPC-focused. For PPC status or “what’s next” questions, anchor on the broader PPC roadmap, not only the current subtask.
 - Admin operational visibility is higher priority than placeholder notification settings unless the user asks for notifications specifically.
 - Dense PPC dashboard style: compact `h-7`/`h-8` controls, `text-xs` where appropriate, zinc-based surfaces, sentence case, and `useTransition` for action pending states.
+- PPC surfaces and controls should use tight operational radii; avoid pill-like or overly rounded dashboard cards, sidebar items, buttons, and badges unless the shape is semantic.
 - Check `getAppSession()` at the top of protected PPC pages and redirect unauthenticated users to the canonical auth entry.
 - Serialize `Date` objects to ISO strings before passing data to client components.
 - Server actions should call `revalidatePath("/ppc", "layout")` after mutations.

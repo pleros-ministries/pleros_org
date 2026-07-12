@@ -10,7 +10,7 @@ export function LevelBadge({ level, size = "sm", variant = "dark" }: LevelBadgeP
   return (
     <span
       className={cn(
-        "inline-flex items-center justify-center rounded-md font-medium",
+        "inline-flex items-center justify-center rounded-sm font-medium",
         variant === "dark"
           ? "bg-[var(--color-brand-blue)] text-white"
           : "bg-white/20 text-white border border-white/30",

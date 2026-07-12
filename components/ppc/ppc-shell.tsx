@@ -116,7 +116,7 @@ function SidebarNavigation({
             aria-current={isActive ? "page" : undefined}
             onClick={onNavigate}
             className={cn(
-              "group relative flex min-h-11 items-center rounded-xl border text-sm font-medium transition-[background-color,border-color,color,box-shadow,transform] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/70",
+              "group relative flex min-h-11 items-center rounded-sm border text-sm font-medium transition-[background-color,border-color,color,box-shadow,transform] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/70",
               collapsed ? "justify-center px-0" : "gap-3 px-3.5 py-2.5",
               isActive
                 ? "border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)] text-white shadow-sm visited:text-white [&_span]:text-white [&_svg]:text-white"
@@ -170,7 +170,7 @@ function StudentLevelNavigation({
           const badge = (
             <span
               className={cn(
-                "flex shrink-0 items-center justify-center rounded-lg border text-[10px] font-semibold transition-colors",
+                "flex shrink-0 items-center justify-center rounded-sm border text-[10px] font-semibold transition-colors",
                 collapsed ? "size-10" : "size-8",
                 item.state === "current"
                   ? "border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)] text-white"
@@ -189,7 +189,7 @@ function StudentLevelNavigation({
                 key={item.id}
                 title={collapsed ? `${item.label} locked` : undefined}
                 className={cn(
-                  "group relative flex min-h-11 items-center rounded-xl border border-zinc-100 bg-zinc-50 text-zinc-400",
+                  "group relative flex min-h-11 items-center rounded-sm border border-zinc-100 bg-zinc-50 text-zinc-400",
                   collapsed ? "justify-center px-0" : "gap-3 px-2.5 py-2",
                 )}
               >
@@ -218,7 +218,7 @@ function StudentLevelNavigation({
               aria-current={isActive ? "page" : undefined}
               onClick={onNavigate}
               className={cn(
-                "group relative flex min-h-11 items-center rounded-xl border transition-[background-color,border-color,color,box-shadow] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/70",
+                "group relative flex min-h-11 items-center rounded-sm border transition-[background-color,border-color,color,box-shadow] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/70",
                 collapsed ? "justify-center px-0" : "gap-3 px-2.5 py-2",
                 isActive
                   ? "border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)] text-white shadow-sm"
@@ -271,14 +271,14 @@ function SidebarFooter({ collapsed, session, signOutHref }: SidebarFooterProps) 
         <div className="grid justify-items-center gap-2">
           <div
             title={`${session.user.name} (${session.user.role})`}
-            className="flex size-10 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-50 text-xs font-semibold text-zinc-700"
+            className="flex size-10 items-center justify-center rounded-sm border border-zinc-200 bg-zinc-50 text-xs font-semibold text-zinc-700"
           >
             {getInitials(session.user.name)}
           </div>
           <Link
             href="/"
             title="Visit site"
-            className="inline-flex size-10 items-center justify-center rounded-xl border border-zinc-200 bg-white text-zinc-500 transition-colors hover:bg-zinc-50 hover:text-zinc-900"
+            className="inline-flex size-10 items-center justify-center rounded-sm border border-zinc-200 bg-white text-zinc-500 transition-colors hover:bg-zinc-50 hover:text-zinc-900"
           >
             <Globe className="size-4" />
             <span className="sr-only">Visit site</span>
@@ -290,16 +290,16 @@ function SidebarFooter({ collapsed, session, signOutHref }: SidebarFooterProps) 
               await authClient.signOut();
               window.location.href = signOutHref;
             }}
-            className="inline-flex size-10 items-center justify-center rounded-xl border border-zinc-200 bg-white text-zinc-500 transition-colors hover:bg-zinc-50 hover:text-zinc-900"
+            className="inline-flex size-10 items-center justify-center rounded-sm border border-zinc-200 bg-white text-zinc-500 transition-colors hover:bg-zinc-50 hover:text-zinc-900"
           >
             <LogOut className="size-4" />
             <span className="sr-only">Sign out</span>
           </button>
         </div>
       ) : (
-        <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-3">
+        <div className="rounded-sm border border-zinc-200 bg-zinc-50 p-3">
           <div className="flex items-center gap-3">
-            <div className="flex size-10 items-center justify-center rounded-xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-700">
+            <div className="flex size-10 items-center justify-center rounded-sm border border-zinc-200 bg-white text-xs font-semibold text-zinc-700">
               {getInitials(session.user.name)}
             </div>
             <div className="min-w-0">
@@ -314,7 +314,7 @@ function SidebarFooter({ collapsed, session, signOutHref }: SidebarFooterProps) 
           <div className="mt-3 grid grid-cols-2 gap-2">
             <Link
               href="/"
-              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-100"
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-sm border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-100"
             >
               <Globe className="size-3.5" />
               Visit site
@@ -325,7 +325,7 @@ function SidebarFooter({ collapsed, session, signOutHref }: SidebarFooterProps) 
                 await authClient.signOut();
                 window.location.href = signOutHref;
               }}
-              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-100"
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-sm border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-100"
             >
               <LogOut className="size-3.5" />
               Sign out
@@ -369,12 +369,12 @@ function SidebarShell({
             href={homeHref}
             onClick={onNavigate}
             className={cn(
-              "group flex min-w-0 items-center rounded-2xl transition-colors hover:bg-zinc-50",
+              "group flex min-w-0 items-center rounded-sm transition-colors hover:bg-zinc-50",
               collapsed ? "justify-center p-1.5" : "gap-3 p-1.5",
             )}
             title={collapsed ? "PPC platform" : undefined}
           >
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-zinc-200 bg-[var(--color-brand-blue)] text-[11px] font-semibold uppercase tracking-[0.16em] text-white">
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-sm border border-zinc-200 bg-[var(--color-brand-blue)] text-[11px] font-semibold uppercase tracking-[0.16em] text-white">
               PP
             </span>
             {!collapsed ? (
@@ -395,7 +395,7 @@ function SidebarShell({
               type="button"
               onClick={onToggleCollapse}
               className={cn(
-                "hidden shrink-0 rounded-xl border border-zinc-200 bg-white text-zinc-500 transition-colors hover:bg-zinc-50 hover:text-zinc-900 lg:inline-flex",
+                "hidden shrink-0 rounded-sm border border-zinc-200 bg-white text-zinc-500 transition-colors hover:bg-zinc-50 hover:text-zinc-900 lg:inline-flex",
                 collapsed ? "size-10 items-center justify-center" : "size-10 items-center justify-center",
               )}
               aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
@@ -480,7 +480,7 @@ export function PpcShell({
   }, [hasLoadedSidebarPreference, isSidebarCollapsed]);
 
   return (
-    <div className="min-h-screen bg-zinc-100/80 text-zinc-900">
+    <div className="ppc-theme min-h-screen bg-zinc-100/80 text-zinc-900">
       <div
         className={cn(
           "mx-auto min-h-screen w-full max-w-[1520px] grid-cols-1 gap-3 p-3 lg:grid lg:gap-4 lg:p-4",
@@ -496,7 +496,7 @@ export function PpcShell({
           )}
         >
           <div className="sticky top-4 h-[calc(100vh-2rem)] w-full">
-            <div className="flex h-full flex-col rounded-[1.5rem] border border-zinc-200/90 bg-white shadow-[0_1px_2px_rgba(15,23,40,0.04),0_12px_28px_rgba(15,23,40,0.06)]">
+            <div className="flex h-full flex-col rounded-md border border-zinc-200/90 bg-white shadow-[0_1px_2px_rgba(15,23,40,0.04),0_12px_28px_rgba(15,23,40,0.06)]">
               <SidebarShell
                 pathname={pathname}
                 logicalPathname={logicalPathname}
@@ -516,7 +516,7 @@ export function PpcShell({
               <button
                 type="button"
                 onClick={() => setIsMobileNavOpen(true)}
-                className="inline-flex size-10 items-center justify-center rounded-xl border border-zinc-200 bg-white text-zinc-600 transition-colors hover:bg-zinc-50 hover:text-zinc-900 lg:hidden"
+                className="inline-flex size-10 items-center justify-center rounded-sm border border-zinc-200 bg-white text-zinc-600 transition-colors hover:bg-zinc-50 hover:text-zinc-900 lg:hidden"
                 aria-label="Open sidebar"
               >
                 <Menu className="size-4" />
