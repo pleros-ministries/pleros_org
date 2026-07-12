@@ -49,10 +49,7 @@ export function StudentDashboardView({
 
   return (
     <div className="grid gap-6">
-      <PageHeader
-        title="My learning"
-        description={`Level ${currentLevel} is active. Use the sidebar to move through your pathway.`}
-      />
+      <PageHeader title="My learning" />
 
       <section className="grid gap-4 lg:grid-cols-[2fr_1fr]">
         <div className="rounded-sm border border-zinc-200 bg-white p-4">
@@ -133,14 +130,6 @@ export function StudentDashboardView({
                   {completedLessonCount}/{totalLessonCount}
                 </span>
               </div>
-              {lockedLessonCount > 0 ? (
-                <div className="flex justify-between">
-                  <span className="text-zinc-500">Locked in this level</span>
-                  <span className="font-medium text-zinc-900">
-                    {lockedLessonCount}
-                  </span>
-                </div>
-              ) : null}
             </div>
           </div>
 

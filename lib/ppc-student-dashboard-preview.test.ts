@@ -28,4 +28,15 @@ describe("PPC student dashboard preview", () => {
     expect(previewSource).toContain('pathnameOverride="/ppc/student"');
     expect(liveSource).toContain("StudentDashboardView");
   });
+
+  test("keeps redundant student dashboard helper copy out of the view", () => {
+    const viewSource = source(
+      "components",
+      "ppc",
+      "student-dashboard-view.tsx",
+    );
+
+    expect(viewSource).not.toContain("Use the sidebar");
+    expect(viewSource).not.toContain("Locked in this level");
+  });
 });
