@@ -170,7 +170,7 @@ function StudentLevelNavigation({
           const badge = (
             <span
               className={cn(
-                "flex shrink-0 items-center justify-center rounded-sm border text-[10px] font-semibold transition-colors",
+                "flex shrink-0 items-center justify-center rounded-[4px] border text-[10px] font-semibold transition-colors",
                 collapsed ? "size-10" : "size-8",
                 item.state === "current"
                   ? "border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)] text-white"
@@ -189,7 +189,7 @@ function StudentLevelNavigation({
                 key={item.id}
                 title={collapsed ? `${item.label} locked` : undefined}
                 className={cn(
-                  "group relative flex min-h-11 items-center rounded-sm border border-zinc-100 bg-zinc-50 text-zinc-400",
+                  "group relative flex min-h-11 items-center rounded-[4px] border border-zinc-100 bg-zinc-50 text-zinc-400",
                   collapsed ? "justify-center px-0" : "gap-3 px-2.5 py-2",
                 )}
               >
@@ -218,7 +218,7 @@ function StudentLevelNavigation({
               aria-current={isActive ? "page" : undefined}
               onClick={onNavigate}
               className={cn(
-                "group relative flex min-h-11 items-center rounded-sm border transition-[background-color,border-color,color,box-shadow] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/70",
+                "group relative flex min-h-11 items-center rounded-[4px] border transition-[background-color,border-color,color,box-shadow] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/70",
                 collapsed ? "justify-center px-0" : "gap-3 px-2.5 py-2",
                 isActive
                   ? "border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)] text-white shadow-sm"
