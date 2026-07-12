@@ -504,7 +504,7 @@ export function PpcShell({
           )}
         >
           <div className="sticky top-4 h-[calc(100vh-2rem)] w-full">
-            <div className="flex h-full flex-col rounded-md border border-zinc-200/90 bg-white shadow-[0_1px_2px_rgba(15,23,40,0.04),0_12px_28px_rgba(15,23,40,0.06)]">
+            <div className="flex h-full flex-col rounded-none border border-zinc-200/90 bg-white shadow-[0_1px_2px_rgba(15,23,40,0.04),0_12px_28px_rgba(15,23,40,0.06)]">
               <SidebarShell
                 pathname={pathname}
                 logicalPathname={logicalPathname}
@@ -548,7 +548,7 @@ export function PpcShell({
       <Sheet open={isMobileNavOpen} onOpenChange={setIsMobileNavOpen}>
         <SheetContent
           side="left"
-          className="ppc-theme w-[88vw] max-w-[320px] p-0"
+          className="ppc-theme w-[88vw] max-w-[320px] rounded-none p-0"
           showCloseButton
         >
           <SidebarShell

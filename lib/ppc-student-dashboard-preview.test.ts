@@ -64,7 +64,10 @@ describe("PPC student dashboard preview", () => {
   test("applies PPC theme tokens to the mobile sidebar portal", () => {
     const shellSource = source("components", "ppc", "ppc-shell.tsx");
 
-    expect(shellSource).toContain('className="ppc-theme w-[88vw] max-w-[320px] p-0"');
+    expect(shellSource).toContain(
+      'className="ppc-theme w-[88vw] max-w-[320px] rounded-none p-0"',
+    );
+    expect(shellSource).toContain("flex h-full flex-col rounded-none border");
   });
 
   test("keeps sidebar controls visually tight", () => {
