@@ -28,7 +28,6 @@ type StudentDashboardViewProps = {
   graduatedLevelCount: number;
   completedLessonCount: number;
   totalLessonCount: number;
-  lockedLessonCount: number;
   progressPercent: number;
   dashboardFocus: StudentDashboardFocus;
   pathwayRows: StudentPathwayRow[];
@@ -41,7 +40,6 @@ export function StudentDashboardView({
   graduatedLevelCount,
   completedLessonCount,
   totalLessonCount,
-  lockedLessonCount,
   progressPercent,
   dashboardFocus,
   pathwayRows,
@@ -84,12 +82,6 @@ export function StudentDashboardView({
               <span>{lessonsRemaining} remaining</span>
               <span className="text-zinc-300">•</span>
               <span>{totalLessonCount} total lessons</span>
-              {lockedLessonCount > 0 ? (
-                <>
-                  <span className="text-zinc-300">•</span>
-                  <span>{lockedLessonCount} locked</span>
-                </>
-              ) : null}
             </div>
           </div>
           <div className="mt-4 flex flex-wrap gap-2">

@@ -76,7 +76,6 @@ export default function PpcStudentDashboardPreviewPage() {
         graduatedLevelCount={graduatedLevelIds.length}
         completedLessonCount={completedLessonCount}
         totalLessonCount={totalLessonCount}
-        lockedLessonCount={lockedLessonCount}
         progressPercent={progressPercent}
         dashboardFocus={dashboardFocus}
         pathwayRows={pathwayRows}

@@ -101,7 +101,6 @@ export default async function StudentDashboardPage() {
       graduatedLevelCount={graduatedIds.size}
       completedLessonCount={completedCount}
       totalLessonCount={allCurrentLessons.length}
-      lockedLessonCount={lockedLessonCount}
       progressPercent={progressPercent}
       dashboardFocus={dashboardFocus}
       pathwayRows={pathwayRows}
