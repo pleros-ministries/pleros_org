@@ -384,12 +384,12 @@ function SidebarShell({
               "group flex min-w-0 rounded-sm transition-colors hover:bg-zinc-50",
               collapsed ? "hidden" : "items-center p-1.5",
             )}
-            title={collapsed ? "PPC platform" : undefined}
+            title={collapsed ? "Pleros Perfecting Course" : undefined}
           >
             {!collapsed ? (
               <span className="min-w-0">
                 <span className="block text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400">
-                  PPC platform
+                  Pleros Perfecting Course
                 </span>
                 <span className="mt-0.5 flex items-center gap-1.5 text-sm font-medium text-zinc-900">
                   {session.user.role === "student" ? "Learning workspace" : "Admin workspace"}

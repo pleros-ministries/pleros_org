@@ -105,6 +105,7 @@ describe("PPC student dashboard preview", () => {
     const shellSource = source("components", "ppc", "ppc-shell.tsx");
 
     expect(shellSource).toContain("Pleros Perfecting Course");
+    expect(shellSource).not.toContain("PPC platform");
   });
 
   test("keeps the mobile top bar flush with the viewport top", () => {
