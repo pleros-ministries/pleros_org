@@ -314,7 +314,7 @@ function SidebarFooter({ collapsed, session, signOutHref }: SidebarFooterProps) 
           <div className="mt-3 grid grid-cols-2 gap-2">
             <Link
               href="/"
-              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-sm border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-100"
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-[4px] border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-100"
             >
               <Globe className="size-3.5" />
               Visit site
@@ -325,7 +325,7 @@ function SidebarFooter({ collapsed, session, signOutHref }: SidebarFooterProps) 
                 await authClient.signOut();
                 window.location.href = signOutHref;
               }}
-              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-sm border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-100"
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-[4px] border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-100"
             >
               <LogOut className="size-3.5" />
               Sign out

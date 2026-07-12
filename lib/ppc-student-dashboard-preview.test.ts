@@ -52,4 +52,10 @@ describe("PPC student dashboard preview", () => {
 
     expect(shellSource).toContain('className="ppc-theme w-[88vw] max-w-[320px] p-0"');
   });
+
+  test("keeps sidebar footer action buttons visually tight", () => {
+    const shellSource = source("components", "ppc", "ppc-shell.tsx");
+
+    expect(shellSource.match(/rounded-\[4px\]/g)?.length).toBeGreaterThanOrEqual(2);
+  });
 });
