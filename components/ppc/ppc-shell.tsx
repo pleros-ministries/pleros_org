@@ -517,7 +517,7 @@ export function PpcShell({
                 <Menu className="size-4" />
               </button>
               <div className="min-w-0">
-                <p className="truncate text-xs text-white/85 sm:text-sm">
+                <p className="ppc-heading truncate text-base font-semibold tracking-[-0.025em] text-white sm:text-lg">
                   Pleros Perfecting Course
                 </p>
               </div>
