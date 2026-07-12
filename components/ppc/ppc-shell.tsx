@@ -173,12 +173,12 @@ function StudentLevelNavigation({
               className={cn(
                 "flex shrink-0 items-center justify-center rounded-[4px] border text-[10px] font-semibold transition-colors",
                 collapsed ? "size-10" : "size-8",
-                isActive
-                  ? "border-blue-200 bg-white text-[var(--color-brand-blue)]"
+                item.state === "completed"
+                  ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                  : isActive
+                    ? "border-blue-200 bg-white text-[var(--color-brand-blue)]"
                   : item.state === "current"
-                  ? "border-[var(--ppc-shell-accent)] bg-[var(--ppc-shell-accent)] text-white"
-                  : item.state === "completed"
-                    ? "border-zinc-200 bg-white text-zinc-700"
+                    ? "border-[var(--ppc-shell-accent)] bg-[var(--ppc-shell-accent)] text-white"
                     : "border-zinc-200 bg-zinc-50 text-zinc-400",
               )}
             >
@@ -253,6 +253,15 @@ function StudentLevelNavigation({
               ) : (
                 <span className="sr-only">{item.label}</span>
               )}
+              {!collapsed && item.state === "completed" ? (
+                <span
+                  className="ml-auto inline-flex size-7 shrink-0 items-center justify-center rounded-[4px] border border-emerald-200 bg-emerald-50 text-emerald-700"
+                  title={`${item.label} completed`}
+                >
+                  <BadgeCheck className="size-3.5" aria-hidden="true" />
+                  <span className="sr-only">{item.label} completed</span>
+                </span>
+              ) : null}
             </Link>
           );
         })}

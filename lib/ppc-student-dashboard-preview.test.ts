@@ -88,6 +88,16 @@ describe("PPC student dashboard preview", () => {
     expect(shellSource).not.toContain("[&_span]:text-white [&_svg]:text-white");
   });
 
+  test("marks completed levels in the sidebar", () => {
+    const shellSource = source("components", "ppc", "ppc-shell.tsx");
+
+    expect(shellSource).toContain(
+      "border-emerald-200 bg-emerald-50 text-emerald-700",
+    );
+    expect(shellSource).toContain('title={`${item.label} completed`}');
+    expect(shellSource).toContain("{item.label} completed");
+  });
+
   test("uses the course name in the shell top bar", () => {
     const shellSource = source("components", "ppc", "ppc-shell.tsx");
 
