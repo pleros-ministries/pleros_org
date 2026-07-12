@@ -173,7 +173,9 @@ function StudentLevelNavigation({
               className={cn(
                 "flex shrink-0 items-center justify-center rounded-[4px] border text-[10px] font-semibold transition-colors",
                 collapsed ? "size-10" : "size-8",
-                item.state === "current"
+                isActive
+                  ? "border-blue-200 bg-white text-[var(--color-brand-blue)]"
+                  : item.state === "current"
                   ? "border-[var(--ppc-shell-accent)] bg-[var(--ppc-shell-accent)] text-white"
                   : item.state === "completed"
                     ? "border-zinc-200 bg-white text-zinc-700"
