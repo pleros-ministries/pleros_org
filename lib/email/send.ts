@@ -2,6 +2,7 @@ import { resend, isEmailEnabled } from "./resend";
 import {
   contactSubmissionNotificationHtml,
   inactivityReminderHtml,
+  passwordResetHtml,
   submissionReviewedHtml,
   graduationCongratulationsHtml,
   staffAssignmentHtml,
@@ -105,6 +106,24 @@ export async function sendStaffInvite(opts: {
     html: staffInviteHtml({
       role: opts.role,
       inviteUrl: opts.inviteUrl,
+    }),
+  });
+}
+
+export async function sendPasswordReset(opts: {
+  to: string;
+  name: string;
+  resetUrl: string;
+}) {
+  if (!isEmailEnabled() || !resend) return null;
+
+  return resend.emails.send({
+    from: FROM,
+    to: opts.to,
+    subject: "Reset your PPC password",
+    html: passwordResetHtml({
+      name: opts.name,
+      resetUrl: opts.resetUrl,
     }),
   });
 }

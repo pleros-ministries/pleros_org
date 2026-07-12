@@ -130,8 +130,16 @@ export function SignInForm({ returnTo }: SignInFormProps) {
         ) : null}
 
         <label className="grid gap-1">
-          <span className="text-[11px] font-medium uppercase tracking-[0.08em] text-zinc-500">
-            Password
+          <span className="flex items-center justify-between gap-3">
+            <span className="text-[11px] font-medium uppercase tracking-[0.08em] text-zinc-500">
+              Password
+            </span>
+            <Link
+              href="/ppc/forgot-password"
+              className="text-[11px] font-medium text-zinc-700 underline-offset-2 hover:text-zinc-950 hover:underline"
+            >
+              Forgot password?
+            </Link>
           </span>
           <input
             type="password"

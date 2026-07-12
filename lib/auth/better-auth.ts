@@ -6,6 +6,7 @@ import { twoFactor } from "better-auth/plugins/two-factor";
 import { db } from "@/lib/db";
 import * as authSchema from "@/lib/db/auth-schema";
 import { buildTrustedOrigins, resolveAuthBaseUrl } from "@/lib/auth/auth-env";
+import { sendPasswordReset } from "@/lib/email/send";
 
 const googleConfigured =
   typeof process.env.GOOGLE_CLIENT_ID === "string" &&
@@ -25,6 +26,14 @@ export const betterAuthServer = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
+    revokeSessionsOnPasswordReset: true,
+    sendResetPassword: async ({ user, url }) => {
+      await sendPasswordReset({
+        to: user.email,
+        name: user.name,
+        resetUrl: url,
+      });
+    },
   },
   socialProviders: googleConfigured
     ? {

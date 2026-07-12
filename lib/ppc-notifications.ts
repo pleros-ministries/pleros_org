@@ -52,7 +52,11 @@ type PushSubscriptionAction =
     }
   | {
       kind: "status";
-      label: "Push setup required" | "Browser unsupported" | "Alerts enabled";
+      label:
+        | "Push setup required"
+        | "Browser unsupported"
+        | "Alerts enabled"
+        | "Waiting for admin setup";
       tone: "muted" | "success";
     };
 
