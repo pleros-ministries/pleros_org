@@ -118,7 +118,7 @@ function SidebarNavigation({
               "group relative flex min-h-11 items-center rounded-sm border text-sm font-medium transition-[background-color,border-color,color,box-shadow,transform] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/70",
               collapsed ? "justify-center px-0" : "gap-3 px-3.5 py-2.5",
               isActive
-                ? "border-[var(--ppc-shell-accent)] bg-[var(--ppc-shell-accent)] text-white shadow-sm visited:text-white [&_span]:text-white [&_svg]:text-white"
+                ? "border-blue-200 bg-blue-50 text-[var(--color-brand-blue)] shadow-sm visited:text-[var(--color-brand-blue)] [&_span]:text-[var(--color-brand-blue)] [&_svg]:text-[var(--color-brand-blue)]"
                 : "border-transparent text-zinc-500 hover:border-zinc-200 hover:bg-zinc-50 hover:text-zinc-900 active:bg-zinc-100",
             )}
           >
@@ -126,7 +126,9 @@ function SidebarNavigation({
               <span
                 className={cn(
                   "absolute left-1.5 top-1/2 size-1.5 -translate-y-1/2 rounded-full transition-colors",
-                  isActive ? "bg-white/80" : "bg-transparent group-hover:bg-zinc-300",
+                  isActive
+                    ? "bg-[var(--color-brand-blue)]"
+                    : "bg-transparent group-hover:bg-zinc-300",
                 )}
               />
             ) : null}
@@ -220,7 +222,7 @@ function StudentLevelNavigation({
                 "group relative flex min-h-11 items-center rounded-[4px] border transition-[background-color,border-color,color,box-shadow] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/70",
                 collapsed ? "justify-center px-0" : "gap-3 px-2.5 py-2",
                 isActive
-                  ? "border-[var(--ppc-shell-accent)] bg-[var(--ppc-shell-accent)] text-white shadow-sm"
+                  ? "border-blue-200 bg-blue-50 text-[var(--color-brand-blue)] shadow-sm"
                   : item.state === "current"
                     ? "border-zinc-200 bg-zinc-50 text-zinc-900 hover:bg-zinc-100"
                     : "border-transparent bg-transparent text-zinc-600 hover:border-zinc-200 hover:bg-zinc-50 hover:text-zinc-900",
@@ -232,7 +234,7 @@ function StudentLevelNavigation({
                   <span
                     className={cn(
                       "block text-xs font-medium",
-                      isActive ? "text-white" : "text-zinc-900",
+                      isActive ? "text-zinc-950" : "text-zinc-900",
                     )}
                   >
                     {item.label}
@@ -240,7 +242,7 @@ function StudentLevelNavigation({
                   <span
                     className={cn(
                       "block truncate text-[11px]",
-                      isActive ? "text-white/70" : "text-zinc-500",
+                      isActive ? "text-zinc-600" : "text-zinc-500",
                     )}
                   >
                     {item.description}
