@@ -60,6 +60,7 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 
 - Notifications v1 should expose operational readiness before adding delivery complexity.
 - Show configured channels, wired event triggers, browser subscription state, and blocked environment prerequisites.
+- Do not render unavailable PPC notification actions as disabled primary buttons; use status pills or clear blocked-state messaging instead.
 - Add tested pure status helpers first, render `/admin/notifications` from that model, and reuse the existing push subscription hook.
 - Do not link this repo to a guessed Vercel account/project. If env values are needed, generate a paste-ready env snippet for the user to add in the correct Vercel account.
 
