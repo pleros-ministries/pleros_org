@@ -32,7 +32,6 @@ import { authClient } from "@/lib/auth/auth-client";
 import { resolvePpcHref } from "@/lib/ppc-navigation";
 import {
   getLogicalPpcShellPath,
-  getPpcShellContext,
   getVisiblePpcShellNavItems,
   isPpcShellNavItemActive,
   isStudentLevelNavItemActive,
@@ -444,7 +443,6 @@ export function PpcShell({
   const currentPathname = usePathname();
   const pathname = pathnameOverride ?? currentPathname;
   const logicalPathname = getLogicalPpcShellPath(pathname);
-  const shellContext = getPpcShellContext(logicalPathname);
   const signOutHref = getSignOutHref(pathname);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [hasLoadedSidebarPreference, setHasLoadedSidebarPreference] = useState(false);
@@ -520,7 +518,7 @@ export function PpcShell({
               </button>
               <div className="min-w-0">
                 <p className="truncate text-xs text-white/85 sm:text-sm">
-                  {shellContext.description}
+                  Pleros Perfecting Course
                 </p>
               </div>
             </div>

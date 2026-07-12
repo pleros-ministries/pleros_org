@@ -66,4 +66,10 @@ describe("PPC student dashboard preview", () => {
     expect(globalsSource).toContain("--ppc-shell-accent: #1f4ed8");
     expect(shellSource.match(/var\(--ppc-shell-accent\)/g)?.length).toBeGreaterThanOrEqual(6);
   });
+
+  test("uses the course name in the shell top bar", () => {
+    const shellSource = source("components", "ppc", "ppc-shell.tsx");
+
+    expect(shellSource).toContain("Pleros Perfecting Course");
+  });
 });
