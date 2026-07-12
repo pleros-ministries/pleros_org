@@ -9,8 +9,9 @@ describe("sheet motion", () => {
       "utf8",
     );
 
+    expect(source).toContain("duration-[420ms]");
     expect(source).toContain("duration-[320ms]");
-    expect(source).toContain("cubic-bezier(0.22,1,0.36,1)");
+    expect(source).toContain("cubic-bezier(0.16,1,0.3,1)");
     expect(source).toContain("data-closed:-translate-x-full");
     expect(source).toContain("data-closed:translate-x-full");
     expect(source).not.toContain("data-closed:-translate-x-8");

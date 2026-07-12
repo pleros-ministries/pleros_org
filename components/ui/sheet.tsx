@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const sheetSideVariants = cva(
-  "fixed z-50 flex flex-col gap-4 border border-[var(--color-line)] bg-[var(--page-surface-raised)] p-5 shadow-[var(--shadow-lg)] transition-[opacity,transform] duration-[320ms] [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] will-change-transform",
+  "fixed z-50 flex flex-col gap-4 border border-[var(--color-line)] bg-[var(--page-surface-raised)] p-5 shadow-[var(--shadow-lg)] transition-[opacity,transform] duration-[420ms] [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] will-change-transform",
   {
     variants: {
       tone: {
@@ -57,7 +57,7 @@ function SheetOverlay({ className, ...props }: SheetPrimitive.Backdrop.Props) {
     <SheetPrimitive.Backdrop
       data-slot="sheet-overlay"
       className={cn(
-        "fixed inset-0 z-50 bg-[rgba(15,23,40,0.36)] backdrop-blur-[2px] transition-opacity duration-[260ms] [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] data-open:opacity-100 data-closed:opacity-0",
+        "fixed inset-0 z-50 bg-[rgba(15,23,40,0.36)] backdrop-blur-[2px] transition-opacity duration-[320ms] [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] data-open:opacity-100 data-closed:opacity-0",
         className,
       )}
       {...props}
