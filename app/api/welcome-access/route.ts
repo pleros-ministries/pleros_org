@@ -72,14 +72,12 @@ export async function POST(request: Request) {
     source,
   });
 
-  const dashboardUrl = new URL("/dashboard/welcomepack", request.url).toString();
   const downloadUrl = buildWelcomePackDownloadUrl(request.url, token);
 
   if (leadResult.created) {
     void sendWelcomePackAccessEmail({
       to: email,
       name,
-      dashboardUrl,
       downloadUrl,
     }).catch((err) => {
       console.error("Failed to send welcome pack email:", err);

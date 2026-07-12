@@ -180,7 +180,6 @@ export function staffInviteHtml({
 
 export type WelcomePackAccessProps = {
   name: string;
-  dashboardUrl: string;
   downloadUrl: string;
 };
 
@@ -201,11 +200,9 @@ export type ContactSubmissionNotificationProps = {
 
 export function welcomePackAccessHtml({
   name,
-  dashboardUrl,
   downloadUrl,
 }: WelcomePackAccessProps): string {
   const safeName = escapeHtml(name);
-  const safeDashboardUrl = escapeHtml(dashboardUrl);
   const safeDownloadUrl = escapeHtml(downloadUrl);
 
   return `
@@ -217,7 +214,9 @@ export function welcomePackAccessHtml({
     
 
     <div style="background-color: #011585; padding: 40px 32px; text-align: center;">
-      <img src="https://pleros-org.vercel.app/brand/white-logotype.png" alt="Pleros" width="120" style="display: block; margin: 0 auto;" />
+      <p style="font-size: 28px; line-height: 1; color: #ffffff; font-weight: 700; letter-spacing: -0.04em; margin: 0;">
+        Pleros
+      </p>
     </div>
 
   
@@ -231,11 +230,6 @@ export function welcomePackAccessHtml({
       <a href="${safeDownloadUrl}" style="display: inline-block; padding: 14px 28px; background-color: #011585; color: #ffffff; border-radius: 999px; font-size: 16px; font-weight: 500; text-decoration: none; text-align: center; box-shadow: 0 4px 14px rgba(15, 23, 40, 0.05); line-height: 1;">
         Download your welcome pack
       </a>
-
-      <p style="font-size: 14px; color: #58657a; line-height: 1.6; margin: 24px 0 0; letter-spacing: -0.01em;">
-        You can also visit your welcome dashboard any time here:
-        <a href="${safeDashboardUrl}" style="color: #011585; font-weight: 600;">${safeDashboardUrl}</a>
-      </p>
 
       <hr style="border: none; border-top: 1px solid rgba(15, 23, 40, 0.08); margin: 40px 0 24px;" />
       
@@ -263,7 +257,9 @@ export function welcomePackExtrasUnlockedHtml({
 <body style="font-family: 'Suisse Int\\'l', Inter, ui-sans-serif, system-ui, sans-serif; background-color: #fdfdfc; margin: 0; padding: 40px 16px;">
   <div style="max-width: 520px; margin: 0 auto; background: #ffffff; border: 1px solid rgba(15, 23, 40, 0.08); border-radius: 20px; box-shadow: 0 10px 30px rgba(15, 23, 40, 0.08); overflow: hidden;">
     <div style="background-color: #011585; padding: 40px 32px; text-align: center;">
-      <img src="https://pleros-org.vercel.app/brand/white-logotype.png" alt="Pleros" width="120" style="display: block; margin: 0 auto;" />
+      <p style="font-size: 28px; line-height: 1; color: #ffffff; font-weight: 700; letter-spacing: -0.04em; margin: 0;">
+        Pleros
+      </p>
     </div>
 
     <div style="padding: 40px 32px;">

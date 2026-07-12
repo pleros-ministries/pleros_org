@@ -116,6 +116,7 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - Public form input is untrusted. Escape user-provided values before rendering HTML email and add regression tests for injected markup.
 - For persistence-backed form features, verify the target DB has the new table/indexes or run the documented schema push before end-to-end submit tests.
 - `/welcome`, `/thankyou`, and `/dashboard/welcomepack` are one stateful public funnel: main access is immediate, extra gifts are trust-unlocked, and email failures must not block access.
+- Public welcome/contact/share links should use the canonical public site URL (`https://pleros.org`) or a dedicated public-site env var, not `NEXT_PUBLIC_APP_URL`, because that value may point to Vercel, PPC, or auth infrastructure.
 - Gift content can stay in typed code config for now and should use public-site Sen/Be Vietnam Pro styling, not PPC dashboard styling.
 - `/dashboard` should require either a valid app session or welcome-access cookie and redirect unauthenticated visitors to `/welcome`.
 - Welcome access cookies should last 100 days and refresh on dashboard visits when present.

@@ -112,7 +112,6 @@ export async function sendStaffInvite(opts: {
 export async function sendWelcomePackAccessEmail(opts: {
   to: string;
   name: string;
-  dashboardUrl: string;
   downloadUrl: string;
 }) {
   if (!isEmailEnabled() || !resend) return null;
@@ -125,7 +124,6 @@ export async function sendWelcomePackAccessEmail(opts: {
     subject: "Your Pleros welcome gift is ready",
     html: welcomePackAccessHtml({
       name: opts.name,
-      dashboardUrl: opts.dashboardUrl,
       downloadUrl: opts.downloadUrl,
     }),
   });

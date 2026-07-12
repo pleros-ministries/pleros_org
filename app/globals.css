@@ -724,8 +724,8 @@
 
   .site-font-theme .site-footer-copy {
     font-family: var(--font-sans), "Be Vietnam Pro", sans-serif !important;
-    font-size: var(--text-body);
-    line-height: 1.4;
+    font-size: 0.75rem;
+    line-height: 1.35;
     letter-spacing: -0.02em;
     color: rgba(255, 255, 255, 0.88);
   }
