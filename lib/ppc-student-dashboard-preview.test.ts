@@ -97,7 +97,7 @@ describe("PPC student dashboard preview", () => {
       "[&_span]:text-[var(--color-brand-blue)] [&_svg]:text-[var(--color-brand-blue)]",
     );
     expect(shellSource).toContain(
-      "border-blue-300 bg-blue-50 text-blue-950",
+      "border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)] text-white",
     );
     expect(shellSource).not.toContain("[&_span]:text-white [&_svg]:text-white");
     expect(shellSource).not.toContain("absolute left-1.5 top-1/2 size-1.5");
