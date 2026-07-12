@@ -103,6 +103,17 @@ describe("PPC student dashboard preview", () => {
     expect(shellSource).not.toContain("absolute left-1.5 top-1/2 size-1.5");
   });
 
+  test("keeps the student dashboard nav row text-only when expanded", () => {
+    const shellSource = source("components", "ppc", "ppc-shell.tsx");
+
+    expect(shellSource).toContain(
+      'const hideIcon = item.path === "/student" && !collapsed;',
+    );
+    expect(shellSource).toContain(
+      '{!hideIcon ? <Icon className="size-4 shrink-0" /> : null}',
+    );
+  });
+
   test("marks completed levels in the sidebar", () => {
     const shellSource = source("components", "ppc", "ppc-shell.tsx");
 

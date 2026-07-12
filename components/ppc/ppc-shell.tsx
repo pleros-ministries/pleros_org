@@ -106,6 +106,7 @@ function SidebarNavigation({
         const href = resolvePpcHref(pathname, item.path);
         const isActive = isPpcShellNavItemActive(item.path, logicalPathname);
         const Icon = iconMap[item.icon];
+        const hideIcon = item.path === "/student" && !collapsed;
 
         return (
           <Link
@@ -122,7 +123,7 @@ function SidebarNavigation({
                 : "border-transparent text-zinc-500 hover:border-zinc-200 hover:bg-zinc-50 hover:text-zinc-900 active:bg-zinc-100",
             )}
           >
-            <Icon className="size-4 shrink-0" />
+            {!hideIcon ? <Icon className="size-4 shrink-0" /> : null}
             {collapsed ? <span className="sr-only">{item.label}</span> : <span>{item.label}</span>}
           </Link>
         );
