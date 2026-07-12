@@ -425,6 +425,57 @@ export const prayerWatchAttendance = pgTable(
   ],
 );
 
+export const bibleReadingLogs = pgTable(
+  "bible_reading_logs",
+  {
+    id: serial("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    readingDate: date("reading_date", { mode: "string" }).notNull(),
+    chaptersRead: integer("chapters_read").notNull(),
+    currentBook: text("current_book").notNull(),
+    currentChapter: integer("current_chapter").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("bible_reading_logs_user_date_idx").on(t.userId, t.readingDate),
+    index("bible_reading_logs_user_idx").on(t.userId),
+  ],
+);
+
+export const podcastEpisodeProgress = pgTable(
+  "podcast_episode_progress",
+  {
+    id: serial("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    episodeGuid: text("episode_guid").notNull(),
+    listenedAt: timestamp("listened_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("podcast_episode_progress_user_episode_idx").on(
+      t.userId,
+      t.episodeGuid,
+    ),
+    index("podcast_episode_progress_user_idx").on(t.userId),
+  ],
+);
+
 // ─── Contact submissions ────────────────────────────────────────────────────
 
 export const contactSubmissions = pgTable(
