@@ -122,16 +122,6 @@ function SidebarNavigation({
                 : "border-transparent text-zinc-500 hover:border-zinc-200 hover:bg-zinc-50 hover:text-zinc-900 active:bg-zinc-100",
             )}
           >
-            {!collapsed ? (
-              <span
-                className={cn(
-                  "absolute left-1.5 top-1/2 size-1.5 -translate-y-1/2 rounded-full transition-colors",
-                  isActive
-                    ? "bg-[var(--color-brand-blue)]"
-                    : "bg-transparent group-hover:bg-zinc-300",
-                )}
-              />
-            ) : null}
             <Icon className="size-4 shrink-0" />
             {collapsed ? <span className="sr-only">{item.label}</span> : <span>{item.label}</span>}
           </Link>

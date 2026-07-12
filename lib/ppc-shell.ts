@@ -101,7 +101,7 @@ export const PPC_SHELL_NAV_ITEMS: PpcShellNavItem[] = [
     roles: ["super_admin", "admin", "instructor"],
   },
   {
-    label: "My learning",
+    label: "Dashboard",
     path: "/student",
     icon: "learning",
     roles: ["student"],
@@ -332,7 +332,7 @@ export function getPpcShellContext(pathname: string): PpcShellContext {
 
   if (logicalPath === "/student") {
     return {
-      label: "My learning",
+      label: "Dashboard",
       description: "Levels, progress, and next steps",
     };
   }

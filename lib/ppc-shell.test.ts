@@ -80,7 +80,7 @@ describe("ppc shell helpers", () => {
         roles: ["super_admin", "admin", "instructor"],
       },
       {
-        label: "My learning",
+        label: "Dashboard",
         path: "/student",
         icon: "learning",
         roles: ["student"],
@@ -178,7 +178,7 @@ describe("ppc shell helpers", () => {
 
   test("resolves top bar context for student lesson routes", () => {
     expect(getPpcShellContext("/student")).toEqual({
-      label: "My learning",
+      label: "Dashboard",
       description: "Levels, progress, and next steps",
     });
     expect(getPpcShellContext("/student/level/2")).toEqual({
