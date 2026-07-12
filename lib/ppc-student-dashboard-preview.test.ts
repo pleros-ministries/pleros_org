@@ -26,7 +26,20 @@ describe("PPC student dashboard preview", () => {
     expect(previewSource).toContain("PpcShell");
     expect(previewSource).toContain("StudentDashboardView");
     expect(previewSource).toContain('pathnameOverride="/ppc/student"');
+    expect(previewSource).toContain("studentName={previewSession.user.name}");
     expect(liveSource).toContain("StudentDashboardView");
+    expect(liveSource).toContain("studentName={session.user.name}");
+  });
+
+  test("uses a personalized first-name dashboard heading", () => {
+    const viewSource = source(
+      "components",
+      "ppc",
+      "student-dashboard-view.tsx",
+    );
+
+    expect(viewSource).toContain("Welcome, ${firstName}");
+    expect(viewSource).not.toContain('<PageHeader title="My learning" />');
   });
 
   test("keeps redundant student dashboard helper copy out of the view", () => {

@@ -96,6 +96,7 @@ export default async function StudentDashboardPage() {
 
   return (
     <StudentDashboardView
+      studentName={session.user.name}
       currentLevel={currentLevel}
       graduatedLevelCount={graduatedIds.size}
       completedLessonCount={completedCount}

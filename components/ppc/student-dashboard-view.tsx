@@ -23,6 +23,7 @@ type StudentPathwayRow = {
 };
 
 type StudentDashboardViewProps = {
+  studentName: string;
   currentLevel: number;
   graduatedLevelCount: number;
   completedLessonCount: number;
@@ -35,6 +36,7 @@ type StudentDashboardViewProps = {
 };
 
 export function StudentDashboardView({
+  studentName,
   currentLevel,
   graduatedLevelCount,
   completedLessonCount,
@@ -46,10 +48,11 @@ export function StudentDashboardView({
   isPushConfigured,
 }: StudentDashboardViewProps) {
   const lessonsRemaining = Math.max(totalLessonCount - completedLessonCount, 0);
+  const firstName = studentName.trim().split(/\s+/)[0] || "there";
 
   return (
     <div className="grid gap-6">
-      <PageHeader title="My learning" />
+      <PageHeader title={`Welcome, ${firstName}`} />
 
       <section className="grid gap-4 lg:grid-cols-[2fr_1fr]">
         <div className="rounded-sm border border-zinc-200 bg-white p-4">

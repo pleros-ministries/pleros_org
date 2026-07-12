@@ -71,6 +71,7 @@ export default function PpcStudentDashboardPreviewPage() {
       pathnameOverride="/ppc/student"
     >
       <StudentDashboardView
+        studentName={previewSession.user.name}
         currentLevel={currentLevel}
         graduatedLevelCount={graduatedLevelIds.length}
         completedLessonCount={completedLessonCount}
