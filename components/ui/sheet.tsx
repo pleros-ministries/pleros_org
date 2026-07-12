@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const sheetSideVariants = cva(
-  "fixed z-50 flex flex-col gap-4 border border-[var(--color-line)] bg-[var(--page-surface-raised)] p-5 shadow-[var(--shadow-lg)] transition-[opacity,transform] duration-200 ease-out",
+  "fixed z-50 flex flex-col gap-4 border border-[var(--color-line)] bg-[var(--page-surface-raised)] p-5 shadow-[var(--shadow-lg)] transition-[opacity,transform] duration-[320ms] [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] will-change-transform",
   {
     variants: {
       tone: {
@@ -20,13 +20,13 @@ const sheetSideVariants = cva(
         fulfil: "theme-fulfil bg-[var(--page-accent-surface)] text-[var(--color-text)]",
       },
       side: {
-        top: "inset-x-0 top-0 rounded-b-[var(--radius-lg)] data-open:translate-y-0 data-closed:-translate-y-8 data-open:opacity-100 data-closed:opacity-0",
+        top: "inset-x-0 top-0 rounded-b-[var(--radius-lg)] data-open:translate-y-0 data-closed:-translate-y-full data-open:opacity-100 data-closed:opacity-0",
         right:
-          "inset-y-0 right-0 h-full w-[min(100%,24rem)] rounded-l-[var(--radius-lg)] data-open:translate-x-0 data-closed:translate-x-8 data-open:opacity-100 data-closed:opacity-0",
+          "inset-y-0 right-0 h-full w-[min(100%,24rem)] rounded-l-[var(--radius-lg)] data-open:translate-x-0 data-closed:translate-x-full data-open:opacity-100 data-closed:opacity-0",
         bottom:
-          "inset-x-0 bottom-0 rounded-t-[var(--radius-lg)] data-open:translate-y-0 data-closed:translate-y-8 data-open:opacity-100 data-closed:opacity-0",
+          "inset-x-0 bottom-0 rounded-t-[var(--radius-lg)] data-open:translate-y-0 data-closed:translate-y-full data-open:opacity-100 data-closed:opacity-0",
         left:
-          "inset-y-0 left-0 h-full w-[min(100%,24rem)] rounded-r-[var(--radius-lg)] data-open:translate-x-0 data-closed:-translate-x-8 data-open:opacity-100 data-closed:opacity-0",
+          "inset-y-0 left-0 h-full w-[min(100%,24rem)] rounded-r-[var(--radius-lg)] data-open:translate-x-0 data-closed:-translate-x-full data-open:opacity-100 data-closed:opacity-0",
       },
     },
     defaultVariants: {
@@ -57,7 +57,7 @@ function SheetOverlay({ className, ...props }: SheetPrimitive.Backdrop.Props) {
     <SheetPrimitive.Backdrop
       data-slot="sheet-overlay"
       className={cn(
-        "fixed inset-0 z-50 bg-[rgba(15,23,40,0.36)] backdrop-blur-[2px] transition-opacity duration-200 data-open:opacity-100 data-closed:opacity-0",
+        "fixed inset-0 z-50 bg-[rgba(15,23,40,0.36)] backdrop-blur-[2px] transition-opacity duration-[260ms] [transition-timing-function:cubic-bezier(0.22,1,0.36,1)] data-open:opacity-100 data-closed:opacity-0",
         className,
       )}
       {...props}
