@@ -38,5 +38,6 @@ describe("PPC student dashboard preview", () => {
 
     expect(viewSource).not.toContain("Use the sidebar");
     expect(viewSource).not.toContain("Locked in this level");
+    expect(viewSource).not.toContain("primary navigator");
   });
 });

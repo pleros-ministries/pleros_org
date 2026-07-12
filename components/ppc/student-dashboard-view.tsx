@@ -146,10 +146,6 @@ export function StudentDashboardView({
             <h3 className="ppc-heading text-sm font-semibold text-zinc-900">
               Pathway overview
             </h3>
-            <p className="mt-1 text-[11px] text-zinc-500">
-              The sidebar is your primary navigator. This view shows where each
-              level stands.
-            </p>
           </div>
         </div>
 
