@@ -92,4 +92,14 @@ describe("PPC student dashboard preview", () => {
     expect(shellSource).toContain("gap-3 px-3 pb-3 lg:grid");
     expect(shellSource).not.toContain("gap-3 p-3 lg:grid");
   });
+
+  test("uses setup-oriented notification copy", () => {
+    const panelSource = source("components", "ppc", "push-subscription-panel.tsx");
+    const copySource = source("lib", "ppc-notifications.ts");
+
+    expect(panelSource).toContain("Setup notifications");
+    expect(panelSource).toContain("Notifications are not ready");
+    expect(copySource).toContain("after the PPC team finishes notification setup");
+    expect(copySource).toContain("Waiting for admin setup");
+  });
 });

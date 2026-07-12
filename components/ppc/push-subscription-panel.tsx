@@ -42,14 +42,14 @@ export function PushSubscriptionPanel({
       <div className="flex items-center gap-2">
         <MonitorSmartphone className="size-4 text-zinc-500" />
         <h3 className="ppc-heading text-sm font-semibold text-zinc-900">
-          This browser
+          Setup notifications
         </h3>
       </div>
 
       <div className="mt-3 rounded-sm border border-zinc-100 bg-zinc-50 px-3 py-2">
         <p className="text-xs font-medium text-zinc-900">
           {!isPushConfigured
-            ? "Push is not configured"
+            ? "Notifications are not ready"
             : !isSupported
               ? "Push is not supported here"
               : isSubscribed

@@ -58,13 +58,13 @@ type PushSubscriptionAction =
 
 const pushSubscriptionCopy: Record<PushSubscriptionAudience, PushSubscriptionCopy> = {
   staff: {
-    unavailable: "Add VAPID keys before staff can subscribe from this page.",
+    unavailable: "Ask a super admin to add VAPID keys before staff subscribe from this page.",
     subscribed: "This device can receive PPC assignment alerts.",
     available: "Subscribe this browser to receive staff assignment push alerts.",
   },
   student: {
     unavailable:
-      "Course reminders are unavailable until push notifications are configured.",
+      "Course reminders will become available after the PPC team finishes notification setup.",
     subscribed: "This device can receive PPC course reminders.",
     available:
       "Subscribe this browser to receive reminders about lessons and course progress.",
@@ -220,7 +220,7 @@ export function getPushSubscriptionAction({
   if (!isPushConfigured) {
     return {
       kind: "status",
-      label: "Push setup required",
+      label: "Waiting for admin setup",
       tone: "muted",
     };
   }
