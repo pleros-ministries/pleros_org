@@ -25,7 +25,7 @@ export function PpcAuthShell({ children }: PpcAuthShellProps) {
             href="/"
             className="text-xs font-medium text-white/80 transition-colors hover:text-white"
           >
-            Back to site
+            Back home
           </Link>
         </div>
       </header>
