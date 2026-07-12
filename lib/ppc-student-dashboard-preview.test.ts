@@ -42,6 +42,17 @@ describe("PPC student dashboard preview", () => {
     expect(viewSource).not.toContain('<PageHeader title="My learning" />');
   });
 
+  test("keeps the dashboard heading close to the first card", () => {
+    const viewSource = source(
+      "components",
+      "ppc",
+      "student-dashboard-view.tsx",
+    );
+
+    expect(viewSource).toContain('<div className="grid gap-4">');
+    expect(viewSource).toContain("<PageHeader title={`Welcome, ${firstName}`} />");
+  });
+
   test("keeps redundant student dashboard helper copy out of the view", () => {
     const viewSource = source(
       "components",
