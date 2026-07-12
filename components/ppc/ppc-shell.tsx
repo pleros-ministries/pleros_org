@@ -537,7 +537,7 @@ export function PpcShell({
       <Sheet open={isMobileNavOpen} onOpenChange={setIsMobileNavOpen}>
         <SheetContent
           side="left"
-          className="w-[88vw] max-w-[320px] p-0"
+          className="ppc-theme w-[88vw] max-w-[320px] p-0"
           showCloseButton
         >
           <SidebarShell
