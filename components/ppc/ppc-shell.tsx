@@ -478,7 +478,7 @@ export function PpcShell({
     <div className="ppc-theme min-h-screen bg-zinc-100/80 text-zinc-900">
       <div
         className={cn(
-          "mx-auto min-h-screen w-full max-w-[1520px] grid-cols-1 gap-3 p-3 lg:grid lg:gap-4 lg:p-4",
+          "mx-auto min-h-screen w-full max-w-[1520px] grid-cols-1 gap-3 px-3 pb-3 lg:grid lg:gap-4 lg:p-4",
           isSidebarCollapsed
             ? "lg:grid-cols-[92px_minmax(0,1fr)]"
             : "lg:grid-cols-[282px_minmax(0,1fr)]",

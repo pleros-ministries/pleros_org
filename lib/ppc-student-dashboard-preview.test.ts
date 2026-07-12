@@ -85,4 +85,11 @@ describe("PPC student dashboard preview", () => {
 
     expect(shellSource).toContain("Pleros Perfecting Course");
   });
+
+  test("keeps the mobile top bar flush with the viewport top", () => {
+    const shellSource = source("components", "ppc", "ppc-shell.tsx");
+
+    expect(shellSource).toContain("gap-3 px-3 pb-3 lg:grid");
+    expect(shellSource).not.toContain("gap-3 p-3 lg:grid");
+  });
 });
