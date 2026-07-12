@@ -511,7 +511,7 @@ export function PpcShell({
         </aside>
 
         <div className="flex min-w-0 flex-1 flex-col gap-3">
-          <header className="sticky top-3 z-20 flex min-h-15 items-center justify-between rounded-[1.5rem] border border-zinc-200/90 bg-white/95 px-4 py-3 shadow-[0_1px_2px_rgba(15,23,40,0.04),0_8px_22px_rgba(15,23,40,0.04)] backdrop-blur sm:px-5">
+          <header className="sticky top-0 z-20 -mx-3 flex min-h-14 items-center justify-between border-b border-zinc-200 bg-zinc-100/95 px-4 py-2 backdrop-blur sm:-mx-4 sm:px-6 lg:top-0">
             <div className="flex min-w-0 items-center gap-3">
               <button
                 type="button"
@@ -522,9 +522,6 @@ export function PpcShell({
                 <Menu className="size-4" />
               </button>
               <div className="min-w-0">
-                <p className="truncate text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400">
-                  {shellContext.label}
-                </p>
                 <p className="truncate text-xs text-zinc-500 sm:text-sm">
                   {shellContext.description}
                 </p>
