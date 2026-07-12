@@ -511,24 +511,24 @@ export function PpcShell({
         </aside>
 
         <div className="flex min-w-0 flex-1 flex-col gap-3">
-          <header className="sticky top-0 z-20 -mx-3 flex min-h-14 items-center justify-between border-b border-zinc-200 bg-zinc-100/95 px-4 py-2 backdrop-blur sm:-mx-4 sm:px-6 lg:top-0">
+          <header className="sticky top-0 z-20 -mx-3 flex min-h-14 items-center justify-between border-b border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)] px-4 py-2 text-white shadow-sm sm:-mx-4 sm:px-6 lg:top-0">
             <div className="flex min-w-0 items-center gap-3">
               <button
                 type="button"
                 onClick={() => setIsMobileNavOpen(true)}
-                className="inline-flex size-10 items-center justify-center rounded-sm border border-zinc-200 bg-white text-zinc-600 transition-colors hover:bg-zinc-50 hover:text-zinc-900 lg:hidden"
+                className="inline-flex size-10 items-center justify-center rounded-sm border border-white/20 bg-white/10 text-white transition-colors hover:bg-white/15 lg:hidden"
                 aria-label="Open sidebar"
               >
                 <Menu className="size-4" />
               </button>
               <div className="min-w-0">
-                <p className="truncate text-xs text-zinc-500 sm:text-sm">
+                <p className="truncate text-xs text-white/85 sm:text-sm">
                   {shellContext.description}
                 </p>
               </div>
             </div>
-            <div className="hidden items-center gap-2 text-[11px] text-zinc-500 lg:flex">
-              <GraduationCap className="size-3.5 text-zinc-400" />
+            <div className="hidden items-center gap-2 text-[11px] text-white/75 lg:flex">
+              <GraduationCap className="size-3.5 text-white/60" />
               <span className="capitalize">{session.user.role}</span>
             </div>
           </header>
