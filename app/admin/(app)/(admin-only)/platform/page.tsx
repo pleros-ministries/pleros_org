@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { getStudentList } from "@/lib/db/queries/students";
 import { getAppSession } from "@/lib/app-session";
+import { hasAdminAccess } from "@/lib/app-role";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
 import { PageHeader } from "@/components/ppc/page-header";
@@ -14,7 +15,7 @@ export default async function AdminPlatformPage() {
     redirect("/admin");
   }
 
-  if (session.user.role !== "admin") {
+  if (!hasAdminAccess(session.user.role)) {
     redirect("/admin/forbidden");
   }
 
