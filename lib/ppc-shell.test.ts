@@ -50,7 +50,7 @@ describe("ppc shell helpers", () => {
         roles: ["super_admin"],
       },
       {
-        label: "Students",
+        label: "Registrants",
         path: "/students",
         icon: "students",
         roles: ["super_admin", "admin", "instructor"],
@@ -135,12 +135,12 @@ describe("ppc shell helpers", () => {
       description: "Course operations overview",
     });
     expect(getPpcShellContext("/students")).toEqual({
-      label: "Students",
-      description: "Roster and cohort progress",
+      label: "Registrants",
+      description: "All signups and progress status",
     });
     expect(getPpcShellContext("/students/student-1")).toEqual({
-      label: "Student detail",
-      description: "Progress and support history",
+      label: "Registrant detail",
+      description: "Profile, progress, and support history",
     });
     expect(getPpcShellContext("/review")).toEqual({
       label: "Review queue",

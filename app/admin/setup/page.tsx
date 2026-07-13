@@ -2,19 +2,17 @@ import { redirect } from "next/navigation";
 
 import { SuperAdminSetupForm } from "@/components/ppc/super-admin-setup-form";
 import { getAppSession } from "@/lib/app-session";
-import {
-  DEFAULT_SUPER_ADMIN_EMAIL,
-  hasSuperAdminUser,
-} from "@/lib/app-user";
+import { getMissingSuperAdminEmails } from "@/lib/app-user";
 
 export default async function AdminSetupPage() {
   const session = await getAppSession();
+  const missingSuperAdminEmails = await getMissingSuperAdminEmails();
 
   if (session?.user.role === "student") {
     redirect("/ppc");
   }
 
-  if (session || (await hasSuperAdminUser())) {
+  if (session || missingSuperAdminEmails.length === 0) {
     redirect("/admin");
   }
 
@@ -28,10 +26,11 @@ export default async function AdminSetupPage() {
           Create the first admin
         </h1>
         <p className="mt-1 text-xs text-zinc-500">
-          This page is only available before the first super admin exists.
+          This page is only available for configured super admin accounts that
+          have not been created yet.
         </p>
 
-        <SuperAdminSetupForm email={DEFAULT_SUPER_ADMIN_EMAIL} />
+        <SuperAdminSetupForm emails={missingSuperAdminEmails} />
       </section>
     </main>
   );

@@ -8,11 +8,12 @@ import { authClient } from "@/lib/auth/auth-client";
 import { formatAuthErrorMessage } from "@/lib/auth-entry";
 
 type SuperAdminSetupFormProps = {
-  email: string;
+  emails: string[];
 };
 
-export function SuperAdminSetupForm({ email }: SuperAdminSetupFormProps) {
+export function SuperAdminSetupForm({ emails }: SuperAdminSetupFormProps) {
   const router = useRouter();
+  const [email, setEmail] = useState(emails[0] ?? "");
   const [name, setName] = useState("FCC Ibadan");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -51,7 +52,7 @@ export function SuperAdminSetupForm({ email }: SuperAdminSetupFormProps) {
           Bootstrap account
         </p>
         <p className="mt-1 text-xs text-zinc-600">
-          This creates the first PPC super admin account for {email}.
+          This creates a configured PPC super admin account.
         </p>
       </div>
 
@@ -79,12 +80,18 @@ export function SuperAdminSetupForm({ email }: SuperAdminSetupFormProps) {
           <span className="text-[11px] font-medium uppercase tracking-[0.08em] text-zinc-500">
             Email
           </span>
-          <input
-            type="email"
-            readOnly
+          <select
+            required
             value={email}
-            className="h-8 rounded-sm border border-zinc-200 bg-zinc-50 px-2.5 text-xs text-zinc-500 outline-none"
-          />
+            onChange={(event) => setEmail(event.target.value)}
+            className="h-8 rounded-sm border border-zinc-300 bg-white px-2.5 text-xs text-zinc-700 outline-none focus:border-zinc-700"
+          >
+            {emails.map((configuredEmail) => (
+              <option key={configuredEmail} value={configuredEmail}>
+                {configuredEmail}
+              </option>
+            ))}
+          </select>
         </label>
 
         <label className="grid gap-1">
