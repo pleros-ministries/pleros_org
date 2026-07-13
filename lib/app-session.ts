@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { headers } from "next/headers";
 
 import type { AppRole } from "@/lib/app-role";
@@ -13,7 +14,7 @@ export type AppSession = {
   };
 };
 
-export async function getAppSession(): Promise<AppSession | null> {
+export const getAppSession = cache(async (): Promise<AppSession | null> => {
   try {
     const headerStore = await headers();
     const authSession = await betterAuthServer.api.getSession({
@@ -43,4 +44,4 @@ export async function getAppSession(): Promise<AppSession | null> {
   } catch {
     return null;
   }
-}
+});

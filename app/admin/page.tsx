@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import { eq, count } from "drizzle-orm";
 
@@ -14,7 +13,6 @@ import {
   listStaffInvites,
   listStaffUsers,
 } from "@/lib/db/queries/staff-invites";
-import { PpcAppFrame } from "@/components/ppc/ppc-app-frame";
 import { PageHeader } from "@/components/ppc/page-header";
 import { StaffLoginPanel } from "@/components/ppc/staff-login-panel";
 import { StatCard } from "@/components/ppc/stat-card";
@@ -69,20 +67,44 @@ export default async function AdminEntryPage() {
     );
   }
 
-  if (session.user.role === "student") {
-    redirect("/ppc");
-  }
-
   const canManageContent = hasAdminAccess(session.user.role);
 
-  const stats = await getDashboardStats();
-  const registrants = await getAdminRegistrantList();
+  const statsPromise = getDashboardStats();
+  const registrantsPromise = getAdminRegistrantList();
+  const reviewQueuePromise = getReviewQueue();
+  const openThreadsPromise = getAllThreads("open");
+  const contentOverviewPromise = getContentOverview();
+  const staffAccessPromise =
+    session.user.role === "super_admin"
+      ? Promise.all([listStaffUsers(), listStaffInvites()])
+      : Promise.resolve(null);
+  const userCountPromise = db.select({ count: count() }).from(schema.users);
+  const lessonCountPromise = db
+    .select({ count: count() })
+    .from(schema.lessons)
+    .where(eq(schema.lessons.status, "published"));
+  const [
+    stats,
+    registrants,
+    reviewQueue,
+    openThreads,
+    contentOverview,
+    staffAccess,
+    [userCount],
+    [lessonCount],
+  ] = await Promise.all([
+    statsPromise,
+    registrantsPromise,
+    reviewQueuePromise,
+    openThreadsPromise,
+    contentOverviewPromise,
+    staffAccessPromise,
+    userCountPromise,
+    lessonCountPromise,
+  ]);
   const welcomeOnlyCount = registrants.filter(
     (registrant) => registrant.accountStatus === "welcome_only",
   ).length;
-  const reviewQueue = await getReviewQueue();
-  const openThreads = await getAllThreads("open");
-  const contentOverview = await getContentOverview();
   const contentDebt = getContentDebtSummary(
     contentOverview.map((level) => ({
       id: level.id,
@@ -105,15 +127,9 @@ export default async function AdminEntryPage() {
       })),
     })),
   );
-  const staffAccessSummary =
-    session.user.role === "super_admin"
-      ? getStaffAccessSummary(await listStaffUsers(), await listStaffInvites())
-      : null;
-  const [userCount] = await db.select({ count: count() }).from(schema.users);
-  const [lessonCount] = await db
-    .select({ count: count() })
-    .from(schema.lessons)
-    .where(eq(schema.lessons.status, "published"));
+  const staffAccessSummary = staffAccess
+    ? getStaffAccessSummary(staffAccess[0], staffAccess[1])
+    : null;
   const reviewPressure = getQueuePressureSummary(reviewQueue, "submittedAt");
   const qaPressure = getQueuePressureSummary(openThreads, "createdAt");
   const reviewOwnership = getAssignmentOwnershipSummary(
@@ -136,8 +152,7 @@ export default async function AdminEntryPage() {
   );
 
   return (
-    <PpcAppFrame session={session}>
-      <div className="grid gap-6">
+    <div className="grid gap-6">
         <PageHeader
           title="Dashboard"
           description="Course operations overview"
@@ -514,7 +529,6 @@ export default async function AdminEntryPage() {
             </div>
           </article>
         </section>
-      </div>
-    </PpcAppFrame>
+    </div>
   );
 }

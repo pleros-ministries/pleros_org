@@ -31,19 +31,40 @@ function refreshWelcomeAccessCookie(
   return response;
 }
 
+function nextResponseWithPathname(request: NextRequest) {
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-pleros-pathname", request.nextUrl.pathname);
+
+  return NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  });
+}
+
 export function proxy(request: NextRequest) {
   const host = request.headers.get("host");
 
   const rewritePath = getPpcRewritePath(host, request.nextUrl.pathname);
 
   if (!rewritePath) {
-    return refreshWelcomeAccessCookie(request, NextResponse.next());
+    return refreshWelcomeAccessCookie(request, nextResponseWithPathname(request));
   }
 
   const rewriteUrl = request.nextUrl.clone();
   rewriteUrl.pathname = rewritePath;
 
-  return refreshWelcomeAccessCookie(request, NextResponse.rewrite(rewriteUrl));
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-pleros-pathname", request.nextUrl.pathname);
+
+  return refreshWelcomeAccessCookie(
+    request,
+    NextResponse.rewrite(rewriteUrl, {
+      request: {
+        headers: requestHeaders,
+      },
+    }),
+  );
 }
 
 export const config = {

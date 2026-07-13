@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 
-import { PpcAppFrame } from "@/components/ppc/ppc-app-frame";
 import { getAppSession } from "@/lib/app-session";
 
 export default async function AdminAppLayout({
@@ -18,5 +17,5 @@ export default async function AdminAppLayout({
     redirect("/ppc");
   }
 
-  return <PpcAppFrame session={session}>{children}</PpcAppFrame>;
+  return children;
 }
