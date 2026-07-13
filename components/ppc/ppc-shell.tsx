@@ -2,7 +2,7 @@
 
 /* eslint-disable react-hooks/set-state-in-effect */
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -47,6 +47,7 @@ import {
 } from "@/lib/ppc-shell-state";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { PpcRouteLoadingSkeleton } from "@/components/ppc/route-loading-skeleton";
 
 type PpcShellProps = {
   children: React.ReactNode;
@@ -60,7 +61,7 @@ type SidebarNavigationProps = {
   pathname: string;
   logicalPathname: string;
   collapsed: boolean;
-  onNavigate?: () => void;
+  onNavigate?: (href: string) => void;
 };
 
 const iconMap: Record<PpcShellIcon, React.ComponentType<{ className?: string }>> = {
@@ -94,6 +95,17 @@ function getSignOutHref(pathname: string): string {
   return "/ppc";
 }
 
+function shouldStartNavigation(event: MouseEvent<HTMLAnchorElement>) {
+  return !(
+    event.defaultPrevented ||
+    event.button !== 0 ||
+    event.metaKey ||
+    event.altKey ||
+    event.ctrlKey ||
+    event.shiftKey
+  );
+}
+
 function SidebarNavigation({
   items,
   pathname,
@@ -115,7 +127,11 @@ function SidebarNavigation({
             href={href}
             title={collapsed ? item.label : undefined}
             aria-current={isActive ? "page" : undefined}
-            onClick={onNavigate}
+            onClick={(event) => {
+              if (shouldStartNavigation(event)) {
+                onNavigate?.(href);
+              }
+            }}
             className={cn(
               "group relative flex min-h-11 items-center rounded-sm border text-sm font-medium transition-[background-color,border-color,color,box-shadow,transform] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/70",
               collapsed ? "justify-center px-0" : "gap-3 px-3.5 py-2.5",
@@ -138,7 +154,7 @@ type StudentLevelNavigationProps = {
   logicalPathname: string;
   pathname: string;
   collapsed: boolean;
-  onNavigate?: () => void;
+  onNavigate?: (href: string) => void;
 };
 
 function StudentLevelNavigation({
@@ -211,7 +227,11 @@ function StudentLevelNavigation({
               href={href}
               title={collapsed ? item.label : undefined}
               aria-current={isActive ? "page" : undefined}
-              onClick={onNavigate}
+              onClick={(event) => {
+                if (shouldStartNavigation(event)) {
+                  onNavigate?.(href);
+                }
+              }}
               className={cn(
                 "group relative flex min-h-11 items-center rounded-[4px] border transition-[background-color,border-color,color,box-shadow] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/70",
                 collapsed ? "justify-center px-0" : "gap-3 px-2.5 py-2",
@@ -349,7 +369,7 @@ type SidebarShellProps = {
   collapsed: boolean;
   session: AppSession;
   studentLevelNavItems?: PpcStudentLevelNavItem[];
-  onNavigate?: () => void;
+  onNavigate?: (href: string) => void;
   onToggleCollapse?: () => void;
   signOutHref: string;
 };
@@ -373,7 +393,11 @@ function SidebarShell({
         <div className={cn("flex items-center", collapsed ? "justify-center" : "justify-between gap-3")}>
           <Link
             href={homeHref}
-            onClick={onNavigate}
+            onClick={(event) => {
+              if (shouldStartNavigation(event)) {
+                onNavigate?.(homeHref);
+              }
+            }}
             className={cn(
               "group flex min-w-0 rounded-sm transition-colors hover:bg-zinc-50",
               collapsed ? "hidden" : "items-center p-1.5",
@@ -449,12 +473,19 @@ export function PpcShell({
 }: PpcShellProps) {
   const currentPathname = usePathname();
   const pathname = pathnameOverride ?? currentPathname;
-  const logicalPathname = getLogicalPpcShellPath(pathname);
   const signOutHref = getSignOutHref(pathname);
   const roleLabel = getAppRoleLabel(session.user.role);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [hasLoadedSidebarPreference, setHasLoadedSidebarPreference] = useState(false);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const [pendingPathname, setPendingPathname] = useState<string | null>(null);
+  const isNavigating = pendingPathname !== null && pendingPathname !== pathname;
+  const navigationPathname = pendingPathname ?? pathname;
+  const navigationLogicalPathname = getLogicalPpcShellPath(navigationPathname);
+
+  useEffect(() => {
+    setPendingPathname(null);
+  }, [pathname]);
 
   useEffect(() => {
     try {
@@ -502,12 +533,13 @@ export function PpcShell({
             <div className="flex h-full flex-col rounded-none border border-zinc-200/90 bg-white shadow-[0_1px_2px_rgba(15,23,40,0.04),0_12px_28px_rgba(15,23,40,0.06)]">
               <SidebarShell
                 pathname={pathname}
-                logicalPathname={logicalPathname}
+                logicalPathname={navigationLogicalPathname}
                 collapsed={isSidebarCollapsed}
                 session={session}
                 studentLevelNavItems={studentLevelNavItems}
                 signOutHref={signOutHref}
                 onToggleCollapse={() => setIsSidebarCollapsed((current) => !current)}
+                onNavigate={setPendingPathname}
               />
             </div>
           </div>
@@ -536,7 +568,9 @@ export function PpcShell({
             </div>
           </header>
 
-          <main className="min-w-0 flex-1 px-1 pb-4 sm:px-2">{children}</main>
+          <main className="min-w-0 flex-1 px-1 pb-4 sm:px-2">
+            {isNavigating ? <PpcRouteLoadingSkeleton /> : children}
+          </main>
         </div>
       </div>
 
@@ -548,12 +582,15 @@ export function PpcShell({
         >
           <SidebarShell
             pathname={pathname}
-            logicalPathname={logicalPathname}
+            logicalPathname={navigationLogicalPathname}
             collapsed={false}
             session={session}
             studentLevelNavItems={studentLevelNavItems}
             signOutHref={signOutHref}
-            onNavigate={() => setIsMobileNavOpen(false)}
+            onNavigate={(href) => {
+              setPendingPathname(href);
+              setIsMobileNavOpen(false);
+            }}
           />
         </SheetContent>
       </Sheet>

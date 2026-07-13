@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, updateTag } from "next/cache";
 import {
   createLevel,
   createLesson,
@@ -19,6 +19,7 @@ import {
   publishLesson,
   unpublishLesson,
   getLessonForEdit,
+  CONTENT_OVERVIEW_CACHE_TAG,
 } from "@/lib/db/queries/content";
 import {
   createQuizQuestion,
@@ -42,6 +43,7 @@ import {
 import { deleteManagedLessonAudio } from "@/lib/upload/lesson-audio";
 
 function revalidateContentSurfaces() {
+  updateTag(CONTENT_OVERVIEW_CACHE_TAG);
   revalidatePath("/ppc", "layout");
   revalidatePath("/admin", "layout");
 }
