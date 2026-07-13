@@ -4,7 +4,8 @@
 
 import { useEffect, useState, type MouseEvent } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import dynamic from "next/dynamic";
+import { usePathname, useRouter } from "next/navigation";
 import {
   BadgeCheck,
   BellRing,
@@ -78,6 +79,60 @@ const iconMap: Record<PpcShellIcon, React.ComponentType<{ className?: string }>>
   waitlist: ClipboardList,
 };
 
+const PREFETCHED_ADMIN_PATHS = new Set([
+  "/platform",
+  "/school-of-purpose",
+  "/staff",
+  "/students",
+  "/review",
+  "/qa",
+  "/contact",
+  "/notifications",
+]);
+
+const AdminPlatformPreview = dynamic(
+  () =>
+    import("@/components/ppc/admin-platform-client").then(
+      (module) => module.AdminPlatformClient,
+    ),
+  { ssr: false },
+);
+const AdminSchoolOfPurposePreview = dynamic(
+  () =>
+    import("@/components/ppc/admin-school-of-purpose-client").then(
+      (module) => module.AdminSchoolOfPurposeClient,
+    ),
+  { ssr: false },
+);
+const AdminStaffPreview = dynamic(
+  () =>
+    import("@/components/ppc/admin-staff-page-client").then(
+      (module) => module.AdminStaffPageClient,
+    ),
+  { ssr: false },
+);
+const AdminRegistrantsPreview = dynamic(
+  () =>
+    import("@/components/ppc/admin-registrant-list-cached").then(
+      (module) => module.AdminRegistrantListCached,
+    ),
+  { ssr: false },
+);
+const AdminReviewPreview = dynamic(
+  () =>
+    import("@/components/ppc/admin-review-page-client").then(
+      (module) => module.AdminReviewPageClient,
+    ),
+  { ssr: false },
+);
+const AdminQaPreview = dynamic(
+  () =>
+    import("@/components/ppc/admin-qa-page-client").then(
+      (module) => module.AdminQaPageClient,
+    ),
+  { ssr: false },
+);
+
 function getInitials(name: string): string {
   return name
     .split(" ")
@@ -104,6 +159,25 @@ function shouldStartNavigation(event: MouseEvent<HTMLAnchorElement>) {
     event.ctrlKey ||
     event.shiftKey
   );
+}
+
+function PendingAdminRoute({ pathname }: { pathname: string }) {
+  switch (pathname) {
+    case "/admin/platform":
+      return <AdminPlatformPreview />;
+    case "/admin/school-of-purpose":
+      return <AdminSchoolOfPurposePreview />;
+    case "/admin/staff":
+      return <AdminStaffPreview />;
+    case "/admin/students":
+      return <AdminRegistrantsPreview />;
+    case "/admin/review":
+      return <AdminReviewPreview />;
+    case "/admin/qa":
+      return <AdminQaPreview />;
+    default:
+      return <PpcRouteLoadingSkeleton />;
+  }
 }
 
 function SidebarNavigation({
@@ -471,6 +545,7 @@ export function PpcShell({
   studentLevelNavItems,
   pathnameOverride,
 }: PpcShellProps) {
+  const router = useRouter();
   const currentPathname = usePathname();
   const pathname = pathnameOverride ?? currentPathname;
   const signOutHref = getSignOutHref(pathname);
@@ -486,6 +561,28 @@ export function PpcShell({
   useEffect(() => {
     setPendingPathname(null);
   }, [pathname]);
+
+  useEffect(() => {
+    if (!pathname.startsWith("/admin")) {
+      return;
+    }
+
+    const prefetchRoutes = () => {
+      getVisiblePpcShellNavItems(session.user.role)
+        .filter((item) => PREFETCHED_ADMIN_PATHS.has(item.path))
+        .forEach((item) => {
+          router.prefetch(resolvePpcHref(pathname, item.path));
+        });
+    };
+
+    const idleCallback = window.requestIdleCallback?.(prefetchRoutes);
+    if (idleCallback !== undefined) {
+      return () => window.cancelIdleCallback(idleCallback);
+    }
+
+    const timeoutId = window.setTimeout(prefetchRoutes, 0);
+    return () => window.clearTimeout(timeoutId);
+  }, [pathname, router, session.user.role]);
 
   useEffect(() => {
     try {
@@ -569,7 +666,7 @@ export function PpcShell({
           </header>
 
           <main className="min-w-0 flex-1 px-1 pb-4 sm:px-2">
-            {isNavigating ? <PpcRouteLoadingSkeleton /> : children}
+            {isNavigating ? <PendingAdminRoute pathname={pendingPathname} /> : children}
           </main>
         </div>
       </div>

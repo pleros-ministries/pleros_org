@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Search,
   ChevronDown,
@@ -21,6 +21,7 @@ import {
   assignReviewer,
   removeReviewerAssignment,
 } from "@/app/ppc/_actions/student-actions";
+import { ADMIN_QUERY_KEYS } from "@/lib/admin-query";
 
 type AdminControlsClientProps = {
   students: Array<{
@@ -56,7 +57,7 @@ export function AdminControlsClient({
   stats,
   adminId,
 }: AdminControlsClientProps) {
-  const router = useRouter();
+  const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
 
   const [studentSearch, setStudentSearch] = useState("");
@@ -82,7 +83,7 @@ export function AdminControlsClient({
     if (!selectedStudentId) return;
     startTransition(async () => {
       await overrideStudentLevel(selectedStudentId, Number(overrideLevel));
-      router.refresh();
+      await queryClient.invalidateQueries({ queryKey: ADMIN_QUERY_KEYS.platform });
     });
   };
 
@@ -90,7 +91,7 @@ export function AdminControlsClient({
     startTransition(async () => {
       await resetStudentProgress(userId);
       setConfirmReset(null);
-      router.refresh();
+      await queryClient.invalidateQueries({ queryKey: ADMIN_QUERY_KEYS.platform });
     });
   };
 
@@ -99,14 +100,14 @@ export function AdminControlsClient({
     startTransition(async () => {
       await assignReviewer(newReviewerUserId, Number(newReviewerLevel));
       setNewReviewerUserId("");
-      router.refresh();
+      await queryClient.invalidateQueries({ queryKey: ADMIN_QUERY_KEYS.platform });
     });
   };
 
   const handleRemoveAssignment = (userId: string, levelId: number) => {
     startTransition(async () => {
       await removeReviewerAssignment(userId, levelId);
-      router.refresh();
+      await queryClient.invalidateQueries({ queryKey: ADMIN_QUERY_KEYS.platform });
     });
   };
 

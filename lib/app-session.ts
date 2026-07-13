@@ -2,7 +2,11 @@ import { cache } from "react";
 import { headers } from "next/headers";
 
 import type { AppRole } from "@/lib/app-role";
-import { ensureAppUserRecord, resolvePersistedRoleForEmail } from "@/lib/app-user";
+import {
+  ensureAppUserRecord,
+  getAppUserByEmail,
+  isConfiguredSuperAdminEmail,
+} from "@/lib/app-user";
 import { betterAuthServer } from "@/lib/auth/better-auth";
 
 export type AppSession = {
@@ -25,13 +29,29 @@ export const getAppSession = cache(async (): Promise<AppSession | null> => {
       return null;
     }
 
-    const role = await resolvePersistedRoleForEmail(authSession.user.email);
-    const ppcUserId = await ensureAppUserRecord({
-      id: authSession.user.id ?? authSession.user.email,
-      name: authSession.user.name,
-      email: authSession.user.email,
-      role,
-    });
+    const authUserId = authSession.user.id ?? authSession.user.email;
+
+    if (isConfiguredSuperAdminEmail(authSession.user.email)) {
+      return {
+        user: {
+          id: authUserId,
+          name: authSession.user.name,
+          email: authSession.user.email,
+          role: "super_admin",
+        },
+      };
+    }
+
+    const appUser = await getAppUserByEmail(authSession.user.email);
+    const role = appUser?.role ?? "student";
+    const ppcUserId =
+      appUser?.id ??
+      (await ensureAppUserRecord({
+        id: authUserId,
+        name: authSession.user.name,
+        email: authSession.user.email,
+        role,
+      }));
 
     return {
       user: {

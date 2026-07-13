@@ -5,15 +5,18 @@
 import { useCallback, useEffect, useState } from "react";
 
 export function usePushSubscription() {
-  const [isSupported] = useState(
-    () =>
+  const [isSupported, setIsSupported] = useState(false);
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [isPending, setIsPending] = useState(false);
+
+  useEffect(() => {
+    setIsSupported(
       typeof navigator !== "undefined" &&
       "serviceWorker" in navigator &&
       typeof window !== "undefined" &&
       "PushManager" in window,
-  );
-  const [isSubscribed, setIsSubscribed] = useState(false);
-  const [isPending, setIsPending] = useState(false);
+    );
+  }, []);
 
   const checkSubscription = useCallback(async () => {
     if (!isSupported) {

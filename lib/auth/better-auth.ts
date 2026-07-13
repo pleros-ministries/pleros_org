@@ -35,6 +35,13 @@ export const betterAuthServer = betterAuth({
       });
     },
   },
+  session: {
+    cookieCache: {
+      enabled: true,
+      maxAge: 60,
+      strategy: "jwe",
+    },
+  },
   socialProviders: googleConfigured
     ? {
         google: {
@@ -45,7 +52,7 @@ export const betterAuthServer = betterAuth({
     : {},
   trustedOrigins: buildTrustedOrigins(process.env),
   plugins: [
-    nextCookies(),
     twoFactor({ issuer: "Pleros PPC" }),
+    nextCookies(),
   ],
 });

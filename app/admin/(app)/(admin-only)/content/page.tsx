@@ -3,6 +3,14 @@ import { PageHeader } from "@/components/ppc/page-header";
 import { Breadcrumb } from "@/components/ppc/breadcrumb";
 import { ContentCmsClient } from "@/components/ppc/content-cms-client";
 
+function serializeAudioUploadedAt(value: Date | string | null): string | null {
+  if (!value) {
+    return null;
+  }
+
+  return value instanceof Date ? value.toISOString() : value;
+}
+
 export default async function AdminContentPage() {
   const rawLevels = await getContentOverview();
 
@@ -20,7 +28,7 @@ export default async function AdminContentPage() {
       audioUploadKey: lesson.audioUploadKey,
       audioFileName: lesson.audioFileName,
       audioFileSize: lesson.audioFileSize,
-      audioUploadedAt: lesson.audioUploadedAt?.toISOString() ?? null,
+      audioUploadedAt: serializeAudioUploadedAt(lesson.audioUploadedAt),
       notesContent: lesson.notesContent,
       responsePrompt: lesson.responsePrompt,
       responseMarkingGuide: lesson.responseMarkingGuide,

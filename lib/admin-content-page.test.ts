@@ -29,4 +29,10 @@ describe("admin content page", () => {
   test("caches the shared content overview", () => {
     expect(contentQuerySource).toContain("unstable_cache");
   });
+
+  test("accepts cached ISO timestamps for uploaded audio", () => {
+    expect(contentPageSource).toContain("serializeAudioUploadedAt");
+    expect(contentPageSource).toContain("value instanceof Date");
+    expect(contentPageSource).not.toContain("audioUploadedAt?.toISOString()");
+  });
 });

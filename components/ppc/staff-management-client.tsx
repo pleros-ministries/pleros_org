@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { MailPlus, RotateCcw, ShieldCheck, XCircle } from "lucide-react";
 
 import {
@@ -10,6 +11,7 @@ import {
 import { StatusBadge } from "@/components/ppc/status-badge";
 import { getAppRoleLabel } from "@/lib/app-role";
 import { cn } from "@/lib/utils";
+import { ADMIN_QUERY_KEYS } from "@/lib/admin-query";
 
 type StaffUser = {
   id: string;
@@ -58,6 +60,7 @@ export function StaffManagementClient({
   staffUsers,
   invites,
 }: StaffManagementClientProps) {
+  const queryClient = useQueryClient();
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"admin" | "instructor">("admin");
   const [feedback, setFeedback] = useState<{
@@ -74,6 +77,7 @@ export function StaffManagementClient({
     startTransition(async () => {
       try {
         const invite = await createStaffInviteAction({ email, role });
+        await queryClient.invalidateQueries({ queryKey: ADMIN_QUERY_KEYS.staff });
         setEmail("");
         setRole("admin");
         setFeedback({
@@ -99,6 +103,7 @@ export function StaffManagementClient({
     startTransition(async () => {
       try {
         await revokeStaffInviteAction(inviteId);
+        await queryClient.invalidateQueries({ queryKey: ADMIN_QUERY_KEYS.staff });
         setFeedback({
           tone: "default",
           message: "Invite revoked.",

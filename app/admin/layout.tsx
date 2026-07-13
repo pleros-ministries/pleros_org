@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { PpcAppFrame } from "@/components/ppc/ppc-app-frame";
+import { QueryProvider } from "@/components/query-provider";
 import { getAppSession } from "@/lib/app-session";
 export const metadata: Metadata = {
   title: "PPC Admin",
@@ -28,7 +29,9 @@ export default async function AdminRootLayout({ children }: { children: React.Re
   return (
     <div className="ppc-theme">
       {session && !isPublicAdminPage ? (
-        <PpcAppFrame session={session}>{children}</PpcAppFrame>
+        <QueryProvider userId={session.user.id}>
+          <PpcAppFrame session={session}>{children}</PpcAppFrame>
+        </QueryProvider>
       ) : (
         children
       )}
