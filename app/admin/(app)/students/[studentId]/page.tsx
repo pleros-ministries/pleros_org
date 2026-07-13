@@ -56,7 +56,7 @@ export default async function AdminStudentDetailPage({
             />
           </div>
 
-          <div className="grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 text-sm lg:grid-cols-4">
             <div>
               <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-400">
                 Source

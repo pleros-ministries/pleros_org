@@ -9,6 +9,9 @@ import { INITIAL_PASSWORD_RESET_STATE } from "@/lib/ppc-password-reset";
 
 type ResetPasswordFormProps = {
   token: string;
+  description?: string;
+  forgotPasswordHref?: string;
+  loginHref?: string;
 };
 
 function SubmitButton() {
@@ -25,7 +28,12 @@ function SubmitButton() {
   );
 }
 
-export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
+export function ResetPasswordForm({
+  token,
+  description = "Choose a new password for your PPC account.",
+  forgotPasswordHref = "/ppc/forgot-password",
+  loginHref = "/ppc",
+}: ResetPasswordFormProps) {
   const [state, formAction] = useActionState(
     resetPpcPasswordAction,
     INITIAL_PASSWORD_RESET_STATE,
@@ -38,7 +46,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           This reset link is invalid or expired. Request a new link to continue.
         </div>
         <Link
-          href="/ppc/forgot-password"
+          href={forgotPasswordHref}
           className="inline-flex h-8 items-center justify-center rounded-sm bg-[var(--color-brand-blue)] px-3 text-xs font-semibold text-white hover:bg-[var(--color-brand-blue-hover)]"
         >
           Request new link
@@ -54,7 +62,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
           {state.message}
         </div>
         <Link
-          href="/ppc"
+          href={loginHref}
           className="inline-flex h-8 items-center justify-center rounded-sm bg-[var(--color-brand-blue)] px-3 text-xs font-semibold text-white hover:bg-[var(--color-brand-blue-hover)]"
         >
           Login
@@ -66,7 +74,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   return (
     <>
       <p className="mt-1 text-xs text-zinc-500">
-        Choose a new password for your PPC account.
+        {description}
       </p>
 
       <form action={formAction} className="mt-4 grid gap-3">

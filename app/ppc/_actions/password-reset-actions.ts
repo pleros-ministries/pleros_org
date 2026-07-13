@@ -36,11 +36,22 @@ function resolveRequestOrigin(headerStore: Headers): string {
   return resolveAuthBaseUrl(process.env) ?? "http://localhost:3000";
 }
 
+function resolveResetRedirectPath(value: FormDataEntryValue | null): string {
+  const path = String(value ?? "").trim();
+
+  if (path === "/admin/reset-password") {
+    return path;
+  }
+
+  return "/ppc/reset-password";
+}
+
 export async function requestPpcPasswordResetAction(
   _previousState: PasswordResetRequestState,
   formData: FormData,
 ): Promise<PasswordResetRequestState> {
   const email = normalizeEmail(formData.get("email"));
+  const resetRedirectPath = resolveResetRedirectPath(formData.get("resetRedirectPath"));
 
   if (!isValidEmail(email)) {
     return {
@@ -61,7 +72,7 @@ export async function requestPpcPasswordResetAction(
       headers: headerStore,
       body: {
         email,
-        redirectTo: `${origin}/ppc/reset-password`,
+        redirectTo: `${origin}${resetRedirectPath}`,
       },
     });
   } catch {

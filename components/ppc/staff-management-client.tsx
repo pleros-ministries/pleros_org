@@ -8,6 +8,7 @@ import {
   revokeStaffInviteAction,
 } from "@/app/ppc/_actions/staff-invite-actions";
 import { StatusBadge } from "@/components/ppc/status-badge";
+import { getAppRoleLabel } from "@/lib/app-role";
 import { cn } from "@/lib/utils";
 
 type StaffUser = {
@@ -32,14 +33,6 @@ type StaffManagementClientProps = {
   staffUsers: StaffUser[];
   invites: StaffInvite[];
 };
-
-function roleLabel(role: string) {
-  if (role === "super_admin") {
-    return "Super admin";
-  }
-
-  return role;
-}
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat("en-US", {
@@ -215,7 +208,7 @@ export function StaffManagementClient({
                     </p>
                   </div>
                   <div>
-                    <StatusBadge status={roleLabel(user.role)} />
+                    <StatusBadge status={getAppRoleLabel(user.role)} />
                   </div>
                   <p className="text-[11px] text-zinc-400">
                     {formatDate(user.createdAt)}
@@ -253,7 +246,7 @@ export function StaffManagementClient({
                       Invited by {invite.invitedByName ?? "staff"}
                     </p>
                   </div>
-                  <StatusBadge status={roleLabel(invite.role)} />
+                  <StatusBadge status={getAppRoleLabel(invite.role)} />
                   <StatusBadge
                     status={invite.status}
                     variant={inviteStatusVariant(invite.status)}
@@ -287,4 +280,3 @@ export function StaffManagementClient({
     </div>
   );
 }
-

@@ -207,7 +207,7 @@ export default async function AdminContactPage({
                 </div>
               </div>
 
-              <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+              <div className="grid grid-cols-2 gap-2 xl:grid-cols-4">
                 <div className="rounded-sm border border-zinc-200 bg-zinc-50 p-3">
                   <p className="text-[11px] uppercase tracking-[0.12em] text-zinc-400">
                     Read at

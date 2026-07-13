@@ -1,4 +1,4 @@
-import { eq, sql, and, count, type SQL } from "drizzle-orm";
+import { eq, sql, and, count, inArray, asc, type SQL } from "drizzle-orm";
 import { db } from "@/lib/db";
 import * as schema from "../schema";
 
@@ -10,6 +10,30 @@ type StudentListParams = {
   sortBy?: "name" | "level" | "progress" | "lastActivity";
   sortDir?: "asc" | "desc";
 };
+
+export async function getStudentPlatformList(limit = 200) {
+  return db
+    .select({
+      id: schema.users.id,
+      name: schema.users.name,
+      email: schema.users.email,
+      currentLevel: sql<number>`least(coalesce(max(${schema.levelGraduations.levelId}) + 1, ${schema.users.startingLevel}), 5)`,
+    })
+    .from(schema.users)
+    .leftJoin(
+      schema.levelGraduations,
+      eq(schema.levelGraduations.userId, schema.users.id),
+    )
+    .where(eq(schema.users.role, "student"))
+    .groupBy(
+      schema.users.id,
+      schema.users.name,
+      schema.users.email,
+      schema.users.startingLevel,
+    )
+    .orderBy(asc(schema.users.name))
+    .limit(limit);
+}
 
 export async function getStudentList(params: StudentListParams = {}) {
   const { search, level, limit = 50, offset = 0 } = params;
@@ -29,68 +53,132 @@ export async function getStudentList(params: StudentListParams = {}) {
     orderBy: (u, { asc }) => [asc(u.name)],
   });
 
-  const enriched = await Promise.all(
-    students.map(async (student) => {
-      const progress = await db
-        .select()
-        .from(schema.studentProgress)
-        .where(eq(schema.studentProgress.userId, student.id));
+  if (students.length === 0) {
+    return [];
+  }
 
-      const graduations = await db
-        .select()
-        .from(schema.levelGraduations)
-        .where(eq(schema.levelGraduations.userId, student.id));
+  const studentIds = students.map((student) => student.id);
+  const [
+    progressRows,
+    graduationRows,
+    lessonRows,
+    openQaRows,
+    pendingReviewRows,
+  ] = await Promise.all([
+    db
+      .select()
+      .from(schema.studentProgress)
+      .where(inArray(schema.studentProgress.userId, studentIds)),
+    db
+      .select()
+      .from(schema.levelGraduations)
+      .where(inArray(schema.levelGraduations.userId, studentIds)),
+    db.query.lessons.findMany(),
+    db
+      .select({
+        userId: schema.qaThreads.userId,
+        count: count(),
+      })
+      .from(schema.qaThreads)
+      .where(
+        and(
+          inArray(schema.qaThreads.userId, studentIds),
+          eq(schema.qaThreads.status, "open"),
+        ),
+      )
+      .groupBy(schema.qaThreads.userId),
+    db
+      .select({
+        userId: schema.writtenSubmissions.userId,
+        count: count(),
+      })
+      .from(schema.writtenSubmissions)
+      .where(
+        and(
+          inArray(schema.writtenSubmissions.userId, studentIds),
+          eq(schema.writtenSubmissions.status, "submitted"),
+        ),
+      )
+      .groupBy(schema.writtenSubmissions.userId),
+  ]);
 
-      const graduatedLevels = graduations.map((g) => g.levelId);
-      const currentLevel = graduatedLevels.length > 0
-        ? Math.max(...graduatedLevels) + 1
-        : student.startingLevel;
+  const progressByUserId = new Map<string, typeof progressRows>();
+  for (const progress of progressRows) {
+    const rows = progressByUserId.get(progress.userId) ?? [];
+    rows.push(progress);
+    progressByUserId.set(progress.userId, rows);
+  }
 
-      const currentLevelLessons = await db.query.lessons.findMany({
-        where: (l, { eq: eq2 }) => eq2(l.levelId, Math.min(currentLevel, 5)),
-      });
+  const graduationsByUserId = new Map<string, typeof graduationRows>();
+  for (const graduation of graduationRows) {
+    const rows = graduationsByUserId.get(graduation.userId) ?? [];
+    rows.push(graduation);
+    graduationsByUserId.set(graduation.userId, rows);
+  }
 
-      const completedLessons = progress.filter((p) => 
-        p.audioListened && p.notesRead && p.quizPassed && p.writtenApproved
-      );
+  const lessonsByLevel = new Map<number, typeof lessonRows>();
+  for (const lesson of lessonRows) {
+    const rows = lessonsByLevel.get(lesson.levelId) ?? [];
+    rows.push(lesson);
+    lessonsByLevel.set(lesson.levelId, rows);
+  }
+  for (const rows of lessonsByLevel.values()) {
+    rows.sort((a, b) => a.lessonNumber - b.lessonNumber);
+  }
 
-      const totalLessons = currentLevelLessons.length || 1;
-      const currentLevelProgress = progress.filter((p) =>
-        currentLevelLessons.some((l) => l.id === p.lessonId)
-      );
-      const currentLevelCompleted = currentLevelProgress.filter((p) =>
-        p.audioListened && p.notesRead && p.quizPassed && p.writtenApproved
-      );
-      const progressPercent = Math.round((currentLevelCompleted.length / totalLessons) * 100);
-
-      const nextLesson = currentLevelLessons
-        .sort((a, b) => a.lessonNumber - b.lessonNumber)
-        .find((l) => !currentLevelProgress.some((p) => p.lessonId === l.id && p.audioListened && p.notesRead && p.quizPassed && p.writtenApproved));
-
-      const openQa = await db
-        .select({ count: count() })
-        .from(schema.qaThreads)
-        .where(and(eq(schema.qaThreads.userId, student.id), eq(schema.qaThreads.status, "open")));
-
-      const pendingReviews = await db
-        .select({ count: count() })
-        .from(schema.writtenSubmissions)
-        .where(and(eq(schema.writtenSubmissions.userId, student.id), eq(schema.writtenSubmissions.status, "submitted")));
-
-      if (level && currentLevel !== level) return null;
-
-      return {
-        ...student,
-        currentLevel: Math.min(currentLevel, 5),
-        progressPercent,
-        currentLesson: nextLesson ? `L${Math.min(currentLevel, 5)}.${nextLesson.lessonNumber}` : "Complete",
-        qaPending: openQa[0]?.count ?? 0,
-        reviewsPending: pendingReviews[0]?.count ?? 0,
-        graduationStatus: currentLevelCompleted.length === totalLessons ? "ready" : "in_progress",
-        completedLessons: completedLessons.length,
-      };
-    })
+  const openQaByUserId = new Map(
+    openQaRows.map((row) => [row.userId, row.count]),
   );
+  const pendingReviewsByUserId = new Map(
+    pendingReviewRows.map((row) => [row.userId, row.count]),
+  );
+
+  const enriched = students.map((student) => {
+    const progress = progressByUserId.get(student.id) ?? [];
+    const graduations = graduationsByUserId.get(student.id) ?? [];
+    const graduatedLevels = graduations.map((g) => g.levelId);
+    const currentLevel = graduatedLevels.length > 0
+      ? Math.max(...graduatedLevels) + 1
+      : student.startingLevel;
+    const cappedCurrentLevel = Math.min(currentLevel, 5);
+    const currentLevelLessons = lessonsByLevel.get(cappedCurrentLevel) ?? [];
+
+    const completedLessons = progress.filter((p) =>
+      p.audioListened && p.notesRead && p.quizPassed && p.writtenApproved
+    );
+    const currentLevelLessonIds = new Set(
+      currentLevelLessons.map((lesson) => lesson.id),
+    );
+    const currentLevelProgress = progress.filter((p) =>
+      currentLevelLessonIds.has(p.lessonId)
+    );
+    const completedLessonIds = new Set(
+      currentLevelProgress
+        .filter((p) =>
+          p.audioListened && p.notesRead && p.quizPassed && p.writtenApproved
+        )
+        .map((p) => p.lessonId),
+    );
+
+    const totalLessons = currentLevelLessons.length || 1;
+    const progressPercent = Math.round((completedLessonIds.size / totalLessons) * 100);
+    const nextLesson = currentLevelLessons.find(
+      (lesson) => !completedLessonIds.has(lesson.id),
+    );
+
+    if (level && cappedCurrentLevel !== level) return null;
+
+    return {
+      ...student,
+      currentLevel: cappedCurrentLevel,
+      progressPercent,
+      currentLesson: nextLesson ? `L${cappedCurrentLevel}.${nextLesson.lessonNumber}` : "Complete",
+      qaPending: openQaByUserId.get(student.id) ?? 0,
+      reviewsPending: pendingReviewsByUserId.get(student.id) ?? 0,
+      graduationStatus: completedLessonIds.size === totalLessons ? "ready" : "in_progress",
+      completedLessons: completedLessons.length,
+    };
+  });
 
   return enriched.filter(Boolean);
 }

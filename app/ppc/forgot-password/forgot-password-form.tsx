@@ -21,7 +21,17 @@ function SubmitButton() {
   );
 }
 
-export function ForgotPasswordForm() {
+type ForgotPasswordFormProps = {
+  description?: string;
+  loginHref?: string;
+  resetRedirectPath?: "/ppc/reset-password" | "/admin/reset-password";
+};
+
+export function ForgotPasswordForm({
+  description = "Enter your PPC account email and we'll send a password reset link.",
+  loginHref = "/ppc",
+  resetRedirectPath = "/ppc/reset-password",
+}: ForgotPasswordFormProps) {
   const [state, formAction] = useActionState(
     requestPpcPasswordResetAction,
     INITIAL_PASSWORD_RESET_REQUEST_STATE,
@@ -30,10 +40,12 @@ export function ForgotPasswordForm() {
   return (
     <>
       <p className="mt-1 text-xs text-zinc-500">
-        Enter your PPC account email and we&apos;ll send a password reset link.
+        {description}
       </p>
 
       <form action={formAction} className="mt-4 grid gap-3">
+        <input type="hidden" name="resetRedirectPath" value={resetRedirectPath} />
+
         {state.message ? (
           <div
             className={
@@ -74,7 +86,7 @@ export function ForgotPasswordForm() {
       <p className="mt-4 text-center text-[11px] text-zinc-500">
         Remembered it?{" "}
         <Link
-          href="/ppc"
+          href={loginHref}
           className="font-medium text-zinc-900 underline-offset-2 hover:underline"
         >
           Login

@@ -117,10 +117,12 @@ export async function sendPasswordReset(opts: {
 }) {
   if (!isEmailEnabled() || !resend) return null;
 
+  const isAdminReset = opts.resetUrl.includes("/admin/reset-password");
+
   return resend.emails.send({
     from: FROM,
     to: opts.to,
-    subject: "Reset your PPC password",
+    subject: isAdminReset ? "Reset your staff password" : "Reset your PPC password",
     html: passwordResetHtml({
       name: opts.name,
       resetUrl: opts.resetUrl,

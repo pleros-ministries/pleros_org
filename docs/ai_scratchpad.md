@@ -40,6 +40,9 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - Admins enter at `/admin`, students at `/ppc`, and staff onboarding should use invite links/password setup.
 - Keep admin work consolidated under `/admin`; do not create parallel admin surfaces when expanding PPC/admin visibility.
 - `super_admin` is the staff-management role; `admin` is content/platform admin; instructors are lower-level staff.
+- Admin sidebar pages should feel instant: avoid loading full student dashboard payloads for summary/dropdown views, batch DB queries, and add route-level loading states for server-rendered destinations.
+- Admin summary stat/card groups should render as 2-column grids on narrow viewports, then expand to their existing wider desktop layouts.
+- Admin/staff role values are internal identifiers; display them through role labels such as `Super Admin`, `Admin`, `Instructor`, and `Student`, never raw `super_admin`.
 - Full PPC account resets must clear auth identity/session tables plus app users and welcome leads: `user`, `session`, `account`, `verification`, `two_factor`, `users`, and `welcome_pack_leads`; verify row counts are zero.
 
 ## PPC content and lesson rules

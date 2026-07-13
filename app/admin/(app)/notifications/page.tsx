@@ -91,7 +91,7 @@ export default function AdminNotificationsPage() {
         description="Operational status for PPC email, push alerts, and reminder policy"
       />
 
-      <section className="grid gap-3 sm:grid-cols-3">
+      <section className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <div className="rounded-sm border border-zinc-200 bg-white p-3">
           <p className="text-[10px] uppercase tracking-[0.12em] text-zinc-400">
             Ready

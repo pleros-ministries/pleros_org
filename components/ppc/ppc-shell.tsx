@@ -28,6 +28,7 @@ import {
 
 import type { AppSession } from "@/lib/app-session";
 import { getRoleDefaultPath } from "@/lib/app-access";
+import { getAppRoleLabel } from "@/lib/app-role";
 import { authClient } from "@/lib/auth/auth-client";
 import { resolvePpcHref } from "@/lib/ppc-navigation";
 import {
@@ -268,12 +269,14 @@ type SidebarFooterProps = {
 };
 
 function SidebarFooter({ collapsed, session, signOutHref }: SidebarFooterProps) {
+  const roleLabel = getAppRoleLabel(session.user.role);
+
   return (
     <div className={cn("mt-auto border-t border-zinc-100", collapsed ? "px-2 py-3" : "px-3 py-3")}>
       {collapsed ? (
         <div className="grid justify-items-center gap-2">
           <div
-            title={`${session.user.name} (${session.user.role})`}
+            title={`${session.user.name} (${roleLabel})`}
             className="flex size-10 items-center justify-center rounded-sm border border-zinc-200 bg-zinc-50 text-xs font-semibold text-zinc-700"
           >
             {getInitials(session.user.name)}
@@ -309,8 +312,8 @@ function SidebarFooter({ collapsed, session, signOutHref }: SidebarFooterProps) 
               <p className="truncate text-xs font-medium text-zinc-900">
                 {session.user.name}
               </p>
-              <p className="text-[11px] capitalize text-zinc-500">
-                {session.user.role}
+              <p className="text-[11px] text-zinc-500">
+                {roleLabel}
               </p>
             </div>
           </div>
@@ -448,6 +451,7 @@ export function PpcShell({
   const pathname = pathnameOverride ?? currentPathname;
   const logicalPathname = getLogicalPpcShellPath(pathname);
   const signOutHref = getSignOutHref(pathname);
+  const roleLabel = getAppRoleLabel(session.user.role);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [hasLoadedSidebarPreference, setHasLoadedSidebarPreference] = useState(false);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
@@ -528,7 +532,7 @@ export function PpcShell({
             </div>
             <div className="hidden items-center gap-2 text-[11px] text-white/75 lg:flex">
               <GraduationCap className="size-3.5 text-white/60" />
-              <span className="capitalize">{session.user.role}</span>
+              <span>{roleLabel}</span>
             </div>
           </header>
 

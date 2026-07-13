@@ -17,4 +17,16 @@ describe("PPC password reset email", () => {
     );
     expect(html).not.toContain("<script>");
   });
+
+  test("uses staff copy for admin password reset links", () => {
+    const html = passwordResetHtml({
+      name: "Daniel",
+      resetUrl: "https://pleros.org/admin/reset-password?token=abc",
+    });
+
+    expect(html).toContain("Pleros admin");
+    expect(html).toContain("staff account");
+    expect(html).not.toContain("Pleros Perfecting Course");
+    expect(html).not.toContain("PPC account");
+  });
 });
