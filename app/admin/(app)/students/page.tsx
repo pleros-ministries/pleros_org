@@ -1,36 +1,21 @@
-import { getStudentList } from "@/lib/db/queries/students";
+import { getAdminRegistrantList } from "@/lib/db/queries/admin-registrants";
 import { PageHeader } from "@/components/ppc/page-header";
-import { StudentListClient } from "@/components/ppc/student-list-client";
-
-function serializeDate(value: Date | string | null | undefined): string | null {
-  if (!value) return null;
-  return value instanceof Date ? value.toISOString() : value;
-}
+import { RegistrantListClient } from "@/components/ppc/registrant-list-client";
 
 export default async function AdminStudentsPage() {
-  const rawStudents = await getStudentList({ limit: 200 });
-
-  const students = rawStudents.map((student) => ({
-    id: student!.id,
-    name: student!.name,
-    email: student!.email,
-    currentLevel: student!.currentLevel,
-    progressPercent: student!.progressPercent,
-    currentLesson: student!.currentLesson,
-    qaPending: student!.qaPending,
-    reviewsPending: student!.reviewsPending,
-    graduationStatus: student!.graduationStatus,
-    location: student!.location ?? null,
-    createdAt: serializeDate(student!.createdAt) ?? new Date().toISOString(),
-  }));
+  const registrants = await getAdminRegistrantList();
+  const ppcAccounts = registrants.filter(
+    (registrant) => registrant.accountStatus === "ppc_account",
+  ).length;
+  const welcomeOnly = registrants.length - ppcAccounts;
 
   return (
     <div className="grid gap-6">
       <PageHeader
-        title="Students"
-        description={`${students.length} enrolled students`}
+        title="Registrants"
+        description={`${registrants.length} total · ${ppcAccounts} PPC accounts · ${welcomeOnly} welcome only`}
       />
-      <StudentListClient students={students} basePath="/admin" />
+      <RegistrantListClient registrants={registrants} basePath="/admin" />
     </div>
   );
 }

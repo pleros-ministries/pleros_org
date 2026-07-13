@@ -37,9 +37,31 @@ describe("dashboard devotion tracking", () => {
     expect(podcastRoute).toContain("PodcastProgressPage");
     expect(podcastPage).toContain("groupPodcastEpisodesBySeries");
     expect(podcastPage).toContain("type=\"checkbox\"");
-    expect(podcastPage).toContain("Mark selected as listened");
-    expect(podcastPage).toContain("Mark listened");
+    expect(podcastPage).toContain("requestSubmit");
+    expect(podcastPage).toContain("handleEpisodeRowClick");
+    expect(podcastPage).toContain('closest("a,button,input,label")');
+    expect(podcastPage).toContain("Mark all as listened");
+    expect(podcastPage).toContain("allEpisodesListened");
+    expect(podcastPage).toContain("Mark all as unlistened");
+    expect(podcastPage).toContain("onSetListened");
+    expect(podcastPage).toContain("ChevronDownIcon");
+    expect(podcastPage).toContain("aria-expanded={!isCollapsed}");
+    expect(podcastPage).toContain("aria-controls={contentId}");
+    expect(podcastPage).toContain("transition-[grid-template-rows,opacity]");
+    expect(podcastPage).toContain("grid-rows-[0fr]");
+    expect(podcastPage).toContain("grid-rows-[1fr]");
+    expect(podcastPage).toContain("defaultCollapsed");
+    expect(podcastPage).toContain("defaultCollapsed={index > 0}");
+    expect(podcastPage).toContain('isCollapsed ? "px-4 py-3 sm:px-5"');
+    expect(podcastPage).not.toContain("Select unlistened");
+    expect(podcastPage).not.toContain("Mark unlistened as listened");
+    expect(podcastPage).not.toContain("Mark selected as listened");
+    expect(podcastPage).not.toContain("Mark listened");
     expect(podcastPage).toContain("Listened");
+    expect(podcastPage).toContain("href={episode.link}");
+    expect(podcastPage).not.toContain("ClockIcon");
+    expect(podcastPage).not.toContain("formatDuration");
+    expect(podcastPage).not.toContain("Open episode");
     expect(actions).toContain("togglePodcastEpisodeProgressAction");
     expect(actions).toContain("markSelectedPodcastEpisodesListenedAction");
     expect(queries).toContain("getPodcastEpisodeProgress");
@@ -49,9 +71,45 @@ describe("dashboard devotion tracking", () => {
   test("keeps podcast progress controls comfortable on mobile", () => {
     const podcastPage = source("components", "dashboard", "podcast-progress-page.tsx");
 
+    expect(podcastPage).toContain("grid-cols-[auto_minmax(0,1fr)]");
+    expect(podcastPage).toContain('className="grid gap-1.5"');
     expect(podcastPage).toContain("min-h-11 min-w-11");
     expect(podcastPage).toContain("size-5");
-    expect(podcastPage).toContain("w-full sm:w-auto");
-    expect(podcastPage).toContain("grid gap-2 sm:flex");
+    expect(podcastPage).toContain("px-4 py-5");
+    expect(podcastPage).toContain("h-10 pl-9");
+    expect(podcastPage).toContain("rounded-full");
+    expect(podcastPage).toContain('size="sm"');
+    expect(podcastPage).toContain("w-fit rounded-full px-4");
+    expect(podcastPage).not.toContain("w-full rounded-full");
+    expect(podcastPage).toContain("previewMode");
+  });
+
+  test("provides sign-in-free preview routes for dashboard tracking surfaces", () => {
+    const previewDashboard = source("app", "preview", "dashboard", "page.tsx");
+    const previewPrayer = source(
+      "app",
+      "preview",
+      "dashboard",
+      "prayer-watch",
+      "page.tsx",
+    );
+    const previewPodcast = source(
+      "app",
+      "preview",
+      "dashboard",
+      "podcast",
+      "page.tsx",
+    );
+    const dashboardView = source("components", "dashboard", "welcome-dashboard-view.tsx");
+
+    expect(previewDashboard).toContain("previewDashboardSections");
+    expect(previewDashboard).toContain("/preview/dashboard/prayer-watch");
+    expect(previewDashboard).toContain("/preview/dashboard/podcast");
+    expect(previewPrayer).toContain("PrayerWatchPage");
+    expect(previewPrayer).toContain("bibleReadingLogs");
+    expect(previewPodcast).toContain("PodcastProgressPage");
+    expect(previewPodcast).toContain("previewPodcastEpisodes");
+    expect(previewPodcast).toContain("previewMode");
+    expect(dashboardView).toContain("sections = welcomeDashboardSections");
   });
 });

@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 
+import { getWelcomeOnlyRegistrantByRouteId } from "@/lib/db/queries/admin-registrants";
 import { getStudentById } from "@/lib/db/queries/students";
 import { getLevels, getStudentLevelProgress } from "@/lib/db/queries/lessons";
 import { isLevelGraduated } from "@/lib/db/queries/graduations";
@@ -10,6 +11,7 @@ import { Breadcrumb } from "@/components/ppc/breadcrumb";
 import { StudentDetailClient } from "@/components/ppc/student-detail-client";
 import { getAppSession } from "@/lib/app-session";
 import { hasAdminAccess } from "@/lib/app-role";
+import { StatusBadge } from "@/components/ppc/status-badge";
 
 type StudentDetailPageProps = {
   params: Promise<{ studentId: string }>;
@@ -28,7 +30,64 @@ export default async function AdminStudentDetailPage({
 
   const { studentId } = await params;
   const student = await getStudentById(studentId);
-  if (!student) notFound();
+  if (!student) {
+    const lead = await getWelcomeOnlyRegistrantByRouteId(studentId);
+    if (!lead) notFound();
+
+    return (
+      <div className="grid gap-6">
+        <Breadcrumb
+          items={[
+            { label: "Registrants", href: "/admin/students" },
+            { label: lead.name ?? lead.email },
+          ]}
+        />
+        <PageHeader
+          title={lead.name ?? "Welcome registrant"}
+          description={lead.email}
+        />
+
+        <section className="grid gap-4 rounded-sm border border-zinc-200 bg-white p-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <StatusBadge status="Welcome only" />
+            <StatusBadge
+              status={lead.extraGiftsUnlocked ? "Extra gifts unlocked" : "Extra gifts locked"}
+              variant={lead.extraGiftsUnlocked ? "success" : "default"}
+            />
+          </div>
+
+          <div className="grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
+            <div>
+              <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-400">
+                Source
+              </p>
+              <p className="mt-1 text-xs text-zinc-700">{lead.source}</p>
+            </div>
+            <div>
+              <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-400">
+                Signup date
+              </p>
+              <p className="mt-1 text-xs text-zinc-700">
+                {serializeDate(lead.createdAt)?.slice(0, 10)}
+              </p>
+            </div>
+            <div>
+              <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-400">
+                PPC progress
+              </p>
+              <p className="mt-1 text-xs text-zinc-500">No PPC account yet</p>
+            </div>
+            <div>
+              <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-400">
+                Devotion progress
+              </p>
+              <p className="mt-1 text-xs text-zinc-500">No app activity yet</p>
+            </div>
+          </div>
+        </section>
+      </div>
+    );
+  }
 
   const allLevels = await getLevels();
   const levelIds =
@@ -87,7 +146,7 @@ export default async function AdminStudentDetailPage({
     <div className="grid gap-6">
       <Breadcrumb
         items={[
-          { label: "Students", href: "/admin/students" },
+          { label: "Registrants", href: "/admin/students" },
           { label: student.name },
         ]}
       />

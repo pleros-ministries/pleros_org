@@ -36,8 +36,9 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 
 - Canonical student auth URLs are `/ppc/login` and `/ppc/signup`; legacy `/ppc/sign-in` and `/ppc/sign-up` should redirect.
 - When changing auth paths, update canonical routes, legacy redirects, link targets, guarded-route redirects, and public-path tests together.
-- Staff access is invite-based. `super_admin` manages admin/instructor invites; bootstrap super admin email is `fccibadan@gmail.com`.
+- Staff access is invite-based. `super_admin` manages admin/instructor invites; configured super admin emails are `akintyr@gmail.com` and `adeyemodaniel10@gmail.com`.
 - Admins enter at `/admin`, students at `/ppc`, and staff onboarding should use invite links/password setup.
+- Keep admin work consolidated under `/admin`; do not create parallel admin surfaces when expanding PPC/admin visibility.
 - `super_admin` is the staff-management role; `admin` is content/platform admin; instructors are lower-level staff.
 - Full PPC account resets must clear auth identity/session tables plus app users and welcome leads: `user`, `session`, `account`, `verification`, `two_factor`, `users`, and `welcome_pack_leads`; verify row counts are zero.
 
@@ -107,6 +108,8 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 ## Public nav, assets, and partner surfaces
 
 - Desktop public nav dropdowns should be real menu panels with vertically stacked full-width links, left-aligned text, and enough width/padding to scan quickly.
+- Public mobile menu open/close motion should stay soft and eased rather than snappy.
+- When public motion feedback says "not feeling it," adjust the concrete homepage component motion as well as shared primitive timing; primitive-only easing changes can be too subtle.
 - For homepage/card asset swaps, import explicit source assets into `public/site/home/assets/*`, update the specific card data, and verify mobile rendering.
 - For welcome dashboard card backgrounds, copy the named source image into `public/site/home/assets/dashboard-cards/`, wire it through card data, and verify the rendered preview card image.
 - Separate SVG foreground color from card header surface color; brand-colored logo artwork may still sit on a white card header.
@@ -122,6 +125,8 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - Public welcome/contact/share links should use the canonical public site URL (`https://pleros.org`) or a dedicated public-site env var, not `NEXT_PUBLIC_APP_URL`, because that value may point to Vercel, PPC, or auth infrastructure.
 - Gift content can stay in typed code config for now and should use public-site Sen/Be Vietnam Pro styling, not PPC dashboard styling.
 - `/dashboard` should require either a valid app session or welcome-access cookie and redirect unauthenticated visitors to `/welcome`.
+- Dashboard progress tracking should avoid duplicate per-item action buttons; checking an item should directly update the tracked state.
+- Dashboard bulk progress actions should be reversible when the whole group is already complete.
 - Welcome access cookies should last 100 days and refresh on dashboard visits when present.
 - Welcome-pack access email should send only when durable lead state says the lead is newly created; client in-flight guards are secondary.
 - While supplementary welcome packs are not ready, thank-you sharing must not promise unlocks; show the main download fallback and email download link instead.

@@ -45,6 +45,19 @@ export async function markPodcastEpisodesListened(
   );
 }
 
+export async function removePodcastEpisodesProgress(
+  userId: string,
+  episodeGuids: string[],
+) {
+  const uniqueGuids = [...new Set(episodeGuids.map((guid) => guid.trim()).filter(Boolean))];
+
+  await Promise.all(
+    uniqueGuids.map((episodeGuid) =>
+      removePodcastEpisodeProgress(userId, episodeGuid),
+    ),
+  );
+}
+
 export async function removePodcastEpisodeProgress(
   userId: string,
   episodeGuid: string,

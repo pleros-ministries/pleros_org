@@ -7,6 +7,7 @@ import {
   markPodcastEpisodeListened,
   markPodcastEpisodesListened,
   removePodcastEpisodeProgress,
+  removePodcastEpisodesProgress,
 } from "@/lib/db/queries/podcast-progress";
 
 export type PodcastProgressActionState = {
@@ -54,12 +55,17 @@ export async function markSelectedPodcastEpisodesListenedAction(
     .getAll("episodeGuid")
     .map((value) => String(value).trim())
     .filter(Boolean);
+  const nextListened = formData.get("listened") !== "false";
 
   if (!episodeGuids.length) {
     return { error: "Select at least one podcast episode." };
   }
 
-  await markPodcastEpisodesListened(session.user.id, episodeGuids);
+  if (nextListened) {
+    await markPodcastEpisodesListened(session.user.id, episodeGuids);
+  } else {
+    await removePodcastEpisodesProgress(session.user.id, episodeGuids);
+  }
 
   revalidatePath("/dashboard/podcast");
   return { error: null };
