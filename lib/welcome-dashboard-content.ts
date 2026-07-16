@@ -45,16 +45,7 @@ export const welcomeDashboardSections: WelcomeDashboardSection[] = [
     id: "devotion",
     title: "Your Devotion",
     cards: [
-      {
-        id: "podcast",
-        title: "The Pleros Podcast",
-        description:
-          "Your daily dose of God's Word helping you fulfill God's purpose",
-        href: "/dashboard/podcast",
-        accent: "orange",
-        backgroundImageSrc: "/site/home/assets/dashboard-cards/3-pleros-podcast-v2.webp",
-        backgroundImagePosition: "object-[72%_center]",
-      },
+
       {
         id: "prayer-watch-devotion",
         title: "Prayer Watch",
@@ -64,6 +55,16 @@ export const welcomeDashboardSections: WelcomeDashboardSection[] = [
         accent: "blue",
         backgroundImageSrc: "/site/home/assets/dashboard-cards/4-prayer-watch-bg.webp",
         backgroundOverlay: "none",
+      },
+      {
+        id: "podcast",
+        title: "The Pleros Podcast",
+        description:
+          "Your daily dose of God's Word helping you fulfill God's purpose",
+        href: "/dashboard/podcast",
+        accent: "orange",
+        backgroundImageSrc: "/site/home/assets/dashboard-cards/3-pleros-podcast-v2.webp",
+        backgroundImagePosition: "object-[72%_center]",
       },
     ],
   },
