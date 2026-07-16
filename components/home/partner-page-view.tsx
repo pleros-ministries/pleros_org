@@ -128,13 +128,13 @@ export function PartnerPageView() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-1">
             {partnerImpactItems.map((item) => (
               <div
                 key={item}
                 className="rounded-[1.125rem] border border-white/12 bg-white/8 px-4 py-5 backdrop-blur-[2px]"
               >
-                <p className="font-[var(--font-sen)] text-[1.25rem] leading-[1.02] tracking-[-0.04em] text-white">
+                <p className="font-[var(--font-sen)] text-[1.00rem] leading-[1.02] tracking-[-0.04em] text-white">
                   {item}
                 </p>
               </div>
@@ -157,7 +157,7 @@ export function PartnerPageView() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5">
+          <div className="mx-auto grid max-w-[36rem] grid-cols-1 gap-4 md:gap-5">
             <Card className="gap-4 rounded-[1.25rem] border-[rgba(6,16,86,0.14)] bg-white p-5 shadow-[0_16px_40px_rgba(6,16,86,0.08)] md:p-6">
               <CardHeader className="gap-1 px-0 py-0">
                 <CardTitle className="font-[var(--font-sen)] text-[1.375rem] leading-[0.95] tracking-[-0.05em] text-[var(--color-brand-indigo)]">
@@ -198,7 +198,7 @@ export function PartnerPageView() {
               </CardContent>
             </Card>
 
-            <Card className="gap-4 rounded-[1.25rem] border-[rgba(6,16,86,0.14)] bg-white p-5 shadow-[0_16px_40px_rgba(6,16,86,0.08)] md:p-6">
+            {/* <Card className="gap-4 rounded-[1.25rem] border-[rgba(6,16,86,0.14)] bg-white p-5 shadow-[0_16px_40px_rgba(6,16,86,0.08)] md:p-6">
               <CardHeader className="gap-2 px-0 py-0">
                 <div className="flex items-center justify-between gap-2">
                   <CardTitle className="font-[var(--font-sen)] text-[1.375rem] leading-[0.95] tracking-[-0.05em] text-[var(--color-brand-indigo)]">
@@ -212,7 +212,7 @@ export function PartnerPageView() {
                   {partnerIntlPayment.description}
                 </CardDescription>
               </CardContent>
-            </Card>
+            </Card> */}
           </div>
         </div>
       </section>
