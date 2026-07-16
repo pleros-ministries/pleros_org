@@ -101,14 +101,18 @@ function DashboardCard({
   );
 }
 
-export function WelcomeDashboardView() {
+type WelcomeDashboardViewProps = {
+  name?: string;
+};
+
+export function WelcomeDashboardView({ name }: WelcomeDashboardViewProps = {}) {
   return (
     <section className="site-font-theme bg-[var(--color-surface)] pb-24">
       <header className="relative overflow-hidden bg-[var(--color-brand-blue)]">
         <div className="container-pleros flex min-h-[17.8125rem] max-w-[36rem] flex-col justify-end pb-8 pt-10 text-white sm:min-h-[21rem] sm:pb-10 sm:pt-12">
           <div className="grid max-w-[19rem] gap-3">
-            <h1 className="site-hero-heading max-w-[11ch] text-[clamp(2.25rem,7vw,4.1rem)] text-white">
-              Welcome to your Pleros Dashboard
+            <h1 className="site-hero-heading max-w-[16ch] text-[clamp(2.25rem,7vw,4.1rem)] text-white">
+              {name ? `Welcome, ${name}` : "Welcome to your Pleros Dashboard"}
             </h1>
             <p className="font-[var(--font-be-vietnam-pro)] max-w-[28ch] text-[0.9375rem] leading-[1.35] tracking-[-0.02em] text-white/88 sm:text-[1.05rem]">
               Start with the welcome pack and other resources.

@@ -1,4 +1,5 @@
 import { CompassIcon, FlameIcon, UsersRoundIcon } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
@@ -11,9 +12,57 @@ import {
   aboutPageBody,
   aboutPageHero,
   aboutPageLeadLines,
+  aboutPageMinisterFollow,
 } from "../../lib/about-page-content";
+import {
+  footerSocialLinks,
+  type HomeSocialLink,
+} from "../../lib/site-homepage-content";
 
 const aboutPageLeadIcons = [UsersRoundIcon, CompassIcon, FlameIcon] as const;
+
+function FollowSocialBlock({
+  title,
+  handle,
+  links,
+}: {
+  title: string;
+  handle: string;
+  links: readonly HomeSocialLink[];
+}) {
+  return (
+    <div className="grid justify-items-center gap-3 text-center md:justify-items-start md:text-left">
+      <div>
+        <p className="font-[var(--font-sen)] text-[1.25rem] leading-[1.1] tracking-[-0.03em] text-[var(--color-brand-indigo)]">
+          {title}
+        </p>
+        <p className="text-[0.9375rem] text-[var(--color-text-muted)]">
+          {handle}
+        </p>
+      </div>
+      <div className="flex items-center gap-2.5">
+        {links.map((link) => (
+          <Link
+            key={link.label}
+            href={link.href}
+            target="_blank"
+            rel="noreferrer"
+            aria-label={link.label}
+            className="flex size-10 items-center justify-center rounded-full bg-[var(--color-brand-blue)] transition-opacity duration-150 hover:opacity-85"
+          >
+            <Image
+              src={link.iconSrc}
+              alt=""
+              width={18}
+              height={18}
+              className="h-[1.125rem] w-[1.125rem]"
+            />
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export function AboutPageView() {
   return (
@@ -85,6 +134,21 @@ export function AboutPageView() {
                 Vision & Mission
               </Button>
             </div>
+          </div>
+        </section>
+
+        <section className="bg-[var(--color-surface-muted)] px-5 py-[3.5rem] md:px-8 md:py-16 xl:px-10">
+          <div className="mx-auto grid max-w-[44rem] gap-8 md:grid-cols-2 md:gap-10">
+            <FollowSocialBlock
+              title={`Follow our Senior Minister, ${aboutPageMinisterFollow.name}`}
+              handle={aboutPageMinisterFollow.handle}
+              links={aboutPageMinisterFollow.links}
+            />
+            <FollowSocialBlock
+              title="Follow Pleros"
+              handle="@pleros_org"
+              links={footerSocialLinks}
+            />
           </div>
         </section>
 

@@ -24,5 +24,5 @@ export default async function WelcomeDashboardPage() {
     redirect("/welcome");
   }
 
-  return <WelcomeDashboardView />;
+  return <WelcomeDashboardView name={appSession.user.name} />;
 }

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { normalizeEmail, validateEmail } from "./welcome-flow";
+import { normalizeEmail, validateEmail, validateFirstName } from "./welcome-flow";
 
 describe("welcome flow helpers", () => {
   test("normalizeEmail trims and lowercases input", () => {
@@ -16,5 +16,15 @@ describe("welcome flow helpers", () => {
   test("validateEmail accepts valid email values", () => {
     expect(validateEmail("person@example.com")).toBe(true);
     expect(validateEmail("Person+tag@Example.org")).toBe(true);
+  });
+
+  test("validateFirstName rejects blank or whitespace-only values", () => {
+    expect(validateFirstName("")).toBe(false);
+    expect(validateFirstName("   ")).toBe(false);
+  });
+
+  test("validateFirstName accepts a non-empty name", () => {
+    expect(validateFirstName("Daniel")).toBe(true);
+    expect(validateFirstName("  Daniel  ")).toBe(true);
   });
 });

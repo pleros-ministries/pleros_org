@@ -8,3 +8,7 @@ export function validateEmail(value: string): boolean {
   const normalized = normalizeEmail(value);
   return EMAIL_REGEX.test(normalized);
 }
+
+export function validateFirstName(value: string): boolean {
+  return value.trim().length > 0;
+}

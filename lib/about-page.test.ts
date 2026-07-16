@@ -39,4 +39,17 @@ describe("about page", () => {
     expect(source).toContain("bg-[var(--color-brand-sky-soft)]");
     expect(source).toContain("text-left");
   });
+
+  test("adds a follow section for the Senior Minister and Pleros", () => {
+    const source = readFileSync(
+      join(process.cwd(), "components", "home", "about-page-view.tsx"),
+      "utf8",
+    );
+
+    expect(source).toContain("FollowSocialBlock");
+    expect(source).toContain("aboutPageMinisterFollow");
+    expect(source).toContain("footerSocialLinks");
+    expect(source).toContain("Follow our Senior Minister");
+    expect(source).toContain("Follow Pleros");
+  });
 });

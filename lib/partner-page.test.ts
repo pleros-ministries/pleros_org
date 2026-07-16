@@ -33,5 +33,11 @@ describe("partner page", () => {
     expect(contentSource).not.toContain("Leadership Training");
     expect(contentSource).toContain("partnerWhatsappHref");
     expect(contentSource).toContain("Become a partner today");
+    expect(contentSource).toContain("partnerBankAccount");
+    expect(contentSource).toContain("Providus Bank");
+    expect(contentSource).toContain("PLEROS MINISTRIES AND MISSIONS");
+    expect(contentSource).toContain("1310000564");
+    expect(viewSource).toContain("partnerBankAccount");
+    expect(viewSource).toContain("CopyToClipboardButton");
   });
 });

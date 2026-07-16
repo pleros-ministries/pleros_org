@@ -364,7 +364,9 @@ describe("site home page", () => {
     expect(drawerSource).toContain("md:data-open:-translate-y-1/2");
     expect(drawerSource).toContain("welcomePackModalCopy.headline");
     expect(drawerSource).toContain("welcomePackModalCopy.subheadline");
+    expect(drawerSource).toContain('placeholder="First name"');
     expect(drawerSource).toContain('placeholder="Email address"');
+    expect(drawerSource).toContain("Enter your first name.");
     expect(drawerSource).toContain("access welcome pack");
     expect(drawerSource).toContain("rounded-t-[var(--radius-xl)]");
     expect(drawerSource).not.toContain("Instant dashboard access");

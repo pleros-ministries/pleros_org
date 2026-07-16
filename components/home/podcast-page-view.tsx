@@ -19,11 +19,17 @@ import {
   podcastSubscribeCta,
   podcastWhyListenItems,
 } from "@/lib/podcast-page-content";
+import { groupPodcastSeriesEpisodes } from "@/lib/podcast-series-episodes";
+import {
+  homePodcastUrl,
+  homeYoutubeChannelUrl,
+} from "@/lib/site-homepage-content";
 
 import { HomepageCommunitySection } from "./homepage-community-section";
 import { HomepageFooter } from "./homepage-footer";
 import { HomepageNav } from "./homepage-nav";
 import { PodcastRssList } from "./podcast-rss-list";
+import { PodcastSeriesGallery } from "./podcast-series-gallery";
 import { PodcastVideoGallery } from "./podcast-video-gallery";
 import { PublicSitePageShell } from "./public-site-page-shell";
 
@@ -53,6 +59,10 @@ export async function PodcastPageView() {
       dateLabel: formatEpisodeDate(episode.publishedAt),
     }
     : null;
+  const seriesWithEpisodes = groupPodcastSeriesEpisodes(
+    podcastSeries,
+    rssEpisodes,
+  );
 
   return (
     <PublicSitePageShell>
@@ -117,7 +127,7 @@ export async function PodcastPageView() {
             </Card>
           )}
 
-          <PodcastVideoGallery featured={featuredVideo} series={[]} />
+          <PodcastVideoGallery featured={featuredVideo} />
 
           <div className="flex justify-center md:justify-start">
             <Button
@@ -136,26 +146,30 @@ export async function PodcastPageView() {
             </Button>
           </div>
 
-          <PodcastVideoGallery featured={null} series={podcastSeries} />
-        </div>
-      </section>
+          <div className="mx-auto grid max-w-[58rem] gap-6">
+            <div className="grid gap-2">
+              <p className="site-hero-eyebrow">All episodes</p>
+              <h2 className="site-section-heading max-w-[28rem]">
+                Listen and download every episode
+              </h2>
+              <p className="font-[var(--font-be-vietnam-pro)] text-[0.93rem] leading-[1.5] tracking-[-0.02em] text-[var(--color-text-muted)]">
+                Stream directly here, download as an MP3, or open on Spotify.
+              </p>
+            </div>
 
-      {/* All episodes from Anchor RSS — public, no auth required */}
-      <section className="bg-[var(--color-surface-muted)] px-[1.25rem] pb-[4.75rem] pt-[2.5rem] md:px-8 md:pb-16 md:pt-10 xl:px-10">
-        <div className="mx-auto grid max-w-[58rem] gap-6">
-          <div className="grid gap-2">
-            <p className="site-hero-eyebrow">All episodes</p>
-            <h2 className="site-section-heading max-w-[28rem]">
-              Listen and download every episode
-            </h2>
-            <p className="font-[var(--font-be-vietnam-pro)] text-[0.93rem] leading-[1.5] tracking-[-0.02em] text-[var(--color-text-muted)]">
-              Stream directly here, download as an MP3, or open on Spotify.
-            </p>
+            <PodcastRssList episodes={rssEpisodes} />
           </div>
 
-          <PodcastRssList episodes={rssEpisodes} />
+
+          <PodcastSeriesGallery
+            series={seriesWithEpisodes}
+            podLinkHref={homePodcastUrl}
+            youtubeChannelHref={homeYoutubeChannelUrl}
+          />
         </div>
       </section>
+
+
 
       {/* <section className="bg-[var(--color-surface-muted)] px-[1.25rem] py-[4.25rem] md:px-8 md:py-16 xl:px-10">
           <div className="mx-auto grid max-w-[58rem] gap-8">

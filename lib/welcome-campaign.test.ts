@@ -34,7 +34,7 @@ describe("welcome campaign pages", () => {
     expect(drawerSource).toContain("returnTo: redirectTo");
   });
 
-  test("wires the thank you page to the dashboard gift and WhatsApp share intent", () => {
+  test("wires the thank you page to the welcome pack dashboard and WhatsApp share intent", () => {
     const pageSource = readFileSync(
       join(process.cwd(), "app", "(site)", "thankyou", "page.tsx"),
       "utf8",
@@ -45,12 +45,11 @@ describe("welcome campaign pages", () => {
     );
 
     expect(pageSource).toContain("ThankYouPage");
-    expect(pageSource).toContain('downloadUrl="/api/welcome-pack/download"');
-    expect(viewSource).toContain("Your download has begun");
-    expect(viewSource).toContain("Download welcome pack");
-    expect(viewSource).toContain("also sent the link to your email");
-    expect(viewSource).toContain('href="/dashboard"');
-    expect(viewSource).toContain("Share this free gift with someone");
+    expect(pageSource).not.toContain("downloadUrl");
+    expect(viewSource).toContain("Thank you for receiving your gift");
+    expect(viewSource).toContain("Visit your dashboard to access your gift.");
+    expect(viewSource).toContain('href="/dashboard/welcomepack"');
+    expect(viewSource).toContain("Before you go, we have something more for you.");
     expect(viewSource).toContain("Share on WhatsApp");
     expect(viewSource).toContain("buildWelcomeShareIntentUrl");
     expect(viewSource).not.toContain("confirmWelcomePackShareAction");

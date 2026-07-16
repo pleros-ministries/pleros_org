@@ -21,12 +21,8 @@ import {
   serializeWelcomePackState,
   shouldShowWelcomePackModal,
 } from "@/lib/homepage-logic";
-import {
-  redirectAfterDownloadStarts,
-  triggerWelcomePackDownload,
-} from "@/lib/welcome-pack-client";
 import { welcomePackModalCopy } from "@/lib/welcome-pack-modal-copy";
-import { validateEmail } from "@/lib/welcome-flow";
+import { validateEmail, validateFirstName } from "@/lib/welcome-flow";
 
 type HomepageGiftDrawerProps = {
   hasWelcomeAccess: boolean;
@@ -48,12 +44,14 @@ export function HomepageGiftDrawer({
   source = "welcome",
 }: HomepageGiftDrawerProps) {
   const [open, setOpen] = useState(false);
+  const [firstName, setFirstName] = useState("");
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const hasCompletedRef = useRef(false);
   const isSubmittingRef = useRef(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const normalizedFirstName = useMemo(() => firstName.trim(), [firstName]);
   const normalizedEmail = useMemo(() => email.trim().toLowerCase(), [email]);
 
   useEffect(() => {
@@ -103,6 +101,11 @@ export function HomepageGiftDrawer({
       return;
     }
 
+    if (!validateFirstName(normalizedFirstName)) {
+      setError("Enter your first name.");
+      return;
+    }
+
     if (!validateEmail(normalizedEmail)) {
       setError("Enter a valid email address.");
       return;
@@ -120,6 +123,7 @@ export function HomepageGiftDrawer({
             "content-type": "application/json",
           },
           body: JSON.stringify({
+            name: normalizedFirstName,
             email: normalizedEmail,
             returnTo: redirectTo,
             source,
@@ -127,7 +131,7 @@ export function HomepageGiftDrawer({
         });
 
         const payload = (await response.json().catch(() => null)) as
-          | { downloadUrl?: string; error?: string; redirectTo?: string }
+          | { error?: string; redirectTo?: string }
           | null;
 
         if (!response.ok || !payload?.redirectTo) {
@@ -148,12 +152,6 @@ export function HomepageGiftDrawer({
 
         hasCompletedRef.current = true;
         setOpen(false);
-
-        if (payload.downloadUrl) {
-          triggerWelcomePackDownload(payload.downloadUrl);
-          redirectAfterDownloadStarts(payload.redirectTo);
-          return;
-        }
 
         window.location.href = payload.redirectTo;
       } catch {
@@ -217,6 +215,15 @@ export function HomepageGiftDrawer({
           </div>
 
           <form onSubmit={handleSubmit} className="grid gap-4 px-6 pb-7 pt-5 md:px-8 md:pb-8 md:pt-6">
+            <Input
+              type="text"
+              autoComplete="given-name"
+              placeholder="First name"
+              value={firstName}
+              onChange={(event) => setFirstName(event.currentTarget.value)}
+              className="h-12 rounded-[var(--radius-md)] border-[rgba(6,16,86,0.12)] bg-[var(--color-surface)] px-4 text-[var(--text-body)]"
+            />
+
             <Input
               type="email"
               inputMode="email"

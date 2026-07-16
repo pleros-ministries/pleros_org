@@ -20,8 +20,38 @@ describe("welcome dashboard access", () => {
     const dashboardSource = source("app", "(site)", "dashboard", "page.tsx");
 
     expect(dashboardSource).toContain("if (!appSession && welcomeSession)");
-    expect(dashboardSource).toContain("return <WelcomeDashboardView />");
+    expect(dashboardSource).toContain(
+      "return <WelcomeDashboardView name={appSession.user.name} />",
+    );
     expect(dashboardSource).toContain('redirect("/welcome")');
+  });
+
+  test("dashboard and thank-you page greet visitors by their first name", () => {
+    const dashboardViewSource = source(
+      "components",
+      "dashboard",
+      "welcome-dashboard-view.tsx",
+    );
+    const thankYouSource = source(
+      "components",
+      "home",
+      "thank-you-page.tsx",
+    );
+    const thankYouRouteSource = source("app", "(site)", "thankyou", "page.tsx");
+
+    expect(dashboardViewSource).toContain("name?: string");
+    expect(dashboardViewSource).toContain("`Welcome, ${name}`");
+
+    expect(thankYouSource).toContain("name?: string");
+    expect(thankYouSource).toContain(
+      "`Thank you for receiving your gift, ${name}.`",
+    );
+
+    expect(thankYouRouteSource).toContain("getAppSession");
+    expect(thankYouRouteSource).toContain("readWelcomeAccessToken");
+    expect(thankYouRouteSource).toContain(
+      "appSession?.user.name ?? welcomeSession?.name",
+    );
   });
 
   test("welcome pack page still requires a session or welcome cookie", () => {

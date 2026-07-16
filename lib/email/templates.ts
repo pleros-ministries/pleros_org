@@ -181,7 +181,6 @@ export function staffInviteHtml({
 export type WelcomePackAccessProps = {
   name: string;
   dashboardUrl: string;
-  downloadUrl: string;
 };
 
 export type WelcomePackExtrasUnlockedProps = {
@@ -202,11 +201,9 @@ export type ContactSubmissionNotificationProps = {
 export function welcomePackAccessHtml({
   name,
   dashboardUrl,
-  downloadUrl,
 }: WelcomePackAccessProps): string {
   const safeName = escapeHtml(name);
   const safeDashboardUrl = escapeHtml(dashboardUrl);
-  const safeDownloadUrl = escapeHtml(downloadUrl);
 
   return `
 <!DOCTYPE html>
@@ -214,31 +211,26 @@ export function welcomePackAccessHtml({
 <head><meta charset="utf-8" /></head>
 <body style="font-family: 'Suisse Int\\'l', Inter, ui-sans-serif, system-ui, sans-serif; background-color: #fdfdfc; margin: 0; padding: 40px 16px;">
   <div style="max-width: 520px; margin: 0 auto; background: #ffffff; border: 1px solid rgba(15, 23, 40, 0.08); border-radius: 20px; box-shadow: 0 10px 30px rgba(15, 23, 40, 0.08); overflow: hidden;">
-    
+
 
     <div style="background-color: #011585; padding: 40px 32px; text-align: center;">
       <img src="https://pleros-org.vercel.app/brand/white-logotype.png" alt="Pleros" width="120" style="display: block; margin: 0 auto;" />
     </div>
 
-  
+
     <div style="padding: 40px 32px;">
-      <h1 style="font-size: 24px; font-weight: 600; color: #0d1726; margin: 0 0 16px; letter-spacing: -0.024em;">Your welcome pack download is ready</h1>
+      <h1 style="font-size: 24px; font-weight: 600; color: #0d1726; margin: 0 0 16px; letter-spacing: -0.024em;">Your welcome pack is ready</h1>
       <p style="font-size: 16px; color: #142033; line-height: 1.6; margin: 0 0 32px; letter-spacing: -0.02em;">
-        Welcome, ${safeName}! Your Pleros welcome pack should have started downloading after you entered your email. If it did not, use the button below to download it directly.
+        Welcome, ${safeName}! Your Pleros welcome pack is ready and waiting for you in your dashboard.
       </p>
-      
-     
-      <a href="${safeDownloadUrl}" style="display: inline-block; padding: 14px 28px; background-color: #011585; color: #ffffff; border-radius: 999px; font-size: 16px; font-weight: 500; text-decoration: none; text-align: center; box-shadow: 0 4px 14px rgba(15, 23, 40, 0.05); line-height: 1;">
-        Download your welcome pack
+
+
+      <a href="${safeDashboardUrl}" style="display: inline-block; padding: 14px 28px; background-color: #011585; color: #ffffff; border-radius: 999px; font-size: 16px; font-weight: 500; text-decoration: none; text-align: center; box-shadow: 0 4px 14px rgba(15, 23, 40, 0.05); line-height: 1;">
+        Access your welcome pack
       </a>
 
-      <p style="font-size: 14px; color: #58657a; line-height: 1.6; margin: 24px 0 0; letter-spacing: -0.01em;">
-        You can also visit your welcome dashboard any time here:
-        <a href="${safeDashboardUrl}" style="color: #011585; font-weight: 600;">${safeDashboardUrl}</a>
-      </p>
-
       <hr style="border: none; border-top: 1px solid rgba(15, 23, 40, 0.08); margin: 40px 0 24px;" />
-      
+
 
       <p style="font-size: 13px; color: #58657a; margin: 0; line-height: 1.5;">
         You're receiving this email because you recently signed up for Pleros. If this was a mistake, you can simply ignore it.

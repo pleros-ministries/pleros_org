@@ -4,6 +4,7 @@ import {
   aboutPageBody,
   aboutPageHero,
   aboutPageLeadLines,
+  aboutPageMinisterFollow,
 } from "./about-page-content";
 
 describe("about page content", () => {
@@ -31,5 +32,17 @@ describe("about page content", () => {
     expect(aboutPageBody[2]).toContain(
       "It reflects our vision to see the fullness of the world reached with the Gospel so they can fulfill God's purpose.",
     );
+  });
+
+  test("lists the Senior Minister's social links", () => {
+    expect(aboutPageMinisterFollow.name).toBe("Akinwunmi Akinbile");
+    expect(aboutPageMinisterFollow.handle).toBe("@akin_akinbile");
+    expect(aboutPageMinisterFollow.links).toHaveLength(4);
+    expect(aboutPageMinisterFollow.links.map((link) => link.label)).toEqual([
+      "Instagram",
+      "X",
+      "TikTok",
+      "Facebook",
+    ]);
   });
 });

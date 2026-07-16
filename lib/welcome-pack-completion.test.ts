@@ -42,21 +42,27 @@ describe("welcome pack completion wiring", () => {
     expect(apiSource).toContain("source");
     expect(apiSource).toContain("sendWelcomePackAccessEmail");
     expect(apiSource).toContain("leadResult.created");
-    expect(apiSource).toContain("buildWelcomePackDownloadUrl");
-    expect(apiSource).toContain("downloadUrl");
+    expect(apiSource).toContain("dashboardUrl");
+    expect(apiSource).not.toContain("buildWelcomePackDownloadUrl");
+    expect(apiSource).not.toContain("downloadUrl");
     expect(querySource).toContain("onConflictDoNothing");
     expect(apiSource).toContain("catch((err)");
-    expect(apiSource).toContain("return NextResponse.json({ redirectTo: returnTo, downloadUrl })");
+    expect(apiSource).toContain("return NextResponse.json({ redirectTo: returnTo })");
   });
 
-  test("welcome forms prevent duplicate in-flight submissions", () => {
+  test("gift drawer prevents duplicate in-flight submissions without auto-triggering a download", () => {
     const drawerSource = source("components", "home", "homepage-gift-drawer.tsx");
-    const modalSource = source("components", "home", "welcome-pack-modal.tsx");
 
     expect(drawerSource).toContain("isSubmittingRef.current");
     expect(drawerSource).toContain("disabled={isSubmitting || isPending}");
-    expect(drawerSource).toContain("triggerWelcomePackDownload");
-    expect(drawerSource).toContain("redirectAfterDownloadStarts");
+    expect(drawerSource).not.toContain("triggerWelcomePackDownload");
+    expect(drawerSource).not.toContain("redirectAfterDownloadStarts");
+    expect(drawerSource).toContain("window.location.href = payload.redirectTo");
+  });
+
+  test("unused welcome-pack modal (not wired into any page) still compiles and guards duplicate submissions", () => {
+    const modalSource = source("components", "home", "welcome-pack-modal.tsx");
+
     expect(modalSource).toContain("isSubmittingRef.current");
     expect(modalSource).toContain("disabled={isSubmitting || isPending}");
     expect(modalSource).toContain("triggerWelcomePackDownload");
@@ -74,17 +80,18 @@ describe("welcome pack completion wiring", () => {
     expect(routeSource).toContain("attachment;");
   });
 
-  test("thank-you page confirms the download and prioritizes sharing before dashboard access", () => {
+  test("thank-you page sends visitors to the dashboard instead of auto-downloading", () => {
     const pageSource = source("components", "home", "thank-you-page.tsx");
 
-    expect(pageSource).toContain("Your download has begun");
-    expect(pageSource).toContain("Download welcome pack");
-    expect(pageSource).toContain("also sent the link to your email");
+    expect(pageSource).toContain("Thank you for receiving your gift");
+    expect(pageSource).toContain("Visit your dashboard to access your gift.");
+    expect(pageSource).toContain('href="/dashboard/welcomepack"');
+    expect(pageSource).toContain("Before you go, we have something more for you.");
+    expect(pageSource).toContain("unlock two extra gifts");
     expect(pageSource).toContain("Share on WhatsApp");
+    expect(pageSource).not.toContain("Your download has begun");
+    expect(pageSource).not.toContain("downloadUrl");
     expect(pageSource).not.toContain("confirmWelcomePackShareAction");
-    expect(pageSource.indexOf("Share this free gift with someone")).toBeLessThan(
-      pageSource.indexOf("Continue to your dashboard"),
-    );
   });
 
   test("dashboard welcome pack displays the main gift and marks supplementary packs as pending", () => {

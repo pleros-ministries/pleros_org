@@ -113,6 +113,20 @@ export const podcastSeries = [
       "Favour available in the Newness of life.",
     href: buildPodcastEpisodeUrl("o-uFSxxt1oA"),
   },
+  {
+    id: "our-righteous-nature-in-christ",
+    title: "Our Righteous Nature in Christ",
+    description:
+      "What does it mean to carry Christ's own righteousness as your new identity?",
+    href: undefined,
+  },
+  {
+    id: "our-love-nature-in-christ",
+    title: "Our Love Nature in Christ",
+    description:
+      "How does God's love nature get reproduced and expressed in you as a believer?",
+    href: undefined,
+  },
 ] as const;
 
 export const podcastWhyListenItems = [

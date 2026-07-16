@@ -160,7 +160,7 @@ export const homePathwayCards: HomePathwayCard[] = [
     title: "Our Church Ministry",
     description: "We are here to help you fulfill God's purpose. Fellowship with us. ",
     mobileDescription: "We are here to help you fulfill God's purpose. Fellowship with us.",
-    href: "/about",
+    href: "/fcchurch",
     headerImageSrc: "/site/home/assets/pathway-card-headers/church-card-header.svg",
     headerImageClassName: "object-fill",
     arrowImageSrc: "/site/home/assets/card-arrows/church-card-arrow.svg",

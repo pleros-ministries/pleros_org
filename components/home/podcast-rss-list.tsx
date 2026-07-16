@@ -20,7 +20,7 @@ type Props = {
 
 const PAGE_SIZE = 10;
 
-function formatDate(isoDate: string): string {
+export function formatDate(isoDate: string): string {
   if (!isoDate) return "";
   try {
     return new Intl.DateTimeFormat("en-US", {
@@ -33,7 +33,7 @@ function formatDate(isoDate: string): string {
   }
 }
 
-function formatDuration(raw: string): string {
+export function formatDuration(raw: string): string {
   if (!raw) return "";
   // raw is "HH:MM:SS" or "MM:SS"
   const parts = raw.split(":");
@@ -45,7 +45,7 @@ function formatDuration(raw: string): string {
   return raw;
 }
 
-function getDownloadHref(episode: RssEpisode) {
+export function getDownloadHref(episode: RssEpisode) {
   const params = new URLSearchParams({
     url: episode.audioUrl,
     title: episode.title,
