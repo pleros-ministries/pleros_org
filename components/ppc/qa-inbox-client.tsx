@@ -3,7 +3,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 
 import { useState, useTransition, useCallback, useEffect, useMemo } from "react";
-import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { Send, XCircle, MessageSquare, Loader2, Search, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/ppc/status-badge";
@@ -21,6 +21,7 @@ import {
   getQaInboxCounts,
   resolveNextSelectedThreadId,
 } from "@/lib/ppc-staff-workflows";
+import { ADMIN_QUERY_KEYS } from "@/lib/admin-query";
 
 type Thread = {
   id: number;
@@ -84,7 +85,7 @@ export function QaInboxClient({
   currentStaffRole,
   staffOptions,
 }: QaInboxClientProps) {
-  const router = useRouter();
+  const queryClient = useQueryClient();
   const [threadRecords, setThreadRecords] = useState(threads);
   const [activeTab, setActiveTab] = useState<TabKey>("open");
   const [assignmentScope, setAssignmentScope] = useState<AssignmentScope>("all");
@@ -213,7 +214,7 @@ export function QaInboxClient({
       setFeedback("Reply sent.");
       const msgs = await fetchThreadMessages(selectedId);
       setMessages(parseMessages(msgs));
-      router.refresh();
+      await queryClient.invalidateQueries({ queryKey: ADMIN_QUERY_KEYS.qa });
     });
   };
 
@@ -233,7 +234,7 @@ export function QaInboxClient({
       );
       setFeedback("Thread closed.");
       setReplyText("");
-      router.refresh();
+      await queryClient.invalidateQueries({ queryKey: ADMIN_QUERY_KEYS.qa });
     });
   };
 
@@ -252,7 +253,7 @@ export function QaInboxClient({
         ),
       );
       setFeedback("Thread reopened.");
-      router.refresh();
+      await queryClient.invalidateQueries({ queryKey: ADMIN_QUERY_KEYS.qa });
     });
   };
 
@@ -269,7 +270,7 @@ export function QaInboxClient({
             : thread,
         ),
       );
-      router.refresh();
+      await queryClient.invalidateQueries({ queryKey: ADMIN_QUERY_KEYS.qa });
     });
   };
 

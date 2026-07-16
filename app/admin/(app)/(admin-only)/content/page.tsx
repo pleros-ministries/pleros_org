@@ -1,7 +1,15 @@
-import { getContentOverview, getLessonForEdit } from "@/lib/db/queries/content";
+import { getContentOverview } from "@/lib/db/queries/content";
 import { PageHeader } from "@/components/ppc/page-header";
 import { Breadcrumb } from "@/components/ppc/breadcrumb";
 import { ContentCmsClient } from "@/components/ppc/content-cms-client";
+
+function serializeAudioUploadedAt(value: Date | string | null): string | null {
+  if (!value) {
+    return null;
+  }
+
+  return value instanceof Date ? value.toISOString() : value;
+}
 
 export default async function AdminContentPage() {
   const rawLevels = await getContentOverview();
@@ -20,7 +28,7 @@ export default async function AdminContentPage() {
       audioUploadKey: lesson.audioUploadKey,
       audioFileName: lesson.audioFileName,
       audioFileSize: lesson.audioFileSize,
-      audioUploadedAt: lesson.audioUploadedAt?.toISOString() ?? null,
+      audioUploadedAt: serializeAudioUploadedAt(lesson.audioUploadedAt),
       notesContent: lesson.notesContent,
       responsePrompt: lesson.responsePrompt,
       responseMarkingGuide: lesson.responseMarkingGuide,
@@ -30,25 +38,22 @@ export default async function AdminContentPage() {
     totalLessons: level.totalLessons,
   }));
 
-  const allLessonIds = levels.flatMap((level) =>
-    level.lessons.map((lesson) => lesson.id),
+  const initialQuestions = Object.fromEntries(
+    rawLevels.flatMap((level) =>
+      level.lessons.map((lesson) => [
+        lesson.id,
+        lesson.questions.map((question) => ({
+          id: question.id,
+          lessonId: question.lessonId,
+          questionType: question.questionType,
+          questionText: question.questionText,
+          options: question.options as string[] | null,
+          correctAnswer: question.correctAnswer,
+          sortOrder: question.sortOrder,
+        })),
+      ]),
+    ),
   );
-  const questionsEntries = await Promise.all(
-    allLessonIds.map(async (lessonId) => {
-      const data = await getLessonForEdit(lessonId);
-      const questions = (data?.questions ?? []).map((question) => ({
-        id: question.id,
-        lessonId: question.lessonId,
-        questionType: question.questionType,
-        questionText: question.questionText,
-        options: question.options as string[] | null,
-        correctAnswer: question.correctAnswer,
-        sortOrder: question.sortOrder,
-      }));
-      return [lessonId, questions] as const;
-    }),
-  );
-  const initialQuestions = Object.fromEntries(questionsEntries);
 
   return (
     <div className="grid gap-6">

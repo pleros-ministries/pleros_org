@@ -6,6 +6,7 @@ import { twoFactor } from "better-auth/plugins/two-factor";
 import { db } from "@/lib/db";
 import * as authSchema from "@/lib/db/auth-schema";
 import { buildTrustedOrigins, resolveAuthBaseUrl } from "@/lib/auth/auth-env";
+import { sendPasswordReset } from "@/lib/email/send";
 
 const googleConfigured =
   typeof process.env.GOOGLE_CLIENT_ID === "string" &&
@@ -25,6 +26,21 @@ export const betterAuthServer = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
+    revokeSessionsOnPasswordReset: true,
+    sendResetPassword: async ({ user, url }) => {
+      await sendPasswordReset({
+        to: user.email,
+        name: user.name,
+        resetUrl: url,
+      });
+    },
+  },
+  session: {
+    cookieCache: {
+      enabled: true,
+      maxAge: 60,
+      strategy: "jwe",
+    },
   },
   socialProviders: googleConfigured
     ? {
@@ -36,7 +52,7 @@ export const betterAuthServer = betterAuth({
     : {},
   trustedOrigins: buildTrustedOrigins(process.env),
   plugins: [
-    nextCookies(),
     twoFactor({ issuer: "Pleros PPC" }),
+    nextCookies(),
   ],
 });

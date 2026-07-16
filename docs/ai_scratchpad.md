@@ -24,6 +24,8 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - This thread has historically been PPC-focused. For PPC status or “what’s next” questions, anchor on the broader PPC roadmap, not only the current subtask.
 - Admin operational visibility is higher priority than placeholder notification settings unless the user asks for notifications specifically.
 - Dense PPC dashboard style: compact `h-7`/`h-8` controls, `text-xs` where appropriate, zinc-based surfaces, sentence case, and `useTransition` for action pending states.
+- PPC surfaces and controls should use tight operational radii; avoid pill-like or overly rounded dashboard cards, sidebar items, buttons, and badges unless the shape is semantic.
+- PPC student dashboards should avoid redundant instructional copy; prioritize active task/progress information over explaining navigation that the UI already shows.
 - Check `getAppSession()` at the top of protected PPC pages and redirect unauthenticated users to the canonical auth entry.
 - Serialize `Date` objects to ISO strings before passing data to client components.
 - Server actions should call `revalidatePath("/ppc", "layout")` after mutations.
@@ -34,9 +36,21 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 
 - Canonical student auth URLs are `/ppc/login` and `/ppc/signup`; legacy `/ppc/sign-in` and `/ppc/sign-up` should redirect.
 - When changing auth paths, update canonical routes, legacy redirects, link targets, guarded-route redirects, and public-path tests together.
-- Staff access is invite-based. `super_admin` manages admin/instructor invites; bootstrap super admin email is `fccibadan@gmail.com`.
+- Staff access is invite-based. `super_admin` manages admin/instructor invites; configured super admin emails are `akintyr@gmail.com` and `adeyemodaniel10@gmail.com`.
 - Admins enter at `/admin`, students at `/ppc`, and staff onboarding should use invite links/password setup.
+- Keep admin work consolidated under `/admin`; do not create parallel admin surfaces when expanding PPC/admin visibility.
 - `super_admin` is the staff-management role; `admin` is content/platform admin; instructors are lower-level staff.
+- Admin sidebar pages should feel instant: avoid loading full student dashboard payloads for summary/dropdown views, batch DB queries, and add route-level loading states for server-rendered destinations.
+- Keep the authenticated admin shell in the shared `/admin` layout so dashboard and sidebar destinations do not cross layout boundaries and remount the shell; memoize request-scoped session lookup when layouts and pages both need it.
+- Sidebar clicks should optimistically replace the content area with the route skeleton and update the selected nav state immediately; do not wait for the server-rendered page payload before showing navigation progress.
+- Profile sidebar latency in the signed-in browser before claiming an improvement: separately time visible destination content and the URL transition. Dynamic App Router commits can remain slow even when TanStack data is cached; render a query-backed destination preview during a pending transition so cached content is not gated by that commit.
+- Better Auth cookie-cache optimizations require `nextCookies()` to be the final plugin and a same-origin client `GET /api/auth/get-session` to issue the cache cookie for existing sessions. Keep its TTL short for staff access.
+- The Content CMS overview can be payload-heavy because lesson notes are large; batch its data, cache the shared overview briefly, and invalidate that tag from every content mutation.
+- Values returned through `unstable_cache` may be ISO strings even when the uncached DB query yields `Date` objects; server-to-client serializers must accept both forms before calling date methods.
+- Admin routes with expensive read models should use a shared TanStack Query client under `/admin`, with role-checked server-action query functions and short stale windows so repeat sidebar visits render cached data immediately while refreshing in the background.
+- When an admin mutation changes query-backed data, invalidate its TanStack query key instead of relying on `router.refresh()`; retain the immediate local update and let the active query reconcile from the server.
+- Admin summary stat/card groups should render as 2-column grids on narrow viewports, then expand to their existing wider desktop layouts.
+- Admin/staff role values are internal identifiers; display them through role labels such as `Super Admin`, `Admin`, `Instructor`, and `Student`, never raw `super_admin`.
 - Full PPC account resets must clear auth identity/session tables plus app users and welcome leads: `user`, `session`, `account`, `verification`, `two_factor`, `users`, and `welcome_pack_leads`; verify row counts are zero.
 
 ## PPC content and lesson rules
@@ -58,6 +72,7 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 
 - Notifications v1 should expose operational readiness before adding delivery complexity.
 - Show configured channels, wired event triggers, browser subscription state, and blocked environment prerequisites.
+- Do not render unavailable PPC notification actions as disabled primary buttons; use status pills or clear blocked-state messaging instead.
 - Add tested pure status helpers first, render `/admin/notifications` from that model, and reuse the existing push subscription hook.
 - Do not link this repo to a guessed Vercel account/project. If env values are needed, generate a paste-ready env snippet for the user to add in the correct Vercel account.
 
@@ -104,6 +119,8 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 ## Public nav, assets, and partner surfaces
 
 - Desktop public nav dropdowns should be real menu panels with vertically stacked full-width links, left-aligned text, and enough width/padding to scan quickly.
+- Public mobile menu open/close motion should stay soft and eased rather than snappy.
+- When public motion feedback says "not feeling it," adjust the concrete homepage component motion as well as shared primitive timing; primitive-only easing changes can be too subtle.
 - For homepage/card asset swaps, import explicit source assets into `public/site/home/assets/*`, update the specific card data, and verify mobile rendering.
 - For welcome dashboard card backgrounds, copy the named source image into `public/site/home/assets/dashboard-cards/`, wire it through card data, and verify the rendered preview card image.
 - Separate SVG foreground color from card header surface color; brand-colored logo artwork may still sit on a white card header.
@@ -116,8 +133,11 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - Public form input is untrusted. Escape user-provided values before rendering HTML email and add regression tests for injected markup.
 - For persistence-backed form features, verify the target DB has the new table/indexes or run the documented schema push before end-to-end submit tests.
 - `/welcome`, `/thankyou`, and `/dashboard/welcomepack` are one stateful public funnel: main access is immediate, extra gifts are trust-unlocked, and email failures must not block access.
+- Public welcome/contact/share links should use the canonical public site URL (`https://pleros.org`) or a dedicated public-site env var, not `NEXT_PUBLIC_APP_URL`, because that value may point to Vercel, PPC, or auth infrastructure.
 - Gift content can stay in typed code config for now and should use public-site Sen/Be Vietnam Pro styling, not PPC dashboard styling.
 - `/dashboard` should require either a valid app session or welcome-access cookie and redirect unauthenticated visitors to `/welcome`.
+- Dashboard progress tracking should avoid duplicate per-item action buttons; checking an item should directly update the tracked state.
+- Dashboard bulk progress actions should be reversible when the whole group is already complete.
 - Welcome access cookies should last 100 days and refresh on dashboard visits when present.
 - Welcome-pack access email should send only when durable lead state says the lead is newly created; client in-flight guards are secondary.
 - While supplementary welcome packs are not ready, thank-you sharing must not promise unlocks; show the main download fallback and email download link instead.

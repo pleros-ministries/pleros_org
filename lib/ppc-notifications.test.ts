@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 
 import {
   getPpcNotificationStatus,
+  getPushSubscriptionAction,
   getPushSubscriptionCopy,
 } from "./ppc-notifications";
 
@@ -118,7 +119,7 @@ describe("ppc notification status", () => {
   test("uses role-specific push subscription copy", () => {
     expect(getPushSubscriptionCopy("staff")).toEqual({
       unavailable:
-        "Add VAPID keys before staff can subscribe from this page.",
+        "Ask a super admin to add VAPID keys before staff subscribe from this page.",
       subscribed: "This device can receive PPC assignment alerts.",
       available:
         "Subscribe this browser to receive staff assignment push alerts.",
@@ -126,10 +127,79 @@ describe("ppc notification status", () => {
 
     expect(getPushSubscriptionCopy("student")).toEqual({
       unavailable:
-        "Course reminders are unavailable until push notifications are configured.",
+        "Course reminders will become available after the PPC team finishes notification setup.",
       subscribed: "This device can receive PPC course reminders.",
       available:
         "Subscribe this browser to receive reminders about lessons and course progress.",
+    });
+  });
+
+  test("uses status pills instead of disabled push buttons for blocked states", () => {
+    expect(
+      getPushSubscriptionAction({
+        isPushConfigured: false,
+        isSupported: true,
+        isSubscribed: false,
+        isPending: false,
+      }),
+    ).toEqual({
+      kind: "status",
+      label: "Waiting for admin setup",
+      tone: "muted",
+    });
+
+    expect(
+      getPushSubscriptionAction({
+        isPushConfigured: true,
+        isSupported: false,
+        isSubscribed: false,
+        isPending: false,
+      }),
+    ).toEqual({
+      kind: "status",
+      label: "Browser unsupported",
+      tone: "muted",
+    });
+  });
+
+  test("shows a push subscribe button only when the browser can act", () => {
+    expect(
+      getPushSubscriptionAction({
+        isPushConfigured: true,
+        isSupported: true,
+        isSubscribed: false,
+        isPending: false,
+      }),
+    ).toEqual({
+      kind: "button",
+      label: "Enable push alerts",
+      disabled: false,
+    });
+
+    expect(
+      getPushSubscriptionAction({
+        isPushConfigured: true,
+        isSupported: true,
+        isSubscribed: false,
+        isPending: true,
+      }),
+    ).toEqual({
+      kind: "button",
+      label: "Subscribing",
+      disabled: true,
+    });
+
+    expect(
+      getPushSubscriptionAction({
+        isPushConfigured: true,
+        isSupported: true,
+        isSubscribed: true,
+        isPending: false,
+      }),
+    ).toEqual({
+      kind: "status",
+      label: "Alerts enabled",
+      tone: "success",
     });
   });
 });

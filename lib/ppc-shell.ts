@@ -71,7 +71,7 @@ export const PPC_SHELL_NAV_ITEMS: PpcShellNavItem[] = [
     roles: ["super_admin"],
   },
   {
-    label: "Students",
+    label: "Registrants",
     path: "/students",
     icon: "students",
     roles: ["super_admin", "admin", "instructor"],
@@ -101,7 +101,7 @@ export const PPC_SHELL_NAV_ITEMS: PpcShellNavItem[] = [
     roles: ["super_admin", "admin", "instructor"],
   },
   {
-    label: "My learning",
+    label: "Dashboard",
     path: "/student",
     icon: "learning",
     roles: ["student"],
@@ -255,8 +255,8 @@ export function getPpcShellContext(pathname: string): PpcShellContext {
 
   if (/^\/students\/[^/]+$/.test(logicalPath)) {
     return {
-      label: "Student detail",
-      description: "Progress and support history",
+      label: "Registrant detail",
+      description: "Profile, progress, and support history",
     };
   }
 
@@ -269,8 +269,8 @@ export function getPpcShellContext(pathname: string): PpcShellContext {
 
   if (logicalPath === "/students") {
     return {
-      label: "Students",
-      description: "Roster and cohort progress",
+      label: "Registrants",
+      description: "All signups and progress status",
     };
   }
 
@@ -332,7 +332,7 @@ export function getPpcShellContext(pathname: string): PpcShellContext {
 
   if (logicalPath === "/student") {
     return {
-      label: "My learning",
+      label: "Dashboard",
       description: "Levels, progress, and next steps",
     };
   }

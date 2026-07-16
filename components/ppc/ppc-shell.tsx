@@ -2,9 +2,10 @@
 
 /* eslint-disable react-hooks/set-state-in-effect */
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import dynamic from "next/dynamic";
+import { usePathname, useRouter } from "next/navigation";
 import {
   BadgeCheck,
   BellRing,
@@ -28,11 +29,11 @@ import {
 
 import type { AppSession } from "@/lib/app-session";
 import { getRoleDefaultPath } from "@/lib/app-access";
+import { getAppRoleLabel } from "@/lib/app-role";
 import { authClient } from "@/lib/auth/auth-client";
 import { resolvePpcHref } from "@/lib/ppc-navigation";
 import {
   getLogicalPpcShellPath,
-  getPpcShellContext,
   getVisiblePpcShellNavItems,
   isPpcShellNavItemActive,
   isStudentLevelNavItemActive,
@@ -47,11 +48,13 @@ import {
 } from "@/lib/ppc-shell-state";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { PpcRouteLoadingSkeleton } from "@/components/ppc/route-loading-skeleton";
 
 type PpcShellProps = {
   children: React.ReactNode;
   session: AppSession;
   studentLevelNavItems?: PpcStudentLevelNavItem[];
+  pathnameOverride?: string;
 };
 
 type SidebarNavigationProps = {
@@ -59,7 +62,7 @@ type SidebarNavigationProps = {
   pathname: string;
   logicalPathname: string;
   collapsed: boolean;
-  onNavigate?: () => void;
+  onNavigate?: (href: string) => void;
 };
 
 const iconMap: Record<PpcShellIcon, React.ComponentType<{ className?: string }>> = {
@@ -75,6 +78,60 @@ const iconMap: Record<PpcShellIcon, React.ComponentType<{ className?: string }>>
   learning: NotebookPen,
   waitlist: ClipboardList,
 };
+
+const PREFETCHED_ADMIN_PATHS = new Set([
+  "/platform",
+  "/school-of-purpose",
+  "/staff",
+  "/students",
+  "/review",
+  "/qa",
+  "/contact",
+  "/notifications",
+]);
+
+const AdminPlatformPreview = dynamic(
+  () =>
+    import("@/components/ppc/admin-platform-client").then(
+      (module) => module.AdminPlatformClient,
+    ),
+  { ssr: false },
+);
+const AdminSchoolOfPurposePreview = dynamic(
+  () =>
+    import("@/components/ppc/admin-school-of-purpose-client").then(
+      (module) => module.AdminSchoolOfPurposeClient,
+    ),
+  { ssr: false },
+);
+const AdminStaffPreview = dynamic(
+  () =>
+    import("@/components/ppc/admin-staff-page-client").then(
+      (module) => module.AdminStaffPageClient,
+    ),
+  { ssr: false },
+);
+const AdminRegistrantsPreview = dynamic(
+  () =>
+    import("@/components/ppc/admin-registrant-list-cached").then(
+      (module) => module.AdminRegistrantListCached,
+    ),
+  { ssr: false },
+);
+const AdminReviewPreview = dynamic(
+  () =>
+    import("@/components/ppc/admin-review-page-client").then(
+      (module) => module.AdminReviewPageClient,
+    ),
+  { ssr: false },
+);
+const AdminQaPreview = dynamic(
+  () =>
+    import("@/components/ppc/admin-qa-page-client").then(
+      (module) => module.AdminQaPageClient,
+    ),
+  { ssr: false },
+);
 
 function getInitials(name: string): string {
   return name
@@ -93,6 +150,36 @@ function getSignOutHref(pathname: string): string {
   return "/ppc";
 }
 
+function shouldStartNavigation(event: MouseEvent<HTMLAnchorElement>) {
+  return !(
+    event.defaultPrevented ||
+    event.button !== 0 ||
+    event.metaKey ||
+    event.altKey ||
+    event.ctrlKey ||
+    event.shiftKey
+  );
+}
+
+function PendingAdminRoute({ pathname }: { pathname: string }) {
+  switch (pathname) {
+    case "/admin/platform":
+      return <AdminPlatformPreview />;
+    case "/admin/school-of-purpose":
+      return <AdminSchoolOfPurposePreview />;
+    case "/admin/staff":
+      return <AdminStaffPreview />;
+    case "/admin/students":
+      return <AdminRegistrantsPreview />;
+    case "/admin/review":
+      return <AdminReviewPreview />;
+    case "/admin/qa":
+      return <AdminQaPreview />;
+    default:
+      return <PpcRouteLoadingSkeleton />;
+  }
+}
+
 function SidebarNavigation({
   items,
   pathname,
@@ -106,6 +193,7 @@ function SidebarNavigation({
         const href = resolvePpcHref(pathname, item.path);
         const isActive = isPpcShellNavItemActive(item.path, logicalPathname);
         const Icon = iconMap[item.icon];
+        const hideIcon = item.path === "/student" && !collapsed;
 
         return (
           <Link
@@ -113,24 +201,20 @@ function SidebarNavigation({
             href={href}
             title={collapsed ? item.label : undefined}
             aria-current={isActive ? "page" : undefined}
-            onClick={onNavigate}
+            onClick={(event) => {
+              if (shouldStartNavigation(event)) {
+                onNavigate?.(href);
+              }
+            }}
             className={cn(
-              "group relative flex min-h-11 items-center rounded-xl border text-sm font-medium transition-[background-color,border-color,color,box-shadow,transform] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/70",
+              "group relative flex min-h-11 items-center rounded-sm border text-sm font-medium transition-[background-color,border-color,color,box-shadow,transform] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/70",
               collapsed ? "justify-center px-0" : "gap-3 px-3.5 py-2.5",
               isActive
-                ? "border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)] text-white shadow-sm visited:text-white [&_span]:text-white [&_svg]:text-white"
+                ? "border-blue-200 bg-blue-50 text-[var(--color-brand-blue)] shadow-sm visited:text-[var(--color-brand-blue)] [&_span]:text-[var(--color-brand-blue)] [&_svg]:text-[var(--color-brand-blue)]"
                 : "border-transparent text-zinc-500 hover:border-zinc-200 hover:bg-zinc-50 hover:text-zinc-900 active:bg-zinc-100",
             )}
           >
-            {!collapsed ? (
-              <span
-                className={cn(
-                  "absolute left-1.5 top-1/2 size-1.5 -translate-y-1/2 rounded-full transition-colors",
-                  isActive ? "bg-white/80" : "bg-transparent group-hover:bg-zinc-300",
-                )}
-              />
-            ) : null}
-            <Icon className="size-4 shrink-0" />
+            {!hideIcon ? <Icon className="size-4 shrink-0" /> : null}
             {collapsed ? <span className="sr-only">{item.label}</span> : <span>{item.label}</span>}
           </Link>
         );
@@ -144,7 +228,7 @@ type StudentLevelNavigationProps = {
   logicalPathname: string;
   pathname: string;
   collapsed: boolean;
-  onNavigate?: () => void;
+  onNavigate?: (href: string) => void;
 };
 
 function StudentLevelNavigation({
@@ -169,12 +253,14 @@ function StudentLevelNavigation({
           const badge = (
             <span
               className={cn(
-                "flex shrink-0 items-center justify-center rounded-lg border text-[10px] font-semibold transition-colors",
+                "flex shrink-0 items-center justify-center rounded-[4px] border text-[10px] font-semibold transition-colors",
                 collapsed ? "size-10" : "size-8",
-                item.state === "current"
-                  ? "border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)] text-white"
-                  : item.state === "completed"
-                    ? "border-zinc-200 bg-white text-zinc-700"
+                item.state === "completed"
+                  ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                  : isActive
+                    ? "border-blue-800 bg-blue-800 text-white"
+                  : item.state === "current"
+                    ? "border-blue-800 bg-blue-800 text-white"
                     : "border-zinc-200 bg-zinc-50 text-zinc-400",
               )}
             >
@@ -188,7 +274,7 @@ function StudentLevelNavigation({
                 key={item.id}
                 title={collapsed ? `${item.label} locked` : undefined}
                 className={cn(
-                  "group relative flex min-h-11 items-center rounded-xl border border-zinc-100 bg-zinc-50 text-zinc-400",
+                  "group relative flex min-h-11 items-center rounded-[4px] border border-zinc-100 bg-zinc-50 text-zinc-400",
                   collapsed ? "justify-center px-0" : "gap-3 px-2.5 py-2",
                 )}
               >
@@ -215,12 +301,16 @@ function StudentLevelNavigation({
               href={href}
               title={collapsed ? item.label : undefined}
               aria-current={isActive ? "page" : undefined}
-              onClick={onNavigate}
+              onClick={(event) => {
+                if (shouldStartNavigation(event)) {
+                  onNavigate?.(href);
+                }
+              }}
               className={cn(
-                "group relative flex min-h-11 items-center rounded-xl border transition-[background-color,border-color,color,box-shadow] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/70",
+                "group relative flex min-h-11 items-center rounded-[4px] border transition-[background-color,border-color,color,box-shadow] duration-150 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-400/70",
                 collapsed ? "justify-center px-0" : "gap-3 px-2.5 py-2",
                 isActive
-                  ? "border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)] text-white shadow-sm"
+                  ? "border-blue-200 bg-blue-50 text-[var(--color-brand-blue)] shadow-sm"
                   : item.state === "current"
                     ? "border-zinc-200 bg-zinc-50 text-zinc-900 hover:bg-zinc-100"
                     : "border-transparent bg-transparent text-zinc-600 hover:border-zinc-200 hover:bg-zinc-50 hover:text-zinc-900",
@@ -232,7 +322,7 @@ function StudentLevelNavigation({
                   <span
                     className={cn(
                       "block text-xs font-medium",
-                      isActive ? "text-white" : "text-zinc-900",
+                      isActive ? "text-zinc-950" : "text-zinc-900",
                     )}
                   >
                     {item.label}
@@ -240,7 +330,7 @@ function StudentLevelNavigation({
                   <span
                     className={cn(
                       "block truncate text-[11px]",
-                      isActive ? "text-white/70" : "text-zinc-500",
+                      isActive ? "text-zinc-600" : "text-zinc-500",
                     )}
                   >
                     {item.description}
@@ -249,6 +339,15 @@ function StudentLevelNavigation({
               ) : (
                 <span className="sr-only">{item.label}</span>
               )}
+              {!collapsed && item.state === "completed" ? (
+                <span
+                  className="ml-auto inline-flex size-7 shrink-0 items-center justify-center rounded-[4px] border border-emerald-200 bg-emerald-50 text-emerald-700"
+                  title={`${item.label} completed`}
+                >
+                  <BadgeCheck className="size-3.5" aria-hidden="true" />
+                  <span className="sr-only">{item.label} completed</span>
+                </span>
+              ) : null}
             </Link>
           );
         })}
@@ -264,20 +363,22 @@ type SidebarFooterProps = {
 };
 
 function SidebarFooter({ collapsed, session, signOutHref }: SidebarFooterProps) {
+  const roleLabel = getAppRoleLabel(session.user.role);
+
   return (
     <div className={cn("mt-auto border-t border-zinc-100", collapsed ? "px-2 py-3" : "px-3 py-3")}>
       {collapsed ? (
         <div className="grid justify-items-center gap-2">
           <div
-            title={`${session.user.name} (${session.user.role})`}
-            className="flex size-10 items-center justify-center rounded-xl border border-zinc-200 bg-zinc-50 text-xs font-semibold text-zinc-700"
+            title={`${session.user.name} (${roleLabel})`}
+            className="flex size-10 items-center justify-center rounded-sm border border-zinc-200 bg-zinc-50 text-xs font-semibold text-zinc-700"
           >
             {getInitials(session.user.name)}
           </div>
           <Link
             href="/"
             title="Visit site"
-            className="inline-flex size-10 items-center justify-center rounded-xl border border-zinc-200 bg-white text-zinc-500 transition-colors hover:bg-zinc-50 hover:text-zinc-900"
+            className="inline-flex size-10 items-center justify-center rounded-sm border border-zinc-200 bg-white text-zinc-500 transition-colors hover:bg-zinc-50 hover:text-zinc-900"
           >
             <Globe className="size-4" />
             <span className="sr-only">Visit site</span>
@@ -289,31 +390,31 @@ function SidebarFooter({ collapsed, session, signOutHref }: SidebarFooterProps) 
               await authClient.signOut();
               window.location.href = signOutHref;
             }}
-            className="inline-flex size-10 items-center justify-center rounded-xl border border-zinc-200 bg-white text-zinc-500 transition-colors hover:bg-zinc-50 hover:text-zinc-900"
+            className="inline-flex size-10 items-center justify-center rounded-sm border border-zinc-200 bg-white text-zinc-500 transition-colors hover:bg-zinc-50 hover:text-zinc-900"
           >
             <LogOut className="size-4" />
             <span className="sr-only">Sign out</span>
           </button>
         </div>
       ) : (
-        <div className="rounded-2xl border border-zinc-200 bg-zinc-50 p-3">
+        <div className="rounded-sm border border-zinc-200 bg-zinc-50 p-3">
           <div className="flex items-center gap-3">
-            <div className="flex size-10 items-center justify-center rounded-xl border border-zinc-200 bg-white text-xs font-semibold text-zinc-700">
+            <div className="flex size-10 items-center justify-center rounded-sm border border-zinc-200 bg-white text-xs font-semibold text-zinc-700">
               {getInitials(session.user.name)}
             </div>
             <div className="min-w-0">
               <p className="truncate text-xs font-medium text-zinc-900">
                 {session.user.name}
               </p>
-              <p className="text-[11px] capitalize text-zinc-500">
-                {session.user.role}
+              <p className="text-[11px] text-zinc-500">
+                {roleLabel}
               </p>
             </div>
           </div>
           <div className="mt-3 grid grid-cols-2 gap-2">
             <Link
               href="/"
-              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-100"
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-[4px] border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-100"
             >
               <Globe className="size-3.5" />
               Visit site
@@ -324,7 +425,7 @@ function SidebarFooter({ collapsed, session, signOutHref }: SidebarFooterProps) 
                 await authClient.signOut();
                 window.location.href = signOutHref;
               }}
-              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-100"
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-[4px] border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-100"
             >
               <LogOut className="size-3.5" />
               Sign out
@@ -342,7 +443,7 @@ type SidebarShellProps = {
   collapsed: boolean;
   session: AppSession;
   studentLevelNavItems?: PpcStudentLevelNavItem[];
-  onNavigate?: () => void;
+  onNavigate?: (href: string) => void;
   onToggleCollapse?: () => void;
   signOutHref: string;
 };
@@ -366,20 +467,21 @@ function SidebarShell({
         <div className={cn("flex items-center", collapsed ? "justify-center" : "justify-between gap-3")}>
           <Link
             href={homeHref}
-            onClick={onNavigate}
+            onClick={(event) => {
+              if (shouldStartNavigation(event)) {
+                onNavigate?.(homeHref);
+              }
+            }}
             className={cn(
-              "group flex min-w-0 items-center rounded-2xl transition-colors hover:bg-zinc-50",
-              collapsed ? "justify-center p-1.5" : "gap-3 p-1.5",
+              "group flex min-w-0 rounded-sm transition-colors hover:bg-zinc-50",
+              collapsed ? "hidden" : "items-center p-1.5",
             )}
-            title={collapsed ? "PPC platform" : undefined}
+            title={collapsed ? "Pleros Perfecting Course" : undefined}
           >
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-zinc-200 bg-[var(--color-brand-blue)] text-[11px] font-semibold uppercase tracking-[0.16em] text-white">
-              PP
-            </span>
             {!collapsed ? (
               <span className="min-w-0">
                 <span className="block text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400">
-                  PPC platform
+                  Pleros Perfecting Course
                 </span>
                 <span className="mt-0.5 flex items-center gap-1.5 text-sm font-medium text-zinc-900">
                   {session.user.role === "student" ? "Learning workspace" : "Admin workspace"}
@@ -394,7 +496,7 @@ function SidebarShell({
               type="button"
               onClick={onToggleCollapse}
               className={cn(
-                "hidden shrink-0 rounded-xl border border-zinc-200 bg-white text-zinc-500 transition-colors hover:bg-zinc-50 hover:text-zinc-900 lg:inline-flex",
+                "hidden shrink-0 rounded-sm border border-zinc-200 bg-white text-zinc-500 transition-colors hover:bg-zinc-50 hover:text-zinc-900 lg:inline-flex",
                 collapsed ? "size-10 items-center justify-center" : "size-10 items-center justify-center",
               )}
               aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
@@ -441,14 +543,46 @@ export function PpcShell({
   children,
   session,
   studentLevelNavItems,
+  pathnameOverride,
 }: PpcShellProps) {
-  const pathname = usePathname();
-  const logicalPathname = getLogicalPpcShellPath(pathname);
-  const shellContext = getPpcShellContext(logicalPathname);
+  const router = useRouter();
+  const currentPathname = usePathname();
+  const pathname = pathnameOverride ?? currentPathname;
   const signOutHref = getSignOutHref(pathname);
+  const roleLabel = getAppRoleLabel(session.user.role);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [hasLoadedSidebarPreference, setHasLoadedSidebarPreference] = useState(false);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const [pendingPathname, setPendingPathname] = useState<string | null>(null);
+  const isNavigating = pendingPathname !== null && pendingPathname !== pathname;
+  const navigationPathname = pendingPathname ?? pathname;
+  const navigationLogicalPathname = getLogicalPpcShellPath(navigationPathname);
+
+  useEffect(() => {
+    setPendingPathname(null);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!pathname.startsWith("/admin")) {
+      return;
+    }
+
+    const prefetchRoutes = () => {
+      getVisiblePpcShellNavItems(session.user.role)
+        .filter((item) => PREFETCHED_ADMIN_PATHS.has(item.path))
+        .forEach((item) => {
+          router.prefetch(resolvePpcHref(pathname, item.path));
+        });
+    };
+
+    const idleCallback = window.requestIdleCallback?.(prefetchRoutes);
+    if (idleCallback !== undefined) {
+      return () => window.cancelIdleCallback(idleCallback);
+    }
+
+    const timeoutId = window.setTimeout(prefetchRoutes, 0);
+    return () => window.clearTimeout(timeoutId);
+  }, [pathname, router, session.user.role]);
 
   useEffect(() => {
     try {
@@ -477,10 +611,10 @@ export function PpcShell({
   }, [hasLoadedSidebarPreference, isSidebarCollapsed]);
 
   return (
-    <div className="min-h-screen bg-zinc-100/80 text-zinc-900">
+    <div className="ppc-theme min-h-screen bg-zinc-100/80 text-zinc-900">
       <div
         className={cn(
-          "mx-auto min-h-screen w-full max-w-[1520px] grid-cols-1 gap-3 p-3 lg:grid lg:gap-4 lg:p-4",
+          "mx-auto min-h-screen w-full max-w-[1520px] grid-cols-1 gap-3 px-3 pb-3 lg:grid lg:gap-4 lg:p-4",
           isSidebarCollapsed
             ? "lg:grid-cols-[92px_minmax(0,1fr)]"
             : "lg:grid-cols-[282px_minmax(0,1fr)]",
@@ -493,64 +627,67 @@ export function PpcShell({
           )}
         >
           <div className="sticky top-4 h-[calc(100vh-2rem)] w-full">
-            <div className="flex h-full flex-col rounded-[1.5rem] border border-zinc-200/90 bg-white shadow-[0_1px_2px_rgba(15,23,40,0.04),0_12px_28px_rgba(15,23,40,0.06)]">
+            <div className="flex h-full flex-col rounded-none border border-zinc-200/90 bg-white shadow-[0_1px_2px_rgba(15,23,40,0.04),0_12px_28px_rgba(15,23,40,0.06)]">
               <SidebarShell
                 pathname={pathname}
-                logicalPathname={logicalPathname}
+                logicalPathname={navigationLogicalPathname}
                 collapsed={isSidebarCollapsed}
                 session={session}
                 studentLevelNavItems={studentLevelNavItems}
                 signOutHref={signOutHref}
                 onToggleCollapse={() => setIsSidebarCollapsed((current) => !current)}
+                onNavigate={setPendingPathname}
               />
             </div>
           </div>
         </aside>
 
         <div className="flex min-w-0 flex-1 flex-col gap-3">
-          <header className="sticky top-3 z-20 flex min-h-15 items-center justify-between rounded-[1.5rem] border border-zinc-200/90 bg-white/95 px-4 py-3 shadow-[0_1px_2px_rgba(15,23,40,0.04),0_8px_22px_rgba(15,23,40,0.04)] backdrop-blur sm:px-5">
+          <header className="sticky top-0 z-20 -mx-3 flex min-h-14 items-center justify-between border-b border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)] px-4 py-2 text-white shadow-sm sm:-mx-4 sm:px-6 lg:top-0">
             <div className="flex min-w-0 items-center gap-3">
               <button
                 type="button"
                 onClick={() => setIsMobileNavOpen(true)}
-                className="inline-flex size-10 items-center justify-center rounded-xl border border-zinc-200 bg-white text-zinc-600 transition-colors hover:bg-zinc-50 hover:text-zinc-900 lg:hidden"
+                className="inline-flex size-10 items-center justify-center rounded-sm border border-white/20 bg-white/10 text-white transition-colors hover:bg-white/15 lg:hidden"
                 aria-label="Open sidebar"
               >
                 <Menu className="size-4" />
               </button>
               <div className="min-w-0">
-                <p className="truncate text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400">
-                  {shellContext.label}
-                </p>
-                <p className="truncate text-xs text-zinc-500 sm:text-sm">
-                  {shellContext.description}
+                <p className="ppc-heading truncate text-base font-semibold tracking-[-0.025em] text-white sm:text-lg">
+                  Pleros Perfecting Course
                 </p>
               </div>
             </div>
-            <div className="hidden items-center gap-2 text-[11px] text-zinc-500 lg:flex">
-              <GraduationCap className="size-3.5 text-zinc-400" />
-              <span className="capitalize">{session.user.role}</span>
+            <div className="hidden items-center gap-2 text-[11px] text-white/75 lg:flex">
+              <GraduationCap className="size-3.5 text-white/60" />
+              <span>{roleLabel}</span>
             </div>
           </header>
 
-          <main className="min-w-0 flex-1 px-1 pb-4 sm:px-2">{children}</main>
+          <main className="min-w-0 flex-1 px-1 pb-4 sm:px-2">
+            {isNavigating ? <PendingAdminRoute pathname={pendingPathname} /> : children}
+          </main>
         </div>
       </div>
 
       <Sheet open={isMobileNavOpen} onOpenChange={setIsMobileNavOpen}>
         <SheetContent
           side="left"
-          className="w-[88vw] max-w-[320px] p-0"
+          className="ppc-theme w-[88vw] max-w-[320px] rounded-none p-0"
           showCloseButton
         >
           <SidebarShell
             pathname={pathname}
-            logicalPathname={logicalPathname}
+            logicalPathname={navigationLogicalPathname}
             collapsed={false}
             session={session}
             studentLevelNavItems={studentLevelNavItems}
             signOutHref={signOutHref}
-            onNavigate={() => setIsMobileNavOpen(false)}
+            onNavigate={(href) => {
+              setPendingPathname(href);
+              setIsMobileNavOpen(false);
+            }}
           />
         </SheetContent>
       </Sheet>

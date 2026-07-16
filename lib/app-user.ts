@@ -2,10 +2,21 @@ import type { AppRole } from "./app-role";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 
-export const DEFAULT_SUPER_ADMIN_EMAIL = "fccibadan@gmail.com";
+export const SUPER_ADMIN_EMAILS = [
+  "akintyr@gmail.com",
+  "adeyemodaniel10@gmail.com",
+] as const;
+
+export const DEFAULT_SUPER_ADMIN_EMAIL = SUPER_ADMIN_EMAILS[0];
 
 function normalizeEmail(email: string) {
   return email.trim().toLowerCase();
+}
+
+export function isConfiguredSuperAdminEmail(email: string) {
+  return SUPER_ADMIN_EMAILS.includes(
+    normalizeEmail(email) as (typeof SUPER_ADMIN_EMAILS)[number],
+  );
 }
 
 export async function resolveDbUserId(email: string): Promise<string | null> {
@@ -44,19 +55,36 @@ export async function hasSuperAdminUser() {
   }
 }
 
+export async function getMissingSuperAdminEmails() {
+  try {
+    const users = await db.query.users.findMany({
+      where: (u, { inArray }) => inArray(u.email, [...SUPER_ADMIN_EMAILS]),
+    });
+    const existingSuperAdminEmails = new Set(
+      users
+        .filter((user) => user.role === "super_admin")
+        .map((user) => normalizeEmail(user.email)),
+    );
+
+    return SUPER_ADMIN_EMAILS.filter(
+      (email) => !existingSuperAdminEmails.has(email),
+    );
+  } catch {
+    return [...SUPER_ADMIN_EMAILS];
+  }
+}
+
 export async function resolvePersistedRoleForEmail(email: string): Promise<AppRole> {
   const normalizedEmail = normalizeEmail(email);
+
+  if (isConfiguredSuperAdminEmail(normalizedEmail)) {
+    return "super_admin";
+  }
+
   const user = await getAppUserByEmail(normalizedEmail);
 
   if (user?.role) {
     return user.role;
-  }
-
-  if (
-    normalizedEmail === DEFAULT_SUPER_ADMIN_EMAIL &&
-    !(await hasSuperAdminUser())
-  ) {
-    return "super_admin";
   }
 
   return "student";

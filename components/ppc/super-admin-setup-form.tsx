@@ -3,18 +3,21 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Eye, EyeOff } from "lucide-react";
 
 import { authClient } from "@/lib/auth/auth-client";
 import { formatAuthErrorMessage } from "@/lib/auth-entry";
 
 type SuperAdminSetupFormProps = {
-  email: string;
+  emails: string[];
 };
 
-export function SuperAdminSetupForm({ email }: SuperAdminSetupFormProps) {
+export function SuperAdminSetupForm({ emails }: SuperAdminSetupFormProps) {
   const router = useRouter();
+  const [email, setEmail] = useState(emails[0] ?? "");
   const [name, setName] = useState("FCC Ibadan");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -51,7 +54,7 @@ export function SuperAdminSetupForm({ email }: SuperAdminSetupFormProps) {
           Bootstrap account
         </p>
         <p className="mt-1 text-xs text-zinc-600">
-          This creates the first PPC super admin account for {email}.
+          This creates a configured PPC super admin account.
         </p>
       </div>
 
@@ -79,27 +82,43 @@ export function SuperAdminSetupForm({ email }: SuperAdminSetupFormProps) {
           <span className="text-[11px] font-medium uppercase tracking-[0.08em] text-zinc-500">
             Email
           </span>
-          <input
-            type="email"
-            readOnly
+          <select
+            required
             value={email}
-            className="h-8 rounded-sm border border-zinc-200 bg-zinc-50 px-2.5 text-xs text-zinc-500 outline-none"
-          />
+            onChange={(event) => setEmail(event.target.value)}
+            className="h-8 rounded-sm border border-zinc-300 bg-white px-2.5 text-xs text-zinc-700 outline-none focus:border-zinc-700"
+          >
+            {emails.map((configuredEmail) => (
+              <option key={configuredEmail} value={configuredEmail}>
+                {configuredEmail}
+              </option>
+            ))}
+          </select>
         </label>
 
         <label className="grid gap-1">
           <span className="text-[11px] font-medium uppercase tracking-[0.08em] text-zinc-500">
             Password
           </span>
-          <input
-            type="password"
-            required
-            minLength={8}
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            placeholder="Min. 8 characters"
-            className="h-8 rounded-sm border border-zinc-300 px-2.5 text-xs outline-none focus:border-zinc-700"
-          />
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              required
+              minLength={8}
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              placeholder="Min. 8 characters"
+              className="h-8 w-full rounded-sm border border-zinc-300 px-2.5 pr-9 text-xs outline-none focus:border-zinc-700"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((value) => !value)}
+              className="absolute right-1.5 top-1/2 flex size-6 -translate-y-1/2 items-center justify-center rounded-sm text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
+            </button>
+          </div>
         </label>
 
         <button

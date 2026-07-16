@@ -1,17 +1,29 @@
-const DEFAULT_PUBLIC_SITE_URL = "https://pleros-org.vercel.app";
+const DEFAULT_PUBLIC_SITE_URL = "https://pleros.org";
 
-export function resolvePublicSiteUrl(env: NodeJS.ProcessEnv): string {
-  const configuredUrl = env.NEXT_PUBLIC_APP_URL?.trim();
+function normalizePublicOrigin(url: string | undefined): string | null {
+  const configuredUrl = url?.trim();
 
   if (!configuredUrl) {
-    return DEFAULT_PUBLIC_SITE_URL;
+    return null;
   }
 
   try {
     return new URL(configuredUrl).origin;
   } catch {
-    return DEFAULT_PUBLIC_SITE_URL;
+    return null;
   }
+}
+
+export function resolvePublicSiteUrl(env: NodeJS.ProcessEnv): string {
+  const configuredPublicUrl =
+    normalizePublicOrigin(env.NEXT_PUBLIC_SITE_URL) ??
+    normalizePublicOrigin(env.NEXT_PUBLIC_PUBLIC_SITE_URL);
+
+  if (configuredPublicUrl) {
+    return configuredPublicUrl;
+  }
+
+  return DEFAULT_PUBLIC_SITE_URL;
 }
 
 export function buildWelcomeShareIntentUrl(siteUrl: string): string {

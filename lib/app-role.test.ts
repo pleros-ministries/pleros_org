@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import {
+  getAppRoleLabel,
   normalizeEmailList,
   resolveRoleFromEmail,
   type AppRole,
@@ -34,5 +35,12 @@ describe("app role resolution", () => {
   test("role union stays stable", () => {
     const roles: AppRole[] = ["super_admin", "admin", "instructor", "student"];
     expect(roles).toHaveLength(4);
+  });
+
+  test("role labels are display friendly", () => {
+    expect(getAppRoleLabel("super_admin")).toBe("Super Admin");
+    expect(getAppRoleLabel("admin")).toBe("Admin");
+    expect(getAppRoleLabel("instructor")).toBe("Instructor");
+    expect(getAppRoleLabel("student")).toBe("Student");
   });
 });

@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 import { acceptStaffInviteAction } from "@/app/ppc/_actions/staff-invite-actions";
+import { getAppRoleLabel } from "@/lib/app-role";
 import { authClient } from "@/lib/auth/auth-client";
 import { formatAuthErrorMessage } from "@/lib/auth-entry";
 
@@ -12,10 +13,6 @@ type StaffInviteAcceptFormProps = {
   email: string;
   role: string;
 };
-
-function roleLabel(role: string) {
-  return role === "admin" ? "admin" : "instructor";
-}
 
 export function StaffInviteAcceptForm({
   token,
@@ -70,7 +67,7 @@ export function StaffInviteAcceptForm({
           Staff invite
         </p>
         <p className="mt-1 text-xs text-zinc-600">
-          {email} · {roleLabel(role)}
+          {email} · {getAppRoleLabel(role)}
         </p>
       </div>
 
@@ -133,4 +130,3 @@ export function StaffInviteAcceptForm({
     </>
   );
 }
-

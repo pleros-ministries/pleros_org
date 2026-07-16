@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Eye, EyeOff } from "lucide-react";
 
 import { previewPortalAccess } from "@/app/ppc/_actions/auth-entry-actions";
 import { authClient } from "@/lib/auth/auth-client";
@@ -34,6 +35,7 @@ export function StaffLoginPanel() {
   const [activeTab, setActiveTab] = useState<StaffRoleTab>("admin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [portalNotice, setPortalNotice] = useState<{
     tone: "default" | "info" | "warning";
@@ -105,14 +107,14 @@ export function StaffLoginPanel() {
   return (
     <>
       <div className="mt-4 grid gap-2">
-        <div className="inline-flex rounded-sm border border-zinc-200 bg-zinc-50 p-1">
+        <div className="inline-flex w-fit justify-self-start rounded-sm border border-zinc-200 bg-zinc-50 p-1">
           {(["admin", "instructor"] as const).map((tab) => (
             <button
               key={tab}
               type="button"
               onClick={() => setActiveTab(tab)}
               className={cn(
-                "h-8 rounded-sm px-3 text-xs font-medium transition-colors",
+                "h-7 rounded-sm px-2.5 text-xs font-medium transition-colors",
                 activeTab === tab
                   ? "bg-[var(--color-brand-blue)] text-white"
                   : "text-zinc-500 hover:text-zinc-900",
@@ -165,33 +167,38 @@ export function StaffLoginPanel() {
           >
             {portalNotice.message}
           </div>
-        ) : (
-          <div className="rounded-sm border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs text-zinc-600">
-            Staff access is invite-only. The first super admin can be created
-            once at{" "}
-            <Link
-              href="/admin/setup"
-              className="font-medium text-zinc-900 underline-offset-2 hover:underline"
-            >
-              /admin/setup
-            </Link>
-            .
-          </div>
-        )}
+        ) : null}
 
         <label className="grid gap-1">
           <span className="text-[11px] font-medium uppercase tracking-[0.08em] text-zinc-500">
             Password
           </span>
-          <input
-            type="password"
-            required
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            placeholder="••••••••"
-            className="h-8 rounded-sm border border-zinc-300 px-2.5 text-xs outline-none focus:border-zinc-700"
-          />
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              required
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              placeholder="••••••••"
+              className="h-8 w-full rounded-sm border border-zinc-300 px-2.5 pr-9 text-xs outline-none focus:border-zinc-700"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((value) => !value)}
+              className="absolute right-1.5 top-1/2 flex size-6 -translate-y-1/2 items-center justify-center rounded-sm text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
+            </button>
+          </div>
         </label>
+
+        <Link
+          href="/admin/forgot-password"
+          className="-mt-1 w-fit justify-self-end text-[11px] font-medium text-zinc-500 underline-offset-2 hover:text-zinc-900 hover:underline"
+        >
+          Forgot password?
+        </Link>
 
         <button
           type="submit"
@@ -239,16 +246,6 @@ export function StaffLoginPanel() {
         </>
       ) : null}
 
-      <p className="mt-4 text-center text-[11px] text-zinc-500">
-        Student access belongs in{" "}
-        <Link
-          href="/ppc"
-          className="font-medium text-zinc-900 underline-offset-2 hover:underline"
-        >
-          /ppc
-        </Link>
-        .
-      </p>
     </>
   );
 }

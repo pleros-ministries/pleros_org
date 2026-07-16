@@ -6,16 +6,18 @@ import {
 } from "./email/templates";
 
 describe("welcome pack emails", () => {
-  test("access email links straight to the dashboard, not a direct download", () => {
+  test("access email uses a text logo and links straight to the dashboard, not a direct download", () => {
     const html = welcomePackAccessHtml({
       name: "Grace",
       dashboardUrl: "https://pleros.org/dashboard/welcomepack",
     });
 
+    expect(html).toContain("Pleros");
     expect(html).toContain("Your welcome pack is ready");
     expect(html).toContain("Access your welcome pack");
     expect(html).toContain("https://pleros.org/dashboard/welcomepack");
     expect(html).not.toContain("download");
+    expect(html).not.toContain("white-logotype");
   });
 
   test("extras unlock email points users back to the welcome pack dashboard", () => {
@@ -26,5 +28,6 @@ describe("welcome pack emails", () => {
 
     expect(html).toContain("Your extra gifts are unlocked");
     expect(html).toContain("https://pleros.org/dashboard/welcomepack");
+    expect(html).not.toContain("white-logotype");
   });
 });

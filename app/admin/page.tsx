@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import { eq, count } from "drizzle-orm";
 
@@ -6,6 +5,7 @@ import { getAppSession } from "@/lib/app-session";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
 import { getDashboardStats } from "@/lib/db/queries/students";
+import { getAdminRegistrantList } from "@/lib/db/queries/admin-registrants";
 import { getReviewQueue } from "@/lib/db/queries/submissions";
 import { getAllThreads } from "@/lib/db/queries/qa";
 import { getContentOverview } from "@/lib/db/queries/content";
@@ -13,7 +13,6 @@ import {
   listStaffInvites,
   listStaffUsers,
 } from "@/lib/db/queries/staff-invites";
-import { PpcAppFrame } from "@/components/ppc/ppc-app-frame";
 import { PageHeader } from "@/components/ppc/page-header";
 import { StaffLoginPanel } from "@/components/ppc/staff-login-panel";
 import { StatCard } from "@/components/ppc/stat-card";
@@ -68,16 +67,44 @@ export default async function AdminEntryPage() {
     );
   }
 
-  if (session.user.role === "student") {
-    redirect("/ppc");
-  }
-
   const canManageContent = hasAdminAccess(session.user.role);
 
-  const stats = await getDashboardStats();
-  const reviewQueue = await getReviewQueue();
-  const openThreads = await getAllThreads("open");
-  const contentOverview = await getContentOverview();
+  const statsPromise = getDashboardStats();
+  const registrantsPromise = getAdminRegistrantList();
+  const reviewQueuePromise = getReviewQueue();
+  const openThreadsPromise = getAllThreads("open");
+  const contentOverviewPromise = getContentOverview();
+  const staffAccessPromise =
+    session.user.role === "super_admin"
+      ? Promise.all([listStaffUsers(), listStaffInvites()])
+      : Promise.resolve(null);
+  const userCountPromise = db.select({ count: count() }).from(schema.users);
+  const lessonCountPromise = db
+    .select({ count: count() })
+    .from(schema.lessons)
+    .where(eq(schema.lessons.status, "published"));
+  const [
+    stats,
+    registrants,
+    reviewQueue,
+    openThreads,
+    contentOverview,
+    staffAccess,
+    [userCount],
+    [lessonCount],
+  ] = await Promise.all([
+    statsPromise,
+    registrantsPromise,
+    reviewQueuePromise,
+    openThreadsPromise,
+    contentOverviewPromise,
+    staffAccessPromise,
+    userCountPromise,
+    lessonCountPromise,
+  ]);
+  const welcomeOnlyCount = registrants.filter(
+    (registrant) => registrant.accountStatus === "welcome_only",
+  ).length;
   const contentDebt = getContentDebtSummary(
     contentOverview.map((level) => ({
       id: level.id,
@@ -100,15 +127,9 @@ export default async function AdminEntryPage() {
       })),
     })),
   );
-  const staffAccessSummary =
-    session.user.role === "super_admin"
-      ? getStaffAccessSummary(await listStaffUsers(), await listStaffInvites())
-      : null;
-  const [userCount] = await db.select({ count: count() }).from(schema.users);
-  const [lessonCount] = await db
-    .select({ count: count() })
-    .from(schema.lessons)
-    .where(eq(schema.lessons.status, "published"));
+  const staffAccessSummary = staffAccess
+    ? getStaffAccessSummary(staffAccess[0], staffAccess[1])
+    : null;
   const reviewPressure = getQueuePressureSummary(reviewQueue, "submittedAt");
   const qaPressure = getQueuePressureSummary(openThreads, "createdAt");
   const reviewOwnership = getAssignmentOwnershipSummary(
@@ -131,22 +152,21 @@ export default async function AdminEntryPage() {
   );
 
   return (
-    <PpcAppFrame session={session}>
-      <div className="grid gap-6">
+    <div className="grid gap-6">
         <PageHeader
           title="Dashboard"
           description="Course operations overview"
         />
 
-        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <section className="grid grid-cols-2 gap-3 xl:grid-cols-4">
           <StatCard
-            label="Active students"
-            value={stats.activeStudents}
+            label="Registrants"
+            value={registrants.length}
             icon={Activity}
-            hint="Currently enrolled"
+            hint={`${stats.activeStudents} PPC accounts · ${welcomeOnlyCount} welcome only`}
           />
           <StatCard
-            label="Avg. progress"
+            label="PPC avg. progress"
             value={`${stats.averageProgress}%`}
             icon={Layers2}
             hint="Across cohort"
@@ -224,10 +244,10 @@ export default async function AdminEntryPage() {
                   <ArrowRight className="size-3.5 text-zinc-300" />
                 </div>
                 <p className="mt-3 text-xs font-medium text-zinc-900">
-                  Student roster
+                  Registrants
                 </p>
                 <p className="mt-1 text-[11px] text-zinc-500">
-                  View progress, support history, and status
+                  View signups, progress, and status
                 </p>
               </Link>
 
@@ -509,7 +529,6 @@ export default async function AdminEntryPage() {
             </div>
           </article>
         </section>
-      </div>
-    </PpcAppFrame>
+    </div>
   );
 }

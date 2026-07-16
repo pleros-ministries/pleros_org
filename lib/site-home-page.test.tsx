@@ -151,6 +151,18 @@ describe("site home page", () => {
     expect(cardSource).toContain('headerImageClassName ?? "p-2"');
   });
 
+  test("keeps the mobile menu panel and menu body on a softer eased animation", () => {
+    const navSource = readFileSync(
+      join(process.cwd(), "components", "home", "homepage-nav.tsx"),
+      "utf8",
+    );
+
+    expect(navSource).toContain("data-starting-style:translate-x-5");
+    expect(navSource).toContain("data-ending-style:translate-x-3");
+    expect(navSource).toContain("duration-[560ms]");
+    expect(navSource).toContain('open ? "translate-x-0 opacity-100" : "translate-x-4 opacity-0"');
+  });
+
   test("uses a refined hierarchy for the featured podcast card", () => {
     const globalsSource = readFileSync(
       join(process.cwd(), "app", "globals.css"),
@@ -335,7 +347,9 @@ describe("site home page", () => {
     expect(navSource).toContain("site-mobile-menu-link");
     expect(navSource).toContain("homeFooterNavGroups");
     expect(navSource).toContain("site-mobile-menu-group-label");
-    expect(navSource).toContain("className=\"site-font-theme border-l border-white/8");
+    expect(navSource).toContain(
+      "className=\"site-font-theme overflow-hidden border-l border-white/8",
+    );
     expect(navSource).toContain("aria-label=\"Close menu\"");
     expect(navSource).toContain("inline-flex h-9 w-9 items-center justify-center text-white transition-opacity duration-150 hover:opacity-80 md:h-10 md:w-10");
     expect(navSource).toContain("border-b border-white/10 py-2.5 font-medium text-white/94");

@@ -19,6 +19,26 @@ export function hasAdminAccess(role: AppRole): boolean {
   return role === "super_admin" || role === "admin";
 }
 
+export function getAppRoleLabel(role: AppRole | string): string {
+  if (role === "super_admin") {
+    return "Super Admin";
+  }
+
+  if (role === "admin") {
+    return "Admin";
+  }
+
+  if (role === "instructor") {
+    return "Instructor";
+  }
+
+  if (role === "student") {
+    return "Student";
+  }
+
+  return role;
+}
+
 export function normalizeEmailList(value: string | undefined): string[] {
   if (!value) {
     return [];

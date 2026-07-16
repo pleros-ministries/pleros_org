@@ -37,15 +37,38 @@ type PushSubscriptionCopy = {
   available: string;
 };
 
+type PushSubscriptionActionInput = {
+  isPushConfigured: boolean;
+  isSupported: boolean;
+  isSubscribed: boolean;
+  isPending: boolean;
+};
+
+type PushSubscriptionAction =
+  | {
+      kind: "button";
+      label: "Enable push alerts" | "Subscribing";
+      disabled: boolean;
+    }
+  | {
+      kind: "status";
+      label:
+        | "Push setup required"
+        | "Browser unsupported"
+        | "Alerts enabled"
+        | "Waiting for admin setup";
+      tone: "muted" | "success";
+    };
+
 const pushSubscriptionCopy: Record<PushSubscriptionAudience, PushSubscriptionCopy> = {
   staff: {
-    unavailable: "Add VAPID keys before staff can subscribe from this page.",
+    unavailable: "Ask a super admin to add VAPID keys before staff subscribe from this page.",
     subscribed: "This device can receive PPC assignment alerts.",
     available: "Subscribe this browser to receive staff assignment push alerts.",
   },
   student: {
     unavailable:
-      "Course reminders are unavailable until push notifications are configured.",
+      "Course reminders will become available after the PPC team finishes notification setup.",
     subscribed: "This device can receive PPC course reminders.",
     available:
       "Subscribe this browser to receive reminders about lessons and course progress.",
@@ -190,4 +213,49 @@ export function getPushSubscriptionCopy(
   audience: PushSubscriptionAudience,
 ): PushSubscriptionCopy {
   return pushSubscriptionCopy[audience];
+}
+
+export function getPushSubscriptionAction({
+  isPushConfigured,
+  isSupported,
+  isSubscribed,
+  isPending,
+}: PushSubscriptionActionInput): PushSubscriptionAction {
+  if (!isPushConfigured) {
+    return {
+      kind: "status",
+      label: "Waiting for admin setup",
+      tone: "muted",
+    };
+  }
+
+  if (!isSupported) {
+    return {
+      kind: "status",
+      label: "Browser unsupported",
+      tone: "muted",
+    };
+  }
+
+  if (isSubscribed) {
+    return {
+      kind: "status",
+      label: "Alerts enabled",
+      tone: "success",
+    };
+  }
+
+  if (isPending) {
+    return {
+      kind: "button",
+      label: "Subscribing",
+      disabled: true,
+    };
+  }
+
+  return {
+    kind: "button",
+    label: "Enable push alerts",
+    disabled: false,
+  };
 }

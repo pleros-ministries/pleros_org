@@ -72,46 +72,52 @@ export function HomepageNav() {
             <SheetContent
               side="right"
               showCloseButton={false}
-              className="site-font-theme border-l border-white/8 bg-[var(--color-brand-blue)] px-4 pb-7 pt-4 text-white shadow-[-18px_0_40px_rgba(1,21,133,0.28)]"
+              className="site-font-theme overflow-hidden border-l border-white/8 bg-[var(--color-brand-blue)] px-4 pb-7 pt-4 text-white shadow-[-18px_0_40px_rgba(1,21,133,0.28)] data-starting-style:translate-x-5 data-starting-style:opacity-0 data-ending-style:translate-x-3 data-ending-style:opacity-0"
             >
-              <SheetHeader className="mb-4 border-b border-white/14 pb-3 pr-0">
-                <div className="flex items-center justify-between gap-4">
-                  <SheetTitle className="site-mobile-menu-title text-left text-white">
-                    Menu
-                  </SheetTitle>
-                  <SheetClose
-                    render={
-                      <button
-                        type="button"
-                        aria-label="Close menu"
-                        className="inline-flex h-9 w-9 items-center justify-center text-white transition-opacity duration-150 hover:opacity-80 md:h-10 md:w-10"
-                      />
-                    }
-                  >
-                    <XIcon className="size-5 stroke-[2.2] text-white" />
-                  </SheetClose>
-                </div>
-              </SheetHeader>
-
-              <nav className="grid gap-5">
-                {homeFooterNavGroups.map((group) => (
-                  <div key={group.label} className="grid gap-1.5">
-                    <p className="site-mobile-menu-group-label">{group.label}</p>
-                    <div className="grid gap-0.5">
-                      {group.links.map((link) => (
-                        <Link
-                          key={link.href}
-                          href={link.href}
-                          onClick={() => setOpen(false)}
-                          className="site-mobile-menu-link border-b border-white/10 py-2.5 font-medium text-white/94 transition-colors duration-150 hover:text-white"
-                        >
-                          {link.label}
-                        </Link>
-                      ))}
-                    </div>
+              <div
+                className={`flex h-full flex-col transition-[opacity,transform] duration-[560ms] [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] will-change-transform ${
+                  open ? "translate-x-0 opacity-100" : "translate-x-4 opacity-0"
+                }`}
+              >
+                <SheetHeader className="mb-4 border-b border-white/14 pb-3 pr-0">
+                  <div className="flex items-center justify-between gap-4">
+                    <SheetTitle className="site-mobile-menu-title text-left text-white">
+                      Menu
+                    </SheetTitle>
+                    <SheetClose
+                      render={
+                        <button
+                          type="button"
+                          aria-label="Close menu"
+                          className="inline-flex h-9 w-9 items-center justify-center text-white transition-opacity duration-150 hover:opacity-80 md:h-10 md:w-10"
+                        />
+                      }
+                    >
+                      <XIcon className="size-5 stroke-[2.2] text-white" />
+                    </SheetClose>
                   </div>
-                ))}
-              </nav>
+                </SheetHeader>
+
+                <nav className="grid gap-5">
+                  {homeFooterNavGroups.map((group) => (
+                    <div key={group.label} className="grid gap-1.5">
+                      <p className="site-mobile-menu-group-label">{group.label}</p>
+                      <div className="grid gap-0.5">
+                        {group.links.map((link) => (
+                          <Link
+                            key={link.href}
+                            href={link.href}
+                            onClick={() => setOpen(false)}
+                            className="site-mobile-menu-link border-b border-white/10 py-2.5 font-medium text-white/94 transition-colors duration-150 hover:text-white"
+                          >
+                            {link.label}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </nav>
+              </div>
             </SheetContent>
           </Sheet>
         </div>

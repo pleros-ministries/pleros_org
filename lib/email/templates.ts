@@ -124,6 +124,11 @@ export type StaffInviteProps = {
   inviteUrl: string;
 };
 
+export type PasswordResetProps = {
+  name: string;
+  resetUrl: string;
+};
+
 export function staffAssignmentHtml({
   staffName,
   itemLabel,
@@ -178,6 +183,36 @@ export function staffInviteHtml({
 </html>`.trim();
 }
 
+export function passwordResetHtml({
+  name,
+  resetUrl,
+}: PasswordResetProps): string {
+  const safeName = escapeHtml(name);
+  const safeResetUrl = escapeHtml(resetUrl);
+  const isAdminReset = resetUrl.includes("/admin/reset-password");
+  const productLabel = isAdminReset ? "Pleros admin" : "Pleros Perfecting Course";
+  const accountLabel = isAdminReset ? "staff account" : "PPC account";
+
+  return `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8" /></head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #142033; max-width: 520px; margin: 0 auto; padding: 32px 16px;">
+  <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #58657a;">${productLabel}</p>
+  <h1 style="font-size: 20px; margin: 12px 0 0;">Reset your password</h1>
+  <p style="font-size: 14px; color: #58657a; line-height: 1.6;">
+    Hi ${safeName}, use the link below to choose a new password for your ${accountLabel}.
+  </p>
+  <a href="${safeResetUrl}" style="display: inline-block; margin-top: 16px; padding: 10px 20px; background: #011585; color: #fff; border-radius: 4px; font-size: 13px; font-weight: 600; text-decoration: none;">
+    Reset password
+  </a>
+  <p style="font-size: 11px; color: #9ca3af; margin-top: 24px;">
+    This link expires in 1 hour. If you did not request a password reset, you can ignore this email.
+  </p>
+</body>
+</html>`.trim();
+}
+
 export type WelcomePackAccessProps = {
   name: string;
   dashboardUrl: string;
@@ -214,7 +249,9 @@ export function welcomePackAccessHtml({
 
 
     <div style="background-color: #011585; padding: 40px 32px; text-align: center;">
-      <img src="https://pleros-org.vercel.app/brand/white-logotype.png" alt="Pleros" width="120" style="display: block; margin: 0 auto;" />
+      <p style="font-size: 28px; line-height: 1; color: #ffffff; font-weight: 700; letter-spacing: -0.04em; margin: 0;">
+        Pleros
+      </p>
     </div>
 
 
@@ -255,7 +292,9 @@ export function welcomePackExtrasUnlockedHtml({
 <body style="font-family: 'Suisse Int\\'l', Inter, ui-sans-serif, system-ui, sans-serif; background-color: #fdfdfc; margin: 0; padding: 40px 16px;">
   <div style="max-width: 520px; margin: 0 auto; background: #ffffff; border: 1px solid rgba(15, 23, 40, 0.08); border-radius: 20px; box-shadow: 0 10px 30px rgba(15, 23, 40, 0.08); overflow: hidden;">
     <div style="background-color: #011585; padding: 40px 32px; text-align: center;">
-      <img src="https://pleros-org.vercel.app/brand/white-logotype.png" alt="Pleros" width="120" style="display: block; margin: 0 auto;" />
+      <p style="font-size: 28px; line-height: 1; color: #ffffff; font-weight: 700; letter-spacing: -0.04em; margin: 0;">
+        Pleros
+      </p>
     </div>
 
     <div style="padding: 40px 32px;">

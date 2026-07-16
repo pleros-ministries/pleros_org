@@ -23,6 +23,7 @@ import {
   resetStudentProgress,
 } from "@/app/ppc/_actions/student-actions";
 import { overrideGraduation } from "@/app/ppc/_actions/graduation-actions";
+import { getAppRoleLabel } from "@/lib/app-role";
 
 type StudentDetailClientProps = {
   student: {
@@ -128,7 +129,7 @@ export function StudentDetailClient({
         <p className="text-sm font-medium text-zinc-900">{student.name}</p>
         <p className="text-xs text-zinc-500">{student.email}</p>
         <div className="mt-1 flex flex-wrap gap-2 text-[10px] text-zinc-400">
-          <span>Role: {student.role}</span>
+          <span>Role: {getAppRoleLabel(student.role)}</span>
           {student.location && <span>· {student.location}</span>}
           <span>· Joined {new Date(student.createdAt).toLocaleDateString()}</span>
         </div>

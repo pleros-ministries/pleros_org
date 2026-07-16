@@ -724,8 +724,8 @@
 
   .site-font-theme .site-footer-copy {
     font-family: var(--font-sans), "Be Vietnam Pro", sans-serif !important;
-    font-size: var(--text-body);
-    line-height: 1.4;
+    font-size: 0.75rem;
+    line-height: 1.35;
     letter-spacing: -0.02em;
     color: rgba(255, 255, 255, 0.88);
   }
@@ -1253,7 +1253,6 @@
     z-index: 40;
     background: #011585;
     border-bottom: 1px solid rgba(255, 255, 255, 0.16);
-    box-shadow: 0 8px 22px rgba(1, 21, 133, 0.34);
   }
 
   .pleros-footer {
@@ -1289,6 +1288,8 @@
 
   /* PPC platform font bridge — applies the public site's body typeface across /ppc and /admin */
   .ppc-theme {
+    --ppc-shell-accent: #1f4ed8;
+    --ppc-shell-accent-hover: #1d45be;
     --font-sans: var(--font-be-vietnam-pro), "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
     font-family: var(--font-sans);
 

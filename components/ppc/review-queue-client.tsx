@@ -4,7 +4,7 @@
 
 import Link from "next/link";
 import { useEffect, useState, useMemo, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, RotateCcw, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/ppc/status-badge";
@@ -20,6 +20,7 @@ import {
   getReviewQueueCounts,
   resolveNextSelectedSubmissionId,
 } from "@/lib/ppc-staff-workflows";
+import { ADMIN_QUERY_KEYS } from "@/lib/admin-query";
 
 type Submission = {
   id: number;
@@ -67,7 +68,7 @@ export function ReviewQueueClient({
   currentStaffRole,
   staffOptions,
 }: ReviewQueueClientProps) {
-  const router = useRouter();
+  const queryClient = useQueryClient();
   const [submissionRecords, setSubmissionRecords] = useState(submissions);
   const [activeTab, setActiveTab] = useState<TabKey>("all");
   const [assignmentScope, setAssignmentScope] = useState<AssignmentScope>("all");
@@ -161,7 +162,7 @@ export function ReviewQueueClient({
             : submission,
         ),
       );
-      router.refresh();
+      await queryClient.invalidateQueries({ queryKey: ADMIN_QUERY_KEYS.review });
     });
   };
 
@@ -184,7 +185,7 @@ export function ReviewQueueClient({
             : submission,
         ),
       );
-      router.refresh();
+      await queryClient.invalidateQueries({ queryKey: ADMIN_QUERY_KEYS.review });
     });
   };
 
@@ -201,7 +202,7 @@ export function ReviewQueueClient({
             : submission,
         ),
       );
-      router.refresh();
+      await queryClient.invalidateQueries({ queryKey: ADMIN_QUERY_KEYS.review });
     });
   };
 

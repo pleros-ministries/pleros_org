@@ -1,46 +1,66 @@
 import { eq } from "drizzle-orm";
+import { unstable_cache } from "next/cache";
 import { db } from "@/lib/db";
 import * as schema from "../schema";
 
-export async function getContentOverview() {
-  const levels = await db.query.levels.findMany({
-    orderBy: (l, { asc }) => [asc(l.sortOrder)],
+export const CONTENT_OVERVIEW_CACHE_TAG = "ppc-content-overview";
+
+async function queryContentOverview() {
+  const [levels, lessons, questions] = await Promise.all([
+    db.query.levels.findMany({
+      orderBy: (level, { asc }) => [asc(level.sortOrder)],
+    }),
+    db.query.lessons.findMany({
+      orderBy: (lesson, { asc }) => [asc(lesson.levelId), asc(lesson.lessonNumber)],
+    }),
+    db.query.quizQuestions.findMany({
+      orderBy: (question, { asc }) => [asc(question.lessonId), asc(question.sortOrder)],
+    }),
+  ]);
+
+  const lessonsByLevelId = new Map<number, typeof lessons>();
+  for (const lesson of lessons) {
+    const levelLessons = lessonsByLevelId.get(lesson.levelId) ?? [];
+    levelLessons.push(lesson);
+    lessonsByLevelId.set(lesson.levelId, levelLessons);
+  }
+
+  const questionsByLessonId = new Map<number, typeof questions>();
+  for (const question of questions) {
+    const lessonQuestions = questionsByLessonId.get(question.lessonId) ?? [];
+    lessonQuestions.push(question);
+    questionsByLessonId.set(question.lessonId, lessonQuestions);
+  }
+
+  return levels.map((level) => {
+    const levelLessons = lessonsByLevelId.get(level.id) ?? [];
+    const publishedCount = levelLessons.filter((lesson) => lesson.status === "published").length;
+    const draftCount = levelLessons.filter((lesson) => lesson.status === "draft").length;
+
+    return {
+      ...level,
+      lessons: levelLessons.map((lesson) => ({
+        ...lesson,
+        questions: questionsByLessonId.get(lesson.id) ?? [],
+      })),
+      publishedCount,
+      draftCount,
+      totalLessons: levelLessons.length,
+    };
   });
+}
 
-  const enriched = await Promise.all(
-    levels.map(async (level) => {
-      const lessons = await db.query.lessons.findMany({
-        where: (l, { eq: eq2 }) => eq2(l.levelId, level.id),
-        orderBy: (l, { asc }) => [asc(l.lessonNumber)],
-      });
+const getCachedContentOverview = unstable_cache(
+  queryContentOverview,
+  [CONTENT_OVERVIEW_CACHE_TAG],
+  {
+    tags: [CONTENT_OVERVIEW_CACHE_TAG],
+    revalidate: 60,
+  },
+);
 
-      const lessonsWithQuestions = await Promise.all(
-        lessons.map(async (lesson) => {
-          const questions = await db.query.quizQuestions.findMany({
-            where: (q, { eq: eq2 }) => eq2(q.lessonId, lesson.id),
-            orderBy: (q, { asc }) => [asc(q.sortOrder)],
-          });
-
-          return {
-            ...lesson,
-            questions,
-          };
-        }),
-      );
-      const publishedCount = lessons.filter((l) => l.status === "published").length;
-      const draftCount = lessons.filter((l) => l.status === "draft").length;
-
-      return {
-        ...level,
-        lessons: lessonsWithQuestions,
-        publishedCount,
-        draftCount,
-        totalLessons: lessons.length,
-      };
-    })
-  );
-
-  return enriched;
+export async function getContentOverview() {
+  return getCachedContentOverview();
 }
 
 export async function getLessonForEdit(lessonId: number) {

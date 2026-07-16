@@ -1,7 +1,10 @@
 import Link from "next/link";
 import Image from "next/image";
 
-import { welcomeDashboardSections } from "@/lib/welcome-dashboard-content";
+import {
+  welcomeDashboardSections,
+  type WelcomeDashboardSection,
+} from "@/lib/welcome-dashboard-content";
 import { cn } from "@/lib/utils";
 
 function getDashboardCardClasses(accent: "orange" | "blue") {
@@ -103,9 +106,13 @@ function DashboardCard({
 
 type WelcomeDashboardViewProps = {
   name?: string;
+  sections?: WelcomeDashboardSection[];
 };
 
-export function WelcomeDashboardView({ name }: WelcomeDashboardViewProps = {}) {
+export function WelcomeDashboardView({
+  name,
+  sections = welcomeDashboardSections,
+}: WelcomeDashboardViewProps = {}) {
   return (
     <section className="site-font-theme bg-[var(--color-surface)] pb-24">
       <header className="relative overflow-hidden bg-[var(--color-brand-blue)]">
@@ -123,7 +130,7 @@ export function WelcomeDashboardView({ name }: WelcomeDashboardViewProps = {}) {
 
       <div className="container-pleros grid max-w-[36rem] gap-10 pt-9 sm:pt-10">
         <div className="grid gap-10">
-          {welcomeDashboardSections.map((section) => (
+          {sections.map((section) => (
             <section key={section.id} className="grid gap-4">
               <div className="grid gap-2">
                 <h2 className="site-section-heading text-[1.1rem] text-[var(--color-brand-blue)] sm:text-[1.35rem]">
