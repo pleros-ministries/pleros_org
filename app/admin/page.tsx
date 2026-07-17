@@ -29,11 +29,9 @@ import {
 } from "@/lib/admin-dashboard";
 import { hasAdminAccess } from "@/lib/app-role";
 import {
-  Activity,
   ArrowRight,
   Clock3,
   FolderKanban,
-  Layers2,
   MessageCircle,
   Settings2,
   Users,
@@ -162,25 +160,21 @@ export default async function AdminEntryPage() {
           <StatCard
             label="Registrants"
             value={registrants.length}
-            icon={Activity}
             hint={`${stats.activeStudents} PPC accounts · ${welcomeOnlyCount} welcome only`}
           />
           <StatCard
             label="PPC avg. progress"
             value={`${stats.averageProgress}%`}
-            icon={Layers2}
             hint="Across cohort"
           />
           <StatCard
             label="Pending reviews"
             value={stats.pendingReviews}
-            icon={Clock3}
             hint={`${reviewOwnership.mine} yours · ${reviewOwnership.unassigned} unassigned`}
           />
           <StatCard
             label="Open Q&A"
             value={stats.openQa}
-            icon={MessageCircle}
             hint={`${qaOwnership.mine} yours · ${qaOwnership.unassigned} unassigned`}
           />
         </section>

@@ -50,6 +50,7 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - Admin routes with expensive read models should use a shared TanStack Query client under `/admin`, with role-checked server-action query functions and short stale windows so repeat sidebar visits render cached data immediately while refreshing in the background.
 - When an admin mutation changes query-backed data, invalidate its TanStack query key instead of relying on `router.refresh()`; retain the immediate local update and let the active query reconcile from the server.
 - Admin summary stat/card groups should render as 2-column grids on narrow viewports, then expand to their existing wider desktop layouts.
+- Keep admin dashboard metric cards text-only; reserve icons for actionable navigation and workflow items.
 - Admin/staff role values are internal identifiers; display them through role labels such as `Super Admin`, `Admin`, `Instructor`, and `Student`, never raw `super_admin`.
 - Full PPC account resets must clear auth identity/session tables plus app users and welcome leads: `user`, `session`, `account`, `verification`, `two_factor`, `users`, and `welcome_pack_leads`; verify row counts are zero.
 
