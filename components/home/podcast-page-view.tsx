@@ -1,3 +1,5 @@
+import { ChevronRight } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
@@ -12,11 +14,15 @@ import {
 import { fetchAnchorEpisodes } from "@/lib/anchor-rss";
 import { getLatestYoutubeEpisode } from "@/lib/homepage-feed";
 import {
+  podcastApplePodcastsUrl,
+  podcastAudiomackUrl,
   podcastFeaturedSection,
   podcastJourneySteps,
   podcastPageHero,
   podcastSeries,
+  podcastSpotifyShowUrl,
   podcastSubscribeCta,
+  podcastTelegramUrl,
   podcastWhyListenItems,
 } from "@/lib/podcast-page-content";
 import { groupPodcastSeriesEpisodes } from "@/lib/podcast-series-episodes";
@@ -64,6 +70,34 @@ export async function PodcastPageView() {
     rssEpisodes,
   );
 
+  const podcastPlatformIcons = [
+    {
+      label: "YouTube",
+      iconSrc: "/site/home/assets/social-media-icons/youtube-icon-white.svg",
+      href: podcastSubscribeCta.href,
+    },
+    {
+      label: "Telegram",
+      iconSrc: "/site/home/assets/social-media-icons/telegram-icon.svg",
+      href: podcastTelegramUrl,
+    },
+    {
+      label: "Spotify",
+      iconSrc: "/site/home/assets/social-media-icons/spotify-icon.svg",
+      href: podcastSpotifyShowUrl,
+    },
+    {
+      label: "Audiomack",
+      iconSrc: "/site/home/assets/social-media-icons/audiomack-icon.svg",
+      href: podcastAudiomackUrl,
+    },
+    {
+      label: "Apple",
+      iconSrc: "/site/home/assets/social-media-icons/apple-podcasts-icon.svg",
+      href: podcastApplePodcastsUrl,
+    },
+  ];
+
   return (
     <PublicSitePageShell>
       <HomepageNav />
@@ -88,66 +122,103 @@ export async function PodcastPageView() {
       </section>
 
       <section className="bg-white px-[1.25rem] pb-[4.75rem] pt-[2.5rem] md:px-8 md:pb-16 md:pt-10 xl:px-10">
-        <div className="mx-auto grid max-w-[58rem] gap-8">
-          <div className="grid gap-2">
-            <p className="site-hero-eyebrow">{podcastFeaturedSection.eyebrow}</p>
-            <h2 className="site-section-heading max-w-[25rem]">
-              {podcastFeaturedSection.title}
-            </h2>
-          </div>
+        <div className="grid gap-8">
+          <div className="mx-auto grid w-full max-w-[58rem] gap-8">
+            <div className="grid gap-2">
+              <p className="site-hero-eyebrow">{podcastFeaturedSection.eyebrow}</p>
+              <h2 className="site-section-heading max-w-[25rem]">
+                {podcastFeaturedSection.title}
+              </h2>
+            </div>
 
-          {episode ? null : (
-            <Card className="gap-5 rounded-[1.25rem] border-[rgba(6,16,86,0.12)] bg-[linear-gradient(180deg,#f4f9ff_0%,#dff3ff_100%)] p-6 shadow-[0_16px_38px_rgba(6,16,86,0.08)] md:p-7">
-              <CardHeader className="gap-2 px-0 py-0">
-                <Badge variant="outline" className="w-fit border-[rgba(6,16,86,0.12)]">
-                  Latest teaching
-                </Badge>
-                <CardTitle className="site-section-heading text-[1.9rem] md:text-[2.2rem]">
-                  {podcastFeaturedSection.fallbackTitle}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="gap-5 px-0 pb-0">
-                <div className="flex">
-                  <Button
-                    size="lg"
-                    render={
-                      <Link
-                        href={podcastSubscribeCta.href}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="site-button-text"
-                      />
-                    }
-                    className="min-h-[2.875rem] rounded-full px-6 text-[0.875rem] font-semibold"
-                  >
-                    {podcastFeaturedSection.fallbackCtaLabel}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          <PodcastVideoGallery featured={featuredVideo} />
-
-          <div className="flex justify-center md:justify-start">
-            <Button
-              size="lg"
-              render={
+            <div className="flex flex-wrap items-start gap-5 md:gap-6">
+              {podcastPlatformIcons.map(({ label, iconSrc, href }) => (
                 <Link
-                  href={podcastSubscribeCta.href}
+                  key={label}
+                  href={href}
                   target="_blank"
                   rel="noreferrer"
-                  className="site-button-text"
-                />
-              }
-              className="min-h-[2.875rem] rounded-full px-6 text-[0.875rem] font-semibold"
-            >
-              {podcastSubscribeCta.label}
-            </Button>
+                  className="flex flex-col items-center gap-1.5 text-center"
+                >
+                  <span className="flex size-11 items-center justify-center rounded-full bg-[var(--color-brand-blue)]">
+                    <Image
+                      src={iconSrc}
+                      alt=""
+                      width={20}
+                      height={20}
+                      className="size-5"
+                    />
+                  </span>
+                  <span className="font-[var(--font-be-vietnam-pro)] text-[0.8rem] font-medium text-[var(--color-text-strong)]">
+                    {label}
+                  </span>
+                </Link>
+              ))}
+
+              <Link
+                href={homePodcastUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-1 self-center font-[var(--font-be-vietnam-pro)] text-[0.875rem] font-semibold text-[var(--color-brand-blue)]"
+              >
+                and more
+                <ChevronRight className="size-4" />
+              </Link>
+            </div>
+
+            {episode ? null : (
+              <Card className="gap-5 rounded-[1.25rem] border-[rgba(6,16,86,0.12)] bg-[linear-gradient(180deg,#f4f9ff_0%,#dff3ff_100%)] p-6 shadow-[0_16px_38px_rgba(6,16,86,0.08)] md:p-7">
+                <CardHeader className="gap-2 px-0 py-0">
+                  <Badge variant="outline" className="w-fit border-[rgba(6,16,86,0.12)]">
+                    Latest teaching
+                  </Badge>
+                  <CardTitle className="site-section-heading text-[1.9rem] md:text-[2.2rem]">
+                    {podcastFeaturedSection.fallbackTitle}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="gap-5 px-0 pb-0">
+                  <div className="flex">
+                    <Button
+                      size="lg"
+                      render={
+                        <Link
+                          href={podcastSubscribeCta.href}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="site-button-text"
+                        />
+                      }
+                      className="min-h-[2.875rem] rounded-full px-6 text-[0.875rem] font-semibold"
+                    >
+                      {podcastFeaturedSection.fallbackCtaLabel}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            <PodcastVideoGallery featured={featuredVideo} />
+
+            <div className="flex justify-center md:justify-start">
+              <Button
+                size="lg"
+                render={
+                  <Link
+                    href={podcastSubscribeCta.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="site-button-text"
+                  />
+                }
+                className="min-h-[2.875rem] rounded-full px-6 text-[0.875rem] font-semibold"
+              >
+                {podcastSubscribeCta.label}
+              </Button>
+            </div>
           </div>
 
-          <div className="mx-auto grid max-w-[58rem] gap-6">
-            <div className="grid gap-2">
+          <div className="mx-auto grid w-full max-w-[58rem] gap-6">
+            <div className="grid gap-2 ">
               <p className="site-hero-eyebrow">All episodes</p>
               <h2 className="site-section-heading max-w-[28rem]">
                 Listen and download every episode
@@ -160,12 +231,13 @@ export async function PodcastPageView() {
             <PodcastRssList episodes={rssEpisodes} />
           </div>
 
-
-          <PodcastSeriesGallery
-            series={seriesWithEpisodes}
-            podLinkHref={homePodcastUrl}
-            youtubeChannelHref={homeYoutubeChannelUrl}
-          />
+          <div className="mx-auto grid w-full max-w-[58rem] gap-8">
+            <PodcastSeriesGallery
+              series={seriesWithEpisodes}
+              podLinkHref={homePodcastUrl}
+              youtubeChannelHref={homeYoutubeChannelUrl}
+            />
+          </div>
         </div>
       </section>
 

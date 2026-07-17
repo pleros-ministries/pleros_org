@@ -56,6 +56,21 @@ describe("podcast page", () => {
     expect(seriesGallerySource).toContain(">Series<");
     expect(seriesGallerySource).toContain("getDownloadHref");
     expect(seriesGallerySource).toContain("ep.link");
+    expect(viewSource).toContain("podcastPlatformIcons");
+    expect(viewSource).toContain("Telegram");
+    expect(viewSource).toContain("Audiomack");
+    expect(viewSource).toContain("and more");
+    expect(viewSource).toContain("podcastSpotifyShowUrl");
+    expect(viewSource).toContain("podcastTelegramUrl");
+    expect(viewSource).toContain("podcastApplePodcastsUrl");
+    expect(viewSource).toContain("podcastAudiomackUrl");
+    expect(viewSource).toContain(
+      "/site/home/assets/social-media-icons/spotify-icon.svg",
+    );
+    expect(contentSource).toContain("podcastSpotifyShowUrl");
+    expect(contentSource).toContain(
+      "https://podcasters.spotify.com/pod/show/pleros-media",
+    );
     expect(viewSource).toContain('id="journey"');
     expect(viewSource).toContain("Why this podcast helps");
     expect(viewSource).toContain("HomepageCommunitySection");

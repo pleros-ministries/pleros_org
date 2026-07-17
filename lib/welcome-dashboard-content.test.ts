@@ -21,8 +21,8 @@ describe("welcome dashboard content", () => {
     const training = welcomeDashboardSections.find((section) => section.id === "training");
     const commitment = welcomeDashboardSections.find((section) => section.id === "commitment");
 
-    expect(devotion?.cards[0]?.href).toBe("/dashboard/podcast");
-    expect(devotion?.cards[1]?.href).toBe("/dashboard/prayer-watch");
+    expect(devotion?.cards[0]?.href).toBe("/dashboard/prayer-watch");
+    expect(devotion?.cards[1]?.href).toBe("/dashboard/podcast");
     expect(training?.cards[0]?.href).toBe("/ppc");
     expect(training?.cards[1]?.href).toBe("/dashboard/school-of-purpose");
     expect(commitment?.cards.find((card) => card.id === "assignments")?.href).toBeUndefined();

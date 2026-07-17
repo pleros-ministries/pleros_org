@@ -46,10 +46,11 @@ describe("about page", () => {
       "utf8",
     );
 
-    expect(source).toContain("FollowSocialBlock");
+    expect(source).toContain("FollowSocialCard");
     expect(source).toContain("aboutPageMinisterFollow");
     expect(source).toContain("footerSocialLinks");
     expect(source).toContain("Follow our Senior Minister");
-    expect(source).toContain("Follow Pleros");
+    expect(source).toContain("Follow us on social media");
+    expect(source).toContain("/assets/home/pastor.jpg");
   });
 });

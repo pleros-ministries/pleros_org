@@ -28,6 +28,18 @@ export const podcastSubscribeCta = {
   href: podcastPlaylistUrl,
 } as const;
 
+export const podcastSpotifyShowUrl =
+  "https://podcasters.spotify.com/pod/show/pleros-media" as const;
+
+export const podcastTelegramUrl =
+  "https://t.me/theplerospodcast" as const;
+
+export const podcastApplePodcastsUrl =
+  "https://podcasts.apple.com/ng/podcast/id1870111674?ls=1" as const;
+
+export const podcastAudiomackUrl =
+  "https://audiomack.com/plerosmedia" as const;
+
 export const podcastSeries = [
   {
     id: "place-of-the-gospel",
