@@ -96,7 +96,7 @@ export const welcomeDashboardSections: WelcomeDashboardSection[] = [
     cards: [
       {
         id: "assignments",
-        title: "Assignments",
+        title: "Commitment Reports",
         description: "Your spiritual assignment dashboard. Coming soon.",
         accent: "orange",
         backgroundImageSrc: "/site/home/assets/dashboard-cards/7-assignment-bg-v2.webp",
