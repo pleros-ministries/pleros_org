@@ -233,6 +233,27 @@ describe("site home page", () => {
     expect(viewSource).toContain("<HomepagePrayerWatchSection />");
   });
 
+  test("embeds a recent Prayer Watch session with a click-to-play poster", () => {
+    const prayerWatchSectionSource = readFileSync(
+      join(process.cwd(), "components", "home", "homepage-prayer-watch-section.tsx"),
+      "utf8",
+    );
+
+    expect(prayerWatchSectionSource).toContain('"use client"');
+    expect(prayerWatchSectionSource).toContain("PRAYER_WATCH_EMBED_URL");
+    expect(prayerWatchSectionSource).toContain("<iframe");
+    expect(prayerWatchSectionSource).toContain("PRAYER_WATCH_THUMBNAIL_URL");
+
+    const prayerWatchLibSource = readFileSync(
+      join(process.cwd(), "lib", "prayer-watch.ts"),
+      "utf8",
+    );
+
+    expect(prayerWatchLibSource).toContain("PRAYER_WATCH_FEATURED_VIDEO_ID");
+    expect(prayerWatchLibSource).toContain("youtube.com/embed/");
+    expect(prayerWatchLibSource).toContain("i.ytimg.com/vi/");
+  });
+
   test("uses a full-width public page shell so desktop nav is not clipped", () => {
     const shellSource = readFileSync(
       join(process.cwd(), "components", "home", "public-site-page-shell.tsx"),

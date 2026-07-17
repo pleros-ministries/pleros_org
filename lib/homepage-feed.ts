@@ -307,10 +307,10 @@ export async function getLatestYoutubeVideos(limit = 5): Promise<YoutubeEpisode[
       if (seconds > 180) continue; // not a Short (Shorts are ≤ 3 minutes)
 
       const id = video.id;
-      const thumbnailUrl =
-        video.snippet.thumbnails.high?.url ??
-        video.snippet.thumbnails.default?.url ??
-        `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+      // hqdefault.jpg often returns a plain mid-video frame for Shorts,
+      // missing the title-card graphic. hq2.jpg matches what YouTube itself
+      // shows as the Short's cover (verified against the oEmbed thumbnail).
+      const thumbnailUrl = `https://i.ytimg.com/vi/${id}/hq2.jpg`;
 
       shorts.push({
         id,
@@ -352,9 +352,13 @@ async function getLatestYoutubeVideosFallback(limit: number): Promise<YoutubeEpi
       const id = extractXmlValue(block, /<yt:videoId>([^<]+)<\/yt:videoId>/);
       const title = extractXmlValue(block, /<title>([^<]+)<\/title>/);
       const publishedAt = extractXmlValue(block, /<published>([^<]+)<\/published>/);
-      const thumbnailUrl = extractXmlValue(block, /<media:thumbnail url="([^"]+)"/);
 
-      if (!id || !title || !publishedAt || !thumbnailUrl) continue;
+      if (!id || !title || !publishedAt) continue;
+
+      // hqdefault.jpg often returns a plain mid-video frame for Shorts,
+      // missing the title-card graphic. hq2.jpg matches what YouTube itself
+      // shows as the Short's cover (verified against the oEmbed thumbnail).
+      const thumbnailUrl = `https://i.ytimg.com/vi/${id}/hq2.jpg`;
 
       videos.push({
         id,

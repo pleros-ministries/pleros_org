@@ -239,7 +239,7 @@ describe("homepage feed", () => {
         id: "short-video",
         title: "A short teaching clip",
         href: "https://www.youtube.com/shorts/short-video",
-        thumbnailUrl: "https://example.com/short.jpg",
+        thumbnailUrl: "https://i.ytimg.com/vi/short-video/hq2.jpg",
         publishedAt: "2026-07-03T05:01:17+00:00",
       },
     ]);

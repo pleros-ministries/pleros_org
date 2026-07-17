@@ -1,5 +1,10 @@
 export const PRAYER_WATCH_YOUTUBE_URL = "https://youtube.com/@PlerosLive";
 
+// Pleros Prayer Watch — Evening Session, the channel's most recent stream
+export const PRAYER_WATCH_FEATURED_VIDEO_ID = "eX95LNHmyg0";
+export const PRAYER_WATCH_EMBED_URL = `https://www.youtube.com/embed/${PRAYER_WATCH_FEATURED_VIDEO_ID}?autoplay=1&rel=0&modestbranding=1&playsinline=1`;
+export const PRAYER_WATCH_THUMBNAIL_URL = `https://i.ytimg.com/vi/${PRAYER_WATCH_FEATURED_VIDEO_ID}/hqdefault.jpg`;
+
 export type PrayerWatchDayState = "future" | "attended" | "missed";
 
 export type PrayerWatchCalendarCell = {

@@ -40,11 +40,11 @@ function FollowSocialCard({
       <div className="grid gap-3 p-5 md:p-6">
         <div>
           {eyebrow ? (
-            <p className="font-[var(--font-be-vietnam-pro)] text-[0.95rem] leading-[1.3] text-[var(--color-text-strong)]">
+            <p className="font-(--font-sen) text-[0.95rem] leading-[1.3] text-[var(--color-text-strong)]">
               {eyebrow}
             </p>
           ) : null}
-          <p className="font-[var(--font-be-vietnam-pro)] text-[1.4rem] font-bold leading-[1.15] tracking-[-0.03em] text-[var(--color-brand-indigo)]">
+          <p className="font-(--font-sen)] text-[1.4rem] font-bold leading-[1.15] tracking-[-0.03em] text-[var(--color-brand-indigo)]">
             {title}
           </p>
           <p className="mt-1 text-[0.9375rem] text-[var(--color-text-muted)]">
