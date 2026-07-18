@@ -22,6 +22,10 @@ const previewDashboardSections = welcomeDashboardSections.map((section) => ({
       return { ...card, href: "/preview/dashboard/podcast" };
     }
 
+    if (card.href === "/dashboard/discipleship-journey") {
+      return { ...card, href: "/preview/dashboard/discipleship-journey" };
+    }
+
     return card;
   }),
 }));

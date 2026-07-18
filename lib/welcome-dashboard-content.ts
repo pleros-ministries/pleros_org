@@ -48,7 +48,7 @@ export const welcomeDashboardSections: WelcomeDashboardSection[] = [
 
       {
         id: "prayer-watch-devotion",
-        title: "Prayer & Bible reading",
+        title: "Prayer Watch & Bible Reading",
         description:
           "Maintain a daily life of devotion by joining our daily times of prayer.",
         href: "/dashboard/prayer-watch",

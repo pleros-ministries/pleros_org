@@ -1,8 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { XIcon } from "lucide-react";
-import { useMemo, useState } from "react";
+import Link from "next/link";
+import { ChevronLeftIcon, XIcon } from "lucide-react";
+import { useState } from "react";
 
 import {
   Dialog,
@@ -69,28 +70,34 @@ function DiscipleshipVideoCard({
 
 export function DiscipleshipJourneyGallery({
   sections,
+  backHref,
 }: {
   sections: DiscipleshipJourneySection[];
+  backHref?: string;
 }) {
   const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);
   const [isPlayerReady, setIsPlayerReady] = useState(false);
 
-  const allVideos = useMemo(
-    () => sections.flatMap((section) => section.videos),
-    [sections],
-  );
-
-  const selectedVideo = useMemo(
-    () => allVideos.find((video) => video.id === selectedVideoId) ?? null,
-    [selectedVideoId, allVideos],
-  );
+  const allVideos = sections.flatMap((section) => section.videos);
+  const selectedVideo =
+    allVideos.find((video) => video.id === selectedVideoId) ?? null;
   const selectedVideoUsesDirectPlayback = selectedVideo
     ? isDirectVideoHref(selectedVideo.href)
     : false;
 
   return (
     <>
-      <div className="grid gap-12 md:gap-14">
+      <div className="grid gap-8 md:gap-10">
+        {backHref ? (
+          <Link
+            href={backHref}
+            className="inline-flex w-fit items-center gap-1 font-[var(--font-be-vietnam-pro)] text-[0.8125rem] font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-brand-blue)]"
+          >
+            <ChevronLeftIcon className="size-4" />
+            Back to series
+          </Link>
+        ) : null}
+
         {sections.map((section) => (
           <div key={section.id} className="grid gap-6">
             <div className="grid gap-2">

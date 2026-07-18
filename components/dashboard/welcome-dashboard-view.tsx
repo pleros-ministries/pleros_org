@@ -75,7 +75,7 @@ function DashboardCard({
         }}
       />
       <div className="relative z-10 grid gap-1.5">
-        <h2 className="site-pathway-title max-w-[13ch] text-[1.05rem] text-white sm:text-[1.4rem]">
+        <h2 className="site-pathway-title max-w-[13ch] text-[1rem] text-white">
           {title}
         </h2>
         <p className="font-[var(--font-be-vietnam-pro)] max-w-[18ch] text-[0.6875rem] leading-[1.15] tracking-[-0.01em] text-white/92 sm:text-[0.8125rem]">

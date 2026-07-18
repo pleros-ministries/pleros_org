@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 
 import { DiscipleshipJourneyPage } from "@/components/dashboard/discipleship-journey-page";
 import { getAppSession } from "@/lib/app-session";
-import { discipleshipJourneySections } from "@/lib/discipleship-journey-content";
 import {
   readWelcomeAccessToken,
   WELCOME_ACCESS_COOKIE_NAME,
@@ -25,5 +24,5 @@ export default async function DashboardDiscipleshipJourneyPage() {
     redirect("/welcome");
   }
 
-  return <DiscipleshipJourneyPage sections={discipleshipJourneySections} />;
+  return <DiscipleshipJourneyPage />;
 }

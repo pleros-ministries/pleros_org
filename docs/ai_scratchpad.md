@@ -139,6 +139,8 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - `/dashboard` should require either a valid app session or welcome-access cookie and redirect unauthenticated visitors to `/welcome`.
 - Dashboard progress tracking should avoid duplicate per-item action buttons; checking an item should directly update the tracked state.
 - Dashboard bulk progress actions should be reversible when the whole group is already complete.
+- Dashboard media hubs should open with compact series/title-card grids, then route into vertical per-series video lists; use local thumbnail assets for hub cards when available.
+- Welcome dashboard card titles should stay at 16px, and dashboard media title cards should use tighter corners with taller proportions.
 - Welcome access cookies should last 100 days and refresh on dashboard visits when present.
 - Welcome-pack access email should send only when durable lead state says the lead is newly created; client in-flight guards are secondary.
 - While supplementary welcome packs are not ready, thank-you sharing must not promise unlocks; show the main download fallback and email download link instead.

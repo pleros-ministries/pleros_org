@@ -3,6 +3,11 @@ import { join } from "path";
 
 import { describe, expect, test } from "vitest";
 
+import {
+  getDiscipleshipJourneySection,
+  getDiscipleshipJourneySeriesCards,
+} from "./discipleship-journey-content";
+
 function source(...parts: string[]) {
   return readFileSync(join(process.cwd(), ...parts), "utf8");
 }
@@ -111,5 +116,82 @@ describe("dashboard devotion tracking", () => {
     expect(previewPodcast).toContain("previewPodcastEpisodes");
     expect(previewPodcast).toContain("previewMode");
     expect(dashboardView).toContain("sections = welcomeDashboardSections");
+  });
+
+  test("routes discipleship journey through series cards before the video list", () => {
+    const content = source("lib", "discipleship-journey-content.ts");
+    const dashboardPage = source(
+      "components",
+      "dashboard",
+      "discipleship-journey-page.tsx",
+    );
+    const gallery = source(
+      "components",
+      "dashboard",
+      "discipleship-journey-gallery.tsx",
+    );
+    const seriesPage = source(
+      "components",
+      "dashboard",
+      "discipleship-journey-series-page.tsx",
+    );
+    const seriesRoute = source(
+      "app",
+      "(site)",
+      "dashboard",
+      "discipleship-journey",
+      "[seriesId]",
+      "page.tsx",
+    );
+    const previewDashboard = source("app", "preview", "dashboard", "page.tsx");
+    const previewJourney = source(
+      "app",
+      "preview",
+      "dashboard",
+      "discipleship-journey",
+      "page.tsx",
+    );
+    const previewSeries = source(
+      "app",
+      "preview",
+      "dashboard",
+      "discipleship-journey",
+      "[seriesId]",
+      "page.tsx",
+    );
+
+    expect(content).toContain("getDiscipleshipJourneySection");
+    expect(content).toContain("href: `/dashboard/discipleship-journey/${section.id}`");
+    expect(dashboardPage).toContain("DiscipleshipJourneySeriesGrid");
+    expect(dashboardPage).toContain("rounded-[var(--radius-md)]");
+    expect(dashboardPage).toContain("aspect-[0.78]");
+    expect(dashboardPage).toContain("priority");
+    expect(dashboardPage).not.toContain("<DiscipleshipJourneyGallery sections={sections}");
+    expect(gallery).toContain("backHref");
+    expect(gallery).toContain("Back to series");
+    expect(seriesRoute).toContain("getDiscipleshipJourneySection");
+    expect(seriesRoute).toContain("notFound()");
+    expect(seriesPage).toContain("DiscipleshipJourneyGallery");
+    expect(seriesPage).toContain("Watch the teachings in this series from top to bottom.");
+    expect(seriesPage).not.toContain("Your Discipleship Journey");
+    expect(previewDashboard).toContain("/preview/dashboard/discipleship-journey");
+    expect(previewJourney).toContain("DiscipleshipJourneyPage");
+    expect(previewJourney).toContain("previewHrefPrefix");
+    expect(previewSeries).toContain("DiscipleshipJourneySeriesPage");
+    expect(previewSeries).toContain("previewHrefPrefix");
+  });
+
+  test("uses representative thumbnails for discipleship journey series cards", () => {
+    const cards = getDiscipleshipJourneySeriesCards();
+    const gospelSection = getDiscipleshipJourneySection("gospel-answers-simple");
+    const gospelCard = cards.find((card) => card.id === "gospel-answers-simple");
+    const purposeCard = cards.find((card) => card.id === "discover-purpose");
+
+    expect(cards).toHaveLength(3);
+    expect(gospelCard?.thumbnailSrc).toBe(gospelSection?.videos[0]?.thumbnailSrc);
+    expect(purposeCard?.thumbnailSrc.startsWith("/site/home/assets/")).toBe(true);
+    expect(cards.some((card) => card.thumbnailSrc.includes("gospel-answers-simple-series"))).toBe(
+      false,
+    );
   });
 });

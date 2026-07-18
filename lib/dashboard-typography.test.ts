@@ -33,4 +33,14 @@ describe("dashboard typography", () => {
 
     expect(dashboardSource).toContain("font-[var(--font-be-vietnam-pro)]");
   });
+
+  test("keeps dashboard card titles at sixteen pixels", () => {
+    const dashboardSource = readFileSync(
+      join(process.cwd(), "components", "dashboard", "welcome-dashboard-view.tsx"),
+      "utf8",
+    );
+
+    expect(dashboardSource).toContain("site-pathway-title max-w-[13ch] text-[1rem]");
+    expect(dashboardSource).not.toContain("text-[1.05rem] text-white sm:text-[1.4rem]");
+  });
 });
