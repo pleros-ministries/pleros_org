@@ -32,8 +32,7 @@ export const welcomeDashboardSections: WelcomeDashboardSection[] = [
       {
         id: "prayer-watch-start",
         title: "Your Discipleship Journey",
-        description:
-          "A Word and prayer community to help you walk in God's purpose daily.",
+        description: "Start here to begin your journey of growth",
         href: "/dashboard/discipleship-journey",
         accent: "blue",
         backgroundImageSrc: "/site/home/assets/pleros-community-background.webp",

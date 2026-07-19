@@ -69,10 +69,10 @@ const dmSans = DM_Sans({
 
 export const metadata: Metadata = {
   title: {
-    default: "Pleros Ministries and Mission – Helping you fulfill God's purpose",
+    default: "Pleros Ministries and Missions – Helping you fulfill God's purpose",
     template: "%s :: Pleros Ministries and Missions",
   },
-  description: "Pleros Ministries and Mission — helping you fulfill God's purpose.",
+  description: "Pleros Ministries and Missions — helping you fulfill God's purpose.",
 };
 
 export default function RootLayout({

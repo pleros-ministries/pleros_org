@@ -7,6 +7,8 @@ import {
   readWelcomeAccessToken,
   WELCOME_ACCESS_COOKIE_NAME,
 } from "@/lib/welcome-access";
+import { getWelcomePackLeadByEmail } from "@/lib/db/queries/welcome-pack-leads";
+import { resolveWelcomeDisplayName } from "@/lib/welcome-display-name";
 
 export default async function WelcomeDashboardPage() {
   const appSession = await getAppSession();
@@ -24,5 +26,14 @@ export default async function WelcomeDashboardPage() {
     redirect("/welcome");
   }
 
-  return <WelcomeDashboardView name={appSession.user.name} />;
+  const welcomeEmail = welcomeSession?.email ?? appSession.user.email;
+  const lead = await getWelcomePackLeadByEmail(welcomeEmail);
+  const displayName = resolveWelcomeDisplayName({
+    email: welcomeEmail,
+    leadName: lead?.name,
+    welcomeName: welcomeSession?.name,
+    sessionName: appSession.user.name,
+  });
+
+  return <WelcomeDashboardView name={displayName ?? undefined} />;
 }

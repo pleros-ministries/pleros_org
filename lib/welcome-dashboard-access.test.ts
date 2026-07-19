@@ -16,12 +16,18 @@ describe("welcome dashboard access", () => {
     expect(layoutSource).not.toContain('redirect("/")');
   });
 
-  test("dashboard page uses welcome cookie only as a session bootstrap fallback", () => {
+  test("dashboard page uses welcome cookie as a session bootstrap and display-name source", () => {
     const dashboardSource = source("app", "(site)", "dashboard", "page.tsx");
 
     expect(dashboardSource).toContain("if (!appSession && welcomeSession)");
     expect(dashboardSource).toContain(
-      "return <WelcomeDashboardView name={appSession.user.name} />",
+      "getWelcomePackLeadByEmail(welcomeEmail)",
+    );
+    expect(dashboardSource).toContain(
+      "resolveWelcomeDisplayName",
+    );
+    expect(dashboardSource).toContain(
+      "return <WelcomeDashboardView name={displayName ?? undefined} />",
     );
     expect(dashboardSource).toContain('redirect("/welcome")');
   });
@@ -49,8 +55,9 @@ describe("welcome dashboard access", () => {
 
     expect(thankYouRouteSource).toContain("getAppSession");
     expect(thankYouRouteSource).toContain("readWelcomeAccessToken");
+    expect(thankYouRouteSource).toContain("getWelcomePackLeadByEmail(email)");
     expect(thankYouRouteSource).toContain(
-      "appSession?.user.name ?? welcomeSession?.name",
+      "resolveWelcomeDisplayName",
     );
   });
 

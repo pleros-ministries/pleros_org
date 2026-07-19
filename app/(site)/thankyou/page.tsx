@@ -6,6 +6,8 @@ import {
   readWelcomeAccessToken,
   WELCOME_ACCESS_COOKIE_NAME,
 } from "@/lib/welcome-access";
+import { getWelcomePackLeadByEmail } from "@/lib/db/queries/welcome-pack-leads";
+import { resolveWelcomeDisplayName } from "@/lib/welcome-display-name";
 
 export default async function ThankYouRoute() {
   const appSession = await getAppSession();
@@ -15,7 +17,14 @@ export default async function ThankYouRoute() {
     process.env,
   );
 
-  const name = appSession?.user.name ?? welcomeSession?.name;
+  const email = welcomeSession?.email ?? appSession?.user.email;
+  const lead = email ? await getWelcomePackLeadByEmail(email) : null;
+  const name = resolveWelcomeDisplayName({
+    email,
+    leadName: lead?.name,
+    welcomeName: welcomeSession?.name,
+    sessionName: appSession?.user.name,
+  });
 
-  return <ThankYouPage name={name} />;
+  return <ThankYouPage name={name ?? undefined} />;
 }

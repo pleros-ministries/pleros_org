@@ -81,6 +81,8 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 
 - Public-facing additions should reuse `HomepageNav`, `HomepageFooter`, `.site-font-theme`, brand-blue CTAs, and existing public tokens before adding new patterns.
 - Public pages should feel like the Pleros public site, not the PPC/admin dashboard.
+- The organization name is `Pleros Ministries and Missions`; do not use singular `Mission` for the site title or metadata.
+- Public page-view roots must include `.site-font-theme`; otherwise scoped heading/body rules fall back to the global Suisse font even when Next font files are loaded.
 - Use `.site-shell-bar-inner` for full-bleed nav/footer and `.site-shell-page` for page content columns.
 - Desktop public padding should flow through shell vars: `--site-shell-padding-x`, `--site-shell-padding-x-lg`, and `--site-shell-padding-x-xl`.
 - Use `PublicSitePageShell` (`max-w-none`) for nav/footer; do not nest `HomepageNav` inside narrow columns that clip desktop dropdowns.
@@ -134,6 +136,8 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - Public form input is untrusted. Escape user-provided values before rendering HTML email and add regression tests for injected markup.
 - For persistence-backed form features, verify the target DB has the new table/indexes or run the documented schema push before end-to-end submit tests.
 - `/welcome`, `/thankyou`, and `/dashboard/welcomepack` are one stateful public funnel: main access is immediate, extra gifts are trust-unlocked, and email failures must not block access.
+- `/welcome` should be a real responsive public page: preserve the mobile stacked flow, but use tablet/desktop section grids and shared public shell widths instead of a cropped mobile column.
+- Welcome funnel greetings must prefer explicit submitted names from lead/cookie data and suppress names derived from email identifiers; stale Better Auth session names may predate the first-name modal.
 - Public welcome/contact/share links should use the canonical public site URL (`https://pleros.org`) or a dedicated public-site env var, not `NEXT_PUBLIC_APP_URL`, because that value may point to Vercel, PPC, or auth infrastructure.
 - Gift content can stay in typed code config for now and should use public-site Sen/Be Vietnam Pro styling, not PPC dashboard styling.
 - `/dashboard` should require either a valid app session or welcome-access cookie and redirect unauthenticated visitors to `/welcome`.
