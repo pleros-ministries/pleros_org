@@ -121,7 +121,7 @@ export function FcchurchPageView() {
                   rel="noopener noreferrer"
                 />
               }
-              className="min-w-[12.875rem] bg-[var(--color-brand-lime)] site-button-text rounded-full px-7 text-[0.875rem] font-semibold uppercase tracking-[0.02em]"
+              className="site-button-text inline-flex min-h-[2.875rem] items-center justify-center rounded-full bg-[var(--color-brand-lime)] px-6 py-2.5 text-[0.875rem] leading-none font-semibold text-[var(--color-brand-blue)]"
             >
               {fcchurchOnlineSection.streamLabel}
             </Button>
