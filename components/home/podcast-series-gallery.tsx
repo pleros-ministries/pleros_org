@@ -91,7 +91,7 @@ export function PodcastSeriesGallery({
               setPlayingGuid(null);
               setSelectedId(item.id);
             }}
-            className="grid gap-3 rounded-[1.25rem] border border-[rgba(6,16,86,0.12)] bg-white p-5 text-left shadow-[0_12px_30px_rgba(6,16,86,0.06)] transition-transform duration-150 hover:-translate-y-px md:p-6"
+            className="grid cursor-pointer gap-3 rounded-[1.25rem] border border-[rgba(6,16,86,0.12)] bg-white p-5 text-left shadow-[0_12px_30px_rgba(6,16,86,0.06)] transition-transform duration-150 hover:-translate-y-px md:p-6"
           >
             <div className="grid gap-2">
               <h3 className="font-[var(--font-sen)] text-[1.2rem] font-semibold leading-[1.04] tracking-[-0.035em] text-[var(--color-brand-indigo)] md:text-[1.35rem]">
