@@ -114,16 +114,25 @@ function DashboardChurchMinistryStrip() {
         aria-hidden="true"
         className="absolute inset-0 bg-[linear-gradient(90deg,rgba(244,252,255,0.98)_0%,rgba(244,252,255,0.92)_56%,rgba(223,245,255,0.78)_100%)]"
       />
-      <Image
-        src="/site/home/assets/pathway-card-headers/church-card-header.svg"
-        alt=""
-        width={486}
-        height={246}
-        className="pointer-events-none absolute right-[-5rem] bottom-[-3.5rem] h-auto w-[18rem] max-w-none opacity-[0.18] sm:right-[-2rem] sm:bottom-[-4rem] sm:w-[24rem]"
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute right-[-5rem] bottom-[-3.5rem] h-[9rem] w-[18rem] bg-[linear-gradient(135deg,rgba(5,20,128,0.2)_0%,rgba(5,20,128,0.12)_58%,rgba(5,20,128,0.06)_100%)] sm:right-[-2rem] sm:bottom-[-4rem] sm:h-[12.125rem] sm:w-[24rem]"
+        style={{
+          WebkitMaskImage:
+            "url('/site/home/assets/pathway-card-headers/church-card-header.svg')",
+          WebkitMaskPosition: "center",
+          WebkitMaskRepeat: "no-repeat",
+          WebkitMaskSize: "contain",
+          maskImage:
+            "url('/site/home/assets/pathway-card-headers/church-card-header.svg')",
+          maskPosition: "center",
+          maskRepeat: "no-repeat",
+          maskSize: "contain",
+        }}
       />
 
       <div className="relative mx-auto grid max-w-[36rem] justify-items-start gap-6 sm:gap-7">
-        <div className="grid max-w-[28rem] gap-5">
+        <div className="grid max-w-[28rem] gap-3">
           <p className="font-[var(--font-be-vietnam-pro)] text-[0.6875rem] font-semibold tracking-[0.22em] text-[var(--color-brand-blue)] uppercase">
             Our church ministry
           </p>
