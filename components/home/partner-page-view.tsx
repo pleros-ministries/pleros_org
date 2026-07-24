@@ -35,7 +35,7 @@ function PartnerReasonCard({
     <Card className="gap-0 rounded-[1.25rem] border-[rgba(6,16,86,0.14)] bg-white p-0 shadow-[0_16px_40px_rgba(6,16,86,0.08)]">
       <CardHeader className="gap-4 px-5 pb-3 pt-5 md:px-6 md:pt-6">
         <div className="flex items-center gap-3">
-          <div className="flex size-[3.25rem] shrink-0 items-center justify-center rounded-full bg-[var(--color-brand-blue)] text-[1.375rem] font-semibold leading-none text-white">
+          <div className="flex size-[2.625rem] shrink-0 items-center justify-center rounded-full bg-[var(--color-brand-blue)] text-[1.125rem] font-semibold leading-none text-white md:size-[3.25rem] md:text-[1.375rem]">
             {step}
           </div>
           <CardTitle className="font-[var(--font-sen)] text-[1.6rem] leading-[0.95] tracking-[-0.05em] text-[var(--color-brand-indigo)]">
@@ -94,7 +94,7 @@ export function PartnerPageView() {
       <section className="bg-[var(--color-surface-muted)] px-[1.25rem] py-[4.25rem] md:px-8 md:py-16 xl:px-10">
         <div className="mx-auto grid max-w-[58rem] gap-8 md:gap-10">
           <div className="grid gap-2 text-center">
-            <p className="font-[var(--font-be-vietnam-pro)] text-[0.8125rem] font-semibold uppercase tracking-[0.24em] text-[var(--color-brand-blue)]">
+            <p className="font-[var(--font-be-vietnam-pro)] text-[0.6875rem] font-semibold uppercase tracking-[0.24em] text-[var(--color-brand-blue)] md:text-[0.8125rem]">
               Partnership
             </p>
             <h2 className="site-section-heading">Why partner with Pleros</h2>
@@ -132,7 +132,7 @@ export function PartnerPageView() {
             {partnerImpactItems.map((item) => (
               <div
                 key={item}
-                className="rounded-[1.125rem] border border-white/12 bg-white/8 px-4 py-5 backdrop-blur-[2px]"
+                className="rounded-[1.125rem] border border-[#3955ff]/65 bg-[#10229f] px-4 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]"
               >
                 <p className="font-[var(--font-sen)] text-[1.00rem] leading-[1.02] tracking-[-0.04em] text-white">
                   {item}
@@ -166,7 +166,7 @@ export function PartnerPageView() {
               </CardHeader>
               <CardContent className="grid gap-3 px-0 pb-0">
                 <div>
-                  <p className="text-[0.75rem] font-semibold uppercase tracking-[0.12em] text-[var(--color-text-muted)]">
+                  <p className="text-[0.625rem] font-semibold uppercase tracking-[0.12em] text-[var(--color-text-muted)]">
                     Account Name
                   </p>
                   <p className="text-[1rem] font-medium text-[var(--color-text-strong)]">
@@ -174,7 +174,7 @@ export function PartnerPageView() {
                   </p>
                 </div>
                 <div>
-                  <p className="text-[0.75rem] font-semibold uppercase tracking-[0.12em] text-[var(--color-text-muted)]">
+                  <p className="text-[0.625rem] font-semibold uppercase tracking-[0.12em] text-[var(--color-text-muted)]">
                     Bank
                   </p>
                   <p className="text-[1rem] font-medium text-[var(--color-text-strong)]">
@@ -182,7 +182,7 @@ export function PartnerPageView() {
                   </p>
                 </div>
                 <div>
-                  <p className="text-[0.75rem] font-semibold uppercase tracking-[0.12em] text-[var(--color-text-muted)]">
+                  <p className="text-[0.625rem] font-semibold uppercase tracking-[0.12em] text-[var(--color-text-muted)]">
                     Account Number
                   </p>
                   <div className="flex items-center gap-2">

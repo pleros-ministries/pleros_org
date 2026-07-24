@@ -150,6 +150,8 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - Separate SVG foreground color from card header surface color; brand-colored logo artwork may still sit on a white card header.
 - Partner/support copy should use the Vision and Mission page as source of truth: reaching people with the word of truth of the Gospel, online and offline, for salvation, establishment, and fulfillment of God's purpose.
 - Partner CTAs should be WhatsApp-first with a prefilled message when requested.
+- Partner impact items on blue sections should use solid blue surfaces, not low-opacity translucent blue/white overlays that read faded.
+- Partner page mobile details should stay compact: smaller section eyebrows, reason step badges, and bank-field eyebrow labels.
 
 ## Welcome, contact, and dashboard funnels
 

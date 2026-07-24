@@ -31,6 +31,8 @@ describe("partner page", () => {
     expect(contentSource).toContain("Extend the Influence of Truth");
     expect(contentSource).not.toContain("Transform Communities");
     expect(contentSource).not.toContain("Leadership Training");
+    expect(viewSource).toContain("bg-[#10229f]");
+    expect(viewSource).not.toContain("bg-white/8");
     expect(contentSource).toContain("partnerWhatsappHref");
     expect(contentSource).toContain("Become a partner today");
     expect(contentSource).toContain("partnerBankAccount");
