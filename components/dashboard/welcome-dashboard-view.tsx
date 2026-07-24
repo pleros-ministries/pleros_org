@@ -116,7 +116,7 @@ function DashboardChurchMinistryStrip() {
       />
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute right-[-5rem] bottom-[-3.5rem] h-[9rem] w-[18rem] bg-[linear-gradient(135deg,rgba(5,20,128,0.2)_0%,rgba(5,20,128,0.12)_58%,rgba(5,20,128,0.06)_100%)] sm:right-[-2rem] sm:bottom-[-4rem] sm:h-[12.125rem] sm:w-[24rem]"
+        className="pointer-events-none absolute right-[-5rem] bottom-[-3.5rem] h-[9rem] w-[18rem] bg-[linear-gradient(135deg,rgba(5,20,128,0.2)_0%,rgba(5,20,128,0.12)_58%,rgba(5,20,128,0.06)_100%)] sm:right-[-2rem] sm:bottom-[-4rem] sm:h-[12.125rem] sm:w-[24rem] md:right-[-3rem] md:bottom-[-7.5rem] md:h-[13.125rem] md:w-[26rem]"
         style={{
           WebkitMaskImage:
             "url('/site/home/assets/pathway-card-headers/church-card-header.svg')",

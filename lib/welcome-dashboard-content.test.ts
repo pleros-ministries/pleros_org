@@ -73,6 +73,7 @@ describe("welcome dashboard content", () => {
     expect(source).toContain("gap-6 sm:gap-7");
     expect(source).toContain("/site/home/assets/pathway-card-headers/church-card-header.svg");
     expect(source).toContain("right-[-5rem] bottom-[-3.5rem]");
+    expect(source).toContain("md:right-[-3rem] md:bottom-[-7.5rem]");
     expect(source).toContain("bg-[linear-gradient(135deg,rgba(5,20,128,0.2)_0%,rgba(5,20,128,0.12)_58%,rgba(5,20,128,0.06)_100%)]");
     expect(source).toContain("WebkitMaskImage");
     expect(source).toContain("Our church ministry");
