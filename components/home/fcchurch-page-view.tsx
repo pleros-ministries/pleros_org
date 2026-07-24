@@ -1,5 +1,6 @@
-import { BookOpenIcon, MapPinIcon, PhoneIcon, SunIcon, Users2Icon } from "lucide-react";
+import { BookOpenIcon, FlameKindlingIcon, MapPinIcon, PhoneIcon, SunIcon } from "lucide-react";
 import Link from "next/link";
+import type { ComponentType } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -19,11 +20,11 @@ import { PublicSitePageShell } from "./public-site-page-shell";
 
 const scheduleConfig: Record<
   ScheduleEntry["type"],
-  { label: string; icon: React.ComponentType<{ className?: string }>; pill: string }
+  { label: string; icon: ComponentType<{ className?: string }>; pill: string }
 > = {
   prayer: {
     label: "Prayer Meeting",
-    icon: Users2Icon,
+    icon: FlameKindlingIcon,
     pill: "bg-[var(--color-brand-sky)] text-[var(--color-brand-blue)]",
   },
   "bible-study": {
@@ -52,7 +53,7 @@ function FcchurchLocationCard({
     <article className="flex flex-col overflow-hidden rounded-[1.25rem] bg-white shadow-[0_16px_44px_rgba(6,16,86,0.10)] ring-1 ring-[rgba(6,16,86,0.08)]">
       {/* Card header */}
       <div className="bg-[var(--color-brand-blue)] px-5 py-4 md:px-6">
-        <span className="mb-2.5 inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 font-[var(--font-be-vietnam-pro)] text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-white/80">
+        <span className="mb-2.5 inline-flex items-center gap-1 rounded-full bg-[var(--color-brand-lime)] px-2 py-0.5 font-[var(--font-be-vietnam-pro)] text-[0.58rem] font-semibold uppercase tracking-[0.1em] text-[var(--color-brand-blue)]">
           {state} State
         </span>
         <h3 className="font-[var(--font-sen)] text-[1.35rem] font-semibold leading-[1.05] tracking-[-0.04em] text-white">
@@ -176,7 +177,7 @@ export function FcchurchPageView() {
       <section className="bg-[var(--color-brand-blue)] px-[1.25rem] py-[4.25rem] text-white md:px-8 md:py-16 xl:px-10">
         <div className="mx-auto grid max-w-[58rem] gap-6 text-center">
           <div className="grid gap-2.5">
-            <p className="font-[var(--font-be-vietnam-pro)] text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-[var(--color-brand-lime)]">
+            <p className="font-[var(--font-be-vietnam-pro)] text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-[var(--color-brand-lime)]">
               {fcchurchOnlineSection.eyebrow}
             </p>
             <h2 className="site-section-heading text-white">

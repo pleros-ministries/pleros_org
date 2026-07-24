@@ -123,6 +123,7 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 
 - Desktop public nav dropdowns should be real menu panels with vertically stacked full-width links, left-aligned text, and enough width/padding to scan quickly.
 - Public mobile menu open/close motion should stay soft and eased rather than snappy.
+- On public blue section/card headers, compact brand-lime pills with primary-blue text read better than translucent white pills.
 - When public motion feedback says "not feeling it," adjust the concrete homepage component motion as well as shared primitive timing; primitive-only easing changes can be too subtle.
 - For homepage/card asset swaps, import explicit source assets into `public/site/home/assets/*`, update the specific card data, and verify mobile rendering.
 - For welcome dashboard card backgrounds, copy the named source image into `public/site/home/assets/dashboard-cards/`, wire it through card data, and verify the rendered preview card image.

@@ -30,8 +30,8 @@ describe("fcchurch page", () => {
     expect(viewSource).toContain("HomepageFooter");
 
     expect(contentSource).toContain("Fullness of Christ Church");
-    expect(contentSource).toContain("[Venue name]");
-    expect(contentSource).toContain("[Service day & time]");
+    expect(contentSource).toContain("ROFEL Hotel");
+    expect(contentSource).toContain("Sunday · 8 am");
     expect(contentSource).toContain("Join us online");
     expect(contentSource).toContain("https://www.youtube.com/@PlerosLive");
   });

@@ -139,8 +139,8 @@ export const fcchurchLocations: FcchurchLocation[] = [
     id: "ife",
     city: "Ile-Ife",
     state: "Osun",
-    venueName: "Former Indigo, Ododuwa Estate",
-    address: "Ododuwa Estate, Ibadan Road, Ile-Ife",
+    venueName: "Former Indigo, Oduduwa Estate",
+    address: "Oduduwa Estate, Ibadan Road, Ile-Ife",
     schedule: [
       {
         type: "prayer",
@@ -208,7 +208,7 @@ export const fcchurchOnlineSection = {
   eyebrow: "Can't join in person?",
   title: "Join us online",
   description:
-    "Watch our services live and stay connected with FCC wherever you are.",
+    "We encourage you to fellowship with a local church in person. But if you can't, you're welcome to join our live services wherever you are.",
   streamLabel: "Watch on YouTube",
   streamHref: "https://www.youtube.com/@PlerosLive",
 } as const;
