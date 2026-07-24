@@ -209,6 +209,68 @@ export const fcchurchLocations: FcchurchLocation[] = [
       },
     ],
   },
+  {
+    id: "Osogbo",
+    city: "Osogbo",
+    state: "Osun",
+    venueName: "Opposite Fountain University, Beside Omoluabi Plaza, Oke-Fia",
+    address: "Opposite Fountain University, Beside Omoluabi Plaza, Oke-Fia, Osogbo, Osun State",
+    schedule: [
+      {
+        type: "prayer",
+        label: "Prayer Meeting",
+        time: "Monday · 5:30–7:30 pm",
+      },
+      {
+        type: "bible-study",
+        label: "Bible Study",
+        time: "Friday · 5:30–7:30 pm",
+      },
+      {
+        type: "sunday",
+        label: "Sunday Service",
+        time: "Sunday · 8:00–11 am",
+      },
+    ],
+    contacts: [
+      {
+        name: "Bro Victor Ayodele/ Sis Mercy Abidoye ",
+        phone: "07064852246",
+        href: "tel:+2347064852246",
+      },
+    ],
+  },
+  {
+    id: "Abuja",
+    city: "Abuja",
+    state: "FCT",
+    venueName: "64, Church gate avenue",
+    address: "64, Church gate avenue, Kurudu Nyaya, Abuja",
+    schedule: [
+      {
+        type: "prayer",
+        label: "Prayer Meeting",
+        time: "Monday · 5:30–7:30 pm",
+      },
+      {
+        type: "bible-study",
+        label: "Bible Study",
+        time: "Friday · 5:30–7:30 pm",
+      },
+      {
+        type: "sunday",
+        label: "Sunday Service",
+        time: "Sunday · 9:00–11 am",
+      },
+    ],
+    contacts: [
+      {
+        name: "Pastor Emmanuel",
+        phone: "09167627526",
+        href: "tel:+2349167627526",
+      },
+    ],
+  },
 ];
 
 export const fcchurchOnlineSection = {
