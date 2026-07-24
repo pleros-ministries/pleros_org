@@ -40,7 +40,7 @@ export function HomepageGiftDrawer({
   redirectTo = "/thankyou",
   triggerLabel,
   submitLabel = "access welcome pack",
-  pendingLabel = "Preparing your download",
+  pendingLabel = "Opening your welcome pack",
   source = "welcome",
 }: HomepageGiftDrawerProps) {
   const [open, setOpen] = useState(false);

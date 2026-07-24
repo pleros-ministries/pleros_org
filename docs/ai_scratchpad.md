@@ -179,6 +179,7 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - Dashboard church ministry invitations should sit as a full-width strip above the footer, use a non-footer light background with the church logo as a visible bottom-corner masked/gradient watermark rather than a faded opacity image, clip the logo wordmark fully out of view on desktop, use `color-text-strong` for heading and body copy on the tinted blue surface, keep the eyebrow close to the title while preserving body/CTA breathing room, and include a `Learn more` CTA to `/fcc` rather than crowding the Start Here card grid.
 - Welcome access cookies should last 100 days and refresh on dashboard visits when present.
 - Welcome-pack access email should send only when durable lead state says the lead is newly created; client in-flight guards are secondary.
+- Welcome modal/drawer submission should grant access and redirect only; do not auto-trigger downloads during submission or use download-focused pending copy.
 - While supplementary welcome packs are not ready, thank-you sharing must not promise unlocks; show the main download fallback and email download link instead.
 - When Drizzle migration history is out of sync with existing DB objects, verify the actual tables/indexes/enums first, then repair `drizzle.__drizzle_migrations` only after confirming the objects already exist.
 

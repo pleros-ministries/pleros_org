@@ -2,7 +2,6 @@ import { describe, expect, test } from "vitest";
 
 import {
   WELCOME_PACK_STORAGE_KEY,
-  buildWelcomePackDownloads,
   readWelcomePackState,
   serializeWelcomePackState,
   shouldShowWelcomePackModal,
@@ -43,13 +42,5 @@ describe("homepage welcome gift logic", () => {
       updatedAt: "2026-03-24T00:00:00.000Z",
     });
     expect(shouldShowWelcomePackModal(raw)).toBe(true);
-  });
-
-  test("builds two placeholder welcome gift downloads", () => {
-    const downloads = buildWelcomePackDownloads("hello@example.com");
-
-    expect(downloads).toHaveLength(2);
-    expect(downloads[0]?.content).toContain("hello@example.com");
-    expect(downloads[1]?.content).toContain("hello@example.com");
   });
 });

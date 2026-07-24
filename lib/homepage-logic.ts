@@ -65,29 +65,3 @@ export function serializeWelcomePackState(state: WelcomePackState): string {
 export function shouldShowWelcomePackModal(raw: string | null): boolean {
   return readWelcomePackState(raw)?.status !== "completed";
 }
-
-export type DownloadPayload = {
-  fileName: string;
-  content: string;
-};
-
-export function buildWelcomePackDownloads(email: string): DownloadPayload[] {
-  return [
-    {
-      fileName: "pleros-welcome-pack-ebook-1.txt",
-      content: [
-        "Pleros welcome pack ebook 1",
-        `Requested by: ${email}`,
-        "Placeholder content for local homepage flow.",
-      ].join("\n"),
-    },
-    {
-      fileName: "pleros-welcome-pack-ebook-2.txt",
-      content: [
-        "Pleros welcome pack ebook 2",
-        `Requested by: ${email}`,
-        "Placeholder content for local homepage flow.",
-      ].join("\n"),
-    },
-  ];
-}
