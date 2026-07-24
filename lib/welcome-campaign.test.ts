@@ -72,7 +72,9 @@ describe("welcome campaign pages", () => {
     expect(viewSource).toContain("Thank you for receiving your gift");
     expect(viewSource).toContain("Visit your dashboard to access your gift.");
     expect(viewSource).toContain('href="/dashboard/welcomepack"');
-    expect(viewSource).toContain("Before you go, we have something more for you.");
+    expect(viewSource).toContain(
+      "Get TWO special gifts today, when you recommend this book",
+    );
     expect(viewSource).toContain("Share on WhatsApp");
     expect(viewSource).toContain("buildWelcomeShareIntentUrl");
     expect(viewSource).not.toContain("confirmWelcomePackShareAction");

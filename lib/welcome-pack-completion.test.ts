@@ -86,8 +86,11 @@ describe("welcome pack completion wiring", () => {
     expect(pageSource).toContain("Thank you for receiving your gift");
     expect(pageSource).toContain("Visit your dashboard to access your gift.");
     expect(pageSource).toContain('href="/dashboard/welcomepack"');
-    expect(pageSource).toContain("Before you go, we have something more for you.");
-    expect(pageSource).toContain("unlock two extra gifts");
+    expect(pageSource).toContain(
+      "Get TWO special gifts today, when you recommend this book",
+    );
+    expect(pageSource).toContain("Breaking Habits and Addictions as a New Creation");
+    expect(pageSource).toContain("How the Gospel Proves Itself to Be the Truth");
     expect(pageSource).toContain("Share on WhatsApp");
     expect(pageSource).not.toContain("Your download has begun");
     expect(pageSource).not.toContain("downloadUrl");

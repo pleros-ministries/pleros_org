@@ -1,18 +1,13 @@
-import { ClockIcon, MapPinIcon, PhoneIcon } from "lucide-react";
+import { BookOpenIcon, MapPinIcon, PhoneIcon, SunIcon, Users2Icon } from "lucide-react";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import {
   fcchurchLocations,
   fcchurchOnlineSection,
   fcchurchPageHero,
   type FcchurchLocation,
+  type ScheduleEntry,
 } from "@/lib/fcchurch-page-content";
 
 import { HomepageCommunitySection } from "./homepage-community-section";
@@ -20,75 +15,156 @@ import { HomepageFooter } from "./homepage-footer";
 import { HomepageNav } from "./homepage-nav";
 import { PublicSitePageShell } from "./public-site-page-shell";
 
+// ─── Schedule row config ────────────────────────────────────────────────────
+
+const scheduleConfig: Record<
+  ScheduleEntry["type"],
+  { label: string; icon: React.ComponentType<{ className?: string }>; pill: string }
+> = {
+  prayer: {
+    label: "Prayer Meeting",
+    icon: Users2Icon,
+    pill: "bg-[var(--color-brand-sky)] text-[var(--color-brand-blue)]",
+  },
+  "bible-study": {
+    label: "Bible Study",
+    icon: BookOpenIcon,
+    pill: "bg-[var(--purpose-surface)] text-[var(--purpose-accent)]",
+  },
+  sunday: {
+    label: "Sunday Service",
+    icon: SunIcon,
+    pill: "bg-[var(--fulfil-surface)] text-[var(--fulfil-accent)]",
+  },
+};
+
+// ─── Location Card ──────────────────────────────────────────────────────────
+
 function FcchurchLocationCard({
+  city,
+  state,
   venueName,
   address,
-  serviceTime,
-  contactLabel,
-  contactHref,
+  schedule,
+  contacts,
 }: FcchurchLocation) {
   return (
-    <Card className="gap-4 rounded-[1.25rem] border-[rgba(6,16,86,0.14)] bg-white p-5 shadow-[0_16px_40px_rgba(6,16,86,0.08)] md:p-6">
-      <CardHeader className="gap-1 px-0 py-0">
-        <CardTitle className="font-[var(--font-sen)] text-[1.375rem] leading-[0.95] tracking-[-0.05em] text-[var(--color-brand-indigo)]">
+    <article className="flex flex-col overflow-hidden rounded-[1.25rem] bg-white shadow-[0_16px_44px_rgba(6,16,86,0.10)] ring-1 ring-[rgba(6,16,86,0.08)]">
+      {/* Card header */}
+      <div className="bg-[var(--color-brand-blue)] px-5 py-4 md:px-6">
+        <span className="mb-2.5 inline-flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 font-[var(--font-be-vietnam-pro)] text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-white/80">
+          {state} State
+        </span>
+        <h3 className="font-[var(--font-sen)] text-[1.35rem] font-semibold leading-[1.05] tracking-[-0.04em] text-white">
+          {city}
+        </h3>
+        <p className="mt-0.5 font-[var(--font-be-vietnam-pro)] text-[0.78rem] font-medium leading-[1.3] text-white/70">
           {venueName}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="grid gap-3 px-0 pb-0">
-        <div className="flex items-start gap-2.5">
-          <MapPinIcon className="mt-0.5 size-4 shrink-0 text-[var(--color-brand-blue)]" />
-          <p className="text-[1rem] leading-[1.4] text-[var(--color-text-strong)]">
-            {address}
-          </p>
+        </p>
+      </div>
+
+      {/* Address */}
+      <div className="flex items-start gap-2.5 border-b border-[rgba(6,16,86,0.08)] px-5 py-3.5 md:px-6">
+        <MapPinIcon className="mt-0.5 size-[0.9rem] shrink-0 text-[var(--color-brand-blue)] opacity-60" />
+        <p className="font-[var(--font-be-vietnam-pro)] text-[0.8rem] leading-[1.45] tracking-[-0.01em] text-[var(--color-text-muted)]">
+          {address}
+        </p>
+      </div>
+
+      {/* Schedule rows */}
+      <div className="grid divide-y divide-[rgba(6,16,86,0.06)] px-5 py-1 md:px-6">
+        {schedule.map((entry) => {
+          const cfg = scheduleConfig[entry.type];
+          const Icon = cfg.icon;
+          return (
+            <div key={entry.type} className="flex items-start gap-3 py-3">
+              <div className={`mt-0.5 rounded-lg p-1.5 ${cfg.pill}`}>
+                <Icon className="size-3.5" />
+              </div>
+              <div className="grid gap-0.5">
+                <span className="font-[var(--font-be-vietnam-pro)] text-[0.7rem] font-semibold uppercase tracking-[0.1em] text-[var(--color-text-muted)]">
+                  {entry.label}
+                </span>
+                <span className="font-[var(--font-be-vietnam-pro)] text-[0.825rem] font-medium leading-[1.35] tracking-[-0.01em] text-[var(--color-text-strong)]">
+                  {entry.time}
+                </span>
+                {entry.venue && (
+                  <span className="font-[var(--font-be-vietnam-pro)] text-[0.75rem] leading-[1.3] tracking-[-0.005em] text-[var(--color-text-muted)]">
+                    {entry.venue}
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Contacts */}
+      <div className="mt-auto border-t border-[rgba(6,16,86,0.08)] bg-[var(--color-surface-muted)] px-5 py-4 md:px-6">
+        <p className="mb-2 font-[var(--font-be-vietnam-pro)] text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[var(--color-text-muted)]">
+          Contact
+        </p>
+        <div className="flex flex-wrap gap-x-4 gap-y-1.5">
+          {contacts.map((c) => (
+            <Link
+              key={c.phone}
+              href={c.href}
+              className="group flex items-center gap-1.5 font-[var(--font-be-vietnam-pro)] text-[0.82rem] font-medium leading-none text-[var(--color-brand-blue)] transition-opacity hover:opacity-75"
+            >
+              <PhoneIcon className="size-3 shrink-0 opacity-60" />
+              <span>
+                {c.name !== contacts[0]?.name || contacts.length === 1
+                  ? `${c.name} · `
+                  : ""}
+                {c.phone}
+              </span>
+            </Link>
+          ))}
         </div>
-        <div className="flex items-start gap-2.5">
-          <ClockIcon className="mt-0.5 size-4 shrink-0 text-[var(--color-brand-blue)]" />
-          <p className="text-[1rem] leading-[1.4] text-[var(--color-text-strong)]">
-            {serviceTime}
-          </p>
-        </div>
-        <Link
-          href={contactHref}
-          className="flex w-fit items-center gap-2.5 text-[1rem] font-medium leading-[1.4] text-[var(--color-brand-blue)] hover:underline"
-        >
-          <PhoneIcon className="size-4 shrink-0" />
-          {contactLabel}
-        </Link>
-      </CardContent>
-    </Card>
+      </div>
+    </article>
   );
 }
+
+// ─── Page ───────────────────────────────────────────────────────────────────
 
 export function FcchurchPageView() {
   return (
     <PublicSitePageShell>
       <HomepageNav />
 
-      <section className="bg-[var(--color-brand-sky)] px-[1.25rem] pb-[1.65rem] pt-[7rem] md:px-8 md:pb-10 md:pt-[8.5rem] xl:px-10 xl:pb-12">
-        <div className="max-w-[22rem] md:max-w-[30rem]">
+      {/* Hero */}
+      <section className="bg-[var(--color-brand-sky)] px-[1.25rem] pb-[2.5rem] pt-[7rem] md:px-8 md:pb-12 md:pt-[8.5rem] xl:px-10 xl:pb-14">
+        <div className="max-w-[24rem] md:max-w-[32rem]">
+          <p className="mb-3 font-[var(--font-be-vietnam-pro)] text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-[var(--color-brand-indigo)] opacity-70">
+            Fullness of Christ Church
+          </p>
           <h1 className="site-hero-heading text-[2.55rem] text-[var(--color-text-strong)] md:text-[3.25rem] xl:text-[4rem]">
             {fcchurchPageHero.title}
           </h1>
-          <p className="site-hero-intro mt-2.5 text-[var(--color-brand-blue)]">
+          <p className="site-hero-intro mt-3 max-w-[26rem] text-[var(--color-brand-blue)]">
             {fcchurchPageHero.description}
           </p>
         </div>
       </section>
 
+      {/* Locations */}
       <section className="bg-white px-[1.25rem] py-[4.25rem] md:px-8 md:py-16 xl:px-10">
-        <div className="mx-auto grid max-w-[58rem] gap-8 md:gap-10">
-          <div className="grid gap-2 text-center">
-            <p className="font-[var(--font-be-vietnam-pro)] text-[0.8125rem] font-semibold uppercase tracking-[0.24em] text-[var(--color-brand-blue)]">
+        <div className="mx-auto grid max-w-[64rem] gap-10 md:gap-12">
+          {/* Section header */}
+          <div className="grid gap-2.5 text-center">
+            <p className="font-[var(--font-be-vietnam-pro)] text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-[var(--color-brand-blue)]">
               Locations
             </p>
             <h2 className="site-section-heading">Join us in person</h2>
-            <p className="site-section-intro mx-auto max-w-[33rem] text-[var(--color-text-muted)]">
-              We would love to have you worship with us. Find a location
-              near you below.
+            <p className="site-section-intro mx-auto max-w-[32rem] text-[var(--color-text-muted)]">
+              We gather weekly for prayer, Bible study, and Sunday worship. Find
+              a branch near you.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5">
+          {/* Cards grid */}
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:gap-6 xl:grid-cols-3">
             {fcchurchLocations.map((location) => (
               <FcchurchLocationCard key={location.id} {...location} />
             ))}
@@ -96,10 +172,11 @@ export function FcchurchPageView() {
         </div>
       </section>
 
+      {/* Online section */}
       <section className="bg-[var(--color-brand-blue)] px-[1.25rem] py-[4.25rem] text-white md:px-8 md:py-16 xl:px-10">
         <div className="mx-auto grid max-w-[58rem] gap-6 text-center">
-          <div className="grid gap-2">
-            <p className="font-[var(--font-be-vietnam-pro)] text-[0.8125rem] font-semibold uppercase tracking-[0.24em] text-[var(--color-brand-lime)]">
+          <div className="grid gap-2.5">
+            <p className="font-[var(--font-be-vietnam-pro)] text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-[var(--color-brand-lime)]">
               {fcchurchOnlineSection.eyebrow}
             </p>
             <h2 className="site-section-heading text-white">

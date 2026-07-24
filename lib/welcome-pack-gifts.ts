@@ -5,6 +5,7 @@ export type WelcomePackGift = {
   imageSrc: string;
   buttonLabel: string;
   href: string;
+  locked?: boolean;
 };
 
 export const mainGifts: WelcomePackGift[] = [
@@ -17,6 +18,34 @@ export const mainGifts: WelcomePackGift[] = [
     buttonLabel: "Download book",
     href: "/api/welcome-pack/download",
   },
+  {
+    id: "purpose-welcome-audio",
+    title: "Audio Version (45 min)",
+    description:
+      "Listen to the full welcome pack teaching in audio format.",
+    imageSrc: "/site/home/assets/welcome-pack-cards/purpose-welcome-card.svg",
+    buttonLabel: "Coming soon",
+    href: "#",
+    locked: true,
+  },
 ];
 
-export const extraGifts: WelcomePackGift[] = [];
+export const extraGifts: WelcomePackGift[] = [
+  {
+    id: "breaking-habits-and-addictions",
+    title: "Breaking Habits and Addictions as a New Creation",
+    description:
+      "A transformative teaching to help you walk free in Christ.",
+    imageSrc: "/site/home/assets/welcome-pack-cards/purpose-welcome-card.svg",
+    buttonLabel: "Coming soon",
+    href: "#",
+  },
+  {
+    id: "gospel-proves-itself-true",
+    title: "How the Gospel Proves Itself to Be the Truth",
+    description: "A clear case for the truth and power of the Gospel.",
+    imageSrc: "/site/home/assets/welcome-pack-cards/ga-welcome-card.svg",
+    buttonLabel: "Coming soon",
+    href: "#",
+  },
+];

@@ -48,15 +48,38 @@ export function ThankYouPage({ name }: ThankYouPageProps) {
           </section>
 
           <section className="bg-white px-6 py-10">
-            <div className="grid gap-7 rounded-[1.375rem] bg-[var(--color-brand-lime)]/20 px-5 py-6 shadow-[inset_0_0_0_1px_rgba(5,20,128,0.08)]">
+            <div className="grid gap-6 rounded-[1.375rem] bg-[var(--color-brand-lime)]/20 px-5 py-6 shadow-[inset_0_0_0_1px_rgba(5,20,128,0.08)]">
               <div className="grid gap-3">
                 <h2 className="site-section-heading text-[2rem] text-[var(--color-brand-blue)]">
-                  Before you go, we have something more for you.
+                  Get TWO special gifts today, when you recommend this book
+                  to others.
                 </h2>
-                <p className="site-section-intro max-w-[31ch] text-[var(--color-text-muted)]">
-                  Share this with your circle. If two people access it
-                  through your link, you unlock two extra gifts we&apos;ve
-                  prepared for you.
+                <p className="site-section-intro max-w-[34ch] text-[var(--color-text-muted)]">
+                  Help a friend, family, or stranger find the answer to
+                  their greatest question.
+                </p>
+              </div>
+
+              <div className="grid gap-2 text-[0.95rem] leading-[1.5] tracking-[-0.01em] text-[var(--color-text-strong)]">
+                <p>
+                  Many people walk in perpetual doubt and darkness about why
+                  they exist.
+                </p>
+                <p>
+                  It has led many into falsehood, all kinds of fleshly
+                  bondages, and wasteful living.
+                </p>
+                <p>You can help put an end to that for someone today.</p>
+              </div>
+
+              <div className="grid gap-2 text-[0.95rem] leading-[1.5] tracking-[-0.01em] text-[var(--color-text-strong)]">
+                <p>
+                  Simply share the gift of purpose with them today, and set
+                  them on course to fulfill God&apos;s will for their lives.
+                </p>
+                <p>
+                  You can share the link across all social media platforms
+                  using the buttons below:
                 </p>
               </div>
 
@@ -67,6 +90,24 @@ export function ThankYouPage({ name }: ThankYouPageProps) {
                 <MessageCircleIcon className="size-4" />
                 Share on WhatsApp
               </a>
+
+              <div className="grid gap-2 text-[0.95rem] leading-[1.5] tracking-[-0.01em] text-[var(--color-text-strong)]">
+                <p>
+                  When you share this gift, we give you early access to two
+                  of the most transformative books you may ever read and
+                  that will help you fulfill God&apos;s purpose for you:
+                </p>
+                <ul className="grid list-disc gap-1 pl-5">
+                  <li>Breaking Habits and Addictions as a New Creation</li>
+                  <li>How the Gospel Proves Itself to Be the Truth</li>
+                </ul>
+              </div>
+
+              <div className="grid gap-1 text-[0.95rem] font-semibold leading-[1.5] tracking-[-0.01em] text-[var(--color-brand-blue)]">
+                <p>Don&apos;t postpone this.</p>
+                <p>Someone&apos;s life and eternity may depend on it.</p>
+                <p>Share God&apos;s gift of purpose with someone today.</p>
+              </div>
             </div>
           </section>
         </main>
