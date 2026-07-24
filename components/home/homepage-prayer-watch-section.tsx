@@ -68,11 +68,11 @@ export function HomepagePrayerWatchSection() {
           </p>
           <dl
             aria-label="Prayer Watch session times"
-            className="w-full max-w-[30rem] overflow-hidden rounded-[1rem] border border-[#A9DDF0] bg-[#DDF5FF] text-[var(--color-brand-blue)]"
+            className="w-full max-w-[30rem] overflow-hidden rounded-[0.625rem] border-[0.5px] border-[#C2ECFA] bg-[#DDF5FF] text-[var(--color-brand-blue)]"
           >
             <div
               aria-live="polite"
-              className="flex min-h-9 items-center justify-center gap-2 bg-[var(--color-brand-blue)] px-3 py-2 text-[0.625rem] leading-none font-bold tracking-[0.1em] text-white uppercase"
+              className="flex min-h-9 items-center justify-center gap-2 border-b-[0.5px] border-[#A9DDF0] bg-[#BCEAFF] px-3 py-2 text-[0.625rem] leading-none font-bold tracking-[0.1em] uppercase"
             >
               <span>Next session</span>
               {nextSession ? (
@@ -92,7 +92,7 @@ export function HomepagePrayerWatchSection() {
                 const Icon = prayerWatchSessionIcons[item.id];
                 const isNextSession = item.id === nextSessionId;
                 const segmentClassName = [
-                  "relative min-w-0 px-2 py-3 transition-colors duration-200 after:absolute after:inset-y-3 after:right-0 after:w-px after:bg-[rgba(5,20,128,0.14)] last:after:hidden",
+                  "relative min-w-0 px-2 py-3 transition-colors duration-200 after:absolute after:inset-y-3 after:right-0 after:w-[0.5px] after:bg-[rgba(5,20,128,0.1)] last:after:hidden",
                   isNextSession
                     ? "bg-[var(--color-brand-lime)]"
                     : "bg-transparent",
@@ -118,7 +118,7 @@ export function HomepagePrayerWatchSection() {
         </div>
 
         <div className="w-full">
-          <div className="relative aspect-video w-full overflow-hidden rounded-[1.25rem] bg-[var(--color-brand-indigo)]">
+          <div className="relative aspect-video w-full overflow-hidden rounded-[0.875rem] bg-[var(--color-brand-indigo)]">
             {isPlaying ? (
               <>
                 <iframe

@@ -136,12 +136,13 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - On public blue section/card headers, compact brand-lime pills with primary-blue text read better than translucent white pills.
 - When public motion feedback says "not feeling it," adjust the concrete homepage component motion as well as shared primitive timing; primitive-only easing changes can be too subtle.
 - In the shared homepage community section, keep the Join Now CTA close to the text block; section separation belongs outside the card/section, not between copy and CTA.
-- In the shared homepage community section, keep the baseline grayscale photo with dark overlay unless the user specifically asks for a new treatment; avoid reintroducing the rejected blue tint edit.
+- In the shared homepage community section, keep the intro copy on a narrower mobile measure than desktop so it does not span nearly the full viewport.
+- In the shared homepage community section, keep a grayscale photo with dark overlay unless the user specifically asks for a new treatment; community imagery should feature Black/African American people and avoid reintroducing the rejected blue tint edit.
 - On public video/CTA bands, use explicit scaled group gaps and balanced mobile top/bottom padding; avoid ambiguous arbitrary gap classes.
 - Do not add redundant explanatory captions between public video embeds and their primary CTA when the heading/intro already establishes the action.
 - Public display headings and short section intro lines should generally omit terminal periods unless the punctuation is intentional copy.
 - Public Prayer Watch session times are Morning 5:30 am, Afternoon 12:30 pm, and Evening 8:30 pm.
-- Public Prayer Watch session times should use a connected schedule strip rather than three separate cards, with a distinct brand-blue `Next session` header and one active segment highlight.
+- Public Prayer Watch session times should use a connected schedule strip rather than three separate cards, with a distinct but soft sky-blue `Next session` header, one active segment highlight, restrained corner radii, and very light borders.
 - Public Prayer Watch video posters should use the branded devotional artwork without tint overlays or image filters, not the raw YouTube thumbnail when that thumbnail looks visually weak.
 - For homepage/card asset swaps, import explicit source assets into `public/site/home/assets/*`, update the specific card data, and verify mobile rendering.
 - For welcome dashboard card backgrounds, copy the named source image into `public/site/home/assets/dashboard-cards/`, wire it through card data, and verify the rendered preview card image.

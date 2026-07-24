@@ -241,15 +241,15 @@ describe("site home page", () => {
     );
     expect(prayerWatchSectionSource).toContain("Next session");
     expect(prayerWatchSectionSource).toContain(
-      "overflow-hidden rounded-[1rem] border border-[#A9DDF0] bg-[#DDF5FF]",
+      "overflow-hidden rounded-[0.625rem] border-[0.5px] border-[#C2ECFA] bg-[#DDF5FF]",
     );
     expect(prayerWatchSectionSource).toContain('aria-live="polite"');
     expect(prayerWatchSectionSource).toContain(
-      "bg-[var(--color-brand-blue)] px-3 py-2",
+      "border-b-[0.5px] border-[#A9DDF0] bg-[#BCEAFF] px-3 py-2",
     );
-    expect(prayerWatchSectionSource).toContain("tracking-[0.1em] text-white uppercase");
+    expect(prayerWatchSectionSource).toContain("tracking-[0.1em] uppercase");
     expect(prayerWatchSectionSource).toContain(
-      "after:absolute after:inset-y-3 after:right-0",
+      "after:absolute after:inset-y-3 after:right-0 after:w-[0.5px]",
     );
     expect(prayerWatchSectionSource).not.toContain(
       "rounded-full bg-white px-1.5 py-0.5",
@@ -262,9 +262,11 @@ describe("site home page", () => {
     expect(prayerWatchSectionSource).toContain("SunIcon");
     expect(prayerWatchSectionSource).toContain("MoonIcon");
     expect(prayerWatchSectionSource).toContain("bg-[#DDF5FF]");
+    expect(prayerWatchSectionSource).toContain("rounded-[0.875rem]");
     expect(prayerWatchSectionSource).not.toContain(
       "rounded-[var(--radius-sm)]",
     );
+    expect(prayerWatchSectionSource).not.toContain("rounded-[1.25rem]");
     expect(prayerWatchSectionSource).not.toContain("homeYoutubeChannelUrl");
     expect(viewSource).toContain("<HomepagePrayerWatchSection />");
   });

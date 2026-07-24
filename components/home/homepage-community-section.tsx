@@ -8,7 +8,7 @@ export function HomepageCommunitySection() {
     <section id="community" className="relative overflow-hidden">
       <div className="absolute inset-0">
         <Image
-          src="/site/home/assets/pleros-community-background.webp"
+          src="/site/home/assets/pleros-community-background-v2.webp"
           alt=""
           fill
           className="object-cover grayscale"
@@ -23,7 +23,7 @@ export function HomepageCommunitySection() {
             <h2 className="site-section-heading max-w-[33.5625rem] text-white">
               Join Pleros Community Channel
             </h2>
-            <p className="site-section-intro max-w-[28.125rem] text-white/90">
+            <p className="site-section-intro max-w-[22.5rem] text-white/90 sm:max-w-[28.125rem]">
               This is a community open to anyone who desires edification via platforms of the Word and prayer designed to help you walk in and fulfill God&apos;s purpose daily.
 
             </p>
