@@ -38,7 +38,7 @@ export function HomepageFooter() {
             className="h-[2.75rem] w-auto sm:h-[3.1rem]"
           />
 
-          <div className="grid grid-cols-1 items-start gap-y-6 sm:grid-cols-2 sm:gap-x-8 sm:gap-y-7 lg:grid-cols-3 lg:gap-x-8">
+          <div className="grid grid-cols-1 items-start gap-y-6 sm:grid-cols-2 sm:gap-x-8 sm:gap-y-7 xl:grid-cols-3 xl:gap-x-8">
             {homeFooterNavGroups.map((group) => (
               <FooterNavGroup key={group.label} {...group} />
             ))}
