@@ -19,7 +19,7 @@ export function HomepageHero() {
         <HomepageCarousel slides={homeCarouselSlides} />
       </div>
 
-      <div className="grid grid-cols-2 gap-x-2 gap-y-3.5 pb-2 sm:gap-x-5 sm:gap-y-5 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-x-2 gap-y-3.5 pb-10 sm:gap-x-5 sm:gap-y-5 sm:pb-12 md:grid-cols-4 lg:pb-0">
         {homePathwayCards.map((card) => (
           <HomepagePathwayCard key={card.title} {...card} />
         ))}

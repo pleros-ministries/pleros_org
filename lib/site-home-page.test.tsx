@@ -104,7 +104,7 @@ describe("site home page", () => {
     );
 
     expect(heroSource).toContain('className="bg-white px-2  pt-3 sm:px-5');
-    expect(heroSource).toContain('className="grid grid-cols-2 gap-x-2 gap-y-3.5 pb-2 sm:gap-x-5 sm:gap-y-5 md:grid-cols-4"');
+    expect(heroSource).toContain('className="grid grid-cols-2 gap-x-2 gap-y-3.5 pb-10 sm:gap-x-5 sm:gap-y-5 sm:pb-12 md:grid-cols-4 lg:pb-0"');
     expect(cardSource).toContain("aspect-[324/164]");
     expect(cardSource).toContain('className="flex h-[4.65rem]');
     expect(cardSource).toContain("headerImageSrc");
@@ -180,6 +180,7 @@ describe("site home page", () => {
     expect(sectionSource).toContain('className="site-podcast-card-title');
     expect(sectionSource).toContain('className="site-podcast-card-date');
     expect(sectionSource).toContain("mt-5");
+    expect(sectionSource).toContain('href="/podcast"');
   });
 
   test("shows the full podcast thumbnail without the blue panel covering it", () => {

@@ -158,7 +158,7 @@ export async function PodcastPageView() {
                 href={homePodcastUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="group flex items-center gap-0.5 self-center font-[var(--font-be-vietnam-pro)] text-[0.78rem] font-semibold uppercase tracking-[0.08em] text-[var(--color-brand-blue)]"
+                className="group flex items-center gap-0.5 self-center font-[var(--font-be-vietnam-pro)] text-[0.78rem] font-semibold uppercase tracking-[0.08em] text-[var(--color-brand-blue)] no-underline"
               >
                 MORE PLATFORMS
                 <ArrowUpRightIcon className="size-3.5 stroke-[2.4] transition-transform duration-150 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-focus-visible:-translate-y-0.5 group-focus-visible:translate-x-0.5" />

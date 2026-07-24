@@ -37,9 +37,7 @@ export function HomepagePodcastSection({
             Your 15-minute dose of transformation, wherever you listen
           </p>
           <Link
-            href={homePodcastUrl}
-            target="_blank"
-            rel="noreferrer"
+            href="/podcast"
             className="site-button-text inline-flex min-h-[2.875rem] items-center justify-center rounded-full bg-[var(--color-brand-blue)] px-6 py-2.5 text-[0.875rem] leading-none font-semibold text-white"
           >
             Listen Now

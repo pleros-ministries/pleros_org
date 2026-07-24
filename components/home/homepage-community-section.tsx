@@ -18,7 +18,7 @@ export function HomepageCommunitySection() {
       </div>
 
       <div className="relative px-[1.3125rem] py-[4.5625rem] text-center text-white lg:px-16 lg:py-24">
-        <div className="grid gap-[3.8125rem]">
+        <div className="grid gap-5 lg:gap-6">
           <div className="grid justify-items-center gap-[0.8125rem]">
             <h2 className="site-section-heading max-w-[33.5625rem] text-white">
               Join Pleros Community Channel

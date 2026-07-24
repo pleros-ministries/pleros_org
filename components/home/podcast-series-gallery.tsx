@@ -157,7 +157,7 @@ export function PodcastSeriesGallery({
               href={podLinkHref}
               target="_blank"
               rel="noreferrer"
-              className="group inline-flex items-center gap-0.5 self-end pb-1 font-[var(--font-be-vietnam-pro)] text-[0.68rem] font-semibold uppercase tracking-[0.08em] text-[var(--color-brand-blue)] transition-colors duration-150 hover:text-[var(--color-brand-blue-hover)]"
+              className="group inline-flex items-center gap-0.5 self-end pb-1 font-[var(--font-be-vietnam-pro)] text-[0.68rem] font-semibold uppercase tracking-[0.08em] text-[var(--color-brand-blue)] no-underline transition-colors duration-150 hover:text-[var(--color-brand-blue-hover)]"
             >
               MORE PLATFORMS
               <ArrowUpRightIcon className="size-3.5 stroke-[2.4] transition-transform duration-150 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-focus-visible:-translate-y-0.5 group-focus-visible:translate-x-0.5" />

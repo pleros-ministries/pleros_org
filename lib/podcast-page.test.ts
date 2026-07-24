@@ -70,6 +70,8 @@ describe("podcast page", () => {
     expect(viewSource).toContain("Audiomack");
     expect(viewSource).toContain("MORE PLATFORMS");
     expect(seriesGallerySource).toContain("MORE PLATFORMS");
+    expect(viewSource).toContain("no-underline");
+    expect(seriesGallerySource).toContain("no-underline");
     expect(viewSource).toContain("uppercase tracking-[0.08em]");
     expect(seriesGallerySource).not.toContain("underline underline-offset-4");
     expect(viewSource).toContain("podcastSpotifyShowUrl");
