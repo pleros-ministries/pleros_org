@@ -37,6 +37,9 @@ describe("partner page", () => {
       "text-[0.6875rem] font-semibold uppercase tracking-[0.22em]",
     );
     expect(viewSource).toContain("md:text-[0.8125rem]");
+    expect(viewSource).toContain(
+      "text-[1rem] leading-[0.95] tracking-[-0.04em]",
+    );
     expect(contentSource).toContain("partnerWhatsappHref");
     expect(viewSource).not.toContain("become-a-partner");
     expect(contentSource).not.toContain("Become a partner today");

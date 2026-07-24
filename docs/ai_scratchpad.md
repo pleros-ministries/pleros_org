@@ -142,7 +142,7 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - Do not add redundant explanatory captions between public video embeds and their primary CTA when the heading/intro already establishes the action.
 - Public display headings and short section intro lines should generally omit terminal periods unless the punctuation is intentional copy.
 - Public Prayer Watch session times are Morning 5:30 am, Afternoon 12:30 pm, and Evening 8:30 pm.
-- Public Prayer Watch session times should use a connected schedule strip rather than three separate cards, with a distinct but soft sky-blue `Next session` header, one active segment highlight, restrained corner radii, and very light borders.
+- Public Prayer Watch session times should use a connected schedule strip rather than three separate cards, with a distinct but soft sky-blue `Next session` header, one active segment highlight, very pale non-next segment backgrounds, low table-like corner radii, and very light borders.
 - Public Prayer Watch active time segments should suppress adjacent vertical dividers so the highlight does not have awkward side rules.
 - Public Prayer Watch video posters should use the branded devotional artwork without tint overlays or image filters, not the raw YouTube thumbnail when that thumbnail looks visually weak.
 - For homepage/card asset swaps, import explicit source assets into `public/site/home/assets/*`, update the specific card data, and verify mobile rendering.
@@ -151,7 +151,8 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - Partner/support copy should use the Vision and Mission page as source of truth: reaching people with the word of truth of the Gospel, online and offline, for salvation, establishment, and fulfillment of God's purpose.
 - Partner CTAs should be WhatsApp-first with a prefilled message when requested.
 - Partner impact items on blue sections should use solid blue surfaces, not low-opacity translucent blue/white overlays that read faded.
-- Partner page mobile details should stay compact: section eyebrows should be 11px on mobile and use the shared public eyebrow letter spacing, with smaller reason step badges and bank-field eyebrow labels.
+- Partner page mobile details should stay compact: section eyebrows should be 11px on mobile and use the shared public eyebrow letter spacing, with smaller reason step badges, small bank card titles, and bank-field eyebrow labels.
+- Partner page intro CTA section under the hero needs generous top padding; avoid tight attachment to the hero band on mobile.
 - Partner page should not include the secondary `Next step / Become a partner today` CTA section after the giving card.
 
 ## Welcome, contact, and dashboard funnels

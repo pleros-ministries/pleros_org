@@ -65,7 +65,7 @@ export function PartnerPageView() {
         </div>
       </section>
 
-      <section className="bg-white px-[1.5rem] pb-[3.25rem] pt-[1.75rem] md:px-8 md:pb-12 md:pt-10 xl:px-10">
+      <section className="bg-white px-[1.5rem] pb-[3.25rem] pt-12 md:px-8 md:pb-12 md:pt-12 xl:px-10">
         <div className="mx-auto grid max-w-[44rem] justify-items-center gap-7 text-center md:gap-8">
           <p className="text-[1.05rem] leading-[1.42] tracking-[-0.03em] text-[var(--color-text-strong)] md:text-[1.35rem]">
             {partnerPageHero.intro}
@@ -157,7 +157,7 @@ export function PartnerPageView() {
           <div className="mx-auto grid max-w-[36rem] grid-cols-1 gap-4 md:gap-5">
             <Card className="gap-4 rounded-[1.25rem] border-[rgba(6,16,86,0.14)] bg-white p-5 shadow-[0_16px_40px_rgba(6,16,86,0.08)] md:p-6">
               <CardHeader className="gap-1 px-0 py-0">
-                <CardTitle className="font-[var(--font-sen)] text-[1.375rem] leading-[0.95] tracking-[-0.05em] text-[var(--color-brand-indigo)]">
+                <CardTitle className="font-[var(--font-sen)] text-[1rem] leading-[0.95] tracking-[-0.04em] text-[var(--color-brand-indigo)] md:text-[1.125rem]">
                   Bank Transfer
                 </CardTitle>
               </CardHeader>

@@ -68,7 +68,7 @@ export function HomepagePrayerWatchSection() {
           </p>
           <dl
             aria-label="Prayer Watch session times"
-            className="w-full max-w-[30rem] overflow-hidden rounded-[0.625rem] border-[0.5px] border-[#C2ECFA] bg-[#DDF5FF] text-[var(--color-brand-blue)]"
+            className="w-full max-w-[30rem] overflow-hidden rounded-[0.375rem] border-[0.5px] border-[#D6F4FC] bg-[#F2FCFF] text-[var(--color-brand-blue)]"
           >
             <div
               aria-live="polite"
@@ -97,7 +97,7 @@ export function HomepagePrayerWatchSection() {
                   "relative min-w-0 px-2 py-3 transition-colors duration-200",
                   isNextSession || isAdjacentToNextSession
                     ? "after:hidden"
-                    : "after:absolute after:inset-y-3 after:right-0 after:w-[0.5px] after:bg-[rgba(5,20,128,0.1)] last:after:hidden",
+                    : "after:absolute after:inset-y-3 after:right-0 after:w-[0.5px] after:bg-[rgba(5,20,128,0.08)] last:after:hidden",
                   isNextSession
                     ? "bg-[var(--color-brand-lime)]"
                     : "bg-transparent",

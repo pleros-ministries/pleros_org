@@ -241,7 +241,7 @@ describe("site home page", () => {
     );
     expect(prayerWatchSectionSource).toContain("Next session");
     expect(prayerWatchSectionSource).toContain(
-      "overflow-hidden rounded-[0.625rem] border-[0.5px] border-[#C2ECFA] bg-[#DDF5FF]",
+      "overflow-hidden rounded-[0.375rem] border-[0.5px] border-[#D6F4FC] bg-[#F2FCFF]",
     );
     expect(prayerWatchSectionSource).toContain('aria-live="polite"');
     expect(prayerWatchSectionSource).toContain(
@@ -263,7 +263,7 @@ describe("site home page", () => {
     expect(prayerWatchSectionSource).toContain("SunriseIcon");
     expect(prayerWatchSectionSource).toContain("SunIcon");
     expect(prayerWatchSectionSource).toContain("MoonIcon");
-    expect(prayerWatchSectionSource).toContain("bg-[#DDF5FF]");
+    expect(prayerWatchSectionSource).toContain("bg-[#F2FCFF]");
     expect(prayerWatchSectionSource).toContain("rounded-[0.875rem]");
     expect(prayerWatchSectionSource).not.toContain(
       "rounded-[var(--radius-sm)]",
