@@ -119,7 +119,7 @@ export function PodcastSeriesGallery({
       <Dialog open={Boolean(selected)} onOpenChange={handleOpenChange}>
         <DialogContent
           tone="default"
-          className="site-font-theme grid max-h-[85vh] w-[min(100%-1.5rem,38rem)] gap-5 overflow-y-auto rounded-[1.25rem] border-[rgba(6,16,86,0.12)] bg-white p-5 text-[var(--color-text)] shadow-[0_24px_64px_rgba(6,16,86,0.18)] sm:p-6"
+          className="site-font-theme grid max-h-[85vh] w-[min(100%-1.5rem,38rem)] grid-rows-[auto_auto_minmax(0,1fr)] gap-5 overflow-hidden rounded-[1rem] border-[rgba(6,16,86,0.12)] bg-white p-5 text-[var(--color-text)] shadow-[0_24px_64px_rgba(6,16,86,0.18)] sm:p-6"
         >
           <DialogHeader className="gap-2">
             <DialogTitle className="font-[var(--font-sen)] text-[1.55rem] font-semibold leading-[0.98] tracking-[-0.045em] text-[var(--color-brand-blue)] md:text-[1.9rem]">
@@ -166,12 +166,12 @@ export function PodcastSeriesGallery({
           </div>
 
           {selected && selected.episodes.length ? (
-            <div className="grid gap-2">
+            <div className="grid min-h-0 gap-2">
               <p className="font-[var(--font-be-vietnam-pro)] text-[0.66rem] font-semibold uppercase tracking-[0.1em] text-[var(--color-text-muted)]">
                 Episodes ({selected.episodes.length})
               </p>
 
-              <div className="overflow-hidden rounded-[0.75rem] border border-[rgba(6,16,86,0.12)] bg-white">
+              <div className="min-h-0 overflow-y-auto rounded-[0.5rem] border border-[rgba(6,16,86,0.12)] bg-white [scrollbar-color:rgba(6,16,86,0.22)_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[rgba(6,16,86,0.22)] [&::-webkit-scrollbar-thumb:hover]:bg-[rgba(6,16,86,0.34)]">
                 <div className="divide-y divide-[rgba(6,16,86,0.10)]">
                   {selected.episodes.map((ep) => {
                     const isPlaying = playingGuid === ep.guid;
@@ -206,7 +206,7 @@ export function PodcastSeriesGallery({
                                 setPlayingGuid(isPlaying ? null : ep.guid)
                               }
                               aria-label={`${isPlaying ? "Pause" : "Play"} ${ep.title}`}
-                              className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-brand-blue)] text-white transition-transform duration-150 hover:-translate-y-px"
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#d7df70] text-[var(--color-brand-blue)] shadow-[inset_0_0_0_1px_rgba(6,16,86,0.1)] transition-[background-color,transform] duration-150 hover:-translate-y-px hover:bg-[#ccd85f]"
                             >
                               {isPlaying ? (
                                 <PauseIcon className="size-3.5 fill-current" />

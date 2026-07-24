@@ -51,6 +51,11 @@ describe("podcast page", () => {
     expect(gallerySource).toContain("<iframe");
     expect(seriesGallerySource).toContain("DialogContent");
     expect(seriesGallerySource).toContain("site-font-theme");
+    expect(seriesGallerySource).toContain("rounded-[1rem]");
+    expect(seriesGallerySource).toContain("grid-rows-[auto_auto_minmax(0,1fr)]");
+    expect(seriesGallerySource).toContain("overflow-y-auto rounded-[0.5rem]");
+    expect(seriesGallerySource).toContain("[scrollbar-width:thin]");
+    expect(seriesGallerySource).toContain("bg-[#d7df70]");
     expect(seriesGallerySource).toContain("platformIconLinks");
     expect(seriesGallerySource).toContain(
       "Start from any of the series",
