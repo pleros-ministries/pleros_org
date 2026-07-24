@@ -116,7 +116,7 @@ export function PartnerPageView() {
       <section className="bg-[var(--color-brand-blue)] px-[1.25rem] py-[4.25rem] text-white md:px-8 md:py-16 xl:px-10">
         <div className="mx-auto grid max-w-[58rem] gap-8 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:items-start md:gap-10">
           <div className="grid gap-3">
-            <p className="font-[var(--font-be-vietnam-pro)] text-[0.8125rem] font-semibold uppercase tracking-[0.24em] text-[var(--color-brand-lime)]">
+            <p className="font-[var(--font-be-vietnam-pro)] text-[0.6875rem] font-semibold uppercase tracking-[0.24em] text-[var(--color-brand-lime)] md:text-[0.8125rem]">
               Stewardship
             </p>
             <h2 className="site-section-heading text-white">
@@ -146,7 +146,7 @@ export function PartnerPageView() {
       <section className="bg-[var(--color-surface-muted)] px-[1.25rem] py-[4.25rem] md:px-8 md:py-16 xl:px-10">
         <div className="mx-auto grid max-w-[58rem] gap-8 md:gap-10">
           <div className="grid gap-2 text-center">
-            <p className="font-[var(--font-be-vietnam-pro)] text-[0.8125rem] font-semibold uppercase tracking-[0.24em] text-[var(--color-brand-blue)]">
+            <p className="font-[var(--font-be-vietnam-pro)] text-[0.6875rem] font-semibold uppercase tracking-[0.24em] text-[var(--color-brand-blue)] md:text-[0.8125rem]">
               {partnerGivingSection.eyebrow}
             </p>
             <h2 className="site-section-heading">
