@@ -93,6 +93,8 @@ describe("podcast page", () => {
     );
     expect(viewSource).toContain('id="journey"');
     expect(viewSource).toContain("Why this podcast helps");
+    expect(viewSource).toContain("text-[0.9375rem] leading-[1.5]");
+    expect(viewSource).toContain("md:text-[0.98rem]");
     expect(viewSource).toContain("HomepageCommunitySection");
     expect(viewSource).toContain("HomepageFooter");
     expect(contentSource).toContain('title: "Pleros Podcast"');

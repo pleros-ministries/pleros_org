@@ -282,7 +282,7 @@ export async function PodcastPageView() {
                 </CardHeader>
 
                 <CardContent className="gap-5 px-0 pb-0">
-                  <p className="text-[0.98rem] leading-[1.5] tracking-[-0.02em] text-[var(--color-text-muted)]">
+                  <p className="text-[0.9375rem] leading-[1.5] tracking-[-0.02em] text-[var(--color-text-muted)] md:text-[0.98rem]">
                     {step.description}
                   </p>
 

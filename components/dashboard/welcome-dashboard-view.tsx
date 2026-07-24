@@ -104,6 +104,54 @@ function DashboardCard({
   );
 }
 
+function DashboardChurchMinistryStrip() {
+  return (
+    <section
+      aria-labelledby="dashboard-church-ministry-title"
+      className="relative mt-12 overflow-hidden bg-[linear-gradient(180deg,#f4fcff_0%,#dff5ff_100%)] px-[1.25rem] py-14 text-[var(--color-brand-blue)] sm:mt-14 sm:px-8 sm:py-16"
+    >
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 bg-[linear-gradient(90deg,rgba(244,252,255,0.98)_0%,rgba(244,252,255,0.92)_56%,rgba(223,245,255,0.78)_100%)]"
+      />
+      <Image
+        src="/site/home/assets/pathway-card-headers/church-card-header.svg"
+        alt=""
+        width={486}
+        height={246}
+        className="pointer-events-none absolute right-[-5rem] bottom-[-3.5rem] h-auto w-[18rem] max-w-none opacity-[0.18] sm:right-[-2rem] sm:bottom-[-4rem] sm:w-[24rem]"
+      />
+
+      <div className="relative mx-auto grid max-w-[36rem] justify-items-start gap-6 sm:gap-7">
+        <div className="grid max-w-[28rem] gap-5">
+          <p className="font-[var(--font-be-vietnam-pro)] text-[0.6875rem] font-semibold tracking-[0.22em] text-[var(--color-brand-blue)] uppercase">
+            Our church ministry
+          </p>
+          <div className="grid gap-3">
+            <h2
+              id="dashboard-church-ministry-title"
+              className="site-section-heading text-[1.75rem] text-[var(--color-text-strong)] sm:text-[2.25rem]"
+            >
+              Fellowship with Fullness of Christ Church
+            </h2>
+            <p className="font-[var(--font-be-vietnam-pro)] max-w-[28rem] text-[0.9375rem] leading-[1.42] tracking-[-0.02em] text-[var(--color-text-strong)] sm:text-[1.05rem]">
+              Grow with believers committed to God&apos;s Word, prayer, and the
+              fulfillment of His purpose.
+            </p>
+          </div>
+        </div>
+
+        <Link
+          href="/fcc"
+          className="site-button-text inline-flex min-h-[2.875rem] items-center justify-center rounded-full bg-[var(--color-brand-lime)] px-7 py-2.5 text-[0.875rem] leading-none font-semibold text-[var(--color-brand-blue)] transition-transform duration-150 hover:-translate-y-px"
+        >
+          Learn more
+        </Link>
+      </div>
+    </section>
+  );
+}
+
 type WelcomeDashboardViewProps = {
   name?: string;
   sections?: WelcomeDashboardSection[];
@@ -114,7 +162,7 @@ export function WelcomeDashboardView({
   sections = welcomeDashboardSections,
 }: WelcomeDashboardViewProps = {}) {
   return (
-    <section className="site-font-theme bg-[var(--color-surface)] pb-24">
+    <section className="site-font-theme bg-[var(--color-surface)]">
       <header className="relative overflow-hidden bg-[var(--color-brand-blue)]">
         <div className="container-pleros flex min-h-[17.8125rem] max-w-[36rem] flex-col justify-end pb-8 pt-10 text-white sm:min-h-[21rem] sm:pb-10 sm:pt-12">
           <div className="grid max-w-[19rem] gap-3">
@@ -128,7 +176,7 @@ export function WelcomeDashboardView({
         </div>
       </header>
 
-      <div className="container-pleros grid max-w-[36rem] gap-10 pt-9 sm:pt-10">
+      <div className="container-pleros grid max-w-[36rem] gap-10 pt-9 pb-12 sm:pt-10 sm:pb-14">
         <div className="grid gap-10">
           {sections.map((section) => (
             <section key={section.id} className="grid gap-4">
@@ -157,6 +205,8 @@ export function WelcomeDashboardView({
           ))}
         </div>
       </div>
+
+      <DashboardChurchMinistryStrip />
     </section>
   );
 }

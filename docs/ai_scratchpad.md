@@ -115,6 +115,7 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - Public podcast internal scroll areas should use thin, quiet, brand-tinted scrollbars instead of default heavy browser scrollbars.
 - Public podcast episode play buttons should use sky-blue surfaces with blue icons, avoiding both heavy blue and lime bases.
 - Public podcast episode external/open actions should use a simple tilted arrow, not the boxed external-link glyph.
+- Public podcast journey card body copy should be 15px on mobile, with larger text reserved for wider breakpoints.
 - For teaching archives, prefer a divided editorial list with inline expansion over repetitive card grids or modal playback.
 - When official ministry/media copy exists, use the source wording first; summarize only when asked for a rewrite.
 - For public series pages, store direct per-item playback URLs and use external platform links for subscribe/full-library CTAs.
@@ -175,6 +176,7 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - Dashboard bulk progress actions should be reversible when the whole group is already complete.
 - Dashboard media hubs should open with compact series/title-card grids, then route into vertical per-series video lists; use local thumbnail assets for hub cards when available.
 - Welcome dashboard card titles should stay at 16px, and dashboard media title cards should use tighter corners with taller proportions.
+- Dashboard church ministry invitations should sit as a full-width strip above the footer, use a non-footer light background with the church logo as a visible bottom-corner watermark, use `color-text-strong` for heading and body copy on the tinted blue surface, keep generous vertical rhythm between eyebrow/copy/CTA, and include a `Learn more` CTA to `/fcc` rather than crowding the Start Here card grid.
 - Welcome access cookies should last 100 days and refresh on dashboard visits when present.
 - Welcome-pack access email should send only when durable lead state says the lead is newly created; client in-flight guards are secondary.
 - While supplementary welcome packs are not ready, thank-you sharing must not promise unlocks; show the main download fallback and email download link instead.

@@ -60,4 +60,26 @@ describe("welcome dashboard content", () => {
     expect(source).toContain("Start with the welcome pack and other resources.");
     expect(source).not.toContain("Your resources are gathered here and tied to");
   });
+
+  test("adds a church ministry strip above the dashboard footer", () => {
+    const source = readFileSync(
+      join(process.cwd(), "components", "dashboard", "welcome-dashboard-view.tsx"),
+      "utf8",
+    );
+
+    expect(source).toContain("DashboardChurchMinistryStrip");
+    expect(source).toContain("bg-[linear-gradient(180deg,#f4fcff_0%,#dff5ff_100%)]");
+    expect(source).toContain("py-14");
+    expect(source).toContain("gap-6 sm:gap-7");
+    expect(source).toContain("/site/home/assets/pathway-card-headers/church-card-header.svg");
+    expect(source).toContain("right-[-5rem] bottom-[-3.5rem]");
+    expect(source).toContain("opacity-[0.18]");
+    expect(source).toContain("Our church ministry");
+    expect(source).toContain("text-[var(--color-text-strong)]");
+    expect(source).not.toContain("text-[rgba(5,20,128,0.78)]");
+    expect(source).toContain("Fellowship with Fullness of Christ Church");
+    expect(source).toContain('href="/fcc"');
+    expect(source).toContain("Learn more");
+    expect(source).toContain("<DashboardChurchMinistryStrip />");
+  });
 });
