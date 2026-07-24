@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ArrowUpRightIcon,
   ClockIcon,
   DownloadIcon,
   ExternalLinkIcon,
@@ -12,7 +13,6 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 
-import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -78,12 +78,12 @@ export function PodcastSeriesGallery({
       <div className="grid gap-2">
         <p className="site-hero-eyebrow">Series</p>
         <h3 className="site-section-heading max-w-[28rem]">
-          Jump to any of the series on the podcast
+          Start from any of the series
         </h3>
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        {series.map((item) => (
+        {series.map((item, index) => (
           <button
             key={item.id}
             type="button"
@@ -91,22 +91,32 @@ export function PodcastSeriesGallery({
               setPlayingGuid(null);
               setSelectedId(item.id);
             }}
-            className="grid cursor-pointer gap-3 rounded-[1.25rem] border border-[rgba(6,16,86,0.12)] bg-white p-5 text-left shadow-[0_12px_30px_rgba(6,16,86,0.06)] transition-transform duration-150 hover:-translate-y-px md:p-6"
+            className="group grid cursor-pointer overflow-hidden rounded-[1.25rem] bg-white text-left shadow-[0_10px_24px_rgba(6,16,86,0.06)] ring-1 ring-[rgba(6,16,86,0.08)] transition-[transform,box-shadow] duration-150 hover:-translate-y-px hover:shadow-[0_14px_30px_rgba(6,16,86,0.08)]"
           >
-            <div className="grid gap-2">
-              <h3 className="font-[var(--font-sen)] text-[1.2rem] font-semibold leading-[1.04] tracking-[-0.035em] text-[var(--color-brand-indigo)] md:text-[1.35rem]">
+            <div className="grid min-h-[10.5rem] content-between gap-5 bg-[var(--color-brand-sky-soft)] px-5 py-5 md:min-h-[11.5rem] md:px-6">
+              <div className="flex items-start">
+                <span className="rounded-full bg-white px-2 py-0.5 font-[var(--font-be-vietnam-pro)] text-[0.58rem] font-semibold uppercase tracking-[0.1em] text-[var(--color-brand-blue)] shadow-[inset_0_0_0_1px_rgba(6,16,86,0.08)]">
+                  Series {index + 1}
+                </span>
+              </div>
+
+              <h3 className="font-[var(--font-sen)] text-[1.45rem] font-semibold leading-[0.98] tracking-[-0.045em] text-[var(--color-brand-blue)] md:text-[1.6rem]">
                 {item.title}
               </h3>
+            </div>
+
+            <div className="grid gap-4 px-5 py-4 md:px-6 md:py-5">
               {item.description ? (
                 <p className="font-[var(--font-sans)] text-[0.95rem] leading-[1.45] tracking-[-0.02em] text-[var(--color-text-muted)]">
                   {item.description}
                 </p>
               ) : null}
-            </div>
 
-            <Badge variant="outline" className="w-fit border-[rgba(6,16,86,0.14)]">
-              {episodeCountLabel(item.episodes.length)}
-            </Badge>
+              <span className="inline-flex w-fit items-center gap-0.5 font-[var(--font-be-vietnam-pro)] text-[0.66rem] font-semibold uppercase tracking-[0.065em] text-[var(--color-brand-blue)]">
+                See episodes
+                <ArrowUpRightIcon className="size-3.5 stroke-[2.4] transition-transform duration-150 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+              </span>
+            </div>
           </button>
         ))}
       </div>

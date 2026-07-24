@@ -51,7 +51,7 @@ describe("podcast page", () => {
     expect(gallerySource).toContain("<iframe");
     expect(seriesGallerySource).toContain("DialogContent");
     expect(seriesGallerySource).toContain(
-      "Jump to any of the series on the podcast",
+      "Start from any of the series",
     );
     expect(seriesGallerySource).toContain(">Series<");
     expect(seriesGallerySource).toContain("getDownloadHref");
@@ -64,6 +64,12 @@ describe("podcast page", () => {
     expect(viewSource).toContain("podcastTelegramUrl");
     expect(viewSource).toContain("podcastApplePodcastsUrl");
     expect(viewSource).toContain("podcastAudiomackUrl");
+    expect(viewSource).toContain(
+      "/site/home/assets/social-media-icons/youtube-icon.svg",
+    );
+    expect(viewSource).not.toContain(
+      "/site/home/assets/social-media-icons/youtube-icon-white.svg",
+    );
     expect(viewSource).toContain(
       "/site/home/assets/social-media-icons/spotify-icon.svg",
     );

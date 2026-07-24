@@ -107,6 +107,7 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - For YouTube Shorts feed work, test the no-API-key RSS path, avoid stale Instagram copy, and do not render ordinary uploads as Shorts.
 - Embedded YouTube playback should use each item’s direct canonical watch URL; playlist links are for subscribe/open actions.
 - Public podcast playback should happen in-page before sending visitors out to YouTube.
+- Public podcast platform icons should use standard colored service marks on neutral wells, not monochrome brand-blue circles.
 - For teaching archives, prefer a divided editorial list with inline expansion over repetitive card grids or modal playback.
 - When official ministry/media copy exists, use the source wording first; summarize only when asked for a rewrite.
 - For public series pages, store direct per-item playback URLs and use external platform links for subscribe/full-library CTAs.
@@ -114,6 +115,7 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 ## Public library and carousel details
 
 - Available media controls should use strong brand-color contrast; reserve faded opacity for disabled states.
+- Questions pathway/podcast journey surfaces should lean bright, low-saturation yellow/olive rather than orange.
 - Public library play/download controls should feel actionable, avoid decorative shadows, and keep muted styles only for unavailable audio.
 - On mobile library tables, keep serial-number headers/cells tight, around `w-8` with minimal padding; use wider sizing only at desktop breakpoints.
 - Multi-line library teaching titles need breathing room, such as `leading-[1.2]`.

@@ -1,4 +1,4 @@
-import { ChevronRight } from "lucide-react";
+import { ArrowUpRightIcon, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -34,7 +34,6 @@ import {
 import { HomepageCommunitySection } from "./homepage-community-section";
 import { HomepageFooter } from "./homepage-footer";
 import { HomepageNav } from "./homepage-nav";
-import { PodcastRssList } from "./podcast-rss-list";
 import { PodcastSeriesGallery } from "./podcast-series-gallery";
 import { PodcastVideoGallery } from "./podcast-video-gallery";
 import { PublicSitePageShell } from "./public-site-page-shell";
@@ -73,7 +72,7 @@ export async function PodcastPageView() {
   const podcastPlatformIcons = [
     {
       label: "YouTube",
-      iconSrc: "/site/home/assets/social-media-icons/youtube-icon-white.svg",
+      iconSrc: "/site/home/assets/social-media-icons/youtube-icon.svg",
       href: podcastSubscribeCta.href,
     },
     {
@@ -140,7 +139,7 @@ export async function PodcastPageView() {
                   rel="noreferrer"
                   className="flex flex-col items-center gap-1.5 text-center"
                 >
-                  <span className="flex size-11 items-center justify-center rounded-full bg-[var(--color-brand-blue)]">
+                  <span className="flex size-11 items-center justify-center rounded-full bg-white shadow-[inset_0_0_0_1px_rgba(6,16,86,0.12),0_6px_14px_rgba(6,16,86,0.06)]">
                     <Image
                       src={iconSrc}
                       alt=""
@@ -217,20 +216,6 @@ export async function PodcastPageView() {
             </div>
           </div>
 
-          <div className="mx-auto grid w-full max-w-[58rem] gap-6">
-            <div className="grid gap-2 ">
-              <p className="site-hero-eyebrow">All episodes</p>
-              <h2 className="site-section-heading max-w-[28rem]">
-                Listen and download every episode
-              </h2>
-              <p className="font-[var(--font-be-vietnam-pro)] text-[0.93rem] leading-[1.5] tracking-[-0.02em] text-[var(--color-text-muted)]">
-                Stream directly here, download as an MP3, or open on Spotify.
-              </p>
-            </div>
-
-            <PodcastRssList episodes={rssEpisodes} />
-          </div>
-
           <div className="mx-auto grid w-full max-w-[58rem] gap-8">
             <PodcastSeriesGallery
               series={seriesWithEpisodes}
@@ -287,12 +272,9 @@ export async function PodcastPageView() {
               <Card
                 key={step.title}
                 tone={step.tone}
-                className="gap-3 rounded-[1.25rem] border-0 p-5 shadow-[0_14px_32px_rgba(15,23,40,0.06)]"
+                className="gap-3 rounded-[1.25rem] border-0 px-5 pb-5 pt-7 shadow-[0_14px_32px_rgba(15,23,40,0.06)]"
               >
                 <CardHeader className="gap-3 px-0 py-0">
-                  <p className="font-[var(--font-be-vietnam-pro)] text-[0.72rem] font-semibold uppercase leading-none tracking-[0.14em] text-[var(--color-brand-indigo)]">
-                    {step.eyebrow}
-                  </p>
                   <CardTitle className="font-[var(--font-sen)] text-[1.5rem] font-bold leading-[1] tracking-[-0.045em] text-[var(--color-text-strong)]">
                     {step.title}
                   </CardTitle>
@@ -304,14 +286,13 @@ export async function PodcastPageView() {
                   </p>
 
                   <div className="flex">
-                    <Button
-                      size="lg"
-                      variant="secondary"
-                      render={<Link href={step.href} className="site-button-text" />}
-                      className="min-h-[2.75rem] rounded-full border-0 px-5 text-[0.8125rem] font-semibold"
+                    <Link
+                      href={step.href}
+                      className="group inline-flex w-fit items-center gap-0.5 rounded-sm font-[var(--font-be-vietnam-pro)] text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-[var(--color-brand-blue)] outline-none transition-colors duration-150 hover:text-[var(--color-brand-blue-hover)] focus-visible:ring-4 focus-visible:ring-[var(--color-focus)]"
                     >
                       {step.ctaLabel}
-                    </Button>
+                      <ArrowUpRightIcon className="size-3.5 stroke-[2.4] transition-transform duration-150 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-focus-visible:-translate-y-0.5 group-focus-visible:translate-x-0.5" />
+                    </Link>
                   </div>
                 </CardContent>
               </Card>

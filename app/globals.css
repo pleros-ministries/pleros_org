@@ -117,14 +117,14 @@
   --ring: var(--color-focus);
 
   /* Questions theme */
-  --questions-surface: #fbe4d3;
-  --questions-surface-strong: #f4b183;
-  --questions-accent: #c96a2b;
-  --questions-accent-soft: rgba(201, 106, 43, 0.12);
-  --questions-ring: rgba(201, 106, 43, 0.22);
+  --questions-surface: #fff8d7;
+  --questions-surface-strong: #eee39a;
+  --questions-accent: #756b21;
+  --questions-accent-soft: rgba(117, 107, 33, 0.12);
+  --questions-ring: rgba(117, 107, 33, 0.22);
   --shadow-glow-questions:
     0 0 0 4px var(--questions-ring),
-    0 16px 40px rgba(201, 106, 43, 0.14);
+    0 16px 40px rgba(117, 107, 33, 0.12);
 
   /* Purpose theme */
   --purpose-surface: #ebddfa;
@@ -414,14 +414,14 @@
     --ring: var(--color-focus);
 
     /* Homepage section + pathway colors */
-    --questions-surface: #ffe4bb;
-    --questions-surface-strong: #b40735;
-    --questions-accent: #b40735;
-    --questions-accent-soft: rgba(180, 7, 53, 0.14);
-    --questions-ring: rgba(180, 7, 53, 0.22);
+    --questions-surface: #fff8d7;
+    --questions-surface-strong: #eee39a;
+    --questions-accent: #756b21;
+    --questions-accent-soft: rgba(117, 107, 33, 0.12);
+    --questions-ring: rgba(117, 107, 33, 0.22);
     --shadow-glow-questions:
       0 0 0 4px var(--questions-ring),
-      0 18px 36px rgba(180, 7, 53, 0.14);
+      0 18px 36px rgba(117, 107, 33, 0.12);
 
     --purpose-surface: #e8d1ff;
     --purpose-surface-strong: #68369b;
@@ -946,13 +946,13 @@
     --page-accent-soft: var(--questions-accent-soft);
     --page-accent-ring: var(--questions-ring);
     --page-accent-glow: var(--shadow-glow-questions);
-    --pathway-card-bg: linear-gradient(160deg, #f3c099 0%, #ea9d6f 56%, #db7e52 100%);
-    --pathway-card-border: rgba(132, 63, 29, 0.14);
-    --pathway-card-shadow: 0 16px 38px rgba(183, 99, 49, 0.18);
-    --pathway-card-glow: 0 22px 50px rgba(183, 99, 49, 0.26);
-    --pathway-card-title: #241410;
-    --pathway-card-copy: rgba(60, 33, 22, 0.78);
-    --pathway-card-cue: rgba(60, 33, 22, 0.56);
+    --pathway-card-bg: linear-gradient(160deg, #fffbe4 0%, #f7efbd 56%, #eee39a 100%);
+    --pathway-card-border: rgba(117, 107, 33, 0.14);
+    --pathway-card-shadow: 0 16px 38px rgba(117, 107, 33, 0.14);
+    --pathway-card-glow: 0 22px 50px rgba(117, 107, 33, 0.18);
+    --pathway-card-title: #1d1c10;
+    --pathway-card-copy: rgba(42, 39, 18, 0.78);
+    --pathway-card-cue: rgba(42, 39, 18, 0.56);
   }
 
   .theme-purpose {
