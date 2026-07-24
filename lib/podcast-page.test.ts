@@ -50,6 +50,8 @@ describe("podcast page", () => {
     expect(viewSource).toContain("groupPodcastSeriesEpisodes");
     expect(gallerySource).toContain("<iframe");
     expect(seriesGallerySource).toContain("DialogContent");
+    expect(seriesGallerySource).toContain("site-font-theme");
+    expect(seriesGallerySource).toContain("platformIconLinks");
     expect(seriesGallerySource).toContain(
       "Start from any of the series",
     );

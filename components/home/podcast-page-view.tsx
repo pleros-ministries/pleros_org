@@ -139,13 +139,13 @@ export async function PodcastPageView() {
                   rel="noreferrer"
                   className="flex flex-col items-center gap-1.5 text-center"
                 >
-                  <span className="flex size-11 items-center justify-center rounded-full bg-white shadow-[inset_0_0_0_1px_rgba(6,16,86,0.12),0_6px_14px_rgba(6,16,86,0.06)]">
+                  <span className="flex h-8 items-center justify-center">
                     <Image
                       src={iconSrc}
                       alt=""
-                      width={20}
-                      height={20}
-                      className="size-5"
+                      width={24}
+                      height={24}
+                      className="size-6"
                     />
                   </span>
                   <span className="font-[var(--font-be-vietnam-pro)] text-[0.8rem] font-medium text-[var(--color-text-strong)]">
@@ -221,6 +221,7 @@ export async function PodcastPageView() {
               series={seriesWithEpisodes}
               podLinkHref={homePodcastUrl}
               youtubeChannelHref={homeYoutubeChannelUrl}
+              platformIconLinks={podcastPlatformIcons}
             />
           </div>
         </div>

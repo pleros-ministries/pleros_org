@@ -107,7 +107,8 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - For YouTube Shorts feed work, test the no-API-key RSS path, avoid stale Instagram copy, and do not render ordinary uploads as Shorts.
 - Embedded YouTube playback should use each item’s direct canonical watch URL; playlist links are for subscribe/open actions.
 - Public podcast playback should happen in-page before sending visitors out to YouTube.
-- Public podcast platform icons should use standard colored service marks on neutral wells, not monochrome brand-blue circles.
+- Public podcast platform icons should use standard colored service marks directly, without enclosing circles or monochrome brand treatment.
+- Public podcast dialogs should use the same public-site font/color styling and platform icon treatment as the parent page.
 - For teaching archives, prefer a divided editorial list with inline expansion over repetitive card grids or modal playback.
 - When official ministry/media copy exists, use the source wording first; summarize only when asked for a rewrite.
 - For public series pages, store direct per-item playback URLs and use external platform links for subscribe/full-library CTAs.

@@ -5,12 +5,10 @@ import {
   ClockIcon,
   DownloadIcon,
   ExternalLinkIcon,
-  Music2Icon,
   PauseIcon,
   PlayIcon,
-  SendIcon,
-  AppleIcon,
 } from "lucide-react";
+import Image from "next/image";
 import { useMemo, useState } from "react";
 
 import {
@@ -28,16 +26,18 @@ type PodcastSeriesGalleryProps = {
   series: PodcastSeriesWithEpisodes[];
   podLinkHref: string;
   youtubeChannelHref: string;
+  platformIconLinks: {
+    label: string;
+    iconSrc: string;
+    href: string;
+  }[];
 };
-
-function episodeCountLabel(count: number) {
-  return `${count} episode${count === 1 ? "" : "s"}`;
-}
 
 export function PodcastSeriesGallery({
   series,
   podLinkHref,
   youtubeChannelHref,
+  platformIconLinks,
 }: PodcastSeriesGalleryProps) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [playingGuid, setPlayingGuid] = useState<string | null>(null);
@@ -59,18 +59,13 @@ export function PodcastSeriesGallery({
   }
 
   const platformLinks = selected
-    ? [
-        {
-          label: "YouTube",
-          href: selected.href ?? youtubeChannelHref,
-          Icon: null,
-          iconSrc: "/site/home/assets/social-media-icons/youtube-icon.svg",
-        },
-        { label: "Spotify", href: podLinkHref, Icon: Music2Icon, iconSrc: null },
-        { label: "Telegram", href: podLinkHref, Icon: SendIcon, iconSrc: null },
-        { label: "Apple Podcasts", href: podLinkHref, Icon: AppleIcon, iconSrc: null },
-        { label: "More platforms", href: podLinkHref, Icon: ExternalLinkIcon, iconSrc: null },
-      ]
+    ? platformIconLinks.map((platform) => ({
+        ...platform,
+        href:
+          platform.label === "YouTube"
+            ? (selected.href ?? youtubeChannelHref)
+            : platform.href,
+      }))
     : [];
 
   return (
@@ -123,37 +118,56 @@ export function PodcastSeriesGallery({
 
       <Dialog open={Boolean(selected)} onOpenChange={handleOpenChange}>
         <DialogContent
-          tone="muted"
-          className="grid max-h-[85vh] w-[min(100%-1.5rem,38rem)] gap-4 overflow-y-auto"
+          tone="default"
+          className="site-font-theme grid max-h-[85vh] w-[min(100%-1.5rem,38rem)] gap-5 overflow-y-auto rounded-[1.25rem] border-[rgba(6,16,86,0.12)] bg-white p-5 text-[var(--color-text)] shadow-[0_24px_64px_rgba(6,16,86,0.18)] sm:p-6"
         >
           <DialogHeader className="gap-2">
-            <DialogTitle>{selected?.title ?? ""}</DialogTitle>
-            <DialogDescription>{selected?.description ?? ""}</DialogDescription>
+            <DialogTitle className="font-[var(--font-sen)] text-[1.55rem] font-semibold leading-[0.98] tracking-[-0.045em] text-[var(--color-brand-blue)] md:text-[1.9rem]">
+              {selected?.title ?? ""}
+            </DialogTitle>
+            <DialogDescription className="font-[var(--font-sans)] text-[1rem] leading-[1.45] tracking-[-0.02em] text-[var(--color-text-muted)]">
+              {selected?.description ?? ""}
+            </DialogDescription>
           </DialogHeader>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap items-start gap-x-5 gap-y-3">
             {platformLinks.map((platform) => (
               <a
                 key={platform.label}
                 href={platform.href}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-2 rounded-full border border-[rgba(6,16,86,0.14)] bg-white px-3.5 py-2 text-[0.8125rem] font-medium text-[var(--color-brand-indigo)] transition-transform duration-150 hover:-translate-y-px"
+                className="flex flex-col items-center gap-1.5 text-center transition-transform duration-150 hover:-translate-y-px"
               >
-                {platform.iconSrc ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={platform.iconSrc} alt="" className="size-4" />
-                ) : platform.Icon ? (
-                  <platform.Icon className="size-4" />
-                ) : null}
-                {platform.label}
+                <span className="flex h-8 items-center justify-center">
+                  <Image
+                    src={platform.iconSrc}
+                    alt=""
+                    width={24}
+                    height={24}
+                    className="size-6"
+                  />
+                </span>
+                <span className="font-[var(--font-be-vietnam-pro)] text-[0.72rem] font-medium text-[var(--color-text-strong)]">
+                  {platform.label}
+                </span>
               </a>
             ))}
+
+            <a
+              href={podLinkHref}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1 self-end pb-1 font-[var(--font-be-vietnam-pro)] text-[0.72rem] font-semibold text-[var(--color-brand-blue)] transition-colors duration-150 hover:text-[var(--color-brand-blue-hover)]"
+            >
+              and more
+              <ArrowUpRightIcon className="size-3.5 stroke-[2.4]" />
+            </a>
           </div>
 
           {selected && selected.episodes.length ? (
             <div className="grid gap-2">
-              <p className="font-[var(--font-be-vietnam-pro)] text-[0.78rem] font-semibold uppercase tracking-[0.14em] text-[var(--color-text-muted)]">
+              <p className="font-[var(--font-be-vietnam-pro)] text-[0.66rem] font-semibold uppercase tracking-[0.1em] text-[var(--color-text-muted)]">
                 Episodes ({selected.episodes.length})
               </p>
 
