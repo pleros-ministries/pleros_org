@@ -143,6 +143,7 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - Public display headings and short section intro lines should generally omit terminal periods unless the punctuation is intentional copy.
 - Public Prayer Watch session times are Morning 5:30 am, Afternoon 12:30 pm, and Evening 8:30 pm.
 - Public Prayer Watch session times should use a connected schedule strip rather than three separate cards, with a distinct but soft sky-blue `Next session` header, one active segment highlight, restrained corner radii, and very light borders.
+- Public Prayer Watch active time segments should suppress adjacent vertical dividers so the highlight does not have awkward side rules.
 - Public Prayer Watch video posters should use the branded devotional artwork without tint overlays or image filters, not the raw YouTube thumbnail when that thumbnail looks visually weak.
 - For homepage/card asset swaps, import explicit source assets into `public/site/home/assets/*`, update the specific card data, and verify mobile rendering.
 - For welcome dashboard card backgrounds, copy the named source image into `public/site/home/assets/dashboard-cards/`, wire it through card data, and verify the rendered preview card image.

@@ -88,11 +88,16 @@ export function HomepagePrayerWatchSection() {
               ) : null}
             </div>
             <div className="grid grid-cols-3">
-              {PRAYER_WATCH_SESSIONS.map((item) => {
+              {PRAYER_WATCH_SESSIONS.map((item, index) => {
                 const Icon = prayerWatchSessionIcons[item.id];
                 const isNextSession = item.id === nextSessionId;
+                const isAdjacentToNextSession =
+                  PRAYER_WATCH_SESSIONS[index + 1]?.id === nextSessionId;
                 const segmentClassName = [
-                  "relative min-w-0 px-2 py-3 transition-colors duration-200 after:absolute after:inset-y-3 after:right-0 after:w-[0.5px] after:bg-[rgba(5,20,128,0.1)] last:after:hidden",
+                  "relative min-w-0 px-2 py-3 transition-colors duration-200",
+                  isNextSession || isAdjacentToNextSession
+                    ? "after:hidden"
+                    : "after:absolute after:inset-y-3 after:right-0 after:w-[0.5px] after:bg-[rgba(5,20,128,0.1)] last:after:hidden",
                   isNextSession
                     ? "bg-[var(--color-brand-lime)]"
                     : "bg-transparent",

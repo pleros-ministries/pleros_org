@@ -251,6 +251,8 @@ describe("site home page", () => {
     expect(prayerWatchSectionSource).toContain(
       "after:absolute after:inset-y-3 after:right-0 after:w-[0.5px]",
     );
+    expect(prayerWatchSectionSource).toContain("isAdjacentToNextSession");
+    expect(prayerWatchSectionSource).toContain("after:hidden");
     expect(prayerWatchSectionSource).not.toContain(
       "rounded-full bg-white px-1.5 py-0.5",
     );
