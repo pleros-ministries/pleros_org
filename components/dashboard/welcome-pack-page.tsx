@@ -2,8 +2,11 @@ import { LockIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { homeWhatsappChannelUrl } from "@/lib/site-homepage-content";
+import { HomepageCommunitySection } from "@/components/home/homepage-community-section";
 import { extraGifts, mainGifts, type WelcomePackGift } from "@/lib/welcome-pack-gifts";
+
+const welcomePackContentFrame =
+  "mx-auto w-full max-w-[36rem] px-[var(--site-shell-padding-x)] md:px-[var(--site-shell-padding-x-md)] lg:px-[var(--site-shell-padding-x-lg)] xl:px-[var(--site-shell-padding-x-xl)]";
 
 function GiftCard({
   gift,
@@ -66,12 +69,12 @@ export function WelcomePackPage({ extraGiftsUnlocked }: WelcomePackPageProps) {
   const hasExtraGifts = extraGifts.length > 0;
 
   return (
-    <section className="site-font-theme bg-[var(--color-surface)] pb-10">
-      <div className="grid gap-10 pb-10">
+    <section className="site-font-theme bg-[var(--color-surface)]">
+      <div className="grid gap-10">
         <section className="bg-white pt-5 sm:pt-6">
-          <div className="container-pleros grid max-w-[36rem] gap-7">
+          <div className={`${welcomePackContentFrame} grid gap-7`}>
             <div className="grid gap-3">
-              <h1 className="site-hero-heading max-w-[15ch] text-[clamp(2.1rem,6vw,2.9rem)] text-[var(--color-brand-blue)]">
+              <h1 className="site-hero-heading max-w-[20ch] text-[2rem] leading-[0.98] text-[var(--color-brand-blue)] sm:max-w-[18ch] sm:text-[2.45rem] md:text-[2.9rem]">
                 Find the Answer to the Most Important Question of Your Life
               </h1>
               <p className="font-[var(--font-be-vietnam-pro)] text-[0.95rem] leading-[1.42] tracking-[-0.02em] text-[var(--color-text-muted)]">
@@ -97,7 +100,7 @@ export function WelcomePackPage({ extraGiftsUnlocked }: WelcomePackPageProps) {
         </section>
 
         <section className="bg-[var(--color-surface-muted)] py-8">
-          <div className="container-pleros grid max-w-[36rem] gap-3">
+          <div className={`${welcomePackContentFrame} grid gap-3`}>
             <h2 className="site-section-heading text-[1.55rem] text-[var(--color-brand-blue)]">
               Your Greatest Burden
             </h2>
@@ -122,7 +125,7 @@ export function WelcomePackPage({ extraGiftsUnlocked }: WelcomePackPageProps) {
         </section>
 
         <section className="bg-white py-8">
-          <div className="container-pleros grid max-w-[36rem] gap-2.5 font-[var(--font-be-vietnam-pro)] text-[0.95rem] leading-[1.45] tracking-[-0.02em] text-[var(--color-text-strong)]">
+          <div className={`${welcomePackContentFrame} grid gap-2.5 font-[var(--font-be-vietnam-pro)] text-[0.95rem] leading-[1.45] tracking-[-0.02em] text-[var(--color-text-strong)]`}>
             <p>What we are offering is not a solution suggestion or a guess.</p>
             <p>
               What we offer is an exact and objective answer to the
@@ -137,7 +140,7 @@ export function WelcomePackPage({ extraGiftsUnlocked }: WelcomePackPageProps) {
         </section>
 
         <section className="bg-[var(--color-brand-sky)] py-8">
-          <div className="container-pleros grid max-w-[36rem] gap-6">
+          <div className={`${welcomePackContentFrame} grid gap-6`}>
             <div className="grid gap-2.5 font-[var(--font-be-vietnam-pro)] text-[0.95rem] leading-[1.45] tracking-[-0.02em] text-[var(--color-text-strong)]">
               <p>
                 The matter discussed and answered in this book is so
@@ -177,7 +180,7 @@ export function WelcomePackPage({ extraGiftsUnlocked }: WelcomePackPageProps) {
 
         {hasExtraGifts ? (
           <section className="bg-white py-8">
-            <div className="container-pleros grid max-w-[36rem] gap-6">
+            <div className={`${welcomePackContentFrame} grid gap-6`}>
               <div className="grid gap-2.5 font-[var(--font-be-vietnam-pro)] text-[0.95rem] leading-[1.45] tracking-[-0.02em] text-[var(--color-text-strong)]">
                 <p>
                   Aside from getting this book for free, we have TWO other
@@ -213,42 +216,21 @@ export function WelcomePackPage({ extraGiftsUnlocked }: WelcomePackPageProps) {
           </section>
         ) : (
           <section className="bg-white py-8">
-            <div className="container-pleros grid max-w-[36rem] gap-2 rounded-[1.25rem] bg-[var(--color-brand-sky)] px-4 py-4">
-              <h2 className="site-section-heading text-[1.55rem] text-[var(--color-brand-blue)]">
-                More resources are coming
-              </h2>
-              <p className="font-[var(--font-be-vietnam-pro)] text-[0.86rem] leading-[1.35] tracking-[-0.02em] text-[var(--color-brand-blue)]">
-                The supplementary packs are not ready yet. For now, your
-                welcome pack book is available above and in your email.
-              </p>
+            <div className={`${welcomePackContentFrame} grid`}>
+              <div className="grid gap-2 rounded-[1.25rem] bg-[var(--color-brand-sky)] px-4 py-4">
+                <h2 className="site-section-heading text-[1.55rem] text-[var(--color-brand-blue)]">
+                  More resources are coming
+                </h2>
+                <p className="font-[var(--font-be-vietnam-pro)] text-[0.86rem] leading-[1.35] tracking-[-0.02em] text-[var(--color-brand-blue)]">
+                  The supplementary packs are not ready yet. For now, your
+                  welcome pack book is available above and in your email.
+                </p>
+              </div>
             </div>
           </section>
         )}
 
-        <div className="relative px-[1.3125rem] py-[4.5625rem] text-center text-white lg:px-16 lg:py-24">
-          <div className="grid gap-[3.8125rem]">
-            <div className="grid justify-items-center gap-[0.8125rem]">
-              <h2 className="site-section-heading max-w-[33.5625rem] text-white">
-                Join Pleros Community Channel
-              </h2>
-              <p className="site-section-intro max-w-[28.125rem] text-white/90">
-                This is a community open to anyone who desires edification via platforms of the Word and prayer designed to help you walk in and fulfill God&apos;s purpose daily.
-
-              </p>
-            </div>
-
-            <div className="flex justify-center">
-              <Link
-                href={homeWhatsappChannelUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="site-button-text inline-flex min-h-[2.875rem] items-center justify-center rounded-full bg-[var(--color-brand-lime)] px-6 py-2.5 text-[0.875rem] leading-none font-semibold text-[var(--color-brand-blue)]"
-              >
-                Join Now
-              </Link>
-            </div>
-          </div>
-        </div>
+        <HomepageCommunitySection />
       </div>
     </section>
   );

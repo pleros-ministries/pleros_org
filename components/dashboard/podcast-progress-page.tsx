@@ -7,6 +7,7 @@ import {
   CheckIcon,
   ChevronDownIcon,
   ChevronLeftIcon,
+  ArrowUpRightIcon,
   SearchIcon,
 } from "lucide-react";
 
@@ -381,6 +382,13 @@ export function PodcastProgressPage({
             Mark the Pleros Podcast episodes you have listened to and keep moving
             through the teachings.
           </p>
+          <Link
+            href="/podcast"
+            className="site-button-text group mt-2 inline-flex w-fit items-center gap-1 text-[0.75rem] font-semibold tracking-[0.12em] text-[var(--color-brand-blue)] uppercase"
+          >
+            Open podcast
+            <ArrowUpRightIcon className="size-3.5 transition-transform duration-150 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          </Link>
         </div>
 
         <div className="grid gap-4 rounded-[1.25rem] border border-[var(--color-line)] bg-white p-4 shadow-[var(--shadow-sm)] sm:p-5">

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildPrayerWatchCalendar,
   getMonthLabel,
+  getNextPrayerWatchSessionId,
   isValidPrayerWatchDateKey,
   toDateKey,
 } from "./prayer-watch";
@@ -17,6 +18,21 @@ describe("toDateKey", () => {
 describe("getMonthLabel", () => {
   it("formats a readable month/year label", () => {
     expect(getMonthLabel(2026, 6)).toBe("July 2026");
+  });
+});
+
+describe("getNextPrayerWatchSessionId", () => {
+  it("selects the next same-day Prayer Watch session in Lagos time", () => {
+    expect(getNextPrayerWatchSessionId(new Date("2026-07-24T04:29:00.000Z"))).toBe("morning");
+    expect(getNextPrayerWatchSessionId(new Date("2026-07-24T04:30:00.000Z"))).toBe("morning");
+    expect(getNextPrayerWatchSessionId(new Date("2026-07-24T04:31:00.000Z"))).toBe("afternoon");
+    expect(getNextPrayerWatchSessionId(new Date("2026-07-24T11:30:00.000Z"))).toBe("afternoon");
+    expect(getNextPrayerWatchSessionId(new Date("2026-07-24T11:31:00.000Z"))).toBe("evening");
+  });
+
+  it("wraps to morning after the evening Prayer Watch session", () => {
+    expect(getNextPrayerWatchSessionId(new Date("2026-07-24T19:30:00.000Z"))).toBe("evening");
+    expect(getNextPrayerWatchSessionId(new Date("2026-07-24T19:31:00.000Z"))).toBe("morning");
   });
 });
 

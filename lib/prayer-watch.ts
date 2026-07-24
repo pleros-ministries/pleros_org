@@ -5,6 +5,24 @@ export const PRAYER_WATCH_FEATURED_VIDEO_ID = "eX95LNHmyg0";
 export const PRAYER_WATCH_EMBED_URL = `https://www.youtube.com/embed/${PRAYER_WATCH_FEATURED_VIDEO_ID}?autoplay=1&rel=0&modestbranding=1&playsinline=1`;
 export const PRAYER_WATCH_THUMBNAIL_URL = `https://i.ytimg.com/vi/${PRAYER_WATCH_FEATURED_VIDEO_ID}/hqdefault.jpg`;
 
+export const PRAYER_WATCH_TIME_ZONE = "Africa/Lagos";
+
+export type PrayerWatchSessionId = "morning" | "afternoon" | "evening";
+
+export type PrayerWatchSession = {
+  id: PrayerWatchSessionId;
+  label: string;
+  time: string;
+  hour: number;
+  minute: number;
+};
+
+export const PRAYER_WATCH_SESSIONS = [
+  { id: "morning", label: "Morning", time: "5:30 am", hour: 5, minute: 30 },
+  { id: "afternoon", label: "Afternoon", time: "12:30 pm", hour: 12, minute: 30 },
+  { id: "evening", label: "Evening", time: "8:30 pm", hour: 20, minute: 30 },
+] satisfies PrayerWatchSession[];
+
 export type PrayerWatchDayState = "future" | "attended" | "missed";
 
 export type PrayerWatchCalendarCell = {
@@ -29,6 +47,32 @@ export function getMonthLabel(year: number, month: number): string {
     month: "long",
     year: "numeric",
   });
+}
+
+function getZonedMinutesSinceMidnight(date: Date, timeZone: string): number {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    hour: "2-digit",
+    hour12: false,
+    minute: "2-digit",
+    timeZone,
+  }).formatToParts(date);
+
+  const hour = Number(parts.find((part) => part.type === "hour")?.value ?? "0") % 24;
+  const minute = Number(parts.find((part) => part.type === "minute")?.value ?? "0");
+
+  return hour * 60 + minute;
+}
+
+export function getNextPrayerWatchSessionId(
+  date = new Date(),
+  timeZone = PRAYER_WATCH_TIME_ZONE,
+): PrayerWatchSessionId {
+  const currentMinutes = getZonedMinutesSinceMidnight(date, timeZone);
+  const nextSession = PRAYER_WATCH_SESSIONS.find(
+    (session) => session.hour * 60 + session.minute >= currentMinutes,
+  );
+
+  return nextSession?.id ?? PRAYER_WATCH_SESSIONS[0].id;
 }
 
 function buildCell(

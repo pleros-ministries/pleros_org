@@ -86,6 +86,9 @@ describe("welcome pack completion wiring", () => {
     expect(pageSource).toContain("Thank you for receiving your gift");
     expect(pageSource).toContain("Visit your dashboard to access your gift.");
     expect(pageSource).toContain('href="/dashboard/welcomepack"');
+    expect(pageSource).toContain("thankYouSectionPadding");
+    expect(pageSource).toContain("px-[var(--site-shell-padding-x)]");
+    expect(pageSource).not.toContain("px-6");
     expect(pageSource).toContain(
       "Get TWO special gifts today, when you recommend this book",
     );

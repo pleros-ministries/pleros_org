@@ -158,8 +158,9 @@ describe("site home page", () => {
     );
 
     expect(navSource).toContain("data-starting-style:translate-x-5");
-    expect(navSource).toContain("data-ending-style:translate-x-3");
-    expect(navSource).toContain("duration-[560ms]");
+    expect(navSource).toContain("data-ending-style:translate-x-full");
+    expect(navSource).toContain("duration-[360ms]");
+    expect(navSource).toContain("duration-[280ms]");
     expect(navSource).toContain('open ? "translate-x-0 opacity-100" : "translate-x-4 opacity-0"');
   });
 
@@ -204,6 +205,7 @@ describe("site home page", () => {
       "utf8",
     );
     expect(socialSource).toContain("HomepageSocialSection({ posts }");
+    expect(socialSource).toContain("bg-[#EDFFEB]");
     expect(socialSource).toContain("site-social-post-title");
     expect(socialSource).toContain("Pleros Ministries");
     expect(socialSource).toContain("Watch short");
@@ -229,7 +231,40 @@ describe("site home page", () => {
     );
 
     expect(prayerWatchSectionSource).toContain("PRAYER_WATCH_YOUTUBE_URL");
+    expect(prayerWatchSectionSource).toContain("getNextPrayerWatchSessionId");
+    expect(prayerWatchSectionSource).toContain("PRAYER_WATCH_SESSIONS");
+    expect(prayerWatchSectionSource).toContain(
+      "Join every Pleros Prayer Watch session on YouTube",
+    );
+    expect(prayerWatchSectionSource).not.toContain(
+      "Join every Pleros Prayer Watch session on YouTube.",
+    );
+    expect(prayerWatchSectionSource).toContain("Next session");
+    expect(prayerWatchSectionSource).toContain(
+      "overflow-hidden rounded-[1rem] border border-[#A9DDF0] bg-[#DDF5FF]",
+    );
+    expect(prayerWatchSectionSource).toContain('aria-live="polite"');
+    expect(prayerWatchSectionSource).toContain(
+      "bg-[var(--color-brand-blue)] px-3 py-2",
+    );
+    expect(prayerWatchSectionSource).toContain("tracking-[0.1em] text-white uppercase");
+    expect(prayerWatchSectionSource).toContain(
+      "after:absolute after:inset-y-3 after:right-0",
+    );
+    expect(prayerWatchSectionSource).not.toContain(
+      "rounded-full bg-white px-1.5 py-0.5",
+    );
+    expect(prayerWatchSectionSource).toContain(
+      "setInterval(updateNextSession, 60_000)",
+    );
     expect(prayerWatchSectionSource).toContain("Subscribe now");
+    expect(prayerWatchSectionSource).toContain("SunriseIcon");
+    expect(prayerWatchSectionSource).toContain("SunIcon");
+    expect(prayerWatchSectionSource).toContain("MoonIcon");
+    expect(prayerWatchSectionSource).toContain("bg-[#DDF5FF]");
+    expect(prayerWatchSectionSource).not.toContain(
+      "rounded-[var(--radius-sm)]",
+    );
     expect(prayerWatchSectionSource).not.toContain("homeYoutubeChannelUrl");
     expect(viewSource).toContain("<HomepagePrayerWatchSection />");
   });
@@ -243,7 +278,13 @@ describe("site home page", () => {
     expect(prayerWatchSectionSource).toContain('"use client"');
     expect(prayerWatchSectionSource).toContain("PRAYER_WATCH_EMBED_URL");
     expect(prayerWatchSectionSource).toContain("<iframe");
-    expect(prayerWatchSectionSource).toContain("PRAYER_WATCH_THUMBNAIL_URL");
+    expect(prayerWatchSectionSource).toContain("PRAYER_WATCH_POSTER_SRC");
+    expect(prayerWatchSectionSource).toContain(
+      "/site/home/assets/dashboard-cards/4-prayer-watch-bg.webp",
+    );
+    expect(prayerWatchSectionSource).not.toContain(
+      "PRAYER_WATCH_THUMBNAIL_URL",
+    );
 
     const prayerWatchLibSource = readFileSync(
       join(process.cwd(), "lib", "prayer-watch.ts"),
@@ -370,9 +411,9 @@ describe("site home page", () => {
     expect(navSource).toContain("homeFooterNavGroups");
     expect(navSource).toContain("site-mobile-menu-group-label");
     expect(navSource).toContain(
-      "className=\"site-font-theme overflow-hidden border-l border-white/8",
+      'className="site-font-theme overflow-hidden rounded-none border-l border-white/8',
     );
-    expect(navSource).toContain("aria-label=\"Close menu\"");
+    expect(navSource).toContain('aria-label="Close menu"');
     expect(navSource).toContain("inline-flex h-9 w-9 items-center justify-center text-white transition-opacity duration-150 hover:opacity-80 md:h-10 md:w-10");
     expect(navSource).toContain("border-b border-white/10 py-2.5 font-medium text-white/94");
     expect(globalsSource).toContain(".site-font-theme .site-mobile-menu-title");
@@ -410,7 +451,7 @@ describe("site home page", () => {
     expect(drawerSource).not.toContain("We&apos;ll take you straight into your dashboard after submit.");
     expect(drawerSource).toContain("WELCOME_PACK_STORAGE_KEY");
     expect(drawerSource).toContain('fetch("/api/welcome-access"');
-    expect(drawerSource).toContain('window.location.href = payload.redirectTo');
+    expect(drawerSource).toContain("window.location.href = payload.redirectTo");
   });
 
   test("wires the root route to the restored homepage instead of redirecting to PPC", () => {

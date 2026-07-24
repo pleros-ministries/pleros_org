@@ -132,10 +132,17 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 ## Public nav, assets, and partner surfaces
 
 - Desktop public nav dropdowns should be real menu panels with vertically stacked full-width links, left-aligned text, and enough width/padding to scan quickly.
-- Public mobile menu open/close motion should stay soft and eased rather than snappy.
+- Public mobile menu open/close motion should stay soft and eased, but the sidebar itself should be square-cornered, move fully off-canvas on close, and avoid leaving an empty frame after content fades.
 - On public blue section/card headers, compact brand-lime pills with primary-blue text read better than translucent white pills.
 - When public motion feedback says "not feeling it," adjust the concrete homepage component motion as well as shared primitive timing; primitive-only easing changes can be too subtle.
 - In the shared homepage community section, keep the Join Now CTA close to the text block; section separation belongs outside the card/section, not between copy and CTA.
+- In the shared homepage community section, keep the baseline grayscale photo with dark overlay unless the user specifically asks for a new treatment; avoid reintroducing the rejected blue tint edit.
+- On public video/CTA bands, use explicit scaled group gaps and balanced mobile top/bottom padding; avoid ambiguous arbitrary gap classes.
+- Do not add redundant explanatory captions between public video embeds and their primary CTA when the heading/intro already establishes the action.
+- Public display headings and short section intro lines should generally omit terminal periods unless the punctuation is intentional copy.
+- Public Prayer Watch session times are Morning 5:30 am, Afternoon 12:30 pm, and Evening 8:30 pm.
+- Public Prayer Watch session times should use a connected schedule strip rather than three separate cards, with a distinct brand-blue `Next session` header and one active segment highlight.
+- Public Prayer Watch video posters should use the branded devotional artwork without tint overlays or image filters, not the raw YouTube thumbnail when that thumbnail looks visually weak.
 - For homepage/card asset swaps, import explicit source assets into `public/site/home/assets/*`, update the specific card data, and verify mobile rendering.
 - For welcome dashboard card backgrounds, copy the named source image into `public/site/home/assets/dashboard-cards/`, wire it through card data, and verify the rendered preview card image.
 - Separate SVG foreground color from card header surface color; brand-colored logo artwork may still sit on a white card header.
@@ -149,11 +156,16 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - For persistence-backed form features, verify the target DB has the new table/indexes or run the documented schema push before end-to-end submit tests.
 - `/welcome`, `/thankyou`, and `/dashboard/welcomepack` are one stateful public funnel: main access is immediate, extra gifts are trust-unlocked, and email failures must not block access.
 - `/welcome` should be a real responsive public page: preserve the mobile stacked flow, but use tablet/desktop section grids and shared public shell widths instead of a cropped mobile column.
+- Welcome-pack hero headings should avoid narrow mobile `ch` caps that create five-line wraps; widen the measure and use explicit breakpoint sizes rather than viewport-scaling text.
 - Welcome funnel greetings must prefer explicit submitted names from lead/cookie data and suppress names derived from email identifiers; stale Better Auth session names may predate the first-name modal.
+- Welcome-pack and thank-you main content should use the public shell horizontal padding vars instead of legacy `container-pleros` gutters or hard-coded `px-6`.
 - Public welcome/contact/share links should use the canonical public site URL (`https://pleros.org`) or a dedicated public-site env var, not `NEXT_PUBLIC_APP_URL`, because that value may point to Vercel, PPC, or auth infrastructure.
 - Gift content can stay in typed code config for now and should use public-site Sen/Be Vietnam Pro styling, not PPC dashboard styling.
+- Welcome-pack pages should reuse the shared public community section instead of duplicating only its text/CTA; otherwise white overlay copy can become invisible without the image layer.
+- When a welcome-pack page ends with the shared community section, keep it flush to the footer; do not add page-level bottom padding after it.
 - `/dashboard` should require either a valid app session or welcome-access cookie and redirect unauthenticated visitors to `/welcome`.
 - Dashboard progress tracking should avoid duplicate per-item action buttons; checking an item should directly update the tracked state.
+- Dashboard podcast progress should include a clear link to the public `/podcast` page so users can listen from the tracker.
 - Dashboard bulk progress actions should be reversible when the whole group is already complete.
 - Dashboard media hubs should open with compact series/title-card grids, then route into vertical per-series video lists; use local thumbnail assets for hub cards when available.
 - Welcome dashboard card titles should stay at 16px, and dashboard media title cards should use tighter corners with taller proportions.

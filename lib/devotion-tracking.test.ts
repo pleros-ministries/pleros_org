@@ -41,6 +41,8 @@ describe("dashboard devotion tracking", () => {
     expect(dashboardContent).toContain('href: "/dashboard/podcast"');
     expect(podcastRoute).toContain("PodcastProgressPage");
     expect(podcastPage).toContain("groupPodcastEpisodesBySeries");
+    expect(podcastPage).toContain('href="/podcast"');
+    expect(podcastPage).toContain("Open podcast");
     expect(podcastPage).toContain("type=\"checkbox\"");
     expect(podcastPage).toContain("requestSubmit");
     expect(podcastPage).toContain("handleEpisodeRowClick");

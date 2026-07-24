@@ -72,10 +72,10 @@ export function HomepageNav() {
             <SheetContent
               side="right"
               showCloseButton={false}
-              className="site-font-theme overflow-hidden border-l border-white/8 bg-[var(--color-brand-blue)] px-4 pb-7 pt-4 text-white shadow-[-18px_0_40px_rgba(1,21,133,0.28)] data-starting-style:translate-x-5 data-starting-style:opacity-0 data-ending-style:translate-x-3 data-ending-style:opacity-0"
+              className="site-font-theme overflow-hidden rounded-none border-l border-white/8 bg-[var(--color-brand-blue)] px-4 pb-7 pt-4 text-white shadow-[-18px_0_40px_rgba(1,21,133,0.28)] duration-[360ms] data-starting-style:translate-x-5 data-starting-style:opacity-0 data-ending-style:translate-x-full data-ending-style:opacity-0"
             >
               <div
-                className={`flex h-full flex-col transition-[opacity,transform] duration-[560ms] [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] will-change-transform ${
+                className={`flex h-full flex-col transition-[opacity,transform] duration-[280ms] [transition-timing-function:cubic-bezier(0.16,1,0.3,1)] will-change-transform ${
                   open ? "translate-x-0 opacity-100" : "translate-x-4 opacity-0"
                 }`}
               >

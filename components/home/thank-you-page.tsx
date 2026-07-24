@@ -14,6 +14,9 @@ type ThankYouPageProps = {
   name?: string;
 };
 
+const thankYouSectionPadding =
+  "px-[var(--site-shell-padding-x)] md:px-[var(--site-shell-padding-x-md)] lg:px-[var(--site-shell-padding-x-lg)] xl:px-[var(--site-shell-padding-x-xl)]";
+
 export function ThankYouPage({ name }: ThankYouPageProps) {
   const shareUrl = buildWelcomeShareIntentUrl(resolvePublicSiteUrl(process.env));
 
@@ -22,7 +25,7 @@ export function ThankYouPage({ name }: ThankYouPageProps) {
         <HomepageNav />
 
         <main>
-          <section className="bg-[var(--color-brand-sky)] px-6 pb-8 pt-10">
+          <section className={`bg-[var(--color-brand-sky)] pb-8 pt-10 ${thankYouSectionPadding}`}>
             <div className="grid gap-6">
               <div className="grid gap-4">
                 <p className="font-[var(--font-be-vietnam-pro)] text-[0.72rem] font-semibold uppercase tracking-[0.18em] text-[var(--color-brand-blue)]">
@@ -47,7 +50,7 @@ export function ThankYouPage({ name }: ThankYouPageProps) {
             </div>
           </section>
 
-          <section className="bg-white px-6 py-10">
+          <section className={`bg-white py-10 ${thankYouSectionPadding}`}>
             <div className="grid gap-6 rounded-[1.375rem] bg-[var(--color-brand-lime)]/20 px-5 py-6 shadow-[inset_0_0_0_1px_rgba(5,20,128,0.08)]">
               <div className="grid gap-3">
                 <h2 className="site-section-heading text-[2rem] text-[var(--color-brand-blue)]">
