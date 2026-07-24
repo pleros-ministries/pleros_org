@@ -1,4 +1,4 @@
-import { ArrowUpRightIcon, ChevronRight } from "lucide-react";
+import { ArrowUpRightIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -158,10 +158,10 @@ export async function PodcastPageView() {
                 href={homePodcastUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center gap-1 self-center font-[var(--font-be-vietnam-pro)] text-[0.875rem] font-semibold text-[var(--color-brand-blue)]"
+                className="group flex items-center gap-0.5 self-center font-[var(--font-be-vietnam-pro)] text-[0.78rem] font-semibold uppercase tracking-[0.08em] text-[var(--color-brand-blue)]"
               >
-                and more
-                <ChevronRight className="size-4" />
+                MORE PLATFORMS
+                <ArrowUpRightIcon className="size-3.5 stroke-[2.4] transition-transform duration-150 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-focus-visible:-translate-y-0.5 group-focus-visible:translate-x-0.5" />
               </Link>
             </div>
 

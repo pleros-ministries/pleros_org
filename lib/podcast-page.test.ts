@@ -55,7 +55,9 @@ describe("podcast page", () => {
     expect(seriesGallerySource).toContain("grid-rows-[auto_auto_minmax(0,1fr)]");
     expect(seriesGallerySource).toContain("overflow-y-auto rounded-[0.5rem]");
     expect(seriesGallerySource).toContain("[scrollbar-width:thin]");
-    expect(seriesGallerySource).toContain("bg-[#d7df70]");
+    expect(seriesGallerySource).toContain("bg-[var(--color-brand-sky)]");
+    expect(seriesGallerySource).toContain("ArrowUpRightIcon");
+    expect(seriesGallerySource).not.toContain("ExternalLinkIcon");
     expect(seriesGallerySource).toContain("platformIconLinks");
     expect(seriesGallerySource).toContain(
       "Start from any of the series",
@@ -66,7 +68,10 @@ describe("podcast page", () => {
     expect(viewSource).toContain("podcastPlatformIcons");
     expect(viewSource).toContain("Telegram");
     expect(viewSource).toContain("Audiomack");
-    expect(viewSource).toContain("and more");
+    expect(viewSource).toContain("MORE PLATFORMS");
+    expect(seriesGallerySource).toContain("MORE PLATFORMS");
+    expect(viewSource).toContain("uppercase tracking-[0.08em]");
+    expect(seriesGallerySource).not.toContain("underline underline-offset-4");
     expect(viewSource).toContain("podcastSpotifyShowUrl");
     expect(viewSource).toContain("podcastTelegramUrl");
     expect(viewSource).toContain("podcastApplePodcastsUrl");

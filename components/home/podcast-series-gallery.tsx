@@ -4,7 +4,6 @@ import {
   ArrowUpRightIcon,
   ClockIcon,
   DownloadIcon,
-  ExternalLinkIcon,
   PauseIcon,
   PlayIcon,
 } from "lucide-react";
@@ -158,10 +157,10 @@ export function PodcastSeriesGallery({
               href={podLinkHref}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1 self-end pb-1 font-[var(--font-be-vietnam-pro)] text-[0.72rem] font-semibold text-[var(--color-brand-blue)] transition-colors duration-150 hover:text-[var(--color-brand-blue-hover)]"
+              className="group inline-flex items-center gap-0.5 self-end pb-1 font-[var(--font-be-vietnam-pro)] text-[0.68rem] font-semibold uppercase tracking-[0.08em] text-[var(--color-brand-blue)] transition-colors duration-150 hover:text-[var(--color-brand-blue-hover)]"
             >
-              and more
-              <ArrowUpRightIcon className="size-3.5 stroke-[2.4]" />
+              MORE PLATFORMS
+              <ArrowUpRightIcon className="size-3.5 stroke-[2.4] transition-transform duration-150 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-focus-visible:-translate-y-0.5 group-focus-visible:translate-x-0.5" />
             </a>
           </div>
 
@@ -206,7 +205,7 @@ export function PodcastSeriesGallery({
                                 setPlayingGuid(isPlaying ? null : ep.guid)
                               }
                               aria-label={`${isPlaying ? "Pause" : "Play"} ${ep.title}`}
-                              className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[#d7df70] text-[var(--color-brand-blue)] shadow-[inset_0_0_0_1px_rgba(6,16,86,0.1)] transition-[background-color,transform] duration-150 hover:-translate-y-px hover:bg-[#ccd85f]"
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(6,16,86,0.12)] bg-[var(--color-brand-sky)] text-[var(--color-brand-blue)] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.42)] transition-[background-color,transform] duration-150 hover:-translate-y-px hover:bg-[var(--color-brand-sky-soft)]"
                             >
                               {isPlaying ? (
                                 <PauseIcon className="size-3.5 fill-current" />
@@ -230,7 +229,7 @@ export function PodcastSeriesGallery({
                               aria-label={`Open ${ep.title} on Spotify`}
                               className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[rgba(6,16,86,0.14)] bg-[var(--color-surface-muted)] text-[var(--color-brand-blue)] transition-transform duration-150 hover:-translate-y-px"
                             >
-                              <ExternalLinkIcon className="size-3.5 stroke-[2]" />
+                              <ArrowUpRightIcon className="size-3.5 stroke-[2.2]" />
                             </a>
                           </div>
                         </div>

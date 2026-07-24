@@ -109,10 +109,12 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - Public podcast playback should happen in-page before sending visitors out to YouTube.
 - Public podcast platform icons should use standard colored service marks directly, without enclosing circles or monochrome brand treatment.
 - Public podcast dialogs should use the same public-site font/color styling and platform icon treatment as the parent page.
+- Public podcast “MORE PLATFORMS” links should use uppercase text with no underline and a close animated tilted arrow.
 - For public podcast series dialogs, keep the header/platform area fixed and make only the episode list internally scrollable.
 - Public podcast series dialogs should use restrained radii, around `1rem` for the modal and `0.5rem` for internal lists.
 - Public podcast internal scroll areas should use thin, quiet, brand-tinted scrollbars instead of default heavy browser scrollbars.
-- Public podcast episode play buttons should use muted lime surfaces with blue icons instead of heavy blue or bright neon-lime circles.
+- Public podcast episode play buttons should use sky-blue surfaces with blue icons, avoiding both heavy blue and lime bases.
+- Public podcast episode external/open actions should use a simple tilted arrow, not the boxed external-link glyph.
 - For teaching archives, prefer a divided editorial list with inline expansion over repetitive card grids or modal playback.
 - When official ministry/media copy exists, use the source wording first; summarize only when asked for a rewrite.
 - For public series pages, store direct per-item playback URLs and use external platform links for subscribe/full-library CTAs.
