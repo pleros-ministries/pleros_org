@@ -4,6 +4,7 @@ import type { ComponentType } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
+  fcchurchAboutSection,
   fcchurchLocations,
   fcchurchOnlineSection,
   fcchurchPageHero,
@@ -137,9 +138,6 @@ export function FcchurchPageView() {
       {/* Hero */}
       <section className="bg-[var(--color-brand-sky)] px-[1.25rem] pb-[2.5rem] pt-[7rem] md:px-8 md:pb-12 md:pt-[8.5rem] xl:px-10 xl:pb-14">
         <div className="max-w-[24rem] md:max-w-[32rem]">
-          <p className="mb-3 font-[var(--font-be-vietnam-pro)] text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-[var(--color-brand-indigo)] opacity-70">
-            Fullness of Christ Church
-          </p>
           <h1 className="site-hero-heading text-[2.55rem] text-[var(--color-text-strong)] md:text-[3.25rem] xl:text-[4rem]">
             {fcchurchPageHero.title}
           </h1>
@@ -149,8 +147,23 @@ export function FcchurchPageView() {
         </div>
       </section>
 
+      {/* About */}
+      <section className="bg-white px-[1.25rem] py-[3.25rem] md:px-8 md:py-14 xl:px-10">
+        <div className="mx-auto grid max-w-[46rem] gap-3 text-center">
+          <p className="font-[var(--font-be-vietnam-pro)] text-[0.7rem] font-semibold uppercase tracking-[0.2em] text-[var(--color-brand-blue)]">
+            {fcchurchAboutSection.eyebrow}
+          </p>
+          <h2 className="site-section-heading">
+            {fcchurchAboutSection.title}
+          </h2>
+          <p className="site-section-intro mx-auto max-w-[38rem] text-[var(--color-text-muted)]">
+            {fcchurchAboutSection.description}
+          </p>
+        </div>
+      </section>
+
       {/* Locations */}
-      <section className="bg-white px-[1.25rem] py-[4.25rem] md:px-8 md:py-16 xl:px-10">
+      <section className="bg-white px-[1.25rem] pb-[4.25rem] pt-8 md:px-8 md:pb-16 md:pt-10 xl:px-10">
         <div className="mx-auto grid max-w-[64rem] gap-10 md:gap-12">
           {/* Section header */}
           <div className="grid gap-2.5 text-center">

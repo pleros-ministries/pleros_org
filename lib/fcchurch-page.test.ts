@@ -24,12 +24,15 @@ describe("fcchurch page", () => {
     expect(routeSource).toContain("FcchurchPageView");
 
     expect(viewSource).toContain("fcchurchLocations");
+    expect(viewSource).toContain("fcchurchAboutSection");
     expect(viewSource).toContain("fcchurchOnlineSection");
     expect(viewSource).toContain("Join us in person");
     expect(viewSource).toContain("HomepageCommunitySection");
     expect(viewSource).toContain("HomepageFooter");
 
     expect(contentSource).toContain("Fullness of Christ Church");
+    expect(contentSource).toContain("A family of purpose");
+    expect(contentSource).toContain("We're a family of believers");
     expect(contentSource).toContain("ROFEL Hotel");
     expect(contentSource).toContain("Sunday · 8 am");
     expect(contentSource).toContain("Join us online");

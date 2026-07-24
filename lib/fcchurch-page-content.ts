@@ -4,6 +4,13 @@ export const fcchurchPageHero = {
     "Join us for worship, teaching, and fellowship as we grow together to fulfill God's purpose.",
 } as const;
 
+export const fcchurchAboutSection = {
+  eyebrow: "About the church",
+  title: "A family of purpose",
+  description:
+    "We're a family of believers grounded in the Word of Truth, committed to reaching people with the Gospel, and helping them grow to fulfill God's purpose.",
+} as const;
+
 export type ScheduleEntry = {
   type: "prayer" | "bible-study" | "sunday";
   label: string;
