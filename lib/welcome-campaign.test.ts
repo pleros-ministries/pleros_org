@@ -29,6 +29,9 @@ describe("welcome campaign pages", () => {
     expect(viewSource).toContain("Get your free book");
     expect(viewSource).toContain('redirectTo="/thankyou"');
     expect(viewSource).toContain("autoOpen={false}");
+    expect(viewSource).toContain("HomepageCommunitySection");
+    expect(viewSource).toContain("<HomepageCommunitySection />");
+    expect(viewSource).not.toContain("homeWhatsappChannelUrl");
     expect(drawerSource).toContain("redirectTo?: string");
     expect(drawerSource).toContain("autoOpen?: boolean");
     expect(drawerSource).toContain("returnTo: redirectTo");
