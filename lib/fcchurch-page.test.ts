@@ -4,7 +4,14 @@ import { describe, expect, test } from "vitest";
 
 describe("fcchurch page", () => {
   test("uses a dedicated public route listing locations and an online-join invitation", () => {
-    const routePath = join(process.cwd(), "app", "(site)", "fcchurch", "page.tsx");
+    const routePath = join(process.cwd(), "app", "(site)", "fcc", "page.tsx");
+    const legacyRoutePath = join(
+      process.cwd(),
+      "app",
+      "(site)",
+      "fcchurch",
+      "page.tsx",
+    );
     const viewPath = join(
       process.cwd(),
       "components",
@@ -14,14 +21,17 @@ describe("fcchurch page", () => {
     const contentPath = join(process.cwd(), "lib", "fcchurch-page-content.ts");
 
     expect(existsSync(routePath)).toBe(true);
+    expect(existsSync(legacyRoutePath)).toBe(true);
     expect(existsSync(viewPath)).toBe(true);
     expect(existsSync(contentPath)).toBe(true);
 
     const routeSource = readFileSync(routePath, "utf8");
+    const legacyRouteSource = readFileSync(legacyRoutePath, "utf8");
     const viewSource = readFileSync(viewPath, "utf8");
     const contentSource = readFileSync(contentPath, "utf8");
 
     expect(routeSource).toContain("FcchurchPageView");
+    expect(legacyRouteSource).toContain('redirect("/fcc")');
 
     expect(viewSource).toContain("fcchurchLocations");
     expect(viewSource).toContain("fcchurchAboutSection");
@@ -39,7 +49,7 @@ describe("fcchurch page", () => {
     expect(contentSource).toContain("https://www.youtube.com/@PlerosLive");
   });
 
-  test("homepage church pathway card links to /fcchurch", () => {
+  test("homepage church pathway card links to /fcc", () => {
     const contentSource = readFileSync(
       join(process.cwd(), "lib", "site-homepage-content.ts"),
       "utf8",
@@ -50,6 +60,6 @@ describe("fcchurch page", () => {
     const cardIndex = contentSource.indexOf('title: "Our Church Ministry"');
     const cardBlock = contentSource.slice(cardIndex, cardIndex + 300);
 
-    expect(cardBlock).toContain('href: "/fcchurch"');
+    expect(cardBlock).toContain('href: "/fcc"');
   });
 });
