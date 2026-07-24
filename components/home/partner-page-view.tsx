@@ -1,6 +1,5 @@
 import Link from "next/link";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -13,8 +12,6 @@ import {
   partnerBankAccount,
   partnerGivingSection,
   partnerImpactItems,
-  partnerIntlPayment,
-  partnerPageCta,
   partnerPageHero,
   partnerReasons,
   partnerWhatsappHref,
@@ -94,7 +91,7 @@ export function PartnerPageView() {
       <section className="bg-[var(--color-surface-muted)] px-[1.25rem] py-[4.25rem] md:px-8 md:py-16 xl:px-10">
         <div className="mx-auto grid max-w-[58rem] gap-8 md:gap-10">
           <div className="grid gap-2 text-center">
-            <p className="font-[var(--font-be-vietnam-pro)] text-[0.6875rem] font-semibold uppercase tracking-[0.24em] text-[var(--color-brand-blue)] md:text-[0.8125rem]">
+            <p className="font-[var(--font-be-vietnam-pro)] text-[0.6875rem] font-semibold uppercase tracking-[0.22em] text-[var(--color-brand-blue)] md:text-[0.8125rem]">
               Partnership
             </p>
             <h2 className="site-section-heading">Why partner with Pleros</h2>
@@ -116,7 +113,7 @@ export function PartnerPageView() {
       <section className="bg-[var(--color-brand-blue)] px-[1.25rem] py-[4.25rem] text-white md:px-8 md:py-16 xl:px-10">
         <div className="mx-auto grid max-w-[58rem] gap-8 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:items-start md:gap-10">
           <div className="grid gap-3">
-            <p className="font-[var(--font-be-vietnam-pro)] text-[0.6875rem] font-semibold uppercase tracking-[0.24em] text-[var(--color-brand-lime)] md:text-[0.8125rem]">
+            <p className="font-[var(--font-be-vietnam-pro)] text-[0.6875rem] font-semibold uppercase tracking-[0.22em] text-[var(--color-brand-lime)] md:text-[0.8125rem]">
               Stewardship
             </p>
             <h2 className="site-section-heading text-white">
@@ -146,7 +143,7 @@ export function PartnerPageView() {
       <section className="bg-[var(--color-surface-muted)] px-[1.25rem] py-[4.25rem] md:px-8 md:py-16 xl:px-10">
         <div className="mx-auto grid max-w-[58rem] gap-8 md:gap-10">
           <div className="grid gap-2 text-center">
-            <p className="font-[var(--font-be-vietnam-pro)] text-[0.6875rem] font-semibold uppercase tracking-[0.24em] text-[var(--color-brand-blue)] md:text-[0.8125rem]">
+            <p className="font-[var(--font-be-vietnam-pro)] text-[0.6875rem] font-semibold uppercase tracking-[0.22em] text-[var(--color-brand-blue)] md:text-[0.8125rem]">
               {partnerGivingSection.eyebrow}
             </p>
             <h2 className="site-section-heading">
@@ -198,63 +195,7 @@ export function PartnerPageView() {
               </CardContent>
             </Card>
 
-            {/* <Card className="gap-4 rounded-[1.25rem] border-[rgba(6,16,86,0.14)] bg-white p-5 shadow-[0_16px_40px_rgba(6,16,86,0.08)] md:p-6">
-              <CardHeader className="gap-2 px-0 py-0">
-                <div className="flex items-center justify-between gap-2">
-                  <CardTitle className="font-[var(--font-sen)] text-[1.375rem] leading-[0.95] tracking-[-0.05em] text-[var(--color-brand-indigo)]">
-                    {partnerIntlPayment.title}
-                  </CardTitle>
-                  <Badge variant="outline" className="text-[10px]">{partnerIntlPayment.status}</Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="px-0 pb-0">
-                <CardDescription className="text-[1rem] leading-[1.45] tracking-[-0.02em] text-[var(--color-text-muted)]">
-                  {partnerIntlPayment.description}
-                </CardDescription>
-              </CardContent>
-            </Card> */}
           </div>
-        </div>
-      </section>
-
-      <section
-        id="become-a-partner"
-        className="bg-white px-[1.25rem] py-[4.25rem] md:px-8 md:py-16 xl:px-10"
-      >
-        <div className="mx-auto max-w-[52rem]">
-          <Card className="gap-6 rounded-[1.5rem] border-[rgba(6,16,86,0.12)] bg-[linear-gradient(180deg,#f4f9ff_0%,#dff3ff_100%)] px-6 py-7 shadow-[0_20px_44px_rgba(6,16,86,0.08)] md:px-8 md:py-9">
-            <CardHeader className="gap-3 px-0 py-0 text-center">
-              <p className="font-[var(--font-be-vietnam-pro)] text-[0.8125rem] font-semibold uppercase tracking-[0.24em] text-[var(--color-brand-blue)]">
-                Next step
-              </p>
-              <CardTitle className="site-section-heading">
-                {partnerPageCta.title}
-              </CardTitle>
-            </CardHeader>
-
-            <CardContent className="grid gap-6 px-0 pb-0 text-center">
-              <p className="site-section-intro mx-auto max-w-[35rem] text-[var(--color-text-strong)]">
-                {partnerPageCta.description}
-              </p>
-
-              <div className="flex justify-center">
-                <Button
-                  size="lg"
-                  render={
-                    <Link
-                      href={partnerWhatsappHref}
-                      className="site-button-text"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    />
-                  }
-                  className="min-w-[12.875rem] rounded-full px-7 text-[0.875rem] font-semibold uppercase tracking-[0.02em]"
-                >
-                  {partnerPageCta.ctaLabel}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       </section>
 

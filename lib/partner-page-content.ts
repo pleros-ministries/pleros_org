@@ -36,15 +36,8 @@ export const partnerImpactItems = [
   "Digital Ministry & Online Resources",
 ] as const;
 
-export const partnerPageCta = {
-  title: "Become a partner today",
-  description:
-    "Join hands with us to spread God’s love, truth, and power across nations. Together, we can fulfill the Great Commission and raise a generation walking in the fullness of Christ.",
-  ctaLabel: "Become a partner",
-} as const;
-
 export const partnerGivingSection = {
-  eyebrow: "Ways to give",
+  eyebrow: "Giving channels",
   title: "Give to Pleros",
   description:
     "You can give directly by bank transfer, or via card and international payment options.",
@@ -54,10 +47,4 @@ export const partnerBankAccount = {
   bankName: "Providus Bank",
   accountName: "PLEROS MINISTRIES AND MISSIONS",
   accountNumber: "1310000564",
-} as const;
-
-export const partnerIntlPayment = {
-  title: "Paystack, Intl. Payments",
-  status: "In progress",
-  description: "Card and international payment options are coming soon.",
 } as const;

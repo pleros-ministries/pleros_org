@@ -33,10 +33,13 @@ describe("partner page", () => {
     expect(contentSource).not.toContain("Leadership Training");
     expect(viewSource).toContain("bg-[#10229f]");
     expect(viewSource).not.toContain("bg-white/8");
-    expect(viewSource).toContain("text-[0.6875rem] font-semibold uppercase");
+    expect(viewSource).toContain(
+      "text-[0.6875rem] font-semibold uppercase tracking-[0.22em]",
+    );
     expect(viewSource).toContain("md:text-[0.8125rem]");
     expect(contentSource).toContain("partnerWhatsappHref");
-    expect(contentSource).toContain("Become a partner today");
+    expect(viewSource).not.toContain("become-a-partner");
+    expect(contentSource).not.toContain("Become a partner today");
     expect(contentSource).toContain("partnerBankAccount");
     expect(contentSource).toContain("Providus Bank");
     expect(contentSource).toContain("PLEROS MINISTRIES AND MISSIONS");
