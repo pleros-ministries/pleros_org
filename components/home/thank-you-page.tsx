@@ -1,3 +1,4 @@
+import { SendIcon, type LucideIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -11,6 +12,7 @@ import { extraGifts } from "@/lib/welcome-pack-gifts";
 import { HomepageFooter } from "./homepage-footer";
 import { HomepageNav } from "./homepage-nav";
 import { PublicSitePageShell } from "./public-site-page-shell";
+import { ShareCopyLinkButton } from "./share-copy-link-button";
 
 type ThankYouPageProps = {
   name?: string;
@@ -59,7 +61,7 @@ function buildShareLinks(siteUrl: string) {
     {
       label: "Share on Telegram",
       href: `https://t.me/share/url?url=${encodeURIComponent(welcomeUrl)}&text=${encodeURIComponent(shareText)}`,
-      iconSrc: "/site/home/assets/social-media-icons/telegram-icon.svg",
+      icon: SendIcon,
     },
     {
       label: "Share on Facebook",
@@ -84,12 +86,14 @@ function buildShareLinks(siteUrl: string) {
   ] satisfies Array<{
     label: string;
     href: string;
-    iconSrc: string;
+    icon?: LucideIcon;
+    iconSrc?: string;
   }>;
 }
 
 export function ThankYouPage({ name }: ThankYouPageProps) {
   const siteUrl = resolvePublicSiteUrl(process.env);
+  const welcomeUrl = `${siteUrl}/welcome`;
   const shareLinks = buildShareLinks(siteUrl);
 
   return (
@@ -223,7 +227,7 @@ export function ThankYouPage({ name }: ThankYouPageProps) {
             </div>
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {shareLinks.map(({ label, href, iconSrc }) => (
+              {shareLinks.map(({ label, href, icon: Icon, iconSrc }) => (
                 <a
                   key={label}
                   href={href}
@@ -232,16 +236,20 @@ export function ThankYouPage({ name }: ThankYouPageProps) {
                   aria-label={label}
                   className="site-button-text inline-flex min-h-[2.875rem] items-center justify-center gap-2 rounded-full bg-[var(--color-brand-blue)] px-6 py-2.5 text-[0.8125rem] font-semibold leading-none text-white shadow-[0_14px_28px_rgba(5,20,128,0.18)] transition-transform duration-150 hover:-translate-y-px"
                 >
-                  <Image
-                    src={iconSrc}
-                    alt=""
-                    width={18}
-                    height={18}
-                    className="size-4"
-                  />
+                  {Icon ? <Icon className="size-4" /> : null}
+                  {iconSrc ? (
+                    <Image
+                      src={iconSrc}
+                      alt=""
+                      width={18}
+                      height={18}
+                      className="size-4"
+                    />
+                  ) : null}
                   {label}
                 </a>
               ))}
+              <ShareCopyLinkButton value={welcomeUrl} />
             </div>
           </div>
         </section>

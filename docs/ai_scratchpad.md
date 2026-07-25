@@ -176,6 +176,7 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - `/thankyou` should start with a simple `Click here to access your book` prompt that scrolls to the dashboard/book access component near the footer, rather than putting dashboard access first.
 - On `/thankyou`, the main blue purpose/reward content should sit directly on the parent blue section background, not inside repeated card boxes.
 - `/thankyou` non-share sections should include a compact `Share this gift` jump to the `#share-gift` share strip, while the share strip itself owns the platform buttons.
+- `/thankyou` share strip should use pill buttons with text labels, include a `Copy your referral link` button, and treat Instagram/TikTok DMs as inbox links because they do not reliably preserve prefilled share text through redirects.
 - `/thankyou` callout share CTAs should keep the same text-to-button spacing rhythm as the first share appeal section.
 - For `/welcome`, `/thankyou`, and related public funnel pages, use shared public typography primitives (`site-hero-eyebrow`, `site-hero-heading`, `site-section-heading`, `site-section-intro`, `site-pathway-title`) before custom font-family, tracking, or arbitrary text-size classes.
 - Welcome-pack hero headings should avoid narrow mobile `ch` caps that create five-line wraps; widen the measure and use explicit breakpoint sizes rather than viewport-scaling text.

@@ -80,6 +80,10 @@ describe("welcome campaign pages", () => {
       join(process.cwd(), "components", "home", "thank-you-page.tsx"),
       "utf8",
     );
+    const copyButtonSource = readFileSync(
+      join(process.cwd(), "components", "home", "share-copy-link-button.tsx"),
+      "utf8",
+    );
     const giftSource = readFileSync(
       join(process.cwd(), "lib", "welcome-pack-gifts.ts"),
       "utf8",
@@ -117,6 +121,8 @@ describe("welcome campaign pages", () => {
     expect(viewSource).toContain("Share on X");
     expect(viewSource).toContain("Share on Instagram DM");
     expect(viewSource).toContain("Share on TikTok DM");
+    expect(viewSource).toContain("ShareCopyLinkButton");
+    expect(viewSource).toContain("value={welcomeUrl}");
     expect(viewSource).toContain('id="share-gift"');
     expect(viewSource).toContain('href="#share-gift"');
     expect(viewSource).toContain("Share this gift");
@@ -131,6 +137,10 @@ describe("welcome campaign pages", () => {
     expect(viewSource).toContain("Share on WhatsApp");
     expect(viewSource).toContain("buildWelcomeShareIntentUrl");
     expect(viewSource).not.toContain("confirmWelcomePackShareAction");
+    expect(copyButtonSource).toContain('"use client"');
+    expect(copyButtonSource).toContain("navigator.clipboard.writeText(value)");
+    expect(copyButtonSource).toContain("Copy your referral link");
+    expect(copyButtonSource).toContain("Copied link");
   });
 
   test("uses the welcome session route only as a cookie bootstrap", () => {
