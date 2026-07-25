@@ -190,6 +190,7 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - `/thankyou` callout colors should usually fill the whole section; avoid inset tinted cards when the section itself is the message.
 - Welcome-pack pages should reuse the shared public community section instead of duplicating only its text/CTA; otherwise white overlay copy can become invisible without the image layer.
 - When a welcome-pack page ends with the shared community section, keep it flush to the footer; do not add page-level bottom padding after it.
+- Welcome-pack locked or coming-soon actions should look visibly unavailable with muted surfaces/text, not the same brand-blue treatment as active CTAs.
 - `/dashboard` should require either a valid app session or welcome-access cookie and redirect unauthenticated visitors to `/welcome`.
 - Dashboard navigation for welcome-cookie visitors should render from the cookie with route-level loading feedback; defer Better Auth provisioning to server actions that actually persist progress or waitlist data.
 - Dashboard progress tracking should avoid duplicate per-item action buttons; checking an item should directly update the tracked state.

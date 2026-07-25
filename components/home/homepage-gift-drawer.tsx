@@ -4,7 +4,7 @@ import {
   GiftIcon,
   XIcon,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -56,7 +56,6 @@ export function HomepageGiftDrawer({
   const hasCompletedRef = useRef(false);
   const isSubmittingRef = useRef(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isPending, startTransition] = useTransition();
   const normalizedFirstName = useMemo(() => firstName.trim(), [firstName]);
   const normalizedEmail = useMemo(() => email.trim().toLowerCase(), [email]);
 
@@ -121,51 +120,49 @@ export function HomepageGiftDrawer({
     isSubmittingRef.current = true;
     setIsSubmitting(true);
 
-    startTransition(async () => {
-      try {
-        const response = await fetch("/api/welcome-access", {
-          method: "POST",
-          headers: {
-            "content-type": "application/json",
-          },
-          body: JSON.stringify({
-            name: normalizedFirstName,
-            email: normalizedEmail,
-            returnTo: redirectTo,
-            source,
-          }),
-        });
+    try {
+      const response = await fetch("/api/welcome-access", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          name: normalizedFirstName,
+          email: normalizedEmail,
+          returnTo: redirectTo,
+          source,
+        }),
+      });
 
-        const payload = (await response.json().catch(() => null)) as
-          | { error?: string; redirectTo?: string }
-          | null;
+      const payload = (await response.json().catch(() => null)) as
+        | { error?: string; redirectTo?: string }
+        | null;
 
-        if (!response.ok || !payload?.redirectTo) {
-          setError(payload?.error ?? "Something went wrong. Please try again.");
-          isSubmittingRef.current = false;
-          setIsSubmitting(false);
-          return;
-        }
-
-        window.localStorage.setItem(
-          WELCOME_PACK_STORAGE_KEY,
-          serializeWelcomePackState({
-            status: "completed",
-            email: normalizedEmail,
-            updatedAt: new Date().toISOString(),
-          }),
-        );
-
-        hasCompletedRef.current = true;
-        setOpen(false);
-
-        window.location.href = payload.redirectTo;
-      } catch {
-        setError("Something went wrong. Please try again.");
+      if (!response.ok || !payload?.redirectTo) {
+        setError(payload?.error ?? "Something went wrong. Please try again.");
         isSubmittingRef.current = false;
         setIsSubmitting(false);
+        return;
       }
-    });
+
+      window.localStorage.setItem(
+        WELCOME_PACK_STORAGE_KEY,
+        serializeWelcomePackState({
+          status: "completed",
+          email: normalizedEmail,
+          updatedAt: new Date().toISOString(),
+        }),
+      );
+
+      hasCompletedRef.current = true;
+      setOpen(false);
+
+      window.location.assign(payload.redirectTo);
+    } catch {
+      setError("Something went wrong. Please try again.");
+      isSubmittingRef.current = false;
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -249,10 +246,10 @@ export function HomepageGiftDrawer({
             <Button
               type="submit"
               variant="primary"
-              disabled={isSubmitting || isPending}
+              disabled={isSubmitting}
               className="site-button-text min-h-[2.875rem] w-full rounded-full px-6 py-2.5 text-[0.875rem] text-white shadow-[0_14px_28px_rgba(5,20,128,0.22)] hover:text-white focus-visible:text-white"
             >
-              {isSubmitting || isPending ? pendingLabel : submitLabel}
+              {isSubmitting ? pendingLabel : submitLabel}
             </Button>
           </form>
         </div>

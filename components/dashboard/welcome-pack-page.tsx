@@ -14,7 +14,14 @@ function GiftCard({
 }) {
   const card = (
     <article className="group overflow-hidden rounded-[0.6875rem] bg-white shadow-[0_12px_26px_rgba(15,23,40,0.08)] ring-1 ring-[rgba(6,16,86,0.08)] transition-transform duration-150 hover:-translate-y-px">
-      <div className="relative overflow-hidden rounded-t-[0.6875rem]">
+      <div
+        className="relative overflow-hidden rounded-t-[0.6875rem]"
+        style={
+          gift.imageBackgroundColor
+            ? { backgroundColor: gift.imageBackgroundColor }
+            : undefined
+        }
+      >
         <Image
           src={gift.imageSrc}
           alt={gift.title}
@@ -40,7 +47,13 @@ function GiftCard({
         <p className="font-[var(--font-be-vietnam-pro)] text-[0.76rem] leading-[1.25] tracking-[-0.02em] text-[var(--color-text-muted)]">
           {gift.description}
         </p>
-        <span className="site-button-text mt-1 inline-flex w-fit items-center rounded-full bg-[var(--color-brand-blue)] px-4 py-2 text-[0.68rem] font-semibold leading-none text-white">
+        <span
+          className={`site-button-text mt-1 inline-flex w-fit items-center rounded-full px-4 py-2 text-[0.68rem] font-semibold leading-none ${
+            locked
+              ? "bg-[rgba(6,16,86,0.1)] text-[rgba(6,16,86,0.58)]"
+              : "bg-[var(--color-brand-blue)] text-white"
+          }`}
+        >
           {locked ? "Coming soon" : gift.buttonLabel}
         </span>
       </div>
@@ -69,7 +82,7 @@ export function WelcomePackPage({ extraGiftsUnlocked }: WelcomePackPageProps) {
     <section className="site-font-theme bg-[var(--color-surface)] pt-5 sm:pt-6">
       <div className="container-pleros grid max-w-[36rem] gap-10 pb-10 sm:pb-12">
         <div className="grid gap-2">
-          <h1 className="site-hero-heading max-w-[11ch] text-[clamp(2.4rem,6.2vw,3.45rem)] text-[var(--color-brand-blue)]">
+          <h1 className="site-hero-heading text-[clamp(2.4rem,6.2vw,3.45rem)] text-[var(--color-brand-blue)]">
             Access your Welcome Pack here
           </h1>
           <p className="max-w-[31ch] font-[var(--font-be-vietnam-pro)] text-[0.95rem] leading-[1.42] tracking-[-0.02em] text-[var(--color-text-muted)]">
@@ -129,6 +142,28 @@ export function WelcomePackPage({ extraGiftsUnlocked }: WelcomePackPageProps) {
             </p>
           </section>
         )}
+
+        <section className="grid gap-3 rounded-[0.875rem] bg-white px-4 py-5 shadow-[0_12px_26px_rgba(15,23,40,0.07)] ring-1 ring-[rgba(6,16,86,0.08)]">
+          <div className="grid gap-1.5">
+            <p className="site-hero-eyebrow text-[0.68rem] text-[var(--color-brand-blue)]">
+              Your next step
+            </p>
+            <h2 className="site-section-heading text-[1.55rem] text-[var(--color-brand-blue)]">
+              Go to your dashboard
+            </h2>
+            <p className="font-[var(--font-be-vietnam-pro)] text-[0.9rem] leading-[1.42] tracking-[-0.02em] text-[var(--color-text-muted)]">
+              Your dashboard brings the full Pleros experience together:
+              teachings, devotion, and accountability.
+            </p>
+          </div>
+
+          <Link
+            href="/dashboard"
+            className="site-button-text inline-flex min-h-[2.875rem] w-fit items-center justify-center rounded-full bg-[var(--color-brand-blue)] px-6 py-2.5 text-[0.75rem] font-semibold leading-none text-white shadow-[0_14px_28px_rgba(5,20,128,0.2)] transition-transform duration-150 hover:-translate-y-px hover:text-white focus-visible:text-white"
+          >
+            Go to dashboard
+          </Link>
+        </section>
       </div>
 
       <HomepageCommunitySection />

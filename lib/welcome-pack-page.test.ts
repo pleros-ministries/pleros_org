@@ -27,6 +27,13 @@ describe("welcome pack page", () => {
     expect(source).toContain("Extra gifts");
     expect(source).toContain("More resources are coming");
     expect(source).toContain("The supplementary packs are not ready yet");
+    expect(source).toContain("Your next step");
+    expect(source).toContain("Go to your dashboard");
+    expect(source).toContain("teachings, devotion, and accountability");
+    expect(source).toContain('href="/dashboard"');
+    expect(source).toContain("gift.imageBackgroundColor");
+    expect(source).toContain("backgroundColor: gift.imageBackgroundColor");
+    expect(source).toContain("bg-[rgba(6,16,86,0.1)]");
     expect(source).not.toContain("Locked until you share");
     expect(source).not.toContain("confirmWelcomePackShareAction");
     expect(source).toContain("mainGifts");
@@ -34,7 +41,12 @@ describe("welcome pack page", () => {
     expect(source).toContain("HomepageCommunitySection");
     expect(source).not.toContain("homeWhatsappChannelUrl");
     expect(giftSource).toContain("/api/welcome-pack/download");
-    expect(giftSource).toContain("/site/home/assets/welcome-pack-cards/purpose-welcome-card.svg");
+    expect(giftSource).toContain(
+      "/assets/dashboard/welcome-pack-main-gift/ebook-purpose-welcome-card.png",
+    );
+    expect(giftSource).toContain(
+      "/assets/dashboard/welcome-pack-main-gift/audiobook-purpose-welcome-card.png",
+    );
     expect(giftSource).toContain("Breaking Habits and Addictions as a New Creation");
     expect(giftSource).toContain("How the Gospel Proves Itself to Be the Truth");
     expect(source).toContain("href={gift.href}");

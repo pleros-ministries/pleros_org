@@ -54,22 +54,24 @@ describe("welcome pack completion wiring", () => {
     const drawerSource = source("components", "home", "homepage-gift-drawer.tsx");
 
     expect(drawerSource).toContain("isSubmittingRef.current");
-    expect(drawerSource).toContain("disabled={isSubmitting || isPending}");
+    expect(drawerSource).toContain("disabled={isSubmitting}");
+    expect(drawerSource).not.toContain("useTransition");
     expect(drawerSource).not.toContain("triggerWelcomePackDownload");
     expect(drawerSource).not.toContain("redirectAfterDownloadStarts");
-    expect(drawerSource).toContain("window.location.href = payload.redirectTo");
+    expect(drawerSource).toContain("window.location.assign(payload.redirectTo)");
   });
 
   test("unused welcome-pack modal (not wired into any page) still compiles without auto-triggering a download", () => {
     const modalSource = source("components", "home", "welcome-pack-modal.tsx");
 
     expect(modalSource).toContain("isSubmittingRef.current");
-    expect(modalSource).toContain("disabled={isSubmitting || isPending}");
+    expect(modalSource).toContain("disabled={isSubmitting}");
+    expect(modalSource).not.toContain("useTransition");
     expect(modalSource).not.toContain("Preparing your download");
     expect(modalSource).not.toContain("triggerWelcomePackDownload");
     expect(modalSource).not.toContain("redirectAfterDownloadStarts");
     expect(modalSource).not.toContain("downloadUrl");
-    expect(modalSource).toContain("window.location.href = payload.redirectTo");
+    expect(modalSource).toContain("window.location.assign(payload.redirectTo)");
   });
 
   test("download route protects the welcome pack file and serves it as an attachment", () => {

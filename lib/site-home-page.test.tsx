@@ -455,7 +455,8 @@ describe("site home page", () => {
     expect(drawerSource).not.toContain("We&apos;ll take you straight into your dashboard after submit.");
     expect(drawerSource).toContain("WELCOME_PACK_STORAGE_KEY");
     expect(drawerSource).toContain('fetch("/api/welcome-access"');
-    expect(drawerSource).toContain("window.location.href = payload.redirectTo");
+    expect(drawerSource).toContain("window.location.assign(payload.redirectTo)");
+    expect(drawerSource).not.toContain("useTransition");
   });
 
   test("wires the root route to the restored homepage instead of redirecting to PPC", () => {

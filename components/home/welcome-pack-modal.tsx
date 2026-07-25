@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -24,7 +24,6 @@ export function WelcomePackModal({ openRequest }: WelcomePackModalProps) {
   const [error, setError] = useState<string | null>(null);
   const isSubmittingRef = useRef(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isPending, startTransition] = useTransition();
   const normalizedEmail = useMemo(() => email.trim().toLowerCase(), [email]);
 
   useEffect(() => {
@@ -47,7 +46,7 @@ export function WelcomePackModal({ openRequest }: WelcomePackModalProps) {
     return () => window.clearTimeout(openTimer);
   }, [openRequest]);
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (isSubmittingRef.current) {
@@ -63,34 +62,32 @@ export function WelcomePackModal({ openRequest }: WelcomePackModalProps) {
     isSubmittingRef.current = true;
     setIsSubmitting(true);
 
-    startTransition(async () => {
-      try {
-        const response = await fetch("/api/welcome-access", {
-          method: "POST",
-          headers: {
-            "content-type": "application/json",
-          },
-          body: JSON.stringify({ email: normalizedEmail }),
-        });
+    try {
+      const response = await fetch("/api/welcome-access", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ email: normalizedEmail }),
+      });
 
-        const payload = (await response.json().catch(() => null)) as
-          | { error?: string; redirectTo?: string }
-          | null;
+      const payload = (await response.json().catch(() => null)) as
+        | { error?: string; redirectTo?: string }
+        | null;
 
-        if (!response.ok || !payload?.redirectTo) {
-          setError(payload?.error ?? "Something went wrong. Please try again.");
-          isSubmittingRef.current = false;
-          setIsSubmitting(false);
-          return;
-        }
-
-        window.location.href = payload.redirectTo;
-      } catch {
-        setError("Something went wrong. Please try again.");
+      if (!response.ok || !payload?.redirectTo) {
+        setError(payload?.error ?? "Something went wrong. Please try again.");
         isSubmittingRef.current = false;
         setIsSubmitting(false);
+        return;
       }
-    });
+
+      window.location.assign(payload.redirectTo);
+    } catch {
+      setError("Something went wrong. Please try again.");
+      isSubmittingRef.current = false;
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -135,9 +132,9 @@ export function WelcomePackModal({ openRequest }: WelcomePackModalProps) {
             type="submit"
             variant="primary"
             size="lg"
-            disabled={isSubmitting || isPending}
+            disabled={isSubmitting}
           >
-            {isSubmitting || isPending
+            {isSubmitting
               ? "Opening your welcome pack..."
               : "Access the welcome pack"}
           </Button>
