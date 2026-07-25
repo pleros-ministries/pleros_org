@@ -85,10 +85,6 @@ export function WelcomePackPage({ extraGiftsUnlocked }: WelcomePackPageProps) {
           <h1 className="site-hero-heading text-[clamp(2.4rem,6.2vw,3.45rem)] text-[var(--color-brand-blue)]">
             Access your Welcome Pack here
           </h1>
-          <p className="max-w-[31ch] font-[var(--font-be-vietnam-pro)] text-[0.95rem] leading-[1.42] tracking-[-0.02em] text-[var(--color-text-muted)]">
-            Your main welcome pack is ready now. We&apos;ll add supplementary
-            resources here once they are prepared.
-          </p>
         </div>
 
         <section className="grid gap-4">

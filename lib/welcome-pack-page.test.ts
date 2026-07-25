@@ -14,7 +14,8 @@ describe("welcome pack page", () => {
     );
 
     expect(source).toContain("Access your Welcome Pack here");
-    expect(source).toContain("Your main welcome pack is ready now");
+    expect(source).not.toContain("Your main welcome pack is ready now");
+    expect(source).not.toContain("We'll add supplementary");
     expect(source).toContain("container-pleros");
     expect(source).toContain("max-w-[36rem]");
     expect(source).not.toContain(
