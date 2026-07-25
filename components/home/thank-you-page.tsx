@@ -1,13 +1,8 @@
-import {
-  FacebookIcon,
-  MessageCircleIcon,
-  SendIcon,
-  TwitterIcon,
-} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
 import {
+  buildWelcomeShareMessage,
   buildWelcomeShareIntentUrl,
   resolvePublicSiteUrl,
 } from "@/lib/welcome-campaign";
@@ -53,31 +48,44 @@ function ShareStripJumpLink({
 
 function buildShareLinks(siteUrl: string) {
   const welcomeUrl = `${siteUrl}/welcome`;
-  const shareText =
-    "I found a free purpose book from Pleros that I thought would bless you.";
+  const shareText = buildWelcomeShareMessage(siteUrl);
 
   return [
     {
       label: "Share on WhatsApp",
       href: buildWelcomeShareIntentUrl(siteUrl),
-      icon: MessageCircleIcon,
+      iconSrc: "/site/home/assets/social-media-icons/whatsapp-icon.svg",
     },
     {
       label: "Share on Telegram",
       href: `https://t.me/share/url?url=${encodeURIComponent(welcomeUrl)}&text=${encodeURIComponent(shareText)}`,
-      icon: SendIcon,
+      iconSrc: "/site/home/assets/social-media-icons/telegram-icon.svg",
     },
     {
       label: "Share on Facebook",
       href: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(welcomeUrl)}`,
-      icon: FacebookIcon,
+      iconSrc: "/site/home/assets/social-media-icons/facebook-icon.svg",
     },
     {
       label: "Share on X",
       href: `https://twitter.com/intent/tweet?url=${encodeURIComponent(welcomeUrl)}&text=${encodeURIComponent(shareText)}`,
-      icon: TwitterIcon,
+      iconSrc: "/site/home/assets/social-media-icons/x-icon.svg",
     },
-  ] as const;
+    {
+      label: "Share on Instagram DM",
+      href: "https://www.instagram.com/direct/inbox/",
+      iconSrc: "/site/home/assets/social-media-icons/instagram-icon.svg",
+    },
+    {
+      label: "Share on TikTok DM",
+      href: "https://www.tiktok.com/messages",
+      iconSrc: "/site/home/assets/social-media-icons/tiktok-icon.svg",
+    },
+  ] satisfies Array<{
+    label: string;
+    href: string;
+    iconSrc: string;
+  }>;
 }
 
 export function ThankYouPage({ name }: ThankYouPageProps) {
@@ -215,15 +223,22 @@ export function ThankYouPage({ name }: ThankYouPageProps) {
             </div>
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {shareLinks.map(({ label, href, icon: Icon }) => (
+              {shareLinks.map(({ label, href, iconSrc }) => (
                 <a
                   key={label}
                   href={href}
                   target="_blank"
                   rel="noreferrer"
+                  aria-label={label}
                   className="site-button-text inline-flex min-h-[2.875rem] items-center justify-center gap-2 rounded-full bg-[var(--color-brand-blue)] px-6 py-2.5 text-[0.8125rem] font-semibold leading-none text-white shadow-[0_14px_28px_rgba(5,20,128,0.18)] transition-transform duration-150 hover:-translate-y-px"
                 >
-                  <Icon className="size-4" />
+                  <Image
+                    src={iconSrc}
+                    alt=""
+                    width={18}
+                    height={18}
+                    className="size-4"
+                  />
                   {label}
                 </a>
               ))}

@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { describe, expect, test } from "vitest";
 
 import {
+  buildWelcomeShareMessage,
   buildWelcomeShareIntentUrl,
   resolvePublicSiteUrl,
 } from "./welcome-campaign";
@@ -114,12 +115,17 @@ describe("welcome campaign pages", () => {
     expect(viewSource).toContain("Share on Telegram");
     expect(viewSource).toContain("Share on Facebook");
     expect(viewSource).toContain("Share on X");
+    expect(viewSource).toContain("Share on Instagram DM");
+    expect(viewSource).toContain("Share on TikTok DM");
     expect(viewSource).toContain('id="share-gift"');
     expect(viewSource).toContain('href="#share-gift"');
     expect(viewSource).toContain("Share this gift");
+    expect(viewSource).toContain("buildWelcomeShareMessage");
     expect(viewSource).toContain("t.me/share/url");
     expect(viewSource).toContain("facebook.com/sharer/sharer.php");
     expect(viewSource).toContain("twitter.com/intent/tweet");
+    expect(viewSource).toContain("instagram.com/direct/inbox");
+    expect(viewSource).toContain("tiktok.com/messages");
     expect(viewSource).toContain("Don&apos;t postpone this");
     expect(viewSource).toContain("Someone&apos;s life and eternity may depend on it.");
     expect(viewSource).toContain("Share on WhatsApp");
@@ -140,13 +146,19 @@ describe("welcome campaign pages", () => {
 });
 
 describe("welcome campaign helpers", () => {
+  test("builds the normalized welcome share message", () => {
+    expect(buildWelcomeShareMessage("https://pleros.org")).toBe(
+      "I thought this free book from Pleros would bless you. It gives clear answers about purpose, why we exist, and how to fulfill God's will. You can access it here: https://pleros.org/welcome",
+    );
+  });
+
   test("builds a generic WhatsApp share intent for the welcome landing page", () => {
     const href = buildWelcomeShareIntentUrl("https://pleros.org");
     const url = new URL(href);
 
     expect(url.origin).toBe("https://wa.me");
     expect(url.searchParams.get("text")).toBe(
-      "I found a free gift from Pleros that I thought would bless you. You can access it here: https://pleros.org/welcome",
+      "I thought this free book from Pleros would bless you. It gives clear answers about purpose, why we exist, and how to fulfill God's will. You can access it here: https://pleros.org/welcome",
     );
   });
 
