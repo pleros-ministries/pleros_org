@@ -91,12 +91,11 @@ describe("welcome pack completion wiring", () => {
     expect(pageSource).toContain('href="/dashboard/welcomepack"');
     expect(pageSource).toContain("thankYouSectionPadding");
     expect(pageSource).toContain("px-[var(--site-shell-padding-x)]");
-    expect(pageSource).not.toContain("px-6");
+    expect(pageSource).not.toContain("container-pleros");
     expect(pageSource).toContain(
       "Get TWO special gifts today, when you recommend this book",
     );
-    expect(pageSource).toContain("Breaking Habits and Addictions as a New Creation");
-    expect(pageSource).toContain("How the Gospel Proves Itself to Be the Truth");
+    expect(pageSource).toContain("extraGifts.map");
     expect(pageSource).toContain("Share on WhatsApp");
     expect(pageSource).not.toContain("Your download has begun");
     expect(pageSource).not.toContain("downloadUrl");

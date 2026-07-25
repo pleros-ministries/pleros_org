@@ -29,35 +29,45 @@ describe("welcome campaign pages", () => {
     expect(viewSource).toContain("Get your free book");
     expect(viewSource).toContain('redirectTo="/thankyou"');
     expect(viewSource).toContain("autoOpen={false}");
+    expect(viewSource).toContain('eyebrowLabel="Book access"');
+    expect(viewSource).toContain('headline="Enter your email to get access"');
+    expect(viewSource).toContain(
+      "Add your first name and email so we can grant you access now.",
+    );
     expect(viewSource).toContain("HomepageCommunitySection");
     expect(viewSource).toContain("<HomepageCommunitySection />");
     expect(viewSource).not.toContain("homeWhatsappChannelUrl");
+    expect(drawerSource).toContain("headline = welcomePackModalCopy.headline");
+    expect(drawerSource).toContain("subheadline = welcomePackModalCopy.subheadline");
     expect(drawerSource).toContain("redirectTo?: string");
     expect(drawerSource).toContain("autoOpen?: boolean");
     expect(drawerSource).toContain("returnTo: redirectTo");
   });
 
-  test("uses real book excerpts and flourish styling on the welcome sneak peek", () => {
+  test("uses the purpose book landing copy with a responsive public layout", () => {
     const viewSource = readFileSync(
       join(process.cwd(), "components", "home", "welcome-landing-page.tsx"),
       "utf8",
     );
 
-    expect(viewSource).toContain("welcomeBookExcerpts");
-    expect(viewSource).toContain("30 pages of clarity");
-    expect(viewSource).not.toContain("Just 15 pages");
-    expect(viewSource).toContain("Selected excerpts from the book");
-    expect(viewSource).not.toContain("Selected pages from the book");
-    expect(viewSource).toContain("Purpose requires revelation");
-    expect(viewSource).toContain("Natural assignment");
-    expect(viewSource).toContain("Our natural pursuits should not be regarded");
-    expect(viewSource).not.toContain("Sonship as God's purpose");
-    expect(viewSource).not.toContain("God has revealed His purpose for us to be Sonship");
-    expect(viewSource).not.toContain("Final affirmation");
-    expect(viewSource).not.toContain("I am driven by the Spirit");
-    expect(viewSource).toContain("✾");
-    expect(viewSource).toContain("✦");
-    expect(viewSource).not.toContain("function as cliffhangers");
+    expect(viewSource).toContain("PublicSitePageShell");
+    expect(viewSource).toContain("welcomePagePadding");
+    expect(viewSource).toContain("welcome-purpose-cover.svg");
+    expect(viewSource).toContain(
+      "Find the Answer to the Most Important Question of Your Life",
+    );
+    expect(viewSource).toContain("Simple, clear, direct, and precise answers");
+    expect(viewSource).toContain("Your greatest burden");
+    expect(viewSource).toContain("Why do we exist?");
+    expect(viewSource).toContain("Not a guess");
+    expect(viewSource).toContain("An exact answer to purpose");
+    expect(viewSource).toContain("Absolutely free");
+    expect(viewSource).toContain("25-30 minutes");
+    expect(viewSource).toContain("45 minutes");
+    expect(viewSource).toContain("Two more gifts");
+    expect(viewSource).not.toContain("welcomeBookExcerpts");
+    expect(viewSource).not.toContain("Selected excerpts from the book");
+    expect(viewSource).not.toContain("bg-[#f3f7fb] px-0 md:px-6 md:py-6");
   });
 
   test("wires the thank you page to the welcome pack dashboard and WhatsApp share intent", () => {
@@ -69,6 +79,10 @@ describe("welcome campaign pages", () => {
       join(process.cwd(), "components", "home", "thank-you-page.tsx"),
       "utf8",
     );
+    const giftSource = readFileSync(
+      join(process.cwd(), "lib", "welcome-pack-gifts.ts"),
+      "utf8",
+    );
 
     expect(pageSource).toContain("ThankYouPage");
     expect(pageSource).not.toContain("downloadUrl");
@@ -78,6 +92,32 @@ describe("welcome campaign pages", () => {
     expect(viewSource).toContain(
       "Get TWO special gifts today, when you recommend this book",
     );
+    expect(viewSource).toContain("Help a friend, family, or stranger");
+    expect(viewSource).toContain("Many people walk in perpetual doubt");
+    expect(viewSource).toContain("all kinds of fleshly");
+    expect(viewSource).toContain("bondages, and wasteful living");
+    expect(viewSource).toContain("extraGifts");
+    expect(viewSource).toContain("gift.imageSrc");
+    expect(viewSource).toContain("<Image");
+    expect(giftSource).toContain("Breaking Habits and Addictions as a New Creation");
+    expect(giftSource).toContain("How the Gospel Proves Itself to Be the Truth");
+    expect(giftSource).toContain(
+      "/site/home/assets/welcome-pack-cards/purpose-welcome-card.svg",
+    );
+    expect(giftSource).toContain(
+      "/site/home/assets/welcome-pack-cards/ga-welcome-card.svg",
+    );
+    expect(viewSource).toContain("Share on Telegram");
+    expect(viewSource).toContain("Share on Facebook");
+    expect(viewSource).toContain("Share on X");
+    expect(viewSource).toContain('id="share-gift"');
+    expect(viewSource).toContain('href="#share-gift"');
+    expect(viewSource).toContain("Share this gift");
+    expect(viewSource).toContain("t.me/share/url");
+    expect(viewSource).toContain("facebook.com/sharer/sharer.php");
+    expect(viewSource).toContain("twitter.com/intent/tweet");
+    expect(viewSource).toContain("Don&apos;t postpone this");
+    expect(viewSource).toContain("Someone&apos;s life and eternity may depend on it.");
     expect(viewSource).toContain("Share on WhatsApp");
     expect(viewSource).toContain("buildWelcomeShareIntentUrl");
     expect(viewSource).not.toContain("confirmWelcomePackShareAction");

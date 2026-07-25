@@ -37,6 +37,7 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - Canonical student auth URLs are `/ppc/login` and `/ppc/signup`; legacy `/ppc/sign-in` and `/ppc/sign-up` should redirect.
 - When changing auth paths, update canonical routes, legacy redirects, link targets, guarded-route redirects, and public-path tests together.
 - Staff access is invite-based. `super_admin` manages admin/instructor invites; configured super admin emails are `akintyr@gmail.com` and `adeyemodaniel10@gmail.com`.
+- Super admin bootstrap must be fail-closed: never render the configured email allowlist to the browser, do not ask for a setup token, do not accept a password before email verification, and require the verified inbox owner to set the password through the staff reset flow before using `super_admin`.
 - Admins enter at `/admin`, students at `/ppc`, and staff onboarding should use invite links/password setup.
 - Keep admin work consolidated under `/admin`; do not create parallel admin surfaces when expanding PPC/admin visibility.
 - `super_admin` is the staff-management role; `admin` is content/platform admin; instructors are lower-level staff.
@@ -163,11 +164,27 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - For persistence-backed form features, verify the target DB has the new table/indexes or run the documented schema push before end-to-end submit tests.
 - `/welcome`, `/thankyou`, and `/dashboard/welcomepack` are one stateful public funnel: main access is immediate, extra gifts are trust-unlocked, and email failures must not block access.
 - `/welcome` should be a real responsive public page: preserve the mobile stacked flow, but use tablet/desktop section grids and shared public shell widths instead of a cropped mobile column.
+- `/welcome` purpose-book copy is text-heavy; keep it sectioned into a white hero with visible book cover, distinct burden/answer/free/gifts bands, and concise CTA moments instead of reverting to excerpt-heavy copy blocks.
+- `/welcome` hero headlines should stay restrained on mobile and wrap naturally to the viewport; avoid oversized clamp-driven display type or narrow `ch` caps that force awkward multi-line breaks.
+- `/welcome` hero should not show read/audio metadata; keep the intro copy and primary CTA direct.
+- `/welcome` hero supporting paragraphs should use calm body weight; avoid bold emphasis that makes the long-form pitch feel salesy.
+- `/welcome` hero supporting paragraphs should use 16px body text on mobile, reserving larger sizes for wider breakpoints.
+- `/welcome` hero should not use the `Free purpose book` eyebrow; keep the headline closer to the nav with tighter top padding.
+- `/welcome` hero book art should use a realistic tablet border around an attractive branded cover; avoid flat covers, pale blue boxed frames, physical book/page-edge previews, and unclear third-party mockup licenses.
+- The welcome gift drawer copy is context-sensitive: homepage can use gift language, but `/welcome` CTA openings should ask for email/book access directly and say "grant you access now" rather than "open access immediately."
+- `/thankyou` should match the sectioned `/welcome` style: dashboard access first, then a clear share appeal, heading-led purpose/reward cards, multiple social share buttons, and a strong closing urgency. Do not use standalone numbers as card titles.
+- On `/thankyou`, the main blue purpose/reward content should sit directly on the parent blue section background, not inside repeated card boxes.
+- `/thankyou` non-share sections should include a compact `Share this gift` jump to the `#share-gift` share strip, while the share strip itself owns the platform buttons.
+- `/thankyou` callout share CTAs should keep the same text-to-button spacing rhythm as the first share appeal section.
+- For `/welcome`, `/thankyou`, and related public funnel pages, use shared public typography primitives (`site-hero-eyebrow`, `site-hero-heading`, `site-section-heading`, `site-section-intro`, `site-pathway-title`) before custom font-family, tracking, or arbitrary text-size classes.
 - Welcome-pack hero headings should avoid narrow mobile `ch` caps that create five-line wraps; widen the measure and use explicit breakpoint sizes rather than viewport-scaling text.
 - Welcome funnel greetings must prefer explicit submitted names from lead/cookie data and suppress names derived from email identifiers; stale Better Auth session names may predate the first-name modal.
 - Welcome-pack and thank-you main content should use the public shell horizontal padding vars instead of legacy `container-pleros` gutters or hard-coded `px-6`.
+- If asked to revert `/dashboard/welcomepack` after the collaborator redesign, restore the compact `Access your Welcome Pack here` dashboard layout, but keep the shared `HomepageCommunitySection` and shared gift config unless the user explicitly asks to revert those dependencies too.
 - Public welcome/contact/share links should use the canonical public site URL (`https://pleros.org`) or a dedicated public-site env var, not `NEXT_PUBLIC_APP_URL`, because that value may point to Vercel, PPC, or auth infrastructure.
 - Gift content can stay in typed code config for now and should use public-site Sen/Be Vietnam Pro styling, not PPC dashboard styling.
+- When `/thankyou` references the two special books, reuse `extraGifts` and the welcome-pack cover assets from `lib/welcome-pack-gifts.ts` instead of duplicating text-only lists.
+- `/thankyou` callout colors should usually fill the whole section; avoid inset tinted cards when the section itself is the message.
 - Welcome-pack pages should reuse the shared public community section instead of duplicating only its text/CTA; otherwise white overlay copy can become invisible without the image layer.
 - When a welcome-pack page ends with the shared community section, keep it flush to the footer; do not add page-level bottom padding after it.
 - `/dashboard` should require either a valid app session or welcome-access cookie and redirect unauthenticated visitors to `/welcome`.

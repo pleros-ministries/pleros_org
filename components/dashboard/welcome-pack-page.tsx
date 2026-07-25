@@ -5,9 +5,6 @@ import Link from "next/link";
 import { HomepageCommunitySection } from "@/components/home/homepage-community-section";
 import { extraGifts, mainGifts, type WelcomePackGift } from "@/lib/welcome-pack-gifts";
 
-const welcomePackContentFrame =
-  "mx-auto w-full max-w-[36rem] px-[var(--site-shell-padding-x)] md:px-[var(--site-shell-padding-x-md)] lg:px-[var(--site-shell-padding-x-lg)] xl:px-[var(--site-shell-padding-x-xl)]";
-
 function GiftCard({
   gift,
   locked = false,
@@ -69,169 +66,72 @@ export function WelcomePackPage({ extraGiftsUnlocked }: WelcomePackPageProps) {
   const hasExtraGifts = extraGifts.length > 0;
 
   return (
-    <section className="site-font-theme bg-[var(--color-surface)]">
-      <div className="grid gap-10">
-        <section className="bg-white pt-5 sm:pt-6">
-          <div className={`${welcomePackContentFrame} grid gap-7`}>
-            <div className="grid gap-3">
-              <h1 className="site-hero-heading max-w-[20ch] text-[2rem] leading-[0.98] text-[var(--color-brand-blue)] sm:max-w-[18ch] sm:text-[2.45rem] md:text-[2.9rem]">
-                Find the Answer to the Most Important Question of Your Life
-              </h1>
-              <p className="font-[var(--font-be-vietnam-pro)] text-[0.95rem] leading-[1.42] tracking-[-0.02em] text-[var(--color-text-muted)]">
-                Simple, clear, direct, and precise answers to the question
-                of purpose and why you exist.
-              </p>
-              <p className="font-[var(--font-be-vietnam-pro)] text-[0.95rem] leading-[1.42] tracking-[-0.02em] text-[var(--color-text-muted)]">
-                You will have zero doubts and guesses after you read this
-                book.
-              </p>
-            </div>
+    <section className="site-font-theme bg-[var(--color-surface)] pt-5 sm:pt-6">
+      <div className="container-pleros grid max-w-[36rem] gap-10 pb-10 sm:pb-12">
+        <div className="grid gap-2">
+          <h1 className="site-hero-heading max-w-[11ch] text-[clamp(2.4rem,6.2vw,3.45rem)] text-[var(--color-brand-blue)]">
+            Access your Welcome Pack here
+          </h1>
+          <p className="max-w-[31ch] font-[var(--font-be-vietnam-pro)] text-[0.95rem] leading-[1.42] tracking-[-0.02em] text-[var(--color-text-muted)]">
+            Your main welcome pack is ready now. We&apos;ll add supplementary
+            resources here once they are prepared.
+          </p>
+        </div>
 
-            <div className="relative mx-auto aspect-[253/355] w-full max-w-[13.5rem] overflow-hidden rounded-[0.875rem] shadow-[0_20px_44px_rgba(6,16,86,0.16)]">
-              <Image
-                src="/site/home/assets/welcome-pack-cards/welcome-book-cover.png"
-                alt="Your Pleros Welcome Pack book cover"
-                fill
-                className="object-cover"
-                priority
-              />
-            </div>
-          </div>
-        </section>
-
-        <section className="bg-[var(--color-surface-muted)] py-8">
-          <div className={`${welcomePackContentFrame} grid gap-3`}>
+        <section className="grid gap-4">
+          <div className="grid gap-1">
             <h2 className="site-section-heading text-[1.55rem] text-[var(--color-brand-blue)]">
-              Your Greatest Burden
+              Main gifts
             </h2>
-            <div className="grid gap-2.5 font-[var(--font-be-vietnam-pro)] text-[0.95rem] leading-[1.45] tracking-[-0.02em] text-[var(--color-text-strong)]">
-              <p>
-                The most troubling concern for all humans is the question
-                of purpose.
-              </p>
-              <p>Why do we exist?</p>
-              <p>
-                We may have wasted, or might be wasting, our time and life
-                right now, if we don&apos;t know exactly why we exist and
-                are not living for His purpose.
-              </p>
-              <p>
-                It is not unlikely that you have heard many generic answers
-                that seem more like assumptions and guesses.
-              </p>
-              <p>But what we need is a clear, precise, and direct answer.</p>
-            </div>
-          </div>
-        </section>
-
-        <section className="bg-white py-8">
-          <div className={`${welcomePackContentFrame} grid gap-2.5 font-[var(--font-be-vietnam-pro)] text-[0.95rem] leading-[1.45] tracking-[-0.02em] text-[var(--color-text-strong)]`}>
-            <p>What we are offering is not a solution suggestion or a guess.</p>
-            <p>
-              What we offer is an exact and objective answer to the
-              question of purpose.
-            </p>
-            <p>
-              This book will lift all concerns, melt all doubts, and
-              resolve all major questions you have about your purpose and
-              pursuit of it.
+            <p className="font-[var(--font-be-vietnam-pro)] text-[0.86rem] leading-[1.35] tracking-[-0.02em] text-[var(--color-text-muted)]">
+              Accessible immediately from your welcome pack.
             </p>
           </div>
-        </section>
 
-        <section className="bg-[var(--color-brand-sky)] py-8">
-          <div className={`${welcomePackContentFrame} grid gap-6`}>
-            <div className="grid gap-2.5 font-[var(--font-be-vietnam-pro)] text-[0.95rem] leading-[1.45] tracking-[-0.02em] text-[var(--color-text-strong)]">
-              <p>
-                The matter discussed and answered in this book is so
-                important that we cannot afford to put a price on it.
-              </p>
-              <p>
-                You need the answer now, and we want you to have it
-                immediately.
-              </p>
-              <p className="font-semibold text-[var(--color-brand-blue)]">
-                So this book is absolutely FREE.
-              </p>
-              <p>
-                It is a 25&ndash;30 minute read at slow pace. Also available
-                in audio format, which is a 45 minute listen.
-              </p>
-            </div>
-
-            <div className="grid gap-4">
-              <div className="grid gap-1">
-                <h2 className="site-section-heading text-[1.55rem] text-[var(--color-brand-blue)]">
-                  Main gifts
-                </h2>
-                <p className="font-[var(--font-be-vietnam-pro)] text-[0.86rem] leading-[1.35] tracking-[-0.02em] text-[var(--color-text-muted)]">
-                  Accessible immediately from your welcome pack.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                {mainGifts.map((gift) => (
-                  <GiftCard key={gift.id} gift={gift} locked={gift.locked} />
-                ))}
-              </div>
-            </div>
+          <div className="grid grid-cols-2 gap-4">
+            {mainGifts.map((gift) => (
+              <GiftCard key={gift.id} gift={gift} locked={gift.locked} />
+            ))}
           </div>
         </section>
 
         {hasExtraGifts ? (
-          <section className="bg-white py-8">
-            <div className={`${welcomePackContentFrame} grid gap-6`}>
-              <div className="grid gap-2.5 font-[var(--font-be-vietnam-pro)] text-[0.95rem] leading-[1.45] tracking-[-0.02em] text-[var(--color-text-strong)]">
-                <p>
-                  Aside from getting this book for free, we have TWO other
-                  special gifts for you.
-                </p>
-                <p>
-                  If you get this book today and recommend it to others,
-                  you will access our special gift for you.
-                </p>
-              </div>
+          <section className="grid gap-4">
+            <div className="grid gap-1">
+              <h2 className="site-section-heading text-[1.55rem] text-[var(--color-brand-blue)]">
+                Extra gifts
+              </h2>
+              <p className="font-[var(--font-be-vietnam-pro)] text-[0.86rem] leading-[1.35] tracking-[-0.02em] text-[var(--color-text-muted)]">
+                {extraGiftsUnlocked
+                  ? "Your extra gifts are unlocked."
+                  : "Supplementary resources are being prepared."}
+              </p>
+            </div>
 
-              <div className="grid gap-1">
-                <h2 className="site-section-heading text-[1.55rem] text-[var(--color-brand-blue)]">
-                  Extra gifts
-                </h2>
-                <p className="font-[var(--font-be-vietnam-pro)] text-[0.86rem] leading-[1.35] tracking-[-0.02em] text-[var(--color-text-muted)]">
-                  {extraGiftsUnlocked
-                    ? "Your extra gifts are unlocked."
-                    : "Supplementary resources are being prepared."}
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                {extraGifts.map((gift) => (
-                  <GiftCard
-                    key={gift.id}
-                    gift={gift}
-                    locked={!extraGiftsUnlocked}
-                  />
-                ))}
-              </div>
+            <div className="grid grid-cols-2 gap-4">
+              {extraGifts.map((gift) => (
+                <GiftCard
+                  key={gift.id}
+                  gift={gift}
+                  locked={!extraGiftsUnlocked}
+                />
+              ))}
             </div>
           </section>
         ) : (
-          <section className="bg-white py-8">
-            <div className={`${welcomePackContentFrame} grid`}>
-              <div className="grid gap-2 rounded-[1.25rem] bg-[var(--color-brand-sky)] px-4 py-4">
-                <h2 className="site-section-heading text-[1.55rem] text-[var(--color-brand-blue)]">
-                  More resources are coming
-                </h2>
-                <p className="font-[var(--font-be-vietnam-pro)] text-[0.86rem] leading-[1.35] tracking-[-0.02em] text-[var(--color-brand-blue)]">
-                  The supplementary packs are not ready yet. For now, your
-                  welcome pack book is available above and in your email.
-                </p>
-              </div>
-            </div>
+          <section className="grid gap-2 rounded-[1.25rem] bg-[var(--color-brand-sky)] px-4 py-4">
+            <h2 className="site-section-heading text-[1.55rem] text-[var(--color-brand-blue)]">
+              More resources are coming
+            </h2>
+            <p className="font-[var(--font-be-vietnam-pro)] text-[0.86rem] leading-[1.35] tracking-[-0.02em] text-[var(--color-brand-blue)]">
+              The supplementary packs are not ready yet. For now, your welcome
+              pack book is available above and in your email.
+            </p>
           </section>
         )}
-
-        <HomepageCommunitySection />
       </div>
+
+      <HomepageCommunitySection />
     </section>
   );
 }

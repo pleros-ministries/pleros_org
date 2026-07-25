@@ -29,6 +29,9 @@ type HomepageGiftDrawerProps = {
   autoOpen?: boolean;
   redirectTo?: string;
   triggerLabel?: string;
+  eyebrowLabel?: string;
+  headline?: string;
+  subheadline?: string;
   submitLabel?: string;
   pendingLabel?: string;
   source?: string;
@@ -39,6 +42,9 @@ export function HomepageGiftDrawer({
   autoOpen = true,
   redirectTo = "/thankyou",
   triggerLabel,
+  eyebrowLabel = "Welcome gift",
+  headline = welcomePackModalCopy.headline,
+  subheadline = welcomePackModalCopy.subheadline,
   submitLabel = "access welcome pack",
   pendingLabel = "Opening your welcome pack",
   source = "welcome",
@@ -187,7 +193,7 @@ export function HomepageGiftDrawer({
               <div className="flex items-start justify-between gap-4">
                 <div className="inline-flex w-fit items-center gap-2 rounded-full border border-[rgba(5,20,128,0.12)] bg-white/70 px-3 py-1.5 text-[0.7rem] font-semibold tracking-[0.08em] text-[var(--color-brand-blue)] uppercase">
                   <GiftIcon className="size-3.5" />
-                  Welcome gift
+                  {eyebrowLabel}
                 </div>
 
                 <SheetClose
@@ -205,10 +211,10 @@ export function HomepageGiftDrawer({
 
               <div className="grid gap-2">
                 <SheetTitle className="font-[var(--font-sen)] text-[1.9rem] font-semibold leading-[0.92] tracking-[-0.05em] text-[var(--color-brand-blue)]">
-                  {welcomePackModalCopy.headline}
+                  {headline}
                 </SheetTitle>
                 <p className="site-section-intro max-w-[32ch] text-[rgba(6,16,86,0.72)] md:max-w-[38ch]">
-                  {welcomePackModalCopy.subheadline}
+                  {subheadline}
                 </p>
               </div>
             </SheetHeader>
