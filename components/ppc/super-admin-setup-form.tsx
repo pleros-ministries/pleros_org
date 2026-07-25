@@ -13,7 +13,7 @@ const initialState: SuperAdminSetupState = {
   status: "idle",
   message: "",
   values: {
-    name: "FCC Ibadan",
+    name: "",
     email: "",
   },
   errors: {},
@@ -73,6 +73,7 @@ export function SuperAdminSetupForm() {
             name="name"
             required
             defaultValue={state.values.name}
+            placeholder="Your name"
             className="h-8 rounded-sm border border-zinc-300 px-2.5 text-xs outline-none focus:border-zinc-700"
           />
           {state.errors.name ? (
