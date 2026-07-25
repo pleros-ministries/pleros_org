@@ -3,6 +3,7 @@
 import { requireAdmin, requireStaff, requireSuperAdmin } from "@/lib/auth/require-role";
 import type { AdminRegistrantSummary } from "@/lib/admin-registrants";
 import type {
+  AdminDashboardData,
   AdminPlatformData,
   AdminSchoolOfPurposeWaitlistEntry,
   AdminStaffData,
@@ -20,6 +21,15 @@ import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
 import { count, eq } from "drizzle-orm";
 import { hasAdminAccess } from "@/lib/app-role";
+import { getDashboardStats } from "@/lib/db/queries/students";
+import { getContentOverview } from "@/lib/db/queries/content";
+import {
+  getAssignmentOwnershipSummary,
+  getContentDebtSummary,
+  getQueuePressureSummary,
+  getStaffAccessSummary,
+  prioritizeOwnershipRows,
+} from "@/lib/admin-dashboard";
 
 function serializeDate(value: Date | string | null | undefined): string | null {
   if (!value) return null;
@@ -35,6 +45,118 @@ async function getStaffDirectory() {
         equal(user.role, "instructor"),
       ),
   });
+}
+
+export async function getAdminDashboardData(): Promise<AdminDashboardData> {
+  const session = await requireStaff();
+  const canManageContent = hasAdminAccess(session.user.role);
+  const [
+    stats,
+    registrants,
+    reviewQueue,
+    openThreads,
+    contentOverview,
+    staffAccess,
+    [userCount],
+    [lessonCount],
+  ] = await Promise.all([
+    getDashboardStats(),
+    getAdminRegistrantList(),
+    getReviewQueue(),
+    getAllThreads("open"),
+    getContentOverview(),
+    session.user.role === "super_admin"
+      ? Promise.all([listStaffUsers(), listStaffInvites()])
+      : Promise.resolve(null),
+    db.select({ count: count() }).from(schema.users),
+    db
+      .select({ count: count() })
+      .from(schema.lessons)
+      .where(eq(schema.lessons.status, "published")),
+  ]);
+  const contentDebt = getContentDebtSummary(
+    contentOverview.map((level) => ({
+      id: level.id,
+      title: level.title,
+      lessons: level.lessons.map((lesson) => ({
+        id: lesson.id,
+        lessonNumber: lesson.lessonNumber,
+        title: lesson.title,
+        status: lesson.status,
+        audioUrl: lesson.audioUrl,
+        notesContent: lesson.notesContent,
+        responsePrompt: lesson.responsePrompt,
+        responseMarkingGuide: lesson.responseMarkingGuide,
+        questions: lesson.questions.map((question) => ({
+          questionType: question.questionType,
+          questionText: question.questionText,
+          options: question.options as string[] | null,
+          correctAnswer: question.correctAnswer,
+        })),
+      })),
+    })),
+  );
+  const reviewOwnership = getAssignmentOwnershipSummary(
+    reviewQueue,
+    session.user.id,
+    "submittedAt",
+  );
+  const qaOwnership = getAssignmentOwnershipSummary(
+    openThreads,
+    session.user.id,
+    "createdAt",
+  );
+  const prioritizedReviewQueue = prioritizeOwnershipRows(
+    reviewQueue,
+    session.user.id,
+  );
+  const prioritizedOpenThreads = prioritizeOwnershipRows(
+    openThreads,
+    session.user.id,
+  );
+  const ppcAccounts = registrants.filter(
+    (registrant) => registrant.accountStatus === "ppc_account",
+  ).length;
+
+  return {
+    canManageContent,
+    currentStaffId: session.user.id,
+    stats,
+    counts: {
+      registrants: registrants.length,
+      welcomeOnly: registrants.length - ppcAccounts,
+      users: userCount?.count ?? 0,
+      publishedLessons: lessonCount?.count ?? 0,
+    },
+    reviewOwnership,
+    qaOwnership,
+    reviewPressure: getQueuePressureSummary(reviewQueue, "submittedAt"),
+    qaPressure: getQueuePressureSummary(openThreads, "createdAt"),
+    contentDebt,
+    staffAccessSummary: staffAccess
+      ? getStaffAccessSummary(staffAccess[0], staffAccess[1])
+      : null,
+    reviewQueuePreview: prioritizedReviewQueue.slice(0, 5).map((item) => ({
+      id: item.id,
+      userId: item.userId,
+      studentName: item.studentName,
+      levelId: item.levelId,
+      lessonNumber: item.lessonNumber,
+      lessonTitle: item.lessonTitle,
+      status: item.status,
+      assignedToId: item.assignedToId,
+      submittedAt: serializeDate(item.submittedAt),
+    })),
+    qaPreview: prioritizedOpenThreads.slice(0, 6).map((thread) => ({
+      id: thread.id,
+      subject: thread.subject,
+      studentName: thread.studentName,
+      levelId: thread.levelId,
+      lessonNumber: thread.lessonNumber,
+      assignedToId: thread.assignedToId,
+      createdAt: serializeDate(thread.createdAt),
+    })),
+  };
 }
 
 export async function getAdminSchoolOfPurposeWaitlist(): Promise<

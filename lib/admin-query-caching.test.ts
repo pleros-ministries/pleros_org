@@ -16,6 +16,21 @@ const schoolOfPurposePageSource = readFileSync(
   "utf8",
 );
 
+const dashboardPageSource = readFileSync(
+  join(process.cwd(), "app", "admin", "page.tsx"),
+  "utf8",
+);
+
+const dashboardClientSource = readFileSync(
+  join(process.cwd(), "components", "ppc", "admin-dashboard-client.tsx"),
+  "utf8",
+);
+
+const readActionsSource = readFileSync(
+  join(process.cwd(), "app", "admin", "_actions", "read-actions.ts"),
+  "utf8",
+);
+
 const registrantsPageSource = readFileSync(
   join(process.cwd(), "app", "admin", "(app)", "students", "page.tsx"),
   "utf8",
@@ -68,6 +83,15 @@ const shellSource = readFileSync(
 );
 
 describe("admin read-model caching", () => {
+  test("renders the main admin dashboard through the client query cache", () => {
+    expect(dashboardPageSource).toContain("AdminDashboardClient");
+    expect(dashboardPageSource).not.toContain("getDashboardStats");
+    expect(dashboardPageSource).not.toContain("getAdminRegistrantList");
+    expect(dashboardClientSource).toContain("ADMIN_QUERY_KEYS.dashboard");
+    expect(dashboardClientSource).toContain("getAdminDashboardData");
+    expect(readActionsSource).toContain("getAdminDashboardData");
+  });
+
   test("renders the School of Purpose page through the client query cache", () => {
     expect(schoolOfPurposePageSource).toContain("AdminSchoolOfPurposeClient");
     expect(schoolOfPurposePageSource).not.toContain(
@@ -108,6 +132,7 @@ describe("admin read-model caching", () => {
 
   test("renders cached admin data while an App Router transition is pending", () => {
     expect(shellSource).toContain("PendingAdminRoute");
+    expect(shellSource).toContain("AdminDashboardPreview");
     expect(shellSource).toContain("AdminPlatformPreview");
     expect(shellSource).toContain("<PendingAdminRoute pathname={pendingPathname} />");
   });

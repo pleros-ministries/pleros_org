@@ -48,7 +48,7 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - Better Auth cookie-cache optimizations require `nextCookies()` to be the final plugin and a same-origin client `GET /api/auth/get-session` to issue the cache cookie for existing sessions. Keep its TTL short for staff access.
 - The Content CMS overview can be payload-heavy because lesson notes are large; batch its data, cache the shared overview briefly, and invalidate that tag from every content mutation.
 - Values returned through `unstable_cache` may be ISO strings even when the uncached DB query yields `Date` objects; server-to-client serializers must accept both forms before calling date methods.
-- Admin routes with expensive read models should use a shared TanStack Query client under `/admin`, with role-checked server-action query functions and short stale windows so repeat sidebar visits render cached data immediately while refreshing in the background.
+- Admin routes with expensive read models, including the main `/admin` dashboard, should use a shared TanStack Query client under `/admin`, with role-checked server-action query functions and short stale windows so repeat sidebar visits render cached data immediately while refreshing in the background.
 - When an admin mutation changes query-backed data, invalidate its TanStack query key instead of relying on `router.refresh()`; retain the immediate local update and let the active query reconcile from the server.
 - Admin summary stat/card groups should render as 2-column grids on narrow viewports, then expand to their existing wider desktop layouts.
 - Keep admin dashboard metric cards text-only; reserve icons for actionable navigation and workflow items.
@@ -201,6 +201,7 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - Welcome access cookies should last 100 days and refresh on dashboard visits when present.
 - Welcome-pack access email should send only when durable lead state says the lead is newly created; client in-flight guards are secondary.
 - Welcome modal/drawer submission should grant access and redirect only; do not auto-trigger downloads during submission or use download-focused pending copy.
+- Welcome modal/drawer submission should redirect with immediate browser navigation after `/api/welcome-access` succeeds, not an App Router transition that leaves users staring at pending button copy.
 - While supplementary welcome packs are not ready, thank-you sharing must not promise unlocks; show the main download fallback and email download link instead.
 - When Drizzle migration history is out of sync with existing DB objects, verify the actual tables/indexes/enums first, then repair `drizzle.__drizzle_migrations` only after confirming the objects already exist.
 

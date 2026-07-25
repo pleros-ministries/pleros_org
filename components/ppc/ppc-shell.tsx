@@ -80,6 +80,7 @@ const iconMap: Record<PpcShellIcon, React.ComponentType<{ className?: string }>>
 };
 
 const PREFETCHED_ADMIN_PATHS = new Set([
+  "/",
   "/platform",
   "/school-of-purpose",
   "/staff",
@@ -90,6 +91,13 @@ const PREFETCHED_ADMIN_PATHS = new Set([
   "/notifications",
 ]);
 
+const AdminDashboardPreview = dynamic(
+  () =>
+    import("@/components/ppc/admin-dashboard-client").then(
+      (module) => module.AdminDashboardClient,
+    ),
+  { ssr: false },
+);
 const AdminPlatformPreview = dynamic(
   () =>
     import("@/components/ppc/admin-platform-client").then(
@@ -163,6 +171,8 @@ function shouldStartNavigation(event: MouseEvent<HTMLAnchorElement>) {
 
 function PendingAdminRoute({ pathname }: { pathname: string }) {
   switch (pathname) {
+    case "/admin":
+      return <AdminDashboardPreview />;
     case "/admin/platform":
       return <AdminPlatformPreview />;
     case "/admin/school-of-purpose":
