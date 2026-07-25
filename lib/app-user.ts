@@ -46,7 +46,8 @@ export async function getAppUserByEmail(email: string) {
 export async function hasSuperAdminUser() {
   try {
     const user = await db.query.users.findFirst({
-      where: (u, { eq }) => eq(u.role, "super_admin"),
+      where: (u, { and, eq }) =>
+        and(eq(u.role, "super_admin"), eq(u.emailVerified, true)),
     });
 
     return Boolean(user);
@@ -62,7 +63,7 @@ export async function getMissingSuperAdminEmails() {
     });
     const existingSuperAdminEmails = new Set(
       users
-        .filter((user) => user.role === "super_admin")
+        .filter((user) => user.role === "super_admin" && user.emailVerified)
         .map((user) => normalizeEmail(user.email)),
     );
 

@@ -53,6 +53,9 @@ describe("super admin setup hardening", () => {
     expect(claimPageSource).toContain("<SuperAdminPasswordSetupForm");
     expect(claimFormSource).toContain('name="password"');
     expect(claimFormSource).toContain('name="confirmPassword"');
+    expect(
+      readFileSync(join(process.cwd(), "lib", "app-user.ts"), "utf8"),
+    ).toContain('user.role === "super_admin" && user.emailVerified');
   });
 
   test("requires verified email before privileged app access", () => {
