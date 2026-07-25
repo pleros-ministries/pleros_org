@@ -37,7 +37,7 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - Canonical student auth URLs are `/ppc/login` and `/ppc/signup`; legacy `/ppc/sign-in` and `/ppc/sign-up` should redirect.
 - When changing auth paths, update canonical routes, legacy redirects, link targets, guarded-route redirects, and public-path tests together.
 - Staff access is invite-based. `super_admin` manages admin/instructor invites; configured super admin emails are `akintyr@gmail.com` and `adeyemodaniel10@gmail.com`.
-- Super admin bootstrap must be fail-closed: never render the configured email allowlist to the browser, do not ask for a setup token, do not accept a password before email verification, and require the verified inbox owner to set the password through the staff reset flow before using `super_admin`.
+- Super admin bootstrap must be fail-closed with minimal round-tripping: never render the configured email allowlist, do not ask for a setup token, send one short-lived inbox claim link, then let the verified inbox owner create and save the password on the setup claim page before using `super_admin`.
 - Admins enter at `/admin`, students at `/ppc`, and staff onboarding should use invite links/password setup.
 - Keep admin work consolidated under `/admin`; do not create parallel admin surfaces when expanding PPC/admin visibility.
 - `super_admin` is the staff-management role; `admin` is content/platform admin; instructors are lower-level staff.
@@ -190,6 +190,7 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - Welcome-pack pages should reuse the shared public community section instead of duplicating only its text/CTA; otherwise white overlay copy can become invisible without the image layer.
 - When a welcome-pack page ends with the shared community section, keep it flush to the footer; do not add page-level bottom padding after it.
 - `/dashboard` should require either a valid app session or welcome-access cookie and redirect unauthenticated visitors to `/welcome`.
+- Dashboard navigation for welcome-cookie visitors should render from the cookie with route-level loading feedback; defer Better Auth provisioning to server actions that actually persist progress or waitlist data.
 - Dashboard progress tracking should avoid duplicate per-item action buttons; checking an item should directly update the tracked state.
 - Dashboard podcast progress should include a clear link to the public `/podcast` page so users can listen from the tracker.
 - Dashboard bulk progress actions should be reversible when the whole group is already complete.

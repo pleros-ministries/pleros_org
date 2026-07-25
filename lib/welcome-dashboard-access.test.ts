@@ -11,17 +11,18 @@ describe("welcome dashboard access", () => {
     const layoutSource = source("app", "(site)", "dashboard", "layout.tsx");
 
     expect(layoutSource).toContain("getAppSession");
-    expect(layoutSource).toContain("if (!appSession && !welcomeSession)");
+    expect(layoutSource).toContain("if (welcomeSession)");
+    expect(layoutSource).toContain("const appSession = await getAppSession()");
     expect(layoutSource).toContain('redirect("/welcome")');
     expect(layoutSource).not.toContain('redirect("/")');
   });
 
-  test("dashboard page uses welcome cookie as a session bootstrap and display-name source", () => {
+  test("dashboard page uses welcome cookie directly for display-name source", () => {
     const dashboardSource = source("app", "(site)", "dashboard", "page.tsx");
 
-    expect(dashboardSource).toContain("if (!appSession && welcomeSession)");
+    expect(dashboardSource).toContain("if (welcomeSession)");
     expect(dashboardSource).toContain(
-      "getWelcomePackLeadByEmail(welcomeEmail)",
+      "getWelcomePackLeadByEmail(welcomeSession.email)",
     );
     expect(dashboardSource).toContain(
       "resolveWelcomeDisplayName",
@@ -29,6 +30,7 @@ describe("welcome dashboard access", () => {
     expect(dashboardSource).toContain(
       "return <WelcomeDashboardView name={displayName ?? undefined} />",
     );
+    expect(dashboardSource).not.toContain("/api/welcome-access/session");
     expect(dashboardSource).toContain('redirect("/welcome")');
   });
 
@@ -70,9 +72,34 @@ describe("welcome dashboard access", () => {
       "page.tsx",
     );
 
-    expect(packSource).toContain("appSession?.user.email ?? welcomeSession?.email");
-    expect(packSource).toContain("if (!appSession && welcomeSession)");
+    expect(packSource).toContain("if (welcomeSession)");
+    expect(packSource).toContain(
+      "getWelcomePackLeadByEmail(welcomeSession.email)",
+    );
+    expect(packSource).not.toContain("/api/welcome-access/session");
     expect(packSource).toContain('redirect("/welcome")');
+  });
+
+  test("dashboard routes provide immediate loading feedback during card navigation", () => {
+    const loadingSource = source("app", "(site)", "dashboard", "loading.tsx");
+
+    expect(loadingSource).toContain("Loading dashboard page");
+    expect(loadingSource).toContain("grid grid-cols-2 gap-4");
+    expect(loadingSource).toContain("animate-pulse");
+  });
+
+  test("dashboard mutations can provision a session from welcome access", () => {
+    const actionSessionSource = source("lib", "dashboard-action-session.ts");
+    const podcastActionsSource = source("app", "_actions", "podcast-progress-actions.ts");
+    const prayerActionsSource = source("app", "_actions", "prayer-watch-actions.ts");
+    const schoolActionsSource = source("app", "_actions", "school-of-purpose-actions.ts");
+
+    expect(actionSessionSource).toContain("provisionWelcomeSession");
+    expect(actionSessionSource).toContain("readWelcomeAccessToken");
+    expect(actionSessionSource).toContain("resolveDbUserId");
+    expect(podcastActionsSource).toContain("getDashboardActionSession");
+    expect(prayerActionsSource).toContain("getDashboardActionSession");
+    expect(schoolActionsSource).toContain("getDashboardActionSession");
   });
 
   test("proxy refreshes the welcome cookie on dashboard visits", () => {

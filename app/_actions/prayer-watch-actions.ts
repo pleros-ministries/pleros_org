@@ -2,8 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 
-import { getAppSession } from "@/lib/app-session";
 import { getBibleBook } from "@/lib/bible-reading";
+import { getDashboardActionSession } from "@/lib/dashboard-action-session";
 import { upsertBibleReadingLog } from "@/lib/db/queries/bible-reading";
 import {
   logPrayerWatchAttendance,
@@ -19,7 +19,7 @@ export async function togglePrayerWatchAttendanceAction(
   _previousState: PrayerWatchActionState,
   formData: FormData,
 ): Promise<PrayerWatchActionState> {
-  const session = await getAppSession();
+  const session = await getDashboardActionSession();
 
   if (!session) {
     return { error: "You need to be signed in to log Prayer Watch attendance." };
@@ -52,7 +52,7 @@ export async function saveBibleReadingLogAction(
   _previousState: BibleReadingActionState,
   formData: FormData,
 ): Promise<BibleReadingActionState> {
-  const session = await getAppSession();
+  const session = await getDashboardActionSession();
 
   if (!session) {
     return { error: "You need to be signed in to log Bible reading." };

@@ -10,25 +10,27 @@ import {
 } from "@/lib/welcome-access";
 
 export default async function DashboardWelcomePackPage() {
-  const appSession = await getAppSession();
   const cookieStore = await cookies();
   const welcomeSession = readWelcomeAccessToken(
     cookieStore.get(WELCOME_ACCESS_COOKIE_NAME)?.value,
     process.env,
   );
 
-  if (!appSession && welcomeSession) {
-    redirect("/api/welcome-access/session?returnTo=%2Fdashboard%2Fwelcomepack");
+  if (welcomeSession) {
+    const lead = await getWelcomePackLeadByEmail(welcomeSession.email);
+
+    return (
+      <WelcomePackPage extraGiftsUnlocked={lead?.extraGiftsUnlocked ?? false} />
+    );
   }
+
+  const appSession = await getAppSession();
 
   if (!appSession) {
     redirect("/welcome");
   }
 
-  const welcomeEmail = appSession?.user.email ?? welcomeSession?.email;
-  const lead = welcomeEmail
-    ? await getWelcomePackLeadByEmail(welcomeEmail)
-    : null;
+  const lead = await getWelcomePackLeadByEmail(appSession.user.email);
   const extraGiftsUnlocked = lead?.extraGiftsUnlocked ?? false;
 
   return <WelcomePackPage extraGiftsUnlocked={extraGiftsUnlocked} />;

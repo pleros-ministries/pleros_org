@@ -12,24 +12,33 @@ import {
 } from "@/lib/welcome-access";
 
 export default async function DashboardPrayerWatchPage() {
-  const appSession = await getAppSession();
   const cookieStore = await cookies();
   const welcomeSession = readWelcomeAccessToken(
     cookieStore.get(WELCOME_ACCESS_COOKIE_NAME)?.value,
     process.env,
   );
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
 
-  if (!appSession && welcomeSession) {
-    redirect("/api/welcome-access/session?returnTo=%2Fdashboard%2Fprayer-watch");
+  if (welcomeSession) {
+    return (
+      <PrayerWatchPage
+        year={year}
+        month={month}
+        todayKey={toDateKey(now)}
+        attendedDateKeys={[]}
+        bibleReadingLogs={[]}
+      />
+    );
   }
+
+  const appSession = await getAppSession();
 
   if (!appSession) {
     redirect("/welcome");
   }
 
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth();
   const [attendedDateKeys, bibleReadingLogs] = await Promise.all([
     getPrayerWatchAttendanceForMonth(appSession.user.id, year, month),
     getBibleReadingLogsForMonth(appSession.user.id, year, month),

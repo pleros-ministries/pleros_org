@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
-import { getAppSession } from "@/lib/app-session";
+import { getDashboardActionSession } from "@/lib/dashboard-action-session";
 import { upsertSchoolOfPurposeWaitlistEntry } from "@/lib/db/queries/school-of-purpose-waitlist";
 import {
   normalizeSchoolOfPurposeWaitlistInput,
@@ -19,7 +19,7 @@ export async function joinSchoolOfPurposeWaitlistAction(
   _previousState: SchoolOfPurposeWaitlistActionState,
   formData: FormData,
 ): Promise<SchoolOfPurposeWaitlistActionState> {
-  const session = await getAppSession();
+  const session = await getDashboardActionSession();
   const values = {
     name: readString(formData, "name"),
     phone: readString(formData, "phone"),

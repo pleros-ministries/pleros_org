@@ -11,16 +11,24 @@ import {
 } from "@/lib/welcome-access";
 
 export default async function DashboardPodcastPage() {
-  const appSession = await getAppSession();
   const cookieStore = await cookies();
   const welcomeSession = readWelcomeAccessToken(
     cookieStore.get(WELCOME_ACCESS_COOKIE_NAME)?.value,
     process.env,
   );
 
-  if (!appSession && welcomeSession) {
-    redirect("/api/welcome-access/session?returnTo=%2Fdashboard%2Fpodcast");
+  if (welcomeSession) {
+    const episodes = await fetchAnchorEpisodes();
+
+    return (
+      <PodcastProgressPage
+        episodes={episodes}
+        listenedEpisodeGuids={[]}
+      />
+    );
   }
+
+  const appSession = await getAppSession();
 
   if (!appSession) {
     redirect("/welcome");

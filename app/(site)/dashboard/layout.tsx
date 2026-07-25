@@ -13,14 +13,19 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const appSession = await getAppSession();
   const cookieStore = await cookies();
   const welcomeSession = readWelcomeAccessToken(
     cookieStore.get(WELCOME_ACCESS_COOKIE_NAME)?.value,
     process.env,
   );
 
-  if (!appSession && !welcomeSession) {
+  if (welcomeSession) {
+    return <AppShell>{children}</AppShell>;
+  }
+
+  const appSession = await getAppSession();
+
+  if (!appSession) {
     redirect("/welcome");
   }
 

@@ -11,27 +11,34 @@ import { getWelcomePackLeadByEmail } from "@/lib/db/queries/welcome-pack-leads";
 import { resolveWelcomeDisplayName } from "@/lib/welcome-display-name";
 
 export default async function WelcomeDashboardPage() {
-  const appSession = await getAppSession();
   const cookieStore = await cookies();
   const welcomeSession = readWelcomeAccessToken(
     cookieStore.get(WELCOME_ACCESS_COOKIE_NAME)?.value,
     process.env,
   );
 
-  if (!appSession && welcomeSession) {
-    redirect("/api/welcome-access/session?returnTo=%2Fdashboard");
+  if (welcomeSession) {
+    const lead = await getWelcomePackLeadByEmail(welcomeSession.email);
+    const displayName = resolveWelcomeDisplayName({
+      email: welcomeSession.email,
+      leadName: lead?.name,
+      welcomeName: welcomeSession.name,
+    });
+
+    return <WelcomeDashboardView name={displayName ?? undefined} />;
   }
+
+  const appSession = await getAppSession();
 
   if (!appSession) {
     redirect("/welcome");
   }
 
-  const welcomeEmail = welcomeSession?.email ?? appSession.user.email;
+  const welcomeEmail = appSession.user.email;
   const lead = await getWelcomePackLeadByEmail(welcomeEmail);
   const displayName = resolveWelcomeDisplayName({
     email: welcomeEmail,
     leadName: lead?.name,
-    welcomeName: welcomeSession?.name,
     sessionName: appSession.user.name,
   });
 

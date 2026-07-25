@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
-import { getAppSession } from "@/lib/app-session";
+import { getDashboardActionSession } from "@/lib/dashboard-action-session";
 import {
   markPodcastEpisodeListened,
   markPodcastEpisodesListened,
@@ -18,7 +18,7 @@ export async function togglePodcastEpisodeProgressAction(
   _previousState: PodcastProgressActionState,
   formData: FormData,
 ): Promise<PodcastProgressActionState> {
-  const session = await getAppSession();
+  const session = await getDashboardActionSession();
 
   if (!session) {
     return { error: "You need to be signed in to track podcast progress." };
@@ -45,7 +45,7 @@ export async function markSelectedPodcastEpisodesListenedAction(
   _previousState: PodcastProgressActionState,
   formData: FormData,
 ): Promise<PodcastProgressActionState> {
-  const session = await getAppSession();
+  const session = await getDashboardActionSession();
 
   if (!session) {
     return { error: "You need to be signed in to track podcast progress." };

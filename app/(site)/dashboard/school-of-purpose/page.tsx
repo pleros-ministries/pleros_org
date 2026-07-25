@@ -10,16 +10,27 @@ import {
 } from "@/lib/welcome-access";
 
 export default async function DashboardSchoolOfPurposePage() {
-  const appSession = await getAppSession();
   const cookieStore = await cookies();
   const welcomeSession = readWelcomeAccessToken(
     cookieStore.get(WELCOME_ACCESS_COOKIE_NAME)?.value,
     process.env,
   );
 
-  if (!appSession && welcomeSession) {
-    redirect("/api/welcome-access/session?returnTo=%2Fdashboard%2Fschool-of-purpose");
+  if (welcomeSession) {
+    const existingEntry = await getSchoolOfPurposeWaitlistEntryByEmail(
+      welcomeSession.email,
+    );
+
+    return (
+      <SchoolOfPurposePage
+        existingEntry={
+          existingEntry ? { name: existingEntry.name, phone: existingEntry.phone } : null
+        }
+      />
+    );
   }
+
+  const appSession = await getAppSession();
 
   if (!appSession) {
     redirect("/welcome");
