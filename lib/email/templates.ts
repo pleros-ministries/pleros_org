@@ -129,6 +129,11 @@ export type PasswordResetProps = {
   resetUrl: string;
 };
 
+export type EmailVerificationProps = {
+  name: string;
+  verificationUrl: string;
+};
+
 export function staffAssignmentHtml({
   staffName,
   itemLabel,
@@ -208,6 +213,33 @@ export function passwordResetHtml({
   </a>
   <p style="font-size: 11px; color: #9ca3af; margin-top: 24px;">
     This link expires in 1 hour. If you did not request a password reset, you can ignore this email.
+  </p>
+</body>
+</html>`.trim();
+}
+
+export function emailVerificationHtml({
+  name,
+  verificationUrl,
+}: EmailVerificationProps): string {
+  const safeName = escapeHtml(name);
+  const safeVerificationUrl = escapeHtml(verificationUrl);
+
+  return `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8" /></head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #142033; max-width: 520px; margin: 0 auto; padding: 32px 16px;">
+  <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #58657a;">Pleros account</p>
+  <h1 style="font-size: 20px; margin: 12px 0 0;">Verify your email</h1>
+  <p style="font-size: 14px; color: #58657a; line-height: 1.6;">
+    Hi ${safeName}, verify this email address to confirm ownership of your Pleros account.
+  </p>
+  <a href="${safeVerificationUrl}" style="display: inline-block; margin-top: 16px; padding: 10px 20px; background: #011585; color: #fff; border-radius: 4px; font-size: 13px; font-weight: 600; text-decoration: none;">
+    Verify email
+  </a>
+  <p style="font-size: 11px; color: #9ca3af; margin-top: 24px;">
+    If you did not create or update this account, you can ignore this email.
   </p>
 </body>
 </html>`.trim();

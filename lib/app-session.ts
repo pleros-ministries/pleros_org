@@ -30,11 +30,24 @@ export const getAppSession = cache(async (): Promise<AppSession | null> => {
     }
 
     const authUserId = authSession.user.id ?? authSession.user.email;
+    const emailVerified = Boolean(authSession.user.emailVerified);
 
     if (isConfiguredSuperAdminEmail(authSession.user.email)) {
+      if (!emailVerified) {
+        return null;
+      }
+
+      const ppcUserId = await ensureAppUserRecord({
+        id: authUserId,
+        name: authSession.user.name,
+        email: authSession.user.email,
+        role: "super_admin",
+        emailVerified: true,
+      });
+
       return {
         user: {
-          id: authUserId,
+          id: ppcUserId,
           name: authSession.user.name,
           email: authSession.user.email,
           role: "super_admin",
@@ -44,14 +57,18 @@ export const getAppSession = cache(async (): Promise<AppSession | null> => {
 
     const appUser = await getAppUserByEmail(authSession.user.email);
     const role = appUser?.role ?? "student";
-    const ppcUserId =
-      appUser?.id ??
-      (await ensureAppUserRecord({
-        id: authUserId,
-        name: authSession.user.name,
-        email: authSession.user.email,
-        role,
-      }));
+
+    if (role !== "student" && !emailVerified) {
+      return null;
+    }
+
+    const ppcUserId = await ensureAppUserRecord({
+      id: appUser?.id ?? authUserId,
+      name: authSession.user.name,
+      email: authSession.user.email,
+      role,
+      emailVerified,
+    });
 
     return {
       user: {

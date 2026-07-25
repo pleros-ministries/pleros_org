@@ -6,7 +6,8 @@ import { twoFactor } from "better-auth/plugins/two-factor";
 import { db } from "@/lib/db";
 import * as authSchema from "@/lib/db/auth-schema";
 import { buildTrustedOrigins, resolveAuthBaseUrl } from "@/lib/auth/auth-env";
-import { sendPasswordReset } from "@/lib/email/send";
+import { ensureAppUserRecord } from "@/lib/app-user";
+import { sendEmailVerification, sendPasswordReset } from "@/lib/email/send";
 
 const googleConfigured =
   typeof process.env.GOOGLE_CLIENT_ID === "string" &&
@@ -32,6 +33,27 @@ export const betterAuthServer = betterAuth({
         to: user.email,
         name: user.name,
         resetUrl: url,
+      });
+    },
+  },
+  emailVerification: {
+    sendOnSignUp: true,
+    sendOnSignIn: true,
+    autoSignInAfterVerification: true,
+    expiresIn: 60 * 60,
+    sendVerificationEmail: async ({ user, url }) => {
+      await sendEmailVerification({
+        to: user.email,
+        name: user.name,
+        verificationUrl: url,
+      });
+    },
+    afterEmailVerification: async (user) => {
+      await ensureAppUserRecord({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        emailVerified: true,
       });
     },
   },

@@ -1,6 +1,7 @@
 import { resend, isEmailEnabled } from "./resend";
 import {
   contactSubmissionNotificationHtml,
+  emailVerificationHtml,
   inactivityReminderHtml,
   passwordResetHtml,
   submissionReviewedHtml,
@@ -126,6 +127,24 @@ export async function sendPasswordReset(opts: {
     html: passwordResetHtml({
       name: opts.name,
       resetUrl: opts.resetUrl,
+    }),
+  });
+}
+
+export async function sendEmailVerification(opts: {
+  to: string;
+  name: string;
+  verificationUrl: string;
+}) {
+  if (!isEmailEnabled() || !resend) return null;
+
+  return resend.emails.send({
+    from: FROM,
+    to: opts.to,
+    subject: "Verify your Pleros email",
+    html: emailVerificationHtml({
+      name: opts.name,
+      verificationUrl: opts.verificationUrl,
     }),
   });
 }

@@ -96,11 +96,16 @@ export async function acceptStaffInviteAction(data: {
     throw new Error("Create your account before accepting this invite.");
   }
 
+  if (!authUser.emailVerified) {
+    throw new Error("Verify your email before accepting this staff invite.");
+  }
+
   const userId = await ensureAppUserRecord({
     id: authUser.id,
     name: authUser.name,
     email: authUser.email,
     role: invite.role,
+    emailVerified: true,
   });
 
   await acceptStaffInvite(invite.id, userId);
@@ -122,4 +127,3 @@ export async function revokeStaffInviteAction(inviteId: number) {
     status: getStaffInviteStatus(invite),
   };
 }
-

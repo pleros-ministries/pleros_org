@@ -30,7 +30,7 @@ export default async function AdminSetupPage() {
           have not been created yet.
         </p>
 
-        <SuperAdminSetupForm emails={missingSuperAdminEmails} />
+        <SuperAdminSetupForm />
       </section>
     </main>
   );

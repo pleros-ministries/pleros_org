@@ -95,18 +95,35 @@ export async function ensureAppUserRecord(opts: {
   name: string;
   email: string;
   role?: AppRole;
+  emailVerified?: boolean;
 }): Promise<string> {
   const normalizedEmail = normalizeEmail(opts.email);
   const existing = await getAppUserByEmail(normalizedEmail);
   const role = opts.role ?? (await resolvePersistedRoleForEmail(normalizedEmail));
 
   if (existing) {
+    const updates: Partial<{
+      role: AppRole;
+      emailVerified: boolean;
+    }> = {};
+
     if (existing.role !== role) {
+      updates.role = role;
+    }
+
+    if (
+      typeof opts.emailVerified === "boolean" &&
+      existing.emailVerified !== opts.emailVerified
+    ) {
+      updates.emailVerified = opts.emailVerified;
+    }
+
+    if (Object.keys(updates).length > 0) {
       const { users } = await import("./db/schema");
 
       await db
         .update(users)
-        .set({ role })
+        .set(updates)
         .where(eq(users.id, existing.id));
     }
 
@@ -121,6 +138,7 @@ export async function ensureAppUserRecord(opts: {
       name: opts.name,
       email: normalizedEmail,
       role,
+      emailVerified: opts.emailVerified ?? false,
     }).onConflictDoNothing();
 
     return opts.id;

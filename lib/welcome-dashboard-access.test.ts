@@ -50,7 +50,7 @@ describe("welcome dashboard access", () => {
 
     expect(thankYouSource).toContain("name?: string");
     expect(thankYouSource).toContain(
-      "`Thank you for receiving your gift, ${name}.`",
+      "`Thank you for receiving your gift, ${name}`",
     );
 
     expect(thankYouRouteSource).toContain("getAppSession");
