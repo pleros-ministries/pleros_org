@@ -148,7 +148,7 @@ export async function createSuperAdminAccountAction(
 
     return {
       status: "success",
-      message: "Setup link sent. Open it from that inbox to create your password.",
+      message: "Setup link sent. Open the link to set your password.",
       values,
       errors: {},
     };
