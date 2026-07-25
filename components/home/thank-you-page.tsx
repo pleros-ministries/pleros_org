@@ -90,17 +90,14 @@ export function ThankYouPage({ name }: ThankYouPageProps) {
 
       <main>
         <section
-          className={`bg-[var(--color-brand-sky)] pb-12 pt-9 md:pb-16 md:pt-12 ${thankYouSectionPadding}`}
+          className={`bg-[var(--color-brand-sky)] py-9 md:py-11 ${thankYouSectionPadding}`}
         >
-          <div className="mx-auto grid max-w-[72rem] gap-7">
-            <div className="grid gap-4">
-              <h1 className="site-hero-heading max-w-[12ch] text-[var(--color-brand-blue)]">
-                Click here to access your book
-              </h1>
-              <p className="site-hero-intro max-w-[34ch] text-[var(--color-text-strong)]">
+          <div className="mx-auto grid max-w-[72rem]">
+            <div className="grid max-w-[30rem] gap-3">
+              <p className="site-section-intro max-w-[31rem] text-[var(--color-text-strong)]">
                 Your free book is ready in your dashboard.
               </p>
-              <div className="flex flex-wrap gap-3 pt-2">
+              <div className="flex flex-wrap gap-3 pt-1">
                 <a
                   href="#book-access"
                   className={`${shareJumpButtonBase} bg-[var(--color-brand-blue)] text-white shadow-[0_14px_28px_rgba(5,20,128,0.18)]`}
@@ -185,11 +182,12 @@ export function ThankYouPage({ name }: ThankYouPageProps) {
                         <Image
                           src={gift.imageSrc}
                           alt={gift.title}
-                          width={253}
-                          height={355}
+                          width={506}
+                          height={710}
+                          sizes="(min-width: 768px) 16vw, 42vw"
                           className="h-auto w-full shadow-[0_16px_34px_rgba(0,0,0,0.18)]"
                         />
-                        <figcaption className="font-[var(--font-be-vietnam-pro)] text-[0.75rem] font-semibold leading-[1.25] tracking-[-0.02em] text-white">
+                        <figcaption className="font-[var(--font-be-vietnam-pro)] text-[0.75rem] font-normal leading-[1.25] tracking-[-0.02em] text-white">
                           {gift.title}
                         </figcaption>
                       </figure>
@@ -261,9 +259,6 @@ export function ThankYouPage({ name }: ThankYouPageProps) {
         >
           <div className="mx-auto grid max-w-[72rem] gap-7">
             <div className="grid gap-4">
-              <p className={thankYouEyebrow}>
-                Thank you
-              </p>
               <h2 className="site-hero-heading max-w-[13ch] text-[var(--color-brand-blue)]">
                 {name
                   ? `Thank you for receiving your gift, ${name}`

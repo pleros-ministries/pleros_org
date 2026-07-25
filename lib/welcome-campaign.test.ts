@@ -86,7 +86,7 @@ describe("welcome campaign pages", () => {
 
     expect(pageSource).toContain("ThankYouPage");
     expect(pageSource).not.toContain("downloadUrl");
-    expect(viewSource).toContain("Click here to access your book");
+    expect(viewSource).not.toContain("Click here to access your book");
     expect(viewSource).toContain("Your free book is ready in your dashboard.");
     expect(viewSource).toContain('href="#book-access"');
     expect(viewSource).toContain('id="book-access"');
@@ -106,10 +106,10 @@ describe("welcome campaign pages", () => {
     expect(giftSource).toContain("Breaking Habits and Addictions as a New Creation");
     expect(giftSource).toContain("How the Gospel Proves Itself to Be the Truth");
     expect(giftSource).toContain(
-      "/assets/dashboard/free-gift-book-covers/book-card-habits-addictions.jpg",
+      "/assets/dashboard/free-gift-book-covers/book-card-habits-addictions.png",
     );
     expect(giftSource).toContain(
-      "/assets/dashboard/free-gift-book-covers/book-card-gospel-prove-truth.jpg",
+      "/assets/dashboard/free-gift-book-covers/book-card-gospel-prove-truth.png",
     );
     expect(viewSource).toContain("Share on Telegram");
     expect(viewSource).toContain("Share on Facebook");
