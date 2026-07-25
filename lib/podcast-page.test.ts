@@ -60,7 +60,7 @@ describe("podcast page", () => {
     expect(seriesGallerySource).not.toContain("ExternalLinkIcon");
     expect(seriesGallerySource).toContain("platformIconLinks");
     expect(seriesGallerySource).toContain(
-      "Start from any of the series",
+      "Start listening from any series",
     );
     expect(seriesGallerySource).toContain(">Series<");
     expect(seriesGallerySource).toContain("getDownloadHref");

@@ -72,7 +72,7 @@ export function PodcastSeriesGallery({
       <div className="grid gap-2">
         <p className="site-hero-eyebrow">Series</p>
         <h3 className="site-section-heading max-w-[28rem]">
-          Start from any of the series
+          Start listening from any series
         </h3>
       </div>
 

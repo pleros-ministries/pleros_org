@@ -103,12 +103,12 @@ export async function PodcastPageView() {
         <div className="relative flex min-h-[17.8125rem] flex-col justify-end px-[1.25rem] pb-[2.125rem] pt-10 md:min-h-[22rem] md:px-8 md:pb-[2.625rem] md:pt-12 xl:min-h-[25rem] xl:px-10 xl:pb-[3rem] xl:pt-14">
           <div className="relative z-10 grid max-w-[22rem] gap-3 md:max-w-[42rem] md:gap-4 xl:max-w-[50rem]">
             <p className="site-hero-eyebrow">{podcastPageHero.eyebrow}</p>
-            <h1 className="site-hero-heading text-[var(--color-brand-indigo)] md:max-w-[40rem] md:text-[3.3rem] md:leading-[0.98] xl:max-w-[48rem] xl:text-[3.8rem]">
+            <h1 className="site-hero-heading text-[var(--color-brand-indigo)] md:max-w-[40rem] md:text-[3.3rem] md:leading-none xl:max-w-[48rem] xl:text-[3.8rem]">
               <span className="grid gap-0 md:hidden">
                 {podcastPageHero.mobileTitleLines.map((line) => (
                   <span
                     key={line}
-                    className="whitespace-nowrap text-[clamp(1.75rem,6.5vw,2.05rem)] leading-[0.98] tracking-[-0.05em]"
+                    className="whitespace-nowrap text-[clamp(1.75rem,6.5vw,2.05rem)] leading-[1.04] tracking-[-0.05em]"
                   >
                     {line}
                   </span>
