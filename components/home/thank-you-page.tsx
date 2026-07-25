@@ -94,24 +94,19 @@ export function ThankYouPage({ name }: ThankYouPageProps) {
         >
           <div className="mx-auto grid max-w-[72rem] gap-7">
             <div className="grid gap-4">
-              <p className={thankYouEyebrow}>
-                Thank you
-              </p>
-              <h1 className="site-hero-heading max-w-[13ch] text-[var(--color-brand-blue)]">
-                {name
-                  ? `Thank you for receiving your gift, ${name}`
-                  : "Thank you for receiving your gift"}
+              <h1 className="site-hero-heading max-w-[12ch] text-[var(--color-brand-blue)]">
+                Click here to access your book
               </h1>
               <p className="site-hero-intro max-w-[34ch] text-[var(--color-text-strong)]">
-                Visit your dashboard to access your gift.
+                Your free book is ready in your dashboard.
               </p>
               <div className="flex flex-wrap gap-3 pt-2">
-                <Link
-                  href="/dashboard/welcomepack"
+                <a
+                  href="#book-access"
                   className={`${shareJumpButtonBase} bg-[var(--color-brand-blue)] text-white shadow-[0_14px_28px_rgba(5,20,128,0.18)]`}
                 >
-                  Go to dashboard
-                </Link>
+                  Access your book
+                </a>
               </div>
             </div>
           </div>
@@ -141,7 +136,7 @@ export function ThankYouPage({ name }: ThankYouPageProps) {
         <section className={`bg-[var(--color-brand-blue)] py-14 text-white md:py-20 ${thankYouSectionPadding}`}>
           <div className="mx-auto grid max-w-[72rem] gap-8">
             <div className="grid gap-10 md:grid-cols-3 md:gap-8">
-              <div className="grid content-start gap-5">
+              <div className="grid content-start gap-3">
                 <h3 className={thankYouCardHeading}>
                   Help end the darkness
                 </h3>
@@ -158,7 +153,7 @@ export function ThankYouPage({ name }: ThankYouPageProps) {
                 </div>
               </div>
 
-              <div className="grid content-start gap-5">
+              <div className="grid content-start gap-3">
                 <h3 className={thankYouCardHeading}>
                   Share the gift of purpose
                 </h3>
@@ -174,7 +169,7 @@ export function ThankYouPage({ name }: ThankYouPageProps) {
                 </div>
               </div>
 
-              <div className="grid content-start gap-5">
+              <div className="grid content-start gap-3">
                 <h3 className={thankYouCardHeading}>
                   Receive two special books
                 </h3>
@@ -256,6 +251,35 @@ export function ThankYouPage({ name }: ThankYouPageProps) {
                 <p>Share God&apos;s gift of purpose with someone today.</p>
               </div>
               <ShareStripJumpLink tone="blue" />
+            </div>
+          </div>
+        </section>
+
+        <section
+          id="book-access"
+          className={`scroll-mt-24 bg-[var(--color-brand-sky)] pb-12 pt-9 md:pb-16 md:pt-12 ${thankYouSectionPadding}`}
+        >
+          <div className="mx-auto grid max-w-[72rem] gap-7">
+            <div className="grid gap-4">
+              <p className={thankYouEyebrow}>
+                Thank you
+              </p>
+              <h2 className="site-hero-heading max-w-[13ch] text-[var(--color-brand-blue)]">
+                {name
+                  ? `Thank you for receiving your gift, ${name}`
+                  : "Thank you for receiving your gift"}
+              </h2>
+              <p className="site-hero-intro max-w-[34ch] text-[var(--color-text-strong)]">
+                Visit your dashboard to access your gift.
+              </p>
+              <div className="flex flex-wrap gap-3 pt-2">
+                <Link
+                  href="/dashboard/welcomepack"
+                  className={`${shareJumpButtonBase} bg-[var(--color-brand-blue)] text-white shadow-[0_14px_28px_rgba(5,20,128,0.18)]`}
+                >
+                  Go to dashboard
+                </Link>
+              </div>
             </div>
           </div>
         </section>

@@ -36,7 +36,7 @@ export const extraGifts: WelcomePackGift[] = [
     title: "Breaking Habits and Addictions as a New Creation",
     description:
       "A transformative teaching to help you walk free in Christ.",
-    imageSrc: "/site/home/assets/welcome-pack-cards/purpose-welcome-card.svg",
+    imageSrc: "/assets/dashboard/free-gift-book-covers/book-card-habits-addictions.jpg",
     buttonLabel: "Coming soon",
     href: "#",
   },
@@ -44,7 +44,7 @@ export const extraGifts: WelcomePackGift[] = [
     id: "gospel-proves-itself-true",
     title: "How the Gospel Proves Itself to Be the Truth",
     description: "A clear case for the truth and power of the Gospel.",
-    imageSrc: "/site/home/assets/welcome-pack-cards/ga-welcome-card.svg",
+    imageSrc: "/assets/dashboard/free-gift-book-covers/book-card-gospel-prove-truth.jpg",
     buttonLabel: "Coming soon",
     href: "#",
   },

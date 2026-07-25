@@ -104,10 +104,10 @@ export function WelcomeLandingPage({
                   <div className="absolute inset-1 rounded-[1.55rem] border border-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.14),inset_0_-10px_18px_rgba(0,0,0,0.2)]" />
                   <div className="relative h-full overflow-hidden rounded-[1.18rem] bg-[var(--color-brand-blue)] ring-1 ring-black/30">
                     <Image
-                      src="/site/home/assets/welcome-pack-cards/welcome-purpose-cover.svg"
+                      src="/site/home/assets/welcome-pack-cards/welcome-book-cover.png"
                       alt="Welcome to Purpose book cover"
-                      width={900}
-                      height={1275}
+                      width={1488}
+                      height={2105}
                       priority
                       className="h-full w-full object-cover"
                     />

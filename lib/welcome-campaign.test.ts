@@ -52,7 +52,7 @@ describe("welcome campaign pages", () => {
 
     expect(viewSource).toContain("PublicSitePageShell");
     expect(viewSource).toContain("welcomePagePadding");
-    expect(viewSource).toContain("welcome-purpose-cover.svg");
+    expect(viewSource).toContain("welcome-book-cover.png");
     expect(viewSource).toContain(
       "Find the Answer to the Most Important Question of Your Life",
     );
@@ -86,6 +86,10 @@ describe("welcome campaign pages", () => {
 
     expect(pageSource).toContain("ThankYouPage");
     expect(pageSource).not.toContain("downloadUrl");
+    expect(viewSource).toContain("Click here to access your book");
+    expect(viewSource).toContain("Your free book is ready in your dashboard.");
+    expect(viewSource).toContain('href="#book-access"');
+    expect(viewSource).toContain('id="book-access"');
     expect(viewSource).toContain("Thank you for receiving your gift");
     expect(viewSource).toContain("Visit your dashboard to access your gift.");
     expect(viewSource).toContain('href="/dashboard/welcomepack"');
@@ -102,10 +106,10 @@ describe("welcome campaign pages", () => {
     expect(giftSource).toContain("Breaking Habits and Addictions as a New Creation");
     expect(giftSource).toContain("How the Gospel Proves Itself to Be the Truth");
     expect(giftSource).toContain(
-      "/site/home/assets/welcome-pack-cards/purpose-welcome-card.svg",
+      "/assets/dashboard/free-gift-book-covers/book-card-habits-addictions.jpg",
     );
     expect(giftSource).toContain(
-      "/site/home/assets/welcome-pack-cards/ga-welcome-card.svg",
+      "/assets/dashboard/free-gift-book-covers/book-card-gospel-prove-truth.jpg",
     );
     expect(viewSource).toContain("Share on Telegram");
     expect(viewSource).toContain("Share on Facebook");

@@ -172,7 +172,8 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - `/welcome` hero should not use the `Free purpose book` eyebrow; keep the headline closer to the nav with tighter top padding.
 - `/welcome` hero book art should use a realistic tablet border around an attractive branded cover; avoid flat covers, pale blue boxed frames, physical book/page-edge previews, and unclear third-party mockup licenses.
 - The welcome gift drawer copy is context-sensitive: homepage can use gift language, but `/welcome` CTA openings should ask for email/book access directly and say "grant you access now" rather than "open access immediately."
-- `/thankyou` should match the sectioned `/welcome` style: dashboard access first, then a clear share appeal, heading-led purpose/reward cards, multiple social share buttons, and a strong closing urgency. Do not use standalone numbers as card titles.
+- `/thankyou` should match the sectioned `/welcome` style: clear access prompt, share appeal, heading-led purpose/reward sections, multiple social share buttons, and a strong closing urgency. Do not use standalone numbers as card titles.
+- `/thankyou` should start with a simple `Click here to access your book` prompt that scrolls to the dashboard/book access component near the footer, rather than putting dashboard access first.
 - On `/thankyou`, the main blue purpose/reward content should sit directly on the parent blue section background, not inside repeated card boxes.
 - `/thankyou` non-share sections should include a compact `Share this gift` jump to the `#share-gift` share strip, while the share strip itself owns the platform buttons.
 - `/thankyou` callout share CTAs should keep the same text-to-button spacing rhythm as the first share appeal section.
@@ -184,6 +185,7 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - Public welcome/contact/share links should use the canonical public site URL (`https://pleros.org`) or a dedicated public-site env var, not `NEXT_PUBLIC_APP_URL`, because that value may point to Vercel, PPC, or auth infrastructure.
 - Gift content can stay in typed code config for now and should use public-site Sen/Be Vietnam Pro styling, not PPC dashboard styling.
 - When `/thankyou` references the two special books, reuse `extraGifts` and the welcome-pack cover assets from `lib/welcome-pack-gifts.ts` instead of duplicating text-only lists.
+- Extra gift cover art should come from `public/assets/dashboard/free-gift-book-covers/` when those production assets are available.
 - `/thankyou` callout colors should usually fill the whole section; avoid inset tinted cards when the section itself is the message.
 - Welcome-pack pages should reuse the shared public community section instead of duplicating only its text/CTA; otherwise white overlay copy can become invisible without the image layer.
 - When a welcome-pack page ends with the shared community section, keep it flush to the footer; do not add page-level bottom padding after it.
