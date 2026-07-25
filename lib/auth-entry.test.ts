@@ -56,6 +56,14 @@ describe("auth entry helpers", () => {
     });
   });
 
+  test("points incomplete super admin setup back to setup", () => {
+    expect(getPortalAccessNotice("staff", "super_admin", "sign_in", true)).toEqual({
+      tone: "warning",
+      message:
+        "Super admins log in here after setup. Open /admin/setup to create your password first.",
+    });
+  });
+
   test("warns when a non-staff email is used from the staff portal", () => {
     expect(getPortalAccessNotice("staff", "student")).toEqual({
       tone: "warning",

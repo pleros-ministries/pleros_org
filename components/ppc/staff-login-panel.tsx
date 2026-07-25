@@ -60,7 +60,12 @@ export function StaffLoginPanel() {
       }
 
       setPortalNotice(
-        getPortalAccessNotice("staff", access.role) as
+        getPortalAccessNotice(
+          "staff",
+          access.role,
+          "sign_in",
+          access.setupRequired,
+        ) as
           | { tone: "default" | "info" | "warning"; message: string }
           | null,
       );
@@ -73,6 +78,17 @@ export function StaffLoginPanel() {
 
     startTransition(async () => {
       const access = await previewPortalAccess(email);
+      if (access?.setupRequired) {
+        setPortalNotice(
+          getPortalAccessNotice("staff", access.role, "sign_in", true) as {
+            tone: "default" | "info" | "warning";
+            message: string;
+          },
+        );
+        setError(null);
+        return;
+      }
+
       const result = await authClient.signIn.email({
         email,
         password,

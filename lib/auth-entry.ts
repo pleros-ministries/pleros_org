@@ -18,6 +18,7 @@ export function getPortalAccessNotice(
   requestedPortal: PortalKind,
   resolvedRole: AppRole,
   intent: AuthIntent = "sign_in",
+  setupRequired = false,
 ) {
   const afterAction = intent === "sign_up" ? "account setup" : "login";
 
@@ -37,6 +38,14 @@ export function getPortalAccessNotice(
       tone: "warning" as const,
       message:
         "This email is not configured for staff access. It will open in the student portal at /ppc.",
+    };
+  }
+
+  if (resolvedRole === "super_admin" && setupRequired) {
+    return {
+      tone: "warning" as const,
+      message:
+        "Super admins log in here after setup. Open /admin/setup to create your password first.",
     };
   }
 
