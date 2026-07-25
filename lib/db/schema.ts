@@ -131,6 +131,30 @@ export const staffInvites = pgTable(
   ],
 );
 
+// ─── Super admin setup claims ───────────────────────────────────────────────
+
+export const superAdminSetupClaims = pgTable(
+  "super_admin_setup_claims",
+  {
+    id: serial("id").primaryKey(),
+    email: text("email").notNull(),
+    name: text("name").notNull(),
+    tokenHash: text("token_hash").notNull(),
+    consumedAt: timestamp("consumed_at", { withTimezone: true }),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index("super_admin_setup_claims_email_idx").on(t.email),
+    uniqueIndex("super_admin_setup_claims_token_hash_idx").on(t.tokenHash),
+  ],
+);
+
 // ─── Levels ─────────────────────────────────────────────────────────────────
 
 export const levels = pgTable("levels", {

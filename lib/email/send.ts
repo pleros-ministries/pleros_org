@@ -8,6 +8,7 @@ import {
   graduationCongratulationsHtml,
   staffAssignmentHtml,
   staffInviteHtml,
+  superAdminSetupHtml,
   welcomePackAccessHtml,
   welcomePackExtrasUnlockedHtml,
 } from "./templates";
@@ -107,6 +108,24 @@ export async function sendStaffInvite(opts: {
     html: staffInviteHtml({
       role: opts.role,
       inviteUrl: opts.inviteUrl,
+    }),
+  });
+}
+
+export async function sendSuperAdminSetup(opts: {
+  to: string;
+  name: string;
+  setupUrl: string;
+}) {
+  if (!isEmailEnabled() || !resend) return null;
+
+  return resend.emails.send({
+    from: FROM,
+    to: opts.to,
+    subject: "Create your Pleros admin password",
+    html: superAdminSetupHtml({
+      name: opts.name,
+      setupUrl: opts.setupUrl,
     }),
   });
 }

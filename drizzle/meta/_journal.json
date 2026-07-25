@@ -43,6 +43,13 @@
       "when": 1783816800000,
       "tag": "0005_devotion_tracking",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1784937600000,
+      "tag": "0006_super_admin_setup_claims",
+      "breakpoints": true
     }
   ]
 }

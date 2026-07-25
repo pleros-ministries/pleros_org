@@ -134,6 +134,11 @@ export type EmailVerificationProps = {
   verificationUrl: string;
 };
 
+export type SuperAdminSetupProps = {
+  name: string;
+  setupUrl: string;
+};
+
 export function staffAssignmentHtml({
   staffName,
   itemLabel,
@@ -240,6 +245,33 @@ export function emailVerificationHtml({
   </a>
   <p style="font-size: 11px; color: #9ca3af; margin-top: 24px;">
     If you did not create or update this account, you can ignore this email.
+  </p>
+</body>
+</html>`.trim();
+}
+
+export function superAdminSetupHtml({
+  name,
+  setupUrl,
+}: SuperAdminSetupProps): string {
+  const safeName = escapeHtml(name);
+  const safeSetupUrl = escapeHtml(setupUrl);
+
+  return `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8" /></head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #142033; max-width: 520px; margin: 0 auto; padding: 32px 16px;">
+  <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #58657a;">Pleros admin</p>
+  <h1 style="font-size: 20px; margin: 12px 0 0;">Create your admin password</h1>
+  <p style="font-size: 14px; color: #58657a; line-height: 1.6;">
+    Hi ${safeName}, use the secure link below to confirm this inbox and create your super admin password.
+  </p>
+  <a href="${safeSetupUrl}" style="display: inline-block; margin-top: 16px; padding: 10px 20px; background: #011585; color: #fff; border-radius: 4px; font-size: 13px; font-weight: 600; text-decoration: none;">
+    Create password
+  </a>
+  <p style="font-size: 11px; color: #9ca3af; margin-top: 24px;">
+    This link expires in 1 hour. If you were not setting up Pleros admin access, you can ignore this email.
   </p>
 </body>
 </html>`.trim();

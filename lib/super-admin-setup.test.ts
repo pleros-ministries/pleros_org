@@ -2,6 +2,13 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, test } from "vitest";
 
+import {
+  buildSuperAdminSetupUrl,
+  getSuperAdminSetupClaimStatus,
+  getSuperAdminSetupExpiry,
+  hashSuperAdminSetupToken,
+} from "./super-admin-setup";
+
 describe("super admin setup hardening", () => {
   test("keeps eligible super admin emails server-side during setup", () => {
     const pageSource = readFileSync(
@@ -16,8 +23,12 @@ describe("super admin setup hardening", () => {
       join(process.cwd(), "app", "admin", "setup", "actions.ts"),
       "utf8",
     );
-    const forgotPasswordSource = readFileSync(
-      join(process.cwd(), "app", "admin", "forgot-password", "page.tsx"),
+    const claimPageSource = readFileSync(
+      join(process.cwd(), "app", "admin", "setup", "claim", "[token]", "page.tsx"),
+      "utf8",
+    );
+    const claimFormSource = readFileSync(
+      join(process.cwd(), "components", "ppc", "super-admin-password-setup-form.tsx"),
       "utf8",
     );
 
@@ -31,14 +42,17 @@ describe("super admin setup hardening", () => {
     expect(formSource).not.toContain("authClient.signUp.email");
     expect(actionSource).not.toContain("SUPER_ADMIN_SETUP_TOKEN");
     expect(actionSource).not.toContain("timingSafeEqual");
-    expect(actionSource).toContain("randomBytes");
-    expect(actionSource).toContain(
-      'callbackURL: "/admin/forgot-password?setup=super-admin"',
-    );
+    expect(actionSource).not.toContain('callbackURL: "/admin/forgot-password');
+    expect(actionSource).not.toContain("signUpEmail");
+    expect(actionSource).toContain("sendSuperAdminSetup");
+    expect(actionSource).toContain("createSuperAdminSetupClaim");
+    expect(actionSource).toContain("completeSuperAdminSetupAction");
     expect(actionSource).toContain("isConfiguredSuperAdminEmail(email)");
     expect(actionSource).toContain("getMissingSuperAdminEmails");
-    expect(forgotPasswordSource).toContain("Create your password");
-    expect(forgotPasswordSource).toContain("setup === \"super-admin\"");
+    expect(claimPageSource).toContain("getSuperAdminSetupClaimByToken");
+    expect(claimPageSource).toContain("<SuperAdminPasswordSetupForm");
+    expect(claimFormSource).toContain('name="password"');
+    expect(claimFormSource).toContain('name="confirmPassword"');
   });
 
   test("requires verified email before privileged app access", () => {
@@ -67,5 +81,38 @@ describe("super admin setup hardening", () => {
     expect(inviteActionSource).toContain(
       "Verify your email before accepting this staff invite.",
     );
+  });
+
+  test("uses short lived one-click claim links for setup", () => {
+    const tokenHash = hashSuperAdminSetupToken("setup-token");
+
+    expect(tokenHash).toHaveLength(64);
+    expect(tokenHash).not.toBe("setup-token");
+    expect(
+      buildSuperAdminSetupUrl("https://pleros.org/", "setup-token"),
+    ).toBe("https://pleros.org/admin/setup/claim/setup-token");
+    expect(getSuperAdminSetupExpiry(new Date("2026-01-01T00:00:00Z"))).toEqual(
+      new Date("2026-01-01T01:00:00Z"),
+    );
+    expect(
+      getSuperAdminSetupClaimStatus({
+        consumedAt: null,
+        expiresAt: new Date("2026-01-01T01:00:00Z"),
+        now: new Date("2026-01-01T00:30:00Z"),
+      }),
+    ).toBe("pending");
+    expect(
+      getSuperAdminSetupClaimStatus({
+        consumedAt: null,
+        expiresAt: new Date("2026-01-01T01:00:00Z"),
+        now: new Date("2026-01-01T01:00:00Z"),
+      }),
+    ).toBe("expired");
+    expect(
+      getSuperAdminSetupClaimStatus({
+        consumedAt: new Date("2026-01-01T00:30:00Z"),
+        expiresAt: new Date("2026-01-01T01:00:00Z"),
+      }),
+    ).toBe("consumed");
   });
 });

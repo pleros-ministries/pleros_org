@@ -16,9 +16,16 @@ const PUBLIC_ADMIN_PATHS = new Set([
   "/admin/setup",
 ]);
 
+function isPublicAdminPath(pathname: string) {
+  return (
+    PUBLIC_ADMIN_PATHS.has(pathname) ||
+    pathname.startsWith("/admin/setup/claim/")
+  );
+}
+
 export default async function AdminRootLayout({ children }: { children: React.ReactNode }) {
   const [session, requestHeaders] = await Promise.all([getAppSession(), headers()]);
-  const isPublicAdminPage = PUBLIC_ADMIN_PATHS.has(
+  const isPublicAdminPage = isPublicAdminPath(
     requestHeaders.get("x-pleros-pathname") ?? "",
   );
 
