@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -23,7 +22,6 @@ import {
   podcastSpotifyShowUrl,
   podcastSubscribeCta,
   podcastTelegramUrl,
-  podcastWhyListenItems,
 } from "@/lib/podcast-page-content";
 import { groupPodcastSeriesEpisodes } from "@/lib/podcast-series-episodes";
 import {
@@ -103,16 +101,18 @@ export async function PodcastPageView() {
 
       <section className="relative overflow-hidden bg-[var(--color-brand-sky-soft)]">
         <div className="relative flex min-h-[17.8125rem] flex-col justify-end px-[1.25rem] pb-[2.125rem] pt-10 md:min-h-[22rem] md:px-8 md:pb-[2.625rem] md:pt-12 xl:min-h-[25rem] xl:px-10 xl:pb-[3rem] xl:pt-14">
-          <div className="relative z-10 grid max-w-[18rem] gap-3 md:max-w-[20rem] md:gap-4 xl:max-w-[24rem]">
+          <div className="relative z-10 grid max-w-[22rem] gap-3 md:max-w-[42rem] md:gap-4 xl:max-w-[50rem]">
             <p className="site-hero-eyebrow">{podcastPageHero.eyebrow}</p>
-            <h1 className="site-hero-heading text-[var(--color-brand-indigo)] md:max-w-[16rem] md:text-[3.6rem] md:leading-none xl:max-w-[19rem] xl:text-[4.15rem]">
+            <h1 className="site-hero-heading text-[var(--color-brand-indigo)] md:max-w-[40rem] md:text-[3.3rem] md:leading-[0.98] xl:max-w-[48rem] xl:text-[3.8rem]">
               <span className="grid gap-0 md:hidden">
-                <span className="whitespace-nowrap text-[clamp(1.9rem,6.8vw,2.15rem)] leading-[0.98] tracking-[-0.05em]">
-                  {podcastPageHero.mobileTitleLines[0]}
-                </span>
-                <span className="whitespace-nowrap text-[clamp(1.9rem,6.8vw,2.15rem)] leading-[0.98] tracking-[-0.05em]">
-                  {podcastPageHero.mobileTitleLines[1]}
-                </span>
+                {podcastPageHero.mobileTitleLines.map((line) => (
+                  <span
+                    key={line}
+                    className="whitespace-nowrap text-[clamp(1.75rem,6.5vw,2.05rem)] leading-[0.98] tracking-[-0.05em]"
+                  >
+                    {line}
+                  </span>
+                ))}
               </span>
               <span className="hidden md:inline">{podcastPageHero.title}</span>
             </h1>
@@ -124,7 +124,6 @@ export async function PodcastPageView() {
         <div className="grid gap-8">
           <div className="mx-auto grid w-full max-w-[58rem] gap-8">
             <div className="grid gap-2">
-              <p className="site-hero-eyebrow">{podcastFeaturedSection.eyebrow}</p>
               <h2 className="site-section-heading max-w-[25rem]">
                 {podcastFeaturedSection.title}
               </h2>

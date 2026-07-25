@@ -97,9 +97,11 @@ describe("podcast page", () => {
     expect(viewSource).toContain("md:text-[0.98rem]");
     expect(viewSource).toContain("HomepageCommunitySection");
     expect(viewSource).toContain("HomepageFooter");
-    expect(contentSource).toContain('title: "Pleros Podcast"');
     expect(contentSource).toContain(
-      "Your 15-minute dose of transformation, wherever you listen",
+      'title: "Your Daily Dose of God\'s Word transforming you to fulfil God\'s Purpose"',
+    );
+    expect(contentSource).toContain(
+      "You can listen wherever you find your podcasts",
     );
     expect(contentSource).toContain("Subscribe on YouTube");
     expect(contentSource).toContain("The Place of the Gospel in Your Life");

@@ -9,14 +9,18 @@ function buildPodcastEpisodeUrl(videoId: string) {
 
 export const podcastPageHero = {
   eyebrow: "Podcast",
-  title: "Pleros Podcast",
-  mobileTitleLines: ["Follow the Pleros", "podcast"] as const,
+  title: "Your Daily Dose of God's Word transforming you to fulfil God's Purpose",
+  mobileTitleLines: [
+    "Your Daily Dose",
+    "of God's Word",
+    "transforming you",
+    "to fulfil God's Purpose",
+  ] as const,
   illustrationSrc: "/assets/home/podcast-poster.webp",
 } as const;
 
 export const podcastFeaturedSection = {
-  eyebrow: "Featured teaching",
-  title: "Your 15-minute dose of transformation, wherever you listen",
+  title: "You can listen wherever you find your podcasts",
   description:
     "Listen to the most recent episode, then move through the podcast sub-series from their starting teachings.",
   fallbackTitle: "Open the Pleros Podcast to hear the latest episode",
