@@ -39,6 +39,37 @@ type StaffAccessInvite = {
   status: string;
 };
 
+export type SuperAdminOverviewCard = {
+  label: string;
+  value: string | number;
+  hint: string;
+};
+
+export type SuperAdminOverviewCardInput = {
+  dashboardVisits: {
+    visitsLast7Days: number;
+    allTimeVisits: number;
+    uniqueVisitorsLast7Days: number;
+  };
+  newUsers: {
+    distinctPeopleLast7Days: number;
+    ppcAccountsLast7Days: number;
+    welcomeLeadsLast7Days: number;
+  };
+  devotion: {
+    participantsLast30Days: number;
+    prayerWatchParticipantsLast30Days: number;
+    bibleReadingParticipantsLast30Days: number;
+    podcastParticipantsLast30Days: number;
+  };
+  training: {
+    averageProgress: number;
+    activeStudents: number;
+    pendingReviews: number;
+    openQa: number;
+  };
+};
+
 export function formatDashboardAge(
   value: string | Date | null,
   nowIso = new Date().toISOString(),
@@ -315,4 +346,31 @@ export function getStaffAccessSummary(
     revokedInvites,
     hint: hintParts.join(" · "),
   };
+}
+
+export function getSuperAdminOverviewCards(
+  input: SuperAdminOverviewCardInput,
+): SuperAdminOverviewCard[] {
+  return [
+    {
+      label: "Dashboard visits",
+      value: input.dashboardVisits.visitsLast7Days,
+      hint: `${input.dashboardVisits.allTimeVisits} all time · ${input.dashboardVisits.uniqueVisitorsLast7Days} visitors`,
+    },
+    {
+      label: "New users",
+      value: input.newUsers.distinctPeopleLast7Days,
+      hint: `${input.newUsers.ppcAccountsLast7Days} PPC accounts · ${input.newUsers.welcomeLeadsLast7Days} welcome leads`,
+    },
+    {
+      label: "Devotion participation",
+      value: input.devotion.participantsLast30Days,
+      hint: `${input.devotion.prayerWatchParticipantsLast30Days} prayer · ${input.devotion.bibleReadingParticipantsLast30Days} Bible · ${input.devotion.podcastParticipantsLast30Days} podcast`,
+    },
+    {
+      label: "Training overview",
+      value: `${input.training.averageProgress}%`,
+      hint: `${input.training.activeStudents} PPC students · ${input.training.pendingReviews} reviews · ${input.training.openQa} Q&A`,
+    },
+  ];
 }

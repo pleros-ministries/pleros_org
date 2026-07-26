@@ -10,6 +10,7 @@ import type {
 } from "@/lib/admin-query";
 import { getAdminRegistrantList } from "@/lib/db/queries/admin-registrants";
 import { getSchoolOfPurposeWaitlistEntries } from "@/lib/db/queries/school-of-purpose-waitlist";
+import { getSuperAdminOverviewMetrics } from "@/lib/db/queries/admin-analytics";
 import { getStudentPlatformList } from "@/lib/db/queries/students";
 import { getAllThreads } from "@/lib/db/queries/qa";
 import { getReviewQueue } from "@/lib/db/queries/submissions";
@@ -28,6 +29,7 @@ import {
   getContentDebtSummary,
   getQueuePressureSummary,
   getStaffAccessSummary,
+  getSuperAdminOverviewCards,
   prioritizeOwnershipRows,
 } from "@/lib/admin-dashboard";
 
@@ -57,6 +59,7 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
     openThreads,
     contentOverview,
     staffAccess,
+    superAdminOverviewMetrics,
     [userCount],
     [lessonCount],
   ] = await Promise.all([
@@ -67,6 +70,9 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
     getContentOverview(),
     session.user.role === "super_admin"
       ? Promise.all([listStaffUsers(), listStaffInvites()])
+      : Promise.resolve(null),
+    session.user.role === "super_admin"
+      ? getSuperAdminOverviewMetrics()
       : Promise.resolve(null),
     db.select({ count: count() }).from(schema.users),
     db
@@ -121,6 +127,38 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
   return {
     canManageContent,
     currentStaffId: session.user.id,
+    overviewCards: superAdminOverviewMetrics
+      ? getSuperAdminOverviewCards({
+          ...superAdminOverviewMetrics,
+          training: {
+            averageProgress: stats.averageProgress,
+            activeStudents: stats.activeStudents,
+            pendingReviews: stats.pendingReviews,
+            openQa: stats.openQa,
+          },
+        })
+      : [
+          {
+            label: "Registrants",
+            value: registrants.length,
+            hint: `${stats.activeStudents} PPC accounts · ${registrants.length - ppcAccounts} welcome only`,
+          },
+          {
+            label: "PPC avg. progress",
+            value: `${stats.averageProgress}%`,
+            hint: "Across cohort",
+          },
+          {
+            label: "Pending reviews",
+            value: stats.pendingReviews,
+            hint: `${reviewOwnership.mine} yours · ${reviewOwnership.unassigned} unassigned`,
+          },
+          {
+            label: "Open Q&A",
+            value: stats.openQa,
+            hint: `${qaOwnership.mine} yours · ${qaOwnership.unassigned} unassigned`,
+          },
+        ],
     stats,
     counts: {
       registrants: registrants.length,

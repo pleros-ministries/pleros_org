@@ -16,6 +16,11 @@ export const ADMIN_QUERY_DEFAULTS = {
 export type AdminDashboardData = {
   canManageContent: boolean;
   currentStaffId: string;
+  overviewCards: Array<{
+    label: string;
+    value: string | number;
+    hint: string;
+  }>;
   stats: {
     activeStudents: number;
     averageProgress: number;

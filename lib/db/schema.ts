@@ -155,6 +155,35 @@ export const superAdminSetupClaims = pgTable(
   ],
 );
 
+// ─── Dashboard visit summaries ──────────────────────────────────────────────
+
+export const dashboardVisitSummaries = pgTable(
+  "dashboard_visit_summaries",
+  {
+    id: serial("id").primaryKey(),
+    visitorKey: text("visitor_key").notNull(),
+    visitorType: text("visitor_type").notNull(),
+    visitedDate: date("visited_date", { mode: "string" }).notNull(),
+    visitCount: integer("visit_count").notNull().default(1),
+    lastVisitedAt: timestamp("last_visited_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("dashboard_visit_summaries_visitor_date_idx").on(
+      t.visitorKey,
+      t.visitedDate,
+    ),
+    index("dashboard_visit_summaries_visited_date_idx").on(t.visitedDate),
+  ],
+);
+
 // ─── Levels ─────────────────────────────────────────────────────────────────
 
 export const levels = pgTable("levels", {

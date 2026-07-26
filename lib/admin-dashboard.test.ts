@@ -6,6 +6,7 @@ import {
   getContentDebtSummary,
   getContentWatchlistSummary,
   getStaffAccessSummary,
+  getSuperAdminOverviewCards,
   prioritizeOwnershipRows,
   getQueuePressureSummary,
 } from "./admin-dashboard";
@@ -279,5 +280,55 @@ describe("admin dashboard helpers", () => {
       revokedInvites: 1,
       hint: "1 pending invite · 1 expired",
     });
+  });
+
+  test("builds the super admin overview analytics cards", () => {
+    expect(
+      getSuperAdminOverviewCards({
+        dashboardVisits: {
+          visitsLast7Days: 24,
+          allTimeVisits: 91,
+          uniqueVisitorsLast7Days: 12,
+        },
+        newUsers: {
+          distinctPeopleLast7Days: 7,
+          ppcAccountsLast7Days: 3,
+          welcomeLeadsLast7Days: 5,
+        },
+        devotion: {
+          participantsLast30Days: 9,
+          prayerWatchParticipantsLast30Days: 4,
+          bibleReadingParticipantsLast30Days: 2,
+          podcastParticipantsLast30Days: 6,
+        },
+        training: {
+          averageProgress: 42,
+          activeStudents: 18,
+          pendingReviews: 2,
+          openQa: 1,
+        },
+      }),
+    ).toEqual([
+      {
+        label: "Dashboard visits",
+        value: 24,
+        hint: "91 all time · 12 visitors",
+      },
+      {
+        label: "New users",
+        value: 7,
+        hint: "3 PPC accounts · 5 welcome leads",
+      },
+      {
+        label: "Devotion participation",
+        value: 9,
+        hint: "4 prayer · 2 Bible · 6 podcast",
+      },
+      {
+        label: "Training overview",
+        value: "42%",
+        hint: "18 PPC students · 2 reviews · 1 Q&A",
+      },
+    ]);
   });
 });

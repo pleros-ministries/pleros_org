@@ -73,26 +73,14 @@ export function AdminDashboardClient() {
       />
 
       <section className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-        <StatCard
-          label="Registrants"
-          value={data.counts.registrants}
-          hint={`${data.stats.activeStudents} PPC accounts · ${data.counts.welcomeOnly} welcome only`}
-        />
-        <StatCard
-          label="PPC avg. progress"
-          value={`${data.stats.averageProgress}%`}
-          hint="Across cohort"
-        />
-        <StatCard
-          label="Pending reviews"
-          value={data.stats.pendingReviews}
-          hint={`${data.reviewOwnership.mine} yours · ${data.reviewOwnership.unassigned} unassigned`}
-        />
-        <StatCard
-          label="Open Q&A"
-          value={data.stats.openQa}
-          hint={`${data.qaOwnership.mine} yours · ${data.qaOwnership.unassigned} unassigned`}
-        />
+        {data.overviewCards.map((card) => (
+          <StatCard
+            key={card.label}
+            label={card.label}
+            value={card.value}
+            hint={card.hint}
+          />
+        ))}
       </section>
 
       <section className="grid gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)]">

@@ -7,6 +7,7 @@ import {
   readWelcomeAccessToken,
   WELCOME_ACCESS_COOKIE_NAME,
 } from "@/lib/welcome-access";
+import { recordDashboardVisit } from "@/lib/db/queries/admin-analytics";
 
 export default async function DashboardLayout({
   children,
@@ -20,6 +21,11 @@ export default async function DashboardLayout({
   );
 
   if (welcomeSession) {
+    await recordDashboardVisit({
+      visitorKey: welcomeSession.email,
+      visitorType: "welcome",
+    });
+
     return <AppShell>{children}</AppShell>;
   }
 
@@ -28,6 +34,11 @@ export default async function DashboardLayout({
   if (!appSession) {
     redirect("/welcome");
   }
+
+  await recordDashboardVisit({
+    visitorKey: appSession.user.id,
+    visitorType: "user",
+  });
 
   return <AppShell>{children}</AppShell>;
 }

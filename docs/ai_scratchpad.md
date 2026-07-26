@@ -40,6 +40,7 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - Super admin bootstrap must be fail-closed with minimal round-tripping: never render the configured email allowlist, do not ask for a setup token, send one short-lived inbox claim link, then let the verified inbox owner create and save the password on the setup claim page before using `super_admin`.
 - Admins enter at `/admin`, students at `/ppc`, and staff onboarding should use invite links/password setup.
 - Keep admin work consolidated under `/admin`; do not create parallel admin surfaces when expanding PPC/admin visibility.
+- Treat `/admin/platform` as operational controls, not the PPC admin home; the `/admin` dashboard is the super-admin overview surface for cross-product analytics.
 - `super_admin` is the staff-management role; `admin` is content/platform admin; instructors are lower-level staff.
 - Admin sidebar pages should feel instant: avoid loading full student dashboard payloads for summary/dropdown views, batch DB queries, and add route-level loading states for server-rendered destinations.
 - Keep the authenticated admin shell in the shared `/admin` layout so dashboard and sidebar destinations do not cross layout boundaries and remount the shell; memoize request-scoped session lookup when layouts and pages both need it.
