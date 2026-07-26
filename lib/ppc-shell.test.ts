@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, test } from "vitest";
 
 import {
@@ -8,6 +10,11 @@ import {
   getVisiblePpcShellNavItems,
   isStudentLevelNavItemActive,
 } from "./ppc-shell";
+
+const shellComponentSource = readFileSync(
+  join(process.cwd(), "components", "ppc", "ppc-shell.tsx"),
+  "utf8",
+);
 
 describe("ppc shell helpers", () => {
   test("nav definitions stay stable", () => {
@@ -127,6 +134,12 @@ describe("ppc shell helpers", () => {
     expect(getLogicalPpcShellPath("/ppc/students")).toBe("/students");
     expect(getLogicalPpcShellPath("/admin/content")).toBe("/content");
     expect(getLogicalPpcShellPath("/student")).toBe("/student");
+  });
+
+  test("uses an admin-specific shell title", () => {
+    expect(shellComponentSource).toContain('pathname.startsWith("/admin")');
+    expect(shellComponentSource).toContain('"Pleros Admin"');
+    expect(shellComponentSource).toContain("{shellTitle}");
   });
 
   test("resolves top bar context for staff routes", () => {

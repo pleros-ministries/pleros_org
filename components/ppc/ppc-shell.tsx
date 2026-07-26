@@ -450,6 +450,7 @@ function SidebarFooter({ collapsed, session, signOutHref }: SidebarFooterProps) 
 type SidebarShellProps = {
   pathname: string;
   logicalPathname: string;
+  shellTitle: string;
   collapsed: boolean;
   session: AppSession;
   studentLevelNavItems?: PpcStudentLevelNavItem[];
@@ -461,6 +462,7 @@ type SidebarShellProps = {
 function SidebarShell({
   pathname,
   logicalPathname,
+  shellTitle,
   collapsed,
   session,
   studentLevelNavItems,
@@ -486,12 +488,12 @@ function SidebarShell({
               "group flex min-w-0 rounded-sm transition-colors hover:bg-zinc-50",
               collapsed ? "hidden" : "items-center p-1.5",
             )}
-            title={collapsed ? "Pleros Perfecting Course" : undefined}
+            title={collapsed ? shellTitle : undefined}
           >
             {!collapsed ? (
               <span className="min-w-0">
                 <span className="block text-[10px] font-semibold uppercase tracking-[0.18em] text-zinc-400">
-                  Pleros Perfecting Course
+                  {shellTitle}
                 </span>
                 <span className="mt-0.5 flex items-center gap-1.5 text-sm font-medium text-zinc-900">
                   {session.user.role === "student" ? "Learning workspace" : "Admin workspace"}
@@ -560,6 +562,9 @@ export function PpcShell({
   const pathname = pathnameOverride ?? currentPathname;
   const signOutHref = getSignOutHref(pathname);
   const roleLabel = getAppRoleLabel(session.user.role);
+  const shellTitle = pathname.startsWith("/admin")
+    ? "Pleros Admin"
+    : "Pleros Perfecting Course";
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [hasLoadedSidebarPreference, setHasLoadedSidebarPreference] = useState(false);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
@@ -641,6 +646,7 @@ export function PpcShell({
               <SidebarShell
                 pathname={pathname}
                 logicalPathname={navigationLogicalPathname}
+                shellTitle={shellTitle}
                 collapsed={isSidebarCollapsed}
                 session={session}
                 studentLevelNavItems={studentLevelNavItems}
@@ -665,7 +671,7 @@ export function PpcShell({
               </button>
               <div className="min-w-0">
                 <p className="ppc-heading truncate text-base font-semibold tracking-[-0.025em] text-white sm:text-lg">
-                  Pleros Perfecting Course
+                  {shellTitle}
                 </p>
               </div>
             </div>
@@ -690,6 +696,7 @@ export function PpcShell({
           <SidebarShell
             pathname={pathname}
             logicalPathname={navigationLogicalPathname}
+            shellTitle={shellTitle}
             collapsed={false}
             session={session}
             studentLevelNavItems={studentLevelNavItems}
