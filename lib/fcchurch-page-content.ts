@@ -281,17 +281,17 @@ export const fcchurchLocations: FcchurchLocation[] = [
       {
         type: "prayer",
         label: "Prayer Meeting",
-        time: "Monday · 5:30–7:30 pm",
+        time: "Monday · 5:00–7:00 pm",
       },
       {
         type: "bible-study",
         label: "Bible Study",
-        time: "Friday · 5:30–7:30 pm",
+        time: "Friday · 5:00–7:00 pm",
       },
       {
         type: "sunday",
         label: "Sunday Service",
-        time: "Sunday · 9:00–11 am",
+        time: "Sunday · 8:30–11 am",
       },
     ],
     contacts: [
