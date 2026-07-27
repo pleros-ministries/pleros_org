@@ -271,6 +271,37 @@ export const fcchurchLocations: FcchurchLocation[] = [
       },
     ],
   },
+  {
+    id: "Sagamu",
+    city: "Sagamu",
+    state: "Ogun",
+    venueName: "Church Street",
+    address: "Church Street, Beside Life Gate School, off Hospital Road, Sagamu, Ogun State.",
+    schedule: [
+      {
+        type: "prayer",
+        label: "Prayer Meeting",
+        time: "Monday · 5:30–7:30 pm",
+      },
+      {
+        type: "bible-study",
+        label: "Bible Study",
+        time: "Friday · 5:30–7:30 pm",
+      },
+      {
+        type: "sunday",
+        label: "Sunday Service",
+        time: "Sunday · 9:00–11 am",
+      },
+    ],
+    contacts: [
+      {
+        name: "Pastor Oladayo",
+        phone: "08024388060",
+        href: "tel:+2348024388060",
+      },
+    ],
+  },
 ];
 
 export const fcchurchOnlineSection = {
