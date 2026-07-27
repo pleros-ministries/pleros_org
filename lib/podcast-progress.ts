@@ -1,4 +1,5 @@
 import type { RssEpisode } from "./anchor-rss";
+import { normalizeSeriesTitle } from "./podcast-series-episodes";
 
 export type PodcastEpisodeGroup = {
   id: string;
@@ -27,7 +28,7 @@ export function groupPodcastEpisodesBySeries(
 
   for (const episode of episodes) {
     const title = getPodcastSeriesTitle(episode.title) || "Standalone episodes";
-    const id = slugify(title) || "standalone-episodes";
+    const id = slugify(normalizeSeriesTitle(title)) || "standalone-episodes";
     const group = groups.get(id);
 
     if (group) {

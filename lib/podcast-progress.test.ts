@@ -46,4 +46,22 @@ describe("podcast progress grouping", () => {
       },
     ]);
   });
+
+  test("merges episodes whose title uses a 'Fulfil' vs 'Fulfill' spelling variant", () => {
+    const groups = groupPodcastEpisodesBySeries([
+      episode("How to Fulfill God's Purpose (Part 12)", "a"),
+      episode("How to Fulfil God's Purpose (Part 6)", "b"),
+    ]);
+
+    expect(groups).toEqual([
+      {
+        id: "how-to-fulfill-god-s-purpose",
+        title: "How to Fulfill God's Purpose",
+        episodes: [
+          episode("How to Fulfill God's Purpose (Part 12)", "a"),
+          episode("How to Fulfil God's Purpose (Part 6)", "b"),
+        ],
+      },
+    ]);
+  });
 });
