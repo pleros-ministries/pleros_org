@@ -63,6 +63,7 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - Section A imports go to `quiz_questions`; Section B prompts go to lesson response prompts; Section B marking schemes must be admin-only and surfaced in `/admin/review`.
 - Marking schemes must never be visible to students.
 - Use `DATABASE_URL_UNPOOLED` with `Pool`/`Client` for bulk PPC content scripts.
+- PPC source text files are `tmp/ppc-l*-notes.txt` and `tmp/ppc-l*-questions.txt`; `docs/level-*-ppc-teachings.json` files are audio manifests, not transcripts.
 - Parse/import only explicitly confirmed tracks and guard against deleting unexpected non-MCQ quiz data.
 - Strict parsing belongs in import/mutation paths; readiness reports should tolerate missing/malformed track sections and report exactly what is missing.
 - Published lesson readiness must include audio, notes, quiz, written response prompt, and admin marking guide.
