@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/card";
 import {
   partnerBankAccount,
+  partnerGivingChannelLabels,
   partnerGivingSection,
   partnerImpactItems,
   partnerPageHero,
@@ -21,6 +22,7 @@ import { CopyToClipboardButton } from "./copy-to-clipboard-button";
 import { HomepageCommunitySection } from "./homepage-community-section";
 import { HomepageFooter } from "./homepage-footer";
 import { HomepageNav } from "./homepage-nav";
+import { PaystackDonateForm } from "./paystack-donate-form";
 import { PublicSitePageShell } from "./public-site-page-shell";
 
 function PartnerReasonCard({
@@ -29,7 +31,7 @@ function PartnerReasonCard({
   description,
 }: (typeof partnerReasons)[number]) {
   return (
-    <Card className="gap-0 rounded-[1.25rem] border-[rgba(6,16,86,0.14)] bg-white p-0 shadow-[0_16px_40px_rgba(6,16,86,0.08)]">
+    <Card className="gap-0 self-start rounded-[1.25rem] border-[rgba(6,16,86,0.14)] bg-white p-0 shadow-[0_16px_40px_rgba(6,16,86,0.08)]">
       <CardHeader className="gap-4 px-5 pb-3 pt-5 md:px-6 md:pt-6">
         <div className="flex items-center gap-3">
           <div className="flex size-[2.625rem] shrink-0 items-center justify-center rounded-full bg-[var(--color-brand-blue)] text-[1.125rem] font-semibold leading-none text-white md:size-[3.25rem] md:text-[1.375rem]">
@@ -41,7 +43,7 @@ function PartnerReasonCard({
         </div>
       </CardHeader>
       <CardContent className="px-5 pb-5 md:px-6 md:pb-6">
-        <CardDescription className="text-[1rem] leading-[1.45] tracking-[-0.02em] text-[var(--color-text-muted)]">
+        <CardDescription className="text-[0.9rem] leading-[1.45] tracking-[-0.02em] text-[var(--color-text-muted)]" style={{ marginBottom: "10px" }}>
           {description}
         </CardDescription>
       </CardContent>
@@ -158,7 +160,7 @@ export function PartnerPageView() {
             <Card className="gap-4 rounded-[1.25rem] border-[rgba(6,16,86,0.14)] bg-white p-5 shadow-[0_16px_40px_rgba(6,16,86,0.08)] md:p-6">
               <CardHeader className="gap-1 px-0 py-0">
                 <CardTitle className="font-[var(--font-sen)] text-[1rem] leading-[0.95] tracking-[-0.04em] text-[var(--color-brand-indigo)] md:text-[1.125rem]">
-                  Bank Transfer
+                  {partnerGivingChannelLabels.bank}
                 </CardTitle>
               </CardHeader>
               <CardContent className="grid gap-3 px-0 pb-0">
@@ -195,6 +197,16 @@ export function PartnerPageView() {
               </CardContent>
             </Card>
 
+            <Card className="gap-4 rounded-[1.25rem] border-[rgba(6,16,86,0.14)] bg-white p-5 shadow-[0_16px_40px_rgba(6,16,86,0.08)] md:p-6">
+              <CardHeader className="gap-1 px-0 py-0">
+                <CardTitle className="font-[var(--font-sen)] text-[1rem] leading-[0.95] tracking-[-0.04em] text-[var(--color-brand-indigo)] md:text-[1.125rem]">
+                  {partnerGivingChannelLabels.online}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="px-0 pb-0">
+                <PaystackDonateForm />
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>

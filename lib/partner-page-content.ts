@@ -48,3 +48,25 @@ export const partnerBankAccount = {
   accountName: "PLEROS MINISTRIES AND MISSIONS",
   accountNumber: "1310000564",
 } as const;
+
+export const partnerGivingChannelLabels = {
+  bank: "Bank Transfer",
+  online: "Pay Online",
+} as const;
+
+export const partnerPayOnlineCopy = {
+  helperText:
+    "Give securely by card in Naira or US Dollars, powered by Paystack.",
+  minimumAmount: 100,
+  currencies: {
+    NGN: { code: "NGN", symbol: "₦" },
+    USD: { code: "USD", symbol: "$" },
+  },
+  submitLabel: "Give now",
+  submittingLabel: "Processing…",
+  verifyingLabel: "Confirming payment…",
+  successTitle: "Thank you for your gift!",
+  successMessage: "Your payment was received and confirmed. God bless you.",
+  genericErrorMessage:
+    "Something went wrong with your payment. Please try again.",
+} as const;
