@@ -20,7 +20,7 @@ export function CompletionSignals({ audioListened, notesRead, quizPassed, writte
   const values: Record<string, boolean> = { audioListened, notesRead, quizPassed, writtenApproved };
 
   return (
-    <div className={cn("flex gap-1.5", compact ? "gap-1" : "gap-2")}>
+    <div className={cn("flex flex-wrap gap-1.5", compact ? "gap-1" : "gap-2")}>
       {signals.map((s) => {
         const done = values[s.key];
         const Icon = s.icon;

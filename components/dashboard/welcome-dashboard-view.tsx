@@ -179,7 +179,7 @@ export function WelcomeDashboardView({
               {name ? `Welcome, ${name}` : "Welcome to your Pleros Dashboard"}
             </h1>
             <p className="font-[var(--font-be-vietnam-pro)] max-w-[28ch] text-[0.9375rem] leading-[1.35] tracking-[-0.02em] text-white/88 sm:text-[1.05rem]">
-              Find everything you need for your spiritual growth, your walk and fulfillment of God's purpose.
+              Find everything you need for your spiritual growth, your walk and fulfillment of God&apos;s purpose.
             </p>
           </div>
         </div>
