@@ -400,7 +400,7 @@ function SidebarFooter({ collapsed, session, signOutHref }: SidebarFooterProps) 
               await authClient.signOut();
               window.location.href = signOutHref;
             }}
-            className="inline-flex size-10 items-center justify-center rounded-sm border border-zinc-200 bg-white text-zinc-500 transition-colors hover:bg-zinc-50 hover:text-zinc-900"
+            className="inline-flex size-10 cursor-pointer items-center justify-center rounded-sm border border-zinc-200 bg-white text-zinc-500 transition-colors hover:bg-zinc-50 hover:text-zinc-900"
           >
             <LogOut className="size-4" />
             <span className="sr-only">Sign out</span>
@@ -435,7 +435,7 @@ function SidebarFooter({ collapsed, session, signOutHref }: SidebarFooterProps) 
                 await authClient.signOut();
                 window.location.href = signOutHref;
               }}
-              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-[4px] border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-100"
+              className="inline-flex h-9 cursor-pointer items-center justify-center gap-1.5 rounded-[4px] border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-100"
             >
               <LogOut className="size-3.5" />
               Sign out

@@ -26,7 +26,7 @@ function PurposeVideoCard({
     <button
       type="button"
       onClick={onPlay}
-      className="group grid gap-3.5 text-left"
+      className="group grid cursor-pointer gap-3.5 text-left"
       aria-label={`Play ${title}`}
     >
       <div className="relative aspect-[493/263] overflow-hidden rounded-[0.6875rem] bg-[#d98d54] shadow-[var(--shadow-sm)]">
@@ -117,7 +117,7 @@ export function PurposeVideoGallery({
                   <button
                     type="button"
                     aria-label="Close video player"
-                    className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[var(--color-text-muted)] transition-colors duration-150 hover:text-[var(--color-text-strong)]"
+                    className="inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full text-[var(--color-text-muted)] transition-colors duration-150 hover:text-[var(--color-text-strong)]"
                   />
                 }
               >

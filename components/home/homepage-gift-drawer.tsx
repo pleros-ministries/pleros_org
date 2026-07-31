@@ -172,7 +172,7 @@ export function HomepageGiftDrawer({
           render={
             <button
               type="button"
-              className="site-button-text inline-flex min-h-[2.875rem] items-center justify-center rounded-full bg-[var(--color-brand-blue)] px-7 py-2.5 text-[0.875rem] leading-none font-semibold text-white shadow-[0_14px_28px_rgba(5,20,128,0.22)] transition-transform duration-150 hover:-translate-y-px hover:text-white focus-visible:text-white"
+              className="site-button-text inline-flex min-h-[2.875rem] cursor-pointer items-center justify-center rounded-full bg-[var(--color-brand-blue)] px-7 py-2.5 text-[0.875rem] leading-none font-semibold text-white shadow-[0_14px_28px_rgba(5,20,128,0.22)] transition-transform duration-150 hover:-translate-y-px hover:text-white focus-visible:text-white"
             />
           }
         >
@@ -198,7 +198,7 @@ export function HomepageGiftDrawer({
                     <button
                       type="button"
                       aria-label="Close gift drawer"
-                      className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[rgba(5,20,128,0.12)] bg-white/70 text-[var(--color-brand-blue)] transition-colors duration-150 hover:bg-white"
+                      className="inline-flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full border border-[rgba(5,20,128,0.12)] bg-white/70 text-[var(--color-brand-blue)] transition-colors duration-150 hover:bg-white"
                     />
                   }
                 >

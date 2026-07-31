@@ -21,7 +21,7 @@ const cardVariants = cva(
         lg: "gap-5 p-6",
       },
       interactive: {
-        true: "hover:-translate-y-px hover:shadow-[var(--shadow-md)]",
+        true: "cursor-pointer hover:-translate-y-px hover:shadow-[var(--shadow-md)]",
         false: "",
       },
     },

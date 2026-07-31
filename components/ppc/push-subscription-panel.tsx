@@ -81,7 +81,7 @@ export function PushSubscriptionPanel({
           type="button"
           onClick={subscribe}
           disabled={action.disabled}
-          className="mt-3 flex h-8 items-center gap-1.5 rounded-sm bg-[var(--color-brand-blue)] px-3 text-xs font-medium text-white hover:bg-[var(--color-brand-blue-hover)] disabled:cursor-not-allowed disabled:opacity-65"
+          className="mt-3 flex h-8 cursor-pointer items-center gap-1.5 rounded-sm bg-[var(--color-brand-blue)] px-3 text-xs font-medium text-white hover:bg-[var(--color-brand-blue-hover)] disabled:cursor-not-allowed disabled:opacity-65"
         >
           {action.disabled ? (
             <LoaderCircle className="size-3 animate-spin" />
