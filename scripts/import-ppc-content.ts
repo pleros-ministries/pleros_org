@@ -42,9 +42,9 @@ const TARGETS: TargetScope[] = [
     levelId: 2,
     questionDocPath: "tmp/ppc-l2-questions.txt",
     notesDocPath: "tmp/ppc-l2-notes.txt",
-    trackNumbers: [1, 2],
+    trackNumbers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
     readinessTrackNumbers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-    releaseTrackNumbers: [1, 2],
+    releaseTrackNumbers: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
     audioManifestPath: "docs/level-2-ppc-teachings.json",
   },
 ];
