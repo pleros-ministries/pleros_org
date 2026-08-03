@@ -107,16 +107,16 @@ export function ThankYouPage({ name }: ThankYouPageProps) {
           <div className="mx-auto grid max-w-[72rem]">
             <div className="grid max-w-[30rem] gap-3">
               <p className="site-section-intro max-w-[31rem] text-[var(--color-text-strong)]">
-                Your free book is ready in your dashboard.
+                our gift is now available on your dashboard. You can access it at the end of this page.
               </p>
-              <div className="flex flex-wrap gap-3 pt-1">
+              {/* <div className="flex flex-wrap gap-3 pt-1">
                 <a
                   href="#book-access"
                   className={`${shareJumpButtonBase} bg-[var(--color-brand-blue)] text-white shadow-[0_14px_28px_rgba(5,20,128,0.18)]`}
                 >
                   Access your book
                 </a>
-              </div>
+              </div> */}
             </div>
           </div>
         </section>
@@ -284,8 +284,8 @@ export function ThankYouPage({ name }: ThankYouPageProps) {
             <div className="grid gap-4">
               <h2 className="site-hero-heading max-w-[13ch] text-[var(--color-brand-blue)]">
                 {name
-                  ? `Thank you for receiving your gift, ${name}`
-                  : "Thank you for receiving your gift"}
+                  ? `Thank you for receiving our gift, ${name}`
+                  : "Thank you for receiving our gift"}
               </h2>
               <p className="site-hero-intro max-w-[34ch] text-[var(--color-text-strong)]">
                 Visit your dashboard to access your gift.

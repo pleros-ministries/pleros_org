@@ -39,6 +39,15 @@ export async function submitForReview(userId: string, lessonId: number) {
     .set({ status: "submitted", submittedAt: new Date() })
     .where(eq(schema.writtenSubmissions.id, submission.id))
     .returning();
+
+  await db
+    .insert(schema.studentProgress)
+    .values({ userId, lessonId, writtenApproved: true })
+    .onConflictDoUpdate({
+      target: [schema.studentProgress.userId, schema.studentProgress.lessonId],
+      set: { writtenApproved: true },
+    });
+
   return updated;
 }
 

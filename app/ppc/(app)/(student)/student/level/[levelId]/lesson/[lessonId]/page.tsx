@@ -216,11 +216,7 @@ export default async function LessonDetailPage({
                 Written response
               </p>
               <p className="text-[10px] text-zinc-500">
-                {writtenApproved
-                  ? "Approved"
-                  : submission
-                    ? submission.status.replace(/_/g, " ")
-                    : "Not started"}
+                {submission ? submission.status.replace(/_/g, " ") : "Not started"}
               </p>
             </div>
             {writtenApproved ? (
