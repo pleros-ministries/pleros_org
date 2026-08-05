@@ -96,6 +96,7 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 
 - Public placeholder routes should become dedicated route + page-view + content module + focused tests when upgraded into real pages.
 - For public landing pages, prefer the existing pathway-page hero proportions over broad marketing hero patterns unless asked otherwise.
+- On the homepage pathways section, give mobile visitors breathable outer space and clear carousel-to-card separation; preserve card proportions rather than making cards taller to create that space.
 - Public pathway copy should use Pleros ministry language and internal concepts, not generic outsider language.
 - `/fcc` is the canonical Fullness of Christ Church route; preserve `/fcchurch` as a legacy redirect when route references are updated.
 - `/fulfill` is the canonical public route and visible spelling; preserve a redirect from `/fulfil`. Keep internal theme token names stable.

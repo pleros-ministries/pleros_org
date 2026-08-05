@@ -4,8 +4,8 @@ import { homeCarouselSlides, homePathwayCards } from "../../lib/site-homepage-co
 
 export function HomepageHero() {
   return (
-    <section id="pathways" className="bg-white px-2  pt-3 sm:px-5 lg:px-16 lg:pt-8 lg:pb-16">
-      <div className="grid justify-items-center gap-2 px-4 pb-5 text-center sm:pb-6 lg:gap-3 lg:pb-8">
+    <section id="pathways" className="bg-white px-2 pt-8 sm:px-5 sm:pt-10 lg:px-16 lg:pt-8 lg:pb-16">
+      <div className="grid justify-items-center gap-2 px-4 pb-8 text-center sm:pb-9 lg:gap-3 lg:pb-8">
         <p className="site-hero-eyebrow">
           Pleros ministries &amp; missions
         </p>
@@ -15,11 +15,11 @@ export function HomepageHero() {
         </h1> */}
       </div>
 
-      <div className="pb-5 lg:pb-8">
+      <div className="pb-8 sm:pb-9 lg:pb-8">
         <HomepageCarousel slides={homeCarouselSlides} />
       </div>
 
-      <div className="grid grid-cols-2 gap-x-2 gap-y-3.5 pb-10 sm:gap-x-5 sm:gap-y-5 sm:pb-12 md:grid-cols-4 lg:pb-0">
+      <div className="grid grid-cols-2 gap-x-2 gap-y-5 pb-12 sm:gap-x-5 sm:gap-y-5 sm:pb-12 md:grid-cols-4 lg:pb-0">
         {homePathwayCards.map((card) => (
           <HomepagePathwayCard key={card.title} {...card} />
         ))}

@@ -103,8 +103,8 @@ describe("site home page", () => {
       "utf8",
     );
 
-    expect(heroSource).toContain('className="bg-white px-2  pt-3 sm:px-5');
-    expect(heroSource).toContain('className="grid grid-cols-2 gap-x-2 gap-y-3.5 pb-10 sm:gap-x-5 sm:gap-y-5 sm:pb-12 md:grid-cols-4 lg:pb-0"');
+    expect(heroSource).toContain('className="bg-white px-2 pt-8 sm:px-5 sm:pt-10');
+    expect(heroSource).toContain('className="grid grid-cols-2 gap-x-2 gap-y-5 pb-12 sm:gap-x-5 sm:gap-y-5 sm:pb-12 md:grid-cols-4 lg:pb-0"');
     expect(cardSource).toContain("aspect-[324/164]");
     expect(cardSource).toContain('className="flex h-[4.65rem]');
     expect(cardSource).toContain("headerImageSrc");
