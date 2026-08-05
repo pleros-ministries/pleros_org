@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { GoogleAnalytics } from "@/components/google-analytics";
+import { MetaPixel } from "@/components/meta-pixel";
 import { Be_Vietnam_Pro, DM_Sans, Figtree, Sen } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
@@ -87,6 +88,7 @@ export default function RootLayout({
     >
       <body className="page-shell antialiased">
         <GoogleAnalytics />
+        <MetaPixel />
         {children}
       </body>
     </html>
