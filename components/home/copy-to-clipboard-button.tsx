@@ -1,16 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { CheckIcon, CopyIcon } from "lucide-react";
+import { CheckIcon, CopyIcon, type LucideIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
 export function CopyToClipboardButton({
   value,
   label,
+  icon: Icon = CopyIcon,
 }: {
   value: string;
   label: string;
+  icon?: LucideIcon;
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -28,11 +30,7 @@ export function CopyToClipboardButton({
       onClick={handleCopy}
       aria-label={label}
     >
-      {copied ? (
-        <CheckIcon className="size-4" />
-      ) : (
-        <CopyIcon className="size-4" />
-      )}
+      {copied ? <CheckIcon className="size-4" /> : <Icon className="size-4" />}
     </Button>
   );
 }

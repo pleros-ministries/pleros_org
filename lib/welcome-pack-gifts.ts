@@ -25,9 +25,8 @@ export const mainGifts: WelcomePackGift[] = [
     description: "Listen to the book in audio format.",
     imageSrc: "/assets/dashboard/welcome-pack-main-gift/audiobook-purpose-welcome-card.png",
     imageBackgroundColor: "#016dd5",
-    buttonLabel: "Coming soon",
-    href: "#",
-    locked: true,
+    buttonLabel: "Listen now",
+    href: "/dashboard/welcomepack/audiobook",
   },
 ];
 

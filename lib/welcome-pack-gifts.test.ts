@@ -3,7 +3,7 @@ import { describe, expect, test } from "vitest";
 import { extraGifts, mainGifts } from "./welcome-pack-gifts";
 
 describe("welcome pack gift config", () => {
-  test("keeps the main gift available and lists a locked audio companion", () => {
+  test("keeps the main gift available and lists an unlocked audio companion", () => {
     expect(mainGifts.length).toBeGreaterThanOrEqual(1);
     expect(mainGifts[0]?.title).toBe("Welcome to Purpose (ebook)");
     expect(mainGifts[0]?.description).toBe("Download for offline reading.");
@@ -21,7 +21,8 @@ describe("welcome pack gift config", () => {
       "/assets/dashboard/welcome-pack-main-gift/audiobook-purpose-welcome-card.png",
     );
     expect(audioGift?.imageBackgroundColor).toBe("#016dd5");
-    expect(audioGift?.locked).toBe(true);
+    expect(audioGift?.href).toBe("/dashboard/welcomepack/audiobook");
+    expect(audioGift?.locked).toBeFalsy();
   });
 
   test("names the two referral extra gifts", () => {
