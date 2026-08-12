@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { GoogleAnalytics } from "@/components/google-analytics";
 import { MetaPixel } from "@/components/meta-pixel";
+import { PushNotificationPrompt } from "@/components/push-notification-prompt";
+import { ServiceWorkerRegister } from "@/components/service-worker-register";
 import { Be_Vietnam_Pro, DM_Sans, Figtree, Sen } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
@@ -96,6 +98,8 @@ export default function RootLayout({
       className={`${suisseIntl.variable} ${sen.variable} ${beVietnamPro.variable} ${figtree.variable} ${dmSans.variable}`}
     >
       <body className="page-shell antialiased">
+        <ServiceWorkerRegister />
+        <PushNotificationPrompt />
         <GoogleAnalytics />
         <MetaPixel />
         {children}

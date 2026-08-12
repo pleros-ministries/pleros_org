@@ -455,6 +455,54 @@ export const pushSubscriptions = pgTable(
   ],
 );
 
+// ─── Site-wide (anonymous) push subscriptions ──────────────────────────────
+
+export const siteWebPushSubscriptions = pgTable(
+  "site_web_push_subscriptions",
+  {
+    id: serial("id").primaryKey(),
+    endpoint: text("endpoint").notNull(),
+    p256dh: text("p256dh").notNull(),
+    auth: text("auth").notNull(),
+    newContentEnabled: boolean("new_content_enabled").notNull().default(true),
+    prayerWatchEnabled: boolean("prayer_watch_enabled").notNull().default(true),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("site_web_push_subscriptions_endpoint_idx").on(t.endpoint),
+  ],
+);
+
+export const notificationCheckpoints = pgTable("notification_checkpoints", {
+  key: text("key").primaryKey(),
+  value: text("value").notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+export const prayerWatchRemindersSent = pgTable(
+  "prayer_watch_reminders_sent",
+  {
+    sessionId: text("session_id").notNull(),
+    date: date("date", { mode: "string" }).notNull(),
+    sentAt: timestamp("sent_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("prayer_watch_reminders_sent_session_date_idx").on(
+      t.sessionId,
+      t.date,
+    ),
+  ],
+);
+
 // ─── Prayer watch attendance ────────────────────────────────────────────────
 
 export const prayerWatchAttendance = pgTable(

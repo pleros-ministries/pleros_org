@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getAllTeachings, createTeaching, getNextSn } from "@/lib/db/queries/teachings";
+import { notifyNewContentSubscribers } from "@/lib/push/notify-content";
 
 export async function GET() {
   try {
@@ -31,6 +32,14 @@ export async function POST(request: Request) {
       audioUrl: audio_url,
       fileKey: file_key,
       duration: duration ?? null,
+    });
+
+    notifyNewContentSubscribers({
+      title: "New teaching added",
+      body: teaching.title,
+      path: "/library",
+    }).catch((err) => {
+      console.error("notifyNewContentSubscribers error:", err);
     });
 
     return NextResponse.json(teaching, { status: 201 });

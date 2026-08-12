@@ -213,8 +213,8 @@ export const fcchurchLocations: FcchurchLocation[] = [
     id: "Osogbo",
     city: "Osogbo",
     state: "Osun",
-    venueName: "Opposite Fountain University, Beside Omoluabi Plaza, Oke-Fia",
-    address: "Opposite Fountain University, Beside Omoluabi Plaza, Oke-Fia, Osogbo, Osun State",
+    venueName: "Clemzeal Arena, Uniosun School campus, Second gate area, Oke baale, Osogbo",
+    address: "Clemzeal Arena, Uniosun School campus, Second gate area, Oke baale, Osogbo",
     schedule: [
       {
         type: "prayer",

@@ -37,13 +37,13 @@ function DiscipleshipVideoCard({
       className="group grid gap-3.5 text-left"
       aria-label={`Play ${title}`}
     >
-      <div className="relative aspect-[395/214] overflow-hidden rounded-[0.875rem] bg-[#d98d54] shadow-[var(--shadow-sm)]">
+      <div className="relative aspect-9/14 overflow-hidden rounded-[0.875rem] bg-[#d98d54] shadow-[var(--shadow-sm)]">
         <Image
           src={thumbnailSrc}
           alt=""
           fill
           className="object-cover transition-transform duration-200 group-hover:scale-[1.015]"
-          sizes="(max-width: 767px) calc(100vw - 4.25rem), (max-width: 1279px) 38rem, 42rem"
+          sizes="(max-width: 767px) calc((100vw - 4.75rem) / 2), 22rem"
         />
         <div className="absolute inset-0 bg-black/12 transition-colors duration-200 group-hover:bg-black/18" />
         <div className="absolute inset-0 flex items-center justify-center">
@@ -100,14 +100,16 @@ export function DiscipleshipJourneyGallery({
 
         {sections.map((section) => (
           <div key={section.id} className="grid gap-6">
-            <div className="grid gap-2">
-              <h2 className="site-section-heading text-[1.1rem] text-[var(--color-brand-blue)] sm:text-[1.35rem]">
-                {section.title}
-              </h2>
-              <div className="h-px w-full bg-[rgba(1,21,133,0.3)]" />
-            </div>
+            {section.title ? (
+              <div className="grid gap-2">
+                <h2 className="site-section-heading text-[1.1rem] text-[var(--color-brand-blue)] sm:text-[1.35rem]">
+                  {section.title}
+                </h2>
+                <div className="h-px w-full bg-[rgba(1,21,133,0.3)]" />
+              </div>
+            ) : null}
 
-            <div className="grid gap-9 md:gap-10">
+            <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:gap-x-5 sm:gap-y-9 md:gap-x-7 md:gap-y-10">
               {section.videos.map((video) => (
                 <DiscipleshipVideoCard
                   key={video.id}

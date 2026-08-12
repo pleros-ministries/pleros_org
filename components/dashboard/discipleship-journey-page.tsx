@@ -2,10 +2,12 @@ import Link from "next/link";
 import Image from "next/image";
 import { ChevronLeftIcon } from "lucide-react";
 
+import { DiscipleshipJourneyGallery } from "@/components/dashboard/discipleship-journey-gallery";
 import {
   getDiscipleshipJourneySeriesCards,
   type DiscipleshipJourneySeriesCard,
 } from "@/lib/discipleship-journey-content";
+import { discipleshipFoundationsVideos } from "@/lib/discipleship-foundations-content";
 
 type DiscipleshipJourneyPageProps = {
   previewHrefPrefix?: string;
@@ -24,7 +26,7 @@ function DiscipleshipJourneySeriesGrid({
           href={card.href}
           className="group grid overflow-hidden rounded-[var(--radius-md)] bg-white shadow-[var(--shadow-sm)] transition-transform duration-200 hover:-translate-y-0.5"
         >
-          <div className="relative aspect-[0.78] overflow-hidden bg-[#d98d54]">
+          <div className="relative aspect-9/14 overflow-hidden bg-[#d98d54]">
             <Image
               src={card.thumbnailSrc}
               alt=""
@@ -70,10 +72,20 @@ export function DiscipleshipJourneyPage({
             Your Discipleship Journey
           </h1>
           <p className="font-[var(--font-be-vietnam-pro)] max-w-[34ch] text-[0.95rem] leading-[1.42] tracking-[-0.02em] text-[var(--color-text-muted)]">
-            Watch every teaching from our Questions and Purpose series in one
-            place.
+            Watch every teaching in one place.
           </p>
         </div>
+
+        <DiscipleshipJourneyGallery
+          sections={[
+            {
+              id: "discipleship-foundations",
+              title: "",
+              thumbnailSrc: "",
+              videos: discipleshipFoundationsVideos,
+            },
+          ]}
+        />
 
         <DiscipleshipJourneySeriesGrid cards={cards} />
       </div>

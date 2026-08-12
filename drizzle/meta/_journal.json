@@ -57,6 +57,13 @@
       "when": 1785196800000,
       "tag": "0007_dashboard_visit_summaries",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1786505768537,
+      "tag": "0008_massive_gravity",
+      "breakpoints": true
     }
   ]
 }
