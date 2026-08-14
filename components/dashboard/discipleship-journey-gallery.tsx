@@ -84,6 +84,7 @@ export function DiscipleshipJourneyGallery({
   const selectedVideoUsesDirectPlayback = selectedVideo
     ? isDirectVideoHref(selectedVideo.href)
     : false;
+  const isPortraitVideo = selectedVideo?.orientation === "portrait";
 
   return (
     <>
@@ -160,8 +161,14 @@ export function DiscipleshipJourneyGallery({
 
           {selectedVideo ? (
             <div className="grid gap-3">
-              <div className="overflow-hidden rounded-[var(--radius-md)] bg-black shadow-[var(--shadow-sm)]">
-                <div className="relative aspect-video w-full">
+              <div
+                className={`overflow-hidden rounded-[var(--radius-md)] bg-black shadow-[var(--shadow-sm)] ${
+                  isPortraitVideo ? "mx-auto max-w-76 sm:max-w-84" : ""
+                }`}
+              >
+                <div
+                  className={`relative w-full ${isPortraitVideo ? "aspect-9/16" : "aspect-video"}`}
+                >
                   {selectedVideoUsesDirectPlayback ? (
                     <video
                       src={selectedVideo.href}

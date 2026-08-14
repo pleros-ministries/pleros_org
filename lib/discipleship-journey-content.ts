@@ -8,6 +8,7 @@ export type DiscipleshipJourneyVideoItem = {
   thumbnailSrc: string;
   playIconSrc: string;
   href: string;
+  orientation?: "portrait" | "landscape";
 };
 
 export type DiscipleshipJourneySection = {
