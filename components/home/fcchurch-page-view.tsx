@@ -186,6 +186,29 @@ export function FcchurchPageView() {
         </div>
       </section>
 
+      <section className="bg-[var(--color-brand-sky)] px-[1.25rem] py-8 md:px-8 md:py-11 xl:px-10">
+        <div className="mx-auto flex max-w-[58rem] flex-col gap-4 rounded-[1.25rem] bg-white px-5 py-6 shadow-[0_14px_34px_rgba(6,16,86,0.08)] ring-1 ring-[rgba(6,16,86,0.08)] sm:px-7 sm:py-7 md:flex-row md:items-center md:justify-between md:gap-8">
+          <div className="grid gap-1.5">
+            <p className="font-[var(--font-be-vietnam-pro)] text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-[var(--color-brand-blue)]">
+              A welcome from us
+            </p>
+            <h2 className="font-[var(--font-sen)] text-[1.5rem] font-semibold leading-[1.1] tracking-[-0.04em] text-[var(--color-text-strong)]">
+              First time worshiping with us?
+            </h2>
+            <p className="max-w-[34rem] font-[var(--font-be-vietnam-pro)] text-[0.9rem] leading-[1.5] text-[var(--color-text-muted)]">
+              Fill this form so we can keep in touch with you.
+            </p>
+          </div>
+          <Button
+            size="lg"
+            render={<Link href="/fcc/first-time" className="site-button-text" />}
+            className="site-button-text inline-flex min-h-[2.875rem] shrink-0 items-center justify-center rounded-full bg-[var(--color-brand-blue)] px-5 text-[0.875rem] font-semibold text-white hover:bg-[var(--color-brand-blue)]/90"
+          >
+            Fill the form
+          </Button>
+        </div>
+      </section>
+
       {/* Online section */}
       <section className="bg-[var(--color-brand-blue)] px-[1.25rem] py-[4.25rem] text-white md:px-8 md:py-16 xl:px-10">
         <div className="mx-auto grid max-w-[58rem] gap-6 text-center">

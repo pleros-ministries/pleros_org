@@ -304,6 +304,12 @@ export const fcchurchLocations: FcchurchLocation[] = [
   },
 ];
 
+export const fcchurchVisitorLocations = fcchurchLocations.map((location) => ({
+  value: location.city,
+  label: `${location.city}, ${location.state}`,
+  sheetName: location.city === "Ile-Ife" ? "Ife" : location.city,
+}));
+
 export const fcchurchOnlineSection = {
   eyebrow: "Can't join in person?",
   title: "Join us online",
