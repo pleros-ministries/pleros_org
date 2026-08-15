@@ -201,7 +201,7 @@ export function FcchurchPageView() {
           </div>
           <Button
             size="lg"
-            render={<Link href="/fcc/first-time" className="site-button-text" />}
+            render={<Link href="/fcc/welcome" className="site-button-text" />}
             className="site-button-text inline-flex min-h-[2.875rem] shrink-0 items-center justify-center rounded-full bg-[var(--color-brand-blue)] px-5 text-[0.875rem] font-semibold text-white hover:bg-[var(--color-brand-blue)]/90"
           >
             Fill the form
