@@ -44,7 +44,7 @@ export async function submitFirstTimeWorshipperAction(
   }
 
   if (readString(formData, "website")) {
-    redirect("/fcc/welcome?submitted=1");
+    redirect("/fft?submitted=1");
   }
 
   try {
@@ -59,5 +59,5 @@ export async function submitFirstTimeWorshipperAction(
     };
   }
 
-  redirect("/fcc/welcome?submitted=1");
+  redirect("/fft?submitted=1");
 }
