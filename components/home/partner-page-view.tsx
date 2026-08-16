@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
@@ -158,10 +159,16 @@ export function PartnerPageView() {
 
           <div className="mx-auto grid max-w-[36rem] grid-cols-1 gap-4 md:gap-5">
             <Card className="gap-4 rounded-[1.25rem] border-[rgba(6,16,86,0.14)] bg-white p-5 shadow-[0_16px_40px_rgba(6,16,86,0.08)] md:p-6">
-              <CardHeader className="gap-1 px-0 py-0">
+              <CardHeader className="flex flex-row items-start justify-between gap-2 px-0 py-0">
                 <CardTitle className="font-[var(--font-sen)] text-[1rem] leading-[0.95] tracking-[-0.04em] text-[var(--color-brand-indigo)] md:text-[1.125rem]">
                   {partnerGivingChannelLabels.bank}
                 </CardTitle>
+                <CardAction>
+                  <CopyToClipboardButton
+                    value={`Account Name: ${partnerBankAccount.accountName}\nBank: ${partnerBankAccount.bankName}\nAccount Number: ${partnerBankAccount.accountNumber}`}
+                    label="Copy all bank details"
+                  />
+                </CardAction>
               </CardHeader>
               <CardContent className="grid gap-3 px-0 pb-0">
                 <div>
