@@ -4,7 +4,9 @@ import { normalizeEmail, validateEmail } from "./welcome-flow";
 export type FirstTimeWorshipperValues = {
   fullName: string;
   phone: string;
+  whatsappNumber: string;
   email: string;
+  homeAddress: string;
   location: string;
 };
 
@@ -22,7 +24,9 @@ export const INITIAL_FIRST_TIME_WORSHIPPER_SUBMIT_STATE: FirstTimeWorshipperSubm
   values: {
     fullName: "",
     phone: "",
+    whatsappNumber: "",
     email: "",
+    homeAddress: "",
     location: "",
   },
   errors: {},
@@ -35,7 +39,9 @@ export function normalizeFirstTimeWorshipperInput(
   return {
     fullName: values.fullName.trim(),
     phone: values.phone.trim(),
+    whatsappNumber: values.whatsappNumber.trim(),
     email: normalizeEmail(values.email),
+    homeAddress: values.homeAddress.trim(),
     location: values.location.trim(),
   };
 }
@@ -53,10 +59,18 @@ export function validateFirstTimeWorshipperInput(
     errors.phone = "Phone number is required.";
   }
 
+  if (!values.whatsappNumber) {
+    errors.whatsappNumber = "WhatsApp number is required.";
+  }
+
   if (!values.email) {
     errors.email = "Email is required.";
   } else if (!validateEmail(values.email)) {
     errors.email = "Enter a valid email address.";
+  }
+
+  if (!values.homeAddress) {
+    errors.homeAddress = "Home address is required.";
   }
 
   if (!fcchurchVisitorLocations.some((location) => location.value === values.location)) {

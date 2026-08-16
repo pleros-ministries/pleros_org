@@ -32,7 +32,9 @@ export async function submitFirstTimeWorshipperAction(
   const values = normalizeFirstTimeWorshipperInput({
     fullName: readString(formData, "fullName"),
     phone: readString(formData, "phone"),
+    whatsappNumber: readString(formData, "whatsappNumber"),
     email: readString(formData, "email") || welcomeAccess?.email || "",
+    homeAddress: readString(formData, "homeAddress"),
     location: readString(formData, "location"),
   });
   const errors = validateFirstTimeWorshipperInput(values);

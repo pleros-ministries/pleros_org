@@ -116,6 +116,39 @@ export function FirstTimeWorshipperForm({
       </div>
 
       <div className="grid gap-1.5">
+        <label htmlFor="whatsappNumber" className="site-button-text text-[0.8rem] font-semibold text-[var(--color-text-strong)]">
+          WhatsApp number
+        </label>
+        <Input
+          id="whatsappNumber"
+          name="whatsappNumber"
+          type="tel"
+          autoComplete="tel"
+          defaultValue={state.values.whatsappNumber}
+          aria-invalid={Boolean(state.errors.whatsappNumber)}
+          aria-describedby={state.errors.whatsappNumber ? "whatsappNumber-error" : undefined}
+          className="h-[2.875rem] rounded-[0.75rem] border-[rgba(6,16,86,0.14)] px-4 text-[0.9rem]"
+        />
+        <FieldError id="whatsappNumber" error={state.errors.whatsappNumber} />
+      </div>
+
+      <div className="grid gap-1.5">
+        <label htmlFor="homeAddress" className="site-button-text text-[0.8rem] font-semibold text-[var(--color-text-strong)]">
+          Home address
+        </label>
+        <textarea
+          id="homeAddress"
+          name="homeAddress"
+          autoComplete="street-address"
+          defaultValue={state.values.homeAddress}
+          aria-invalid={Boolean(state.errors.homeAddress)}
+          aria-describedby={state.errors.homeAddress ? "homeAddress-error" : undefined}
+          className="min-h-[5.5rem] w-full rounded-[0.75rem] border border-[rgba(6,16,86,0.14)] bg-white px-4 py-3 text-[0.9rem] text-[var(--color-text-strong)] outline-none transition-[border-color,box-shadow] duration-150 placeholder:text-[var(--color-text-muted)] focus-visible:border-[var(--color-brand-blue)] focus-visible:ring-4 focus-visible:ring-[var(--color-focus)]"
+        />
+        <FieldError id="homeAddress" error={state.errors.homeAddress} />
+      </div>
+
+      <div className="grid gap-1.5">
         <label htmlFor="location" className="site-button-text text-[0.8rem] font-semibold text-[var(--color-text-strong)]">
           Church location
         </label>

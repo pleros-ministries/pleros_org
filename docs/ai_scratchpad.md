@@ -229,6 +229,7 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - Present detected form values as editable fields without an explanatory hint, and use "welcome pack" as two words in public copy.
 - Use a left-arrow icon with public-site back-navigation links when requested.
 - Use intentional line breaks for mobile public-page headings when requested, with a sufficiently wide measure or non-wrapping line to preserve the intended line count.
+- Keep FCC first-time worshipper fields, validation, and per-location Sheet headers aligned; capture both WhatsApp number and home address.
 
 - After meaningful tasks, add only concise, reusable notes when there was an error, correction, expressed preference, or clearly better strategy.
 - Prefer updating these consolidated sections over adding another dated entry unless chronology is important.

@@ -74,7 +74,7 @@ export async function appendFirstTimeWorshipper(
   });
   const sheets = google.sheets({ version: "v4", auth });
   const spreadsheetId = getSpreadsheetId();
-  const range = `'${sheetName.replaceAll("'", "''")}'!A:E`;
+  const range = `'${sheetName.replaceAll("'", "''")}'!A:G`;
   const dateMarker = getLagosDateMarker();
   const [existing, spreadsheet] = await Promise.all([
     sheets.spreadsheets.values.get({ spreadsheetId, range }),
@@ -95,7 +95,9 @@ export async function appendFirstTimeWorshipper(
     .reverse()
     .find((row) => row.some((cell) => Boolean(cell?.trim())));
   const rows = [
-    ...(lastRow?.[0] === dateMarker ? [] : [[dateMarker, "", "", "", ""]]),
+    ...(lastRow?.[0] === dateMarker
+      ? []
+      : [[dateMarker, "", "", "", "", "", ""]]),
     [
       new Intl.DateTimeFormat("en-GB", {
         timeZone: "Africa/Lagos",
@@ -104,7 +106,9 @@ export async function appendFirstTimeWorshipper(
       }).format(new Date()),
       protectSpreadsheetValue(values.fullName),
       protectSpreadsheetValue(values.phone),
+      protectSpreadsheetValue(values.whatsappNumber),
       protectSpreadsheetValue(values.email),
+      protectSpreadsheetValue(values.homeAddress),
       protectSpreadsheetValue(values.location),
     ],
   ];
@@ -134,7 +138,7 @@ export async function appendFirstTimeWorshipper(
                   startRowIndex: dateRowIndex,
                   endRowIndex: dateRowIndex + 1,
                   startColumnIndex: 0,
-                  endColumnIndex: 5,
+                  endColumnIndex: 7,
                 },
                 cell: {
                   userEnteredFormat: {
