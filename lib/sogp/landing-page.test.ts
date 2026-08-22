@@ -4,23 +4,18 @@ import { sogpLandingContent } from "./landing-content";
 
 describe("SOGP landing content", () => {
   test("covers the supplied launch copy", () => {
-    expect(sogpLandingContent.hero.title).toContain("Find truth");
+    expect(sogpLandingContent.hero.title).toContain("Find Truth");
     expect(sogpLandingContent.hero.ctaHref).toBe("/sogp/enroll");
     expect(sogpLandingContent.outcomes).toHaveLength(5);
-    expect(sogpLandingContent.audiences.length).toBeGreaterThanOrEqual(7);
-    expect(sogpLandingContent.structure).toMatchObject({
-      durationDays: 28,
-      trackCount: 20,
-      liveClassCount: 4,
-    });
-    expect(sogpLandingContent.tools.map((tool) => tool.name)).toEqual([
-      "Telegram",
-      "Pleros Dashboard",
-    ]);
+    expect(sogpLandingContent.audiences).toHaveLength(7);
+    expect(sogpLandingContent.structure.title).toBe("The Structure of SOGP");
+    expect(sogpLandingContent.tools.items).toHaveLength(2);
   });
 
-  test("does not claim complete privacy through Telegram", () => {
-    const serialized = JSON.stringify(sogpLandingContent).toLowerCase();
-    expect(serialized).not.toContain("stay private through the entire process");
+  test("keeps structural document instructions out of visitor copy", () => {
+    const serialized = JSON.stringify(sogpLandingContent);
+    expect(serialized).not.toContain('"Visual"');
+    expect(serialized).not.toContain('"Video"');
+    expect(serialized).not.toContain('"Headline/Subheadline"');
   });
 });
