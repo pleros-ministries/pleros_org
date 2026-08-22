@@ -32,8 +32,27 @@ export const sogpLandingContent = {
   ],
   curriculum: {
     title: "Curriculum of SOGP",
-    description:
-      "The SOGP curriculum is designed to cover the foundational scope of",
+    tracks: [
+      { level: "Level 1", title: "Gospel: The Word of Truth" },
+      { level: "Level 1", title: "God's Purpose: Why We Exist" },
+      {
+        level: "Level 1",
+        title: "The New Creation: Who You Are in Christ",
+      },
+      { level: "Level 1", title: "Faith Stand: How to Grow in Christ" },
+      { level: "Level 1", title: "Commitment: How to Fulfil Purpose" },
+      { level: "Level 2", title: "Introduction to Doctrinal Summaries" },
+      { level: "Level 2", title: "Bibliology" },
+      { level: "Level 2", title: "God and His Eternal Purpose" },
+      { level: "Level 2", title: "Biblical Origin and Ontology" },
+      { level: "Level 2", title: "Sin and Its Implication" },
+      { level: "Level 2", title: "God's Wisdom Towards Redemption" },
+      { level: "Level 2", title: "Christology" },
+      { level: "Level 2", title: "Redemption" },
+      { level: "Level 2", title: "Church and Its Mission" },
+      { level: "Level 2", title: "Eschatology" },
+      { level: "Level 2", title: "The New Creation" },
+    ],
   },
   structure: {
     title: "The Structure of SOGP",

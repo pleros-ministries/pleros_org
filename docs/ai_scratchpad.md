@@ -98,6 +98,7 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - Every SOGP public/learner content wrapper must pair `site-shell-page` with `sogp-shell-page`; `site-shell-page` alone has no horizontal padding. SOGP gutters use existing public shell padding tokens at each breakpoint.
 - SOGP public landing hero uses design-system pastel `--color-brand-sky` as dominant surface, navy text/CTA, and lime only as a small accent. Do not revert the hero to a navy-dominant treatment.
 - SOGP landing FAQs belong after Benefits in a mobile-first pastel-blue/white accordion. Approved basics cover free cost, participation from another church, eligibility, four-week format, guided-but-flexible pacing, device/platform needs, and certification requirements.
+- SOGP landing curriculum is an editorial title-only track list, never paired with Structure as matching cards. Show the 16 confirmed Level 1–2 PPC tracks now with numbering and compact level labels; add the four Level 3 titles only after explicit selection. Structure gets its own distinct treatment below.
 
 ## Public site visual system
 
