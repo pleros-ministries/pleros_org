@@ -1,0 +1,308 @@
+import { ArrowUpRightIcon } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { fetchAnchorEpisodes } from "@/lib/anchor-rss";
+import { getLatestYoutubeEpisode } from "@/lib/homepage-feed";
+import {
+  podcastApplePodcastsUrl,
+  podcastAudiomackUrl,
+  podcastFeaturedSection,
+  podcastJourneySteps,
+  podcastPageHero,
+  podcastSeries,
+  podcastSpotifyShowUrl,
+  podcastSubscribeCta,
+  podcastTelegramUrl,
+} from "@/lib/podcast-page-content";
+import { groupPodcastSeriesEpisodes } from "@/lib/podcast-series-episodes";
+import {
+  homePodcastUrl,
+  homeYoutubeChannelUrl,
+} from "@/lib/site-homepage-content";
+
+import { HomepageCommunitySection } from "./homepage-community-section";
+import { HomepageFooter } from "./homepage-footer";
+import { HomepageNav } from "./homepage-nav";
+import { PodcastSeriesGallery } from "./podcast-series-gallery";
+import { PodcastVideoGallery } from "./podcast-video-gallery";
+import { PublicSitePageShell } from "./public-site-page-shell";
+
+function formatEpisodeDate(value: string) {
+  try {
+    return new Intl.DateTimeFormat("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    }).format(new Date(value));
+  } catch {
+    return "Latest episode";
+  }
+}
+
+export async function PodcastPageView() {
+  const [episode, rssEpisodes] = await Promise.all([
+    getLatestYoutubeEpisode(),
+    fetchAnchorEpisodes(),
+  ]);
+  const featuredVideo = episode
+    ? {
+      id: episode.id,
+      title: episode.title,
+      href: episode.href,
+      thumbnailSrc: episode.thumbnailUrl,
+      dateLabel: formatEpisodeDate(episode.publishedAt),
+    }
+    : null;
+  const seriesWithEpisodes = groupPodcastSeriesEpisodes(
+    podcastSeries,
+    rssEpisodes,
+  );
+
+  const podcastPlatformIcons = [
+    {
+      label: "YouTube",
+      iconSrc: "/site/home/assets/social-media-icons/youtube-icon.svg",
+      href: podcastSubscribeCta.href,
+    },
+    {
+      label: "Telegram",
+      iconSrc: "/site/home/assets/social-media-icons/telegram-icon.svg",
+      href: podcastTelegramUrl,
+    },
+    {
+      label: "Spotify",
+      iconSrc: "/site/home/assets/social-media-icons/spotify-icon.svg",
+      href: podcastSpotifyShowUrl,
+    },
+    {
+      label: "Audiomack",
+      iconSrc: "/site/home/assets/social-media-icons/audiomack-icon.svg",
+      href: podcastAudiomackUrl,
+    },
+    {
+      label: "Apple",
+      iconSrc: "/site/home/assets/social-media-icons/apple-podcasts-icon.svg",
+      href: podcastApplePodcastsUrl,
+    },
+  ];
+
+  return (
+    <PublicSitePageShell>
+      <HomepageNav />
+
+      <section className="relative overflow-hidden bg-[var(--color-brand-sky-soft)]">
+        <div className="relative flex min-h-[17.8125rem] flex-col justify-end px-[1.25rem] pb-[2.125rem] pt-10 md:min-h-[22rem] md:px-8 md:pb-[2.625rem] md:pt-12 xl:min-h-[25rem] xl:px-10 xl:pb-[3rem] xl:pt-14">
+          <div className="relative z-10 grid max-w-[22rem] gap-3 md:max-w-[42rem] md:gap-4 xl:max-w-[50rem]">
+            <p className="site-hero-eyebrow">{podcastPageHero.eyebrow}</p>
+            <h1 className="site-hero-heading text-[var(--color-brand-indigo)] md:max-w-[40rem] md:text-[3.3rem] md:leading-none xl:max-w-[48rem] xl:text-[3.8rem]">
+              <span className="grid gap-0 md:hidden">
+                {podcastPageHero.mobileTitleLines.map((line) => (
+                  <span
+                    key={line}
+                    className="whitespace-nowrap text-[clamp(1.75rem,6.5vw,2.05rem)] leading-[1.04] tracking-[-0.05em]"
+                  >
+                    {line}
+                  </span>
+                ))}
+              </span>
+              <span className="hidden md:inline">{podcastPageHero.title}</span>
+            </h1>
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-white px-[1.25rem] pb-[4.75rem] pt-[2.5rem] md:px-8 md:pb-16 md:pt-10 xl:px-10">
+        <div className="grid gap-8">
+          <div className="mx-auto grid w-full max-w-[58rem] gap-8">
+            <div className="grid gap-2">
+              <h2 className="site-section-heading max-w-[25rem]">
+                {podcastFeaturedSection.title}
+              </h2>
+            </div>
+
+            <div className="flex flex-wrap items-start gap-5 md:gap-6">
+              {podcastPlatformIcons.map(({ label, iconSrc, href }) => (
+                <Link
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex flex-col items-center gap-1.5 text-center"
+                >
+                  <span className="flex h-8 items-center justify-center">
+                    <Image
+                      src={iconSrc}
+                      alt=""
+                      width={24}
+                      height={24}
+                      className="size-6"
+                    />
+                  </span>
+                  <span className="font-[var(--font-be-vietnam-pro)] text-[0.8rem] font-medium text-[var(--color-text-strong)]">
+                    {label}
+                  </span>
+                </Link>
+              ))}
+
+              <Link
+                href={homePodcastUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="group flex items-center gap-0.5 self-center font-[var(--font-be-vietnam-pro)] text-[0.78rem] font-semibold uppercase tracking-[0.08em] text-[var(--color-brand-blue)] no-underline"
+              >
+                MORE PLATFORMS
+                <ArrowUpRightIcon className="size-3.5 stroke-[2.4] transition-transform duration-150 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-focus-visible:-translate-y-0.5 group-focus-visible:translate-x-0.5" />
+              </Link>
+            </div>
+
+            {episode ? null : (
+              <Card className="gap-5 rounded-[1.25rem] border-[rgba(6,16,86,0.12)] bg-[linear-gradient(180deg,#f4f9ff_0%,#dff3ff_100%)] p-6 shadow-[0_16px_38px_rgba(6,16,86,0.08)] md:p-7">
+                <CardHeader className="gap-2 px-0 py-0">
+                  <Badge variant="outline" className="w-fit border-[rgba(6,16,86,0.12)]">
+                    Latest teaching
+                  </Badge>
+                  <CardTitle className="site-section-heading text-[1.9rem] md:text-[2.2rem]">
+                    {podcastFeaturedSection.fallbackTitle}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="gap-5 px-0 pb-0">
+                  <div className="flex">
+                    <Button
+                      size="lg"
+                      render={
+                        <Link
+                          href={podcastSubscribeCta.href}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="site-button-text"
+                        />
+                      }
+                      className="min-h-[2.875rem] rounded-full px-6 text-[0.875rem] font-semibold"
+                    >
+                      {podcastFeaturedSection.fallbackCtaLabel}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            <PodcastVideoGallery featured={featuredVideo} />
+
+            <div className="flex justify-center md:justify-start">
+              <Button
+                size="lg"
+                render={
+                  <Link
+                    href={podcastSubscribeCta.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="site-button-text"
+                  />
+                }
+                className="min-h-[2.875rem] rounded-full px-6 text-[0.875rem] font-semibold"
+              >
+                {podcastSubscribeCta.label}
+              </Button>
+            </div>
+          </div>
+
+          <div className="mx-auto grid w-full max-w-[58rem] gap-8">
+            <PodcastSeriesGallery
+              series={seriesWithEpisodes}
+              podLinkHref={homePodcastUrl}
+              youtubeChannelHref={homeYoutubeChannelUrl}
+              platformIconLinks={podcastPlatformIcons}
+            />
+          </div>
+        </div>
+      </section>
+
+
+
+      {/* <section className="bg-[var(--color-surface-muted)] px-[1.25rem] py-[4.25rem] md:px-8 md:py-16 xl:px-10">
+          <div className="mx-auto grid max-w-[58rem] gap-8">
+            <div className="grid gap-2 text-center">
+              <p className="site-hero-eyebrow justify-center">Why listen</p>
+              <h2 className="site-section-heading">Why this podcast helps</h2>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-3">
+              {podcastWhyListenItems.map((item) => (
+                <Card
+                  key={item.title}
+                  className="gap-4 rounded-[1.25rem] border-[rgba(6,16,86,0.1)] bg-white p-5 shadow-[0_12px_30px_rgba(6,16,86,0.06)]"
+                >
+                  <CardHeader className="gap-2 px-0 py-0">
+                    <CardTitle className="font-[var(--font-sen)] text-[1.45rem] font-bold leading-[1] tracking-[-0.045em] text-[var(--color-brand-indigo)]">
+                      {item.title}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardDescription className="text-[0.98rem] leading-[1.5] tracking-[-0.02em] text-[var(--color-text-muted)]">
+                    {item.description}
+                  </CardDescription>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section> */}
+
+      <section
+        id="journey"
+        className="bg-white px-[1.25rem] py-[4.25rem] md:px-8 md:py-16 xl:px-10"
+      >
+        <div className="mx-auto grid max-w-[58rem] gap-8">
+          <div className="grid gap-2 text-center">
+            <p className="site-hero-eyebrow justify-center">Next steps</p>
+            <h2 className="site-section-heading">
+              Let the Podcast lead you deeper into the Pleros journey
+            </h2>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-3">
+            {podcastJourneySteps.map((step) => (
+              <Card
+                key={step.title}
+                tone={step.tone}
+                className="gap-3 rounded-[1.25rem] border-0 px-5 pb-5 pt-7 shadow-[0_14px_32px_rgba(15,23,40,0.06)]"
+              >
+                <CardHeader className="gap-3 px-0 py-0">
+                  <CardTitle className="font-[var(--font-sen)] text-[1.5rem] font-bold leading-[1] tracking-[-0.045em] text-[var(--color-text-strong)]">
+                    {step.title}
+                  </CardTitle>
+                </CardHeader>
+
+                <CardContent className="gap-5 px-0 pb-0">
+                  <p className="text-[0.9375rem] leading-[1.5] tracking-[-0.02em] text-[var(--color-text-muted)] md:text-[0.98rem]">
+                    {step.description}
+                  </p>
+
+                  <div className="flex">
+                    <Link
+                      href={step.href}
+                      className="group inline-flex w-fit items-center gap-0.5 rounded-sm font-[var(--font-be-vietnam-pro)] text-[0.72rem] font-semibold uppercase tracking-[0.08em] text-[var(--color-brand-blue)] outline-none transition-colors duration-150 hover:text-[var(--color-brand-blue-hover)] focus-visible:ring-4 focus-visible:ring-[var(--color-focus)]"
+                    >
+                      {step.ctaLabel}
+                      <ArrowUpRightIcon className="size-3.5 stroke-[2.4] transition-transform duration-150 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-focus-visible:-translate-y-0.5 group-focus-visible:translate-x-0.5" />
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <HomepageCommunitySection />
+      <HomepageFooter />
+    </PublicSitePageShell>
+  );
+}

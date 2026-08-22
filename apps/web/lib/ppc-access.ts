@@ -1,0 +1,91 @@
+import type { AppRole } from "./app-role";
+import { getRoleDefaultPath } from "./app-access";
+import { isPpcHost } from "./ppc-routing";
+
+const STUDENT_PATH_PREFIXES = ["/student"];
+
+function normalizeLogicalPath(path: string): string {
+  if (!path.startsWith("/")) {
+    return `/${path}`;
+  }
+
+  if (path.length > 1 && path.endsWith("/")) {
+    return path.slice(0, -1);
+  }
+
+  return path;
+}
+
+function matchesPrefix(pathname: string, prefixes: string[]): boolean {
+  return prefixes.some((prefix) => {
+    if (prefix === "/") {
+      return pathname === "/";
+    }
+
+    return pathname === prefix || pathname.startsWith(`${prefix}/`);
+  });
+}
+
+export function isPublicPpcPath(path: string): boolean {
+  const pathname = normalizeLogicalPath(path);
+
+  return (
+    pathname === "/" ||
+    pathname === "/login" ||
+    pathname === "/signup" ||
+    pathname === "/sign-in" ||
+    pathname === "/sign-up" ||
+    pathname === "/forbidden"
+  );
+}
+
+export function getRoleHomePath(role: AppRole): string {
+  return getRoleDefaultPath(role);
+}
+
+export function canAccessPpcPath(role: AppRole, path: string): boolean {
+  const pathname = normalizeLogicalPath(path);
+
+  if (isPublicPpcPath(pathname)) {
+    return true;
+  }
+
+  return role === "student" && matchesPrefix(pathname, STUDENT_PATH_PREFIXES);
+}
+
+export function toExternalPpcPath(host: string | null, logicalPath: string): string {
+  const normalizedPath = normalizeLogicalPath(logicalPath);
+
+  if (isPpcHost(host)) {
+    return normalizedPath;
+  }
+
+  if (normalizedPath === "/") {
+    return "/ppc";
+  }
+
+  return `/ppc${normalizedPath}`;
+}
+
+export function getLogicalPpcPath(host: string | null, pathname: string): string | null {
+  if (isPpcHost(host)) {
+    if (pathname.startsWith("/ppc")) {
+      const strippedPath = pathname.slice(4);
+      return strippedPath.length === 0 ? "/" : normalizeLogicalPath(strippedPath);
+    }
+
+    return normalizeLogicalPath(pathname);
+  }
+
+  if (!pathname.startsWith("/ppc")) {
+    return null;
+  }
+
+  const strippedPath = pathname.slice(4);
+
+  if (strippedPath.length === 0) {
+    return "/";
+  }
+
+  return normalizeLogicalPath(strippedPath);
+}

@@ -1,0 +1,218 @@
+"use client";
+
+import Image from "next/image";
+import Link from "next/link";
+import { ChevronLeftIcon, XIcon } from "lucide-react";
+import { useState } from "react";
+
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import type {
+  DiscipleshipJourneySection,
+  DiscipleshipJourneyVideoItem,
+} from "@/lib/discipleship-journey-content";
+
+function isDirectVideoHref(href: string): boolean {
+  return href.includes(".ufs.sh/f/") || href.match(/\.(mp4|webm|ogg)(\?|$)/i) !== null;
+}
+
+function DiscipleshipVideoCard({
+  title,
+  description: _description,
+  thumbnailSrc,
+  playIconSrc,
+  onPlay,
+}: DiscipleshipJourneyVideoItem & {
+  onPlay: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onPlay}
+      className="group grid gap-3.5 text-left"
+      aria-label={`Play ${title}`}
+    >
+      <div className="relative aspect-9/14 overflow-hidden rounded-[0.875rem] bg-[#d98d54] shadow-[var(--shadow-sm)]">
+        <Image
+          src={thumbnailSrc}
+          alt=""
+          fill
+          className="object-cover transition-transform duration-200 group-hover:scale-[1.015]"
+          sizes="(max-width: 767px) calc((100vw - 4.75rem) / 2), 22rem"
+        />
+        <div className="absolute inset-0 bg-black/12 transition-colors duration-200 group-hover:bg-black/18" />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="rounded-full bg-white/12 p-1 backdrop-blur-[1px]">
+            <Image
+              src={playIconSrc}
+              alt=""
+              width={84}
+              height={84}
+              className="h-[4.75rem] w-[4.75rem] transition-transform duration-200 group-hover:scale-[1.03]"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-1.5 text-left">
+        <h3 className="font-[var(--font-sen)] text-[1.125rem] font-semibold leading-[1.02] tracking-[-0.03em] text-[var(--color-brand-indigo)] md:text-[1.4rem]">
+          {title}
+        </h3>
+      </div>
+    </button>
+  );
+}
+
+export function DiscipleshipJourneyGallery({
+  sections,
+  backHref,
+}: {
+  sections: DiscipleshipJourneySection[];
+  backHref?: string;
+}) {
+  const [selectedVideoId, setSelectedVideoId] = useState<string | null>(null);
+  const [isPlayerReady, setIsPlayerReady] = useState(false);
+
+  const allVideos = sections.flatMap((section) => section.videos);
+  const selectedVideo =
+    allVideos.find((video) => video.id === selectedVideoId) ?? null;
+  const selectedVideoUsesDirectPlayback = selectedVideo
+    ? isDirectVideoHref(selectedVideo.href)
+    : false;
+  const isPortraitVideo = selectedVideo?.orientation === "portrait";
+
+  return (
+    <>
+      <div className="grid gap-8 md:gap-10">
+        {backHref ? (
+          <Link
+            href={backHref}
+            className="inline-flex w-fit items-center gap-1 font-[var(--font-be-vietnam-pro)] text-[0.8125rem] font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-brand-blue)]"
+          >
+            <ChevronLeftIcon className="size-4" />
+            Back to series
+          </Link>
+        ) : null}
+
+        {sections.map((section) => (
+          <div key={section.id} className="grid gap-6">
+            {section.title ? (
+              <div className="grid gap-2">
+                <h2 className="site-section-heading text-[1.1rem] text-[var(--color-brand-blue)] sm:text-[1.35rem]">
+                  {section.title}
+                </h2>
+                <div className="h-px w-full bg-[rgba(1,21,133,0.3)]" />
+              </div>
+            ) : null}
+
+            <div className="grid grid-cols-2 gap-x-4 gap-y-8 sm:gap-x-5 sm:gap-y-9 md:gap-x-7 md:gap-y-10">
+              {section.videos.map((video) => (
+                <DiscipleshipVideoCard
+                  key={video.id}
+                  {...video}
+                  onPlay={() => {
+                    setIsPlayerReady(false);
+                    setSelectedVideoId(video.id);
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <Dialog
+        open={Boolean(selectedVideo)}
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen) {
+            setIsPlayerReady(false);
+            setSelectedVideoId(null);
+          }
+        }}
+      >
+        <DialogContent
+          showCloseButton={false}
+          className="site-font-theme w-[min(100%-1rem,42rem)] gap-3 rounded-[var(--radius-xl)] border border-[var(--color-line)] bg-[var(--color-surface)] p-3 sm:p-4"
+        >
+          <DialogHeader className="gap-0 border-none pb-0 pr-0">
+            <div className="flex items-start justify-between gap-4">
+              <DialogTitle className="font-[var(--font-sen)] text-[1.15rem] font-semibold leading-[1.02] tracking-[-0.03em] text-[var(--color-brand-indigo)] sm:text-[1.35rem]">
+                {selectedVideo?.title ?? ""}
+              </DialogTitle>
+
+              <DialogClose
+                render={
+                  <button
+                    type="button"
+                    aria-label="Close video player"
+                    className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[var(--color-text-muted)] transition-colors duration-150 hover:text-[var(--color-text-strong)]"
+                  />
+                }
+              >
+                <XIcon className="size-4.5 stroke-[2.2]" />
+              </DialogClose>
+            </div>
+          </DialogHeader>
+
+          {selectedVideo ? (
+            <div className="grid gap-3">
+              <div
+                className={`overflow-hidden rounded-[var(--radius-md)] bg-black shadow-[var(--shadow-sm)] ${
+                  isPortraitVideo ? "mx-auto max-w-76 sm:max-w-84" : ""
+                }`}
+              >
+                <div
+                  className={`relative w-full ${isPortraitVideo ? "aspect-9/16" : "aspect-video"}`}
+                >
+                  {selectedVideoUsesDirectPlayback ? (
+                    <video
+                      src={selectedVideo.href}
+                      title={selectedVideo.title}
+                      className={`h-full w-full transition-opacity duration-200 ${
+                        isPlayerReady ? "opacity-100" : "pointer-events-none opacity-0"
+                      }`}
+                      controls
+                      autoPlay
+                      playsInline
+                      preload="metadata"
+                      onLoadedData={() => setIsPlayerReady(true)}
+                    />
+                  ) : (
+                    <iframe
+                      src={selectedVideo.href}
+                      title={selectedVideo.title}
+                      className={`h-full w-full border-0 transition-opacity duration-200 ${
+                        isPlayerReady ? "opacity-100" : "pointer-events-none opacity-0"
+                      }`}
+                      allow="autoplay; fullscreen"
+                      allowFullScreen
+                      onLoad={() => setIsPlayerReady(true)}
+                    />
+                  )}
+
+                  {!isPlayerReady ? (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-[rgba(5,20,128,0.12)] text-white">
+                      <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                      <p className="text-[0.8125rem] font-medium tracking-[-0.02em] text-white">
+                        Loading player...
+                      </p>
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+
+              <p className="text-[0.8125rem] leading-[1.3] tracking-[-0.02em] text-[var(--color-text-muted)]">
+                {selectedVideo.description}
+              </p>
+            </div>
+          ) : null}
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+}

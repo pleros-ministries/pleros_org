@@ -1,0 +1,53 @@
+{
+  "name": "web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "test": "vitest run",
+    "migrate:pathway-videos": "tsx scripts/migrate-pathway-videos.ts",
+    "sync:ppc-teachings": "tsx scripts/sync-ppc-teachings.ts",
+    "import:ppc-content": "tsx scripts/import-ppc-content.ts"
+  },
+  "dependencies": {
+    "@base-ui/react": "^1.2.0",
+    "@neondatabase/serverless": "^1.0.2",
+    "@paystack/inline-js": "^2.24.0",
+    "@react-pdf/renderer": "^4.3.2",
+    "@tanstack/react-query": "^5.101.2",
+    "@uploadthing/react": "^7.3.3",
+    "better-auth": "^1.5.4",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "dotenv": "^17.4.2",
+    "drizzle-orm": "^0.45.1",
+    "googleapis": "^174.0.1",
+    "lucide-react": "^0.577.0",
+    "next": "16.1.6",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "resend": "^6.9.3",
+    "shadcn": "^4.0.5",
+    "tailwind-merge": "^3.5.0",
+    "tw-animate-css": "^1.4.0",
+    "uploadthing": "^7.7.4",
+    "web-push": "^3.6.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/web-push": "^3.6.4",
+    "drizzle-kit": "^0.31.9",
+    "eslint": "^9",
+    "eslint-config-next": "16.1.6",
+    "tailwindcss": "^4",
+    "tsx": "^4.21.0",
+    "typescript": "^5",
+    "vitest": "^4.0.18"
+  }
+}

@@ -1,0 +1,225 @@
+import Link from "next/link";
+
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  partnerBankAccount,
+  partnerGivingChannelLabels,
+  partnerGivingSection,
+  partnerImpactItems,
+  partnerPageHero,
+  partnerReasons,
+  partnerWhatsappHref,
+} from "@/lib/partner-page-content";
+
+import { CopyToClipboardButton } from "./copy-to-clipboard-button";
+import { HomepageCommunitySection } from "./homepage-community-section";
+import { HomepageFooter } from "./homepage-footer";
+import { HomepageNav } from "./homepage-nav";
+import { PaystackDonateForm } from "./paystack-donate-form";
+import { PublicSitePageShell } from "./public-site-page-shell";
+
+function PartnerReasonCard({
+  step,
+  title,
+  description,
+}: (typeof partnerReasons)[number]) {
+  return (
+    <Card className="gap-0 self-start rounded-[1.25rem] border-[rgba(6,16,86,0.14)] bg-white p-0 shadow-[0_16px_40px_rgba(6,16,86,0.08)]">
+      <CardHeader className="gap-4 px-5 pb-3 pt-5 md:px-6 md:pt-6">
+        <div className="flex items-center gap-3">
+          <div className="flex size-[2.625rem] shrink-0 items-center justify-center rounded-full bg-[var(--color-brand-blue)] text-[1.125rem] font-semibold leading-none text-white md:size-[3.25rem] md:text-[1.375rem]">
+            {step}
+          </div>
+          <CardTitle className="font-[var(--font-sen)] text-[1.6rem] leading-[0.95] tracking-[-0.05em] text-[var(--color-brand-indigo)]">
+            {title}
+          </CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent className="px-5 pb-5 md:px-6 md:pb-6">
+        <CardDescription className="text-[0.9rem] leading-[1.45] tracking-[-0.02em] text-[var(--color-text-muted)]" style={{ marginBottom: "10px" }}>
+          {description}
+        </CardDescription>
+      </CardContent>
+    </Card>
+  );
+}
+
+export function PartnerPageView() {
+  return (
+    <PublicSitePageShell>
+      <HomepageNav />
+
+      <section className="bg-[var(--color-brand-sky)] px-[1.25rem] pb-[1.65rem] pt-[7rem] md:px-8 md:pb-10 md:pt-[8.5rem] xl:px-10 xl:pb-12">
+        <div className="max-w-[22rem] md:max-w-[30rem]">
+          <h1 className="site-hero-heading text-[2.55rem] text-[var(--color-text-strong)] md:text-[3.25rem] xl:text-[4rem]">
+            {partnerPageHero.title}
+          </h1>
+          <p className="site-hero-intro mt-2.5 text-[var(--color-brand-blue)]">
+            {partnerPageHero.description}
+          </p>
+        </div>
+      </section>
+
+      <section className="bg-white px-[1.5rem] pb-[3.25rem] pt-12 md:px-8 md:pb-12 md:pt-12 xl:px-10">
+        <div className="mx-auto grid max-w-[44rem] justify-items-center gap-7 text-center md:gap-8">
+          <p className="text-[1.05rem] leading-[1.42] tracking-[-0.03em] text-[var(--color-text-strong)] md:text-[1.35rem]">
+            {partnerPageHero.intro}
+          </p>
+
+          <Button
+            size="lg"
+            render={
+              <Link
+                href={partnerWhatsappHref}
+                className="site-button-text"
+                target="_blank"
+                rel="noopener noreferrer"
+              />
+            }
+            className="min-w-[12.875rem] rounded-full px-7 text-[0.875rem] font-semibold uppercase tracking-[0.02em]"
+          >
+            {partnerPageHero.ctaLabel}
+          </Button>
+        </div>
+      </section>
+
+      <section className="bg-[var(--color-surface-muted)] px-[1.25rem] py-[4.25rem] md:px-8 md:py-16 xl:px-10">
+        <div className="mx-auto grid max-w-[58rem] gap-8 md:gap-10">
+          <div className="grid gap-2 text-center">
+            <p className="font-[var(--font-be-vietnam-pro)] text-[0.6875rem] font-semibold uppercase tracking-[0.22em] text-[var(--color-brand-blue)] md:text-[0.8125rem]">
+              Partnership
+            </p>
+            <h2 className="site-section-heading">Why partner with Pleros</h2>
+            <p className="site-section-intro mx-auto max-w-[33rem] text-[var(--color-text-muted)]">
+              Partnership is a practical way to join the work God is doing
+              through Pleros across teaching, discipleship, outreach, and
+              digital ministry.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5">
+            {partnerReasons.map((reason) => (
+              <PartnerReasonCard key={reason.title} {...reason} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-[var(--color-brand-blue)] px-[1.25rem] py-[4.25rem] text-white md:px-8 md:py-16 xl:px-10">
+        <div className="mx-auto grid max-w-[58rem] gap-8 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:items-start md:gap-10">
+          <div className="grid gap-3">
+            <p className="font-[var(--font-be-vietnam-pro)] text-[0.6875rem] font-semibold uppercase tracking-[0.22em] text-[var(--color-brand-lime)] md:text-[0.8125rem]">
+              Stewardship
+            </p>
+            <h2 className="site-section-heading text-white">
+              What your partnership makes possible
+            </h2>
+            <p className="site-section-intro text-white/80">
+              Every gift helps strengthen real ministry work that reaches
+              people, supports growth, and keeps Gospel resources moving.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-1">
+            {partnerImpactItems.map((item) => (
+              <div
+                key={item}
+                className="rounded-[1.125rem] border border-[#3955ff]/65 bg-[#10229f] px-4 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]"
+              >
+                <p className="font-[var(--font-sen)] text-[1.00rem] leading-[1.02] tracking-[-0.04em] text-white">
+                  {item}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-[var(--color-surface-muted)] px-[1.25rem] py-[4.25rem] md:px-8 md:py-16 xl:px-10">
+        <div className="mx-auto grid max-w-[58rem] gap-8 md:gap-10">
+          <div className="grid gap-2 text-center">
+            <p className="font-[var(--font-be-vietnam-pro)] text-[0.6875rem] font-semibold uppercase tracking-[0.22em] text-[var(--color-brand-blue)] md:text-[0.8125rem]">
+              {partnerGivingSection.eyebrow}
+            </p>
+            <h2 className="site-section-heading">
+              {partnerGivingSection.title}
+            </h2>
+            <p className="site-section-intro mx-auto max-w-[33rem] text-[var(--color-text-muted)]">
+              {partnerGivingSection.description}
+            </p>
+          </div>
+
+          <div className="mx-auto grid max-w-[36rem] grid-cols-1 gap-4 md:gap-5">
+            <Card className="gap-4 rounded-[1.25rem] border-[rgba(6,16,86,0.14)] bg-white p-5 shadow-[0_16px_40px_rgba(6,16,86,0.08)] md:p-6">
+              <CardHeader className="flex flex-row items-start justify-between gap-2 px-0 py-0">
+                <CardTitle className="font-[var(--font-sen)] text-[1rem] leading-[0.95] tracking-[-0.04em] text-[var(--color-brand-indigo)] md:text-[1.125rem]">
+                  {partnerGivingChannelLabels.bank}
+                </CardTitle>
+                <CardAction>
+                  <CopyToClipboardButton
+                    value={`Account Name: ${partnerBankAccount.accountName}\nBank: ${partnerBankAccount.bankName}\nAccount Number: ${partnerBankAccount.accountNumber}`}
+                    label="Copy all bank details"
+                  />
+                </CardAction>
+              </CardHeader>
+              <CardContent className="grid gap-3 px-0 pb-0">
+                <div>
+                  <p className="text-[0.625rem] font-semibold uppercase tracking-[0.12em] text-[var(--color-text-muted)]">
+                    Account Name
+                  </p>
+                  <p className="text-[1rem] font-medium text-[var(--color-text-strong)]">
+                    {partnerBankAccount.accountName}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[0.625rem] font-semibold uppercase tracking-[0.12em] text-[var(--color-text-muted)]">
+                    Bank
+                  </p>
+                  <p className="text-[1rem] font-medium text-[var(--color-text-strong)]">
+                    {partnerBankAccount.bankName}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[0.625rem] font-semibold uppercase tracking-[0.12em] text-[var(--color-text-muted)]">
+                    Account Number
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-[1rem] font-medium text-[var(--color-text-strong)]">
+                      {partnerBankAccount.accountNumber}
+                    </p>
+                    <CopyToClipboardButton
+                      value={partnerBankAccount.accountNumber}
+                      label="Copy account number"
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="gap-4 rounded-[1.25rem] border-[rgba(6,16,86,0.14)] bg-white p-5 shadow-[0_16px_40px_rgba(6,16,86,0.08)] md:p-6">
+              <CardHeader className="gap-1 px-0 py-0">
+                <CardTitle className="font-[var(--font-sen)] text-[1rem] leading-[0.95] tracking-[-0.04em] text-[var(--color-brand-indigo)] md:text-[1.125rem]">
+                  {partnerGivingChannelLabels.online}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="px-0 pb-0">
+                <PaystackDonateForm />
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      <HomepageCommunitySection />
+      <HomepageFooter />
+    </PublicSitePageShell>
+  );
+}
