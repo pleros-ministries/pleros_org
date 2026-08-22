@@ -86,7 +86,9 @@ function matchesAssignment(
   return assignedToId == null;
 }
 
-export function getReviewQueueCounts(submissions: Pick<ReviewSubmission, "status">[]) {
+export function getReviewQueueCounts(
+  submissions: readonly Pick<ReviewSubmission, "status">[],
+) {
   return submissions.reduce<Record<ReviewStatus, number>>(
     (counts, submission) => ({
       ...counts,
@@ -148,7 +150,7 @@ export function getReviewGradingReadiness(input: ReviewGradingInput) {
 }
 
 export function filterReviewQueue<T extends ReviewSubmission>(
-  submissions: T[],
+  submissions: readonly T[],
   filters: {
     activeTab: ReviewStatus;
     assignmentScope: AssignmentScope;
@@ -199,7 +201,7 @@ export function filterReviewQueue<T extends ReviewSubmission>(
   });
 }
 
-export function getQaInboxCounts(threads: Pick<QaThread, "status">[]) {
+export function getQaInboxCounts(threads: readonly Pick<QaThread, "status">[]) {
   return threads.reduce<Record<QaStatus, number>>(
     (counts, thread) => ({
       ...counts,
@@ -217,7 +219,7 @@ export function getQaInboxCounts(threads: Pick<QaThread, "status">[]) {
 }
 
 export function filterQaInbox<T extends QaThread>(
-  threads: T[],
+  threads: readonly T[],
   filters: {
     activeTab: QaStatus;
     assignmentScope: AssignmentScope;
@@ -266,7 +268,7 @@ export function filterQaInbox<T extends QaThread>(
 }
 
 export function resolveNextSelectedThreadId<T extends Pick<QaThread, "id">>(
-  threads: T[],
+  threads: readonly T[],
   selectedId: number | null,
 ) {
   if (selectedId != null && threads.some((thread) => thread.id === selectedId)) {
@@ -278,7 +280,7 @@ export function resolveNextSelectedThreadId<T extends Pick<QaThread, "id">>(
 
 export function resolveNextSelectedSubmissionId<
   T extends Pick<ReviewSubmission, "id">,
->(submissions: T[], selectedId: number | null) {
+>(submissions: readonly T[], selectedId: number | null) {
   if (
     selectedId != null &&
     submissions.some((submission) => submission.id === selectedId)

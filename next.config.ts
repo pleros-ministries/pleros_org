@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  outputFileTracingIncludes: {
+    "/api/welcome-pack/download": ["./private/welcome-pack/**/*"],
+  },
   images: {
     remotePatterns: [
       {

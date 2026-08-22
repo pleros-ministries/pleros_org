@@ -5,18 +5,26 @@ export const DEFAULT_WELCOME_PACK_FILE_PATH =
 export const DEFAULT_WELCOME_PACK_DOWNLOAD_FILENAME =
   "welcome-to-purpose-Pleros.pdf";
 
+type WelcomePackEnvironment = {
+  readonly [key: string]: string | undefined;
+  WELCOME_PACK_FILE_PATH?: string;
+  WELCOME_PACK_DOWNLOAD_FILENAME?: string;
+};
+
 export function resolveWelcomePackDownloadFilePath(
-  env: NodeJS.ProcessEnv,
+  env: WelcomePackEnvironment,
   cwd = process.cwd(),
 ): string {
   const configuredPath = env.WELCOME_PACK_FILE_PATH?.trim();
   const filePath = configuredPath || DEFAULT_WELCOME_PACK_FILE_PATH;
 
-  return path.isAbsolute(filePath) ? filePath : path.join(cwd, filePath);
+  return path.isAbsolute(filePath)
+    ? filePath
+    : path.join(/* turbopackIgnore: true */ cwd, filePath);
 }
 
 export function getWelcomePackDownloadFilename(
-  env: NodeJS.ProcessEnv,
+  env: WelcomePackEnvironment,
 ): string {
   const filename = env.WELCOME_PACK_DOWNLOAD_FILENAME?.trim();
 
