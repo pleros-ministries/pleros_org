@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -146,6 +147,60 @@ export function SogpLandingPage() {
                 </article>
               );
             })}
+          </div>
+        </section>
+
+        <section className="bg-[var(--color-brand-sky)] py-20 md:py-28">
+          <div className="site-shell-page sogp-shell-page grid items-center gap-10 md:grid-cols-[0.72fr_1.28fr] md:gap-14">
+            <div className="grid gap-4">
+              <p className="site-hero-eyebrow text-[var(--color-brand-indigo)]">
+                School leadership
+              </p>
+              <h2 className="site-section-heading text-[2.3rem] text-[var(--color-brand-blue)] md:text-[3.25rem]">
+                {content.facilitator.title}
+              </h2>
+            </div>
+
+            <article className="grid overflow-hidden rounded-[var(--radius-md)] border border-[rgba(5,20,128,0.12)] bg-white shadow-[var(--shadow-sm)] sm:grid-cols-[minmax(13rem,0.72fr)_minmax(0,1fr)]">
+              <div className="relative min-h-80 bg-[var(--color-surface-muted)] sm:min-h-[25rem]">
+                <Image
+                  src={content.facilitator.imageSrc}
+                  alt={content.facilitator.name}
+                  fill
+                  sizes="(min-width: 768px) 32vw, 100vw"
+                  className="object-cover object-top"
+                />
+              </div>
+              <div className="grid content-center gap-7 p-6 md:p-9">
+                <div className="grid gap-2">
+                  <h3 className="site-section-heading text-[2rem] text-[var(--color-brand-blue)]">
+                    {content.facilitator.name}
+                  </h3>
+                  <p className="font-[var(--font-be-vietnam-pro)] text-sm text-[var(--color-text-muted)]">
+                    {content.facilitator.handle}
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  {content.facilitator.links.map((link) => (
+                    <a
+                      key={link.href}
+                      href={link.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label={`${content.facilitator.name} on ${link.label}`}
+                      className="grid size-11 place-items-center rounded-full bg-[var(--color-brand-blue)] transition-transform duration-150 hover:-translate-y-px"
+                    >
+                      <Image
+                        src={link.iconSrc}
+                        alt=""
+                        width={20}
+                        height={20}
+                      />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </article>
           </div>
         </section>
 
