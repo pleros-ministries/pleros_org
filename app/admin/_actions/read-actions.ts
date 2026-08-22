@@ -6,10 +6,12 @@ import type {
   AdminDashboardData,
   AdminPlatformData,
   AdminSchoolOfPurposeWaitlistEntry,
+  AdminSogpData,
   AdminStaffData,
 } from "@/lib/admin-query";
 import { getAdminRegistrantList } from "@/lib/db/queries/admin-registrants";
 import { getSchoolOfPurposeWaitlistEntries } from "@/lib/db/queries/school-of-purpose-waitlist";
+import { getAdminSogpData as getSogpOperationsData } from "@/lib/db/queries/sogp";
 import { getSuperAdminOverviewMetrics } from "@/lib/db/queries/admin-analytics";
 import { getStudentPlatformList } from "@/lib/db/queries/students";
 import { getAllThreads } from "@/lib/db/queries/qa";
@@ -211,6 +213,101 @@ export async function getAdminSchoolOfPurposeWaitlist(): Promise<
     email: entry.email,
     createdAt: entry.createdAt.toISOString(),
   }));
+}
+
+export async function getAdminSogpData(): Promise<AdminSogpData> {
+  await requireAdmin();
+  const [data, levelThreeLessons, quizRows] = await Promise.all([
+    getSogpOperationsData(),
+    db.query.lessons.findMany({
+      where: (lesson, { eq: equal }) => equal(lesson.levelId, 3),
+      orderBy: (lesson, { asc }) => [asc(lesson.lessonNumber)],
+    }),
+    db.select({ lessonId: schema.quizQuestions.lessonId }).from(schema.quizQuestions),
+  ]);
+  const lessonsWithQuiz = new Set(quizRows.map((row) => row.lessonId));
+  const ready = (lesson: {
+    id: number;
+    status: string;
+    audioUrl: string | null;
+    notesContent: string | null;
+    responsePrompt: string | null;
+    responseMarkingGuide: string | null;
+  }) =>
+    lesson.status === "published" &&
+    Boolean(
+      lesson.audioUrl &&
+        lesson.notesContent &&
+        lesson.responsePrompt &&
+        lesson.responseMarkingGuide &&
+        lessonsWithQuiz.has(lesson.id),
+    );
+
+  return {
+    cohorts: data.cohorts.map((cohort) => ({
+      id: cohort.id,
+      slug: cohort.slug,
+      title: cohort.title,
+      status: cohort.status,
+      startsAt: cohort.startsAt.toISOString(),
+      endsAt: cohort.endsAt.toISOString(),
+      telegramChannelUrl: cohort.telegramChannelUrl,
+      telegramDiscussionUrl: cohort.telegramDiscussionUrl,
+      telegramBotUsername: cohort.telegramBotUsername,
+    })),
+    enrollments: data.enrollments.map((enrollment) => ({
+      id: enrollment.id,
+      cohortId: enrollment.cohortId,
+      name: enrollment.name,
+      email: enrollment.email,
+      phone: enrollment.phone,
+      country: enrollment.country,
+      status: enrollment.status,
+      telegramLinkedAt: serializeDate(enrollment.telegramLinkedAt),
+      createdAt: enrollment.createdAt.toISOString(),
+    })),
+    tracks: data.tracks.map(({ track, lesson }) => ({
+      id: track.id,
+      cohortId: track.cohortId,
+      dayNumber: track.dayNumber,
+      weekNumber: track.weekNumber,
+      lessonId: lesson.id,
+      levelId: lesson.levelId,
+      lessonNumber: lesson.lessonNumber,
+      title: lesson.title,
+      status: lesson.status,
+      ready: ready(lesson),
+    })),
+    levelThreeLessons: levelThreeLessons.map((lesson) => ({
+      id: lesson.id,
+      lessonNumber: lesson.lessonNumber,
+      title: lesson.title,
+      status: lesson.status,
+      ready: ready(lesson),
+    })),
+    liveClasses: data.liveClasses.map((liveClass) => ({
+      id: liveClass.id,
+      cohortId: liveClass.cohortId,
+      title: liveClass.title,
+      startsAt: liveClass.startsAt.toISOString(),
+      endsAt: liveClass.endsAt.toISOString(),
+      status: liveClass.status,
+      youtubeLiveUrl: liveClass.youtubeLiveUrl,
+      recordingUrl: liveClass.recordingUrl,
+    })),
+    certificates: data.certificates.map((certificate) => ({
+      id: certificate.id,
+      enrollmentId: certificate.enrollmentId,
+      verificationCode: certificate.verificationCode,
+      issuedAt: certificate.issuedAt.toISOString(),
+      revokedAt: serializeDate(certificate.revokedAt),
+    })),
+    telegram: {
+      channelConfigured: Boolean(process.env.TELEGRAM_SOGP_CHANNEL_ID),
+      botConfigured: Boolean(process.env.TELEGRAM_SOGP_BOT_TOKEN),
+      webhookSecretConfigured: Boolean(process.env.TELEGRAM_SOGP_WEBHOOK_SECRET),
+    },
+  };
 }
 
 export async function getAdminRegistrants(): Promise<AdminRegistrantSummary[]> {

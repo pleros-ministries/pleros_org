@@ -287,6 +287,48 @@ export type WelcomePackExtrasUnlockedProps = {
   dashboardUrl: string;
 };
 
+export type SogpEnrollmentProps = {
+  name: string;
+  cohortTitle: string;
+  cohortDates: string;
+  dashboardUrl: string;
+  telegramUrl: string | null;
+};
+
+export function sogpEnrollmentHtml({
+  name,
+  cohortTitle,
+  cohortDates,
+  dashboardUrl,
+  telegramUrl,
+}: SogpEnrollmentProps): string {
+  const safeName = escapeHtml(name);
+  const safeCohortTitle = escapeHtml(cohortTitle);
+  const safeCohortDates = escapeHtml(cohortDates);
+  const safeDashboardUrl = escapeHtml(dashboardUrl);
+  const safeTelegramUrl = telegramUrl ? escapeHtml(telegramUrl) : null;
+
+  return `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8" /></head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background:#f4f8fb; margin:0; padding:40px 16px; color:#101a3f;">
+  <div style="max-width:540px; margin:0 auto; background:#fff; border:1px solid #dfe7f1; overflow:hidden;">
+    <div style="background:#061056; padding:36px 32px; color:#fff;">
+      <p style="font-size:12px; letter-spacing:.14em; text-transform:uppercase; margin:0 0 12px; color:#cbe96b;">School of God's Purpose</p>
+      <h1 style="font-size:28px; line-height:1.05; margin:0;">Your SOGP journey starts here</h1>
+    </div>
+    <div style="padding:32px;">
+      <p style="font-size:16px; line-height:1.6; margin:0 0 18px;">Welcome, ${safeName}. You are enrolled in <strong>${safeCohortTitle}</strong>.</p>
+      <p style="font-size:14px; color:#53617a; margin:0 0 24px;">${safeCohortDates}</p>
+      <a href="${safeDashboardUrl}" style="display:inline-block; background:#061056; color:#fff; padding:13px 22px; border-radius:999px; text-decoration:none; font-weight:600; font-size:14px;">Open your SOGP dashboard</a>
+      ${safeTelegramUrl ? `<p style="font-size:14px; line-height:1.6; margin:28px 0 10px;">Connect with the SOGP Telegram bot for your community and course updates.</p><a href="${safeTelegramUrl}" style="color:#061056; font-weight:600;">Connect Telegram</a>` : ""}
+    </div>
+  </div>
+</body>
+</html>`.trim();
+}
+
 export type ContactSubmissionNotificationProps = {
   fullName: string;
   email: string;

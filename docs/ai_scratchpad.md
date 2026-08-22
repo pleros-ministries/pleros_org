@@ -80,6 +80,19 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - Add tested pure status helpers first, render `/admin/notifications` from that model, and reuse the existing push subscription hook.
 - Do not link this repo to a guessed Vercel account/project. If env values are needed, generate a paste-ready env snippet for the user to add in the correct Vercel account.
 
+## SOGP product rules
+
+- Canonical routes are `/sogp`, `/sogp/enroll`, `/dashboard/sogp`, and `/admin/sogp`. Permanently remove old `school-of-purpose` routes and aliases; do not preserve redirects.
+- SOGP is a guided four-week cohort experience; PPC remains a separate flexible, self-paced product. SOGP may reuse PPC lesson/progress records without inheriting PPC UI styling.
+- First SOGP curriculum is 20 weekday tracks: all Level 1, all Level 2, plus four explicitly selected Level 3 tracks. Weekends are for YouTube live classes.
+- Telegram provides launch community, text, and voice notes. Use channel plus linked discussion group. Bot links enrolments, delivers dashboard/group access, and sends scheduled or admin-triggered cohort broadcasts; never post learner PII to channel. Do not build native discussion or voice storage for launch.
+- SOGP learner UI should combine public-site typography, tokens, warmth, and cohesion with modern MOOC density: continue-learning focus, week/day navigation, progress, live class, community, and assessment state. Do not copy `/ppc` zinc styling and do not redesign tokens.
+- SOGP needs a status-aware learner area at `/dashboard/sogp` and an operations center inside the existing admin shell at `/admin/sogp` for cohorts, curriculum, enrolments, live classes, completion, certificates, and rewards.
+- Course structure is guided and date-based, but learners may carry unfinished work beyond cohort end. Assessment policy should be cohort-configurable; certificates must be digital and SOGP-branded.
+- Public landing copy source is the Google Doc titled `SOGP Landing Page`; omit empty facilitator, social-proof, and FAQ sections until copy exists.
+- Live DB verification on 2026-08-22 found all 5 Level 1 and all 11 Level 2 lessons published and content-ready. Level 3 contains draft placeholder lessons; four approved named tracks still block SOGP activation.
+- Verified Telegram bot is channel admin and can post/edit messages; public channel is `https://t.me/pleros_sogp`. No linked discussion group existed at verification time, so do not promise interactive community until one is attached.
+
 ## Public site visual system
 
 - Public-facing additions should reuse `HomepageNav`, `HomepageFooter`, `.site-font-theme`, brand-blue CTAs, and existing public tokens before adding new patterns.

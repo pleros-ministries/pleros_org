@@ -23,8 +23,8 @@ describe("welcome dashboard content", () => {
 
     expect(devotion?.cards[0]?.href).toBe("/dashboard/prayer-watch");
     expect(devotion?.cards[1]?.href).toBe("/dashboard/podcast");
-    expect(training?.cards[0]?.href).toBe("/ppc");
-    expect(training?.cards[1]?.href).toBe("/dashboard/school-of-purpose");
+    expect(training?.cards[0]?.href).toBe("/dashboard/sogp");
+    expect(training?.cards[1]?.href).toBe("/ppc");
     expect(commitment?.cards.find((card) => card.id === "assignments")?.href).toBeUndefined();
     expect(commitment?.cards.find((card) => card.id === "partnership")?.href).toBe(
       "/partner",
@@ -57,7 +57,7 @@ describe("welcome dashboard content", () => {
       "utf8",
     );
 
-    expect(source).toContain("Start with the welcome pack and other resources.");
+    expect(source).toContain("Start with SOGP and keep the resources");
     expect(source).not.toContain("Your resources are gathered here and tied to");
   });
 

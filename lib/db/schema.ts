@@ -12,6 +12,7 @@ import {
   date,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
+import type { SogpAssessmentPolicy } from "../sogp/types";
 
 export const userRoleEnum = pgEnum("user_role", [
   "super_admin",
@@ -54,6 +55,31 @@ export const contactSubmissionStatusEnum = pgEnum("contact_submission_status", [
   "new",
   "read",
   "resolved",
+]);
+
+export const sogpCohortStatusEnum = pgEnum("sogp_cohort_status", [
+  "draft",
+  "enrollment_open",
+  "preparing",
+  "active",
+  "completed",
+  "archived",
+]);
+
+export const sogpEnrollmentStatusEnum = pgEnum("sogp_enrollment_status", [
+  "enrolled",
+  "preparing",
+  "active",
+  "carryover",
+  "completed",
+  "withdrawn",
+]);
+
+export const sogpLiveClassStatusEnum = pgEnum("sogp_live_class_status", [
+  "scheduled",
+  "live",
+  "completed",
+  "cancelled",
 ]);
 
 // ─── Welcome pack leads ─────────────────────────────────────────────────────
@@ -634,5 +660,203 @@ export const schoolOfPurposeWaitlist = pgTable(
   (t) => [
     uniqueIndex("school_of_purpose_waitlist_email_idx").on(t.email),
     index("school_of_purpose_waitlist_created_at_idx").on(t.createdAt),
+  ],
+);
+
+// ─── School of God's Purpose ───────────────────────────────────────────────
+
+export const sogpCohorts = pgTable(
+  "sogp_cohorts",
+  {
+    id: serial("id").primaryKey(),
+    slug: text("slug").notNull(),
+    title: text("title").notNull(),
+    status: sogpCohortStatusEnum("status").notNull().default("draft"),
+    enrollmentOpensAt: timestamp("enrollment_opens_at", { withTimezone: true }),
+    enrollmentClosesAt: timestamp("enrollment_closes_at", { withTimezone: true }),
+    preparationStartsAt: timestamp("preparation_starts_at", { withTimezone: true }),
+    startsAt: timestamp("starts_at", { withTimezone: true }).notNull(),
+    endsAt: timestamp("ends_at", { withTimezone: true }).notNull(),
+    telegramChannelUrl: text("telegram_channel_url"),
+    telegramDiscussionUrl: text("telegram_discussion_url"),
+    telegramBotUsername: text("telegram_bot_username"),
+    assessmentPolicy: jsonb("assessment_policy")
+      .notNull()
+      .$type<SogpAssessmentPolicy>()
+      .default(
+        sql`'{"requiredTrackCompletionPercent":100,"requiredPrayerWatchPercent":80,"requiredLiveClassCount":0}'::jsonb`,
+      ),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("sogp_cohorts_slug_idx").on(t.slug),
+    index("sogp_cohorts_status_idx").on(t.status),
+  ],
+);
+
+export const sogpEnrollments = pgTable(
+  "sogp_enrollments",
+  {
+    id: serial("id").primaryKey(),
+    cohortId: integer("cohort_id")
+      .notNull()
+      .references(() => sogpCohorts.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    email: text("email").notNull(),
+    phone: text("phone").notNull(),
+    country: text("country").notNull(),
+    reason: text("reason"),
+    status: sogpEnrollmentStatusEnum("status").notNull().default("enrolled"),
+    utmSource: text("utm_source"),
+    utmMedium: text("utm_medium"),
+    utmCampaign: text("utm_campaign"),
+    utmContent: text("utm_content"),
+    utmTerm: text("utm_term"),
+    telegramLinkTokenHash: text("telegram_link_token_hash"),
+    telegramUserId: text("telegram_user_id"),
+    telegramChatId: text("telegram_chat_id"),
+    telegramLinkedAt: timestamp("telegram_linked_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("sogp_enrollments_cohort_user_idx").on(t.cohortId, t.userId),
+    uniqueIndex("sogp_enrollments_cohort_email_idx").on(t.cohortId, t.email),
+    index("sogp_enrollments_status_idx").on(t.status),
+    index("sogp_enrollments_telegram_user_idx").on(t.telegramUserId),
+  ],
+);
+
+export const sogpCohortTracks = pgTable(
+  "sogp_cohort_tracks",
+  {
+    id: serial("id").primaryKey(),
+    cohortId: integer("cohort_id")
+      .notNull()
+      .references(() => sogpCohorts.id, { onDelete: "cascade" }),
+    lessonId: integer("lesson_id")
+      .notNull()
+      .references(() => lessons.id),
+    dayNumber: integer("day_number").notNull(),
+    weekNumber: integer("week_number").notNull(),
+    releaseAt: timestamp("release_at", { withTimezone: true }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("sogp_cohort_tracks_cohort_day_idx").on(
+      t.cohortId,
+      t.dayNumber,
+    ),
+    uniqueIndex("sogp_cohort_tracks_cohort_lesson_idx").on(
+      t.cohortId,
+      t.lessonId,
+    ),
+    index("sogp_cohort_tracks_release_idx").on(t.releaseAt),
+  ],
+);
+
+export const sogpLiveClasses = pgTable(
+  "sogp_live_classes",
+  {
+    id: serial("id").primaryKey(),
+    cohortId: integer("cohort_id")
+      .notNull()
+      .references(() => sogpCohorts.id, { onDelete: "cascade" }),
+    title: text("title").notNull(),
+    startsAt: timestamp("starts_at", { withTimezone: true }).notNull(),
+    endsAt: timestamp("ends_at", { withTimezone: true }).notNull(),
+    youtubeLiveUrl: text("youtube_live_url"),
+    recordingUrl: text("recording_url"),
+    status: sogpLiveClassStatusEnum("status").notNull().default("scheduled"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index("sogp_live_classes_cohort_idx").on(t.cohortId),
+    index("sogp_live_classes_starts_at_idx").on(t.startsAt),
+  ],
+);
+
+export const sogpLiveClassAttendance = pgTable(
+  "sogp_live_class_attendance",
+  {
+    id: serial("id").primaryKey(),
+    liveClassId: integer("live_class_id")
+      .notNull()
+      .references(() => sogpLiveClasses.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    attendedAt: timestamp("attended_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("sogp_live_class_attendance_class_user_idx").on(
+      t.liveClassId,
+      t.userId,
+    ),
+    index("sogp_live_class_attendance_user_idx").on(t.userId),
+  ],
+);
+
+export const sogpCertificates = pgTable(
+  "sogp_certificates",
+  {
+    id: serial("id").primaryKey(),
+    enrollmentId: integer("enrollment_id")
+      .notNull()
+      .references(() => sogpEnrollments.id, { onDelete: "cascade" }),
+    verificationCode: text("verification_code").notNull(),
+    issuedBy: text("issued_by").references(() => users.id),
+    overrideReason: text("override_reason"),
+    issuedAt: timestamp("issued_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
+  },
+  (t) => [
+    uniqueIndex("sogp_certificates_enrollment_idx").on(t.enrollmentId),
+    uniqueIndex("sogp_certificates_verification_idx").on(t.verificationCode),
+  ],
+);
+
+export const sogpRewardGrants = pgTable(
+  "sogp_reward_grants",
+  {
+    id: serial("id").primaryKey(),
+    enrollmentId: integer("enrollment_id")
+      .notNull()
+      .references(() => sogpEnrollments.id, { onDelete: "cascade" }),
+    rewardKey: text("reward_key").notNull(),
+    label: text("label").notNull(),
+    grantedBy: text("granted_by").references(() => users.id),
+    grantedAt: timestamp("granted_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("sogp_reward_grants_enrollment_reward_idx").on(
+      t.enrollmentId,
+      t.rewardKey,
+    ),
   ],
 );

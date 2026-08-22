@@ -1,11 +1,78 @@
 export const ADMIN_QUERY_KEYS = {
   dashboard: ["admin", "dashboard"] as const,
   schoolOfPurposeWaitlist: ["admin", "school-of-purpose", "waitlist"] as const,
+  sogp: ["admin", "sogp"] as const,
   registrants: ["admin", "registrants"] as const,
   platform: ["admin", "platform"] as const,
   staff: ["admin", "staff"] as const,
   qa: ["admin", "qa"] as const,
   review: ["admin", "review"] as const,
+};
+
+export type AdminSogpData = {
+  cohorts: Array<{
+    id: number;
+    slug: string;
+    title: string;
+    status: string;
+    startsAt: string;
+    endsAt: string;
+    telegramChannelUrl: string | null;
+    telegramDiscussionUrl: string | null;
+    telegramBotUsername: string | null;
+  }>;
+  enrollments: Array<{
+    id: number;
+    cohortId: number;
+    name: string;
+    email: string;
+    phone: string;
+    country: string;
+    status: string;
+    telegramLinkedAt: string | null;
+    createdAt: string;
+  }>;
+  tracks: Array<{
+    id: number;
+    cohortId: number;
+    dayNumber: number;
+    weekNumber: number;
+    lessonId: number;
+    levelId: number;
+    lessonNumber: number;
+    title: string;
+    status: string;
+    ready: boolean;
+  }>;
+  levelThreeLessons: Array<{
+    id: number;
+    lessonNumber: number;
+    title: string;
+    status: string;
+    ready: boolean;
+  }>;
+  liveClasses: Array<{
+    id: number;
+    cohortId: number;
+    title: string;
+    startsAt: string;
+    endsAt: string;
+    status: string;
+    youtubeLiveUrl: string | null;
+    recordingUrl: string | null;
+  }>;
+  certificates: Array<{
+    id: number;
+    enrollmentId: number;
+    verificationCode: string;
+    issuedAt: string;
+    revokedAt: string | null;
+  }>;
+  telegram: {
+    channelConfigured: boolean;
+    botConfigured: boolean;
+    webhookSecretConfigured: boolean;
+  };
 };
 
 export const ADMIN_QUERY_DEFAULTS = {

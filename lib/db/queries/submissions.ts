@@ -40,14 +40,6 @@ export async function submitForReview(userId: string, lessonId: number) {
     .where(eq(schema.writtenSubmissions.id, submission.id))
     .returning();
 
-  await db
-    .insert(schema.studentProgress)
-    .values({ userId, lessonId, writtenApproved: true })
-    .onConflictDoUpdate({
-      target: [schema.studentProgress.userId, schema.studentProgress.lessonId],
-      set: { writtenApproved: true },
-    });
-
   return updated;
 }
 
@@ -110,6 +102,21 @@ export async function requestRevision(submissionId: number, reviewerId: string, 
     })
     .where(eq(schema.writtenSubmissions.id, submissionId))
     .returning();
+
+  if (updated) {
+    await db
+      .insert(schema.studentProgress)
+      .values({
+        userId: updated.userId,
+        lessonId: updated.lessonId,
+        writtenApproved: false,
+      })
+      .onConflictDoUpdate({
+        target: [schema.studentProgress.userId, schema.studentProgress.lessonId],
+        set: { writtenApproved: false },
+      });
+  }
+
   return updated;
 }
 

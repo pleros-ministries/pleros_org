@@ -45,8 +45,8 @@ describe("ppc shell helpers", () => {
         roles: ["super_admin", "admin"],
       },
       {
-        label: "School of Purpose",
-        path: "/school-of-purpose",
+        label: "SOGP",
+        path: "/sogp",
         icon: "waitlist",
         roles: ["super_admin", "admin"],
       },
@@ -102,7 +102,7 @@ describe("ppc shell helpers", () => {
       "/",
       "/platform",
       "/content",
-      "/school-of-purpose",
+      "/sogp",
       "/staff",
       "/students",
       "/review",
@@ -114,7 +114,7 @@ describe("ppc shell helpers", () => {
       "/",
       "/platform",
       "/content",
-      "/school-of-purpose",
+      "/sogp",
       "/students",
       "/review",
       "/qa",
@@ -179,9 +179,9 @@ describe("ppc shell helpers", () => {
       label: "Content CMS",
       description: "Lessons, notes, audio, and quizzes",
     });
-    expect(getPpcShellContext("/school-of-purpose")).toEqual({
-      label: "School of Purpose waitlist",
-      description: "Name, WhatsApp number, and signup date",
+    expect(getPpcShellContext("/sogp")).toEqual({
+      label: "SOGP operations",
+      description: "Cohorts, curriculum, enrolments, live classes, and completion",
     });
     expect(getPpcShellContext("/staff")).toEqual({
       label: "Staff access",

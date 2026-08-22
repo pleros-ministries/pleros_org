@@ -3,14 +3,14 @@ import { join } from "node:path";
 
 import { describe, expect, test } from "vitest";
 
-const schoolOfPurposePageSource = readFileSync(
+const sogpPageSource = readFileSync(
   join(
     process.cwd(),
     "app",
     "admin",
     "(app)",
     "(admin-only)",
-    "school-of-purpose",
+    "sogp",
     "page.tsx",
   ),
   "utf8",
@@ -92,9 +92,9 @@ describe("admin read-model caching", () => {
     expect(readActionsSource).toContain("getAdminDashboardData");
   });
 
-  test("renders the School of Purpose page through the client query cache", () => {
-    expect(schoolOfPurposePageSource).toContain("AdminSchoolOfPurposeClient");
-    expect(schoolOfPurposePageSource).not.toContain(
+  test("renders SOGP operations through the client query cache", () => {
+    expect(sogpPageSource).toContain("AdminSogpPage");
+    expect(sogpPageSource).not.toContain(
       "getSchoolOfPurposeWaitlistEntries",
     );
   });

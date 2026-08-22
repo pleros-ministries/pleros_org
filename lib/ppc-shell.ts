@@ -59,8 +59,8 @@ export const PPC_SHELL_NAV_ITEMS: PpcShellNavItem[] = [
     roles: ["super_admin", "admin"],
   },
   {
-    label: "School of Purpose",
-    path: "/school-of-purpose",
+    label: "SOGP",
+    path: "/sogp",
     icon: "waitlist",
     roles: ["super_admin", "admin"],
   },
@@ -309,10 +309,10 @@ export function getPpcShellContext(pathname: string): PpcShellContext {
     };
   }
 
-  if (logicalPath === "/school-of-purpose") {
+  if (logicalPath === "/sogp") {
     return {
-      label: "School of Purpose waitlist",
-      description: "Name, WhatsApp number, and signup date",
+      label: "SOGP operations",
+      description: "Cohorts, curriculum, enrolments, live classes, and completion",
     };
   }
 

@@ -82,7 +82,7 @@ const iconMap: Record<PpcShellIcon, React.ComponentType<{ className?: string }>>
 const PREFETCHED_ADMIN_PATHS = new Set([
   "/",
   "/platform",
-  "/school-of-purpose",
+  "/sogp",
   "/staff",
   "/students",
   "/review",
@@ -105,10 +105,10 @@ const AdminPlatformPreview = dynamic(
     ),
   { ssr: false },
 );
-const AdminSchoolOfPurposePreview = dynamic(
+const AdminSogpPreview = dynamic(
   () =>
-    import("@/components/ppc/admin-school-of-purpose-client").then(
-      (module) => module.AdminSchoolOfPurposeClient,
+    import("@/components/ppc/admin-sogp-page").then(
+      (module) => module.AdminSogpPage,
     ),
   { ssr: false },
 );
@@ -175,8 +175,8 @@ function PendingAdminRoute({ pathname }: { pathname: string }) {
       return <AdminDashboardPreview />;
     case "/admin/platform":
       return <AdminPlatformPreview />;
-    case "/admin/school-of-purpose":
-      return <AdminSchoolOfPurposePreview />;
+    case "/admin/sogp":
+      return <AdminSogpPreview />;
     case "/admin/staff":
       return <AdminStaffPreview />;
     case "/admin/students":

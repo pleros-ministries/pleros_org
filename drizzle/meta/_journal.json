@@ -64,6 +64,13 @@
       "when": 1786505768537,
       "tag": "0008_massive_gravity",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1787391902261,
+      "tag": "0009_sogp_platform",
+      "breakpoints": true
     }
   ]
 }

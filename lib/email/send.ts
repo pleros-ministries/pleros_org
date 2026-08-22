@@ -11,6 +11,7 @@ import {
   superAdminSetupHtml,
   welcomePackAccessHtml,
   welcomePackExtrasUnlockedHtml,
+  sogpEnrollmentHtml,
 } from "./templates";
 
 const FROM = process.env.EMAIL_FROM ?? "PPC <noreply@pleros.org>";
@@ -249,4 +250,22 @@ export async function sendContactSubmissionNotification(opts: {
       reason: "send_failed" as const,
     };
   }
+}
+
+export async function sendSogpEnrollmentEmail(opts: {
+  to: string;
+  name: string;
+  cohortTitle: string;
+  cohortDates: string;
+  dashboardUrl: string;
+  telegramUrl: string | null;
+}) {
+  if (!isEmailEnabled() || !resend) return null;
+
+  return resend.emails.send({
+    from: process.env.EMAIL_FROM_PLEROS ?? FROM,
+    to: opts.to,
+    subject: `You are enrolled in ${opts.cohortTitle}`,
+    html: sogpEnrollmentHtml(opts),
+  });
 }
