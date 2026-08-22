@@ -22,6 +22,35 @@ export async function sendAdminSogpBroadcast(input: {
   return sendSogpChannelMessage(normalized);
 }
 
+export async function configureSogpTelegramWebhook() {
+  await requireAdmin();
+  const token = process.env.TELEGRAM_SOGP_BOT_TOKEN;
+  const secret = process.env.TELEGRAM_SOGP_WEBHOOK_SECRET;
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
+  if (!token || !secret || !baseUrl?.startsWith("https://")) {
+    throw new Error(
+      "Telegram token, webhook secret, and HTTPS NEXT_PUBLIC_APP_URL are required.",
+    );
+  }
+  const response = await fetch(`https://api.telegram.org/bot${token}/setWebhook`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      url: `${baseUrl.replace(/\/$/, "")}/api/telegram/sogp/webhook`,
+      secret_token: secret,
+      allowed_updates: ["message"],
+    }),
+  });
+  const payload = (await response.json()) as {
+    ok?: boolean;
+    description?: string;
+  };
+  if (!response.ok || !payload.ok) {
+    throw new Error(payload.description ?? "Telegram webhook setup failed.");
+  }
+  return { configured: true };
+}
+
 export async function configureSogpCurriculum(input: {
   cohortId: number;
   levelThreeLessonNumbers: number[];
