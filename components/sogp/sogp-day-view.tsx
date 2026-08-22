@@ -107,12 +107,12 @@ export function SogpDayView({ dayNumber }: { dayNumber: number }) {
   return (
     <section className="site-font-theme min-h-screen bg-[var(--color-surface)] pb-20">
       <header className="border-b border-[var(--color-line)] bg-white">
-        <div className="site-shell-page grid gap-4 py-7">
+        <div className="site-shell-page sogp-shell-page grid gap-4 py-7">
           <Link href="/dashboard/sogp" className="inline-flex w-fit items-center gap-1 text-xs font-semibold text-[var(--color-text-muted)] hover:text-[var(--color-brand-blue)]"><ArrowLeft className="size-3.5"/> SOGP dashboard</Link>
           <div className="grid gap-2"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-brand-blue)]">Day {data.track.dayNumber} · Week {data.track.weekNumber}</p><h1 className="font-[var(--font-sen)] text-[clamp(2.2rem,5vw,4rem)] font-semibold leading-[0.95] tracking-[-0.06em] text-[var(--color-text-strong)]">{data.track.lesson.title}</h1></div>
         </div>
       </header>
-      <div className="site-shell-page grid gap-5 py-8 lg:grid-cols-[15rem_minmax(0,1fr)_18rem]">
+      <div className="site-shell-page sogp-shell-page grid gap-5 py-8 lg:grid-cols-[15rem_minmax(0,1fr)_18rem]">
         <Curriculum data={data}/>
         <main className="grid content-start gap-5">
           {data.track.lesson.audioUrl ? <SogpAudioPlayer dayNumber={dayNumber} src={data.track.lesson.audioUrl} listened={data.track.progress.audioListened}/> : <div className="rounded-[var(--radius-md)] border border-amber-200 bg-amber-50 p-5 text-sm text-amber-800">Teaching audio is being prepared.</div>}

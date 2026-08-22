@@ -20,11 +20,11 @@ export function SogpEnrollmentPage() {
       <HomepageNav />
       <main className="site-font-theme bg-[var(--color-surface)]">
         <section className="border-b border-[var(--color-line)] bg-[var(--color-brand-sky)] py-12 md:py-16">
-          <div className="site-shell-page">
+          <div className="site-shell-page sogp-shell-page">
             <p className="site-hero-eyebrow">School of God&apos;s Purpose</p>
           </div>
         </section>
-        <section className="site-shell-page grid gap-10 py-12 md:grid-cols-[minmax(0,0.85fr)_minmax(26rem,1fr)] md:items-start md:gap-16 md:py-20">
+        <section className="site-shell-page sogp-shell-page grid gap-10 py-12 md:grid-cols-[minmax(0,0.85fr)_minmax(26rem,1fr)] md:items-start md:gap-16 md:py-20">
           <div className="grid gap-8 md:sticky md:top-24">
             <div className="grid gap-4">
               <h1 className="site-hero-heading max-w-[12ch] text-[clamp(2.8rem,6vw,5rem)] text-[var(--color-brand-blue)]">Take your next step with SOGP</h1>

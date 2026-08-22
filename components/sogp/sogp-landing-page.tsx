@@ -41,7 +41,7 @@ export function SogpLandingPage() {
       <SogpLandingAnalytics />
       <main className="site-font-theme bg-white">
         <section className="relative overflow-hidden bg-[var(--color-brand-blue)] text-white">
-          <div className="site-shell-page relative grid min-h-[34rem] content-end gap-10 pb-14 pt-28 md:min-h-[40rem] md:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)] md:items-end md:pb-20">
+          <div className="site-shell-page sogp-shell-page relative grid min-h-[34rem] content-end gap-10 pb-14 pt-28 md:min-h-[40rem] md:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)] md:items-end md:pb-20">
             <div className="grid max-w-[44rem] gap-7">
               <p className="site-hero-eyebrow text-[var(--color-brand-lime)]">
                 {content.hero.eyebrow}
@@ -81,12 +81,12 @@ export function SogpLandingPage() {
         </section>
 
         <section className="bg-[var(--color-brand-lime)] py-5 text-[var(--color-brand-blue)]">
-          <div className="site-shell-page flex flex-wrap items-center justify-between gap-x-6 gap-y-3 font-[var(--font-be-vietnam-pro)] text-xs font-semibold uppercase tracking-[0.12em]">
+          <div className="site-shell-page sogp-shell-page flex flex-wrap items-center justify-between gap-x-6 gap-y-3 font-[var(--font-be-vietnam-pro)] text-xs font-semibold uppercase tracking-[0.12em]">
             <span>Truth</span><span>Purpose</span><span>Transformation</span><span>Community</span><span>Action</span>
           </div>
         </section>
 
-        <section className="site-shell-page grid gap-12 py-20 md:grid-cols-[0.8fr_1.2fr] md:py-28">
+        <section className="site-shell-page sogp-shell-page grid gap-12 py-20 md:grid-cols-[0.8fr_1.2fr] md:py-28">
           <div className="grid content-start gap-3">
             <p className="site-hero-eyebrow">What you gain</p>
             <h2 className="site-section-heading text-[2.3rem] md:text-[3.2rem]">Clarity that changes how you live</h2>
@@ -105,7 +105,7 @@ export function SogpLandingPage() {
         </section>
 
         <section className="bg-[var(--color-surface-muted)] py-20 md:py-28">
-          <div className="site-shell-page grid gap-12 lg:grid-cols-[1fr_1.15fr]">
+          <div className="site-shell-page sogp-shell-page grid gap-12 lg:grid-cols-[1fr_1.15fr]">
             <div className="grid content-start gap-5">
               <p className="site-hero-eyebrow">What is SOGP?</p>
               <h2 className="site-section-heading text-[2.3rem] md:text-[3.25rem]">{content.definition.title}</h2>
@@ -122,7 +122,7 @@ export function SogpLandingPage() {
           </div>
         </section>
 
-        <section className="site-shell-page grid gap-12 py-20 md:py-28">
+        <section className="site-shell-page sogp-shell-page grid gap-12 py-20 md:py-28">
           <div className="grid max-w-[43rem] gap-4">
             <p className="site-hero-eyebrow">Course structure</p>
             <h2 className="site-section-heading text-[2.3rem] md:text-[3.25rem]">{content.structure.title}</h2>
@@ -139,7 +139,7 @@ export function SogpLandingPage() {
         </section>
 
         <section className="bg-[var(--color-brand-sky)] py-20 md:py-24">
-          <div className="site-shell-page grid gap-8 md:grid-cols-2">
+          <div className="site-shell-page sogp-shell-page grid gap-8 md:grid-cols-2">
             {content.tools.map((tool, index) => {
               const Icon = index === 0 ? MessageCircleMore : BookOpen;
               return (
@@ -155,7 +155,7 @@ export function SogpLandingPage() {
           </div>
         </section>
 
-        <section className="site-shell-page grid gap-8 py-20 md:grid-cols-4 md:py-24">
+        <section className="site-shell-page sogp-shell-page grid gap-8 py-20 md:grid-cols-4 md:py-24">
           {content.benefits.map((benefit, index) => {
             const Icon = [Globe2, CalendarDays, MessageCircleMore, Sparkles][index] ?? Check;
             return (
@@ -171,7 +171,7 @@ export function SogpLandingPage() {
         </section>
 
         <section className="bg-[var(--color-brand-blue)] py-20 text-white md:py-28">
-          <div className="site-shell-page grid justify-items-start gap-7 md:grid-cols-[1fr_auto] md:items-end">
+          <div className="site-shell-page sogp-shell-page grid justify-items-start gap-7 md:grid-cols-[1fr_auto] md:items-end">
             <div className="grid max-w-[46rem] gap-4">
               <p className="site-hero-eyebrow text-[var(--color-brand-lime)]">Start your journey</p>
               <h2 className="site-section-heading text-[2.5rem] text-white md:text-[4rem]">Ready to find truth and walk in purpose?</h2>

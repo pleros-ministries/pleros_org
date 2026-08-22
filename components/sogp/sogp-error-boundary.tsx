@@ -19,7 +19,7 @@ export class SogpErrorBoundary extends Component<
   render() {
     if (this.state.error) {
       return (
-        <section className="site-shell-page py-16">
+        <section className="site-shell-page sogp-shell-page py-16">
           <div className="grid max-w-xl gap-3 rounded-[var(--radius-md)] border border-red-200 bg-red-50 p-6">
             <h1 className="site-section-heading text-2xl text-red-950">Your SOGP dashboard could not load</h1>
             <p className="font-[var(--font-be-vietnam-pro)] text-sm leading-[1.5] text-red-800">Refresh the page. If this continues, contact the SOGP team.</p>

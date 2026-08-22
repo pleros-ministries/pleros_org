@@ -95,6 +95,7 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - SOGP formation requirements are certificate-gating: log Morning Prayer Watch on at least 80% of cohort mornings, and log one distinct Pleros Podcast episode on every cohort day (100%; multiple episodes on one Lagos calendar day count once). Dashboard must link to both existing trackers and show both counts/targets.
 - Prayer Watch attendance is session-aware (`morning`, `afternoon`, `evening`); legacy undifferentiated records remain `unspecified` and do not count as SOGP morning attendance.
 - Vercel project uses Hobby cron limits: keep SOGP Vercel cron at once daily (`0 5 * * *`, 06:00 WAT). Use admin bot composer for immediate sends; hourly/one-hour automation needs Pro or an external scheduler.
+- Every SOGP public/learner content wrapper must pair `site-shell-page` with `sogp-shell-page`; `site-shell-page` alone has no horizontal padding. SOGP gutters use existing public shell padding tokens at each breakpoint.
 
 ## Public site visual system
 

@@ -293,12 +293,12 @@ export function SogpDashboard() {
   return (
     <section className="site-font-theme min-h-screen bg-[var(--color-surface)] pb-16">
       <header className="border-b border-[var(--color-line)] bg-white">
-        <div className="site-shell-page flex min-h-28 items-end justify-between gap-4 pb-6 pt-8">
+        <div className="site-shell-page sogp-shell-page flex min-h-28 items-end justify-between gap-4 pb-6 pt-8">
           <div className="grid gap-1"><p className="font-[var(--font-be-vietnam-pro)] text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-brand-blue)]">School of God&apos;s Purpose</p><h1 className="font-[var(--font-sen)] text-[clamp(2rem,4vw,3.1rem)] font-semibold tracking-[-0.06em] text-[var(--color-text-strong)]">Welcome, {firstName(data.enrollment.name)}</h1></div>
           <Link href="/dashboard" className="hidden text-xs font-semibold text-[var(--color-text-muted)] hover:text-[var(--color-brand-blue)] sm:inline">Pleros dashboard</Link>
         </div>
       </header>
-      <div className="site-shell-page grid gap-5 py-8 lg:grid-cols-[15rem_minmax(0,1fr)_18rem]">
+      <div className="site-shell-page sogp-shell-page grid gap-5 py-8 lg:grid-cols-[15rem_minmax(0,1fr)_18rem]">
         <CurriculumRail data={data} />
         <div className="grid content-start gap-7">
           {data.learnerState === "preparing" ? <PreparingDashboard data={data} /> : <ActiveDashboard data={data} />}

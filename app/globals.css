@@ -686,15 +686,33 @@
     margin-inline: auto;
   }
 
+  .site-font-theme .sogp-shell-page {
+    padding-inline: var(--site-shell-padding-x);
+  }
+
   @media (min-width: 48rem) {
     .site-font-theme .site-shell-page {
       max-width: var(--site-page-max-md);
+    }
+
+    .site-font-theme .sogp-shell-page {
+      padding-inline: var(--site-shell-padding-x-md);
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .site-font-theme .sogp-shell-page {
+      padding-inline: var(--site-shell-padding-x-lg);
     }
   }
 
   @media (min-width: 80rem) {
     .site-font-theme .site-shell-page {
       max-width: var(--site-page-max-xl);
+    }
+
+    .site-font-theme .sogp-shell-page {
+      padding-inline: var(--site-shell-padding-x-xl);
     }
   }
 

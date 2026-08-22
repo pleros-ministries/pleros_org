@@ -40,7 +40,7 @@ export function SogpWrittenResponse({ dayNumber }: { dayNumber: number }) {
   const locked = data.submission?.status === "submitted" || data.submission?.status === "approved";
 
   return (
-    <section className="site-shell-page py-10">
+    <section className="site-shell-page sogp-shell-page py-10">
       <Link href={`/dashboard/sogp/course/day/${dayNumber}`} className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--color-text-muted)]"><ArrowLeft className="size-3.5"/> Back to lesson</Link>
       <div className="mx-auto mt-8 grid max-w-3xl gap-6">
         <header className="grid gap-2"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-brand-blue)]">Day {dayNumber} written response</p><h1 className="font-[var(--font-sen)] text-4xl font-semibold tracking-[-0.06em] text-[var(--color-text-strong)]">{data.lessonTitle}</h1></header>
