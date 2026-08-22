@@ -126,3 +126,15 @@ export const sogpLandingContent = {
     },
   ],
 } as const;
+
+const sogpCurriculumLevelLabels = ["Level 1", "Level 2"] as const;
+
+export function getSogpCurriculumLevels() {
+  return sogpCurriculumLevelLabels.map((label, levelIndex) => ({
+    value: `level-${levelIndex + 1}`,
+    label,
+    tracks: sogpLandingContent.curriculum.tracks.flatMap((track, index) =>
+      track.level === label ? [{ ...track, number: index + 1 }] : [],
+    ),
+  }));
+}

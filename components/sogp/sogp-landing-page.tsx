@@ -4,6 +4,7 @@ import {
   ArrowRight,
   BookOpen,
   Check,
+  ChevronDown,
   MessageCircleMore,
 } from "lucide-react";
 
@@ -16,7 +17,10 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { sogpLandingContent as content } from "@/lib/sogp/landing-content";
+import {
+  getSogpCurriculumLevels,
+  sogpLandingContent as content,
+} from "@/lib/sogp/landing-content";
 import { SogpLandingAnalytics } from "./sogp-analytics";
 
 function Cta({ inverse = false }: { inverse?: boolean }) {
@@ -36,6 +40,8 @@ function Cta({ inverse = false }: { inverse?: boolean }) {
 }
 
 export function SogpLandingPage() {
+  const curriculumLevels = getSogpCurriculumLevels();
+
   return (
     <PublicSitePageShell>
       <HomepageNav />
@@ -103,35 +109,41 @@ export function SogpLandingPage() {
 
         <section className="py-20 md:py-28">
           <div className="site-shell-page sogp-shell-page grid gap-10 md:gap-14">
-            <header className="flex flex-wrap items-end justify-between gap-5">
+            <header>
               <h2 className="site-section-heading text-[2.3rem] text-[var(--color-brand-blue)] md:text-[3.25rem]">
                 {content.curriculum.title}
               </h2>
-              <span className="site-button-text text-xs font-semibold uppercase tracking-[0.08em] text-[var(--color-text-muted)]">
-                {content.curriculum.tracks.length} confirmed tracks
-              </span>
             </header>
 
-            <ol className="grid border-t border-[var(--color-line)] md:grid-cols-2">
-              {content.curriculum.tracks.map((track, index) => (
-                <li
-                  key={`${track.level}-${track.title}`}
-                  className="grid min-h-28 grid-cols-[2.75rem_1fr] gap-3 border-b border-[var(--color-line)] py-5 md:gap-5 md:odd:pr-8 md:even:border-l md:even:pl-8"
+            <div className="border-t border-[var(--color-line)]">
+              {curriculumLevels.map((level) => (
+                <details
+                  key={level.value}
+                  open={level.value === "level-1"}
+                  className="group border-b border-[var(--color-line)]"
                 >
-                  <span className="font-[var(--font-sen)] text-sm font-semibold tabular-nums text-[var(--color-brand-blue)]">
-                    {String(index + 1).padStart(2, "0")}
-                  </span>
-                  <div className="grid content-start gap-3">
-                    <span className="w-fit rounded-full bg-[var(--color-brand-sky)] px-2.5 py-1 font-[var(--font-be-vietnam-pro)] text-[0.65rem] font-semibold uppercase tracking-[0.08em] text-[var(--color-brand-blue)]">
-                      {track.level}
-                    </span>
-                    <h3 className="font-[var(--font-sen)] text-[1.15rem] font-semibold leading-[1.2] tracking-[-0.035em] text-[var(--color-text-strong)] md:text-[1.3rem]">
-                      {track.title}
-                    </h3>
-                  </div>
-                </li>
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-5 font-[var(--font-sen)] text-[1.4rem] font-semibold tracking-[-0.04em] text-[var(--color-brand-blue)] outline-none [&::-webkit-details-marker]:hidden">
+                    {level.label}
+                    <ChevronDown className="size-5 shrink-0 transition-transform duration-200 group-open:rotate-180" />
+                  </summary>
+                  <ol className="grid border-t border-[var(--color-line)] md:grid-cols-2">
+                    {level.tracks.map((track) => (
+                      <li
+                        key={`${level.value}-${track.title}`}
+                        className="grid min-h-24 grid-cols-[2.75rem_1fr] gap-3 border-b border-[var(--color-line)] py-5 last:border-b-0 md:gap-5 md:odd:pr-8 md:even:border-l md:even:pl-8 md:[&:nth-last-child(2):nth-child(odd)]:border-b-0"
+                      >
+                        <span className="font-[var(--font-sen)] text-sm font-semibold tabular-nums text-[var(--color-brand-blue)]">
+                          {String(track.number).padStart(2, "0")}
+                        </span>
+                        <h3 className="font-[var(--font-sen)] text-[1.15rem] font-semibold leading-[1.2] tracking-[-0.035em] text-[var(--color-text-strong)] md:text-[1.3rem]">
+                          {track.title}
+                        </h3>
+                      </li>
+                    ))}
+                  </ol>
+                </details>
               ))}
-            </ol>
+            </div>
 
             <article className="grid gap-10 rounded-[var(--radius-md)] bg-[var(--color-brand-blue)] p-6 text-white md:grid-cols-[0.72fr_1.28fr] md:gap-14 md:p-10">
               <div className="grid content-start gap-5">

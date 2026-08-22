@@ -1,6 +1,9 @@
 import { describe, expect, test } from "vitest";
 
-import { sogpLandingContent } from "./landing-content";
+import {
+  getSogpCurriculumLevels,
+  sogpLandingContent,
+} from "./landing-content";
 
 describe("SOGP landing content", () => {
   test("covers the supplied launch copy", () => {
@@ -17,5 +20,28 @@ describe("SOGP landing content", () => {
     expect(serialized).not.toContain('"Visual"');
     expect(serialized).not.toContain('"Video"');
     expect(serialized).not.toContain('"Headline/Subheadline"');
+  });
+
+  test("groups curriculum tracks into collapsible levels without resetting numbering", () => {
+    const levels = getSogpCurriculumLevels();
+
+    expect(
+      levels.map((level) => ({
+        value: level.value,
+        label: level.label,
+        numbers: level.tracks.map((track) => track.number),
+      })),
+    ).toEqual([
+      {
+        value: "level-1",
+        label: "Level 1",
+        numbers: [1, 2, 3, 4, 5],
+      },
+      {
+        value: "level-2",
+        label: "Level 2",
+        numbers: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
+      },
+    ]);
   });
 });
