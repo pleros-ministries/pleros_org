@@ -72,7 +72,7 @@ export const sogpLandingContent = {
     ],
   },
   benefits: {
-    title: "Other Reasons and Benefits to Join",
+    title: "More Reasons and Benefits to Join",
     items: [
       "Flexibility: Self-paced",
       "Accessibility: Worldwide",

@@ -73,7 +73,7 @@ test("preserves the authoritative SOGP landing copy while correcting obvious err
     ],
   });
   expect(sogpLandingContent.benefits).toEqual({
-    title: "Other Reasons and Benefits to Join",
+    title: "More Reasons and Benefits to Join",
     items: [
       "Flexibility: Self-paced",
       "Accessibility: Worldwide",
