@@ -40,47 +40,47 @@ export function SogpLandingPage() {
       <HomepageNav />
       <SogpLandingAnalytics />
       <main className="site-font-theme bg-white">
-        <section className="relative overflow-hidden bg-[var(--color-brand-blue)] text-white">
+        <section className="relative overflow-hidden bg-[var(--color-brand-sky)] text-[var(--color-brand-blue)]">
           <div className="site-shell-page sogp-shell-page relative grid min-h-[34rem] content-end gap-10 pb-14 pt-28 md:min-h-[40rem] md:grid-cols-[minmax(0,1.15fr)_minmax(18rem,0.85fr)] md:items-end md:pb-20">
             <div className="grid max-w-[44rem] gap-7">
-              <p className="site-hero-eyebrow text-[var(--color-brand-lime)]">
+              <p className="site-hero-eyebrow text-[var(--color-brand-indigo)]">
                 {content.hero.eyebrow}
               </p>
               <div className="grid gap-5">
-                <h1 className="site-hero-heading text-[clamp(3rem,7vw,6.4rem)] leading-[0.88] text-white">
+                <h1 className="site-hero-heading text-[clamp(3rem,7vw,6.4rem)] leading-[0.88] text-[var(--color-brand-blue)]">
                   Find truth.
                   <br />
                   Discover purpose.
                 </h1>
-                <p className="max-w-[39rem] font-[var(--font-be-vietnam-pro)] text-[1rem] leading-[1.55] tracking-[-0.02em] text-white/84 md:text-[1.15rem]">
+                <p className="max-w-[39rem] font-[var(--font-be-vietnam-pro)] text-[1rem] leading-[1.55] tracking-[-0.02em] text-[var(--color-text-muted)] md:text-[1.15rem]">
                   {content.hero.description}
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-4">
-                <Cta inverse />
-                <span className="font-[var(--font-be-vietnam-pro)] text-xs font-medium text-white/70">
+                <Cta />
+                <span className="font-[var(--font-be-vietnam-pro)] text-xs font-medium text-[var(--color-text-muted)]">
                   Free · Four weeks · Worldwide
                 </span>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-px overflow-hidden rounded-[var(--radius-md)] bg-white/15 ring-1 ring-white/15">
+            <div className="grid grid-cols-2 gap-px overflow-hidden rounded-[var(--radius-md)] bg-[rgba(5,20,128,0.14)] ring-1 ring-[rgba(5,20,128,0.12)]">
               {[
                 ["28", "days"],
                 ["20", "guided tracks"],
                 ["4", "live classes"],
                 ["1", "shared journey"],
               ].map(([value, label]) => (
-                <div key={label} className="grid min-h-28 content-end gap-1 bg-white/8 p-5 backdrop-blur-sm">
-                  <strong className="font-[var(--font-sen)] text-3xl tracking-[-0.06em]">{value}</strong>
-                  <span className="font-[var(--font-be-vietnam-pro)] text-xs text-white/72">{label}</span>
+                <div key={label} className="grid min-h-28 content-end gap-1 bg-white/70 p-5 backdrop-blur-sm">
+                  <strong className="font-[var(--font-sen)] text-3xl tracking-[-0.06em] text-[var(--color-brand-blue)]">{value}</strong>
+                  <span className="font-[var(--font-be-vietnam-pro)] text-xs text-[var(--color-text-muted)]">{label}</span>
                 </div>
               ))}
             </div>
           </div>
         </section>
 
-        <section className="bg-[var(--color-brand-lime)] py-5 text-[var(--color-brand-blue)]">
+        <section className="border-y border-[rgba(5,20,128,0.1)] bg-[var(--color-brand-sky-soft)] py-5 text-[var(--color-brand-blue)]">
           <div className="site-shell-page sogp-shell-page flex flex-wrap items-center justify-between gap-x-6 gap-y-3 font-[var(--font-be-vietnam-pro)] text-xs font-semibold uppercase tracking-[0.12em]">
             <span>Truth</span><span>Purpose</span><span>Transformation</span><span>Community</span><span>Action</span>
           </div>
