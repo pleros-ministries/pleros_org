@@ -82,6 +82,13 @@ export const sogpLiveClassStatusEnum = pgEnum("sogp_live_class_status", [
   "cancelled",
 ]);
 
+export const prayerWatchSessionEnum = pgEnum("prayer_watch_session", [
+  "unspecified",
+  "morning",
+  "afternoon",
+  "evening",
+]);
+
 // ─── Welcome pack leads ─────────────────────────────────────────────────────
 
 export const welcomePackLeads = pgTable(
@@ -539,14 +546,18 @@ export const prayerWatchAttendance = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     attendedDate: date("attended_date", { mode: "string" }).notNull(),
+    session: prayerWatchSessionEnum("session")
+      .notNull()
+      .default("unspecified"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
   },
   (t) => [
-    uniqueIndex("prayer_watch_attendance_user_date_idx").on(
+    uniqueIndex("prayer_watch_attendance_user_date_session_idx").on(
       t.userId,
       t.attendedDate,
+      t.session,
     ),
     index("prayer_watch_attendance_user_idx").on(t.userId),
   ],
@@ -684,7 +695,7 @@ export const sogpCohorts = pgTable(
       .notNull()
       .$type<SogpAssessmentPolicy>()
       .default(
-        sql`'{"requiredTrackCompletionPercent":100,"requiredPrayerWatchPercent":80,"requiredLiveClassCount":0}'::jsonb`,
+        sql`'{"requiredTrackCompletionPercent":100,"requiredPrayerWatchPercent":80,"requiredPodcastDailyPercent":100,"requiredLiveClassCount":0}'::jsonb`,
       ),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()

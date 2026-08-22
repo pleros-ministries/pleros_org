@@ -27,7 +27,7 @@ export default async function DashboardPrayerWatchPage() {
         year={year}
         month={month}
         todayKey={toDateKey(now)}
-        attendedDateKeys={[]}
+        attendanceRecords={[]}
         bibleReadingLogs={[]}
       />
     );
@@ -39,7 +39,7 @@ export default async function DashboardPrayerWatchPage() {
     redirect("/welcome");
   }
 
-  const [attendedDateKeys, bibleReadingLogs] = await Promise.all([
+  const [attendanceRecords, bibleReadingLogs] = await Promise.all([
     getPrayerWatchAttendanceForMonth(appSession.user.id, year, month),
     getBibleReadingLogsForMonth(appSession.user.id, year, month),
   ]);
@@ -49,7 +49,7 @@ export default async function DashboardPrayerWatchPage() {
       year={year}
       month={month}
       todayKey={toDateKey(now)}
-      attendedDateKeys={attendedDateKeys}
+      attendanceRecords={attendanceRecords}
       bibleReadingLogs={bibleReadingLogs}
     />
   );

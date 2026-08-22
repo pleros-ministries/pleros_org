@@ -18,11 +18,14 @@ export async function getPrayerWatchAttendanceForMonth(
   userId: string,
   year: number,
   month: number,
-): Promise<string[]> {
+): Promise<Array<{ dateKey: string; session: "unspecified" | "morning" | "afternoon" | "evening" }>> {
   const { start, end } = getMonthDateRange(year, month);
 
   const rows = await db
-    .select({ attendedDate: schema.prayerWatchAttendance.attendedDate })
+    .select({
+      attendedDate: schema.prayerWatchAttendance.attendedDate,
+      session: schema.prayerWatchAttendance.session,
+    })
     .from(schema.prayerWatchAttendance)
     .where(
       and(
@@ -32,28 +35,41 @@ export async function getPrayerWatchAttendanceForMonth(
       ),
     );
 
-  return rows.map((row) => row.attendedDate);
+  return rows.map((row) => ({ dateKey: row.attendedDate, session: row.session }));
 }
 
-export async function logPrayerWatchAttendance(userId: string, dateKey: string) {
+export async function logPrayerWatchAttendance(
+  userId: string,
+  dateKey: string,
+  session: "morning" | "afternoon" | "evening",
+) {
   const [row] = await db
     .insert(schema.prayerWatchAttendance)
-    .values({ userId, attendedDate: dateKey })
+    .values({ userId, attendedDate: dateKey, session })
     .onConflictDoNothing({
-      target: [schema.prayerWatchAttendance.userId, schema.prayerWatchAttendance.attendedDate],
+      target: [
+        schema.prayerWatchAttendance.userId,
+        schema.prayerWatchAttendance.attendedDate,
+        schema.prayerWatchAttendance.session,
+      ],
     })
     .returning();
 
   return row ?? null;
 }
 
-export async function removePrayerWatchAttendance(userId: string, dateKey: string) {
+export async function removePrayerWatchAttendance(
+  userId: string,
+  dateKey: string,
+  session: "morning" | "afternoon" | "evening",
+) {
   await db
     .delete(schema.prayerWatchAttendance)
     .where(
       and(
         eq(schema.prayerWatchAttendance.userId, userId),
         eq(schema.prayerWatchAttendance.attendedDate, dateKey),
+        eq(schema.prayerWatchAttendance.session, session),
       ),
     );
 }

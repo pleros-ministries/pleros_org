@@ -39,6 +39,8 @@ npx drizzle-kit migrate
 
 Current additive migration: `drizzle/0009_sogp_platform.sql`.
 
+Formation-tracking migration: `drizzle/0010_sogp_formation_tracking.sql`. Legacy Prayer Watch records become `unspecified`; only explicit `morning` records count toward SOGP.
+
 Current production data has an enrolment-open `september-2026` cohort. Level 1 and Level 2 provide 16 content-ready tracks. Four named, content-ready Level 3 selections remain required before course activation.
 
 Configure first 20-track curriculum after Level 3 content is ready:
@@ -75,6 +77,8 @@ Verify with `getWebhookInfo`. Admin `/admin/sogp` can preview and send one-off c
 8. Send one admin test broadcast, then delete test message in Telegram.
 9. Activate cohort only after readiness alert clears.
 10. Verify cron authorization and first reminder checkpoint.
+11. Verify learner dashboard shows Morning Prayer Watch and podcast progress links.
+12. Verify certificate remains blocked below 80% of cohort mornings or below 28/28 podcast days.
 
 ## Verification
 

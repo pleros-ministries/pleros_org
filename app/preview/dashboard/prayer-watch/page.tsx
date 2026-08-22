@@ -37,7 +37,11 @@ export default function PrayerWatchDashboardPreviewPage() {
       year={2026}
       month={6}
       todayKey="2026-07-13"
-      attendedDateKeys={["2026-07-01", "2026-07-03", "2026-07-06"]}
+      attendanceRecords={[
+        { dateKey: "2026-07-01", session: "morning" },
+        { dateKey: "2026-07-03", session: "afternoon" },
+        { dateKey: "2026-07-06", session: "evening" },
+      ]}
       bibleReadingLogs={bibleReadingLogs}
     />
   );

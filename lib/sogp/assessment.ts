@@ -1,7 +1,9 @@
 import type {
+  SogpAssessmentPolicy,
   SogpEligibilityInput,
   SogpEligibilityResult,
 } from "./types";
+import { DEFAULT_SOGP_ASSESSMENT_POLICY } from "./types";
 
 function percent(part: number, whole: number) {
   if (whole <= 0) return 0;
@@ -16,6 +18,10 @@ export function calculateSogpEligibility(
     input.prayerDaysAttended,
     input.prayerDaysAvailable,
   );
+  const podcastPercent = percent(
+    input.podcastDaysLogged,
+    input.podcastDaysAvailable,
+  );
   const unmet: SogpEligibilityResult["unmet"] = [];
 
   if (trackPercent < input.policy.requiredTrackCompletionPercent) {
@@ -26,6 +32,10 @@ export function calculateSogpEligibility(
     unmet.push("prayer_watch");
   }
 
+  if (podcastPercent < input.policy.requiredPodcastDailyPercent) {
+    unmet.push("podcast");
+  }
+
   if (input.liveClassesAttended < input.policy.requiredLiveClassCount) {
     unmet.push("live_classes");
   }
@@ -34,6 +44,13 @@ export function calculateSogpEligibility(
     eligible: unmet.length === 0,
     trackPercent,
     prayerPercent,
+    podcastPercent,
     unmet,
   };
+}
+
+export function normalizeSogpAssessmentPolicy(
+  policy: Partial<SogpAssessmentPolicy> | null | undefined,
+) {
+  return { ...DEFAULT_SOGP_ASSESSMENT_POLICY, ...policy };
 }

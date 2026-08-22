@@ -12,6 +12,7 @@ import type {
 import { getAdminRegistrantList } from "@/lib/db/queries/admin-registrants";
 import { getSchoolOfPurposeWaitlistEntries } from "@/lib/db/queries/school-of-purpose-waitlist";
 import { getAdminSogpData as getSogpOperationsData } from "@/lib/db/queries/sogp";
+import { countDistinctLagosActivityDays } from "@/lib/sogp/formation-progress";
 import { getSuperAdminOverviewMetrics } from "@/lib/db/queries/admin-analytics";
 import { getStudentPlatformList } from "@/lib/db/queries/students";
 import { getAllThreads } from "@/lib/db/queries/qa";
@@ -217,13 +218,32 @@ export async function getAdminSchoolOfPurposeWaitlist(): Promise<
 
 export async function getAdminSogpData(): Promise<AdminSogpData> {
   await requireAdmin();
-  const [data, levelThreeLessons, quizRows] = await Promise.all([
+  const [
+    data,
+    levelThreeLessons,
+    quizRows,
+    morningPrayerRows,
+    podcastRows,
+  ] = await Promise.all([
     getSogpOperationsData(),
     db.query.lessons.findMany({
       where: (lesson, { eq: equal }) => equal(lesson.levelId, 3),
       orderBy: (lesson, { asc }) => [asc(lesson.lessonNumber)],
     }),
     db.select({ lessonId: schema.quizQuestions.lessonId }).from(schema.quizQuestions),
+    db
+      .select({
+        userId: schema.prayerWatchAttendance.userId,
+        attendedDate: schema.prayerWatchAttendance.attendedDate,
+      })
+      .from(schema.prayerWatchAttendance)
+      .where(eq(schema.prayerWatchAttendance.session, "morning")),
+    db
+      .select({
+        userId: schema.podcastEpisodeProgress.userId,
+        listenedAt: schema.podcastEpisodeProgress.listenedAt,
+      })
+      .from(schema.podcastEpisodeProgress),
   ]);
   const lessonsWithQuiz = new Set(quizRows.map((row) => row.lessonId));
   const ready = (lesson: {
@@ -255,17 +275,39 @@ export async function getAdminSogpData(): Promise<AdminSogpData> {
       telegramDiscussionUrl: cohort.telegramDiscussionUrl,
       telegramBotUsername: cohort.telegramBotUsername,
     })),
-    enrollments: data.enrollments.map((enrollment) => ({
-      id: enrollment.id,
-      cohortId: enrollment.cohortId,
-      name: enrollment.name,
-      email: enrollment.email,
-      phone: enrollment.phone,
-      country: enrollment.country,
-      status: enrollment.status,
-      telegramLinkedAt: serializeDate(enrollment.telegramLinkedAt),
-      createdAt: enrollment.createdAt.toISOString(),
-    })),
+    enrollments: data.enrollments.map((enrollment) => {
+      const cohort = data.cohorts.find((item) => item.id === enrollment.cohortId);
+      const startDateKey = cohort?.startsAt.toISOString().slice(0, 10) ?? "";
+      const endDateKey = cohort?.endsAt.toISOString().slice(0, 10) ?? "";
+      const podcastDates = podcastRows
+        .filter(
+          (row) =>
+            row.userId === enrollment.userId &&
+            cohort &&
+            row.listenedAt >= cohort.startsAt &&
+            row.listenedAt <= cohort.endsAt,
+        )
+        .map((row) => row.listenedAt);
+
+      return {
+        id: enrollment.id,
+        cohortId: enrollment.cohortId,
+        name: enrollment.name,
+        email: enrollment.email,
+        phone: enrollment.phone,
+        country: enrollment.country,
+        status: enrollment.status,
+        telegramLinkedAt: serializeDate(enrollment.telegramLinkedAt),
+        createdAt: enrollment.createdAt.toISOString(),
+        morningPrayerDays: morningPrayerRows.filter(
+          (row) =>
+            row.userId === enrollment.userId &&
+            row.attendedDate >= startDateKey &&
+            row.attendedDate <= endDateKey,
+        ).length,
+        podcastDaysLogged: countDistinctLagosActivityDays(podcastDates),
+      };
+    }),
     tracks: data.tracks.map(({ track, lesson }) => ({
       id: track.id,
       cohortId: track.cohortId,

@@ -31,6 +31,8 @@ export type AdminSogpData = {
     status: string;
     telegramLinkedAt: string | null;
     createdAt: string;
+    morningPrayerDays: number;
+    podcastDaysLogged: number;
   }>;
   tracks: Array<{
     id: number;

@@ -10,6 +10,7 @@ import {
   removePrayerWatchAttendance,
 } from "@/lib/db/queries/prayer-watch";
 import { isValidPrayerWatchDateKey, toDateKey } from "@/lib/prayer-watch";
+import { isPrayerWatchSession } from "@/lib/prayer-watch-session";
 
 export type PrayerWatchActionState = {
   error: string | null;
@@ -33,14 +34,20 @@ export async function togglePrayerWatchAttendanceAction(
   }
 
   const wasAttended = formData.get("attended") === "true";
+  const sessionId = String(formData.get("session") ?? "");
+
+  if (!isPrayerWatchSession(sessionId)) {
+    return { error: "Choose the Prayer Watch session you attended." };
+  }
 
   if (wasAttended) {
-    await removePrayerWatchAttendance(session.user.id, dateKey);
+    await removePrayerWatchAttendance(session.user.id, dateKey, sessionId);
   } else {
-    await logPrayerWatchAttendance(session.user.id, dateKey);
+    await logPrayerWatchAttendance(session.user.id, dateKey, sessionId);
   }
 
   revalidatePath("/dashboard/prayer-watch");
+  revalidatePath("/dashboard/sogp");
   return { error: null };
 }
 

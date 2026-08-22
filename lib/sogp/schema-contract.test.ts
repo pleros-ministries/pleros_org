@@ -8,6 +8,7 @@ import {
   sogpLiveClassAttendance,
   sogpLiveClasses,
   sogpRewardGrants,
+  prayerWatchAttendance,
 } from "../db/schema";
 
 describe("SOGP schema", () => {
@@ -19,5 +20,9 @@ describe("SOGP schema", () => {
     expect(sogpLiveClassAttendance).toBeDefined();
     expect(sogpCertificates).toBeDefined();
     expect(sogpRewardGrants).toBeDefined();
+  });
+
+  test("tracks Prayer Watch attendance by session", () => {
+    expect(prayerWatchAttendance.session).toBeDefined();
   });
 });

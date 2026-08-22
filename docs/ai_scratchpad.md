@@ -92,6 +92,8 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - Public landing copy source is the Google Doc titled `SOGP Landing Page`; omit empty facilitator, social-proof, and FAQ sections until copy exists.
 - Live DB verification on 2026-08-22 found all 5 Level 1 and all 11 Level 2 lessons published and content-ready. Level 3 contains draft placeholder lessons; four approved named tracks still block SOGP activation.
 - Verified Telegram bot is channel admin and can post/edit messages; public channel is `https://t.me/pleros_sogp`. No linked discussion group existed at verification time, so do not promise interactive community until one is attached.
+- SOGP formation requirements are certificate-gating: log Morning Prayer Watch on at least 80% of cohort mornings, and log one distinct Pleros Podcast episode on every cohort day (100%; multiple episodes on one Lagos calendar day count once). Dashboard must link to both existing trackers and show both counts/targets.
+- Prayer Watch attendance is session-aware (`morning`, `afternoon`, `evening`); legacy undifferentiated records remain `unspecified` and do not count as SOGP morning attendance.
 
 ## Public site visual system
 

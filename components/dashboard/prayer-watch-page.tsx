@@ -28,6 +28,8 @@ import {
   buildPrayerWatchCalendar,
   getMonthLabel,
   PRAYER_WATCH_YOUTUBE_URL,
+  PRAYER_WATCH_SESSIONS,
+  type PrayerWatchSessionId,
   type PrayerWatchCalendarCell,
 } from "@/lib/prayer-watch";
 import { cn } from "@/lib/utils";
@@ -105,7 +107,10 @@ type PrayerWatchPageProps = {
   year: number;
   month: number;
   todayKey: string;
-  attendedDateKeys: string[];
+  attendanceRecords: Array<{
+    dateKey: string;
+    session: "unspecified" | PrayerWatchSessionId;
+  }>;
   bibleReadingLogs: BibleReadingLog[];
 };
 
@@ -113,13 +118,15 @@ export function PrayerWatchPage({
   year,
   month,
   todayKey,
-  attendedDateKeys,
+  attendanceRecords,
   bibleReadingLogs,
 }: PrayerWatchPageProps) {
+  const attendedDateKeys = [...new Set(attendanceRecords.map((record) => record.dateKey))];
   const weeks = buildPrayerWatchCalendar({ year, month, attendedDateKeys, todayKey });
   const cells = weeks.flat();
   const [selectedDateKey, setSelectedDateKey] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"prayer" | "bible">("prayer");
+  const [selectedSession, setSelectedSession] = useState<PrayerWatchSessionId>("morning");
   const [chaptersRead, setChaptersRead] = useState("1");
   const [currentBook, setCurrentBook] = useState("Matthew");
   const [currentChapter, setCurrentChapter] = useState("1");
@@ -157,6 +164,7 @@ export function PrayerWatchPage({
   function openDate(dateKey: string) {
     const readingLog = bibleReadingLogs.find((log) => log.dateKey === dateKey);
     setActiveTab("prayer");
+    setSelectedSession("morning");
     setChaptersRead(`${readingLog?.chaptersRead ?? 1}`);
     setCurrentBook(readingLog?.currentBook ?? "Matthew");
     setCurrentChapter(`${readingLog?.currentChapter ?? 1}`);
@@ -281,20 +289,46 @@ export function PrayerWatchPage({
               {activeTab === "prayer" ? (
                 <form action={formAction}>
                   <input type="hidden" name="date" value={selectedCell.dateKey} />
+                  <input type="hidden" name="session" value={selectedSession} />
                   <input
                     type="hidden"
                     name="attended"
-                    value={selectedCell.state === "attended" ? "true" : "false"}
+                    value={attendanceRecords.some((record) => record.dateKey === selectedCell.dateKey && record.session === selectedSession) ? "true" : "false"}
                   />
                   <div className="grid gap-4">
+                    <div className="grid grid-cols-3 gap-1 rounded-[var(--radius-sm)] bg-[var(--color-surface-muted)] p-1">
+                      {PRAYER_WATCH_SESSIONS.map((session) => {
+                        const logged = attendanceRecords.some(
+                          (record) =>
+                            record.dateKey === selectedCell.dateKey &&
+                            record.session === session.id,
+                        );
+                        return (
+                          <button
+                            key={session.id}
+                            type="button"
+                            onClick={() => setSelectedSession(session.id)}
+                            className={cn(
+                              "grid min-h-12 content-center rounded-[calc(var(--radius-sm)-2px)] px-2 text-center text-[0.7rem] font-semibold",
+                              selectedSession === session.id
+                                ? "bg-white text-[var(--color-brand-blue)] shadow-[var(--shadow-sm)]"
+                                : "text-[var(--color-text-muted)]",
+                            )}
+                          >
+                            <span>{session.label}</span>
+                            <span className="text-[0.6rem] font-normal">{logged ? "Logged" : session.time}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
                     <p className="font-[var(--font-be-vietnam-pro)] text-[0.875rem] leading-[1.45] text-[var(--color-text-muted)]">
-                      {selectedCell.state === "attended"
-                        ? "You logged your attendance for this Prayer Watch."
-                        : "Did you join Prayer Watch live on this day?"}
+                      {attendanceRecords.some((record) => record.dateKey === selectedCell.dateKey && record.session === selectedSession)
+                        ? `You logged the ${selectedSession} Prayer Watch.`
+                        : `Did you join the ${selectedSession} Prayer Watch live?`}
                     </p>
                     <DialogFooter>
-                      <ToggleAttendanceButton isUndo={selectedCell.state === "attended"} />
-                      {selectedCell.state !== "attended" ? (
+                      <ToggleAttendanceButton isUndo={attendanceRecords.some((record) => record.dateKey === selectedCell.dateKey && record.session === selectedSession)} />
+                      {!attendanceRecords.some((record) => record.dateKey === selectedCell.dateKey && record.session === selectedSession) ? (
                         <Button
                           variant="secondary"
                           render={

@@ -14,6 +14,8 @@ import {
   MessageCircleMore,
   Play,
   Radio,
+  Sunrise,
+  Podcast,
 } from "lucide-react";
 
 import { calculateSogpEligibility } from "@/lib/sogp/assessment";
@@ -39,6 +41,7 @@ type DashboardPayload = {
     assessmentPolicy: {
       requiredTrackCompletionPercent: number;
       requiredPrayerWatchPercent: number;
+      requiredPodcastDailyPercent: number;
       requiredLiveClassCount: number;
     };
   };
@@ -61,6 +64,7 @@ type DashboardPayload = {
     status: "scheduled" | "live" | "completed" | "cancelled";
   }>;
   prayerDaysAttended: number;
+  podcastDaysLogged: number;
   liveClassesAttended: number;
   certificate: { verificationCode: string; issuedAt: string; revokedAt: string | null } | null;
 };
@@ -202,7 +206,7 @@ function ActiveDashboard({ data }: { data: DashboardPayload }) {
 function ContextRail({ data }: { data: DashboardPayload }) {
   const completed = data.tracks.filter((track) => track.completed).length;
   const prayerDays = Math.max(1, Math.round((new Date(data.cohort.endsAt).getTime() - new Date(data.cohort.startsAt).getTime()) / 86_400_000) + 1);
-  const eligibility = calculateSogpEligibility({ completedTracks: completed, totalTracks: data.tracks.length, prayerDaysAttended: data.prayerDaysAttended, prayerDaysAvailable: prayerDays, liveClassesAttended: data.liveClassesAttended, policy: data.cohort.assessmentPolicy });
+  const eligibility = calculateSogpEligibility({ completedTracks: completed, totalTracks: data.tracks.length, prayerDaysAttended: data.prayerDaysAttended, prayerDaysAvailable: prayerDays, podcastDaysLogged: data.podcastDaysLogged, podcastDaysAvailable: prayerDays, liveClassesAttended: data.liveClassesAttended, policy: data.cohort.assessmentPolicy });
   const telegramUrl = data.cohort.telegramDiscussionUrl ?? data.cohort.telegramChannelUrl ?? (data.cohort.telegramBotUsername ? `https://t.me/${data.cohort.telegramBotUsername.replace(/^@/, "")}` : null);
   return (
     <aside className="grid content-start gap-4">
@@ -217,10 +221,66 @@ function ContextRail({ data }: { data: DashboardPayload }) {
         <div className="mt-5 grid gap-4">{[
           ["Course tracks", `${completed}/${data.tracks.length || 20}`, !eligibility.unmet.includes("tracks")],
           ["Prayer Watch", `${eligibility.prayerPercent}%`, !eligibility.unmet.includes("prayer_watch")],
+          ["Daily podcast", `${data.podcastDaysLogged}/${prayerDays}`, !eligibility.unmet.includes("podcast")],
           ["Live classes", String(data.liveClassesAttended), !eligibility.unmet.includes("live_classes")],
         ].map(([label,value,ready])=><div key={String(label)} className="grid grid-cols-[1.25rem_1fr_auto] items-center gap-2"><span className={`grid size-5 place-items-center rounded-full ${ready?"bg-[var(--color-brand-lime)]":"border border-[var(--color-line-strong)]"}`}>{ready?<Check className="size-3 text-[var(--color-brand-blue)]"/>:<Circle className="size-2 text-[var(--color-text-muted)]"/>}</span><span className="text-xs font-medium text-[var(--color-text-strong)]">{label}</span><span className="text-xs text-[var(--color-text-muted)]">{value}</span></div>)}</div>
       </section>
     </aside>
+  );
+}
+
+function FormationProgress({ data }: { data: DashboardPayload }) {
+  const cohortDays = Math.max(
+    1,
+    Math.round(
+      (new Date(data.cohort.endsAt).getTime() -
+        new Date(data.cohort.startsAt).getTime()) /
+        86_400_000,
+    ) + 1,
+  );
+  const requiredMorningWatches = Math.ceil(
+    (data.cohort.assessmentPolicy.requiredPrayerWatchPercent / 100) *
+      cohortDays,
+  );
+  const items = [
+    {
+      title: "Morning Prayer Watch",
+      description: "Log the morning watches you attend during your SOGP cohort.",
+      value: `${data.prayerDaysAttended} / ${requiredMorningWatches}`,
+      hint: `${data.cohort.assessmentPolicy.requiredPrayerWatchPercent}% required`,
+      href: "/dashboard/prayer-watch",
+      Icon: Sunrise,
+    },
+    {
+      title: "Daily Pleros Podcast",
+      description: "Listen to and log one distinct podcast episode every cohort day.",
+      value: `${data.podcastDaysLogged} / ${cohortDays}`,
+      hint: "100% required",
+      href: "/dashboard/podcast",
+      Icon: Podcast,
+    },
+  ];
+
+  return (
+    <section id="progress" className="grid gap-3">
+      <div className="flex items-end justify-between gap-3">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-brand-blue)]">Mandatory formation</p>
+          <h2 className="mt-1 font-[var(--font-sen)] text-xl font-semibold tracking-[-0.045em] text-[var(--color-text-strong)]">Keep your daily spiritual rhythm</h2>
+        </div>
+      </div>
+      <div className="grid gap-3 md:grid-cols-2">
+        {items.map(({ title, description, value, hint, href, Icon }) => (
+          <Link key={title} href={href} className="group grid min-h-48 content-between rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white p-5 transition-transform duration-150 hover:-translate-y-px">
+            <div className="flex items-start justify-between gap-3">
+              <span className="grid size-10 place-items-center rounded-full bg-[var(--color-brand-sky)]"><Icon className="size-5 text-[var(--color-brand-blue)]" /></span>
+              <div className="text-right"><strong className="font-[var(--font-sen)] text-xl text-[var(--color-brand-blue)]">{value}</strong><p className="text-[0.65rem] text-[var(--color-text-muted)]">{hint}</p></div>
+            </div>
+            <div className="grid gap-2"><h3 className="font-[var(--font-sen)] text-lg font-semibold tracking-[-0.04em] text-[var(--color-text-strong)]">{title}</h3><p className="text-xs leading-[1.5] text-[var(--color-text-muted)]">{description}</p><span className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--color-brand-blue)]">Log progress <ArrowRight className="size-3.5" /></span></div>
+          </Link>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -240,7 +300,10 @@ export function SogpDashboard() {
       </header>
       <div className="site-shell-page grid gap-5 py-8 lg:grid-cols-[15rem_minmax(0,1fr)_18rem]">
         <CurriculumRail data={data} />
-        {data.learnerState === "preparing" ? <PreparingDashboard data={data} /> : <ActiveDashboard data={data} />}
+        <div className="grid content-start gap-7">
+          {data.learnerState === "preparing" ? <PreparingDashboard data={data} /> : <ActiveDashboard data={data} />}
+          <FormationProgress data={data} />
+        </div>
         <ContextRail data={data} />
       </div>
       <nav aria-label="SOGP navigation" className="fixed inset-x-3 bottom-3 z-30 grid grid-cols-4 rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white p-1.5 shadow-[var(--shadow-lg)] lg:hidden">

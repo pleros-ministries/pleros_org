@@ -24,6 +24,7 @@
 - Telegram bot posts scheduled preparation/course/live-class announcements and admin-triggered one-off broadcasts to cohort channel. Channel messages contain no learner PII.
 - YouTube handles live classes and recordings.
 - SOGP certificate eligibility derives from configurable cohort policy. Default: 100% tracks complete, all required quizzes/written responses approved, 80% Prayer Watch participation, and zero mandatory live classes until admin sets a number.
+- Formation requirements: Morning Prayer Watch on at least 80% of cohort mornings, plus one distinct Pleros Podcast episode logged on every cohort day. Multiple podcast episodes on one Lagos date count once. Both existing tracker links and progress counts appear on learner/admin SOGP dashboards.
 - Public and learner UI use existing `app/globals.css` tokens. No token redesign.
 - Admin stays under existing `/admin` shell. SOGP route: `/admin/sogp`.
 - Client reads/mutations use TanStack Query. Route segments use Suspense and ErrorBoundary; no `isPending`/`isError` page-state branches.
