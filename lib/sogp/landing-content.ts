@@ -71,5 +71,39 @@ export const sogpLandingContent = {
     links: aboutPageMinisterFollow.links,
   },
   socialProof: [] as Array<{ quote: string; name: string }>,
-  faqs: [] as Array<{ question: string; answer: string }>,
+  faqs: [
+    {
+      question: "What does SOGP cost?",
+      answer: "Currently completely free.",
+    },
+    {
+      question: "Can I join if I attend another church?",
+      answer: "Yes. No church-membership change required.",
+    },
+    {
+      question: "Who can enrol?",
+      answer:
+        "Anyone seeking truth, purpose, spiritual growth, or answers about Christianity.",
+    },
+    {
+      question: "How long does it take?",
+      answer:
+        "Four-week guided cohort: weekday tracks and weekend live classes.",
+    },
+    {
+      question: "Is it self-paced?",
+      answer:
+        "Guided schedule, with flexibility to catch up and finish outstanding work.",
+    },
+    {
+      question: "What do I need?",
+      answer:
+        "Internet-enabled smartphone or laptop, Telegram, and Pleros Dashboard access.",
+    },
+    {
+      question: "How do I earn certification?",
+      answer:
+        "Complete required tracks and assessments, daily podcast logging, and at least 80% Morning Prayer Watch attendance.",
+    },
+  ],
 } as const;

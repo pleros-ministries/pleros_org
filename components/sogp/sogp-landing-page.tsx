@@ -10,6 +10,12 @@ import {
 import { HomepageFooter } from "@/components/home/homepage-footer";
 import { HomepageNav } from "@/components/home/homepage-nav";
 import { PublicSitePageShell } from "@/components/home/public-site-page-shell";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { sogpLandingContent as content } from "@/lib/sogp/landing-content";
 import { SogpLandingAnalytics } from "./sogp-analytics";
 
@@ -219,6 +225,36 @@ export function SogpLandingPage() {
                 </p>
               ))}
             </div>
+          </div>
+        </section>
+
+        <section className="bg-[var(--color-brand-sky)] py-20 md:py-28">
+          <div className="site-shell-page sogp-shell-page grid gap-10 md:grid-cols-[0.72fr_1.28fr] md:gap-14">
+            <div className="grid content-start gap-4">
+              <p className="site-hero-eyebrow text-[var(--color-brand-indigo)]">
+                Need to know
+              </p>
+              <h2 className="site-section-heading text-[2.3rem] text-[var(--color-brand-blue)] md:text-[3.25rem]">
+                Frequently asked questions
+              </h2>
+            </div>
+
+            <Accordion className="gap-3">
+              {content.faqs.map((faq, index) => (
+                <AccordionItem
+                  key={faq.question}
+                  value={`faq-${index + 1}`}
+                  className="rounded-[var(--radius-md)] bg-white shadow-[var(--shadow-sm)]"
+                >
+                  <AccordionTrigger className="py-5 font-[var(--font-be-vietnam-pro)] text-[0.98rem] font-semibold leading-[1.4] md:text-[1.05rem]">
+                    {faq.question}
+                  </AccordionTrigger>
+                  <AccordionContent className="font-[var(--font-be-vietnam-pro)] text-[0.93rem] leading-[1.6] md:text-[0.98rem]">
+                    <p>{faq.answer}</p>
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
           </div>
         </section>
 

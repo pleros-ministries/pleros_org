@@ -97,6 +97,7 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - Vercel project uses Hobby cron limits: keep SOGP Vercel cron at once daily (`0 5 * * *`, 06:00 WAT). Use admin bot composer for immediate sends; hourly/one-hour automation needs Pro or an external scheduler.
 - Every SOGP public/learner content wrapper must pair `site-shell-page` with `sogp-shell-page`; `site-shell-page` alone has no horizontal padding. SOGP gutters use existing public shell padding tokens at each breakpoint.
 - SOGP public landing hero uses design-system pastel `--color-brand-sky` as dominant surface, navy text/CTA, and lime only as a small accent. Do not revert the hero to a navy-dominant treatment.
+- SOGP landing FAQs belong after Benefits in a mobile-first pastel-blue/white accordion. Approved basics cover free cost, participation from another church, eligibility, four-week format, guided-but-flexible pacing, device/platform needs, and certification requirements.
 
 ## Public site visual system
 
