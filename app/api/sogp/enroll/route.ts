@@ -3,19 +3,15 @@ import { NextResponse } from "next/server";
 import { resolveDbUserId } from "@/lib/app-user";
 import {
   getOpenSogpCohort,
-  storeSogpTelegramLinkTokenHash,
   upsertSogpEnrollment,
 } from "@/lib/db/queries/sogp";
 import { sendSogpEnrollmentEmail } from "@/lib/email/send";
 import {
+  buildSogpEnrollmentRedirect,
   normalizeSogpEnrollment,
   validateSogpEnrollment,
   type SogpEnrollmentInput,
 } from "@/lib/sogp/enrollment";
-import {
-  createSogpTelegramLink,
-  getSogpTelegramLinkSecret,
-} from "@/lib/telegram/sogp";
 import { provisionWelcomeSession } from "@/lib/welcome-session";
 
 function formatCohortDates(startsAt: Date, endsAt: Date) {
@@ -52,26 +48,23 @@ export async function POST(request: Request) {
       requestHeaders: request.headers,
     });
     const userId = (await resolveDbUserId(authUser.email)) ?? authUser.id;
-    const enrollment = await upsertSogpEnrollment({
+    await upsertSogpEnrollment({
       ...values,
       cohortId: cohort.id,
       userId,
     });
 
-    const botUsername =
-      cohort.telegramBotUsername ?? process.env.TELEGRAM_SOGP_BOT_USERNAME;
-    const telegramLink = botUsername
-      ? createSogpTelegramLink({
-          enrollmentId: enrollment.id,
-          botUsername,
-          secret: getSogpTelegramLinkSecret(process.env),
-        })
-      : null;
-
-    if (telegramLink) {
-      await storeSogpTelegramLinkTokenHash(
-        enrollment.id,
-        telegramLink.tokenHash,
+    const redirect = buildSogpEnrollmentRedirect({
+      cohortChannelUrl: cohort.telegramChannelUrl,
+      configuredChannelUrl: process.env.TELEGRAM_SOGP_CHANNEL_URL,
+    });
+    if (!redirect) {
+      return NextResponse.json(
+        {
+          error:
+            "Your enrolment was saved, but the Telegram channel is not configured yet.",
+        },
+        { status: 500 },
       );
     }
 
@@ -82,15 +75,12 @@ export async function POST(request: Request) {
       cohortTitle: cohort.title,
       cohortDates: formatCohortDates(cohort.startsAt, cohort.endsAt),
       dashboardUrl,
-      telegramUrl: telegramLink?.url ?? cohort.telegramDiscussionUrl,
+      telegramUrl: redirect.telegramUrl,
     }).catch((error) => {
       console.error("SOGP enrolment email failed:", error);
     });
 
-    return NextResponse.json({
-      redirectTo: "/dashboard/sogp",
-      telegramUrl: telegramLink?.url ?? cohort.telegramDiscussionUrl,
-    });
+    return NextResponse.json(redirect);
   } catch (error) {
     console.error("SOGP enrolment failed:", error);
     return NextResponse.json(

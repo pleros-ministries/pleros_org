@@ -1,11 +1,33 @@
 import { describe, expect, test } from "vitest";
 
 import {
+  buildSogpEnrollmentRedirect,
   normalizeSogpEnrollment,
   validateSogpEnrollment,
 } from "./enrollment";
 
 describe("SOGP enrolment", () => {
+  test("redirects successful enrolments to the configured Telegram channel", () => {
+    expect(
+      buildSogpEnrollmentRedirect({
+        cohortChannelUrl: " https://t.me/cohort_channel ",
+        configuredChannelUrl: "https://t.me/default_channel",
+      }),
+    ).toEqual({
+      redirectTo: "https://t.me/cohort_channel",
+      telegramUrl: "https://t.me/cohort_channel",
+    });
+    expect(
+      buildSogpEnrollmentRedirect({
+        configuredChannelUrl: " https://t.me/pleros_sogp ",
+      }),
+    ).toEqual({
+      redirectTo: "https://t.me/pleros_sogp",
+      telegramUrl: "https://t.me/pleros_sogp",
+    });
+    expect(buildSogpEnrollmentRedirect({})).toBeNull();
+  });
+
   test("normalizes valid input and bounded attribution", () => {
     expect(
       normalizeSogpEnrollment({

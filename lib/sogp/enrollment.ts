@@ -19,6 +19,21 @@ export type SogpEnrollmentErrors = Partial<
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_PATTERN = /^[+\d][\d\s()-]{6,19}$/;
 
+export function buildSogpEnrollmentRedirect(input: {
+  cohortChannelUrl?: string | null;
+  configuredChannelUrl?: string | null;
+}) {
+  const telegramUrl =
+    input.cohortChannelUrl?.trim() || input.configuredChannelUrl?.trim();
+
+  return telegramUrl
+    ? {
+        redirectTo: telegramUrl,
+        telegramUrl,
+      }
+    : null;
+}
+
 function clean(value: unknown, maxLength: number) {
   return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
 }
