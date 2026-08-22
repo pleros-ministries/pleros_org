@@ -1170,7 +1170,7 @@ git commit -m "feat: add SOGP completion and certificates"
 - Enrolment confirmation immediately.
 - Preparation reminder daily only when content exists.
 - Track reminder at cohort-local 06:00.
-- Live-class reminder 24 hours and 1 hour before.
+- Daily live-class reminder when a class falls within the next 24 hours. One-hour automatic reminders require Vercel Pro or an external scheduler.
 - Carryover notice after cohort end.
 - Certificate email on issue.
 

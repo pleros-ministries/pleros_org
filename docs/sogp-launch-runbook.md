@@ -63,7 +63,7 @@ curl --request POST "https://api.telegram.org/bot$TELEGRAM_SOGP_BOT_TOKEN/setWeb
   --data-urlencode "secret_token=$TELEGRAM_SOGP_WEBHOOK_SECRET"
 ```
 
-Verify with `getWebhookInfo`. Admin `/admin/sogp` can preview and send one-off channel broadcasts. Hourly cron sends deduplicated preparation, track-release, and live-class messages.
+Verify with `getWebhookInfo`. Admin `/admin/sogp` can preview and send one-off channel broadcasts. Hobby-compatible daily cron runs at 05:00 UTC (06:00 WAT) and sends deduplicated preparation, newly released track, and next-24-hours live-class messages.
 
 ## Launch checklist
 

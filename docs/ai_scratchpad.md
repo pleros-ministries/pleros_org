@@ -94,6 +94,7 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - Verified Telegram bot is channel admin and can post/edit messages; public channel is `https://t.me/pleros_sogp`. No linked discussion group existed at verification time, so do not promise interactive community until one is attached.
 - SOGP formation requirements are certificate-gating: log Morning Prayer Watch on at least 80% of cohort mornings, and log one distinct Pleros Podcast episode on every cohort day (100%; multiple episodes on one Lagos calendar day count once). Dashboard must link to both existing trackers and show both counts/targets.
 - Prayer Watch attendance is session-aware (`morning`, `afternoon`, `evening`); legacy undifferentiated records remain `unspecified` and do not count as SOGP morning attendance.
+- Vercel project uses Hobby cron limits: keep SOGP Vercel cron at once daily (`0 5 * * *`, 06:00 WAT). Use admin bot composer for immediate sends; hourly/one-hour automation needs Pro or an external scheduler.
 
 ## Public site visual system
 

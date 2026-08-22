@@ -26,18 +26,14 @@ type ReminderInput = {
   }>;
 };
 
-function withinMinutes(value: Date, target: Date, minutes: number) {
-  return Math.abs(value.getTime() - target.getTime()) <= minutes * 60_000;
-}
-
 export function buildSogpChannelReminderCandidates(
   input: ReminderInput,
 ): SogpChannelReminder[] {
   const events: SogpChannelReminder[] = [];
-  const oneHourAgo = new Date(input.now.getTime() - 60 * 60_000);
+  const oneDayAgo = new Date(input.now.getTime() - 24 * 60 * 60_000);
 
   for (const track of input.tracks) {
-    if (track.releaseAt <= input.now && track.releaseAt > oneHourAgo) {
+    if (track.releaseAt <= input.now && track.releaseAt > oneDayAgo) {
       events.push({
         key: `sogp:${input.cohort.id}:track:${track.id}:released`,
         kind: "track_release",
@@ -47,30 +43,20 @@ export function buildSogpChannelReminderCandidates(
   }
 
   for (const liveClass of input.liveClasses) {
-    const twentyFourHoursBefore = new Date(
-      liveClass.startsAt.getTime() - 24 * 60 * 60_000,
-    );
-    const oneHourBefore = new Date(liveClass.startsAt.getTime() - 60 * 60_000);
+    const timeUntilClass = liveClass.startsAt.getTime() - input.now.getTime();
     const suffix = liveClass.youtubeLiveUrl
       ? `\n\nWatch: ${liveClass.youtubeLiveUrl}`
       : "\n\nYour joining link will appear in the SOGP dashboard.";
-    if (withinMinutes(input.now, twentyFourHoursBefore, 30)) {
+    if (timeUntilClass > 0 && timeUntilClass <= 24 * 60 * 60_000) {
       events.push({
         key: `sogp:${input.cohort.id}:live:${liveClass.id}:24h`,
         kind: "live_class",
         message: `${liveClass.title} starts in 24 hours.${suffix}`,
       });
     }
-    if (withinMinutes(input.now, oneHourBefore, 30)) {
-      events.push({
-        key: `sogp:${input.cohort.id}:live:${liveClass.id}:1h`,
-        kind: "live_class",
-        message: `${liveClass.title} starts in one hour.${suffix}`,
-      });
-    }
   }
 
-  if (input.cohort.status === "preparing" && input.now.getUTCHours() === 7) {
+  if (input.cohort.status === "preparing") {
     const days = Math.ceil(
       (input.cohort.startsAt.getTime() - input.now.getTime()) / 86_400_000,
     );
