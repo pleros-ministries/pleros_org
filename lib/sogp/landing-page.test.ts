@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, test } from "vitest";
 
 import {
@@ -7,11 +9,11 @@ import {
 
 describe("SOGP landing content", () => {
   test("covers the supplied launch copy", () => {
-    expect(sogpLandingContent.hero.title).toContain("Find Truth");
+    expect(sogpLandingContent.hero.titleLines[0]).toContain("Find Truth");
     expect(sogpLandingContent.hero.ctaHref).toBe("/sogp/enroll");
     expect(sogpLandingContent.outcomes).toHaveLength(5);
     expect(sogpLandingContent.audiences).toHaveLength(7);
-    expect(sogpLandingContent.structure.title).toBe("The Structure of SOGP");
+    expect(sogpLandingContent.structure.title).toBe("The structure of SOGP");
     expect(sogpLandingContent.tools.items).toHaveLength(2);
   });
 
@@ -42,6 +44,21 @@ describe("SOGP landing content", () => {
         label: "Level 2",
         numbers: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
       },
+      {
+        value: "level-3",
+        label: "Level 3",
+        numbers: [17, 18, 19, 20],
+      },
     ]);
+  });
+
+  test("keeps the landing page distraction-free and action-oriented", () => {
+    const source = readFileSync(
+      join(process.cwd(), "components", "sogp", "sogp-landing-page.tsx"),
+      "utf8",
+    );
+
+    expect(source).not.toContain("<HomepageNav");
+    expect(source.match(/<SectionCta/g)?.length ?? 0).toBeGreaterThanOrEqual(12);
   });
 });

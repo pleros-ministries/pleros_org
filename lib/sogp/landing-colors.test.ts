@@ -2,30 +2,27 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { expect, test } from "vitest";
 
-test("uses design-system pastel blue as SOGP landing hero surface", () => {
+test("uses a white SOGP hero with a pastel-blue school-name accent", () => {
   const source = readFileSync(
     join(process.cwd(), "components", "sogp", "sogp-landing-page.tsx"),
     "utf8",
   );
 
+  expect(source).toContain('<section className="bg-white">');
   expect(source).toContain(
-    'bg-[var(--color-brand-sky)] text-[var(--color-brand-blue)]',
-  );
-  expect(source).toContain(
-    'text-[clamp(2.8rem,6.5vw,5.8rem)] leading-[0.92] text-[var(--color-brand-blue)]',
+    'inline-block bg-[var(--color-brand-sky)] px-3 py-2',
   );
   expect(source).not.toContain(
     'bg-[var(--color-brand-lime)] py-5 text-[var(--color-brand-blue)]',
   );
 });
 
-test("keeps white facilitator social icons visible on brand-blue controls", () => {
+test("keeps facilitator social links out of the distraction-free landing page", () => {
   const source = readFileSync(
     join(process.cwd(), "components", "sogp", "sogp-landing-page.tsx"),
     "utf8",
   );
 
-  expect(source).toContain(
-    'className="grid size-11 place-items-center rounded-full bg-[var(--color-brand-blue)]',
-  );
+  expect(source).not.toContain("content.facilitator.links");
+  expect(source).toContain("content.facilitator.description");
 });
