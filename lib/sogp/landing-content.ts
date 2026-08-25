@@ -13,6 +13,7 @@ export const sogpLandingContent = {
     ctaLabel: "Enroll for free",
     ctaHref: "/sogp/enroll",
   },
+  questionsTitle: "What are you seeking?",
   questions: [
     "Do you have doubts about your faith, beliefs, or religious worldview?",
     "Do you wonder what exactly your purpose in life is?",

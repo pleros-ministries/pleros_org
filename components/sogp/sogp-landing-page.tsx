@@ -268,13 +268,13 @@ export function SogpLandingPage() {
         <section className="bg-[var(--color-brand-sky)] py-14 md:py-20">
           <div className="site-shell-page sogp-shell-page grid gap-8">
             <h2 className="site-section-heading max-w-[13ch] text-[2.35rem] text-[var(--color-brand-blue)] md:text-[3.4rem]">
-              Are these your questions?
+              {content.questionsTitle}
             </h2>
             <ol className="grid border-t border-[rgba(5,20,128,0.16)] md:grid-cols-2">
               {content.questions.map((question, index) => (
                 <li
                   key={question}
-                  className="grid min-h-36 grid-cols-[2.5rem_1fr] gap-3 border-b border-[rgba(5,20,128,0.16)] py-5 md:min-h-44 md:gap-5 md:odd:pr-8 md:even:border-l md:even:pl-8"
+                  className="grid grid-cols-[2.5rem_1fr] gap-3 border-b border-[rgba(5,20,128,0.16)] pb-4 pt-5 md:min-h-36 md:gap-5 md:py-5 md:odd:pr-8 md:even:border-l md:even:pl-8"
                 >
                   <span className="font-[var(--font-sen)] text-sm font-semibold tabular-nums text-[var(--color-brand-blue)]">
                     {String(index + 1).padStart(2, "0")}

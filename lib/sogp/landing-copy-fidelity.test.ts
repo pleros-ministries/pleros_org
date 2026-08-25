@@ -13,6 +13,7 @@ test("uses the approved conversion-focused SOGP hero and reader questions", () =
   expect(sogpLandingContent.hero.description).toBe(
     "Get answers to difficult questions about God, gain clarity on God’s purpose for your life, and receive the transformation and empowerment needed to fulfill it.",
   );
+  expect(sogpLandingContent.questionsTitle).toBe("What are you seeking?");
   expect(sogpLandingContent.questions).toEqual([
     "Do you have doubts about your faith, beliefs, or religious worldview?",
     "Do you wonder what exactly your purpose in life is?",
