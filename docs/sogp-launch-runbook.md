@@ -3,7 +3,7 @@
 ## Routes
 
 - Public: `/sogp`
-- Enrolment: `/sogp/enroll`
+- Enrolment: `/sogp/enrol`
 - Learner: `/dashboard/sogp`
 - Admin: `/admin/sogp`
 - Telegram webhook: `/api/telegram/sogp/webhook`
@@ -67,7 +67,7 @@ Verify with `getWebhookInfo`. Admin `/admin/sogp` can preview and send one-off c
 
 ## Launch checklist
 
-1. Confirm `/sogp` and `/sogp/enroll` render on mobile and desktop.
+1. Confirm `/sogp` and `/sogp/enrol` render on mobile and desktop.
 2. Submit one real internal enrolment; verify session, enrolment row, email, dashboard, and Telegram deep link.
 3. Add four approved Level 3 tracks and run curriculum seed.
 4. Confirm `/admin/sogp` shows `20 / 20` readiness.

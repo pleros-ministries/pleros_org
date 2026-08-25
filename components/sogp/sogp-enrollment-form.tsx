@@ -17,7 +17,7 @@ type EnrollmentResponse = {
 
 async function submitEnrollment(formData: FormData) {
   const params = new URLSearchParams(window.location.search);
-  const response = await fetch("/api/sogp/enroll", {
+  const response = await fetch("/api/sogp/enrol", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({

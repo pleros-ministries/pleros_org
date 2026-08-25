@@ -11,7 +11,7 @@ export const sogpLandingContent = {
     description:
       "Get answers to difficult questions about God, gain clarity on God’s purpose for your life, and receive the transformation and empowerment needed to fulfil it.",
     ctaLabel: "Enrol for free",
-    ctaHref: "/sogp/enroll",
+    ctaHref: "/sogp/enrol",
   },
   questionsTitle: "What are you seeking?",
   questions: [

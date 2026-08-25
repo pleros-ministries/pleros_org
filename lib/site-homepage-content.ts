@@ -149,8 +149,8 @@ export const homePathwayCards: HomePathwayCard[] = [
     description:
       "Tailored for those who want to grow and be transformed spiritually to fulfil God’s purpose",
     mobileDescription: "Want to grow and be trained to fulfil purpose?",
-    href: "/fulfill",
-    headerImageSrc: "/site/home/assets/pathway-card-headers/fulfill-card-header.webp",
+    href: "/fulfil",
+    headerImageSrc: "/site/home/assets/pathway-card-headers/fulfil-card-header.webp",
     headerImageClassName: "object-fill",
     arrowImageSrc: "/site/home/assets/card-arrows/fulfil-card-arrow.svg",
     surfaceClassName: "bg-[#1A4A4D] text-white",
@@ -179,7 +179,7 @@ export const homeCarouselSlides: HomeCarouselSlide[] = [
   {
     id: "how-to-fulfil-gods-purpose",
     text: "How to Fulfil God's Purpose",
-    href: "/fulfill",
+    href: "/fulfil",
   },
 
 

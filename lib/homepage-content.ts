@@ -96,7 +96,7 @@ export const pathwayCards: PathwayCard[] = [
     title: "Fulfil Purpose",
     mobileDescription: "Follow God with clarity.",
     description: "Find out what God's purpose for your life really is.",
-    href: "/fulfill",
+    href: "/fulfil",
     themeClass: "theme-fulfil",
     badgeVariant: "fulfil",
   },

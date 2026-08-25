@@ -83,7 +83,7 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 
 ## SOGP product rules
 
-- Canonical routes are `/sogp`, `/sogp/enroll`, `/dashboard/sogp`, and `/admin/sogp`. Permanently remove old `school-of-purpose` routes and aliases; do not preserve redirects.
+- Canonical routes are `/sogp`, `/sogp/enrol`, `/dashboard/sogp`, and `/admin/sogp`; `/sogp/enroll` permanently redirects to `/sogp/enrol`. Permanently remove old `school-of-purpose` routes and aliases; do not preserve redirects for those removed routes.
 - SOGP is a guided four-week cohort experience; PPC remains a separate flexible, self-paced product. SOGP may reuse PPC lesson/progress records without inheriting PPC UI styling.
 - First SOGP curriculum is 20 weekday tracks: all Level 1, all Level 2, plus four explicitly selected Level 3 tracks. Weekends are for YouTube live classes.
 - Telegram provides launch community, text, and voice notes. After DB persistence, enrollment redirects directly to the configured Telegram channel; do not use bot deep links or identity-linking in this flow. Bot handles scheduled/admin-triggered channel broadcasts only; never post learner PII. Do not build native discussion or voice storage for launch.
@@ -120,8 +120,8 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - On the homepage pathways section, give mobile visitors breathable outer space and a small, deliberate carousel-to-card separation; preserve card proportions rather than making cards taller to create that space.
 - Public pathway copy should use Pleros ministry language and internal concepts, not generic outsider language.
 - `/fcc` is the canonical Fullness of Christ Church route; preserve `/fcchurch` as a legacy redirect when route references are updated.
-- `/fulfill` is the canonical public route and visible spelling; preserve a redirect from `/fulfil`. Keep internal theme token names stable.
-- `/fulfill` is the public entry point into PPC and should use PPC-specific language, levels, and growth structure.
+- `/fulfil` is the canonical public route; preserve a permanent redirect from `/fulfill`. Keep internal theme token names stable.
+- `/fulfil` is the public entry point into PPC and should use PPC-specific language, levels, and growth structure.
 - Do not touch `components/home/fulfil-page-view.tsx` or `lib/fulfil-page-content.ts` while the user is actively editing them unless explicitly asked.
 - The current Pleros Podcast presentation is intentional; limit `/podcast` feedback to functional blockers, tests, responsiveness, or explicitly requested polish.
 

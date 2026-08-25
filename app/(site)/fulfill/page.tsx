@@ -1,13 +1,5 @@
-import type { Metadata } from "next";
+import { permanentRedirect } from "next/navigation";
 
-import { FulfillPageView } from "../../../components/home/fulfill-page-view";
-
-export const metadata: Metadata = {
-  title: "Fulfil Purpose",
-  description:
-    "Take the next step into spiritual growth and see how PPC helps you fulfil God's purpose.",
-};
-
-export default function FulfillPage() {
-  return <FulfillPageView />;
+export default function LegacyFulfillPage() {
+  permanentRedirect("/fulfil");
 }

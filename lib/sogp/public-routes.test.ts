@@ -7,9 +7,9 @@ const root = process.cwd();
 describe("SOGP public routes", () => {
   test("uses only canonical /sogp public pages", () => {
     const landing = join(root, "app", "(site)", "sogp", "page.tsx");
-    const enroll = join(root, "app", "(site)", "sogp", "enroll", "page.tsx");
+    const enrol = join(root, "app", "(site)", "sogp", "enrol", "page.tsx");
     expect(existsSync(landing)).toBe(true);
-    expect(existsSync(enroll)).toBe(true);
+    expect(existsSync(enrol)).toBe(true);
     expect(
       existsSync(join(root, "app", "(site)", "school-of-purpose")),
     ).toBe(false);
@@ -20,6 +20,6 @@ describe("SOGP public routes", () => {
       join(root, "lib", "sogp", "landing-content.ts"),
       "utf8",
     );
-    expect(source).toContain('ctaHref: "/sogp/enroll"');
+    expect(source).toContain('ctaHref: "/sogp/enrol"');
   });
 });

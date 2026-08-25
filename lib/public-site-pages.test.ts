@@ -7,7 +7,7 @@ describe("public site pages", () => {
     expect(publicSitePages.map((page) => page.slug)).toEqual([
       "questions",
       "purpose",
-      "fulfill",
+      "fulfil",
       "podcast",
       "library",
       "about",

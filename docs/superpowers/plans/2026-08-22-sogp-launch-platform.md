@@ -13,7 +13,7 @@
 ## Locked product decisions
 
 - Canonical public route: `/sogp`.
-- Canonical enrolment route: `/sogp/enroll`.
+- Canonical enrolment route: `/sogp/enrol`.
 - Canonical learner route: `/dashboard/sogp`.
 - Remove old `school-of-purpose` route files and references; do not preserve redirects or parallel route aliases.
 - PPC remains available at `/ppc`; SOGP reuses PPC lesson records without adopting PPC UI styling.
@@ -449,7 +449,7 @@ export const sogpLandingContent = {
     title: "Find truth. Discover God's purpose. Grow to fulfil it.",
     description: "Get answers to difficult questions about God, gain clarity about His purpose for your life, and receive the transformation and strength to fulfil it.",
     ctaLabel: "Enrol for free",
-    ctaHref: "/sogp/enroll",
+    ctaHref: "/sogp/enrol",
   },
   structure: { durationDays: 28, trackCount: 20, liveClassCount: 4 },
   tools: [
@@ -520,9 +520,9 @@ git commit -m "feat: add SOGP public landing page"
 ### Task 5: Build enrolment and session handoff
 
 **Files:**
-- Create: `app/(site)/sogp/enroll/page.tsx`
+- Create: `app/(site)/sogp/enrol/page.tsx`
 - Create: `components/sogp/sogp-enrollment-form.tsx`
-- Create: `app/api/sogp/enroll/route.ts`
+- Create: `app/api/sogp/enrol/route.ts`
 - Create: `lib/sogp/enrollment.ts`
 - Create: `lib/sogp/enrollment.test.ts`
 - Create: `lib/telegram/sogp.ts`
@@ -613,7 +613,7 @@ Manual: submit new and existing email; both land on `/dashboard/sogp` with one e
 - [ ] **Step 6: Commit**
 
 ```bash
-git add 'app/(site)/sogp/enroll/page.tsx' components/sogp/sogp-enrollment-form.tsx app/api/sogp/enroll/route.ts lib/sogp/enrollment.ts lib/sogp/enrollment.test.ts lib/telegram/sogp.ts lib/telegram/sogp.test.ts lib/email/send.ts lib/email/sogp-enrollment.test.ts
+git add 'app/(site)/sogp/enrol/page.tsx' components/sogp/sogp-enrollment-form.tsx app/api/sogp/enrol/route.ts lib/sogp/enrollment.ts lib/sogp/enrollment.test.ts lib/telegram/sogp.ts lib/telegram/sogp.test.ts lib/email/send.ts lib/email/sogp-enrollment.test.ts
 git commit -m "feat: add SOGP enrolment funnel"
 ```
 

@@ -1,5 +1,13 @@
-import { redirect } from "next/navigation";
+import type { Metadata } from "next";
 
-export default function LegacyFulfilPage() {
-  redirect("/fulfill");
+import { FulfillPageView } from "../../../components/home/fulfill-page-view";
+
+export const metadata: Metadata = {
+  title: "Fulfil Purpose",
+  description:
+    "Take the next step into spiritual growth and see how PPC helps you fulfil God's purpose.",
+};
+
+export default function FulfilPage() {
+  return <FulfillPageView />;
 }

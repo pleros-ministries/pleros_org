@@ -10,7 +10,7 @@ import {
 describe("SOGP landing content", () => {
   test("covers the supplied launch copy", () => {
     expect(sogpLandingContent.hero.titleLines[0]).toContain("Find Truth");
-    expect(sogpLandingContent.hero.ctaHref).toBe("/sogp/enroll");
+    expect(sogpLandingContent.hero.ctaHref).toBe("/sogp/enrol");
     expect(sogpLandingContent.outcomes).toHaveLength(5);
     expect(sogpLandingContent.audiences).toHaveLength(7);
     expect(sogpLandingContent.structure.title).toBe("The structure of SOGP");

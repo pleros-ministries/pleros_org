@@ -4,7 +4,7 @@ import { describe, expect, test } from "vitest";
 
 describe("fulfill page", () => {
   test("uses a dedicated route and points visitors into PPC as the next step", () => {
-    const routePath = join(process.cwd(), "app", "(site)", "fulfill", "page.tsx");
+    const routePath = join(process.cwd(), "app", "(site)", "fulfil", "page.tsx");
     const viewPath = join(
       process.cwd(),
       "components",
