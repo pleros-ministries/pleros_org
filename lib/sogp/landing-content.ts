@@ -115,7 +115,7 @@ export const sogpLandingContent = {
     title: "Enrollment requirement",
     paragraphs: [
       "The School of God’s Purpose is an extremely valuable platform that enlightens you about the truth of existence, helps you clearly discover God’s specific purpose for your life, and transforms you to fulfill all God wants you to.",
-      "As valuable as it is, you can access this school for free if you enroll today. Take advantage of this offer while it lasts, before logistical costs may be required later.",
+      "As valuable as it is, you can access this school for free if you enrol today. Take advantage of this offer while it lasts; logistical costs may apply in the future.",
       "You are also welcome to support and partner with our vision to see every person saved, established, and fulfilling God’s purpose. You will be able to access the partnership section after enrollment.",
     ],
   },
