@@ -114,7 +114,7 @@ describe("site home page", () => {
     expect(cardSource).toContain("px-3 py-1.5");
     expect(cardSource).toContain("font-medium");
     expect(contentSource).toContain('title: "Find Purpose"');
-    expect(contentSource).toContain('mobileDescription: "Want to grow and be trained to fulfill purpose?"');
+    expect(contentSource).toContain('mobileDescription: "Want to grow and be trained to fulfil purpose?"');
   });
 
   test("keeps the dashboard menu link pointed to /dashboard and current church pathway copy", () => {
@@ -126,10 +126,10 @@ describe("site home page", () => {
     expect(contentSource).toContain('{ href: "/dashboard", label: "Dashboard" }');
     expect(contentSource).toContain('title: "Our Church Ministry"');
     expect(contentSource).toContain(
-      'description: "We are here to help you fulfill God\'s purpose. Fellowship with us. "',
+      'description: "We are here to help you fulfil God\'s purpose. Fellowship with us. "',
     );
     expect(contentSource).toContain(
-      'mobileDescription: "We are here to help you fulfill God\'s purpose. Fellowship with us."',
+      'mobileDescription: "We are here to help you fulfil God\'s purpose. Fellowship with us."',
     );
   });
 

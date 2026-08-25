@@ -2,7 +2,7 @@ export const partnerPageHero = {
   title: "Partner with Us",
   description: "Building Together for God’s Purpose",
   intro:
-    "At PLEROS Ministries & Missions, partnership is how we join hands to reach people across generations with the word of truth of the Gospel, through every possible means online and offline, so they are saved, established, and helped to fulfill God’s purpose.",
+    "At PLEROS Ministries & Missions, partnership is how we join hands to reach people across generations with the word of truth of the Gospel, through every possible means online and offline, so they are saved, established, and helped to fulfil God’s purpose.",
   ctaLabel: "Become a partner",
 } as const;
 
@@ -26,12 +26,12 @@ export const partnerReasons = [
     step: "3",
     title: "Extend the Influence of Truth",
     description:
-      "Your support enables us to reach more nations, plant seeds of truth, and help many fulfill God’s purpose.",
+      "Your support enables us to reach more nations, plant seeds of truth, and help many fulfil God’s purpose.",
   },
 ] as const;
 
 export const partnerImpactItems = [
-  "Teaching & Discipleship Programs",
+  "Teaching & Discipleship Programmes",
   "Missionary Outreach & Evangelism",
   "Digital Ministry & Online Resources",
 ] as const;

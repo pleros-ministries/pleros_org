@@ -6,7 +6,7 @@ import { pushSubscriptions } from "@/lib/db/schema";
 export async function POST(request: Request) {
   const session = await getAppSession();
   if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
   }
 
   const body = await request.json();

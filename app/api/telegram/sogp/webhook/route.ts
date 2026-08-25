@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     "x-telegram-bot-api-secret-token",
   );
   if (!expectedSecret || providedSecret !== expectedSecret) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
   }
   const update = await request.json().catch(() => null);
   const start = parseSogpTelegramStart(update ?? {});

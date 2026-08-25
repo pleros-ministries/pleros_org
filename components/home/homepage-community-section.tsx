@@ -24,7 +24,7 @@ export function HomepageCommunitySection() {
               Join Pleros Community Channel
             </h2>
             <p className="site-section-intro max-w-[22.5rem] text-white/90 sm:max-w-[28.125rem]">
-              This is a community open to anyone who desires edification via platforms of the Word and prayer designed to help you walk in and fulfill God&apos;s purpose daily.
+              This is a community open to anyone who desires edification via platforms of the Word and prayer designed to help you walk in and fulfil God&apos;s purpose daily.
 
             </p>
           </div>

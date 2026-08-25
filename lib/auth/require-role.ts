@@ -4,7 +4,7 @@ import type { AppRole } from "@/lib/app-role";
 export async function requireRole(...allowed: AppRole[]): Promise<AppSession> {
   const session = await getAppSession();
   if (!session) {
-    throw new Error("Unauthorized: not signed in");
+    throw new Error("Unauthorised: not signed in");
   }
   if (!allowed.includes(session.user.role)) {
     throw new Error(`Forbidden: ${session.user.role} cannot perform this action`);

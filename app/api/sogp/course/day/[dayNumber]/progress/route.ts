@@ -13,7 +13,7 @@ export async function POST(
   { params }: { params: Promise<{ dayNumber: string }> },
 ) {
   const session = await getAppSession();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session) return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
   const { dayNumber: rawDayNumber } = await params;
   const dayNumber = Number(rawDayNumber);
   const body = (await request.json().catch(() => null)) as { signal?: string } | null;

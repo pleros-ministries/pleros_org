@@ -12,7 +12,7 @@ export async function GET(
 ) {
   const session = await getAppSession();
   if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
   }
 
   const { levelId: levelIdStr } = await params;

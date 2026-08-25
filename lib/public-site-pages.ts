@@ -36,8 +36,8 @@ export const publicSitePages: PublicSitePage[] = [
   },
   {
     slug: "fulfill",
-    eyebrow: "Fulfill",
-    title: "Fulfill Purpose",
+    eyebrow: "Fulfil",
+    title: "Fulfil Purpose",
     description:
       "A public overview for people ready to grow in consistency, maturity, and practical obedience to God's call.",
     bullets: [

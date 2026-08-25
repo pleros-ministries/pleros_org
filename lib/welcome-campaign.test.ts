@@ -158,7 +158,7 @@ describe("welcome campaign pages", () => {
 describe("welcome campaign helpers", () => {
   test("builds the normalized welcome share message", () => {
     expect(buildWelcomeShareMessage("https://pleros.org")).toBe(
-      "I thought this free book from Pleros would bless you. It gives clear answers about purpose, why we exist, and how to fulfill God's will. You can access it here: https://pleros.org/welcome",
+      "I thought this free book from Pleros would bless you. It gives clear answers about purpose, why we exist, and how to fulfil God's will. You can access it here: https://pleros.org/welcome",
     );
   });
 
@@ -168,7 +168,7 @@ describe("welcome campaign helpers", () => {
 
     expect(url.origin).toBe("https://wa.me");
     expect(url.searchParams.get("text")).toBe(
-      "I thought this free book from Pleros would bless you. It gives clear answers about purpose, why we exist, and how to fulfill God's will. You can access it here: https://pleros.org/welcome",
+      "I thought this free book from Pleros would bless you. It gives clear answers about purpose, why we exist, and how to fulfil God's will. You can access it here: https://pleros.org/welcome",
     );
   });
 

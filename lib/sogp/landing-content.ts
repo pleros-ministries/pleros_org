@@ -5,12 +5,12 @@ export const sogpLandingContent = {
     titleLines: [
       "Find Truth,",
       "Discover God’s Purpose,",
-      "Grow to fulfill it,",
+      "Grow to fulfil it,",
       "with the School of God’s Purpose",
     ],
     description:
-      "Get answers to difficult questions about God, gain clarity on God’s purpose for your life, and receive the transformation and empowerment needed to fulfill it.",
-    ctaLabel: "Enroll for free",
+      "Get answers to difficult questions about God, gain clarity on God’s purpose for your life, and receive the transformation and empowerment needed to fulfil it.",
+    ctaLabel: "Enrol for free",
     ctaHref: "/sogp/enroll",
   },
   questionsTitle: "What are you seeking?",
@@ -19,19 +19,19 @@ export const sogpLandingContent = {
     "Do you wonder what exactly your purpose in life is?",
     "Do you struggle to grow spiritually and break free from habits and addictions?",
     "Do you desire to function in the healing power and the supernatural?",
-    "Do you want to walk more strongly in the strength and power of the Spirit to fulfill God’s purpose for you?",
+    "Do you want to walk more strongly in the strength and power of the Spirit to fulfil God’s purpose for you?",
   ],
   outcomes: [
     "Gain clarity on difficult questions about God, His truth, and His Word",
     "Discover God’s purpose for your life",
     "Be transformed and strengthened to walk in God’s will",
     "Learn how to receive and minister healing and the supernatural",
-    "Be empowered to pursue and fulfill God’s purpose for your life",
+    "Be empowered to pursue and fulfil God’s purpose for your life",
   ],
   definition: {
     title: "What is SOGP?",
     description:
-      "The School of God’s Purpose is a single platform that answers life’s most foundational questions, edifies you for radical transformation, and empowers and stirs you to fulfill God’s purpose for your life.",
+      "The School of God’s Purpose is a single platform that answers life’s most foundational questions, edifies you for radical transformation, and empowers and stirs you to fulfil God’s purpose for your life.",
     outcomesIntro: "With SOGP, you will:",
   },
   audiences: [
@@ -41,7 +41,7 @@ export const sogpLandingContent = {
     "Those desiring to receive and minister divine healing for themselves and others.",
     "Those desiring empowerment to walk and function in the supernatural.",
     "Those seeking God’s wisdom for their careers, businesses, finances, and other natural pursuits.",
-    "Anyone who wants a stronger walk with God and hungers to fulfill His purpose.",
+    "Anyone who wants a stronger walk with God and hungers to fulfil His purpose.",
   ],
   curriculum: {
     title: "Curriculum of SOGP",
@@ -60,7 +60,7 @@ export const sogpLandingContent = {
         title: "The New Creation: Who You Are in Christ",
       },
       { level: "Level 1", title: "Faith Stand: How to Grow in Christ" },
-      { level: "Level 1", title: "Commitment: How to Fulfill Purpose" },
+      { level: "Level 1", title: "Commitment: How to Fulfil Purpose" },
       { level: "Level 2", title: "Introduction to Doctrinal Summaries" },
       { level: "Level 2", title: "Bibliology" },
       { level: "Level 2", title: "God and His Eternal Purpose" },
@@ -112,11 +112,11 @@ export const sogpLandingContent = {
     ],
   },
   enrollment: {
-    title: "Enrollment requirement",
+    title: "Enrolment requirement",
     paragraphs: [
-      "The School of God’s Purpose is an extremely valuable platform that enlightens you about the truth of existence, helps you clearly discover God’s specific purpose for your life, and transforms you to fulfill all God wants you to.",
+      "The School of God’s Purpose is an extremely valuable platform that enlightens you about the truth of existence, helps you clearly discover God’s specific purpose for your life, and transforms you to fulfil all God wants you to.",
       "As valuable as it is, you can access this school for free if you enrol today. Take advantage of this offer while it lasts; logistical costs may apply in the future.",
-      "You are also welcome to support and partner with our vision to see every person saved, established, and fulfilling God’s purpose. You will be able to access the partnership section after enrollment.",
+      "You are also welcome to support and partner with our vision to see every person saved, established, and fulfilling God’s purpose. You will be able to access the partnership section after enrolment.",
     ],
   },
   tools: {
@@ -142,7 +142,7 @@ export const sogpLandingContent = {
     name: aboutPageMinisterFollow.name,
     imageSrc: "/assets/home/pastor.jpg",
     description:
-      "Akinwunmi Akinbile is the leader of Pleros Ministries and Missions and the pastor of Fullness of Christ Church. His passion and mission are to reach all people by all means with the Gospel—leading them into salvation, establishment, and the fulfillment of God’s purpose.",
+      "Akinwunmi Akinbile is the leader of Pleros Ministries and Missions and the pastor of Fullness of Christ Church. His passion and mission are to reach all people by all means with the Gospel—leading them into salvation, establishment, and the fulfilment of God’s purpose.",
   },
   socialProof: {
     title: "Join an ever-increasing number of changed lives",
@@ -171,7 +171,7 @@ export const sogpLandingContent = {
       answer: "Yes. No church-membership change required.",
     },
     {
-      question: "Who can enroll?",
+      question: "Who can enrol?",
       answer:
         "Anyone seeking truth, purpose, spiritual growth, or answers about Christianity.",
     },

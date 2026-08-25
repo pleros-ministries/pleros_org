@@ -86,14 +86,14 @@ export const pathwayCards: PathwayCard[] = [
     title: "Discover Purpose",
     mobileDescription: "Grow to discover calling.",
     description:
-      "Start your journey of growth to fulfill God's purpose for your life.",
+      "Start your journey of growth to fulfil God's purpose for your life.",
     href: "/purpose",
     themeClass: "theme-purpose",
     badgeVariant: "purpose",
   },
   {
     key: "fulfil",
-    title: "Fulfill Purpose",
+    title: "Fulfil Purpose",
     mobileDescription: "Follow God with clarity.",
     description: "Find out what God's purpose for your life really is.",
     href: "/fulfill",

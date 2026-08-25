@@ -13,7 +13,7 @@ test("provides the approved basic SOGP enrolment FAQs", () => {
       answer: "Yes. No church-membership change required.",
     },
     {
-      question: "Who can enroll?",
+      question: "Who can enrol?",
       answer:
         "Anyone seeking truth, purpose, spiritual growth, or answers about Christianity.",
     },

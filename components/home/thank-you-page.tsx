@@ -169,7 +169,7 @@ export function ThankYouPage({ name }: ThankYouPageProps) {
                 <div className={`grid gap-3 ${thankYouDarkBodyCopy}`}>
                   <p>
                     Simply share the gift of purpose with them today, and set
-                    them on course to fulfill God&apos;s will for their lives.
+                    them on course to fulfil God&apos;s will for their lives.
                   </p>
                   <p>
                     You can share the link across all social media platforms
@@ -186,7 +186,7 @@ export function ThankYouPage({ name }: ThankYouPageProps) {
                   <p>
                     When you share this gift, we give you early access to two of
                     the most transformative books you may ever read, and they
-                    will help you fulfill God&apos;s purpose for you:
+                    will help you fulfil God&apos;s purpose for you:
                   </p>
                   <div className="grid grid-cols-2 gap-3 pt-2">
                     {extraGifts.map((gift) => (

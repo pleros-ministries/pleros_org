@@ -128,7 +128,7 @@ export function AboutPageView() {
                 <strong className="font-semibold">Pleres</strong>
                 <span>{" (full), "}</span>
                 <strong className="font-semibold">Pleroo</strong>
-                <span>{" (fulfill)."}</span>
+                <span>{" (fulfil)."}</span>
               </p>
             </div>
 

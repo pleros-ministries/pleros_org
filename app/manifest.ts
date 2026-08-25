@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "Pleros Ministries and Missions",
     short_name: "Pleros",
     description:
-      "Pleros Ministries and Missions — helping you fulfill God's purpose.",
+      "Pleros Ministries and Missions — helping you fulfil God's purpose.",
     start_url: "/",
     display: "standalone",
     background_color: "#011585",

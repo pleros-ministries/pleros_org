@@ -471,7 +471,7 @@ export function SogpLandingPage() {
         <section className="bg-[var(--color-brand-blue)] py-14 text-white md:py-18">
           <div className="site-shell-page sogp-shell-page grid justify-items-start gap-5 md:justify-items-center md:text-center">
             <h2 className="site-section-heading max-w-[17ch] text-[2.2rem] text-white md:text-[3rem]">
-              Find truth. Discover God’s purpose. Grow to fulfill it.
+              Find truth. Discover God’s purpose. Grow to fulfil it.
             </h2>
             <SectionCta inverse />
           </div>

@@ -145,10 +145,10 @@ export const homePathwayCards: HomePathwayCard[] = [
     headerClassName: "bg-[#FFE9BF]",
   },
   {
-    title: "Fulfill Purpose",
+    title: "Fulfil Purpose",
     description:
-      "Tailored for those who want to grow and be transformed spiritually to fulfill God’s purpose",
-    mobileDescription: "Want to grow and be trained to fulfill purpose?",
+      "Tailored for those who want to grow and be transformed spiritually to fulfil God’s purpose",
+    mobileDescription: "Want to grow and be trained to fulfil purpose?",
     href: "/fulfill",
     headerImageSrc: "/site/home/assets/pathway-card-headers/fulfill-card-header.webp",
     headerImageClassName: "object-fill",
@@ -158,8 +158,8 @@ export const homePathwayCards: HomePathwayCard[] = [
   },
   {
     title: "Our Church Ministry",
-    description: "We are here to help you fulfill God's purpose. Fellowship with us. ",
-    mobileDescription: "We are here to help you fulfill God's purpose. Fellowship with us.",
+    description: "We are here to help you fulfil God's purpose. Fellowship with us. ",
+    mobileDescription: "We are here to help you fulfil God's purpose. Fellowship with us.",
     href: "/fcc",
     headerImageSrc: "/site/home/assets/pathway-card-headers/church-card-header.svg",
     headerImageClassName: "object-fill",
@@ -230,7 +230,7 @@ export const homeInstagramReels: HomeInstagramReel[] = [
   {
     id: "3864819336682960006",
     title:
-      "Our spiritual growth as believers is very important because that's how we fulfill God...",
+      "Our spiritual growth as believers is very important because that's how we fulfil God...",
     href: "https://www.instagram.com/reel/DWimLXEDHSG/",
     imageUrl:
       "https://instagram.fiba2-2.fna.fbcdn.net/v/t51.71878-15/656824516_1478971880598829_7034558870681660349_n.jpg?stp=c0.249.640.640a_dst-jpg_e15_tt6&_nc_ht=instagram.fiba2-2.fna.fbcdn.net&_nc_cat=101&_nc_sid=8b3546",

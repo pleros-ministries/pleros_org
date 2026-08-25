@@ -145,7 +145,7 @@ function DashboardChurchMinistryStrip() {
             </h2>
             <p className="font-[var(--font-be-vietnam-pro)] max-w-[28rem] text-[0.9375rem] leading-[1.42] tracking-[-0.02em] text-[var(--color-text-strong)] sm:text-[1.05rem]">
               Grow with believers committed to God&apos;s Word, prayer, and the
-              fulfillment of His purpose.
+              fulfilment of His purpose.
             </p>
           </div>
         </div>

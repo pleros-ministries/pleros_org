@@ -13,7 +13,7 @@ export async function DELETE(
   try {
     const session = await getAppSession();
     if (!session || session.user.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
     }
 
     const { id } = await params;
@@ -50,7 +50,7 @@ export async function PATCH(
   try {
     const session = await getAppSession();
     if (!session || session.user.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
     }
 
     const { id } = await params;

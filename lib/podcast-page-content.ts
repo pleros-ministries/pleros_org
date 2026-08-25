@@ -68,9 +68,9 @@ export const podcastSeries = [
   },
   {
     id: "how-to-fulfill-gods-purpose",
-    title: "How to Fulfill God's Purpose",
+    title: "How to Fulfil God's Purpose",
     description:
-      "What prepares you to fulfill the spiritual assignment given only to you?",
+      "What prepares you to fulfil the spiritual assignment given only to you?",
     href: buildPodcastEpisodeUrl("EWXgKv1Eo9Q"),
   },
   {
@@ -98,7 +98,7 @@ export const podcastSeries = [
     id: "developing-the-inner-man",
     title: "Developing the Inner Man",
     description:
-      "How to develop the hidden man at the center of fulfillment.",
+      "How to develop the hidden man at the centre of fulfilment.",
     href: buildPodcastEpisodeUrl("L4ENdc91y3o"),
   },
   {
@@ -183,7 +183,7 @@ export const podcastJourneySteps = [
     tone: "purpose",
   },
   {
-    eyebrow: "Fulfill",
+    eyebrow: "Fulfil",
     title: "Keep growing through PPC",
     description:
       "If you are ready for structure, accountability, and structured discipleship, PPC helps you take the next step into fulfilling God's purpose.",

@@ -24,7 +24,7 @@ export function SchoolOfPurposePage({ existingEntry }: SchoolOfPurposePageProps)
             School of God&apos;s Purpose
           </h1>
           <p className="font-[var(--font-be-vietnam-pro)] max-w-[34ch] text-[0.95rem] leading-[1.42] tracking-[-0.02em] text-[var(--color-text-muted)]">
-            A weekly live teaching series helping you fulfill God&apos;s purpose.
+            A weekly live teaching series helping you fulfil God&apos;s purpose.
           </p>
         </div>
 

@@ -10,7 +10,7 @@ export const uploadRouter = {
     .middleware(async () => {
       const session = await getAppSession();
       if (!session || (session.user.role !== "admin" && session.user.role !== "instructor")) {
-        throw new Error("Unauthorized");
+        throw new Error("Unauthorised");
       }
       return { userId: session.user.id };
     })
@@ -30,7 +30,7 @@ export const uploadRouter = {
     .middleware(async () => {
       const session = await getAppSession();
       if (!session || session.user.role !== "admin") {
-        throw new Error("Unauthorized");
+        throw new Error("Unauthorised");
       }
       return { userId: session.user.id };
     })

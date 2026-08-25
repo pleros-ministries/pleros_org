@@ -394,7 +394,7 @@ export function AdminDashboardClient() {
             </Link>
           </div>
           <p className="mt-1 text-[11px] text-zinc-500">
-            Prioritized to show your assigned work first, then unassigned items.
+            Prioritised to show your assigned work first, then unassigned items.
           </p>
           <div className="mt-3 grid gap-2">
             <ReviewQueuePreview
@@ -417,7 +417,7 @@ export function AdminDashboardClient() {
             </Link>
           </div>
           <p className="mt-1 text-[11px] text-zinc-500">
-            Prioritized to show your assigned threads first, then unassigned threads.
+            Prioritised to show your assigned threads first, then unassigned threads.
           </p>
           <div className="mt-3">
             <QaInboxPreview

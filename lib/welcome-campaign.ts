@@ -29,7 +29,7 @@ export function resolvePublicSiteUrl(env: NodeJS.ProcessEnv): string {
 export function buildWelcomeShareMessage(siteUrl: string): string {
   return [
     "I thought this free book from Pleros would bless you.",
-    "It gives clear answers about purpose, why we exist, and how to fulfill God's will.",
+    "It gives clear answers about purpose, why we exist, and how to fulfil God's will.",
     `You can access it here: ${siteUrl}/welcome`,
   ].join(" ");
 }

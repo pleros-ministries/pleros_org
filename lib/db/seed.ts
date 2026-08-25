@@ -57,7 +57,7 @@ async function seed() {
     2: ["Introduction to Doctrinal Summaries", "Bibliology", "God and His Eternal Purpose", "Biblical Origin and Ontology", "Sin and its Implication", "God's Wisdom Towards Redemption", "Christology", "Redemption", "Church and its Mission", "Eschatology", "The New Creation"],
     3: ["Preaching foundations", "Teaching methods", "Pastoral care", "Small group leadership", "Community outreach", "Discipleship models", "Conflict resolution", "Cross-cultural ministry", "Youth ministry", "Missions awareness"],
     4: ["Vision casting", "Strategic planning", "Team building", "Financial management", "Church governance", "Mentoring leaders", "Church planting 101", "Urban ministry", "Rural ministry", "Digital ministry"],
-    5: ["Advanced hermeneutics", "Systematic theology review", "Apologetics", "World religions survey", "Ethics in leadership", "Seminary-level exegesis", "Counseling foundations", "Organizational development", "Global missions strategy", "Capstone project"],
+    5: ["Advanced hermeneutics", "Systematic theology review", "Apologetics", "World religions survey", "Ethics in leadership", "Seminary-level exegesis", "Counselling foundations", "Organisational development", "Global missions strategy", "Capstone project"],
   };
 
   let totalLessons = 0;

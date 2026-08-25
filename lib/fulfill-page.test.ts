@@ -37,6 +37,6 @@ describe("fulfill page", () => {
     expect(contentSource).toContain("Introduction to Doctrinal Summaries");
     expect(contentSource).toContain("The Truth on Morality");
     expect(contentSource).toContain("Spiritual Warfare");
-    expect(contentSource).toContain("Commitment: How to Fulfill Purpose");
+    expect(contentSource).toContain("Commitment: How to Fulfil Purpose");
   });
 });

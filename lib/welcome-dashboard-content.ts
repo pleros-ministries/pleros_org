@@ -59,7 +59,7 @@ export const welcomeDashboardSections: WelcomeDashboardSection[] = [
         id: "podcast",
         title: "The Pleros Podcast",
         description:
-          "Your daily dose of God's Word helping you fulfill God's purpose",
+          "Your daily dose of God's Word helping you fulfil God's purpose",
         href: "/dashboard/podcast",
         accent: "orange",
         backgroundImageSrc: "/site/home/assets/dashboard-cards/3-pleros-podcast-v2.webp",

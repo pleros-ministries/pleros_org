@@ -1,14 +1,14 @@
 export const fcchurchPageHero = {
   title: "Fullness of Christ Church",
   description:
-    "Join us for worship, teaching, and fellowship as we grow together to fulfill God's purpose.",
+    "Join us for worship, teaching, and fellowship as we grow together to fulfil God's purpose.",
 } as const;
 
 export const fcchurchAboutSection = {
   eyebrow: "About the church",
   title: "A family of purpose",
   description:
-    "We're a family of believers grounded in the Word of Truth, committed to reaching people with the Gospel, and helping them grow to fulfill God's purpose.",
+    "We're a family of believers grounded in the Word of Truth, committed to reaching people with the Gospel, and helping them grow to fulfil God's purpose.",
 } as const;
 
 export type ScheduleEntry = {

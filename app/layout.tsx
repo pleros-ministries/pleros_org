@@ -73,10 +73,10 @@ const dmSans = DM_Sans({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "https://pleros.org"),
   title: {
-    default: "Pleros Ministries and Missions – Helping you fulfill God's purpose",
+    default: "Pleros Ministries and Missions – Helping you fulfil God's purpose",
     template: "%s :: Pleros Ministries and Missions",
   },
-  description: "Pleros Ministries and Missions — helping you fulfill God's purpose.",
+  description: "Pleros Ministries and Missions — helping you fulfil God's purpose.",
   openGraph: {
     type: "website",
     siteName: "Pleros Ministries and Missions",

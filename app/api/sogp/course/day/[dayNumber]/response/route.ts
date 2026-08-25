@@ -24,7 +24,7 @@ export async function GET(
 ) {
   try {
     const context = await resolveContext(params);
-    if (!context) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!context) return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
     const submission = await getSubmission(
       context.session.user.id,
       context.data.track.lesson.id,
@@ -46,7 +46,7 @@ export async function POST(
 ) {
   try {
     const context = await resolveContext(params);
-    if (!context) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!context) return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
     const body = (await request.json().catch(() => null)) as {
       action?: "save" | "submit";
       content?: string;

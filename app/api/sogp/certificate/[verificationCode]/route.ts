@@ -12,7 +12,7 @@ export async function GET(
   { params }: { params: Promise<{ verificationCode: string }> },
 ) {
   const session = await getAppSession();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session) return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
   const { verificationCode } = await params;
   const certificate = await getSogpCertificateByCode(verificationCode);
   if (!certificate || certificate.revokedAt) {

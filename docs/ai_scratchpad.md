@@ -9,6 +9,7 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - Read `AGENTS.md` and preserve the existing token system in `app/globals.css`.
 - For UI work, use existing shells, tokens, fonts, and component patterns before introducing new styling.
 - Sentence case is the default copy style.
+- Use UK English for all user-facing copy (`fulfil`, `fulfilment`, `enrol`, `enrolment`, `programme`, `centre`, and `-ise` forms); preserve technical routes, identifiers, schema fields, event names, and third-party product names.
 - Do not revert unrelated worktree changes. For rollback requests, inspect the touched-file set, restore only the requested files, remove added-only files from that task, and verify with `git status --short`.
 - For PPC work, commit and push completed slices frequently when safe, using explicit path staging so unrelated dirty work is not bundled accidentally.
 

@@ -1,5 +1,5 @@
 export const fulfillPageHero = {
-  eyebrow: "Fulfill purpose",
+  eyebrow: "Fulfil purpose",
   title: "The Pleros Perfecting Course",
 } as const;
 
@@ -41,13 +41,13 @@ export const fulfillPageLevels = [
     level: "Level 1",
     title: "Foundations",
     description:
-      "Level 1 lays the foundation for life in the Gospel and the fulfillment of God's purpose.",
+      "Level 1 lays the foundation for life in the Gospel and the fulfilment of God's purpose.",
     modules: [
       "Gospel: The Word of Truth",
       "God's Purpose: Why We Exist",
       "The New Creation: Who You are in Christ",
       "Faith Stand: How to Grow in Christ",
-      "Commitment: How to Fulfill Purpose",
+      "Commitment: How to Fulfil Purpose",
     ],
   },
   {

@@ -11,7 +11,7 @@ describe("about page content", () => {
   test("keeps the hero copy aligned with the figma frame", () => {
     expect(aboutPageHero.title).toBe("About Us");
     expect(aboutPageHero.description).toBe(
-      "⁠Helping you fulfill God's purpose for your life.",
+      "⁠Helping you fulfil God's purpose for your life.",
     );
   });
 
@@ -30,7 +30,7 @@ describe("about page content", () => {
     expect(aboutPageBody[1]).toContain("Pleres");
     expect(aboutPageBody[1]).toContain("Pleroo");
     expect(aboutPageBody[2]).toContain(
-      "It reflects our vision to see the fullness of the world reached with the Gospel so they can fulfill God's purpose.",
+      "It reflects our vision to see the fullness of the world reached with the Gospel so they can fulfil God's purpose.",
     );
   });
 
