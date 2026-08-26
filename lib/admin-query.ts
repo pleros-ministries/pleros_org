@@ -78,6 +78,22 @@ export type AdminSogpData = {
     issuedAt: string;
     revokedAt: string | null;
   }>;
+  preparationDays: Array<{
+    id: number;
+    cohortId: number;
+    publishDate: string;
+    countdownLabel: string;
+    introduction: string;
+    status: "draft" | "published";
+    resources: Array<{
+      id: number;
+      type: "teaching" | "podcast" | "video" | "reading" | "gift" | "announcement";
+      title: string;
+      description: string | null;
+      url: string;
+      sortOrder: number;
+    }>;
+  }>;
   telegram: {
     channelConfigured: boolean;
     botConfigured: boolean;

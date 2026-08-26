@@ -1,12 +1,16 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { expect, test } from "vitest";
 
-import { SOGP_PREPARATION_CONTENT } from "./preparation-content";
+test("renders today-first preparation with a previous-days archive", () => {
+  const source = readFileSync(
+    join(process.cwd(), "components", "sogp", "sogp-dashboard.tsx"),
+    "utf8",
+  );
 
-test("uses existing Pleros destinations in stable order", () => {
-  expect(SOGP_PREPARATION_CONTENT.map((item) => item.id)).toEqual([
-    "questions",
-    "purpose",
-    "discipleship",
-  ]);
-  expect(SOGP_PREPARATION_CONTENT.every((item) => item.href.startsWith("/"))).toBe(true);
+  expect(source).toContain("partitionSogpPreparationDays");
+  expect(source).toContain("Today’s preparation");
+  expect(source).toContain("Previous preparation days");
+  expect(source).toContain("Your material for today is being prepared");
+  expect(source).not.toContain("SOGP_PREPARATION_CONTENT");
 });

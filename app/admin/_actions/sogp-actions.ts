@@ -8,6 +8,10 @@ import * as schema from "@/lib/db/schema";
 import { buildFirstCohortTrackSelection } from "@/lib/sogp/first-cohort";
 import { buildWeekdayReleaseDates } from "@/lib/sogp/schedule";
 import {
+  normalizeSogpPreparationInput,
+  type SogpPreparationInput,
+} from "@/lib/sogp/preparation-admin";
+import {
   normalizeSogpBroadcast,
   sendSogpChannelMessage,
   type SogpBroadcastKind,
@@ -151,6 +155,79 @@ export async function updateSogpCohort(input: {
     .returning();
   if (!updated) throw new Error("SOGP cohort not found.");
   return updated;
+}
+
+export async function saveSogpPreparationDay(input: SogpPreparationInput) {
+  await requireAdmin();
+  const normalized = normalizeSogpPreparationInput(input);
+  const cohort = await db.query.sogpCohorts.findFirst({
+    where: (row, { eq: equal }) => equal(row.id, normalized.cohortId),
+  });
+  if (!cohort) throw new Error("SOGP cohort not found.");
+
+  return db.transaction(async (tx) => {
+    const [day] = normalized.id
+      ? await tx
+          .update(schema.sogpPreparationDays)
+          .set({
+            publishDate: normalized.publishDate,
+            countdownLabel: normalized.countdownLabel,
+            introduction: normalized.introduction,
+            updatedAt: new Date(),
+          })
+          .where(
+            and(
+              eq(schema.sogpPreparationDays.id, normalized.id),
+              eq(schema.sogpPreparationDays.cohortId, normalized.cohortId),
+            ),
+          )
+          .returning()
+      : await tx
+          .insert(schema.sogpPreparationDays)
+          .values({
+            cohortId: normalized.cohortId,
+            publishDate: normalized.publishDate,
+            countdownLabel: normalized.countdownLabel,
+            introduction: normalized.introduction,
+          })
+          .returning();
+    if (!day) throw new Error("Preparation day could not be saved.");
+
+    await tx
+      .delete(schema.sogpPreparationResources)
+      .where(eq(schema.sogpPreparationResources.preparationDayId, day.id));
+    await tx.insert(schema.sogpPreparationResources).values(
+      normalized.resources.map((resource) => ({
+        preparationDayId: day.id,
+        ...resource,
+      })),
+    );
+    return { id: day.id };
+  });
+}
+
+export async function setSogpPreparationStatus(input: {
+  id: number;
+  status: "draft" | "published";
+}) {
+  await requireAdmin();
+  const [updated] = await db
+    .update(schema.sogpPreparationDays)
+    .set({ status: input.status, updatedAt: new Date() })
+    .where(eq(schema.sogpPreparationDays.id, input.id))
+    .returning({ id: schema.sogpPreparationDays.id });
+  if (!updated) throw new Error("Preparation day not found.");
+  return updated;
+}
+
+export async function deleteSogpPreparationDay(input: { id: number }) {
+  await requireAdmin();
+  const [deleted] = await db
+    .delete(schema.sogpPreparationDays)
+    .where(eq(schema.sogpPreparationDays.id, input.id))
+    .returning({ id: schema.sogpPreparationDays.id });
+  if (!deleted) throw new Error("Preparation day not found.");
+  return deleted;
 }
 
 export async function createSogpLiveClass(input: {

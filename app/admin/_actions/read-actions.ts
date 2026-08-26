@@ -352,6 +352,22 @@ export async function getAdminSogpData(): Promise<AdminSogpData> {
       issuedAt: certificate.issuedAt.toISOString(),
       revokedAt: serializeDate(certificate.revokedAt),
     })),
+    preparationDays: data.preparationDays.map((day) => ({
+      id: day.id,
+      cohortId: day.cohortId,
+      publishDate: day.publishDate,
+      countdownLabel: day.countdownLabel,
+      introduction: day.introduction,
+      status: day.status,
+      resources: day.resources.map((resource) => ({
+        id: resource.id,
+        type: resource.type,
+        title: resource.title,
+        description: resource.description,
+        url: resource.url,
+        sortOrder: resource.sortOrder,
+      })),
+    })),
     telegram: {
       channelConfigured: Boolean(process.env.TELEGRAM_SOGP_CHANNEL_ID),
       botConfigured: Boolean(process.env.TELEGRAM_SOGP_BOT_TOKEN),

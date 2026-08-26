@@ -13,6 +13,7 @@ import { db } from "@/lib/db";
 import { deriveSogpLearnerState } from "@/lib/sogp/status";
 import { normalizeSogpAssessmentPolicy } from "@/lib/sogp/assessment";
 import { countDistinctLagosActivityDays } from "@/lib/sogp/formation-progress";
+import { toLagosDateKey } from "@/lib/sogp/formation-progress";
 import type {
   SogpDashboardData,
   SogpEnrollmentCreateInput,
@@ -168,6 +169,7 @@ export async function getSogpDashboardData(
     podcastRows,
     certificate,
     rewards,
+    preparationRows,
   ] =
     await Promise.all([
       db
@@ -247,6 +249,33 @@ export async function getSogpDashboardData(
         .from(schema.sogpRewardGrants)
         .where(eq(schema.sogpRewardGrants.enrollmentId, row.enrollment.id))
         .orderBy(asc(schema.sogpRewardGrants.grantedAt)),
+      db
+        .select({
+          day: schema.sogpPreparationDays,
+          resource: schema.sogpPreparationResources,
+        })
+        .from(schema.sogpPreparationDays)
+        .leftJoin(
+          schema.sogpPreparationResources,
+          eq(
+            schema.sogpPreparationResources.preparationDayId,
+            schema.sogpPreparationDays.id,
+          ),
+        )
+        .where(
+          and(
+            eq(schema.sogpPreparationDays.cohortId, row.cohort.id),
+            eq(schema.sogpPreparationDays.status, "published"),
+            lte(
+              schema.sogpPreparationDays.publishDate,
+              toLagosDateKey(new Date()),
+            ),
+          ),
+        )
+        .orderBy(
+          desc(schema.sogpPreparationDays.publishDate),
+          asc(schema.sogpPreparationResources.sortOrder),
+        ),
     ]);
 
   const tracks = trackRows.map(({ track, lesson, progress }) => {
@@ -333,7 +362,31 @@ export async function getSogpDashboardData(
       label: reward.label,
       grantedAt: reward.grantedAt,
     })),
-    preparationDays: [],
+    preparationDays: Array.from(
+      preparationRows.reduce((days, row) => {
+        const current = days.get(row.day.id) ?? {
+          id: row.day.id,
+          cohortId: row.day.cohortId,
+          publishDate: row.day.publishDate,
+          countdownLabel: row.day.countdownLabel,
+          introduction: row.day.introduction,
+          status: row.day.status,
+          resources: [],
+        };
+        if (row.resource) {
+          current.resources.push({
+            id: row.resource.id,
+            type: row.resource.type,
+            title: row.resource.title,
+            description: row.resource.description,
+            url: row.resource.url,
+            sortOrder: row.resource.sortOrder,
+          });
+        }
+        days.set(row.day.id, current);
+        return days;
+      }, new Map<number, SogpDashboardData["preparationDays"][number]>()),
+    ).map(([, day]) => day),
   };
 }
 
@@ -355,7 +408,14 @@ export async function getSogpDayData(userId: string, dayNumber: number) {
 }
 
 export async function getAdminSogpData() {
-  const [cohorts, enrollments, tracks, liveClasses, certificates] =
+  const [
+    cohorts,
+    enrollments,
+    tracks,
+    liveClasses,
+    certificates,
+    preparationRows,
+  ] =
     await Promise.all([
       db.select().from(schema.sogpCohorts).orderBy(desc(schema.sogpCohorts.startsAt)),
       db.select().from(schema.sogpEnrollments).orderBy(desc(schema.sogpEnrollments.createdAt)),
@@ -369,7 +429,43 @@ export async function getAdminSogpData() {
         .orderBy(asc(schema.sogpCohortTracks.curriculumOrder)),
       db.select().from(schema.sogpLiveClasses).orderBy(asc(schema.sogpLiveClasses.startsAt)),
       db.select().from(schema.sogpCertificates).orderBy(desc(schema.sogpCertificates.issuedAt)),
+      db
+        .select({
+          day: schema.sogpPreparationDays,
+          resource: schema.sogpPreparationResources,
+        })
+        .from(schema.sogpPreparationDays)
+        .leftJoin(
+          schema.sogpPreparationResources,
+          eq(
+            schema.sogpPreparationResources.preparationDayId,
+            schema.sogpPreparationDays.id,
+          ),
+        )
+        .orderBy(
+          desc(schema.sogpPreparationDays.publishDate),
+          asc(schema.sogpPreparationResources.sortOrder),
+        ),
     ]);
 
-  return { cohorts, enrollments, tracks, liveClasses, certificates };
+  const preparationDays = Array.from(
+    preparationRows.reduce((days, row) => {
+      const current = days.get(row.day.id) ?? {
+        ...row.day,
+        resources: [] as Array<typeof schema.sogpPreparationResources.$inferSelect>,
+      };
+      if (row.resource) current.resources.push(row.resource);
+      days.set(row.day.id, current);
+      return days;
+    }, new Map<number, (typeof schema.sogpPreparationDays.$inferSelect) & { resources: Array<typeof schema.sogpPreparationResources.$inferSelect> }>()),
+  ).map(([, day]) => day);
+
+  return {
+    cohorts,
+    enrollments,
+    tracks,
+    liveClasses,
+    certificates,
+    preparationDays,
+  };
 }

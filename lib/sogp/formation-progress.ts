@@ -1,4 +1,4 @@
-function toLagosDateKey(date: Date) {
+export function toLagosDateKey(date: Date) {
   const parts = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Africa/Lagos",
     year: "numeric",

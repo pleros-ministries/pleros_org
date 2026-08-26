@@ -19,7 +19,8 @@ import {
 } from "lucide-react";
 
 import { calculateSogpEligibility } from "@/lib/sogp/assessment";
-import { SOGP_PREPARATION_CONTENT } from "@/lib/sogp/preparation-content";
+import { partitionSogpPreparationDays } from "@/lib/sogp/preparation";
+import type { SogpPreparationDay } from "@/lib/sogp/types";
 
 type DashboardPayload = {
   generatedAt: string;
@@ -48,8 +49,12 @@ type DashboardPayload = {
   learnerState: "preparing" | "active" | "carryover" | "completed" | "withdrawn";
   tracks: Array<{
     id: number;
-    dayNumber: number;
+    dayNumber: number | null;
     weekNumber: number;
+    curriculumLevel: number;
+    curriculumOrder: number;
+    isRequired: boolean;
+    liveSessionNumber: number | null;
     releaseAt: string;
     lesson: { id: number; title: string; status: "draft" | "published" };
     completed: boolean;
@@ -67,6 +72,7 @@ type DashboardPayload = {
   podcastDaysLogged: number;
   liveClassesAttended: number;
   certificate: { verificationCode: string; issuedAt: string; revokedAt: string | null } | null;
+  preparationDays: SogpPreparationDay[];
 };
 
 async function fetchDashboard(): Promise<DashboardPayload> {
@@ -100,7 +106,9 @@ function CurriculumRail({ data }: { data: DashboardPayload }) {
       </div>
       <div className="max-h-[42rem] overflow-y-auto p-2">
         {[1, 2, 3, 4].map((week) => {
-          const tracks = data.tracks.filter((track) => track.weekNumber === week);
+          const tracks = data.tracks.filter(
+            (track) => track.isRequired && track.weekNumber === week && track.dayNumber !== null,
+          );
           return (
             <div key={week} className="border-b border-[var(--color-line)] py-3 last:border-0">
               <p className="px-2 pb-2 font-[var(--font-be-vietnam-pro)] text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-[var(--color-text-muted)]">Week {week}</p>
@@ -132,6 +140,31 @@ function PreparingDashboard({ data }: { data: DashboardPayload }) {
       (startsAt.getTime() - new Date(data.generatedAt).getTime()) / 86_400_000,
     ),
   );
+  const preparation = partitionSogpPreparationDays(
+    data.preparationDays,
+    new Date(data.generatedAt),
+  );
+
+  function resourceLink(
+    resource: SogpPreparationDay["resources"][number],
+  ) {
+    const external = resource.url.startsWith("https://");
+    const content = (
+      <>
+        <span className="text-[0.62rem] font-semibold uppercase tracking-[0.1em] text-[var(--color-brand-blue)]">{resource.type}</span>
+        <span className="font-[var(--font-sen)] text-lg font-semibold leading-[1.08] tracking-[-0.04em] text-[var(--color-text-strong)]">{resource.title}</span>
+        {resource.description ? <span className="text-xs leading-[1.5] text-[var(--color-text-muted)]">{resource.description}</span> : null}
+        <span className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--color-brand-blue)]">Open resource <ArrowRight className="size-3.5" /></span>
+      </>
+    );
+    const className = "group grid min-h-40 content-between gap-3 rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white p-5 transition-transform duration-150 hover:-translate-y-px";
+    return external ? (
+      <a key={resource.id} href={resource.url} target="_blank" rel="noreferrer" className={className}>{content}</a>
+    ) : (
+      <Link key={resource.id} href={resource.url} className={className}>{content}</Link>
+    );
+  }
+
   return (
     <div className="grid gap-5">
       <section className="grid min-h-64 content-between overflow-hidden rounded-[var(--radius-md)] bg-[var(--color-brand-blue)] p-6 text-white md:p-8">
@@ -141,17 +174,42 @@ function PreparingDashboard({ data }: { data: DashboardPayload }) {
           <p className="max-w-[36rem] font-[var(--font-be-vietnam-pro)] text-sm leading-[1.55] text-white/78">Use this preparation window to explore Pleros, connect with the community, and build a steady learning rhythm.</p>
         </div>
       </section>
-      <section className="grid gap-3 md:grid-cols-3">
-        {SOGP_PREPARATION_CONTENT.map((item, index) => (
-          <Link key={item.id} href={item.href} className="group grid min-h-48 content-between rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white p-5 transition-transform duration-150 hover:-translate-y-px">
-            <span className="font-[var(--font-sen)] text-sm font-semibold text-[var(--color-brand-blue)]">0{index + 1}</span>
-            <div className="grid gap-2">
-              <h3 className="font-[var(--font-sen)] text-xl font-semibold leading-[1.05] tracking-[-0.045em] text-[var(--color-text-strong)]">{item.title}</h3>
-              <p className="font-[var(--font-be-vietnam-pro)] text-xs leading-[1.45] text-[var(--color-text-muted)]">{item.description}</p>
-            </div>
-          </Link>
-        ))}
-      </section>
+      {preparation.today ? (
+        <section className="grid gap-4">
+          <div className="grid gap-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-brand-blue)]">Today’s preparation</p>
+            <h2 className="font-[var(--font-sen)] text-2xl font-semibold tracking-[-0.045em] text-[var(--color-text-strong)]">{preparation.today.countdownLabel}</h2>
+            <p className="max-w-[44rem] text-sm leading-[1.6] text-[var(--color-text-muted)]">{preparation.today.introduction}</p>
+          </div>
+          <div className="grid gap-3 md:grid-cols-2">{preparation.today.resources.map(resourceLink)}</div>
+        </section>
+      ) : (
+        <section className="rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white p-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-brand-blue)]">Today’s preparation</p>
+          <h2 className="mt-3 font-[var(--font-sen)] text-2xl font-semibold tracking-[-0.045em] text-[var(--color-text-strong)]">Your material for today is being prepared</h2>
+          <p className="mt-2 text-sm leading-[1.55] text-[var(--color-text-muted)]">Check back shortly. You can still revisit every previously published preparation day below.</p>
+        </section>
+      )}
+
+      {preparation.previous.length ? (
+        <section className="grid gap-3">
+          <h2 className="font-[var(--font-sen)] text-xl font-semibold tracking-[-0.04em] text-[var(--color-text-strong)]">Previous preparation days</h2>
+          <div className="divide-y divide-[var(--color-line)] border-y border-[var(--color-line)]">
+            {preparation.previous.map((day) => (
+              <details key={day.id} className="group py-4">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-sm font-semibold text-[var(--color-text-strong)] [&::-webkit-details-marker]:hidden">
+                  <span>{day.countdownLabel}</span>
+                  <span className="text-xs font-normal text-[var(--color-text-muted)]">{day.publishDate}</span>
+                </summary>
+                <div className="mt-4 grid gap-3">
+                  <p className="text-sm leading-[1.55] text-[var(--color-text-muted)]">{day.introduction}</p>
+                  <div className="grid gap-3 md:grid-cols-2">{day.resources.map(resourceLink)}</div>
+                </div>
+              </details>
+            ))}
+          </div>
+        </section>
+      ) : null}
     </div>
   );
 }

@@ -85,6 +85,7 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 
 - Canonical routes are `/sogp`, `/sogp/enrol`, `/dashboard/sogp`, and `/admin/sogp`; `/sogp/enroll` permanently redirects to `/sogp/enrol`. Permanently remove old `school-of-purpose` routes and aliases; do not preserve redirects for those removed routes.
 - SOGP is a guided four-week cohort experience; PPC remains a separate flexible, self-paced product. SOGP may reuse PPC lesson/progress records without inheriting PPC UI styling.
+- SOGP preparation is cohort-specific and admin-managed: `/dashboard/sogp` shows today’s published Lagos-date material first and previous published days as an archive; drafts and future days are never learner-visible. The public `/sogp` route remains a conversion page.
 - First SOGP curriculum is 20 weekday tracks: all Level 1, all Level 2, plus four explicitly selected Level 3 tracks. Weekends are for YouTube live classes.
 - Telegram provides launch community, text, and voice notes. After DB persistence, enrollment redirects directly to the configured Telegram channel; do not use bot deep links or identity-linking in this flow. Bot handles scheduled/admin-triggered channel broadcasts only; never post learner PII. Do not build native discussion or voice storage for launch.
 - SOGP enrolment email is urgent and Telegram-first: Telegram is the sole CTA and supplies information, gifts, reminders, updates, and the dashboard link; do not include a direct dashboard button/link in that email.
