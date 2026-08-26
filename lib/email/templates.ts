@@ -291,22 +291,22 @@ export type SogpEnrollmentProps = {
   name: string;
   cohortTitle: string;
   cohortDates: string;
-  dashboardUrl: string;
-  telegramUrl: string | null;
+  telegramUrl: string;
 };
+
+export const SOGP_ENROLLMENT_SUBJECT =
+  "Your SOGP enrolment is confirmed — join Telegram now";
 
 export function sogpEnrollmentHtml({
   name,
   cohortTitle,
   cohortDates,
-  dashboardUrl,
   telegramUrl,
 }: SogpEnrollmentProps): string {
   const safeName = escapeHtml(name);
   const safeCohortTitle = escapeHtml(cohortTitle);
   const safeCohortDates = escapeHtml(cohortDates);
-  const safeDashboardUrl = escapeHtml(dashboardUrl);
-  const safeTelegramUrl = telegramUrl ? escapeHtml(telegramUrl) : null;
+  const safeTelegramUrl = escapeHtml(telegramUrl);
 
   return `
 <!DOCTYPE html>
@@ -316,13 +316,14 @@ export function sogpEnrollmentHtml({
   <div style="max-width:540px; margin:0 auto; background:#fff; border:1px solid #dfe7f1; overflow:hidden;">
     <div style="background:#061056; padding:36px 32px; color:#fff;">
       <p style="font-size:12px; letter-spacing:.14em; text-transform:uppercase; margin:0 0 12px; color:#cbe96b;">School of God's Purpose</p>
-      <h1 style="font-size:28px; line-height:1.05; margin:0;">Your SOGP journey starts here</h1>
+      <h1 style="font-size:28px; line-height:1.05; margin:0;">Your enrolment is confirmed</h1>
     </div>
     <div style="padding:32px;">
-      <p style="font-size:16px; line-height:1.6; margin:0 0 18px;">Welcome, ${safeName}. You are enrolled in <strong>${safeCohortTitle}</strong>.</p>
+      <p style="font-size:16px; line-height:1.6; margin:0 0 18px;">Welcome, ${safeName}. Your enrolment in <strong>${safeCohortTitle}</strong> is confirmed.</p>
       <p style="font-size:14px; color:#53617a; margin:0 0 24px;">${safeCohortDates}</p>
-      <a href="${safeDashboardUrl}" style="display:inline-block; background:#061056; color:#fff; padding:13px 22px; border-radius:999px; text-decoration:none; font-weight:600; font-size:14px;">Open your SOGP dashboard</a>
-      ${safeTelegramUrl ? `<p style="font-size:14px; line-height:1.6; margin:28px 0 10px;">Connect with the SOGP Telegram bot for your community and course updates.</p><a href="${safeTelegramUrl}" style="color:#061056; font-weight:600;">Connect Telegram</a>` : ""}
+      <p style="font-size:15px; line-height:1.65; margin:0 0 18px;"><strong>Kindly join your SOGP Telegram channel now</strong> to receive important information, gifts, reminders, and updates throughout your learning.</p>
+      <p style="font-size:14px; line-height:1.65; color:#53617a; margin:0 0 24px;">Your dashboard link will be shared in the Telegram channel. Open it there to begin your learning and transformation journey with us at SOGP.</p>
+      <a href="${safeTelegramUrl}" style="display:inline-block; background:#061056; color:#fff; padding:13px 22px; border-radius:999px; text-decoration:none; font-weight:600; font-size:14px;">Join the Telegram channel now</a>
     </div>
   </div>
 </body>

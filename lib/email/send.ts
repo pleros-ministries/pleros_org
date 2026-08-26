@@ -11,6 +11,7 @@ import {
   superAdminSetupHtml,
   welcomePackAccessHtml,
   welcomePackExtrasUnlockedHtml,
+  SOGP_ENROLLMENT_SUBJECT,
   sogpEnrollmentHtml,
 } from "./templates";
 
@@ -257,15 +258,14 @@ export async function sendSogpEnrollmentEmail(opts: {
   name: string;
   cohortTitle: string;
   cohortDates: string;
-  dashboardUrl: string;
-  telegramUrl: string | null;
+  telegramUrl: string;
 }) {
   if (!isEmailEnabled() || !resend) return null;
 
   return resend.emails.send({
     from: process.env.EMAIL_FROM_PLEROS ?? FROM,
     to: opts.to,
-    subject: `You are enrolled in ${opts.cohortTitle}`,
+    subject: SOGP_ENROLLMENT_SUBJECT,
     html: sogpEnrollmentHtml(opts),
   });
 }

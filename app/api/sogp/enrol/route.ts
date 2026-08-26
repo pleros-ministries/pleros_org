@@ -68,13 +68,11 @@ export async function POST(request: Request) {
       );
     }
 
-    const dashboardUrl = new URL("/dashboard/sogp", request.url).toString();
     void sendSogpEnrollmentEmail({
       to: values.email,
       name: values.name,
       cohortTitle: cohort.title,
       cohortDates: formatCohortDates(cohort.startsAt, cohort.endsAt),
-      dashboardUrl,
       telegramUrl: redirect.telegramUrl,
     }).catch((error) => {
       console.error("SOGP enrolment email failed:", error);
