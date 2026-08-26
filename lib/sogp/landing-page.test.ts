@@ -47,7 +47,7 @@ describe("SOGP landing content", () => {
       {
         value: "level-3",
         label: "Level 3",
-        numbers: [17, 18, 19],
+        numbers: [17, 18, 19, 20, 21, 22, 23, 24],
       },
     ]);
   });

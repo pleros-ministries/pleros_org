@@ -81,12 +81,20 @@ export const sogpLandingContent = {
       { level: "Level 2", title: "Church and Its Mission" },
       { level: "Level 2", title: "Eschatology" },
       { level: "Level 2", title: "The New Creation" },
-      { level: "Level 3", title: "Being Led by the Spirit of God" },
-      { level: "Level 3", title: "The Life of Devotion" },
+      { level: "Level 3", title: "Baptism of the Holy Ghost" },
+      { level: "Level 3", title: "The Walk of Faith" },
+      { level: "Level 3", title: "The Life of Prayer" },
+      { level: "Level 3", title: "Believer’s Authority" },
+      { level: "Level 3", title: "Healing in the Newness of Life" },
       {
         level: "Level 3",
-        title: "Ministering and Receiving Christ’s Healing Power",
+        title: "Natural Assignment in the Newness of Life",
       },
+      {
+        level: "Level 3",
+        title: "Spiritual Assignment in the Newness of Life",
+      },
+      { level: "Level 3", title: "Supernatural in the Newness of Life" },
     ],
   },
   structure: {
