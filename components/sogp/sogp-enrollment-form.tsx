@@ -3,16 +3,13 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { ArrowRight, LoaderCircle } from "lucide-react";
-import {
-  getCountryCallingCode,
-  type CountryCode,
-} from "libphonenumber-js/min";
+import type { CountryCode } from "libphonenumber-js/min";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { SogpEnrollmentErrors } from "@/lib/sogp/enrollment";
-import { SOGP_COUNTRIES } from "@/lib/sogp/countries";
 import { CountryCombobox } from "./country-combobox";
+import { PhoneField } from "./phone-field";
 import { trackSogpEvent } from "./sogp-analytics";
 
 type EnrollmentResponse = {
@@ -27,14 +24,14 @@ async function submitEnrollment(formData: FormData) {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      firstName: formData.get("firstName"),
-      lastName: formData.get("lastName"),
+      name: formData.get("name"),
       email: formData.get("email"),
       phone: formData.get("phone"),
       phoneCountryCode: formData.get("phoneCountryCode"),
       country: formData.get("country"),
       countryCode: formData.get("countryCode"),
       region: formData.get("region"),
+      birthYear: formData.get("birthYear"),
       reason: formData.get("reason"),
       utmSource: params.get("utm_source"),
       utmMedium: params.get("utm_medium"),
@@ -89,17 +86,10 @@ export function SogpEnrollmentForm({
         mutation.mutate(new FormData(event.currentTarget));
       }}
     >
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="grid gap-2">
-          <label htmlFor="firstName" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">First name</label>
-          <Input id="firstName" name="firstName" autoComplete="given-name" aria-invalid={Boolean(errors.firstName)} aria-describedby={errors.firstName ? "first-name-error" : undefined} />
-          <FieldError id="first-name-error" error={errors.firstName} />
-        </div>
-        <div className="grid gap-2">
-          <label htmlFor="lastName" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">Last name</label>
-          <Input id="lastName" name="lastName" autoComplete="family-name" aria-invalid={Boolean(errors.lastName)} aria-describedby={errors.lastName ? "last-name-error" : undefined} />
-          <FieldError id="last-name-error" error={errors.lastName} />
-        </div>
+      <div className="grid gap-2">
+        <label htmlFor="name" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">Full name</label>
+        <Input id="name" name="name" autoComplete="name" aria-invalid={Boolean(errors.name)} aria-describedby={errors.name ? "name-error" : undefined} />
+        <FieldError id="name-error" error={errors.name} />
       </div>
       <div className="grid gap-2">
         <label htmlFor="email" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">Email address</label>
@@ -108,12 +98,15 @@ export function SogpEnrollmentForm({
       </div>
       <div className="grid gap-2">
         <label htmlFor="phone" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">Phone number</label>
-        <div className="sogp-phone-input">
-          <select aria-label="Phone country" value={phoneCountryCode} onChange={(event) => setPhoneCountryCode(event.target.value as CountryCode)}>
-            {SOGP_COUNTRIES.map((country) => <option key={country.code} value={country.code}>{country.code} +{getCountryCallingCode(country.code)}</option>)}
-          </select>
-          <input id="phone" type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} autoComplete="tel" placeholder="801 234 5678" aria-invalid={Boolean(errors.phone)} aria-describedby={errors.phone ? "phone-help phone-error" : "phone-help"} />
-        </div>
+        <PhoneField
+          defaultCountryCode={defaultCountryCode}
+          invalid={Boolean(errors.phone)}
+          describedBy={errors.phone ? "phone-help phone-error" : "phone-help"}
+          onChange={(next) => {
+            setPhone(next.phone);
+            setPhoneCountryCode(next.countryCode);
+          }}
+        />
         <input type="hidden" name="phone" value={phone} />
         <input type="hidden" name="phoneCountryCode" value={phoneCountryCode} />
         <p id="phone-help" className="font-[var(--font-be-vietnam-pro)] text-xs leading-[1.45] text-[var(--color-text-muted)]">Use the number linked to your WhatsApp account.</p>
@@ -124,13 +117,20 @@ export function SogpEnrollmentForm({
         <CountryCombobox defaultCountryCode={defaultCountryCode} invalid={Boolean(errors.country || errors.countryCode)} describedBy={errors.country || errors.countryCode ? "country-error" : undefined} />
         <FieldError id="country-error" error={errors.country ?? errors.countryCode} />
       </div>
-      <div className="grid gap-2">
-        <label htmlFor="region" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">State / province / region</label>
-        <Input id="region" name="region" autoComplete="address-level1" aria-invalid={Boolean(errors.region)} aria-describedby={errors.region ? "region-error" : undefined} />
-        <FieldError id="region-error" error={errors.region} />
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-2">
+          <label htmlFor="region" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">State / province / region</label>
+          <Input id="region" name="region" autoComplete="address-level1" aria-invalid={Boolean(errors.region)} aria-describedby={errors.region ? "region-error" : undefined} />
+          <FieldError id="region-error" error={errors.region} />
+        </div>
+        <div className="grid gap-2">
+          <label htmlFor="birthYear" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">Year of birth</label>
+          <Input id="birthYear" name="birthYear" type="text" inputMode="numeric" pattern="[0-9]*" maxLength={4} autoComplete="bday-year" placeholder="1998" aria-invalid={Boolean(errors.birthYear)} aria-describedby={errors.birthYear ? "birth-year-error" : undefined} />
+          <FieldError id="birth-year-error" error={errors.birthYear} />
+        </div>
       </div>
       <div className="grid gap-2">
-        <label htmlFor="reason" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">Why do you want to join? <span className="font-normal text-[var(--color-text-muted)]">(optional)</span></label>
+        <label htmlFor="reason" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">What do you want to get out of SOGP? <span className="font-normal text-[var(--color-text-muted)]">(optional)</span></label>
         <textarea id="reason" name="reason" rows={4} maxLength={1000} className="w-full resize-y rounded-[var(--radius-sm)] border border-[var(--color-line-strong)] bg-white px-4 py-3 font-[var(--font-be-vietnam-pro)] text-sm text-[var(--color-text-strong)] outline-none transition focus-visible:border-[var(--color-brand-blue)] focus-visible:ring-4 focus-visible:ring-[var(--color-focus)]" aria-invalid={Boolean(errors.reason)} aria-describedby={errors.reason ? "reason-error" : undefined} />
         <FieldError id="reason-error" error={errors.reason} />
       </div>

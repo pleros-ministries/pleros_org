@@ -1,4 +1,5 @@
-import { CalendarDays, MessageCircleMore, Radio, Sparkles } from "lucide-react";
+import Link from "next/link";
+import { ArrowLeft, CalendarDays, MessageCircleMore, Radio, Sparkles } from "lucide-react";
 
 import { HomepageFooter } from "@/components/home/homepage-footer";
 import { HomepageNav } from "@/components/home/homepage-nav";
@@ -8,10 +9,26 @@ import { SogpPublicQueryProvider } from "./sogp-public-query-provider";
 import type { CountryCode } from "libphonenumber-js/min";
 
 const summary = [
-  { label: "4 weeks", Icon: CalendarDays },
-  { label: "Live classes", Icon: Radio },
-  { label: "Telegram community", Icon: MessageCircleMore },
-  { label: "Free enrolment", Icon: Sparkles },
+  {
+    label: "Four weeks",
+    meta: "24 guided tracks, Monday to Friday",
+    Icon: CalendarDays,
+  },
+  {
+    label: "Live classes",
+    meta: "Weekend sessions with the cohort",
+    Icon: Radio,
+  },
+  {
+    label: "Telegram community",
+    meta: "Updates and cohort connection",
+    Icon: MessageCircleMore,
+  },
+  {
+    label: "Free enrolment",
+    meta: "No payment required to join",
+    Icon: Sparkles,
+  },
 ];
 
 export function SogpEnrollmentPage({
@@ -26,17 +43,33 @@ export function SogpEnrollmentPage({
         <section className="site-shell-page sogp-shell-page grid gap-10 py-12 md:grid-cols-[minmax(0,0.85fr)_minmax(26rem,1fr)] md:items-start md:gap-16 md:py-20">
           <div className="grid gap-8 md:sticky md:top-24">
             <div className="grid gap-4">
+              <Link
+                href="/sogp"
+                className="inline-flex w-fit items-center gap-1 font-[var(--font-be-vietnam-pro)] text-xs font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-brand-blue)] focus-visible:text-[var(--color-brand-blue)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-brand-blue)]"
+              >
+                <ArrowLeft className="size-3.5" aria-hidden="true" />
+                Back
+              </Link>
               <h1 className="site-hero-heading max-w-[12ch] text-[clamp(2.8rem,6vw,5rem)] text-[var(--color-brand-blue)]">Take your next step with SOGP</h1>
               <p className="site-section-intro max-w-[32rem] text-[var(--color-text-muted)]">Join a guided four-week journey into truth, spiritual growth, and God&apos;s purpose.</p>
             </div>
-            <div className="grid grid-cols-2 gap-px overflow-hidden rounded-[var(--radius-md)] border border-[var(--color-line)] bg-[var(--color-line)]">
-              {summary.map(({ label, Icon }) => (
-                <div key={label} className="flex aspect-square items-center gap-3 bg-white p-4">
-                  <Icon className="size-5 shrink-0 text-[var(--color-brand-blue)]" />
-                  <span className="font-[var(--font-be-vietnam-pro)] text-xs font-semibold text-[var(--color-text-strong)]">{label}</span>
-                </div>
+            <ul className="grid gap-3">
+              {summary.map(({ label, meta, Icon }) => (
+                <li key={label} className="flex items-center gap-3">
+                  <span className="grid size-9 shrink-0 place-items-center rounded-full bg-[var(--color-brand-sky)] text-[var(--color-brand-blue)]">
+                    <Icon className="size-4" aria-hidden="true" />
+                  </span>
+                  <span className="grid gap-0.5">
+                    <span className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold leading-tight text-[var(--color-text-strong)]">
+                      {label}
+                    </span>
+                    <span className="font-[var(--font-be-vietnam-pro)] text-xs leading-tight text-[var(--color-text-muted)]">
+                      {meta}
+                    </span>
+                  </span>
+                </li>
               ))}
-            </div>
+            </ul>
           </div>
           <div className="rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white p-5 shadow-[var(--shadow-md)] sm:p-7 md:p-8">
             <SogpPublicQueryProvider>

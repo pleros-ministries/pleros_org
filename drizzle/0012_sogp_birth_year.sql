@@ -1,0 +1,1 @@
+ALTER TABLE "sogp_enrollments" ADD COLUMN "birth_year" integer;

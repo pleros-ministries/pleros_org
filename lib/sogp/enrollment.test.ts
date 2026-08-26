@@ -31,14 +31,14 @@ describe("SOGP enrolment", () => {
   test("normalizes valid input and bounded attribution", () => {
     expect(
       normalizeSogpEnrollment({
-        firstName: "  Ada ",
-        lastName: " Grace ",
+        name: "  Ada Grace ",
         email: " ADA@EXAMPLE.COM ",
         phone: " 0803 000 0000 ",
         phoneCountryCode: "NG",
         countryCode: " ng ",
         country: " Nigeria ",
         region: " Lagos ",
+        birthYear: " 1998 ",
         reason: " I want clarity. ",
         utmSource: " meta ",
       }),
@@ -51,8 +51,24 @@ describe("SOGP enrolment", () => {
       countryCode: "NG",
       country: "Nigeria",
       region: "Lagos",
+      birthYear: "1998",
       reason: "I want clarity.",
       utmSource: "meta",
+    });
+  });
+
+  test("derives first and last name from a single full-name field", () => {
+    expect(
+      normalizeSogpEnrollment({ name: "  Mary   Jane  Watson " }),
+    ).toMatchObject({
+      firstName: "Mary",
+      lastName: "Jane Watson",
+      name: "Mary Jane Watson",
+    });
+    expect(normalizeSogpEnrollment({ name: "Prince" })).toMatchObject({
+      firstName: "Prince",
+      lastName: "",
+      name: "Prince",
     });
   });
 
@@ -60,8 +76,7 @@ describe("SOGP enrolment", () => {
     expect(
       validateSogpEnrollment(
         normalizeSogpEnrollment({
-          firstName: "",
-          lastName: "",
+          name: "",
           email: "bad",
           phone: "12",
           countryCode: "",
@@ -71,25 +86,53 @@ describe("SOGP enrolment", () => {
         }),
       ),
     ).toEqual({
-      firstName: "First name is required.",
-      lastName: "Last name is required.",
+      name: "Enter your full name.",
       email: "Enter a valid email address.",
       phone: "Enter a valid phone number.",
       countryCode: "Country is required.",
       country: "Country is required.",
       region: "State, province or region is required.",
+      birthYear: "Year of birth is required.",
     });
   });
 
-  test("rejects an overlong reason", () => {
-    const input = normalizeSogpEnrollment({
-      firstName: "Ada",
-      lastName: "Grace",
+  test("rejects birth years outside a plausible range", () => {
+    const base = {
+      name: "Ada Grace",
       email: "ada@example.com",
       phone: "+2348030000000",
       countryCode: "NG",
       country: "Nigeria",
       region: "Lagos",
+    };
+    const thisYear = new Date().getUTCFullYear();
+
+    expect(
+      validateSogpEnrollment(
+        normalizeSogpEnrollment({ ...base, birthYear: "1899" }),
+      ).birthYear,
+    ).toBeDefined();
+    expect(
+      validateSogpEnrollment(
+        normalizeSogpEnrollment({ ...base, birthYear: String(thisYear) }),
+      ).birthYear,
+    ).toBeDefined();
+    expect(
+      validateSogpEnrollment(
+        normalizeSogpEnrollment({ ...base, birthYear: "1998" }),
+      ).birthYear,
+    ).toBeUndefined();
+  });
+
+  test("rejects an overlong reason", () => {
+    const input = normalizeSogpEnrollment({
+      name: "Ada Grace",
+      email: "ada@example.com",
+      phone: "+2348030000000",
+      countryCode: "NG",
+      country: "Nigeria",
+      region: "Lagos",
+      birthYear: "1998",
       reason: "x".repeat(1_001),
     });
 

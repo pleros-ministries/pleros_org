@@ -1,56 +1,99 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useRef, useState } from "react";
+import { Combobox } from "@base-ui/react/combobox";
+import { ChevronDown } from "lucide-react";
 import type { CountryCode } from "libphonenumber-js/min";
 
 import {
-  getSogpCountry,
+  getSogpCountryOrDefault,
+  matchesSogpCountryQuery,
   SOGP_COUNTRIES,
+  type SogpCountryOption,
 } from "@/lib/sogp/countries";
+import { CountryFlag } from "./country-flag";
+import { CountryOptions } from "./country-options";
 
 type CountryComboboxProps = {
   defaultCountryCode: CountryCode;
   describedBy?: string;
   invalid?: boolean;
+  onCountryChange?: (country: SogpCountryOption) => void;
 };
 
 export function CountryCombobox({
   defaultCountryCode,
   describedBy,
   invalid,
+  onCountryChange,
 }: CountryComboboxProps) {
-  const initial = useMemo(
-    () => getSogpCountry(defaultCountryCode) ?? getSogpCountry("NG")!,
-    [defaultCountryCode],
+  const [selected, setSelected] = useState<SogpCountryOption>(() =>
+    getSogpCountryOrDefault(defaultCountryCode),
   );
-  const [label, setLabel] = useState(initial.label);
-  const selected =
-    SOGP_COUNTRIES.find(
-      (country) => country.label.toLocaleLowerCase() === label.trim().toLocaleLowerCase(),
-    ) ?? null;
+  const [query, setQuery] = useState(() => selected.label);
+  // Read synchronously while the popup closes, before the state update lands.
+  const selectedRef = useRef(selected);
 
   return (
-    <>
-      <input
-        id="country"
-        name="country"
-        list="sogp-country-options"
-        value={label}
-        onChange={(event) => setLabel(event.target.value)}
-        autoComplete="country-name"
-        aria-invalid={invalid}
-        aria-label="Country of residence"
-        aria-describedby={describedBy}
-        className="h-11 w-full rounded-[var(--radius-sm)] border border-[var(--color-line-strong)] bg-white px-4 text-sm text-[var(--color-text-strong)] outline-none transition focus-visible:border-[var(--color-brand-blue)] focus-visible:ring-4 focus-visible:ring-[var(--color-focus)]"
-      />
-      <input type="hidden" name="countryCode" value={selected?.code ?? ""} />
-      <datalist id="sogp-country-options">
-        {SOGP_COUNTRIES.map((country) => (
-          <option key={country.code} value={country.label}>
-            {country.code}
-          </option>
-        ))}
-      </datalist>
-    </>
+    <Combobox.Root
+      items={SOGP_COUNTRIES}
+      value={selected}
+      onValueChange={(country: SogpCountryOption | null) => {
+        if (!country) return;
+        selectedRef.current = country;
+        setSelected(country);
+        setQuery(country.label);
+        onCountryChange?.(country);
+      }}
+      inputValue={query}
+      onInputValueChange={setQuery}
+      onOpenChange={(open: boolean) => {
+        // An unmatched search should not linger in the field once it closes.
+        if (!open) setQuery(selectedRef.current.label);
+      }}
+      itemToStringLabel={(country: SogpCountryOption) => country.label}
+      itemToStringValue={(country: SogpCountryOption) => country.code}
+      isItemEqualToValue={(left: SogpCountryOption, right: SogpCountryOption) =>
+        left.code === right.code
+      }
+      filter={(country: SogpCountryOption, search: string) =>
+        matchesSogpCountryQuery(country, search)
+      }
+      autoHighlight
+    >
+      <div className="sogp-field-control" data-invalid={invalid || undefined}>
+        <span className="sogp-field-lead">
+          <CountryFlag code={selected.code} />
+        </span>
+        <Combobox.Input
+          id="country"
+          autoComplete="off"
+          spellCheck={false}
+          placeholder="Search for your country"
+          aria-invalid={invalid}
+          aria-describedby={describedBy}
+          className="sogp-field-input"
+        />
+        <Combobox.Trigger
+          className="sogp-field-trigger"
+          aria-label="Show country list"
+        >
+          <Combobox.Icon
+            render={<ChevronDown className="size-4" aria-hidden="true" />}
+          />
+        </Combobox.Trigger>
+      </div>
+
+      <input type="hidden" name="country" value={selected.label} />
+      <input type="hidden" name="countryCode" value={selected.code} />
+
+      <Combobox.Portal>
+        <Combobox.Positioner sideOffset={6} className="sogp-popup-positioner">
+          <Combobox.Popup className="sogp-popup">
+            <CountryOptions />
+          </Combobox.Popup>
+        </Combobox.Positioner>
+      </Combobox.Portal>
+    </Combobox.Root>
   );
 }

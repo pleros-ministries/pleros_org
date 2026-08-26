@@ -41,6 +41,8 @@ Current additive migration: `drizzle/0009_sogp_platform.sql`.
 
 Formation-tracking migration: `drizzle/0010_sogp_formation_tracking.sql`. Legacy Prayer Watch records become `unspecified`; only explicit `morning` records count toward SOGP.
 
+Birth-year migration: `drizzle/0012_sogp_birth_year.sql` adds the nullable `sogp_enrollments.birth_year` column collected on the enrolment form (applied to the current Neon database on 2026-08-26). Existing rows stay `NULL`; run it before deploying the updated form to any environment that has not had it applied.
+
 Current production data has an enrolment-open `september-2026` cohort. Level 1 and Level 2 provide 16 content-ready tracks. Four named, content-ready Level 3 selections remain required before course activation.
 
 Configure first 20-track curriculum after Level 3 content is ready:

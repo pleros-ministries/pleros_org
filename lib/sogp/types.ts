@@ -65,6 +65,7 @@ export type SogpEnrollmentCreateInput = {
   countryCode: string;
   country: string;
   region: string;
+  birthYear?: number | null;
   reason?: string | null;
   utmSource?: string | null;
   utmMedium?: string | null;

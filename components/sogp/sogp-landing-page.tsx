@@ -4,7 +4,6 @@ import {
   ArrowRight,
   CalendarDays,
   Check,
-  ChevronDown,
   Clock3,
   Radio,
   RotateCcw,
@@ -24,6 +23,7 @@ import {
 } from "@/lib/sogp/landing-content";
 import { SogpLandingAnalytics } from "./sogp-analytics";
 import { SogpHeroPhone } from "./sogp-hero-phone";
+import { SogpCurriculumAccordion } from "./sogp-curriculum-accordion";
 
 function SectionCta({
   label,
@@ -63,44 +63,7 @@ function CurriculumSection() {
             {content.curriculum.description}
           </p>
         </div>
-        <div className="border-t border-[var(--color-line)]">
-          {curriculumLevels.map((level) => (
-            <details
-              key={level.value}
-              className="group border-b border-[var(--color-line)]"
-            >
-              <summary className="flex min-h-20 cursor-pointer list-none items-center justify-between gap-4 py-4 outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-brand-blue)] focus-visible:ring-offset-2 [&::-webkit-details-marker]:hidden">
-                <span className="grid gap-1">
-                  <span className="font-[var(--font-sen)] text-[1.35rem] font-semibold tracking-[-0.04em] text-[var(--color-brand-blue)]">
-                    {level.label}
-                  </span>
-                  <span className="font-[var(--font-be-vietnam-pro)] text-xs text-[var(--color-text-muted)]">
-                    {level.description}
-                  </span>
-                </span>
-                <ChevronDown
-                  className="size-5 shrink-0 text-[var(--color-brand-blue)] transition-transform duration-200 group-open:rotate-180"
-                  aria-hidden="true"
-                />
-              </summary>
-              <ol className="grid border-t border-[var(--color-line)] md:grid-cols-2">
-                {level.tracks.map((track) => (
-                  <li
-                    key={`${level.value}-${track.title}`}
-                    className="grid min-h-20 grid-cols-[2.5rem_1fr] gap-3 border-b border-[var(--color-line)] py-4 last:border-b-0 md:gap-5 md:odd:pr-8 md:even:border-l md:even:pl-8 md:[&:nth-last-child(2):nth-child(odd)]:border-b-0"
-                  >
-                    <span className="font-[var(--font-sen)] text-sm font-semibold tabular-nums text-[var(--color-brand-blue)]">
-                      {String(track.number).padStart(2, "0")}
-                    </span>
-                    <h3 className="font-[var(--font-sen)] text-[1rem] font-semibold leading-[1.25] tracking-[-0.03em] text-[var(--color-text-strong)] md:text-[1.08rem]">
-                      {track.title}
-                    </h3>
-                  </li>
-                ))}
-              </ol>
-            </details>
-          ))}
-        </div>
+        <SogpCurriculumAccordion levels={curriculumLevels} />
         <SectionCta label={content.ctas.curriculum} />
       </div>
     </section>
@@ -305,9 +268,18 @@ export function SogpLandingPage() {
               <h2 className="site-section-heading text-[2.35rem] md:text-[3.4rem]">
                 {content.definition.title}
               </h2>
-              <p className="site-section-intro text-[var(--color-text-muted)]">
-                {content.definition.description}
-              </p>
+              <div className="grid gap-4">
+                {content.definition.description
+                  .split(/(?<=\.)\s+(?=[A-Z])/)
+                  .map((paragraph) => (
+                    <p
+                      key={paragraph}
+                      className="site-section-intro text-[var(--color-text-muted)]"
+                    >
+                      {paragraph}
+                    </p>
+                  ))}
+              </div>
             </div>
             <div className="grid content-start gap-4">
               <p className="font-[var(--font-sen)] text-xl font-semibold tracking-[-0.035em] text-[var(--color-brand-blue)]">
@@ -435,11 +407,19 @@ export function SogpLandingPage() {
             </h2>
             <div className="grid content-start gap-6">
               <ul className="divide-y divide-[var(--color-line)] border-y border-[var(--color-line)]">
-                {content.benefits.items.map((item) => (
-                  <li key={item} className="py-4 font-[var(--font-be-vietnam-pro)] text-[0.95rem] leading-[1.55] text-[var(--color-text-strong)]">
-                    {item}
-                  </li>
-                ))}
+                {content.benefits.items.map((item) => {
+                  const [lead, ...rest] = item.split(": ");
+                  const detail = rest.join(": ");
+                  return (
+                    <li key={item} className="py-4 font-[var(--font-be-vietnam-pro)] text-[0.95rem] leading-[1.55] text-[var(--color-text-muted)]">
+                      <span className="font-semibold text-[var(--color-text-strong)]">
+                        {lead}
+                        {detail ? ":" : null}
+                      </span>
+                      {detail ? ` ${detail}` : null}
+                    </li>
+                  );
+                })}
               </ul>
               <SectionCta label={content.ctas.free} />
             </div>

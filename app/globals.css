@@ -1356,40 +1356,249 @@
   display: none;
 }
 
-.sogp-phone-input {
+/* ─── SOGP form controls ────────────────────────────────────────────────────
+   Shared shell for the country combobox and the international phone field so
+   both sit flush with the plain <Input> fields around them. */
+
+.sogp-field-control {
   display: flex;
   min-height: 2.75rem;
   align-items: stretch;
+  overflow: hidden;
   border: 1px solid var(--color-line-strong);
   border-radius: var(--radius-sm);
   background: #fff;
   transition: border-color 150ms ease, box-shadow 150ms ease;
 }
 
-.sogp-phone-input:focus-within {
+.sogp-field-control:focus-within {
   border-color: var(--color-brand-blue);
   box-shadow: 0 0 0 4px var(--color-focus);
 }
 
-.sogp-phone-input select {
-  border-right: 1px solid var(--color-line);
-  cursor: pointer;
-  background: transparent;
-  padding-inline: 0.75rem;
-  color: var(--color-text-strong);
-  font-size: 0.75rem;
-  outline: none;
+.sogp-field-control[data-invalid] {
+  border-color: var(--destructive);
 }
 
-.sogp-phone-input input {
+.sogp-field-lead {
+  display: flex;
+  align-items: center;
+  padding-inline: 0.85rem 0;
+}
+
+.sogp-field-input {
+  flex: 1 1 auto;
   min-width: 0;
   border: 0;
   background: transparent;
-  padding-inline: 1rem;
+  padding-inline: 0.75rem;
   color: var(--color-text-strong);
   font-family: var(--font-be-vietnam-pro), var(--font-sans), sans-serif;
   font-size: 0.875rem;
   outline: none;
+}
+
+.sogp-field-input::placeholder {
+  color: var(--color-text-muted);
+  opacity: 0.75;
+}
+
+.sogp-field-trigger {
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  padding-inline: 0.75rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  outline: none;
+}
+
+.sogp-field-trigger:hover {
+  color: var(--color-brand-blue);
+}
+
+.sogp-field-trigger svg {
+  transition: transform 180ms ease;
+}
+
+.sogp-field-trigger[data-popup-open] svg {
+  transform: rotate(180deg);
+}
+
+.sogp-phone-country {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 0;
+  border-right: 1px solid var(--color-line);
+  background: var(--color-surface-muted);
+  padding-inline: 0.8rem;
+  color: var(--color-text-strong);
+  cursor: pointer;
+  outline: none;
+  transition: background-color 150ms ease;
+}
+
+.sogp-phone-country:hover,
+.sogp-phone-country[data-popup-open] {
+  background: var(--color-brand-sky-soft, var(--color-surface-muted));
+}
+
+.sogp-phone-country:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--color-brand-blue);
+}
+
+.sogp-phone-dial {
+  font-family: var(--font-be-vietnam-pro), var(--font-sans), sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.sogp-flag {
+  display: inline-flex;
+  width: 1.35rem;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 0.2rem;
+  box-shadow: inset 0 0 0 1px rgba(15, 23, 40, 0.12);
+  line-height: 0;
+}
+
+.sogp-flag svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.sogp-flag-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.55rem;
+  border-radius: 0.25rem;
+  background: var(--color-brand-sky);
+  padding: 0.15rem 0.25rem;
+  color: var(--color-brand-blue);
+  font-family: var(--font-be-vietnam-pro), var(--font-sans), sans-serif;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+/* ─── SOGP country popup ────────────────────────────────────────────────── */
+
+.sogp-popup-positioner {
+  z-index: 60;
+}
+
+.sogp-popup {
+  display: flex;
+  width: var(--anchor-width);
+  min-width: 17rem;
+  max-width: calc(100vw - 2rem);
+  max-height: min(20rem, var(--available-height, 20rem));
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  box-shadow: 0 18px 44px rgba(5, 20, 128, 0.16);
+  transform-origin: var(--transform-origin);
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+
+.sogp-popup[data-starting-style],
+.sogp-popup[data-ending-style] {
+  opacity: 0;
+  transform: scale(0.97);
+}
+
+.sogp-popup-search {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--color-line);
+  padding: 0.6rem 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.sogp-popup-search input {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-strong);
+  font-family: var(--font-be-vietnam-pro), var(--font-sans), sans-serif;
+  font-size: 0.875rem;
+  outline: none;
+}
+
+.sogp-popup-list {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.35rem;
+  scroll-padding-block: 0.35rem;
+}
+
+.sogp-popup-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  border-radius: calc(var(--radius-sm) - 0.35rem);
+  padding: 0.5rem 0.6rem;
+  color: var(--color-text-strong);
+  cursor: default;
+  font-family: var(--font-be-vietnam-pro), var(--font-sans), sans-serif;
+  font-size: 0.875rem;
+  outline: none;
+  user-select: none;
+}
+
+.sogp-popup-item[data-highlighted] {
+  background: var(--color-brand-sky);
+  color: var(--color-brand-blue);
+}
+
+.sogp-popup-item[data-selected] {
+  font-weight: 600;
+}
+
+.sogp-popup-item-label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sogp-popup-item-meta {
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.sogp-popup-item[data-highlighted] .sogp-popup-item-meta {
+  color: var(--color-brand-blue);
+}
+
+.sogp-popup-item-check {
+  display: grid;
+  place-items: center;
+  color: var(--color-brand-blue);
+}
+
+.sogp-popup-empty {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.9rem 1rem;
+  color: var(--color-text-muted);
+  font-family: var(--font-be-vietnam-pro), var(--font-sans), sans-serif;
+  font-size: 0.8125rem;
+}
+
+.sogp-popup-empty:empty {
+  display: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -14,6 +14,7 @@ export type SogpEnrollmentValues = {
   countryCode: string;
   country: string;
   region: string;
+  birthYear: string;
   reason: string;
   utmSource: string;
   utmMedium: string;
@@ -27,19 +28,22 @@ export type SogpEnrollmentInput = Partial<SogpEnrollmentValues> & {
 };
 export type SogpEnrollmentErrors = Partial<
   Record<
-    | "firstName"
-    | "lastName"
+    | "name"
     | "email"
     | "phone"
     | "countryCode"
     | "country"
     | "region"
+    | "birthYear"
     | "reason",
     string
   >
 >;
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const EARLIEST_BIRTH_YEAR = 1900;
+/** SOGP is open to teenagers upwards, so anything younger reads as a typo. */
+const MINIMUM_AGE = 10;
 
 export function buildSogpEnrollmentRedirect(input: {
   cohortChannelUrl?: string | null;
@@ -63,8 +67,9 @@ function clean(value: unknown, maxLength: number) {
 export function normalizeSogpEnrollment(
   input: SogpEnrollmentInput,
 ): SogpEnrollmentValues {
-  const firstName = clean(input.firstName, 80);
-  const lastName = clean(input.lastName, 80);
+  const nameParts = clean(input.name, 160).split(/\s+/).filter(Boolean);
+  const name = nameParts.join(" ");
+  const [firstName, ...lastNameParts] = nameParts;
   const rawPhone = clean(input.phone, 32);
   const rawPhoneCountry = clean(input.phoneCountryCode, 2).toUpperCase();
   const phoneCountryCode = isSupportedCountry(rawPhoneCountry)
@@ -79,14 +84,15 @@ export function normalizeSogpEnrollment(
   }
 
   return {
-    firstName,
-    lastName,
-    name: [firstName, lastName].filter(Boolean).join(" "),
+    firstName: firstName ?? "",
+    lastName: lastNameParts.join(" "),
+    name,
     email: clean(input.email, 320).toLowerCase(),
     phone,
     countryCode: clean(input.countryCode, 2).toUpperCase(),
     country: clean(input.country, 100),
     region: clean(input.region, 120),
+    birthYear: clean(input.birthYear, 4).replace(/\D/g, ""),
     reason: typeof input.reason === "string" ? input.reason.trim() : "",
     utmSource: clean(input.utmSource, 200),
     utmMedium: clean(input.utmMedium, 200),
@@ -101,8 +107,7 @@ export function validateSogpEnrollment(
 ): SogpEnrollmentErrors {
   const errors: SogpEnrollmentErrors = {};
 
-  if (!input.firstName) errors.firstName = "First name is required.";
-  if (!input.lastName) errors.lastName = "Last name is required.";
+  if (!input.name) errors.name = "Enter your full name.";
   if (!EMAIL_PATTERN.test(input.email)) {
     errors.email = "Enter a valid email address.";
   }
@@ -113,6 +118,17 @@ export function validateSogpEnrollment(
   if (!input.country) errors.country = "Country is required.";
   if (!input.region) {
     errors.region = "State, province or region is required.";
+  }
+  const birthYear = Number(input.birthYear);
+  const latestBirthYear = new Date().getUTCFullYear() - MINIMUM_AGE;
+  if (!input.birthYear) {
+    errors.birthYear = "Year of birth is required.";
+  } else if (
+    !Number.isInteger(birthYear) ||
+    birthYear < EARLIEST_BIRTH_YEAR ||
+    birthYear > latestBirthYear
+  ) {
+    errors.birthYear = `Enter a year between ${EARLIEST_BIRTH_YEAR} and ${latestBirthYear}.`;
   }
   if (input.reason.length > 1_000) {
     errors.reason = "Keep your response within 1,000 characters.";

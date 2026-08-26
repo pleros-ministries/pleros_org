@@ -738,6 +738,7 @@ export const sogpEnrollments = pgTable(
     countryCode: text("country_code").notNull().default(""),
     country: text("country").notNull(),
     region: text("region").notNull().default(""),
+    birthYear: integer("birth_year"),
     reason: text("reason"),
     status: sogpEnrollmentStatusEnum("status").notNull().default("enrolled"),
     utmSource: text("utm_source"),

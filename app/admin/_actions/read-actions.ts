@@ -300,6 +300,7 @@ export async function getAdminSogpData(): Promise<AdminSogpData> {
         countryCode: enrollment.countryCode,
         country: enrollment.country,
         region: enrollment.region,
+        birthYear: enrollment.birthYear,
         status: enrollment.status,
         telegramLinkedAt: serializeDate(enrollment.telegramLinkedAt),
         createdAt: enrollment.createdAt.toISOString(),

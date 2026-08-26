@@ -50,6 +50,7 @@ export async function POST(request: Request) {
     const userId = (await resolveDbUserId(authUser.email)) ?? authUser.id;
     await upsertSogpEnrollment({
       ...values,
+      birthYear: values.birthYear ? Number(values.birthYear) : null,
       cohortId: cohort.id,
       userId,
     });

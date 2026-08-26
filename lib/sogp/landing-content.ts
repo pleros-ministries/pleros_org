@@ -107,7 +107,7 @@ export const sogpLandingContent = {
       {
         label: "Duration",
         meta: "Four weeks",
-        detail: "Twenty tracks paced across the cohort",
+        detail: "24 tracks paced across the cohort",
       },
       {
         label: "Catch-up",
