@@ -1,13 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { ArrowRight, LoaderCircle } from "lucide-react";
 import type { CountryCode } from "libphonenumber-js/min";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import type { SogpEnrollmentErrors } from "@/lib/sogp/enrollment";
+import {
+  normalizeSogpEnrollment,
+  validateSogpEnrollment,
+  type SogpEnrollmentErrors,
+} from "@/lib/sogp/enrollment";
+import { getSogpCountryOrDefault } from "@/lib/sogp/countries";
 import { CountryCombobox } from "./country-combobox";
 import { PhoneField } from "./phone-field";
 import { trackSogpEvent } from "./sogp-analytics";
@@ -18,21 +23,41 @@ type EnrollmentResponse = {
   error?: string;
 };
 
-async function submitEnrollment(formData: FormData) {
+// Fields validated inline, in the order they appear so we can focus the first
+// one that still needs attention on a blocked submit.
+const FIELD_ORDER = [
+  "name",
+  "email",
+  "phone",
+  "country",
+  "countryCode",
+  "region",
+  "birthYear",
+  "reason",
+] as const;
+
+type FieldName = (typeof FIELD_ORDER)[number];
+
+const FOCUS_TARGET: Partial<Record<FieldName, string>> = {
+  name: "name",
+  email: "email",
+  phone: "phone",
+  country: "country",
+  countryCode: "country",
+  region: "region",
+  birthYear: "birthYear",
+};
+
+const FILL_IN_MESSAGE =
+  "Please fill in the highlighted fields before completing your enrolment.";
+
+async function submitEnrollment(body: Record<string, unknown>) {
   const params = new URLSearchParams(window.location.search);
   const response = await fetch("/api/sogp/enrol", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      name: formData.get("name"),
-      email: formData.get("email"),
-      phone: formData.get("phone"),
-      phoneCountryCode: formData.get("phoneCountryCode"),
-      country: formData.get("country"),
-      countryCode: formData.get("countryCode"),
-      region: formData.get("region"),
-      birthYear: formData.get("birthYear"),
-      reason: formData.get("reason"),
+      ...body,
       utmSource: params.get("utm_source"),
       utmMedium: params.get("utm_medium"),
       utmCampaign: params.get("utm_campaign"),
@@ -58,11 +83,31 @@ export function SogpEnrollmentForm({
 }: {
   defaultCountryCode: CountryCode;
 }) {
-  const [errors, setErrors] = useState<SogpEnrollmentErrors>({});
+  const initialCountry = getSogpCountryOrDefault(defaultCountryCode);
+
+  const [values, setValues] = useState({
+    name: "",
+    email: "",
+    region: "",
+    birthYear: "",
+    reason: "",
+    phone: "",
+    phoneCountryCode: defaultCountryCode as CountryCode,
+    country: initialCountry.label,
+    countryCode: initialCountry.code as string,
+  });
+  const [touched, setTouched] = useState<Partial<Record<FieldName, boolean>>>({});
+  const [submitAttempted, setSubmitAttempted] = useState(false);
+  const [serverErrors, setServerErrors] = useState<SogpEnrollmentErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
-  const [phone, setPhone] = useState("");
-  const [phoneCountryCode, setPhoneCountryCode] =
-    useState<CountryCode>(defaultCountryCode);
+
+  // Validate through the same normalize/validate the server uses, so what the
+  // visitor sees inline matches exactly what the API would reject.
+  const clientErrors = useMemo(
+    () => validateSogpEnrollment(normalizeSogpEnrollment(values)),
+    [values],
+  );
+
   const mutation = useMutation({
     mutationFn: submitEnrollment,
     onSuccess(payload) {
@@ -70,72 +115,195 @@ export function SogpEnrollmentForm({
       window.location.assign(payload.redirectTo ?? "/dashboard/sogp");
     },
     onError(error: EnrollmentResponse) {
-      setErrors(error.errors ?? {});
-      setFormError(error.error ?? "We could not complete your enrolment. Try again.");
+      const fieldErrors = error.errors ?? {};
+      setServerErrors(fieldErrors);
+      setSubmitAttempted(true);
+      setFormError(
+        error.error ??
+          (Object.keys(fieldErrors).length > 0
+            ? FILL_IN_MESSAGE
+            : "We could not complete your enrolment. Try again."),
+      );
     },
   });
 
+  function clearServerError(field: keyof SogpEnrollmentErrors) {
+    // A fresh edit supersedes whatever the server last said about that field.
+    setServerErrors((current) => {
+      if (!(field in current)) return current;
+      const next = { ...current };
+      delete next[field];
+      return next;
+    });
+  }
+
+  function update<K extends keyof typeof values>(key: K, value: (typeof values)[K]) {
+    setValues((current) => ({ ...current, [key]: value }));
+    clearServerError(key as keyof SogpEnrollmentErrors);
+  }
+
+  function markTouched(field: FieldName) {
+    setTouched((current) => ({ ...current, [field]: true }));
+  }
+
+  // Show a field's error once it has been touched or a submit was attempted;
+  // a server-reported error always shows.
+  function errorFor(field: keyof SogpEnrollmentErrors): string | undefined {
+    if (serverErrors[field]) return serverErrors[field];
+    if (submitAttempted || touched[field as FieldName]) return clientErrors[field];
+    return undefined;
+  }
+
+  const nameError = errorFor("name");
+  const emailError = errorFor("email");
+  const phoneError = errorFor("phone");
+  const countryError = errorFor("country") ?? errorFor("countryCode");
+  const regionError = errorFor("region");
+  const birthYearError = errorFor("birthYear");
+  const reasonError = errorFor("reason");
+
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSubmitAttempted(true);
+    setServerErrors({});
+    trackSogpEvent("sogp_enrolment_started");
+
+    if (Object.keys(clientErrors).length > 0) {
+      setFormError(FILL_IN_MESSAGE);
+      const firstInvalid = FIELD_ORDER.find((field) => clientErrors[field]);
+      const focusId = firstInvalid ? FOCUS_TARGET[firstInvalid] : undefined;
+      if (focusId) document.getElementById(focusId)?.focus();
+      return;
+    }
+
+    setFormError(null);
+    mutation.mutate(values);
+  }
+
   return (
-    <form
-      className="grid gap-5"
-      onSubmit={(event) => {
-        event.preventDefault();
-        setErrors({});
-        setFormError(null);
-        trackSogpEvent("sogp_enrolment_started");
-        mutation.mutate(new FormData(event.currentTarget));
-      }}
-    >
+    <form className="grid gap-5" noValidate onSubmit={handleSubmit}>
       <div className="grid gap-2">
         <label htmlFor="name" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">Full name</label>
-        <Input id="name" name="name" autoComplete="name" aria-invalid={Boolean(errors.name)} aria-describedby={errors.name ? "name-error" : undefined} />
-        <FieldError id="name-error" error={errors.name} />
+        <Input
+          id="name"
+          name="name"
+          autoComplete="name"
+          value={values.name}
+          onChange={(event) => update("name", event.target.value)}
+          onBlur={() => markTouched("name")}
+          aria-invalid={Boolean(nameError)}
+          aria-describedby={nameError ? "name-error" : undefined}
+        />
+        <FieldError id="name-error" error={nameError} />
       </div>
       <div className="grid gap-2">
         <label htmlFor="email" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">Email address</label>
-        <Input id="email" name="email" type="email" autoComplete="email" aria-invalid={Boolean(errors.email)} aria-describedby={errors.email ? "email-error" : undefined} />
-        <FieldError id="email-error" error={errors.email} />
+        <Input
+          id="email"
+          name="email"
+          type="email"
+          autoComplete="email"
+          value={values.email}
+          onChange={(event) => update("email", event.target.value)}
+          onBlur={() => markTouched("email")}
+          aria-invalid={Boolean(emailError)}
+          aria-describedby={emailError ? "email-error" : undefined}
+        />
+        <FieldError id="email-error" error={emailError} />
       </div>
       <div className="grid gap-2">
         <label htmlFor="phone" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">Phone number</label>
         <PhoneField
           defaultCountryCode={defaultCountryCode}
-          invalid={Boolean(errors.phone)}
-          describedBy={errors.phone ? "phone-help phone-error" : "phone-help"}
+          invalid={Boolean(phoneError)}
+          describedBy={phoneError ? "phone-help phone-error" : "phone-help"}
           onChange={(next) => {
-            setPhone(next.phone);
-            setPhoneCountryCode(next.countryCode);
+            setValues((current) => ({
+              ...current,
+              phone: next.phone,
+              phoneCountryCode: next.countryCode,
+            }));
+            clearServerError("phone");
           }}
+          onBlur={() => markTouched("phone")}
         />
-        <input type="hidden" name="phone" value={phone} />
-        <input type="hidden" name="phoneCountryCode" value={phoneCountryCode} />
         <p id="phone-help" className="font-[var(--font-be-vietnam-pro)] text-xs leading-[1.45] text-[var(--color-text-muted)]">Use the number linked to your WhatsApp account.</p>
-        <FieldError id="phone-error" error={errors.phone} />
+        <FieldError id="phone-error" error={phoneError} />
       </div>
       <div className="grid gap-2">
         <label htmlFor="country" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">Country of residence</label>
-        <CountryCombobox defaultCountryCode={defaultCountryCode} invalid={Boolean(errors.country || errors.countryCode)} describedBy={errors.country || errors.countryCode ? "country-error" : undefined} />
-        <FieldError id="country-error" error={errors.country ?? errors.countryCode} />
+        <CountryCombobox
+          defaultCountryCode={defaultCountryCode}
+          invalid={Boolean(countryError)}
+          describedBy={countryError ? "country-error" : undefined}
+          onCountryChange={(country) => {
+            setValues((current) => ({
+              ...current,
+              country: country.label,
+              countryCode: country.code,
+            }));
+            clearServerError("country");
+            clearServerError("countryCode");
+            markTouched("country");
+          }}
+        />
+        <FieldError id="country-error" error={countryError} />
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="grid gap-2">
           <label htmlFor="region" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">State / province / region</label>
-          <Input id="region" name="region" autoComplete="address-level1" aria-invalid={Boolean(errors.region)} aria-describedby={errors.region ? "region-error" : undefined} />
-          <FieldError id="region-error" error={errors.region} />
+          <Input
+            id="region"
+            name="region"
+            autoComplete="address-level1"
+            value={values.region}
+            onChange={(event) => update("region", event.target.value)}
+            onBlur={() => markTouched("region")}
+            aria-invalid={Boolean(regionError)}
+            aria-describedby={regionError ? "region-error" : undefined}
+          />
+          <FieldError id="region-error" error={regionError} />
         </div>
         <div className="grid gap-2">
           <label htmlFor="birthYear" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">Year of birth</label>
-          <Input id="birthYear" name="birthYear" type="text" inputMode="numeric" pattern="[0-9]*" maxLength={4} autoComplete="bday-year" placeholder="1998" aria-invalid={Boolean(errors.birthYear)} aria-describedby={errors.birthYear ? "birth-year-error" : undefined} />
-          <FieldError id="birth-year-error" error={errors.birthYear} />
+          <Input
+            id="birthYear"
+            name="birthYear"
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            maxLength={4}
+            autoComplete="bday-year"
+            placeholder="1998"
+            value={values.birthYear}
+            onChange={(event) =>
+              update("birthYear", event.target.value.replace(/\D/g, "").slice(0, 4))
+            }
+            onBlur={() => markTouched("birthYear")}
+            aria-invalid={Boolean(birthYearError)}
+            aria-describedby={birthYearError ? "birth-year-error" : undefined}
+          />
+          <FieldError id="birth-year-error" error={birthYearError} />
         </div>
       </div>
       <div className="grid gap-2">
         <label htmlFor="reason" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">What do you want to get out of SOGP? <span className="font-normal text-[var(--color-text-muted)]">(optional)</span></label>
-        <textarea id="reason" name="reason" rows={4} maxLength={1000} className="w-full resize-y rounded-[var(--radius-sm)] border border-[var(--color-line-strong)] bg-white px-4 py-3 font-[var(--font-be-vietnam-pro)] text-sm text-[var(--color-text-strong)] outline-none transition focus-visible:border-[var(--color-brand-blue)] focus-visible:ring-4 focus-visible:ring-[var(--color-focus)]" aria-invalid={Boolean(errors.reason)} aria-describedby={errors.reason ? "reason-error" : undefined} />
-        <FieldError id="reason-error" error={errors.reason} />
+        <textarea
+          id="reason"
+          name="reason"
+          rows={4}
+          maxLength={1000}
+          value={values.reason}
+          onChange={(event) => update("reason", event.target.value)}
+          onBlur={() => markTouched("reason")}
+          className="w-full resize-y rounded-[var(--radius-sm)] border border-[var(--color-line-strong)] bg-white px-4 py-3 font-[var(--font-be-vietnam-pro)] text-sm text-[var(--color-text-strong)] outline-none transition focus-visible:border-[var(--color-brand-blue)] focus-visible:ring-4 focus-visible:ring-[var(--color-focus)]"
+          aria-invalid={Boolean(reasonError)}
+          aria-describedby={reasonError ? "reason-error" : undefined}
+        />
+        <FieldError id="reason-error" error={reasonError} />
       </div>
       {formError ? (
-        <div role="alert" className="rounded-[var(--radius-sm)] border border-red-200 bg-red-50 px-4 py-3 font-[var(--font-be-vietnam-pro)] text-sm text-red-800">{formError}</div>
+        <div role="alert" className="rounded-[var(--radius-sm)] border border-red-200 bg-red-50 px-4 py-2.5 font-[var(--font-be-vietnam-pro)] text-xs leading-[1.5] text-red-800">{formError}</div>
       ) : null}
       <Button type="submit" size="lg" disabled={mutation.isPending} className="min-h-12 w-full rounded-full bg-[var(--color-brand-blue)] text-white">
         {mutation.isPending ? <LoaderCircle className="size-4 animate-spin" /> : null}

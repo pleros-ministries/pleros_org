@@ -35,6 +35,8 @@ type PhoneFieldProps = {
   describedBy?: string;
   /** Emits the E.164 number when the input parses, otherwise the raw digits. */
   onChange: (value: { phone: string; countryCode: CountryCode }) => void;
+  /** Fires when the tel input loses focus, for touched-based validation. */
+  onBlur?: () => void;
 };
 
 export function PhoneField({
@@ -42,6 +44,7 @@ export function PhoneField({
   invalid,
   describedBy,
   onChange,
+  onBlur,
 }: PhoneFieldProps) {
   const [country, setCountry] = useState<SogpCountryOption>(() =>
     getSogpCountryOrDefault(defaultCountryCode),
@@ -157,6 +160,7 @@ export function PhoneField({
         autoComplete="tel-national"
         value={value}
         onChange={(event) => handleInput(event.target.value)}
+        onBlur={onBlur}
         placeholder={placeholder}
         aria-invalid={invalid}
         aria-describedby={describedBy}
