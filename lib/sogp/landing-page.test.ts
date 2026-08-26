@@ -47,7 +47,7 @@ describe("SOGP landing content", () => {
       {
         value: "level-3",
         label: "Level 3",
-        numbers: [17, 18, 19, 20],
+        numbers: [17, 18, 19],
       },
     ]);
   });
@@ -60,5 +60,13 @@ describe("SOGP landing content", () => {
 
     expect(source).not.toContain("<HomepageNav");
     expect(source.match(/<SectionCta/g)?.length ?? 0).toBeGreaterThanOrEqual(12);
+    expect(source).toContain("<SogpHeroPhone");
+    const definitionSection = source.slice(
+      source.indexOf("content.definition.title"),
+      source.indexOf("Who should join SOGP?"),
+    );
+    expect(definitionSection.indexOf("content.outcomes.map")).toBeLessThan(
+      definitionSection.indexOf('<SectionCta label={content.ctas.middle}'),
+    );
   });
 });

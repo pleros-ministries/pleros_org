@@ -10,8 +10,14 @@ export const sogpLandingContent = {
     ],
     description:
       "Get answers to difficult questions about God, gain clarity on God’s purpose for your life, and receive the transformation and empowerment needed to fulfil it.",
-    ctaLabel: "Enrol for free",
     ctaHref: "/sogp/enrol",
+  },
+  ctas: {
+    hero: "Enrol to get started",
+    early: "Begin your enrolment",
+    middle: "Start your journey",
+    curriculum: "Enrol to start learning",
+    free: "Enrol for free",
   },
   questionsTitle: "What are you seeking?",
   questions: [
@@ -31,7 +37,7 @@ export const sogpLandingContent = {
   definition: {
     title: "What is SOGP?",
     description:
-      "The School of God’s Purpose is a single platform that answers life’s most foundational questions, edifies you for radical transformation, and empowers and stirs you to fulfil God’s purpose for your life.",
+      "The School of God’s Purpose is a platform that provides you with answers to the most important questions of life in a simple, clear, well-structured and flexible manner. The goal is to give you persuasion and clarity about the truth of existence, help you discover and recognise God’s purpose for your life, and cause you to live a transformed and empowered life that fulfils God’s assignments.",
     outcomesIntro: "With SOGP, you will:",
   },
   audiences: [
@@ -39,7 +45,7 @@ export const sogpLandingContent = {
     "Those with questions and doubts about God’s purpose for their lives.",
     "Those desiring spiritual growth and transformation in character, habits, and freedom from difficult addictions.",
     "Those desiring to receive and minister divine healing for themselves and others.",
-    "Those desiring empowerment to walk and function in the supernatural.",
+    "Those desiring empowerment to do the work of ministry and to function in the supernatural.",
     "Those seeking God’s wisdom for their careers, businesses, finances, and other natural pursuits.",
     "Anyone who wants a stronger walk with God and hungers to fulfil His purpose.",
   ],
@@ -60,7 +66,10 @@ export const sogpLandingContent = {
         title: "The New Creation: Who You Are in Christ",
       },
       { level: "Level 1", title: "Faith Stand: How to Grow in Christ" },
-      { level: "Level 1", title: "Commitment: How to Fulfil Purpose" },
+      {
+        level: "Level 1",
+        title: "Discipline – The Foundation of the Pursuit of Purpose",
+      },
       { level: "Level 2", title: "Introduction to Doctrinal Summaries" },
       { level: "Level 2", title: "Bibliology" },
       { level: "Level 2", title: "God and His Eternal Purpose" },
@@ -72,10 +81,6 @@ export const sogpLandingContent = {
       { level: "Level 2", title: "Church and Its Mission" },
       { level: "Level 2", title: "Eschatology" },
       { level: "Level 2", title: "The New Creation" },
-      {
-        level: "Level 3",
-        title: "Discipline – The Foundation of the Pursuit of Purpose",
-      },
       { level: "Level 3", title: "Being Led by the Spirit of God" },
       { level: "Level 3", title: "The Life of Devotion" },
       {

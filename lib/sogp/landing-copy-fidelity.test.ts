@@ -31,21 +31,34 @@ test("uses the approved conversion-focused SOGP hero and reader questions", () =
   expect(sogpLandingContent.definition.outcomesIntro).toBe(
     "With SOGP, you will:",
   );
+  expect(sogpLandingContent.definition.description).toBe(
+    "The School of God’s Purpose is a platform that provides you with answers to the most important questions of life in a simple, clear, well-structured and flexible manner. The goal is to give you persuasion and clarity about the truth of existence, help you discover and recognise God’s purpose for your life, and cause you to live a transformed and empowered life that fulfils God’s assignments.",
+  );
+  expect(sogpLandingContent.audiences[4]).toBe(
+    "Those desiring empowerment to do the work of ministry and to function in the supernatural.",
+  );
+  expect(sogpLandingContent.ctas).toEqual({
+    hero: "Enrol to get started",
+    early: "Begin your enrolment",
+    middle: "Start your journey",
+    curriculum: "Enrol to start learning",
+    free: "Enrol for free",
+  });
 });
 
 test("uses the approved curriculum, structure, and enrollment copy", () => {
   expect(sogpLandingContent.curriculum.description).toBe(
     "The curriculum of SOGP is paced to answer foundational questions, strengthen your overall doctrinal persuasion, and stir you into a practical walk with God and in His purpose.",
   );
+  expect(sogpLandingContent.curriculum.tracks[4]).toEqual({
+    level: "Level 1",
+    title: "Discipline – The Foundation of the Pursuit of Purpose",
+  });
   expect(
     sogpLandingContent.curriculum.tracks.filter(
       (track) => track.level === "Level 3",
     ),
   ).toEqual([
-    {
-      level: "Level 3",
-      title: "Discipline – The Foundation of the Pursuit of Purpose",
-    },
     { level: "Level 3", title: "Being Led by the Spirit of God" },
     { level: "Level 3", title: "The Life of Devotion" },
     {

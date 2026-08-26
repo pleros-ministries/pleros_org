@@ -23,8 +23,15 @@ import {
   sogpLandingContent as content,
 } from "@/lib/sogp/landing-content";
 import { SogpLandingAnalytics } from "./sogp-analytics";
+import { SogpHeroPhone } from "./sogp-hero-phone";
 
-function SectionCta({ inverse = false }: { inverse?: boolean }) {
+function SectionCta({
+  label,
+  inverse = false,
+}: {
+  label: string;
+  inverse?: boolean;
+}) {
   return (
     <Link
       href={content.hero.ctaHref}
@@ -34,7 +41,7 @@ function SectionCta({ inverse = false }: { inverse?: boolean }) {
           : "site-button-text inline-flex min-h-12 w-fit items-center justify-center gap-2 rounded-full bg-[var(--color-brand-blue)] px-7 text-sm font-semibold text-white transition-transform duration-150 hover:-translate-y-px focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-brand-blue)]"
       }
     >
-      {content.hero.ctaLabel}
+      {label}
       <ArrowRight className="size-4" aria-hidden="true" />
     </Link>
   );
@@ -94,7 +101,7 @@ function CurriculumSection() {
             </details>
           ))}
         </div>
-        <SectionCta />
+        <SectionCta label={content.ctas.curriculum} />
       </div>
     </section>
   );
@@ -139,7 +146,7 @@ function StructureSection() {
             );
           })}
         </div>
-        <SectionCta inverse />
+        <SectionCta label={content.ctas.middle} inverse />
       </div>
     </section>
   );
@@ -229,7 +236,7 @@ function ToolsSection() {
             </div>
           </article>
         </div>
-        <SectionCta />
+        <SectionCta label={content.ctas.middle} />
       </div>
     </section>
   );
@@ -244,24 +251,27 @@ export function SogpLandingPage() {
 
       <main className="site-font-theme bg-white">
         <section className="bg-white">
-          <div className="site-shell-page sogp-shell-page grid gap-7 pb-14 pt-10 md:pb-20 md:pt-16">
-            <h1 className="site-hero-heading max-w-[18ch] text-[clamp(2.65rem,6.2vw,5.5rem)] leading-[0.96] text-[var(--color-brand-blue)]">
-              {content.hero.titleLines.slice(0, 3).map((line) => (
-                <span key={line} className="block md:whitespace-nowrap">
-                  {line}
+          <div className="site-shell-page sogp-shell-page grid gap-8 pb-14 pt-10 lg:grid-cols-[minmax(0,1.08fr)_minmax(22rem,0.92fr)] lg:items-center lg:gap-12 lg:pb-20 lg:pt-12">
+            <div className="grid gap-7">
+              <h1 className="site-hero-heading max-w-[18ch] text-[clamp(2.65rem,6.2vw,5.5rem)] leading-[0.96] text-[var(--color-brand-blue)]">
+                {content.hero.titleLines.slice(0, 3).map((line) => (
+                  <span key={line} className="block lg:whitespace-nowrap">
+                    {line}
+                  </span>
+                ))}
+                <span className="mt-3 block text-[0.46em] leading-[1.05] tracking-[-0.035em] text-[var(--color-text-muted)] md:mt-5">
+                  with the
                 </span>
-              ))}
-              <span className="mt-3 block text-[0.46em] leading-[1.05] tracking-[-0.035em] text-[var(--color-text-muted)] md:mt-5">
-                with the
-              </span>
-              <span className="mt-2 inline-block bg-[var(--color-brand-sky)] px-3 py-2 text-[0.58em] leading-[1.05] tracking-[-0.045em] text-[var(--color-brand-blue)] md:px-5 md:py-3">
-                {schoolName}
-              </span>
-            </h1>
-            <p className="max-w-[42rem] font-[var(--font-be-vietnam-pro)] text-[1rem] leading-[1.6] tracking-[-0.02em] text-[var(--color-text-muted)] md:text-[1.15rem]">
-              {content.hero.description}
-            </p>
-            <SectionCta />
+                <span className="mt-2 inline-block bg-[var(--color-brand-sky)] px-3 py-2 text-[0.58em] leading-[1.05] tracking-[-0.045em] text-[var(--color-brand-blue)] md:px-5 md:py-3">
+                  {schoolName}
+                </span>
+              </h1>
+              <p className="max-w-[42rem] font-[var(--font-be-vietnam-pro)] text-[1rem] leading-[1.6] tracking-[-0.02em] text-[var(--color-text-muted)] md:text-[1.15rem]">
+                {content.hero.description}
+              </p>
+              <SectionCta label={content.ctas.hero} />
+            </div>
+            <SogpHeroPhone />
           </div>
         </section>
 
@@ -285,7 +295,7 @@ export function SogpLandingPage() {
                 </li>
               ))}
             </ol>
-            <SectionCta />
+            <SectionCta label={content.ctas.early} />
           </div>
         </section>
 
@@ -298,7 +308,6 @@ export function SogpLandingPage() {
               <p className="site-section-intro text-[var(--color-text-muted)]">
                 {content.definition.description}
               </p>
-              <SectionCta />
             </div>
             <div className="grid content-start gap-4">
               <p className="font-[var(--font-sen)] text-xl font-semibold tracking-[-0.035em] text-[var(--color-brand-blue)]">
@@ -316,6 +325,7 @@ export function SogpLandingPage() {
                   </li>
                 ))}
               </ul>
+              <SectionCta label={content.ctas.middle} />
             </div>
           </div>
         </section>
@@ -340,7 +350,7 @@ export function SogpLandingPage() {
                 </li>
               ))}
             </ol>
-            <SectionCta />
+            <SectionCta label={content.ctas.middle} />
           </div>
         </section>
 
@@ -365,7 +375,7 @@ export function SogpLandingPage() {
                   {paragraph}
                 </p>
               ))}
-              <SectionCta />
+              <SectionCta label={content.ctas.free} />
             </div>
           </div>
         </section>
@@ -393,7 +403,7 @@ export function SogpLandingPage() {
               <p className="site-section-intro text-[var(--color-text-strong)]">
                 {content.facilitator.description}
               </p>
-              <SectionCta />
+              <SectionCta label={content.ctas.free} />
             </div>
           </div>
         </section>
@@ -414,7 +424,7 @@ export function SogpLandingPage() {
             <p className="site-section-intro max-w-[45rem] text-white/84">
               {content.socialProof.description}
             </p>
-            <SectionCta inverse />
+            <SectionCta label={content.ctas.free} inverse />
           </div>
         </section>
 
@@ -431,7 +441,7 @@ export function SogpLandingPage() {
                   </li>
                 ))}
               </ul>
-              <SectionCta />
+              <SectionCta label={content.ctas.free} />
             </div>
           </div>
         </section>
@@ -463,7 +473,7 @@ export function SogpLandingPage() {
                   </AccordionItem>
                 ))}
               </Accordion>
-              <SectionCta />
+              <SectionCta label={content.ctas.free} />
             </div>
           </div>
         </section>
@@ -473,7 +483,7 @@ export function SogpLandingPage() {
             <h2 className="site-section-heading max-w-[17ch] text-[2.2rem] text-white md:text-[3rem]">
               Find truth. Discover God’s purpose. Grow to fulfil it.
             </h2>
-            <SectionCta inverse />
+            <SectionCta label={content.ctas.free} inverse />
           </div>
         </section>
       </main>
