@@ -22,6 +22,8 @@ type Track = {
   id: number;
   dayNumber: number;
   weekNumber: number;
+  isRequired: boolean;
+  liveSessionNumber: number | null;
   releaseAt: string;
   lesson: {
     id: number;
@@ -69,7 +71,7 @@ function Curriculum({ data }: { data: DayPayload }) {
   return (
     <nav aria-label="Course curriculum" className="hidden max-h-[calc(100vh-8rem)] overflow-y-auto rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white lg:block">
       <div className="sticky top-0 z-10 border-b border-[var(--color-line)] bg-white px-4 py-4"><h2 className="font-[var(--font-sen)] text-sm font-semibold">Course curriculum</h2></div>
-      <div className="p-2">{[1,2,3,4].map((week)=><div key={week} className="border-b border-[var(--color-line)] py-3 last:border-0"><p className="px-2 pb-2 text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[var(--color-text-muted)]">Week {week} of 4</p><div className="grid gap-1">{data.dashboard.tracks.filter((item)=>item.weekNumber===week).map((item)=>{const unlocked=new Date(item.releaseAt).getTime()<=now; const Icon=item.completed?Check:unlocked?Play:LockKeyhole; return <Link key={item.id} href={unlocked?`/dashboard/sogp/course/day/${item.dayNumber}`:"#"} aria-current={item.dayNumber===data.track.dayNumber?"page":undefined} className={`grid grid-cols-[1.4rem_1fr] gap-2 rounded-[0.45rem] px-2 py-2.5 text-xs leading-[1.35] ${item.dayNumber===data.track.dayNumber?"bg-[var(--color-brand-sky)] text-[var(--color-brand-blue)]":unlocked?"hover:bg-[var(--color-surface-muted)]":"pointer-events-none opacity-45"}`}><Icon className="mt-0.5 size-3.5"/><span>Day {item.dayNumber} · {item.lesson.title}</span></Link>;})}</div></div>)}</div>
+      <div className="p-2">{[1,2,3,4].map((week)=><div key={week} className="border-b border-[var(--color-line)] py-3 last:border-0"><p className="px-2 pb-2 text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[var(--color-text-muted)]">Week {week} of 4</p><div className="grid gap-1">{data.dashboard.tracks.filter((item)=>item.isRequired&&item.weekNumber===week).map((item)=>{const unlocked=new Date(item.releaseAt).getTime()<=now; const Icon=item.completed?Check:unlocked?Play:LockKeyhole; return <Link key={item.id} href={unlocked?`/dashboard/sogp/course/day/${item.dayNumber}`:"#"} aria-current={item.dayNumber===data.track.dayNumber?"page":undefined} className={`grid grid-cols-[1.4rem_1fr] gap-2 rounded-[0.45rem] px-2 py-2.5 text-xs leading-[1.35] ${item.dayNumber===data.track.dayNumber?"bg-[var(--color-brand-sky)] text-[var(--color-brand-blue)]":unlocked?"hover:bg-[var(--color-surface-muted)]":"pointer-events-none opacity-45"}`}><Icon className="mt-0.5 size-3.5"/><span>Day {item.dayNumber} · {item.lesson.title}</span></Link>;})}</div></div>)}</div>
     </nav>
   );
 }

@@ -1,6 +1,9 @@
 import { describe, expect, test } from "vitest";
 
-import { calculateSogpEligibility } from "./assessment";
+import {
+  calculateSogpEligibility,
+  summarizeSogpTrackCompletion,
+} from "./assessment";
 
 describe("calculateSogpEligibility", () => {
   test("passes when every configured requirement is met", () => {
@@ -69,5 +72,21 @@ describe("calculateSogpEligibility", () => {
     expect(result.trackPercent).toBe(0);
     expect(result.prayerPercent).toBe(0);
     expect(result.podcastPercent).toBe(0);
+  });
+
+  test("counts only required tracks towards certification", () => {
+    expect(
+      summarizeSogpTrackCompletion([
+        { isRequired: true, completed: true },
+        { isRequired: true, completed: false },
+        { isRequired: false, completed: true },
+        { isRequired: false, completed: false },
+      ]),
+    ).toEqual({
+      requiredCompleted: 1,
+      requiredTotal: 2,
+      optionalCompleted: 1,
+      optionalTotal: 2,
+    });
   });
 });

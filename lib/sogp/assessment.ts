@@ -10,6 +10,19 @@ function percent(part: number, whole: number) {
   return Math.round((Math.max(part, 0) / whole) * 100);
 }
 
+export function summarizeSogpTrackCompletion(
+  tracks: Array<{ isRequired: boolean; completed: boolean }>,
+) {
+  const required = tracks.filter((track) => track.isRequired);
+  const optional = tracks.filter((track) => !track.isRequired);
+  return {
+    requiredCompleted: required.filter((track) => track.completed).length,
+    requiredTotal: required.length,
+    optionalCompleted: optional.filter((track) => track.completed).length,
+    optionalTotal: optional.length,
+  };
+}
+
 export function calculateSogpEligibility(
   input: SogpEligibilityInput,
 ): SogpEligibilityResult {

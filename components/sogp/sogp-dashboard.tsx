@@ -18,7 +18,10 @@ import {
   Podcast,
 } from "lucide-react";
 
-import { calculateSogpEligibility } from "@/lib/sogp/assessment";
+import {
+  calculateSogpEligibility,
+  summarizeSogpTrackCompletion,
+} from "@/lib/sogp/assessment";
 import { partitionSogpPreparationDays } from "@/lib/sogp/preparation";
 import type { SogpPreparationDay } from "@/lib/sogp/types";
 
@@ -215,16 +218,21 @@ function PreparingDashboard({ data }: { data: DashboardPayload }) {
 }
 
 function ActiveDashboard({ data }: { data: DashboardPayload }) {
-  const completed = data.tracks.filter((track) => track.completed).length;
-  const total = data.tracks.length;
+  const trackCompletion = summarizeSogpTrackCompletion(data.tracks);
+  const completed = trackCompletion.requiredCompleted;
+  const total = trackCompletion.requiredTotal;
   const percent = total ? Math.round((completed / total) * 100) : 0;
   const now = new Date(data.generatedAt).getTime();
   const nextTrack = data.tracks.find(
-    (track) => !track.completed && new Date(track.releaseAt).getTime() <= now,
+    (track) =>
+      track.isRequired &&
+      !track.completed &&
+      new Date(track.releaseAt).getTime() <= now,
   );
   const nextClass = data.liveClasses.find(
     (item) => item.status !== "cancelled" && new Date(item.endsAt).getTime() > now,
   );
+  const optionalTracks = data.tracks.filter((track) => !track.isRequired);
 
   return (
     <div className="grid gap-5">
@@ -254,17 +262,33 @@ function ActiveDashboard({ data }: { data: DashboardPayload }) {
         </div>
         <div className="rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white p-5">
           <div className="flex items-center gap-2"><Radio className="size-4 text-[var(--color-brand-blue)]" /><h3 className="font-[var(--font-sen)] text-lg font-semibold text-[var(--color-text-strong)]">Week progress</h3></div>
-          <div className="mt-6 grid grid-cols-4 gap-3">{[1,2,3,4].map((week) => { const weekTracks=data.tracks.filter((track)=>track.weekNumber===week); const done=weekTracks.filter((track)=>track.completed).length; const value=weekTracks.length?Math.round(done/weekTracks.length*100):0; return <div key={week} className="grid justify-items-center gap-2"><div className={`grid size-10 place-items-center rounded-full border-2 ${value===100?"border-[var(--color-brand-lime)] bg-[var(--color-brand-lime)]":"border-[var(--color-line-strong)]"}`}><span className="text-xs font-semibold">{week}</span></div><span className="text-[0.65rem] text-[var(--color-text-muted)]">{value}%</span></div>;})}</div>
+          <div className="mt-6 grid grid-cols-4 gap-3">{[1,2,3,4].map((week) => { const weekTracks=data.tracks.filter((track)=>track.isRequired&&track.weekNumber===week); const done=weekTracks.filter((track)=>track.completed).length; const value=weekTracks.length?Math.round(done/weekTracks.length*100):0; return <div key={week} className="grid justify-items-center gap-2"><div className={`grid size-10 place-items-center rounded-full border-2 ${value===100?"border-[var(--color-brand-lime)] bg-[var(--color-brand-lime)]":"border-[var(--color-line-strong)]"}`}><span className="text-xs font-semibold">{week}</span></div><span className="text-[0.65rem] text-[var(--color-text-muted)]">{value}%</span></div>;})}</div>
         </div>
       </section>
+      {optionalTracks.length ? (
+        <section className="grid gap-3 rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white p-5">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-brand-blue)]">Optional Level 3 listening</p>
+            <h2 className="mt-1 font-[var(--font-sen)] text-xl font-semibold tracking-[-0.04em] text-[var(--color-text-strong)]">Prepare for the Saturday live sessions</h2>
+          </div>
+          <div className="divide-y divide-[var(--color-line)] border-y border-[var(--color-line)]">
+            {optionalTracks.map((track) => {
+              const unlocked = new Date(track.releaseAt).getTime() <= now;
+              return <Link key={track.id} href={unlocked&&track.dayNumber!==null?`/dashboard/sogp/course/day/${track.dayNumber}`:"#"} aria-disabled={!unlocked} className={`flex items-center justify-between gap-4 py-3 text-sm ${unlocked?"text-[var(--color-text-strong)]":"pointer-events-none text-[var(--color-text-muted)] opacity-50"}`}><span>{track.lesson.title}</span><span className="text-xs text-[var(--color-brand-blue)]">Session {track.liveSessionNumber}</span></Link>;
+            })}
+          </div>
+          <p className="text-xs text-[var(--color-text-muted)]">Optional tracks enrich the live sessions and do not affect certification.</p>
+        </section>
+      ) : null}
     </div>
   );
 }
 
 function ContextRail({ data }: { data: DashboardPayload }) {
-  const completed = data.tracks.filter((track) => track.completed).length;
+  const trackCompletion = summarizeSogpTrackCompletion(data.tracks);
+  const completed = trackCompletion.requiredCompleted;
   const prayerDays = Math.max(1, Math.round((new Date(data.cohort.endsAt).getTime() - new Date(data.cohort.startsAt).getTime()) / 86_400_000) + 1);
-  const eligibility = calculateSogpEligibility({ completedTracks: completed, totalTracks: data.tracks.length, prayerDaysAttended: data.prayerDaysAttended, prayerDaysAvailable: prayerDays, podcastDaysLogged: data.podcastDaysLogged, podcastDaysAvailable: prayerDays, liveClassesAttended: data.liveClassesAttended, policy: data.cohort.assessmentPolicy });
+  const eligibility = calculateSogpEligibility({ completedTracks: completed, totalTracks: trackCompletion.requiredTotal, prayerDaysAttended: data.prayerDaysAttended, prayerDaysAvailable: prayerDays, podcastDaysLogged: data.podcastDaysLogged, podcastDaysAvailable: prayerDays, liveClassesAttended: data.liveClassesAttended, policy: data.cohort.assessmentPolicy });
   const telegramUrl = data.cohort.telegramDiscussionUrl ?? data.cohort.telegramChannelUrl ?? (data.cohort.telegramBotUsername ? `https://t.me/${data.cohort.telegramBotUsername.replace(/^@/, "")}` : null);
   return (
     <aside className="grid content-start gap-4">
@@ -277,7 +301,7 @@ function ContextRail({ data }: { data: DashboardPayload }) {
       <section className="rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white p-5">
         <h2 className="font-[var(--font-sen)] text-lg font-semibold tracking-[-0.04em] text-[var(--color-text-strong)]">Assessment readiness</h2>
         <div className="mt-5 grid gap-4">{[
-          ["Course tracks", `${completed}/${data.tracks.length || 20}`, !eligibility.unmet.includes("tracks")],
+          ["Required tracks", `${completed}/${trackCompletion.requiredTotal || 20}`, !eligibility.unmet.includes("tracks")],
           ["Prayer Watch", `${eligibility.prayerPercent}%`, !eligibility.unmet.includes("prayer_watch")],
           ["Daily podcast", `${data.podcastDaysLogged}/${prayerDays}`, !eligibility.unmet.includes("podcast")],
           ["Live classes", String(data.liveClassesAttended), !eligibility.unmet.includes("live_classes")],

@@ -2,7 +2,10 @@ import { eq } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
-import { calculateSogpEligibility } from "@/lib/sogp/assessment";
+import {
+  calculateSogpEligibility,
+  summarizeSogpTrackCompletion,
+} from "@/lib/sogp/assessment";
 
 export async function getSogpCompletionForEnrollment(enrollmentId: number) {
   const enrollment = await db.query.sogpEnrollments.findFirst({
@@ -13,8 +16,7 @@ export async function getSogpCompletionForEnrollment(enrollmentId: number) {
     getSogpDashboardData(enrollment.userId),
   );
   if (!dashboard || dashboard.enrollment.id !== enrollmentId) return null;
-  const totalTracks = dashboard.tracks.length;
-  const completedTracks = dashboard.tracks.filter((track) => track.completed).length;
+  const trackCompletion = summarizeSogpTrackCompletion(dashboard.tracks);
   const prayerDaysAvailable = Math.max(
     1,
     Math.round(
@@ -23,8 +25,8 @@ export async function getSogpCompletionForEnrollment(enrollmentId: number) {
     ) + 1,
   );
   const eligibility = calculateSogpEligibility({
-    completedTracks,
-    totalTracks,
+    completedTracks: trackCompletion.requiredCompleted,
+    totalTracks: trackCompletion.requiredTotal,
     prayerDaysAttended: dashboard.prayerDaysAttended,
     prayerDaysAvailable,
     podcastDaysLogged: dashboard.podcastDaysLogged,

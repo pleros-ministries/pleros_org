@@ -13,11 +13,20 @@ function argument(name: string) {
 const slug = argument("slug") ?? "september-2026";
 const title = argument("title") ?? "SOGP September 2026";
 const starts = argument("starts") ?? "2026-09-07";
-const levelThree = (argument("level3") ?? "")
+const disciplineLessonNumber = Number(argument("discipline") ?? "0");
+const requiredPractical = (argument("required-level3") ?? argument("level3") ?? "")
   .split(",")
   .filter(Boolean)
   .map(Number);
-const selection = buildFirstCohortTrackSelection(levelThree);
+const optionalPractical = (argument("optional-level3") ?? "")
+  .split(",")
+  .filter(Boolean)
+  .map(Number);
+const selection = buildFirstCohortTrackSelection({
+  disciplineLessonNumber,
+  requiredPracticalLessonNumbers: requiredPractical,
+  optionalPracticalLessonNumbers: optionalPractical,
+});
 const startsAt = new Date(`${starts}T00:00:00+01:00`);
 if (Number.isNaN(startsAt.getTime())) throw new Error("Invalid --starts date.");
 const endsAt = new Date(startsAt);
@@ -84,19 +93,36 @@ if (!cohort) throw new Error("Cohort could not be created.");
 const firstRelease = new Date(startsAt);
 firstRelease.setUTCHours(5, 0, 0, 0);
 const dates = buildWeekdayReleaseDates(firstRelease, 20);
+const firstSaturday = new Date(firstRelease);
+firstSaturday.setUTCDate(
+  firstSaturday.getUTCDate() + ((6 - firstSaturday.getUTCDay() + 7) % 7),
+);
+const saturdayDates = Array.from({ length: 4 }, (_, index) => {
+  const releaseAt = new Date(firstSaturday);
+  releaseAt.setUTCDate(firstSaturday.getUTCDate() + index * 7);
+  return releaseAt;
+});
 await db.transaction(async (tx) => {
   await tx
     .delete(schema.sogpCohortTracks)
     .where(eq(schema.sogpCohortTracks.cohortId, cohort.id));
   await tx.insert(schema.sogpCohortTracks).values(
-    selected.map(({ item, lesson }, index) => ({
+    selected.map(({ item, lesson }) => ({
       cohortId: cohort.id,
       lessonId: lesson.id,
       dayNumber: item.dayNumber,
       weekNumber: item.weekNumber,
-      releaseAt: dates[index]!,
+      curriculumLevel: item.curriculumLevel,
+      curriculumOrder: item.curriculumOrder,
+      isRequired: item.isRequired,
+      liveSessionNumber: item.liveSessionNumber,
+      releaseAt: item.isRequired
+        ? dates[item.dayNumber! - 1]!
+        : saturdayDates[item.liveSessionNumber! - 1]!,
     })),
   );
 });
 
-console.log(`Seeded ${cohort.title} with 20 tracks.`);
+console.log(
+  `Seeded ${cohort.title} with 20 required and ${optionalPractical.length} optional tracks.`,
+);

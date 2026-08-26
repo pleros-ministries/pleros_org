@@ -57,12 +57,16 @@ export async function configureSogpTelegramWebhook() {
 
 export async function configureSogpCurriculum(input: {
   cohortId: number;
-  levelThreeLessonNumbers: number[];
+  disciplineLessonNumber: number;
+  requiredPracticalLessonNumbers: number[];
+  optionalPracticalLessonNumbers: number[];
 }) {
   await requireAdmin();
-  const selection = buildFirstCohortTrackSelection(
-    input.levelThreeLessonNumbers,
-  );
+  const selection = buildFirstCohortTrackSelection({
+    disciplineLessonNumber: input.disciplineLessonNumber,
+    requiredPracticalLessonNumbers: input.requiredPracticalLessonNumbers,
+    optionalPracticalLessonNumbers: input.optionalPracticalLessonNumbers,
+  });
   const cohort = await db.query.sogpCohorts.findFirst({
     where: (row, { eq: equal }) => equal(row.id, input.cohortId),
   });
@@ -113,23 +117,41 @@ export async function configureSogpCurriculum(input: {
   const firstRelease = new Date(cohort.startsAt);
   firstRelease.setUTCHours(5, 0, 0, 0);
   const releaseDates = buildWeekdayReleaseDates(firstRelease, 20);
+  const firstSaturday = new Date(firstRelease);
+  firstSaturday.setUTCDate(
+    firstSaturday.getUTCDate() + ((6 - firstSaturday.getUTCDay() + 7) % 7),
+  );
+  const saturdayReleaseDates = Array.from({ length: 4 }, (_, index) => {
+    const releaseAt = new Date(firstSaturday);
+    releaseAt.setUTCDate(firstSaturday.getUTCDate() + index * 7);
+    return releaseAt;
+  });
 
   await db.transaction(async (tx) => {
     await tx
       .delete(schema.sogpCohortTracks)
       .where(eq(schema.sogpCohortTracks.cohortId, input.cohortId));
     await tx.insert(schema.sogpCohortTracks).values(
-      selectedLessons.map(({ selected, lesson }, index) => ({
+      selectedLessons.map(({ selected, lesson }) => ({
         cohortId: input.cohortId,
         lessonId: lesson.id,
         dayNumber: selected.dayNumber,
         weekNumber: selected.weekNumber,
-        releaseAt: releaseDates[index]!,
+        curriculumLevel: selected.curriculumLevel,
+        curriculumOrder: selected.curriculumOrder,
+        isRequired: selected.isRequired,
+        liveSessionNumber: selected.liveSessionNumber,
+        releaseAt: selected.isRequired
+          ? releaseDates[selected.dayNumber! - 1]!
+          : saturdayReleaseDates[selected.liveSessionNumber! - 1]!,
       })),
     );
   });
 
-  return { trackCount: 20 };
+  return {
+    requiredTrackCount: selection.filter((track) => track.isRequired).length,
+    optionalTrackCount: selection.filter((track) => !track.isRequired).length,
+  };
 }
 
 export async function updateSogpCohort(input: {
