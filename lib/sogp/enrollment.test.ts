@@ -31,18 +31,25 @@ describe("SOGP enrolment", () => {
   test("normalizes valid input and bounded attribution", () => {
     expect(
       normalizeSogpEnrollment({
-        name: "  Ada Grace ",
+        firstName: "  Ada ",
+        lastName: " Grace ",
         email: " ADA@EXAMPLE.COM ",
         phone: " +234 803 000 0000 ",
+        countryCode: " ng ",
         country: " Nigeria ",
+        region: " Lagos ",
         reason: " I want clarity. ",
         utmSource: " meta ",
       }),
     ).toMatchObject({
+      firstName: "Ada",
+      lastName: "Grace",
       name: "Ada Grace",
       email: "ada@example.com",
-      phone: "+234 803 000 0000",
+      phone: "+2348030000000",
+      countryCode: "NG",
       country: "Nigeria",
+      region: "Lagos",
       reason: "I want clarity.",
       utmSource: "meta",
     });
@@ -52,27 +59,36 @@ describe("SOGP enrolment", () => {
     expect(
       validateSogpEnrollment(
         normalizeSogpEnrollment({
-          name: "",
+          firstName: "",
+          lastName: "",
           email: "bad",
           phone: "12",
+          countryCode: "",
           country: "",
+          region: "",
           reason: "",
         }),
       ),
     ).toEqual({
-      name: "Full name is required.",
+      firstName: "First name is required.",
+      lastName: "Last name is required.",
       email: "Enter a valid email address.",
-      phone: "Enter a valid WhatsApp number.",
+      phone: "Enter a valid phone number.",
+      countryCode: "Country is required.",
       country: "Country is required.",
+      region: "State, province or region is required.",
     });
   });
 
   test("rejects an overlong reason", () => {
     const input = normalizeSogpEnrollment({
-      name: "Ada Grace",
+      firstName: "Ada",
+      lastName: "Grace",
       email: "ada@example.com",
       phone: "+2348030000000",
+      countryCode: "NG",
       country: "Nigeria",
+      region: "Lagos",
       reason: "x".repeat(1_001),
     });
 

@@ -82,6 +82,16 @@ export const sogpLiveClassStatusEnum = pgEnum("sogp_live_class_status", [
   "cancelled",
 ]);
 
+export const sogpPreparationStatusEnum = pgEnum("sogp_preparation_status", [
+  "draft",
+  "published",
+]);
+
+export const sogpPreparationResourceTypeEnum = pgEnum(
+  "sogp_preparation_resource_type",
+  ["teaching", "podcast", "video", "reading", "gift", "announcement"],
+);
+
 export const prayerWatchSessionEnum = pgEnum("prayer_watch_session", [
   "unspecified",
   "morning",
@@ -721,9 +731,13 @@ export const sogpEnrollments = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
+    firstName: text("first_name").notNull().default(""),
+    lastName: text("last_name").notNull().default(""),
     email: text("email").notNull(),
     phone: text("phone").notNull(),
+    countryCode: text("country_code").notNull().default(""),
     country: text("country").notNull(),
+    region: text("region").notNull().default(""),
     reason: text("reason"),
     status: sogpEnrollmentStatusEnum("status").notNull().default("enrolled"),
     utmSource: text("utm_source"),
@@ -760,8 +774,12 @@ export const sogpCohortTracks = pgTable(
     lessonId: integer("lesson_id")
       .notNull()
       .references(() => lessons.id),
-    dayNumber: integer("day_number").notNull(),
+    dayNumber: integer("day_number"),
     weekNumber: integer("week_number").notNull(),
+    curriculumLevel: integer("curriculum_level").notNull().default(1),
+    curriculumOrder: integer("curriculum_order").notNull().default(1),
+    isRequired: boolean("is_required").notNull().default(true),
+    liveSessionNumber: integer("live_session_number"),
     releaseAt: timestamp("release_at", { withTimezone: true }).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
@@ -776,7 +794,69 @@ export const sogpCohortTracks = pgTable(
       t.cohortId,
       t.lessonId,
     ),
+    uniqueIndex("sogp_cohort_tracks_cohort_order_idx").on(
+      t.cohortId,
+      t.curriculumOrder,
+    ),
     index("sogp_cohort_tracks_release_idx").on(t.releaseAt),
+  ],
+);
+
+export const sogpPreparationDays = pgTable(
+  "sogp_preparation_days",
+  {
+    id: serial("id").primaryKey(),
+    cohortId: integer("cohort_id")
+      .notNull()
+      .references(() => sogpCohorts.id, { onDelete: "cascade" }),
+    publishDate: date("publish_date").notNull(),
+    countdownLabel: text("countdown_label").notNull(),
+    introduction: text("introduction").notNull(),
+    status: sogpPreparationStatusEnum("status").notNull().default("draft"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("sogp_preparation_days_cohort_date_idx").on(
+      t.cohortId,
+      t.publishDate,
+    ),
+    index("sogp_preparation_days_status_date_idx").on(
+      t.status,
+      t.publishDate,
+    ),
+  ],
+);
+
+export const sogpPreparationResources = pgTable(
+  "sogp_preparation_resources",
+  {
+    id: serial("id").primaryKey(),
+    preparationDayId: integer("preparation_day_id")
+      .notNull()
+      .references(() => sogpPreparationDays.id, { onDelete: "cascade" }),
+    type: sogpPreparationResourceTypeEnum("type").notNull(),
+    title: text("title").notNull(),
+    description: text("description"),
+    url: text("url").notNull(),
+    sortOrder: integer("sort_order").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("sogp_preparation_resources_day_order_idx").on(
+      t.preparationDayId,
+      t.sortOrder,
+    ),
+    index("sogp_preparation_resources_day_idx").on(t.preparationDayId),
   ],
 );
 

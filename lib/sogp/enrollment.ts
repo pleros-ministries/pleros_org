@@ -1,8 +1,14 @@
+import { isValidPhoneNumber, parsePhoneNumber } from "react-phone-number-input";
+
 export type SogpEnrollmentValues = {
+  firstName: string;
+  lastName: string;
   name: string;
   email: string;
   phone: string;
+  countryCode: string;
   country: string;
+  region: string;
   reason: string;
   utmSource: string;
   utmMedium: string;
@@ -13,11 +19,20 @@ export type SogpEnrollmentValues = {
 
 export type SogpEnrollmentInput = Partial<SogpEnrollmentValues>;
 export type SogpEnrollmentErrors = Partial<
-  Record<"name" | "email" | "phone" | "country" | "reason", string>
+  Record<
+    | "firstName"
+    | "lastName"
+    | "email"
+    | "phone"
+    | "countryCode"
+    | "country"
+    | "region"
+    | "reason",
+    string
+  >
 >;
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const PHONE_PATTERN = /^[+\d][\d\s()-]{6,19}$/;
 
 export function buildSogpEnrollmentRedirect(input: {
   cohortChannelUrl?: string | null;
@@ -41,11 +56,23 @@ function clean(value: unknown, maxLength: number) {
 export function normalizeSogpEnrollment(
   input: SogpEnrollmentInput,
 ): SogpEnrollmentValues {
+  const firstName = clean(input.firstName, 80);
+  const lastName = clean(input.lastName, 80);
+  const rawPhone = clean(input.phone, 32);
+  let phone = rawPhone;
+  if (rawPhone && isValidPhoneNumber(rawPhone)) {
+    phone = parsePhoneNumber(rawPhone)?.number ?? rawPhone;
+  }
+
   return {
-    name: clean(input.name, 120),
+    firstName,
+    lastName,
+    name: [firstName, lastName].filter(Boolean).join(" "),
     email: clean(input.email, 320).toLowerCase(),
-    phone: clean(input.phone, 24),
+    phone,
+    countryCode: clean(input.countryCode, 2).toUpperCase(),
     country: clean(input.country, 100),
+    region: clean(input.region, 120),
     reason: typeof input.reason === "string" ? input.reason.trim() : "",
     utmSource: clean(input.utmSource, 200),
     utmMedium: clean(input.utmMedium, 200),
@@ -60,14 +87,19 @@ export function validateSogpEnrollment(
 ): SogpEnrollmentErrors {
   const errors: SogpEnrollmentErrors = {};
 
-  if (!input.name) errors.name = "Full name is required.";
+  if (!input.firstName) errors.firstName = "First name is required.";
+  if (!input.lastName) errors.lastName = "Last name is required.";
   if (!EMAIL_PATTERN.test(input.email)) {
     errors.email = "Enter a valid email address.";
   }
-  if (!PHONE_PATTERN.test(input.phone)) {
-    errors.phone = "Enter a valid WhatsApp number.";
+  if (!input.phone || !isValidPhoneNumber(input.phone)) {
+    errors.phone = "Enter a valid phone number.";
   }
+  if (!input.countryCode) errors.countryCode = "Country is required.";
   if (!input.country) errors.country = "Country is required.";
+  if (!input.region) {
+    errors.region = "State, province or region is required.";
+  }
   if (input.reason.length > 1_000) {
     errors.reason = "Keep your response within 1,000 characters.";
   }

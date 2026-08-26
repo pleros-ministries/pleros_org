@@ -46,7 +46,9 @@ export async function GET(request: Request) {
     const candidates = buildSogpChannelReminderCandidates({
       now,
       cohort,
-      tracks,
+      tracks: tracks.flatMap((track) =>
+        track.dayNumber === null ? [] : [{ ...track, dayNumber: track.dayNumber }],
+      ),
       liveClasses: liveClasses.map((item) => ({
         id: item.id,
         title: item.title,

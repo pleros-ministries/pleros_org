@@ -7,6 +7,8 @@ import {
   sogpEnrollments,
   sogpLiveClassAttendance,
   sogpLiveClasses,
+  sogpPreparationDays,
+  sogpPreparationResources,
   sogpRewardGrants,
   prayerWatchAttendance,
 } from "../db/schema";
@@ -18,8 +20,21 @@ describe("SOGP schema", () => {
     expect(sogpCohortTracks).toBeDefined();
     expect(sogpLiveClasses).toBeDefined();
     expect(sogpLiveClassAttendance).toBeDefined();
+    expect(sogpPreparationDays).toBeDefined();
+    expect(sogpPreparationResources).toBeDefined();
     expect(sogpCertificates).toBeDefined();
     expect(sogpRewardGrants).toBeDefined();
+  });
+
+  test("stores structured enrolment and curriculum metadata", () => {
+    expect(sogpEnrollments.firstName).toBeDefined();
+    expect(sogpEnrollments.lastName).toBeDefined();
+    expect(sogpEnrollments.countryCode).toBeDefined();
+    expect(sogpEnrollments.region).toBeDefined();
+    expect(sogpCohortTracks.curriculumLevel).toBeDefined();
+    expect(sogpCohortTracks.curriculumOrder).toBeDefined();
+    expect(sogpCohortTracks.isRequired).toBeDefined();
+    expect(sogpCohortTracks.liveSessionNumber).toBeDefined();
   });
 
   test("tracks Prayer Watch attendance by session", () => {

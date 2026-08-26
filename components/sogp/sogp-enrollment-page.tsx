@@ -5,6 +5,7 @@ import { HomepageNav } from "@/components/home/homepage-nav";
 import { PublicSitePageShell } from "@/components/home/public-site-page-shell";
 import { SogpEnrollmentForm } from "./sogp-enrollment-form";
 import { SogpPublicQueryProvider } from "./sogp-public-query-provider";
+import type { Country } from "react-phone-number-input";
 
 const summary = [
   { label: "4 weeks", Icon: CalendarDays },
@@ -14,7 +15,11 @@ const summary = [
   { label: "Free enrolment", Icon: Sparkles },
 ];
 
-export function SogpEnrollmentPage() {
+export function SogpEnrollmentPage({
+  defaultCountryCode,
+}: {
+  defaultCountryCode: Country;
+}) {
   return (
     <PublicSitePageShell>
       <HomepageNav />
@@ -41,7 +46,7 @@ export function SogpEnrollmentPage() {
           </div>
           <div className="rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white p-5 shadow-[var(--shadow-md)] sm:p-7 md:p-8">
             <SogpPublicQueryProvider>
-              <SogpEnrollmentForm />
+              <SogpEnrollmentForm defaultCountryCode={defaultCountryCode} />
             </SogpPublicQueryProvider>
           </div>
         </section>

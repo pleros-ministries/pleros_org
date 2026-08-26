@@ -57,10 +57,14 @@ export type SogpEligibilityResult = {
 export type SogpEnrollmentCreateInput = {
   cohortId: number;
   userId: string;
+  firstName: string;
+  lastName: string;
   name: string;
   email: string;
   phone: string;
+  countryCode: string;
   country: string;
+  region: string;
   reason?: string | null;
   utmSource?: string | null;
   utmMedium?: string | null;
@@ -71,8 +75,12 @@ export type SogpEnrollmentCreateInput = {
 
 export type SogpDashboardTrack = {
   id: number;
-  dayNumber: number;
+  dayNumber: number | null;
   weekNumber: number;
+  curriculumLevel: number;
+  curriculumOrder: number;
+  isRequired: boolean;
+  liveSessionNumber: number | null;
   releaseAt: Date;
   lesson: {
     id: number;
@@ -98,9 +106,13 @@ export type SogpDashboardData = {
     id: number;
     userId: string;
     name: string;
+    firstName: string;
+    lastName: string;
     email: string;
     phone: string;
+    countryCode: string;
     country: string;
+    region: string;
     status: SogpEnrollmentStatus;
     telegramLinkedAt: Date | null;
   };
@@ -133,4 +145,32 @@ export type SogpDashboardData = {
   liveClassesAttended: number;
   certificate: { verificationCode: string; issuedAt: Date; revokedAt: Date | null } | null;
   rewards: Array<{ rewardKey: string; label: string; grantedAt: Date }>;
+  preparationDays: SogpPreparationDay[];
+};
+
+export type SogpPreparationResourceType =
+  | "teaching"
+  | "podcast"
+  | "video"
+  | "reading"
+  | "gift"
+  | "announcement";
+
+export type SogpPreparationResource = {
+  id: number;
+  type: SogpPreparationResourceType;
+  title: string;
+  description: string | null;
+  url: string;
+  sortOrder: number;
+};
+
+export type SogpPreparationDay = {
+  id: number;
+  cohortId: number;
+  publishDate: string;
+  countdownLabel: string;
+  introduction: string;
+  status: "draft" | "published";
+  resources: SogpPreparationResource[];
 };

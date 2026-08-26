@@ -24,10 +24,14 @@ export type AdminSogpData = {
   enrollments: Array<{
     id: number;
     cohortId: number;
+    firstName: string;
+    lastName: string;
     name: string;
     email: string;
     phone: string;
+    countryCode: string;
     country: string;
+    region: string;
     status: string;
     telegramLinkedAt: string | null;
     createdAt: string;
@@ -37,8 +41,12 @@ export type AdminSogpData = {
   tracks: Array<{
     id: number;
     cohortId: number;
-    dayNumber: number;
+    dayNumber: number | null;
     weekNumber: number;
+    curriculumLevel: number;
+    curriculumOrder: number;
+    isRequired: boolean;
+    liveSessionNumber: number | null;
     lessonId: number;
     levelId: number;
     lessonNumber: number;

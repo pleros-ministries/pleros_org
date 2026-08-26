@@ -3,10 +3,12 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { ArrowRight, LoaderCircle } from "lucide-react";
+import PhoneInput, { type Country, type Value } from "react-phone-number-input";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { SogpEnrollmentErrors } from "@/lib/sogp/enrollment";
+import { CountryCombobox } from "./country-combobox";
 import { trackSogpEvent } from "./sogp-analytics";
 
 type EnrollmentResponse = {
@@ -22,9 +24,13 @@ async function submitEnrollment(formData: FormData) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       name: formData.get("name"),
+      firstName: formData.get("firstName"),
+      lastName: formData.get("lastName"),
       email: formData.get("email"),
       phone: formData.get("phone"),
       country: formData.get("country"),
+      countryCode: formData.get("countryCode"),
+      region: formData.get("region"),
       reason: formData.get("reason"),
       utmSource: params.get("utm_source"),
       utmMedium: params.get("utm_medium"),
@@ -46,9 +52,14 @@ function FieldError({ id, error }: { id: string; error?: string }) {
   ) : null;
 }
 
-export function SogpEnrollmentForm() {
+export function SogpEnrollmentForm({
+  defaultCountryCode,
+}: {
+  defaultCountryCode: Country;
+}) {
   const [errors, setErrors] = useState<SogpEnrollmentErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
+  const [phone, setPhone] = useState<Value>();
   const mutation = useMutation({
     mutationFn: submitEnrollment,
     onSuccess(payload) {
@@ -72,10 +83,17 @@ export function SogpEnrollmentForm() {
         mutation.mutate(new FormData(event.currentTarget));
       }}
     >
-      <div className="grid gap-2">
-        <label htmlFor="name" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">Full name</label>
-        <Input id="name" name="name" autoComplete="name" aria-invalid={Boolean(errors.name)} aria-describedby={errors.name ? "name-error" : undefined} />
-        <FieldError id="name-error" error={errors.name} />
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-2">
+          <label htmlFor="firstName" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">First name</label>
+          <Input id="firstName" name="firstName" autoComplete="given-name" aria-invalid={Boolean(errors.firstName)} aria-describedby={errors.firstName ? "first-name-error" : undefined} />
+          <FieldError id="first-name-error" error={errors.firstName} />
+        </div>
+        <div className="grid gap-2">
+          <label htmlFor="lastName" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">Last name</label>
+          <Input id="lastName" name="lastName" autoComplete="family-name" aria-invalid={Boolean(errors.lastName)} aria-describedby={errors.lastName ? "last-name-error" : undefined} />
+          <FieldError id="last-name-error" error={errors.lastName} />
+        </div>
       </div>
       <div className="grid gap-2">
         <label htmlFor="email" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">Email address</label>
@@ -83,14 +101,31 @@ export function SogpEnrollmentForm() {
         <FieldError id="email-error" error={errors.email} />
       </div>
       <div className="grid gap-2">
-        <label htmlFor="phone" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">WhatsApp number</label>
-        <Input id="phone" name="phone" type="tel" autoComplete="tel" placeholder="Include your country code" aria-invalid={Boolean(errors.phone)} aria-describedby={errors.phone ? "phone-error" : undefined} />
+        <label htmlFor="phone" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">Phone number</label>
+        <PhoneInput
+          id="phone"
+          className="sogp-phone-input"
+          defaultCountry={defaultCountryCode}
+          value={phone}
+          onChange={setPhone}
+          international
+          countryCallingCodeEditable={false}
+          aria-invalid={Boolean(errors.phone)}
+          aria-describedby={errors.phone ? "phone-help phone-error" : "phone-help"}
+        />
+        <input type="hidden" name="phone" value={phone ?? ""} />
+        <p id="phone-help" className="font-[var(--font-be-vietnam-pro)] text-xs leading-[1.45] text-[var(--color-text-muted)]">Use the number linked to your WhatsApp account.</p>
         <FieldError id="phone-error" error={errors.phone} />
       </div>
       <div className="grid gap-2">
-        <label htmlFor="country" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">Country</label>
-        <Input id="country" name="country" autoComplete="country-name" aria-invalid={Boolean(errors.country)} aria-describedby={errors.country ? "country-error" : undefined} />
-        <FieldError id="country-error" error={errors.country} />
+        <label htmlFor="country" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">Country of residence</label>
+        <CountryCombobox defaultCountryCode={defaultCountryCode} invalid={Boolean(errors.country || errors.countryCode)} describedBy={errors.country || errors.countryCode ? "country-error" : undefined} />
+        <FieldError id="country-error" error={errors.country ?? errors.countryCode} />
+      </div>
+      <div className="grid gap-2">
+        <label htmlFor="region" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">State / province / region</label>
+        <Input id="region" name="region" autoComplete="address-level1" aria-invalid={Boolean(errors.region)} aria-describedby={errors.region ? "region-error" : undefined} />
+        <FieldError id="region-error" error={errors.region} />
       </div>
       <div className="grid gap-2">
         <label htmlFor="reason" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">Why do you want to join? <span className="font-normal text-[var(--color-text-muted)]">(optional)</span></label>
@@ -106,7 +141,7 @@ export function SogpEnrollmentForm() {
         {!mutation.isPending ? <ArrowRight className="size-4" /> : null}
       </Button>
       <p className="text-center font-[var(--font-be-vietnam-pro)] text-xs leading-[1.5] text-[var(--color-text-muted)]">
-        Your details help us place you in the next cohort and keep you informed.
+        Your information is kept private and used only to manage your enrolment, learning experience, and relevant SOGP communications. We will not sell your personal information.
       </p>
     </form>
   );

@@ -79,10 +79,14 @@ export async function upsertSogpEnrollment(input: SogpEnrollmentCreateInput) {
         schema.sogpEnrollments.userId,
       ],
       set: {
+        firstName: input.firstName,
+        lastName: input.lastName,
         name: input.name,
         email: input.email,
         phone: input.phone,
+        countryCode: input.countryCode,
         country: input.country,
+        region: input.region,
         reason: input.reason || null,
         utmSource: input.utmSource || null,
         utmMedium: input.utmMedium || null,
@@ -185,7 +189,7 @@ export async function getSogpDashboardData(
           ),
         )
         .where(eq(schema.sogpCohortTracks.cohortId, row.cohort.id))
-        .orderBy(asc(schema.sogpCohortTracks.dayNumber)),
+        .orderBy(asc(schema.sogpCohortTracks.curriculumOrder)),
       db
         .select()
         .from(schema.sogpLiveClasses)
@@ -256,6 +260,10 @@ export async function getSogpDashboardData(
       id: track.id,
       dayNumber: track.dayNumber,
       weekNumber: track.weekNumber,
+      curriculumLevel: track.curriculumLevel,
+      curriculumOrder: track.curriculumOrder,
+      isRequired: track.isRequired,
+      liveSessionNumber: track.liveSessionNumber,
       releaseAt: track.releaseAt,
       lesson: {
         id: lesson.id,
@@ -277,9 +285,13 @@ export async function getSogpDashboardData(
       id: row.enrollment.id,
       userId: row.enrollment.userId,
       name: row.enrollment.name,
+      firstName: row.enrollment.firstName,
+      lastName: row.enrollment.lastName,
       email: row.enrollment.email,
       phone: row.enrollment.phone,
+      countryCode: row.enrollment.countryCode,
       country: row.enrollment.country,
+      region: row.enrollment.region,
       status: row.enrollment.status,
       telegramLinkedAt: row.enrollment.telegramLinkedAt,
     },
@@ -321,6 +333,7 @@ export async function getSogpDashboardData(
       label: reward.label,
       grantedAt: reward.grantedAt,
     })),
+    preparationDays: [],
   };
 }
 
@@ -353,7 +366,7 @@ export async function getAdminSogpData() {
           schema.lessons,
           eq(schema.sogpCohortTracks.lessonId, schema.lessons.id),
         )
-        .orderBy(asc(schema.sogpCohortTracks.dayNumber)),
+        .orderBy(asc(schema.sogpCohortTracks.curriculumOrder)),
       db.select().from(schema.sogpLiveClasses).orderBy(asc(schema.sogpLiveClasses.startsAt)),
       db.select().from(schema.sogpCertificates).orderBy(desc(schema.sogpCertificates.issuedAt)),
     ]);
