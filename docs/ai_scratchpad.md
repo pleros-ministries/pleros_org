@@ -16,6 +16,7 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 ## Current project setup
 
 - The app uses Next.js 16.3.1 and Tailwind v4. Read version-matched framework docs from `node_modules/next/dist/docs/`; keep the managed Next.js block in `AGENTS.md`, and use `/_next/mcp` plus browser verification for runtime checks.
+- `package-lock.json` pins Better Auth 1.5.4. Do not let a package-manager install float it to newer releases: maintain an exact `better-auth` version and a matching lockfile before invoking `pnpm dev`.
 - Local Suisse Int'l fonts are committed under `app/fonts/suisse-intl/`; wire them with `next/font/local`, handle exact awkward filenames, expose a CSS variable, and integrate through globals tokens.
 - Important commands: `npm run lint`, `npm test`, `npm run build`, `npm run dev`.
 - PPC DB pages require `DATABASE_URL`; `/ppc/sign-in` or redirect-compatible auth pages can work without DB depending on the flow.
