@@ -75,7 +75,7 @@ export function SogpHeroPhone() {
                   <BookOpen className="size-2.5" /> Today&apos;s track
                 </div>
                 <p className="mt-1.5 font-[var(--font-sen)] text-[0.8rem] font-semibold leading-[1.15] tracking-[-0.02em]">
-                  Being Led by the Spirit of God
+                  The Life of Prayer
                 </p>
                 <div className="mt-2.5 flex items-center gap-1.5">
                   <span className="grid size-[1.15rem] place-items-center rounded-full bg-white text-[var(--color-brand-blue)]">
