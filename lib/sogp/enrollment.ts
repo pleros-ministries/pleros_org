@@ -1,4 +1,9 @@
-import { isValidPhoneNumber, parsePhoneNumber } from "react-phone-number-input";
+import {
+  isSupportedCountry,
+  isValidPhoneNumber,
+  parsePhoneNumberFromString,
+  type CountryCode,
+} from "libphonenumber-js/min";
 
 export type SogpEnrollmentValues = {
   firstName: string;
@@ -17,7 +22,9 @@ export type SogpEnrollmentValues = {
   utmTerm: string;
 };
 
-export type SogpEnrollmentInput = Partial<SogpEnrollmentValues>;
+export type SogpEnrollmentInput = Partial<SogpEnrollmentValues> & {
+  phoneCountryCode?: string;
+};
 export type SogpEnrollmentErrors = Partial<
   Record<
     | "firstName"
@@ -59,9 +66,16 @@ export function normalizeSogpEnrollment(
   const firstName = clean(input.firstName, 80);
   const lastName = clean(input.lastName, 80);
   const rawPhone = clean(input.phone, 32);
+  const rawPhoneCountry = clean(input.phoneCountryCode, 2).toUpperCase();
+  const phoneCountryCode = isSupportedCountry(rawPhoneCountry)
+    ? (rawPhoneCountry as CountryCode)
+    : undefined;
   let phone = rawPhone;
-  if (rawPhone && isValidPhoneNumber(rawPhone)) {
-    phone = parsePhoneNumber(rawPhone)?.number ?? rawPhone;
+  const parsedPhone = rawPhone
+    ? parsePhoneNumberFromString(rawPhone, phoneCountryCode)
+    : undefined;
+  if (parsedPhone?.isValid()) {
+    phone = parsedPhone.number;
   }
 
   return {

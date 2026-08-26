@@ -251,11 +251,11 @@ export function SogpLandingPage() {
 
       <main className="site-font-theme bg-white">
         <section className="bg-white">
-          <div className="site-shell-page sogp-shell-page grid gap-8 pb-14 pt-10 lg:grid-cols-[minmax(0,1.08fr)_minmax(22rem,0.92fr)] lg:items-center lg:gap-12 lg:pb-20 lg:pt-12">
-            <div className="grid gap-7">
-              <h1 className="site-hero-heading max-w-[18ch] text-[clamp(2.65rem,6.2vw,5.5rem)] leading-[0.96] text-[var(--color-brand-blue)]">
+          <div className="site-shell-page sogp-shell-page grid gap-8 pb-14 pt-10 lg:max-w-[var(--site-shell-max)] lg:grid-cols-[minmax(0,1.2fr)_minmax(22rem,0.8fr)] lg:items-center lg:gap-12 lg:pb-20 lg:pt-12">
+            <div className="grid min-w-0 gap-7">
+              <h1 className="site-hero-heading max-w-[18ch] text-[clamp(2.65rem,5vw,4.65rem)] leading-[0.96] text-[var(--color-brand-blue)]">
                 {content.hero.titleLines.slice(0, 3).map((line) => (
-                  <span key={line} className="block lg:whitespace-nowrap">
+                  <span key={line} className="block">
                     {line}
                   </span>
                 ))}

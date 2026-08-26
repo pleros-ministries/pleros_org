@@ -5,7 +5,7 @@ import { HomepageNav } from "@/components/home/homepage-nav";
 import { PublicSitePageShell } from "@/components/home/public-site-page-shell";
 import { SogpEnrollmentForm } from "./sogp-enrollment-form";
 import { SogpPublicQueryProvider } from "./sogp-public-query-provider";
-import type { Country } from "react-phone-number-input";
+import type { CountryCode } from "libphonenumber-js/min";
 
 const summary = [
   { label: "4 weeks", Icon: CalendarDays },
@@ -18,7 +18,7 @@ const summary = [
 export function SogpEnrollmentPage({
   defaultCountryCode,
 }: {
-  defaultCountryCode: Country;
+  defaultCountryCode: CountryCode;
 }) {
   return (
     <PublicSitePageShell>

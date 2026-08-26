@@ -3,11 +3,15 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { ArrowRight, LoaderCircle } from "lucide-react";
-import PhoneInput, { type Country, type Value } from "react-phone-number-input";
+import {
+  getCountryCallingCode,
+  type CountryCode,
+} from "libphonenumber-js/min";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { SogpEnrollmentErrors } from "@/lib/sogp/enrollment";
+import { SOGP_COUNTRIES } from "@/lib/sogp/countries";
 import { CountryCombobox } from "./country-combobox";
 import { trackSogpEvent } from "./sogp-analytics";
 
@@ -23,11 +27,11 @@ async function submitEnrollment(formData: FormData) {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      name: formData.get("name"),
       firstName: formData.get("firstName"),
       lastName: formData.get("lastName"),
       email: formData.get("email"),
       phone: formData.get("phone"),
+      phoneCountryCode: formData.get("phoneCountryCode"),
       country: formData.get("country"),
       countryCode: formData.get("countryCode"),
       region: formData.get("region"),
@@ -55,11 +59,13 @@ function FieldError({ id, error }: { id: string; error?: string }) {
 export function SogpEnrollmentForm({
   defaultCountryCode,
 }: {
-  defaultCountryCode: Country;
+  defaultCountryCode: CountryCode;
 }) {
   const [errors, setErrors] = useState<SogpEnrollmentErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
-  const [phone, setPhone] = useState<Value>();
+  const [phone, setPhone] = useState("");
+  const [phoneCountryCode, setPhoneCountryCode] =
+    useState<CountryCode>(defaultCountryCode);
   const mutation = useMutation({
     mutationFn: submitEnrollment,
     onSuccess(payload) {
@@ -102,18 +108,14 @@ export function SogpEnrollmentForm({
       </div>
       <div className="grid gap-2">
         <label htmlFor="phone" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">Phone number</label>
-        <PhoneInput
-          id="phone"
-          className="sogp-phone-input"
-          defaultCountry={defaultCountryCode}
-          value={phone}
-          onChange={setPhone}
-          international
-          countryCallingCodeEditable={false}
-          aria-invalid={Boolean(errors.phone)}
-          aria-describedby={errors.phone ? "phone-help phone-error" : "phone-help"}
-        />
-        <input type="hidden" name="phone" value={phone ?? ""} />
+        <div className="sogp-phone-input">
+          <select aria-label="Phone country" value={phoneCountryCode} onChange={(event) => setPhoneCountryCode(event.target.value as CountryCode)}>
+            {SOGP_COUNTRIES.map((country) => <option key={country.code} value={country.code}>{country.code} +{getCountryCallingCode(country.code)}</option>)}
+          </select>
+          <input id="phone" type="tel" value={phone} onChange={(event) => setPhone(event.target.value)} autoComplete="tel" placeholder="801 234 5678" aria-invalid={Boolean(errors.phone)} aria-describedby={errors.phone ? "phone-help phone-error" : "phone-help"} />
+        </div>
+        <input type="hidden" name="phone" value={phone} />
+        <input type="hidden" name="phoneCountryCode" value={phoneCountryCode} />
         <p id="phone-help" className="font-[var(--font-be-vietnam-pro)] text-xs leading-[1.45] text-[var(--color-text-muted)]">Use the number linked to your WhatsApp account.</p>
         <FieldError id="phone-error" error={errors.phone} />
       </div>

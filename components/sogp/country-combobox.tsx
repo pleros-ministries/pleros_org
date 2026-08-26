@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { Country } from "react-phone-number-input";
+import type { CountryCode } from "libphonenumber-js/min";
 
 import {
   getSogpCountry,
@@ -9,7 +9,7 @@ import {
 } from "@/lib/sogp/countries";
 
 type CountryComboboxProps = {
-  defaultCountryCode: Country;
+  defaultCountryCode: CountryCode;
   describedBy?: string;
   invalid?: boolean;
 };
@@ -39,6 +39,7 @@ export function CountryCombobox({
         onChange={(event) => setLabel(event.target.value)}
         autoComplete="country-name"
         aria-invalid={invalid}
+        aria-label="Country of residence"
         aria-describedby={describedBy}
         className="h-11 w-full rounded-[var(--radius-sm)] border border-[var(--color-line-strong)] bg-white px-4 text-sm text-[var(--color-text-strong)] outline-none transition focus-visible:border-[var(--color-brand-blue)] focus-visible:ring-4 focus-visible:ring-[var(--color-focus)]"
       />

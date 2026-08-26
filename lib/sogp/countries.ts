@@ -1,26 +1,27 @@
 import {
   getCountries,
   isSupportedCountry,
-  type Country,
-} from "react-phone-number-input";
-import countryLabels from "react-phone-number-input/locale/en.json";
+  type CountryCode,
+} from "libphonenumber-js/min";
+
+const countryNames = new Intl.DisplayNames(["en-GB"], { type: "region" });
 
 export type SogpCountryOption = {
-  code: Country;
+  code: CountryCode;
   label: string;
 };
 
 export const SOGP_COUNTRIES: SogpCountryOption[] = getCountries()
-  .map((code) => ({ code, label: countryLabels[code] ?? code }))
+  .map((code) => ({ code, label: countryNames.of(code) ?? code }))
   .sort((left, right) => left.label.localeCompare(right.label, "en-GB"));
 
-export function resolveSogpCountryCode(value?: string | null): Country {
+export function resolveSogpCountryCode(value?: string | null): CountryCode {
   const normalized = value?.trim().toUpperCase();
   return normalized && isSupportedCountry(normalized)
     ? normalized
     : "NG";
 }
 
-export function getSogpCountry(code: Country) {
+export function getSogpCountry(code: CountryCode) {
   return SOGP_COUNTRIES.find((country) => country.code === code) ?? null;
 }
