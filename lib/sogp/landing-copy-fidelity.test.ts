@@ -19,7 +19,7 @@ test("uses the approved conversion-focused SOGP hero and reader questions", () =
     "Do you wonder what exactly your purpose in life is?",
     "Do you struggle to grow spiritually and break free from habits and addictions?",
     "Do you desire to function in the healing power and the supernatural?",
-    "Do you want to walk more strongly in the strength and power of the Spirit to fulfil God’s purpose for you?",
+    "Do you want to walk more in the strength and power of the Spirit to fulfil God’s purpose for you?",
   ]);
   expect(sogpLandingContent.outcomes).toEqual([
     "Gain clarity on difficult questions about God, His truth, and His Word",
