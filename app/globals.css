@@ -702,6 +702,7 @@
 
   @media (min-width: 64rem) {
     .site-font-theme .sogp-shell-page {
+      max-width: none;
       padding-inline: var(--site-shell-padding-x-lg);
     }
   }
@@ -712,6 +713,7 @@
     }
 
     .site-font-theme .sogp-shell-page {
+      max-width: none;
       padding-inline: var(--site-shell-padding-x-xl);
     }
   }

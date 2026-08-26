@@ -27,4 +27,7 @@ test("SOGP gutter utility uses existing public shell tokens", () => {
   const globals = readFileSync(join(process.cwd(), "app/globals.css"), "utf8");
   expect(globals).toContain(".site-font-theme .sogp-shell-page");
   expect(globals).toContain("padding-inline: var(--site-shell-padding-x)");
+  expect(globals).toContain(
+    ".site-font-theme .sogp-shell-page {\n      max-width: none;\n      padding-inline: var(--site-shell-padding-x-lg);",
+  );
 });

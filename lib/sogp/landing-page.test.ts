@@ -61,7 +61,7 @@ describe("SOGP landing content", () => {
     expect(source).not.toContain("<HomepageNav");
     expect(source).not.toContain("lg:whitespace-nowrap");
     expect(source).toContain("lg:grid-cols-[minmax(0,1.2fr)_minmax(22rem,0.8fr)]");
-    expect(source).toContain("lg:max-w-[var(--site-shell-max)]");
+    expect(source).toContain("lg:max-w-none");
     expect(source).toContain('className="grid min-w-0 gap-7"');
     expect(source.match(/<SectionCta/g)?.length ?? 0).toBeGreaterThanOrEqual(12);
     expect(source).toContain("<SogpHeroPhone");
