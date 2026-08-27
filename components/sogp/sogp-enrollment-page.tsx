@@ -2,7 +2,6 @@ import Link from "next/link";
 import { ArrowLeft, CalendarDays, MessageCircleMore, Radio, Sparkles } from "lucide-react";
 
 import { HomepageFooter } from "@/components/home/homepage-footer";
-import { HomepageNav } from "@/components/home/homepage-nav";
 import { PublicSitePageShell } from "@/components/home/public-site-page-shell";
 import { SogpEnrollmentForm } from "./sogp-enrollment-form";
 import { SogpPublicQueryProvider } from "./sogp-public-query-provider";
@@ -38,7 +37,6 @@ export function SogpEnrollmentPage({
 }) {
   return (
     <PublicSitePageShell>
-      <HomepageNav />
       <main className="site-font-theme bg-[var(--color-surface)]">
         <section className="site-shell-page sogp-shell-page grid gap-10 py-12 md:grid-cols-[minmax(0,0.85fr)_minmax(26rem,1fr)] md:items-start md:gap-16 md:py-20">
           <div className="grid gap-8 md:sticky md:top-24">
