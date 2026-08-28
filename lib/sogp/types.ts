@@ -136,6 +136,7 @@ export type SogpDashboardData = {
     endsAt: Date;
     youtubeLiveUrl: string | null;
     recordingUrl: string | null;
+    isRequired: boolean;
     status: "scheduled" | "live" | "completed" | "cancelled";
   }>;
   prayerDaysAttended: number;

@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 
 import {
   buildPreparationDateKeys,
+  buildSogpDateKeys,
   deriveSogpCalendarState,
   getSogpCountdown,
 } from "./calendar";
@@ -15,6 +16,19 @@ describe("buildPreparationDateKeys", () => {
     expect(dates).toHaveLength(30);
     expect(dates[0]).toBe("2026-10-02");
     expect(dates.at(-1)).toBe("2026-10-31");
+  });
+});
+
+describe("buildSogpDateKeys", () => {
+  test("includes every Lagos calendar date from cohort start through end", () => {
+    const dates = buildSogpDateKeys(
+      new Date("2026-11-02T00:00:00+01:00"),
+      new Date("2026-11-29T23:59:59+01:00"),
+    );
+
+    expect(dates).toHaveLength(28);
+    expect(dates[0]).toBe("2026-11-02");
+    expect(dates.at(-1)).toBe("2026-11-29");
   });
 });
 

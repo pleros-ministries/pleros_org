@@ -2,10 +2,8 @@ import { eq } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
-import {
-  calculateSogpEligibility,
-  summarizeSogpTrackCompletion,
-} from "@/lib/sogp/assessment";
+import { calculateSogpEligibility } from "@/lib/sogp/assessment";
+import { getActiveSogpJourney } from "./sogp-journey";
 
 export async function getSogpCompletionForEnrollment(enrollmentId: number) {
   const enrollment = await db.query.sogpEnrollments.findFirst({
@@ -16,20 +14,14 @@ export async function getSogpCompletionForEnrollment(enrollmentId: number) {
     getSogpDashboardData(enrollment.userId),
   );
   if (!dashboard || dashboard.enrollment.id !== enrollmentId) return null;
-  const trackCompletion = summarizeSogpTrackCompletion(dashboard.tracks);
-  const prayerDaysAvailable = Math.max(
-    1,
-    Math.round(
-      (dashboard.cohort.endsAt.getTime() - dashboard.cohort.startsAt.getTime()) /
-        86_400_000,
-    ) + 1,
-  );
+  const journey = await getActiveSogpJourney(enrollment.userId);
+  if (!journey) return null;
   const eligibility = calculateSogpEligibility({
-    completedTracks: trackCompletion.requiredCompleted,
-    totalTracks: trackCompletion.requiredTotal,
-    prayerDaysAttended: dashboard.prayerDaysAttended,
-    prayerDaysAvailable,
-    liveClassesAttended: dashboard.liveClassesAttended,
+    completedTracks: journey.progress.coreCompleted,
+    totalTracks: journey.progress.coreTotal,
+    prayerDaysAttended: journey.progress.prayerCompleted,
+    prayerDaysAvailable: journey.progress.prayerTotal,
+    liveClassesAttended: journey.progress.reviewsCompleted,
     policy: dashboard.cohort.assessmentPolicy,
   });
   return { enrollment, dashboard, eligibility };

@@ -3,11 +3,18 @@ import { and, asc, eq, gte, inArray, lte } from "drizzle-orm";
 import { db } from "@/lib/db";
 import {
   buildPreparationDateKeys,
+  buildSogpDateKeys,
   deriveSogpCalendarState,
   getSogpCountdown,
 } from "@/lib/sogp/calendar";
 import { toLagosDateKey } from "@/lib/sogp/formation-progress";
-import { getPreparationRequirements, isDateWithinSogpWindow } from "@/lib/sogp/journey";
+import { calculateSogpEligibility } from "@/lib/sogp/assessment";
+import {
+  getPreparationRequirements,
+  getSogpDayRequirements,
+  isDateWithinSogpWindow,
+} from "@/lib/sogp/journey";
+import { getSogpDashboardData } from "./sogp";
 
 import * as schema from "../schema";
 
@@ -328,4 +335,241 @@ export async function setSogpReviewComplete(input: {
       );
   }
   return { complete: input.complete, source: input.source };
+}
+
+export type SogpJourneyData = {
+  generatedAt: string;
+  todayKey: string;
+  enrollment: { name: string };
+  cohort: {
+    title: string;
+    startsAt: string;
+    endsAt: string;
+    telegramUrl: string;
+  };
+  days: Array<{
+    dateKey: string;
+    kind: "weekday" | "weekend" | "review";
+    state: ReturnType<typeof deriveSogpCalendarState>;
+    prayerWatchComplete: boolean;
+    track: null | {
+      id: number;
+      dayNumber: number;
+      title: string;
+      audioUrl: string | null;
+      assessmentComplete: boolean;
+      assessmentHref: string;
+      reviewState: string | null;
+    };
+    review: null | {
+      id: number;
+      title: string;
+      startsAt: string;
+      endsAt: string;
+      liveUrl: string | null;
+      recordingUrl: string | null;
+      complete: boolean;
+      completionSource: "live" | "recording" | null;
+    };
+  }>;
+  extras: Array<{
+    id: number;
+    title: string;
+    audioUrl: string | null;
+  }>;
+  progress: {
+    coreCompleted: number;
+    coreTotal: number;
+    prayerCompleted: number;
+    prayerTotal: number;
+    prayerPercent: number;
+    reviewsCompleted: number;
+    reviewsTotal: number;
+    eligible: boolean;
+  };
+};
+
+export async function getActiveSogpJourney(
+  userId: string,
+  now = new Date(),
+): Promise<SogpJourneyData | null> {
+  const dashboard = await getSogpDashboardData(userId);
+  if (!dashboard) return null;
+
+  const dateKeys = buildSogpDateKeys(
+    dashboard.cohort.startsAt,
+    dashboard.cohort.endsAt,
+  );
+  const todayKey = toLagosDateKey(now);
+  const lessonIds = dashboard.tracks.map((track) => track.lesson.id);
+  const requiredReviewIds = dashboard.liveClasses
+    .filter((item) => item.isRequired && item.status !== "cancelled")
+    .map((item) => item.id);
+  const [prayerRows, submissionRows, reviewRows] = await Promise.all([
+    db
+      .select({ dateKey: schema.prayerWatchAttendance.attendedDate })
+      .from(schema.prayerWatchAttendance)
+      .where(
+        and(
+          eq(schema.prayerWatchAttendance.userId, userId),
+          eq(schema.prayerWatchAttendance.session, "morning"),
+          gte(schema.prayerWatchAttendance.attendedDate, dateKeys[0]!),
+          lte(schema.prayerWatchAttendance.attendedDate, dateKeys.at(-1)!),
+        ),
+      ),
+    lessonIds.length
+      ? db
+          .select({
+            lessonId: schema.writtenSubmissions.lessonId,
+            status: schema.writtenSubmissions.status,
+          })
+          .from(schema.writtenSubmissions)
+          .where(
+            and(
+              eq(schema.writtenSubmissions.userId, userId),
+              inArray(schema.writtenSubmissions.lessonId, lessonIds),
+            ),
+          )
+      : Promise.resolve([]),
+    requiredReviewIds.length
+      ? db
+          .select({
+            liveClassId: schema.sogpLiveClassAttendance.liveClassId,
+            completionSource: schema.sogpLiveClassAttendance.completionSource,
+          })
+          .from(schema.sogpLiveClassAttendance)
+          .where(
+            and(
+              eq(schema.sogpLiveClassAttendance.userId, userId),
+              inArray(schema.sogpLiveClassAttendance.liveClassId, requiredReviewIds),
+            ),
+          )
+      : Promise.resolve([]),
+  ]);
+
+  const prayerDates = new Set(prayerRows.map((row) => row.dateKey));
+  const submissions = new Map(
+    submissionRows.map((row) => [row.lessonId, row.status]),
+  );
+  const reviewCompletion = new Map(
+    reviewRows.map((row) => [row.liveClassId, row.completionSource]),
+  );
+  const requiredTracks = dashboard.tracks.filter(
+    (track) => track.isRequired && track.dayNumber !== null,
+  );
+  const coreCompleted = requiredTracks.filter((track) => {
+    const writtenStatus = submissions.get(track.lesson.id);
+    const writtenComplete =
+      !track.lesson.responsePrompt || (writtenStatus !== undefined && writtenStatus !== "draft");
+    return track.progress.quizPassed && writtenComplete;
+  }).length;
+  const requiredReviews = dashboard.liveClasses.filter(
+    (item) => item.isRequired && item.status !== "cancelled",
+  );
+  const eligibility = calculateSogpEligibility({
+    completedTracks: coreCompleted,
+    totalTracks: requiredTracks.length,
+    prayerDaysAttended: prayerDates.size,
+    prayerDaysAvailable: dateKeys.length,
+    liveClassesAttended: reviewCompletion.size,
+    policy: dashboard.cohort.assessmentPolicy,
+  });
+
+  const days = dateKeys.map((dateKey) => {
+    const track = requiredTracks.find(
+      (item) => toLagosDateKey(item.releaseAt) === dateKey,
+    );
+    const review = requiredReviews.find(
+      (item) => toLagosDateKey(item.startsAt) === dateKey,
+    );
+    const writtenStatus = track ? submissions.get(track.lesson.id) : undefined;
+    const assessmentComplete = track
+      ? track.progress.quizPassed &&
+        (!track.lesson.responsePrompt ||
+          (writtenStatus !== undefined && writtenStatus !== "draft"))
+      : false;
+    const prayerWatchComplete = prayerDates.has(dateKey);
+    const completedReviewSource = review
+      ? reviewCompletion.get(review.id) ?? null
+      : null;
+    const kind = review
+      ? ("review" as const)
+      : track
+        ? ("weekday" as const)
+        : ("weekend" as const);
+    const requirements =
+      kind === "weekday"
+        ? getSogpDayRequirements({ kind, prayerWatchComplete, assessmentComplete })
+        : kind === "review"
+          ? getSogpDayRequirements({
+              kind,
+              prayerWatchComplete,
+              reviewComplete: Boolean(completedReviewSource),
+            })
+          : getSogpDayRequirements({ kind, prayerWatchComplete });
+    return {
+      dateKey,
+      kind,
+      state: deriveSogpCalendarState({ dateKey, todayKey, requirements }),
+      prayerWatchComplete,
+      track: track
+        ? {
+            id: track.id,
+            dayNumber: track.dayNumber!,
+            title: track.lesson.title,
+            audioUrl: track.lesson.audioUrl,
+            assessmentComplete,
+            assessmentHref: track.progress.quizPassed
+              ? `/dashboard/sogp/course/day/${track.dayNumber}/response`
+              : `/dashboard/sogp/course/day/${track.dayNumber}/quiz`,
+            reviewState: writtenStatus ?? null,
+          }
+        : null,
+      review: review
+        ? {
+            id: review.id,
+            title: review.title,
+            startsAt: review.startsAt.toISOString(),
+            endsAt: review.endsAt.toISOString(),
+            liveUrl: review.youtubeLiveUrl,
+            recordingUrl: review.recordingUrl,
+            complete: Boolean(completedReviewSource),
+            completionSource: completedReviewSource,
+          }
+        : null,
+    };
+  });
+
+  return {
+    generatedAt: now.toISOString(),
+    todayKey,
+    enrollment: { name: dashboard.enrollment.name },
+    cohort: {
+      title: dashboard.cohort.title,
+      startsAt: dashboard.cohort.startsAt.toISOString(),
+      endsAt: dashboard.cohort.endsAt.toISOString(),
+      telegramUrl:
+        dashboard.cohort.telegramDiscussionUrl ??
+        dashboard.cohort.telegramChannelUrl ??
+        "https://t.me/pleros_sogp",
+    },
+    days,
+    extras: dashboard.tracks
+      .filter((track) => !track.isRequired)
+      .map((track) => ({
+        id: track.id,
+        title: track.lesson.title,
+        audioUrl: track.lesson.audioUrl,
+      })),
+    progress: {
+      coreCompleted,
+      coreTotal: requiredTracks.length,
+      prayerCompleted: prayerDates.size,
+      prayerTotal: dateKeys.length,
+      prayerPercent: eligibility.prayerPercent,
+      reviewsCompleted: reviewCompletion.size,
+      reviewsTotal: requiredReviews.length,
+      eligible: eligibility.eligible,
+    },
+  };
 }

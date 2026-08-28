@@ -40,6 +40,20 @@ export function buildCoreWeekdayDateKeys(
   return dates;
 }
 
+export function buildSogpDateKeys(startsAt: Date, endsAt: Date): string[] {
+  const startDateKey = toLagosDateKey(startsAt);
+  const endDateKey = toLagosDateKey(endsAt);
+  const dates: string[] = [];
+  let cursor = startDateKey;
+
+  while (cursor <= endDateKey) {
+    dates.push(cursor);
+    cursor = addDays(cursor, 1);
+  }
+
+  return dates;
+}
+
 export function deriveSogpCalendarState({
   dateKey,
   todayKey,

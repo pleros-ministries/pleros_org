@@ -21,3 +21,30 @@ test("Prayer Watch mutations refresh SOGP progress", () => {
   );
   expect(prayerActions).toContain('revalidatePath("/dashboard/sogp")');
 });
+
+test("renders a calendar-led SOGP journey with reviews and Extras", () => {
+  const source = readFileSync(
+    join(process.cwd(), "components", "sogp", "sogp-journey-page.tsx"),
+    "utf8",
+  );
+  const calendar = source.indexOf('data-sogp-section="calendar"');
+  const dailyContent = source.indexOf('data-sogp-section="daily-content"');
+  expect(calendar).toBeGreaterThan(-1);
+  expect(dailyContent).toBeGreaterThan(calendar);
+  expect(source).toContain("Assessment");
+  expect(source).toContain("Required live review");
+  expect(source).toContain("Complete using recording");
+  expect(source).toContain("Extras");
+  expect(source).toContain("excluded from SOGP completion");
+  expect(source).not.toContain("Daily Pleros Podcast");
+});
+
+test("uses the calendar journey for certificate eligibility", () => {
+  const source = readFileSync(
+    join(process.cwd(), "lib", "db", "queries", "sogp-completion.ts"),
+    "utf8",
+  );
+  expect(source).toContain("getActiveSogpJourney");
+  expect(source).not.toContain("summarizeSogpTrackCompletion");
+  expect(source).not.toContain("podcast");
+});
