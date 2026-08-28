@@ -49,10 +49,10 @@ export default async function PublicSitePage({ params }: PublicSitePageProps) {
                 Back to home
               </Link>
               <Link
-                href="/ppc"
+                href="/sogp"
                 className={cn(buttonVariants({ variant: "secondary", size: "lg" }))}
               >
-                Enter PPC
+                Explore SOGP
               </Link>
             </div>
           </div>

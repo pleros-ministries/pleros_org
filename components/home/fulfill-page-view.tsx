@@ -54,10 +54,10 @@ export function FulfillPageView() {
         <section className="bg-[var(--color-surface-muted)] px-[1.25rem] py-[4.25rem] md:px-8 md:py-16 xl:px-10">
           <div className="mx-auto grid max-w-[58rem] gap-8 md:gap-10">
             <div className="grid gap-2 text-center">
-              <p className="site-hero-eyebrow justify-center">Start PPC</p>
+              <p className="site-hero-eyebrow justify-center">Start SOGP</p>
               <h2 className="site-section-heading">What happens when you start</h2>
               <p className="site-section-intro mx-auto max-w-[34rem] text-[var(--color-text-muted)]">
-                PPC is built for ordered growth through teaching, notes,
+                SOGP is built for ordered growth through teaching, assessments,
                 response, and steady progress.
               </p>
             </div>
@@ -96,7 +96,7 @@ export function FulfillPageView() {
             <div className="grid gap-2 text-center">
               <p className="site-hero-eyebrow justify-center">Course levels</p>
               <h2 className="site-section-heading">
-                PPC moves through three levels
+                SOGP moves through three levels
               </h2>
               <p className="site-section-intro mx-auto max-w-[34rem] text-[var(--color-text-muted)]">
                 Each level carries its own focus and modules, helping you grow
@@ -166,7 +166,7 @@ export function FulfillPageView() {
         <section className="bg-[var(--color-brand-blue)] px-[1.25rem] py-[4.25rem] text-white md:px-8 md:py-16 xl:px-10">
           <div className="mx-auto grid max-w-[44rem] gap-6 text-center">
             <p className="site-hero-eyebrow justify-center text-white/72">
-              PPC
+              SOGP
             </p>
             <h2 className="site-section-heading text-white">
               {fulfillPageCta.title}

@@ -418,7 +418,7 @@ describe("site home page", () => {
       'className="site-font-theme overflow-hidden rounded-none border-l border-white/8',
     );
     expect(navSource).toContain('aria-label="Close menu"');
-    expect(navSource).toContain("inline-flex h-9 w-9 items-center justify-center text-white transition-opacity duration-150 hover:opacity-80 md:h-10 md:w-10");
+    expect(navSource).toContain("inline-flex h-9 w-9 cursor-pointer items-center justify-center text-white transition-opacity duration-150 hover:opacity-80 md:h-10 md:w-10");
     expect(navSource).toContain("border-b border-white/10 py-2.5 font-medium text-white/94");
     expect(globalsSource).toContain(".site-font-theme .site-mobile-menu-title");
     expect(globalsSource).toContain(".site-font-theme .site-mobile-menu-link");

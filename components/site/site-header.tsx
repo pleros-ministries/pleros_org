@@ -102,13 +102,13 @@ export function SiteHeader() {
         </div>
 
         <Link
-          href="/ppc"
+          href="/sogp"
           className={cn(
             buttonVariants({ variant: "secondary", size: "sm" }),
             "hidden min-h-10 md:inline-flex",
           )}
         >
-          Enter PPC
+          Explore SOGP
         </Link>
       </div>
     </header>

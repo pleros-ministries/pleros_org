@@ -27,7 +27,7 @@ export function inactivityReminderHtml({
 <html>
 <head><meta charset="utf-8" /></head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #142033; max-width: 520px; margin: 0 auto; padding: 32px 16px;">
-  <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #58657a;">Pleros Perfecting Courses</p>
+  <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #58657a;">School of God's Purpose</p>
   <h1 style="font-size: 20px; margin: 12px 0 0;">We miss you, ${studentName}</h1>
   <p style="font-size: 14px; color: #58657a; line-height: 1.6;">
     It's been ${daysSinceActivity} days since your last activity on Level ${currentLevel}. Your next lesson is <strong>${currentLesson}</strong>.
@@ -37,7 +37,7 @@ export function inactivityReminderHtml({
   </a>
   <hr style="border: none; border-top: 1px solid rgba(15,23,40,0.08); margin: 24px 0;" />
   <p style="font-size: 11px; color: #9ca3af;">
-    You're receiving this because you have an active PPC account. Reminders are sent every 2 days when you're inactive.
+    You're receiving this because you have an active SOGP enrolment. Reminders are sent every 2 days when you're inactive.
   </p>
 </body>
 </html>`.trim();
@@ -66,7 +66,7 @@ export function submissionReviewedHtml({
 <html>
 <head><meta charset="utf-8" /></head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #142033; max-width: 520px; margin: 0 auto; padding: 32px 16px;">
-  <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #58657a;">Pleros Perfecting Courses</p>
+  <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #58657a;">School of God's Purpose</p>
   <h1 style="font-size: 20px; margin: 12px 0 0;">Submission ${statusText}</h1>
   <p style="font-size: 14px; color: #58657a; line-height: 1.6;">
     Hi ${studentName}, your written response for <strong>${lessonTitle}</strong> has been
@@ -98,7 +98,7 @@ export function graduationCongratulationsHtml({
 <html>
 <head><meta charset="utf-8" /></head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #142033; max-width: 520px; margin: 0 auto; padding: 32px 16px;">
-  <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #58657a;">Pleros Perfecting Courses</p>
+  <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #58657a;">School of God's Purpose</p>
   <h1 style="font-size: 20px; margin: 12px 0 0;">Congratulations, ${studentName}! 🎓</h1>
   <p style="font-size: 14px; color: #58657a; line-height: 1.6;">
     You've graduated from <strong>${levelTitle}</strong>.
@@ -151,7 +151,7 @@ export function staffAssignmentHtml({
 <html>
 <head><meta charset="utf-8" /></head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #142033; max-width: 520px; margin: 0 auto; padding: 32px 16px;">
-  <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #58657a;">Pleros Perfecting Courses</p>
+  <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #58657a;">Pleros admin</p>
   <h1 style="font-size: 20px; margin: 12px 0 0;">New assignment for ${staffName}</h1>
   <p style="font-size: 14px; color: #58657a; line-height: 1.6;">
     ${itemLabel}
@@ -178,8 +178,8 @@ export function staffInviteHtml({
 <html>
 <head><meta charset="utf-8" /></head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #142033; max-width: 520px; margin: 0 auto; padding: 32px 16px;">
-  <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #58657a;">Pleros Perfecting Courses</p>
-  <h1 style="font-size: 20px; margin: 12px 0 0;">You have been invited to PPC admin</h1>
+  <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #58657a;">Pleros admin</p>
+  <h1 style="font-size: 20px; margin: 12px 0 0;">You have been invited to Pleros admin</h1>
   <p style="font-size: 14px; color: #58657a; line-height: 1.6;">
     You have been invited as a <strong>${safeRole}</strong>. Use the link below to set your password and activate your staff access.
   </p>
@@ -200,8 +200,8 @@ export function passwordResetHtml({
   const safeName = escapeHtml(name);
   const safeResetUrl = escapeHtml(resetUrl);
   const isAdminReset = resetUrl.includes("/admin/reset-password");
-  const productLabel = isAdminReset ? "Pleros admin" : "Pleros Perfecting Course";
-  const accountLabel = isAdminReset ? "staff account" : "PPC account";
+  const productLabel = isAdminReset ? "Pleros admin" : "School of God's Purpose";
+  const accountLabel = isAdminReset ? "staff account" : "SOGP account";
 
   return `
 <!DOCTYPE html>

@@ -50,6 +50,10 @@ describe("retired learner-facing PPC routes", () => {
     ["app/ppc/(app)/(student)/layout.tsx", "/sogp"],
     ["app/ppc/login/page.tsx", "/sogp"],
     ["app/ppc/signup/page.tsx", "/sogp"],
+    ["app/ppc/sign-in/page.tsx", "/sogp"],
+    ["app/ppc/sign-up/page.tsx", "/sogp"],
+    ["app/ppc/forgot-password/page.tsx", "/sogp"],
+    ["app/ppc/reset-password/page.tsx", "/sogp"],
   ])("permanently redirects %s", (relativePath, destination) => {
     const source = readFileSync(join(process.cwd(), relativePath), "utf8");
     expect(source).toContain("permanentRedirect");

@@ -1,12 +1,12 @@
 export const fulfillPageHero = {
   eyebrow: "Fulfil purpose",
-  title: "The Pleros Perfecting Course",
+  title: "School of God's Purpose",
 } as const;
 
 export const fulfillPageIntro = {
-  title: "PPC is the course platform for growth.",
+  title: "SOGP is the course platform for growth.",
   description:
-    "It helps you stay with sound teaching, move through doctrine carefully, and keep growing with structure. When you start PPC, you do not just watch content. You move through the course and grow through it.",
+    "It helps you stay with sound teaching, move through doctrine carefully, and keep growing with structure. When you start SOGP, you do not just watch content. You move through the course and grow through it.",
 } as const;
 
 export const fulfillPageStudentJourney = [
@@ -26,13 +26,13 @@ export const fulfillPageStudentJourney = [
     step: "03",
     title: "Take the quiz and written response",
     description:
-      "You do not move casually through PPC. You respond to what you are learning and show that you are staying with it.",
+      "You do not move casually through SOGP. You respond to what you are learning and show that you are staying with it.",
   },
   {
     step: "04",
     title: "Continue level by level",
     description:
-      "PPC keeps your growth ordered. You complete lessons, move through levels, and keep going in God's purpose.",
+      "SOGP keeps your growth ordered. You complete lessons, move through levels, and keep going in God's purpose.",
   },
 ] as const;
 
@@ -113,7 +113,7 @@ export const fulfillPageReasons = [
   {
     title: "It gives structure to your growth",
     description:
-      "PPC helps you stay in order instead of growing in scattered moments.",
+      "SOGP helps you stay in order instead of growing in scattered moments.",
   },
   {
     title: "It keeps you with sound doctrine",
@@ -123,14 +123,14 @@ export const fulfillPageReasons = [
   {
     title: "It moves you from learning into response",
     description:
-      "Through lessons, quizzes, and written responses, PPC helps you engage what you are receiving.",
+      "Through lessons, quizzes, and written responses, SOGP helps you engage what you are receiving.",
   },
 ] as const;
 
 export const fulfillPageCta = {
-  title: "Ready to start PPC?",
+  title: "Ready to start SOGP?",
   description:
-    "Enter the Pleros Perfecting Course and begin moving through the levels.",
-  ctaLabel: "Enter PPC",
-  ctaHref: "/ppc",
+    "Enrol in the School of God's Purpose and begin moving through the programme.",
+  ctaLabel: "Explore SOGP",
+  ctaHref: "/sogp",
 } as const;

@@ -124,7 +124,7 @@ export function WelcomePackModal({ openRequest }: WelcomePackModalProps) {
             <p className="text-sm text-[var(--destructive)]">{error}</p>
           ) : (
             <p className="text-sm text-[var(--color-text-muted)]">
-              Your email will also follow you into PPC when you are ready to onboard.
+              Your email will also follow you into SOGP when you are ready to enrol.
             </p>
           )}
 

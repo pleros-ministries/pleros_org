@@ -63,13 +63,13 @@ type PushSubscriptionAction =
 const pushSubscriptionCopy: Record<PushSubscriptionAudience, PushSubscriptionCopy> = {
   staff: {
     unavailable: "Ask a super admin to add VAPID keys before staff subscribe from this page.",
-    subscribed: "This device can receive PPC assignment alerts.",
+    subscribed: "This device can receive staff assignment alerts.",
     available: "Subscribe this browser to receive staff assignment push alerts.",
   },
   student: {
     unavailable:
-      "Course reminders will become available after the PPC team finishes notification setup.",
-    subscribed: "This device can receive PPC course reminders.",
+      "Course reminders will become available after the SOGP team finishes notification setup.",
+    subscribed: "This device can receive SOGP course reminders.",
     available:
       "Subscribe this browser to receive reminders about lessons and course progress.",
   },
@@ -95,7 +95,7 @@ function getEmailStatus(env: NotificationEnvironment): NotificationChannelStatus
     label: "Email",
     state: "ready",
     detail: `Transactional email is enabled from ${
-      env.EMAIL_FROM?.trim() || "PPC <noreply@pleros.org>"
+      env.EMAIL_FROM?.trim() || "Pleros <noreply@pleros.org>"
     }.`,
     missing: [],
   };
