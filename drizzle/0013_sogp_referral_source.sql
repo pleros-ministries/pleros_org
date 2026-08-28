@@ -1,0 +1,1 @@
+ALTER TABLE "sogp_enrollments" ADD COLUMN "referral_source" text DEFAULT '' NOT NULL;

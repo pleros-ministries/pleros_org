@@ -35,6 +35,7 @@ function SectionCta({
   return (
     <Link
       href={content.hero.ctaHref}
+      prefetch={true}
       className={
         inverse
           ? "site-button-text inline-flex min-h-12 w-fit items-center justify-center gap-2 rounded-full bg-white px-7 text-sm font-semibold text-[var(--color-brand-blue)] transition-transform duration-150 hover:-translate-y-px focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"

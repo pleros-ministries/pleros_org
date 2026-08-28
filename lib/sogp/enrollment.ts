@@ -15,7 +15,7 @@ export type SogpEnrollmentValues = {
   country: string;
   region: string;
   birthYear: string;
-  reason: string;
+  referralSource: string;
   utmSource: string;
   utmMedium: string;
   utmCampaign: string;
@@ -29,13 +29,15 @@ export type SogpEnrollmentInput = Partial<SogpEnrollmentValues> & {
 export type SogpEnrollmentErrors = Partial<
   Record<
     | "name"
+    | "firstName"
+    | "lastName"
     | "email"
     | "phone"
     | "countryCode"
     | "country"
     | "region"
     | "birthYear"
-    | "reason",
+    | "referralSource",
     string
   >
 >;
@@ -44,6 +46,31 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const EARLIEST_BIRTH_YEAR = 1900;
 /** SOGP is open to teenagers upwards, so anything younger reads as a typo. */
 const MINIMUM_AGE = 10;
+
+export const SOGP_REFERRAL_OPTIONS = [
+  { value: "friend_or_family", label: "Friend or family member" },
+  { value: "church_or_pastor", label: "Church, pastor or minister" },
+  { value: "whatsapp", label: "WhatsApp" },
+  { value: "telegram", label: "Telegram" },
+  { value: "social_media", label: "Social media" },
+  { value: "pleros_website", label: "Pleros website" },
+  { value: "pleros_event", label: "Pleros programme or event" },
+  { value: "search_engine", label: "Search engine" },
+  { value: "other", label: "Other" },
+] as const;
+
+const SOGP_REFERRAL_VALUES = new Set<string>(
+  SOGP_REFERRAL_OPTIONS.map((option) => option.value),
+);
+
+export function getSogpBirthYearOptions(
+  currentYear = new Date().getUTCFullYear(),
+) {
+  return Array.from(
+    { length: currentYear - MINIMUM_AGE - EARLIEST_BIRTH_YEAR + 1 },
+    (_, index) => String(currentYear - MINIMUM_AGE - index),
+  );
+}
 
 export function buildSogpEnrollmentRedirect(input: {
   cohortChannelUrl?: string | null;
@@ -67,9 +94,9 @@ function clean(value: unknown, maxLength: number) {
 export function normalizeSogpEnrollment(
   input: SogpEnrollmentInput,
 ): SogpEnrollmentValues {
-  const nameParts = clean(input.name, 160).split(/\s+/).filter(Boolean);
-  const name = nameParts.join(" ");
-  const [firstName, ...lastNameParts] = nameParts;
+  const firstName = clean(input.firstName, 80);
+  const lastName = clean(input.lastName, 80);
+  const name = [firstName, lastName].filter(Boolean).join(" ");
   const rawPhone = clean(input.phone, 32);
   const rawPhoneCountry = clean(input.phoneCountryCode, 2).toUpperCase();
   const phoneCountryCode = isSupportedCountry(rawPhoneCountry)
@@ -84,8 +111,8 @@ export function normalizeSogpEnrollment(
   }
 
   return {
-    firstName: firstName ?? "",
-    lastName: lastNameParts.join(" "),
+    firstName,
+    lastName,
     name,
     email: clean(input.email, 320).toLowerCase(),
     phone,
@@ -93,7 +120,7 @@ export function normalizeSogpEnrollment(
     country: clean(input.country, 100),
     region: clean(input.region, 120),
     birthYear: clean(input.birthYear, 4).replace(/\D/g, ""),
-    reason: typeof input.reason === "string" ? input.reason.trim() : "",
+    referralSource: clean(input.referralSource, 80),
     utmSource: clean(input.utmSource, 200),
     utmMedium: clean(input.utmMedium, 200),
     utmCampaign: clean(input.utmCampaign, 200),
@@ -107,7 +134,8 @@ export function validateSogpEnrollment(
 ): SogpEnrollmentErrors {
   const errors: SogpEnrollmentErrors = {};
 
-  if (!input.name) errors.name = "Enter your full name.";
+  if (!input.firstName) errors.firstName = "Enter your first name.";
+  if (!input.lastName) errors.lastName = "Enter your surname.";
   if (!EMAIL_PATTERN.test(input.email)) {
     errors.email = "Enter a valid email address.";
   }
@@ -130,8 +158,8 @@ export function validateSogpEnrollment(
   ) {
     errors.birthYear = `Enter a year between ${EARLIEST_BIRTH_YEAR} and ${latestBirthYear}.`;
   }
-  if (input.reason.length > 1_000) {
-    errors.reason = "Keep your response within 1,000 characters.";
+  if (!SOGP_REFERRAL_VALUES.has(input.referralSource)) {
+    errors.referralSource = "Select how you heard about us.";
   }
 
   return errors;

@@ -59,6 +59,7 @@ describe("SOGP landing content", () => {
     );
 
     expect(source).not.toContain("<HomepageNav");
+    expect(source).toContain("prefetch={true}");
     expect(source).not.toContain("lg:whitespace-nowrap");
     expect(source).toContain("lg:grid-cols-[minmax(0,1.2fr)_minmax(22rem,0.8fr)]");
     expect(source).toContain("lg:max-w-none");

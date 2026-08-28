@@ -8,7 +8,9 @@ import type { CountryCode } from "libphonenumber-js/min";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
+  getSogpBirthYearOptions,
   normalizeSogpEnrollment,
+  SOGP_REFERRAL_OPTIONS,
   validateSogpEnrollment,
   type SogpEnrollmentErrors,
 } from "@/lib/sogp/enrollment";
@@ -26,27 +28,32 @@ type EnrollmentResponse = {
 // Fields validated inline, in the order they appear so we can focus the first
 // one that still needs attention on a blocked submit.
 const FIELD_ORDER = [
-  "name",
+  "firstName",
+  "lastName",
   "email",
   "phone",
   "country",
   "countryCode",
   "region",
   "birthYear",
-  "reason",
+  "referralSource",
 ] as const;
 
 type FieldName = (typeof FIELD_ORDER)[number];
 
 const FOCUS_TARGET: Partial<Record<FieldName, string>> = {
-  name: "name",
+  firstName: "firstName",
+  lastName: "lastName",
   email: "email",
   phone: "phone",
   country: "country",
   countryCode: "country",
   region: "region",
   birthYear: "birthYear",
+  referralSource: "referralSource",
 };
+
+const BIRTH_YEAR_OPTIONS = getSogpBirthYearOptions();
 
 const FILL_IN_MESSAGE =
   "Please fill in the highlighted fields before completing your enrolment.";
@@ -86,11 +93,12 @@ export function SogpEnrollmentForm({
   const initialCountry = getSogpCountryOrDefault(defaultCountryCode);
 
   const [values, setValues] = useState({
-    name: "",
+    firstName: "",
+    lastName: "",
     email: "",
     region: "",
     birthYear: "",
-    reason: "",
+    referralSource: "",
     phone: "",
     phoneCountryCode: defaultCountryCode as CountryCode,
     country: initialCountry.label,
@@ -154,13 +162,14 @@ export function SogpEnrollmentForm({
     return undefined;
   }
 
-  const nameError = errorFor("name");
+  const firstNameError = errorFor("firstName");
+  const lastNameError = errorFor("lastName");
   const emailError = errorFor("email");
   const phoneError = errorFor("phone");
   const countryError = errorFor("country") ?? errorFor("countryCode");
   const regionError = errorFor("region");
   const birthYearError = errorFor("birthYear");
-  const reasonError = errorFor("reason");
+  const referralSourceError = errorFor("referralSource");
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -182,19 +191,35 @@ export function SogpEnrollmentForm({
 
   return (
     <form className="grid gap-5" noValidate onSubmit={handleSubmit}>
-      <div className="grid gap-2">
-        <label htmlFor="name" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">Full name</label>
-        <Input
-          id="name"
-          name="name"
-          autoComplete="name"
-          value={values.name}
-          onChange={(event) => update("name", event.target.value)}
-          onBlur={() => markTouched("name")}
-          aria-invalid={Boolean(nameError)}
-          aria-describedby={nameError ? "name-error" : undefined}
-        />
-        <FieldError id="name-error" error={nameError} />
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-2">
+          <label htmlFor="firstName" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">First name</label>
+          <Input
+            id="firstName"
+            name="firstName"
+            autoComplete="given-name"
+            value={values.firstName}
+            onChange={(event) => update("firstName", event.target.value)}
+            onBlur={() => markTouched("firstName")}
+            aria-invalid={Boolean(firstNameError)}
+            aria-describedby={firstNameError ? "first-name-error" : undefined}
+          />
+          <FieldError id="first-name-error" error={firstNameError} />
+        </div>
+        <div className="grid gap-2">
+          <label htmlFor="lastName" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">Surname</label>
+          <Input
+            id="lastName"
+            name="lastName"
+            autoComplete="family-name"
+            value={values.lastName}
+            onChange={(event) => update("lastName", event.target.value)}
+            onBlur={() => markTouched("lastName")}
+            aria-invalid={Boolean(lastNameError)}
+            aria-describedby={lastNameError ? "last-name-error" : undefined}
+          />
+          <FieldError id="last-name-error" error={lastNameError} />
+        </div>
       </div>
       <div className="grid gap-2">
         <label htmlFor="email" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">Email address</label>
@@ -266,41 +291,43 @@ export function SogpEnrollmentForm({
         </div>
         <div className="grid gap-2">
           <label htmlFor="birthYear" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">Year of birth</label>
-          <Input
+          <select
             id="birthYear"
             name="birthYear"
-            type="text"
-            inputMode="numeric"
-            pattern="[0-9]*"
-            maxLength={4}
             autoComplete="bday-year"
-            placeholder="1998"
             value={values.birthYear}
-            onChange={(event) =>
-              update("birthYear", event.target.value.replace(/\D/g, "").slice(0, 4))
-            }
+            onChange={(event) => update("birthYear", event.target.value)}
             onBlur={() => markTouched("birthYear")}
             aria-invalid={Boolean(birthYearError)}
             aria-describedby={birthYearError ? "birth-year-error" : undefined}
-          />
+            className="h-11 w-full rounded-[var(--radius-sm)] border border-[var(--color-line-strong)] bg-white px-4 text-sm text-[var(--color-text-strong)] outline-none transition focus-visible:border-[var(--color-brand-blue)] focus-visible:ring-4 focus-visible:ring-[var(--color-focus)]"
+          >
+            <option value="">Select year</option>
+            {BIRTH_YEAR_OPTIONS.map((year) => (
+              <option key={year} value={year}>{year}</option>
+            ))}
+          </select>
           <FieldError id="birth-year-error" error={birthYearError} />
         </div>
       </div>
       <div className="grid gap-2">
-        <label htmlFor="reason" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">What do you want to get out of SOGP? <span className="font-normal text-[var(--color-text-muted)]">(optional)</span></label>
-        <textarea
-          id="reason"
-          name="reason"
-          rows={4}
-          maxLength={1000}
-          value={values.reason}
-          onChange={(event) => update("reason", event.target.value)}
-          onBlur={() => markTouched("reason")}
-          className="w-full resize-y rounded-[var(--radius-sm)] border border-[var(--color-line-strong)] bg-white px-4 py-3 font-[var(--font-be-vietnam-pro)] text-sm text-[var(--color-text-strong)] outline-none transition focus-visible:border-[var(--color-brand-blue)] focus-visible:ring-4 focus-visible:ring-[var(--color-focus)]"
-          aria-invalid={Boolean(reasonError)}
-          aria-describedby={reasonError ? "reason-error" : undefined}
-        />
-        <FieldError id="reason-error" error={reasonError} />
+        <label htmlFor="referralSource" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">How did you hear about us?</label>
+        <select
+          id="referralSource"
+          name="referralSource"
+          value={values.referralSource}
+          onChange={(event) => update("referralSource", event.target.value)}
+          onBlur={() => markTouched("referralSource")}
+          aria-invalid={Boolean(referralSourceError)}
+          aria-describedby={referralSourceError ? "referral-source-error" : undefined}
+          className="h-11 w-full rounded-[var(--radius-sm)] border border-[var(--color-line-strong)] bg-white px-4 text-sm text-[var(--color-text-strong)] outline-none transition focus-visible:border-[var(--color-brand-blue)] focus-visible:ring-4 focus-visible:ring-[var(--color-focus)]"
+        >
+          <option value="">Select an option</option>
+          {SOGP_REFERRAL_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>{option.label}</option>
+          ))}
+        </select>
+        <FieldError id="referral-source-error" error={referralSourceError} />
       </div>
       {formError ? (
         <div role="alert" className="rounded-[var(--radius-sm)] border border-red-200 bg-red-50 px-4 py-2.5 font-[var(--font-be-vietnam-pro)] text-xs leading-[1.5] text-red-800">{formError}</div>

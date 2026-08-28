@@ -32,6 +32,8 @@ export type AdminSogpData = {
     countryCode: string;
     country: string;
     region: string;
+    birthYear: number | null;
+    referralSource: string;
     status: string;
     telegramLinkedAt: string | null;
     createdAt: string;

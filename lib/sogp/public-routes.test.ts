@@ -8,8 +8,17 @@ describe("SOGP public routes", () => {
   test("uses only canonical /sogp public pages", () => {
     const landing = join(root, "app", "(site)", "sogp", "page.tsx");
     const enrol = join(root, "app", "(site)", "sogp", "enrol", "page.tsx");
+    const enrolLoading = join(
+      root,
+      "app",
+      "(site)",
+      "sogp",
+      "enrol",
+      "loading.tsx",
+    );
     expect(existsSync(landing)).toBe(true);
     expect(existsSync(enrol)).toBe(true);
+    expect(existsSync(enrolLoading)).toBe(true);
     expect(
       existsSync(join(root, "app", "(site)", "school-of-purpose")),
     ).toBe(false);

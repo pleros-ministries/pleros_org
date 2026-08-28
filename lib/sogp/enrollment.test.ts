@@ -2,11 +2,18 @@ import { describe, expect, test } from "vitest";
 
 import {
   buildSogpEnrollmentRedirect,
+  getSogpBirthYearOptions,
   normalizeSogpEnrollment,
   validateSogpEnrollment,
 } from "./enrollment";
 
 describe("SOGP enrolment", () => {
+  test("offers a controlled descending list of birth years", () => {
+    const years = getSogpBirthYearOptions(2026);
+    expect(years[0]).toBe("2016");
+    expect(years.at(-1)).toBe("1900");
+  });
+
   test("redirects successful enrolments to the configured Telegram channel", () => {
     expect(
       buildSogpEnrollmentRedirect({
@@ -31,7 +38,8 @@ describe("SOGP enrolment", () => {
   test("normalizes valid input and bounded attribution", () => {
     expect(
       normalizeSogpEnrollment({
-        name: "  Ada Grace ",
+        firstName: "  Ada ",
+        lastName: " Grace ",
         email: " ADA@EXAMPLE.COM ",
         phone: " 0803 000 0000 ",
         phoneCountryCode: "NG",
@@ -39,7 +47,7 @@ describe("SOGP enrolment", () => {
         country: " Nigeria ",
         region: " Lagos ",
         birthYear: " 1998 ",
-        reason: " I want clarity. ",
+        referralSource: "social_media",
         utmSource: " meta ",
       }),
     ).toMatchObject({
@@ -52,20 +60,23 @@ describe("SOGP enrolment", () => {
       country: "Nigeria",
       region: "Lagos",
       birthYear: "1998",
-      reason: "I want clarity.",
+      referralSource: "social_media",
       utmSource: "meta",
     });
   });
 
-  test("derives first and last name from a single full-name field", () => {
+  test("combines separate first name and surname fields", () => {
     expect(
-      normalizeSogpEnrollment({ name: "  Mary   Jane  Watson " }),
+      normalizeSogpEnrollment({
+        firstName: "  Mary Jane ",
+        lastName: " Watson ",
+      }),
     ).toMatchObject({
-      firstName: "Mary",
-      lastName: "Jane Watson",
+      firstName: "Mary Jane",
+      lastName: "Watson",
       name: "Mary Jane Watson",
     });
-    expect(normalizeSogpEnrollment({ name: "Prince" })).toMatchObject({
+    expect(normalizeSogpEnrollment({ firstName: "Prince" })).toMatchObject({
       firstName: "Prince",
       lastName: "",
       name: "Prince",
@@ -76,34 +87,39 @@ describe("SOGP enrolment", () => {
     expect(
       validateSogpEnrollment(
         normalizeSogpEnrollment({
-          name: "",
+          firstName: "",
+          lastName: "",
           email: "bad",
           phone: "12",
           countryCode: "",
           country: "",
           region: "",
-          reason: "",
+          referralSource: "",
         }),
       ),
     ).toEqual({
-      name: "Enter your full name.",
+      firstName: "Enter your first name.",
+      lastName: "Enter your surname.",
       email: "Enter a valid email address.",
       phone: "Enter a valid phone number.",
       countryCode: "Country is required.",
       country: "Country is required.",
       region: "State, province or region is required.",
       birthYear: "Year of birth is required.",
+      referralSource: "Select how you heard about us.",
     });
   });
 
   test("rejects birth years outside a plausible range", () => {
     const base = {
-      name: "Ada Grace",
+      firstName: "Ada",
+      lastName: "Grace",
       email: "ada@example.com",
       phone: "+2348030000000",
       countryCode: "NG",
       country: "Nigeria",
       region: "Lagos",
+      referralSource: "friend_or_family",
     };
     const thisYear = new Date().getUTCFullYear();
 
@@ -124,20 +140,21 @@ describe("SOGP enrolment", () => {
     ).toBeUndefined();
   });
 
-  test("rejects an overlong reason", () => {
+  test("rejects an unknown referral source", () => {
     const input = normalizeSogpEnrollment({
-      name: "Ada Grace",
+      firstName: "Ada",
+      lastName: "Grace",
       email: "ada@example.com",
       phone: "+2348030000000",
       countryCode: "NG",
       country: "Nigeria",
       region: "Lagos",
       birthYear: "1998",
-      reason: "x".repeat(1_001),
+      referralSource: "word_of_mouth_or_something",
     });
 
-    expect(validateSogpEnrollment(input).reason).toBe(
-      "Keep your response within 1,000 characters.",
+    expect(validateSogpEnrollment(input).referralSource).toBe(
+      "Select how you heard about us.",
     );
   });
 });

@@ -89,6 +89,7 @@ export async function upsertSogpEnrollment(input: SogpEnrollmentCreateInput) {
         country: input.country,
         region: input.region,
         birthYear: input.birthYear ?? null,
+        referralSource: input.referralSource,
         reason: input.reason || null,
         utmSource: input.utmSource || null,
         utmMedium: input.utmMedium || null,

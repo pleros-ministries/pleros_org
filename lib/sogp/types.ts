@@ -66,6 +66,7 @@ export type SogpEnrollmentCreateInput = {
   country: string;
   region: string;
   birthYear?: number | null;
+  referralSource: string;
   reason?: string | null;
   utmSource?: string | null;
   utmMedium?: string | null;
