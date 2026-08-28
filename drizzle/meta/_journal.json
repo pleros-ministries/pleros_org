@@ -99,6 +99,13 @@
       "when": 1787916705097,
       "tag": "0013_sogp_referral_source",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1787917653316,
+      "tag": "0014_sogp_whatsapp_consent",
+      "breakpoints": true
     }
   ]
 }

@@ -67,6 +67,7 @@ export type SogpEnrollmentCreateInput = {
   region: string;
   birthYear?: number | null;
   referralSource: string;
+  whatsappConsent: boolean;
   reason?: string | null;
   utmSource?: string | null;
   utmMedium?: string | null;

@@ -62,6 +62,7 @@ export async function getSogpEnrollmentByUserId(userId: string) {
 
 export async function upsertSogpEnrollment(input: SogpEnrollmentCreateInput) {
   const now = new Date();
+  const whatsappOptedInAt = input.whatsappConsent ? now : null;
   const [enrollment] = await db
     .insert(schema.sogpEnrollments)
     .values({
@@ -72,6 +73,7 @@ export async function upsertSogpEnrollment(input: SogpEnrollmentCreateInput) {
       utmCampaign: input.utmCampaign || null,
       utmContent: input.utmContent || null,
       utmTerm: input.utmTerm || null,
+      whatsappOptedInAt,
       updatedAt: now,
     })
     .onConflictDoUpdate({
@@ -90,6 +92,8 @@ export async function upsertSogpEnrollment(input: SogpEnrollmentCreateInput) {
         region: input.region,
         birthYear: input.birthYear ?? null,
         referralSource: input.referralSource,
+        whatsappConsent: input.whatsappConsent,
+        whatsappOptedInAt,
         reason: input.reason || null,
         utmSource: input.utmSource || null,
         utmMedium: input.utmMedium || null,

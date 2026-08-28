@@ -16,6 +16,7 @@ export type SogpEnrollmentValues = {
   region: string;
   birthYear: string;
   referralSource: string;
+  whatsappConsent: boolean;
   utmSource: string;
   utmMedium: string;
   utmCampaign: string;
@@ -121,6 +122,7 @@ export function normalizeSogpEnrollment(
     region: clean(input.region, 120),
     birthYear: clean(input.birthYear, 4).replace(/\D/g, ""),
     referralSource: clean(input.referralSource, 80),
+    whatsappConsent: input.whatsappConsent === true,
     utmSource: clean(input.utmSource, 200),
     utmMedium: clean(input.utmMedium, 200),
     utmCampaign: clean(input.utmCampaign, 200),

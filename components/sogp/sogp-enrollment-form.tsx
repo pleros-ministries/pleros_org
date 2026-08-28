@@ -99,6 +99,7 @@ export function SogpEnrollmentForm({
     region: "",
     birthYear: "",
     referralSource: "",
+    whatsappConsent: false,
     phone: "",
     phoneCountryCode: defaultCountryCode as CountryCode,
     country: initialCountry.label,
@@ -329,6 +330,18 @@ export function SogpEnrollmentForm({
         </select>
         <FieldError id="referral-source-error" error={referralSourceError} />
       </div>
+      <label className="flex items-start gap-3 rounded-[var(--radius-sm)] border border-[var(--color-line)] bg-[var(--color-surface-muted)] p-4">
+        <input
+          type="checkbox"
+          name="whatsappConsent"
+          checked={values.whatsappConsent}
+          onChange={(event) => update("whatsappConsent", event.target.checked)}
+          className="mt-0.5 size-4 shrink-0 accent-[var(--color-brand-blue)]"
+        />
+        <span className="font-[var(--font-be-vietnam-pro)] text-xs leading-[1.5] text-[var(--color-text-muted)]">
+          I agree to receive SOGP updates and course reminders via WhatsApp. I can opt out at any time.
+        </span>
+      </label>
       {formError ? (
         <div role="alert" className="rounded-[var(--radius-sm)] border border-red-200 bg-red-50 px-4 py-2.5 font-[var(--font-be-vietnam-pro)] text-xs leading-[1.5] text-red-800">{formError}</div>
       ) : null}

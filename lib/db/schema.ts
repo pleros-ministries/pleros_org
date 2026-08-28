@@ -740,6 +740,10 @@ export const sogpEnrollments = pgTable(
     region: text("region").notNull().default(""),
     birthYear: integer("birth_year"),
     referralSource: text("referral_source").notNull().default(""),
+    whatsappConsent: boolean("whatsapp_consent").notNull().default(false),
+    whatsappOptedInAt: timestamp("whatsapp_opted_in_at", {
+      withTimezone: true,
+    }),
     reason: text("reason"),
     status: sogpEnrollmentStatusEnum("status").notNull().default("enrolled"),
     utmSource: text("utm_source"),

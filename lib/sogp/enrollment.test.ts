@@ -48,6 +48,7 @@ describe("SOGP enrolment", () => {
         region: " Lagos ",
         birthYear: " 1998 ",
         referralSource: "social_media",
+        whatsappConsent: true,
         utmSource: " meta ",
       }),
     ).toMatchObject({
@@ -61,8 +62,16 @@ describe("SOGP enrolment", () => {
       region: "Lagos",
       birthYear: "1998",
       referralSource: "social_media",
+      whatsappConsent: true,
       utmSource: "meta",
     });
+  });
+
+  test("keeps WhatsApp reminders opt-in explicit", () => {
+    expect(normalizeSogpEnrollment({}).whatsappConsent).toBe(false);
+    expect(
+      normalizeSogpEnrollment({ whatsappConsent: true }).whatsappConsent,
+    ).toBe(true);
   });
 
   test("combines separate first name and surname fields", () => {

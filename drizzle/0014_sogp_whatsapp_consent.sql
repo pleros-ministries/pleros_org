@@ -1,0 +1,2 @@
+ALTER TABLE "sogp_enrollments" ADD COLUMN "whatsapp_consent" boolean DEFAULT false NOT NULL;--> statement-breakpoint
+ALTER TABLE "sogp_enrollments" ADD COLUMN "whatsapp_opted_in_at" timestamp with time zone;

@@ -34,6 +34,8 @@ export type AdminSogpData = {
     region: string;
     birthYear: number | null;
     referralSource: string;
+    whatsappConsent: boolean;
+    whatsappOptedInAt: string | null;
     status: string;
     telegramLinkedAt: string | null;
     createdAt: string;

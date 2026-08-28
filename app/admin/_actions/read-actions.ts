@@ -302,6 +302,8 @@ export async function getAdminSogpData(): Promise<AdminSogpData> {
         region: enrollment.region,
         birthYear: enrollment.birthYear,
         referralSource: enrollment.referralSource,
+        whatsappConsent: enrollment.whatsappConsent,
+        whatsappOptedInAt: serializeDate(enrollment.whatsappOptedInAt),
         status: enrollment.status,
         telegramLinkedAt: serializeDate(enrollment.telegramLinkedAt),
         createdAt: enrollment.createdAt.toISOString(),
