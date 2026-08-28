@@ -1,4 +1,4 @@
-import { LockIcon } from "lucide-react";
+import { GiftIcon, LockIcon, PlayCircleIcon, SendIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -87,7 +87,72 @@ export function WelcomePackPage({ extraGiftsUnlocked }: WelcomePackPageProps) {
           </h1>
         </div>
 
-        <section className="grid gap-4">
+        <section id="welcome-orientation" className="scroll-mt-24 grid gap-5">
+          <div className="overflow-hidden rounded-[var(--radius-md)] bg-[var(--color-brand-blue)] shadow-[var(--shadow-md)]">
+            <video
+              controls
+              playsInline
+              preload="metadata"
+              poster="/site/sogp/sogp-welcome-WaXgk9zqi78.jpg"
+              className="aspect-video w-full bg-black object-cover"
+            >
+              <source
+                src="/site/sogp/sogp-welcome-WaXgk9zqi78.mp4"
+                type="video/mp4"
+              />
+            </video>
+          </div>
+          <div className="grid gap-3">
+            <p className="font-[var(--font-be-vietnam-pro)] text-[0.9rem] leading-[1.5] text-[var(--color-text-muted)]">
+              Begin with this welcome, then join the orientation group for your
+              next steps, updates, and preparation.
+            </p>
+            <a
+              href="https://t.me/pleros_sogp"
+              target="_blank"
+              rel="noreferrer"
+              className="site-button-text inline-flex min-h-[2.875rem] w-fit items-center justify-center gap-2 rounded-full bg-[var(--color-brand-blue)] px-6 py-2.5 text-[0.75rem] font-semibold leading-none text-white transition-transform duration-150 hover:-translate-y-px"
+            >
+              <SendIcon className="size-4" />
+              Join the orientation group
+            </a>
+          </div>
+        </section>
+
+        <nav aria-label="Welcome Pack sections" className="grid grid-cols-2 gap-4">
+          <a
+            href="#welcome-orientation"
+            className="group relative grid min-h-36 content-end overflow-hidden rounded-[var(--radius-md)] bg-[var(--color-brand-blue)] p-4 text-white"
+          >
+            <Image
+              src="/site/sogp/sogp-welcome-WaXgk9zqi78.jpg"
+              alt=""
+              fill
+              sizes="(max-width: 640px) 50vw, 18rem"
+              className="object-cover opacity-55 transition-transform duration-200 group-hover:scale-[1.02]"
+            />
+            <span className="relative z-10 inline-flex items-center gap-2 font-[var(--font-sen)] text-base font-semibold">
+              <PlayCircleIcon className="size-4" /> Orientation video
+            </span>
+          </a>
+          <a
+            href="#welcome-gifts"
+            className="group relative grid min-h-36 content-end overflow-hidden rounded-[var(--radius-md)] bg-[var(--color-brand-sky)] p-4 text-[var(--color-brand-blue)]"
+          >
+            <Image
+              src="/assets/dashboard/welcome-pack-main-gift/ebook-purpose-welcome-card.png"
+              alt=""
+              fill
+              sizes="(max-width: 640px) 50vw, 18rem"
+              className="object-cover opacity-35 transition-transform duration-200 group-hover:scale-[1.02]"
+            />
+            <span className="relative z-10 inline-flex items-center gap-2 font-[var(--font-sen)] text-base font-semibold">
+              <GiftIcon className="size-4" /> Your gifts
+            </span>
+          </a>
+        </nav>
+
+        <section id="welcome-gifts" className="scroll-mt-24 grid gap-4">
           <div className="grid gap-1">
             <h2 className="site-section-heading text-[1.55rem] text-[var(--color-brand-blue)]">
               Main gifts

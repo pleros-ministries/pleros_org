@@ -3,6 +3,21 @@ import { join } from "node:path";
 import { describe, expect, test } from "vitest";
 
 describe("welcome pack page", () => {
+  test("leads with orientation media, Telegram, and visual navigation", () => {
+    const source = readFileSync(
+      join(process.cwd(), "components", "dashboard", "welcome-pack-page.tsx"),
+      "utf8",
+    );
+
+    expect(source).toContain('id="welcome-orientation"');
+    expect(source).toContain("sogp-welcome-WaXgk9zqi78.mp4");
+    expect(source).toContain("Join the orientation group");
+    expect(source).toContain("https://t.me/pleros_sogp");
+    expect(source).toContain("Orientation video");
+    expect(source).toContain("Your gifts");
+    expect(source).toContain('id="welcome-gifts"');
+  });
+
   test("shows the main gift immediately and marks supplementary packs as coming soon", () => {
     const source = readFileSync(
       join(process.cwd(), "components", "dashboard", "welcome-pack-page.tsx"),
