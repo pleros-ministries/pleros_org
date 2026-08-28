@@ -92,10 +92,9 @@ describe("welcome campaign pages", () => {
     expect(pageSource).toContain("ThankYouPage");
     expect(pageSource).not.toContain("downloadUrl");
     expect(viewSource).not.toContain("Click here to access your book");
-    expect(viewSource).toContain("Your free book is ready in your dashboard.");
-    expect(viewSource).toContain('href="#book-access"');
+    expect(viewSource).toContain("our gift is now available on your dashboard");
     expect(viewSource).toContain('id="book-access"');
-    expect(viewSource).toContain("Thank you for receiving your gift");
+    expect(viewSource).toContain("Thank you for receiving our gift");
     expect(viewSource).toContain("Visit your dashboard to access your gift.");
     expect(viewSource).toContain('href="/dashboard/welcomepack"');
     expect(viewSource).toContain(

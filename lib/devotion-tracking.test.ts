@@ -166,7 +166,7 @@ describe("dashboard devotion tracking", () => {
     expect(content).toContain("href: `/dashboard/discipleship-journey/${section.id}`");
     expect(dashboardPage).toContain("DiscipleshipJourneySeriesGrid");
     expect(dashboardPage).toContain("rounded-[var(--radius-md)]");
-    expect(dashboardPage).toContain("aspect-[0.78]");
+    expect(dashboardPage).toContain("aspect-9/14");
     expect(dashboardPage).toContain("priority");
     expect(dashboardPage).not.toContain("<DiscipleshipJourneyGallery sections={sections}");
     expect(gallery).toContain("backHref");

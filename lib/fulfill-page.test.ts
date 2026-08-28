@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { describe, expect, test } from "vitest";
 
 describe("fulfill page", () => {
-  test("uses a dedicated route and points visitors into PPC as the next step", () => {
+  test("uses a dedicated route and points visitors into SOGP as the next step", () => {
     const routePath = join(process.cwd(), "app", "(site)", "fulfil", "page.tsx");
     const viewPath = join(
       process.cwd(),
@@ -26,10 +26,11 @@ describe("fulfill page", () => {
     expect(viewSource).toContain("HomepageCommunitySection");
     expect(viewSource).toContain("HomepageFooter");
     expect(viewSource).toContain("What happens when you start");
-    expect(viewSource).toContain("PPC moves through three levels");
-    expect(contentSource).toContain("The Pleros Perfecting Course");
-    expect(contentSource).toContain("PPC is the course platform for growth.");
-    expect(contentSource).toContain("Ready to start PPC?");
+    expect(viewSource).toContain("SOGP moves through three levels");
+    expect(contentSource).toContain("School of God's Purpose");
+    expect(contentSource).toContain("SOGP is the course platform for growth.");
+    expect(contentSource).toContain("Ready to start SOGP?");
+    expect(contentSource).toContain('ctaHref: "/sogp"');
     expect(contentSource).toContain('"Level 1"');
     expect(contentSource).toContain('"Level 2"');
     expect(contentSource).toContain('"Level 3"');

@@ -39,6 +39,7 @@ function DashboardCard({
   const className = cn(
     "group relative flex min-h-[14.625rem] flex-col justify-end overflow-hidden rounded-[var(--radius-md)] border p-3 pb-4 shadow-[var(--shadow-sm)] transition-transform duration-150 ease-out sm:min-h-[15.5rem] sm:p-4 sm:pb-5",
     href && "hover:-translate-y-px",
+    status === "coming_soon" && "cursor-default saturate-[0.72]",
     backgroundImageSrc
       ? "border-transparent bg-transparent text-white shadow-[0_14px_30px_rgba(15,23,42,0.16)]"
       : getDashboardCardClasses(accent),

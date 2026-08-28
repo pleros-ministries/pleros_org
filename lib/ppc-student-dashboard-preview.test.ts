@@ -134,7 +134,7 @@ describe("PPC student dashboard preview", () => {
   test("keeps the mobile top bar flush with the viewport top", () => {
     const shellSource = source("components", "ppc", "ppc-shell.tsx");
 
-    expect(shellSource).toContain("gap-3 px-3 pb-3 lg:grid");
+    expect(shellSource).toContain("gap-3 px-3 pb-3 sm:px-4 lg:grid");
     expect(shellSource).not.toContain("gap-3 p-3 lg:grid");
   });
 
@@ -144,7 +144,7 @@ describe("PPC student dashboard preview", () => {
 
     expect(panelSource).toContain("Setup notifications");
     expect(panelSource).toContain("Notifications are not ready");
-    expect(copySource).toContain("after the PPC team finishes notification setup");
+    expect(copySource).toContain("after the SOGP team finishes notification setup");
     expect(copySource).toContain("Waiting for admin setup");
   });
 });

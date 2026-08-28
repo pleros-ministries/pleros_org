@@ -88,7 +88,7 @@ describe("welcome pack completion wiring", () => {
   test("thank-you page sends visitors to the dashboard instead of auto-downloading", () => {
     const pageSource = source("components", "home", "thank-you-page.tsx");
 
-    expect(pageSource).toContain("Thank you for receiving your gift");
+    expect(pageSource).toContain("Thank you for receiving our gift");
     expect(pageSource).toContain("Visit your dashboard to access your gift.");
     expect(pageSource).toContain('href="/dashboard/welcomepack"');
     expect(pageSource).toContain("thankYouSectionPadding");
