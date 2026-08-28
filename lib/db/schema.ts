@@ -92,6 +92,11 @@ export const sogpPreparationResourceTypeEnum = pgEnum(
   ["teaching", "podcast", "video", "reading", "gift", "announcement"],
 );
 
+export const sogpReviewCompletionSourceEnum = pgEnum(
+  "sogp_review_completion_source",
+  ["live", "recording"],
+);
+
 export const prayerWatchSessionEnum = pgEnum("prayer_watch_session", [
   "unspecified",
   "morning",
@@ -705,7 +710,7 @@ export const sogpCohorts = pgTable(
       .notNull()
       .$type<SogpAssessmentPolicy>()
       .default(
-        sql`'{"requiredTrackCompletionPercent":100,"requiredPrayerWatchPercent":80,"requiredPodcastDailyPercent":100,"requiredLiveClassCount":0}'::jsonb`,
+        sql`'{"requiredTrackCompletionPercent":100,"requiredPrayerWatchPercent":80,"requiredLiveClassCount":4}'::jsonb`,
       ),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
@@ -866,6 +871,28 @@ export const sogpPreparationResources = pgTable(
   ],
 );
 
+export const sogpPreparationCompletions = pgTable(
+  "sogp_preparation_completions",
+  {
+    id: serial("id").primaryKey(),
+    enrollmentId: integer("enrollment_id")
+      .notNull()
+      .references(() => sogpEnrollments.id, { onDelete: "cascade" }),
+    preparationDayId: integer("preparation_day_id")
+      .notNull()
+      .references(() => sogpPreparationDays.id, { onDelete: "cascade" }),
+    completedAt: timestamp("completed_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("sogp_preparation_completion_enrollment_day_idx").on(
+      t.enrollmentId,
+      t.preparationDayId,
+    ),
+  ],
+);
+
 export const sogpLiveClasses = pgTable(
   "sogp_live_classes",
   {
@@ -878,6 +905,7 @@ export const sogpLiveClasses = pgTable(
     endsAt: timestamp("ends_at", { withTimezone: true }).notNull(),
     youtubeLiveUrl: text("youtube_live_url"),
     recordingUrl: text("recording_url"),
+    isRequired: boolean("is_required").notNull().default(true),
     status: sogpLiveClassStatusEnum("status").notNull().default("scheduled"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
@@ -905,6 +933,9 @@ export const sogpLiveClassAttendance = pgTable(
     attendedAt: timestamp("attended_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
+    completionSource: sogpReviewCompletionSourceEnum("completion_source")
+      .notNull()
+      .default("live"),
   },
   (t) => [
     uniqueIndex("sogp_live_class_attendance_class_user_idx").on(
