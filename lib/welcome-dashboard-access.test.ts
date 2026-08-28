@@ -34,6 +34,14 @@ describe("welcome dashboard access", () => {
     expect(dashboardSource).toContain('redirect("/welcome")');
   });
 
+  test("dashboard resolves SOGP card access from the authenticated enrolment", () => {
+    const dashboardSource = source("app", "(site)", "dashboard", "page.tsx");
+
+    expect(dashboardSource).toContain("getSogpDashboardAccess");
+    expect(dashboardSource).toContain("resolveWelcomeDashboardSections");
+    expect(dashboardSource).toContain("sections={sections}");
+  });
+
   test("dashboard and thank-you page greet visitors by their first name", () => {
     const dashboardViewSource = source(
       "components",
@@ -52,7 +60,7 @@ describe("welcome dashboard access", () => {
 
     expect(thankYouSource).toContain("name?: string");
     expect(thankYouSource).toContain(
-      "`Thank you for receiving your gift, ${name}`",
+      "`Thank you for receiving our gift, ${name}`",
     );
 
     expect(thankYouRouteSource).toContain("getAppSession");

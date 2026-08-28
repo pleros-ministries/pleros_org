@@ -2,44 +2,91 @@ import { describe, expect, test } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { welcomeDashboardSections } from "./welcome-dashboard-content";
+import {
+  resolveWelcomeDashboardSections,
+  welcomeDashboardSections,
+} from "./welcome-dashboard-content";
 
 describe("welcome dashboard content", () => {
-  test("starts with a start here section and links the welcome pack card to its route", () => {
-    expect(welcomeDashboardSections[0]?.title).toBe("Start Here");
-    expect(welcomeDashboardSections[0]?.cards).toHaveLength(2);
-    expect(welcomeDashboardSections[0]?.cards[0]?.title).toBe("Your Welcome Pack");
-    expect(welcomeDashboardSections[0]?.cards[0]?.href).toBe("/dashboard/welcomepack");
-    expect(welcomeDashboardSections[0]?.cards[1]?.title).toBe("Your Discipleship Journey");
-    expect(welcomeDashboardSections[0]?.cards[1]?.href).toBe(
-      "/dashboard/discipleship-journey",
+  test("uses the approved eight-card order and destinations", () => {
+    expect(
+      welcomeDashboardSections.flatMap((section) =>
+        section.cards.map((card) => card.title),
+      ),
+    ).toEqual([
+      "Welcome Pack",
+      "Pre-SOGP Lessons",
+      "Podcast",
+      "Devotion",
+      "SOGP",
+      "Advanced SOGP",
+      "Community",
+      "Partnership",
+    ]);
+    expect(welcomeDashboardSections[0]?.cards[0]?.href).toBe(
+      "/dashboard/welcomepack",
     );
-  });
-
-  test("links devotion and training cards to their destinations", () => {
-    const devotion = welcomeDashboardSections.find((section) => section.id === "devotion");
-    const training = welcomeDashboardSections.find((section) => section.id === "training");
-    const commitment = welcomeDashboardSections.find((section) => section.id === "commitment");
-
-    expect(devotion?.cards[0]?.href).toBe("/dashboard/prayer-watch");
-    expect(devotion?.cards[1]?.href).toBe("/dashboard/podcast");
-    expect(training?.cards[0]?.href).toBe("/dashboard/sogp");
-    expect(training?.cards[1]?.href).toBe("/ppc");
-    expect(commitment?.cards.find((card) => card.id === "assignments")?.href).toBeUndefined();
-    expect(commitment?.cards.find((card) => card.id === "partnership")?.href).toBe(
-      "/partner",
+    expect(welcomeDashboardSections[1]?.cards[0]?.href).toBe(
+      "/dashboard/podcast",
     );
+    expect(welcomeDashboardSections[1]?.cards[1]?.href).toBe(
+      "/dashboard/prayer-watch",
+    );
+    expect(welcomeDashboardSections[3]?.cards[1]?.href).toBe("/partner");
   });
 
   test("defines four two-card dashboard sections matching the mobile frame", () => {
     expect(welcomeDashboardSections.map((section) => section.title)).toEqual([
-      "Start Here",
-      "Your Devotion",
-      "Your Training",
-      "Your Commitment",
+      "Start here",
+      "Your rhythm",
+      "Your learning",
+      "Your next steps",
     ]);
 
     expect(welcomeDashboardSections.every((section) => section.cards.length === 2)).toBe(true);
+  });
+
+  test("gates SOGP journeys by enrolment and marks future products coming soon", () => {
+    const locked = resolveWelcomeDashboardSections({
+      isSogpEnrolled: false,
+      startsAt: null,
+      now: new Date("2026-09-01T12:00:00+01:00"),
+    });
+    expect(locked[0]?.cards[1]).toMatchObject({
+      href: "/sogp/enrol",
+      status: "enrolment_required",
+    });
+    expect(locked[2]?.cards[0]).toMatchObject({
+      href: "/sogp/enrol",
+      status: "enrolment_required",
+    });
+    expect(locked[2]?.cards[1]).toMatchObject({
+      href: undefined,
+      status: "coming_soon",
+      statusLabel: "Coming soon",
+    });
+    expect(locked[3]?.cards[0]).toMatchObject({
+      href: undefined,
+      status: "coming_soon",
+      statusLabel: "Coming soon",
+    });
+  });
+
+  test("opens enrolled journeys and puts the SOGP countdown on its card", () => {
+    const enrolled = resolveWelcomeDashboardSections({
+      isSogpEnrolled: true,
+      startsAt: new Date("2026-09-10T00:00:00+01:00"),
+      now: new Date("2026-09-07T12:00:00+01:00"),
+    });
+    expect(enrolled[0]?.cards[1]).toMatchObject({
+      href: "/dashboard/pre-sogp",
+      status: "available",
+    });
+    expect(enrolled[2]?.cards[0]).toMatchObject({
+      href: "/dashboard/sogp",
+      status: "upcoming",
+      statusLabel: "3 days until SOGP begins",
+    });
   });
 
   test("keeps a dedicated welcome pack route under the dashboard", () => {

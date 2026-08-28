@@ -53,6 +53,19 @@ async function getEnrollmentCohort(userId: string) {
   return row ?? null;
 }
 
+export async function getSogpDashboardAccess(userId: string) {
+  const row = await getEnrollmentCohort(userId);
+  return row
+    ? {
+        isSogpEnrolled: true,
+        startsAt: row.cohort.startsAt,
+      }
+    : {
+        isSogpEnrolled: false,
+        startsAt: null,
+      };
+}
+
 export async function getPreSogpJourney(
   userId: string,
   now = new Date(),

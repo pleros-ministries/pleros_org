@@ -23,6 +23,8 @@ function DashboardCard({
   backgroundImageSrc,
   backgroundImagePosition,
   backgroundOverlay = "text-gradient",
+  status,
+  statusLabel,
 }: {
   title: string;
   description: string;
@@ -31,6 +33,8 @@ function DashboardCard({
   backgroundImageSrc?: string;
   backgroundImagePosition?: string;
   backgroundOverlay?: "text-gradient" | "text-panel" | "none";
+  status: "available" | "enrolment_required" | "upcoming" | "coming_soon";
+  statusLabel?: string;
 }) {
   const className = cn(
     "group relative flex min-h-[14.625rem] flex-col justify-end overflow-hidden rounded-[var(--radius-md)] border p-3 pb-4 shadow-[var(--shadow-sm)] transition-transform duration-150 ease-out sm:min-h-[15.5rem] sm:p-4 sm:pb-5",
@@ -75,6 +79,11 @@ function DashboardCard({
         }}
       />
       <div className="relative z-10 grid gap-1.5">
+        {statusLabel ? (
+          <span className="mb-1 inline-flex w-fit rounded-full bg-white/92 px-2.5 py-1 font-[var(--font-be-vietnam-pro)] text-[0.6rem] font-semibold text-[var(--color-brand-blue)]">
+            {statusLabel}
+          </span>
+        ) : null}
         <h2 className="site-pathway-title max-w-[13ch] text-[1rem] text-white">
           {title}
         </h2>
@@ -207,6 +216,8 @@ export function WelcomeDashboardView({
                     backgroundImageSrc={card.backgroundImageSrc}
                     backgroundImagePosition={card.backgroundImagePosition}
                     backgroundOverlay={card.backgroundOverlay}
+                    status={card.status}
+                    statusLabel={card.statusLabel}
                   />
                 ))}
               </div>

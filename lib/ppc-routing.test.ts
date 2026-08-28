@@ -1,4 +1,6 @@
 import { describe, expect, test } from "vitest";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 
 import { getPpcRewritePath } from "./ppc-routing";
 
@@ -39,5 +41,18 @@ describe("getPpcRewritePath", () => {
     expect(getPpcRewritePath("ppc.pleros.org", "/api/health")).toBeNull();
     expect(getPpcRewritePath("ppc.pleros.org", "/favicon.ico")).toBeNull();
     expect(getPpcRewritePath("ppc.pleros.org", "/brand/logo.svg")).toBeNull();
+  });
+});
+
+describe("retired learner-facing PPC routes", () => {
+  test.each([
+    ["app/ppc/page.tsx", "/sogp"],
+    ["app/ppc/(app)/(student)/layout.tsx", "/sogp"],
+    ["app/ppc/login/page.tsx", "/sogp"],
+    ["app/ppc/signup/page.tsx", "/sogp"],
+  ])("permanently redirects %s", (relativePath, destination) => {
+    const source = readFileSync(join(process.cwd(), relativePath), "utf8");
+    expect(source).toContain("permanentRedirect");
+    expect(source).toContain(`permanentRedirect("${destination}")`);
   });
 });
