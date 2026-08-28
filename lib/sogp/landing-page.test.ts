@@ -17,6 +17,16 @@ describe("SOGP landing content", () => {
     expect(sogpLandingContent.tools.items).toHaveLength(2);
   });
 
+  test("uses the supplied SOGP welcome video", () => {
+    expect(sogpLandingContent.introVideo).toEqual({
+      id: "WaXgk9zqi78",
+      title: "Welcome to the School of God’s Purpose",
+      description:
+        "Watch this short introduction to the journey you are about to begin.",
+      thumbnailSrc: "https://i.ytimg.com/vi/WaXgk9zqi78/maxresdefault.jpg",
+    });
+  });
+
   test("keeps structural document instructions out of visitor copy", () => {
     const serialized = JSON.stringify(sogpLandingContent);
     expect(serialized).not.toContain('"Visual"');

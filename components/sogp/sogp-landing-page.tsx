@@ -23,6 +23,7 @@ import {
 } from "@/lib/sogp/landing-content";
 import { SogpLandingAnalytics } from "./sogp-analytics";
 import { SogpHeroPhone } from "./sogp-hero-phone";
+import { SogpIntroVideo } from "./sogp-intro-video";
 import { SogpCurriculumAccordion } from "./sogp-curriculum-accordion";
 
 function SectionCta({
@@ -260,6 +261,25 @@ export function SogpLandingPage() {
               ))}
             </ol>
             <SectionCta label={content.ctas.early} />
+          </div>
+        </section>
+
+        <section className="bg-[var(--color-brand-blue)] py-14 text-white md:py-20">
+          <div className="site-shell-page sogp-shell-page grid items-center gap-10 md:grid-cols-[minmax(0,0.9fr)_minmax(19rem,0.55fr)] md:gap-16">
+            <div className="grid content-center gap-5">
+              <h2 className="site-section-heading max-w-[13ch] text-[2.35rem] text-white md:text-[3.4rem]">
+                {content.introVideo.title}
+              </h2>
+              <p className="site-section-intro max-w-[34rem] text-white/82">
+                {content.introVideo.description}
+              </p>
+              <SectionCta label={content.ctas.middle} inverse />
+            </div>
+            <SogpIntroVideo
+              videoId={content.introVideo.id}
+              title={content.introVideo.title}
+              thumbnailSrc={content.introVideo.thumbnailSrc}
+            />
           </div>
         </section>
 
