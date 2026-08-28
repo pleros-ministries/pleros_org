@@ -7,6 +7,7 @@ import { ArrowDown, ArrowUp, Plus, Trash2 } from "lucide-react";
 import {
   deleteSogpPreparationDay,
   saveSogpPreparationDay,
+  seedSogpPreparation,
   setSogpPreparationStatus,
 } from "@/app/admin/_actions/sogp-actions";
 import { ADMIN_QUERY_KEYS, type AdminSogpData } from "@/lib/admin-query";
@@ -86,6 +87,13 @@ export function AdminSogpPreparation({
     mutationFn: deleteSogpPreparationDay,
     onSuccess: refresh,
   });
+  const seedMutation = useMutation({
+    mutationFn: () => {
+      if (!cohortId) throw new Error("Create a cohort first.");
+      return seedSogpPreparation({ cohortId });
+    },
+    onSuccess: refresh,
+  });
 
   function edit(day: AdminSogpData["preparationDays"][number]) {
     setEditingId(day.id);
@@ -131,6 +139,13 @@ export function AdminSogpPreparation({
         <div className="border-b border-zinc-100 px-4 py-3">
           <h2 className="ppc-heading text-sm font-semibold">Preparation schedule</h2>
           <p className="mt-0.5 text-xs text-zinc-500">Published days become visible on the learner dashboard on their Lagos calendar date.</p>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <button type="button" disabled={!cohortId || seedMutation.isPending} onClick={() => seedMutation.mutate()} className="h-8 rounded-sm bg-[var(--color-brand-blue)] px-3 text-xs font-medium text-white disabled:opacity-50">
+              {seedMutation.isPending ? "Building 30-day schedule…" : "Build approved 30-day schedule"}
+            </button>
+            <span className="text-[10px] text-zinc-500">{days.length}/30 preparation days</span>
+          </div>
+          {seedMutation.error ? <p className="mt-2 text-xs text-rose-700">{seedMutation.error.message}</p> : null}
         </div>
         <div className="divide-y divide-zinc-100">
           {days.length ? days.map((day) => (

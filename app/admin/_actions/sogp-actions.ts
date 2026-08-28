@@ -1,6 +1,7 @@
 "use server";
 
 import { and, eq, inArray } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 
 import { requireAdmin } from "@/lib/auth/require-role";
 import { db } from "@/lib/db";
@@ -11,6 +12,15 @@ import {
   normalizeSogpPreparationInput,
   type SogpPreparationInput,
 } from "@/lib/sogp/preparation-admin";
+import {
+  buildPreSogpSeed,
+  validateSogpLaunchReadiness,
+} from "@/lib/sogp/preparation-seed";
+import {
+  setPreparationLessonComplete,
+  setSogpMorningPrayerComplete,
+  setSogpReviewComplete,
+} from "@/lib/db/queries/sogp-journey";
 import {
   normalizeSogpBroadcast,
   sendSogpChannelMessage,
@@ -143,10 +153,12 @@ export async function configureSogpCurriculum(input: {
         liveSessionNumber: selected.liveSessionNumber,
         releaseAt: selected.isRequired
           ? releaseDates[selected.dayNumber! - 1]!
-          : saturdayReleaseDates[selected.liveSessionNumber! - 1]!,
+          : saturdayReleaseDates[selected.curriculumOrder - 21]!,
       })),
     );
   });
+
+  revalidatePath("/admin/sogp");
 
   return {
     requiredTrackCount: selection.filter((track) => track.isRequired).length,
@@ -161,6 +173,52 @@ export async function updateSogpCohort(input: {
   telegramDiscussionUrl?: string | null;
 }) {
   await requireAdmin();
+  if (input.status === "active") {
+    const [preparationRows, trackRows, reviewRows] = await Promise.all([
+      db
+        .select({
+          dayId: schema.sogpPreparationDays.id,
+          url: schema.sogpPreparationResources.url,
+        })
+        .from(schema.sogpPreparationDays)
+        .innerJoin(
+          schema.sogpPreparationResources,
+          eq(
+            schema.sogpPreparationResources.preparationDayId,
+            schema.sogpPreparationDays.id,
+          ),
+        )
+        .where(eq(schema.sogpPreparationDays.cohortId, input.cohortId)),
+      db
+        .select({ track: schema.sogpCohortTracks, lesson: schema.lessons })
+        .from(schema.sogpCohortTracks)
+        .innerJoin(
+          schema.lessons,
+          eq(schema.sogpCohortTracks.lessonId, schema.lessons.id),
+        )
+        .where(eq(schema.sogpCohortTracks.cohortId, input.cohortId)),
+      db
+        .select({ id: schema.sogpLiveClasses.id })
+        .from(schema.sogpLiveClasses)
+        .where(
+          and(
+            eq(schema.sogpLiveClasses.cohortId, input.cohortId),
+            eq(schema.sogpLiveClasses.isRequired, true),
+          ),
+        ),
+    ]);
+    const readinessIssues = validateSogpLaunchReadiness({
+      preparationCount: new Set(preparationRows.map((row) => row.dayId)).size,
+      uniquePreparationUrlCount: new Set(preparationRows.map((row) => row.url)).size,
+      readyCoreTrackCount: trackRows.filter(
+        ({ track, lesson }) =>
+          track.isRequired && lesson.status === "published" && Boolean(lesson.audioUrl),
+      ).length,
+      extraTrackCount: trackRows.filter(({ track }) => !track.isRequired).length,
+      requiredReviewCount: reviewRows.length,
+    });
+    if (readinessIssues.length) throw new Error(readinessIssues.join(" "));
+  }
   const [updated] = await db
     .update(schema.sogpCohorts)
     .set({
@@ -176,7 +234,58 @@ export async function updateSogpCohort(input: {
     .where(eq(schema.sogpCohorts.id, input.cohortId))
     .returning();
   if (!updated) throw new Error("SOGP cohort not found.");
+  revalidatePath("/admin/sogp");
   return updated;
+}
+
+export async function seedSogpPreparation(input: { cohortId: number }) {
+  await requireAdmin();
+  const cohort = await db.query.sogpCohorts.findFirst({
+    where: (row, { eq: equal }) => equal(row.id, input.cohortId),
+  });
+  if (!cohort) throw new Error("SOGP cohort not found.");
+  const seed = buildPreSogpSeed(cohort.startsAt);
+
+  await db.transaction(async (tx) => {
+    for (const item of seed) {
+      const [day] = await tx
+        .insert(schema.sogpPreparationDays)
+        .values({
+          cohortId: input.cohortId,
+          publishDate: item.publishDate,
+          countdownLabel: item.countdownLabel,
+          introduction: item.introduction,
+          status: "published",
+        })
+        .onConflictDoUpdate({
+          target: [
+            schema.sogpPreparationDays.cohortId,
+            schema.sogpPreparationDays.publishDate,
+          ],
+          set: {
+            countdownLabel: item.countdownLabel,
+            introduction: item.introduction,
+            status: "published",
+            updatedAt: new Date(),
+          },
+        })
+        .returning({ id: schema.sogpPreparationDays.id });
+      if (!day) throw new Error("Pre-SOGP seed could not be saved.");
+      await tx
+        .delete(schema.sogpPreparationResources)
+        .where(eq(schema.sogpPreparationResources.preparationDayId, day.id));
+      await tx.insert(schema.sogpPreparationResources).values({
+        preparationDayId: day.id,
+        type: "video",
+        title: item.title,
+        description: item.introduction,
+        url: item.url,
+        sortOrder: 0,
+      });
+    }
+  });
+  revalidatePath("/admin/sogp");
+  return { count: seed.length };
 }
 
 export async function saveSogpPreparationDay(input: SogpPreparationInput) {
@@ -258,6 +367,8 @@ export async function createSogpLiveClass(input: {
   startsAt: string;
   endsAt: string;
   youtubeLiveUrl?: string | null;
+  recordingUrl?: string | null;
+  isRequired?: boolean;
 }) {
   await requireAdmin();
   const title = input.title.trim();
@@ -274,9 +385,96 @@ export async function createSogpLiveClass(input: {
       startsAt,
       endsAt,
       youtubeLiveUrl: input.youtubeLiveUrl?.trim() || null,
+      recordingUrl: input.recordingUrl?.trim() || null,
+      isRequired: input.isRequired ?? true,
     })
     .returning();
+  revalidatePath("/admin/sogp");
   return created;
+}
+
+export async function updateSogpLiveClass(input: {
+  id: number;
+  youtubeLiveUrl?: string | null;
+  recordingUrl?: string | null;
+  isRequired?: boolean;
+}) {
+  await requireAdmin();
+  const [updated] = await db
+    .update(schema.sogpLiveClasses)
+    .set({
+      ...(input.youtubeLiveUrl !== undefined
+        ? { youtubeLiveUrl: input.youtubeLiveUrl?.trim() || null }
+        : {}),
+      ...(input.recordingUrl !== undefined
+        ? { recordingUrl: input.recordingUrl?.trim() || null }
+        : {}),
+      ...(input.isRequired !== undefined ? { isRequired: input.isRequired } : {}),
+      updatedAt: new Date(),
+    })
+    .where(eq(schema.sogpLiveClasses.id, input.id))
+    .returning();
+  if (!updated) throw new Error("SOGP review session not found.");
+  revalidatePath("/admin/sogp");
+  return updated;
+}
+
+async function requireSogpEnrollmentForCorrection(enrollmentId: number) {
+  const enrollment = await db.query.sogpEnrollments.findFirst({
+    where: (row, { eq: equal }) => equal(row.id, enrollmentId),
+  });
+  if (!enrollment) throw new Error("SOGP enrolment not found.");
+  return enrollment;
+}
+
+export async function correctSogpPreparationCompletion(input: {
+  enrollmentId: number;
+  preparationDayId: number;
+  complete: boolean;
+}) {
+  await requireAdmin();
+  const enrollment = await requireSogpEnrollmentForCorrection(input.enrollmentId);
+  const result = await setPreparationLessonComplete({
+    userId: enrollment.userId,
+    preparationDayId: input.preparationDayId,
+    complete: input.complete,
+  });
+  revalidatePath("/admin/sogp");
+  return result;
+}
+
+export async function correctSogpPrayerCompletion(input: {
+  enrollmentId: number;
+  dateKey: string;
+  complete: boolean;
+}) {
+  await requireAdmin();
+  const enrollment = await requireSogpEnrollmentForCorrection(input.enrollmentId);
+  const result = await setSogpMorningPrayerComplete({
+    userId: enrollment.userId,
+    dateKey: input.dateKey,
+    complete: input.complete,
+  });
+  revalidatePath("/admin/sogp");
+  return result;
+}
+
+export async function correctSogpReviewCompletion(input: {
+  enrollmentId: number;
+  liveClassId: number;
+  complete: boolean;
+  source: "live" | "recording";
+}) {
+  await requireAdmin();
+  const enrollment = await requireSogpEnrollmentForCorrection(input.enrollmentId);
+  const result = await setSogpReviewComplete({
+    userId: enrollment.userId,
+    liveClassId: input.liveClassId,
+    complete: input.complete,
+    source: input.source,
+  });
+  revalidatePath("/admin/sogp");
+  return result;
 }
 
 export async function markSogpLiveClassAttendance(input: {

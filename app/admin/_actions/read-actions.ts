@@ -12,7 +12,6 @@ import type {
 import { getAdminRegistrantList } from "@/lib/db/queries/admin-registrants";
 import { getSchoolOfPurposeWaitlistEntries } from "@/lib/db/queries/school-of-purpose-waitlist";
 import { getAdminSogpData as getSogpOperationsData } from "@/lib/db/queries/sogp";
-import { countDistinctLagosActivityDays } from "@/lib/sogp/formation-progress";
 import { getSuperAdminOverviewMetrics } from "@/lib/db/queries/admin-analytics";
 import { getStudentPlatformList } from "@/lib/db/queries/students";
 import { getAllThreads } from "@/lib/db/queries/qa";
@@ -223,7 +222,8 @@ export async function getAdminSogpData(): Promise<AdminSogpData> {
     levelThreeLessons,
     quizRows,
     morningPrayerRows,
-    podcastRows,
+    preparationCompletionRows,
+    reviewCompletionRows,
   ] = await Promise.all([
     getSogpOperationsData(),
     db.query.lessons.findMany({
@@ -240,10 +240,14 @@ export async function getAdminSogpData(): Promise<AdminSogpData> {
       .where(eq(schema.prayerWatchAttendance.session, "morning")),
     db
       .select({
-        userId: schema.podcastEpisodeProgress.userId,
-        listenedAt: schema.podcastEpisodeProgress.listenedAt,
+        enrollmentId: schema.sogpPreparationCompletions.enrollmentId,
       })
-      .from(schema.podcastEpisodeProgress),
+      .from(schema.sogpPreparationCompletions),
+    db
+      .select({
+        userId: schema.sogpLiveClassAttendance.userId,
+      })
+      .from(schema.sogpLiveClassAttendance),
   ]);
   const lessonsWithQuiz = new Set(quizRows.map((row) => row.lessonId));
   const ready = (lesson: {
@@ -279,16 +283,6 @@ export async function getAdminSogpData(): Promise<AdminSogpData> {
       const cohort = data.cohorts.find((item) => item.id === enrollment.cohortId);
       const startDateKey = cohort?.startsAt.toISOString().slice(0, 10) ?? "";
       const endDateKey = cohort?.endsAt.toISOString().slice(0, 10) ?? "";
-      const podcastDates = podcastRows
-        .filter(
-          (row) =>
-            row.userId === enrollment.userId &&
-            cohort &&
-            row.listenedAt >= cohort.startsAt &&
-            row.listenedAt <= cohort.endsAt,
-        )
-        .map((row) => row.listenedAt);
-
       return {
         id: enrollment.id,
         cohortId: enrollment.cohortId,
@@ -313,7 +307,12 @@ export async function getAdminSogpData(): Promise<AdminSogpData> {
             row.attendedDate >= startDateKey &&
             row.attendedDate <= endDateKey,
         ).length,
-        podcastDaysLogged: countDistinctLagosActivityDays(podcastDates),
+        preparationDaysComplete: preparationCompletionRows.filter(
+          (row) => row.enrollmentId === enrollment.id,
+        ).length,
+        reviewSessionsComplete: reviewCompletionRows.filter(
+          (row) => row.userId === enrollment.userId,
+        ).length,
       };
     }),
     tracks: data.tracks.map(({ track, lesson }) => ({
@@ -348,6 +347,7 @@ export async function getAdminSogpData(): Promise<AdminSogpData> {
       status: liveClass.status,
       youtubeLiveUrl: liveClass.youtubeLiveUrl,
       recordingUrl: liveClass.recordingUrl,
+      isRequired: liveClass.isRequired,
     })),
     certificates: data.certificates.map((certificate) => ({
       id: certificate.id,

@@ -40,7 +40,8 @@ export type AdminSogpData = {
     telegramLinkedAt: string | null;
     createdAt: string;
     morningPrayerDays: number;
-    podcastDaysLogged: number;
+    preparationDaysComplete: number;
+    reviewSessionsComplete: number;
   }>;
   tracks: Array<{
     id: number;
@@ -74,6 +75,7 @@ export type AdminSogpData = {
     status: string;
     youtubeLiveUrl: string | null;
     recordingUrl: string | null;
+    isRequired: boolean;
   }>;
   certificates: Array<{
     id: number;
