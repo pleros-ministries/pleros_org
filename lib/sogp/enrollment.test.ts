@@ -48,7 +48,7 @@ describe("SOGP enrolment", () => {
         region: " Lagos ",
         birthYear: " 1998 ",
         referralSource: "social_media",
-        whatsappConsent: true,
+        whatsappConsent: "yes",
         utmSource: " meta ",
       }),
     ).toMatchObject({
@@ -68,10 +68,13 @@ describe("SOGP enrolment", () => {
   });
 
   test("keeps WhatsApp reminders opt-in explicit", () => {
-    expect(normalizeSogpEnrollment({}).whatsappConsent).toBe(false);
+    expect(normalizeSogpEnrollment({}).whatsappConsent).toBeNull();
     expect(
-      normalizeSogpEnrollment({ whatsappConsent: true }).whatsappConsent,
+      normalizeSogpEnrollment({ whatsappConsent: "yes" }).whatsappConsent,
     ).toBe(true);
+    expect(
+      normalizeSogpEnrollment({ whatsappConsent: "no" }).whatsappConsent,
+    ).toBe(false);
   });
 
   test("combines separate first name and surname fields", () => {
@@ -113,9 +116,10 @@ describe("SOGP enrolment", () => {
       phone: "Enter a valid phone number.",
       countryCode: "Country is required.",
       country: "Country is required.",
-      region: "State, province or region is required.",
+      region: "State, province or region of residence is required.",
       birthYear: "Year of birth is required.",
       referralSource: "Select how you heard about us.",
+      whatsappConsent: "Select whether you want WhatsApp reminders.",
     });
   });
 

@@ -16,7 +16,7 @@ export type SogpEnrollmentValues = {
   region: string;
   birthYear: string;
   referralSource: string;
-  whatsappConsent: boolean;
+  whatsappConsent: boolean | null;
   utmSource: string;
   utmMedium: string;
   utmCampaign: string;
@@ -24,8 +24,12 @@ export type SogpEnrollmentValues = {
   utmTerm: string;
 };
 
-export type SogpEnrollmentInput = Partial<SogpEnrollmentValues> & {
+export type SogpEnrollmentInput = Omit<
+  Partial<SogpEnrollmentValues>,
+  "whatsappConsent"
+> & {
   phoneCountryCode?: string;
+  whatsappConsent?: boolean | "" | "yes" | "no" | null;
 };
 export type SogpEnrollmentErrors = Partial<
   Record<
@@ -38,7 +42,8 @@ export type SogpEnrollmentErrors = Partial<
     | "country"
     | "region"
     | "birthYear"
-    | "referralSource",
+    | "referralSource"
+    | "whatsappConsent",
     string
   >
 >;
@@ -92,6 +97,14 @@ function clean(value: unknown, maxLength: number) {
   return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
 }
 
+function normalizeWhatsappConsent(
+  value: SogpEnrollmentInput["whatsappConsent"],
+): boolean | null {
+  if (value === true || value === "yes") return true;
+  if (value === false || value === "no") return false;
+  return null;
+}
+
 export function normalizeSogpEnrollment(
   input: SogpEnrollmentInput,
 ): SogpEnrollmentValues {
@@ -122,7 +135,7 @@ export function normalizeSogpEnrollment(
     region: clean(input.region, 120),
     birthYear: clean(input.birthYear, 4).replace(/\D/g, ""),
     referralSource: clean(input.referralSource, 80),
-    whatsappConsent: input.whatsappConsent === true,
+    whatsappConsent: normalizeWhatsappConsent(input.whatsappConsent),
     utmSource: clean(input.utmSource, 200),
     utmMedium: clean(input.utmMedium, 200),
     utmCampaign: clean(input.utmCampaign, 200),
@@ -147,7 +160,7 @@ export function validateSogpEnrollment(
   if (!input.countryCode) errors.countryCode = "Country is required.";
   if (!input.country) errors.country = "Country is required.";
   if (!input.region) {
-    errors.region = "State, province or region is required.";
+    errors.region = "State, province or region of residence is required.";
   }
   const birthYear = Number(input.birthYear);
   const latestBirthYear = new Date().getUTCFullYear() - MINIMUM_AGE;
@@ -162,6 +175,9 @@ export function validateSogpEnrollment(
   }
   if (!SOGP_REFERRAL_VALUES.has(input.referralSource)) {
     errors.referralSource = "Select how you heard about us.";
+  }
+  if (input.whatsappConsent === null) {
+    errors.whatsappConsent = "Select whether you want WhatsApp reminders.";
   }
 
   return errors;

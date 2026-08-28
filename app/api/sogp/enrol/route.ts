@@ -51,6 +51,7 @@ export async function POST(request: Request) {
     await upsertSogpEnrollment({
       ...values,
       birthYear: values.birthYear ? Number(values.birthYear) : null,
+      whatsappConsent: values.whatsappConsent === true,
       cohortId: cohort.id,
       userId,
     });

@@ -37,6 +37,7 @@ const FIELD_ORDER = [
   "region",
   "birthYear",
   "referralSource",
+  "whatsappConsent",
 ] as const;
 
 type FieldName = (typeof FIELD_ORDER)[number];
@@ -51,6 +52,7 @@ const FOCUS_TARGET: Partial<Record<FieldName, string>> = {
   region: "region",
   birthYear: "birthYear",
   referralSource: "referralSource",
+  whatsappConsent: "whatsappConsent",
 };
 
 const BIRTH_YEAR_OPTIONS = getSogpBirthYearOptions();
@@ -99,7 +101,7 @@ export function SogpEnrollmentForm({
     region: "",
     birthYear: "",
     referralSource: "",
-    whatsappConsent: false,
+    whatsappConsent: "" as "" | "yes" | "no",
     phone: "",
     phoneCountryCode: defaultCountryCode as CountryCode,
     country: initialCountry.label,
@@ -171,6 +173,7 @@ export function SogpEnrollmentForm({
   const regionError = errorFor("region");
   const birthYearError = errorFor("birthYear");
   const referralSourceError = errorFor("referralSource");
+  const whatsappConsentError = errorFor("whatsappConsent");
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -277,7 +280,7 @@ export function SogpEnrollmentForm({
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="grid gap-2">
-          <label htmlFor="region" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">State / province / region</label>
+          <label htmlFor="region" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">State / province / region of residence</label>
           <Input
             id="region"
             name="region"
@@ -330,18 +333,26 @@ export function SogpEnrollmentForm({
         </select>
         <FieldError id="referral-source-error" error={referralSourceError} />
       </div>
-      <label className="flex items-start gap-3 rounded-[var(--radius-sm)] border border-[var(--color-line)] bg-[var(--color-surface-muted)] p-4">
-        <input
-          type="checkbox"
+      <div className="grid gap-2">
+        <label htmlFor="whatsappConsent" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold leading-[1.45] text-[var(--color-text-strong)]">
+          Would you like to receive SOGP updates and course reminders via WhatsApp?
+        </label>
+        <select
+          id="whatsappConsent"
           name="whatsappConsent"
-          checked={values.whatsappConsent}
-          onChange={(event) => update("whatsappConsent", event.target.checked)}
-          className="mt-0.5 size-4 shrink-0 accent-[var(--color-brand-blue)]"
-        />
-        <span className="font-[var(--font-be-vietnam-pro)] text-xs leading-[1.5] text-[var(--color-text-muted)]">
-          I agree to receive SOGP updates and course reminders via WhatsApp. I can opt out at any time.
-        </span>
-      </label>
+          value={values.whatsappConsent}
+          onChange={(event) => update("whatsappConsent", event.target.value as "" | "yes" | "no")}
+          onBlur={() => markTouched("whatsappConsent")}
+          aria-invalid={Boolean(whatsappConsentError)}
+          aria-describedby={whatsappConsentError ? "whatsapp-consent-error" : undefined}
+          className="h-11 w-full rounded-[var(--radius-sm)] border border-[var(--color-line-strong)] bg-white px-4 text-sm text-[var(--color-text-strong)] outline-none transition focus-visible:border-[var(--color-brand-blue)] focus-visible:ring-4 focus-visible:ring-[var(--color-focus)]"
+        >
+          <option value="">Select an option</option>
+          <option value="yes">Yes</option>
+          <option value="no">No</option>
+        </select>
+        <FieldError id="whatsapp-consent-error" error={whatsappConsentError} />
+      </div>
       {formError ? (
         <div role="alert" className="rounded-[var(--radius-sm)] border border-red-200 bg-red-50 px-4 py-2.5 font-[var(--font-be-vietnam-pro)] text-xs leading-[1.5] text-red-800">{formError}</div>
       ) : null}
