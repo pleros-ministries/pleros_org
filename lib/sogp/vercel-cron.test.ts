@@ -10,7 +10,7 @@ test("uses one Hobby-compatible daily SOGP cron", () => {
   expect(config.crons).toEqual([
     {
       path: "/api/cron/sogp-reminders",
-      schedule: "0 5 * * *",
+      schedule: "20 4 * * *",
     },
   ]);
 });

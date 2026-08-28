@@ -12,6 +12,7 @@ import { PRAYER_WATCH_YOUTUBE_URL } from "@/lib/prayer-watch";
 
 import { SogpCalendar } from "./sogp-calendar";
 import { SogpDailyRequirements } from "./sogp-daily-requirements";
+import { SogpPushPanel } from "./sogp-push-panel";
 
 const queryKey = ["sogp", "preparation"] as const;
 
@@ -184,6 +185,7 @@ export function PreSogpPage() {
           {completionMutation.error ? (
             <p role="alert" className="text-sm text-red-700">{completionMutation.error.message}</p>
           ) : null}
+          <SogpPushPanel />
         </main>
 
         <section

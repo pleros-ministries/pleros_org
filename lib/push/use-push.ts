@@ -50,7 +50,7 @@ export function usePushSubscription() {
       });
 
       const json = sub.toJSON();
-      await fetch("/api/ppc/push/subscribe", {
+      await fetch("/api/sogp/push/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

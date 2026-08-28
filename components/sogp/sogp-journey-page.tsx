@@ -19,6 +19,7 @@ import { PRAYER_WATCH_YOUTUBE_URL } from "@/lib/prayer-watch";
 
 import { SogpCalendar } from "./sogp-calendar";
 import { SogpDailyRequirements } from "./sogp-daily-requirements";
+import { SogpPushPanel } from "./sogp-push-panel";
 
 const queryKey = ["sogp", "journey"] as const;
 
@@ -247,6 +248,8 @@ export function SogpJourneyPage() {
             ]}
           />
           {mutation.error ? <p role="alert" className="text-sm text-red-700">{mutation.error.message}</p> : null}
+
+          <SogpPushPanel />
 
           <section className="grid gap-3 rounded-[var(--radius-md)] bg-[var(--color-brand-sky)] p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-brand-blue)]">SOGP progress</p>

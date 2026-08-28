@@ -4,6 +4,44 @@ export type SogpChannelReminder = {
   message: string;
 };
 
+export type SogpPrayerWatchPushCandidate = {
+  key: string;
+  title: string;
+  body: string;
+  url: string;
+};
+
+export function buildSogpPrayerWatchPushCandidate(input: {
+  now: Date;
+  userId: string;
+  cohortId: number;
+  cohortStatus: string;
+}): SogpPrayerWatchPushCandidate | null {
+  if (input.cohortStatus !== "preparing" && input.cohortStatus !== "active") {
+    return null;
+  }
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Africa/Lagos",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(input.now);
+  const value = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((part) => part.type === type)?.value ?? "";
+  if (value("hour") !== "05" || value("minute") !== "20") return null;
+  const dateKey = `${value("year")}-${value("month")}-${value("day")}`;
+  const path = input.cohortStatus === "preparing" ? "/dashboard/pre-sogp" : "/dashboard/sogp";
+  return {
+    key: `sogp:${input.cohortId}:prayer:${input.userId}:${dateKey}`,
+    title: "Prayer Watch begins in 10 minutes",
+    body: "Join the 5:30 am Prayer Watch on Pleros Live.",
+    url: `${path}?date=${dateKey}`,
+  };
+}
+
 type ReminderInput = {
   now: Date;
   cohort: {

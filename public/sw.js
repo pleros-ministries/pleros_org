@@ -6,7 +6,7 @@ self.addEventListener("push", (event) => {
   if (!event.data) return;
 
   const payload = event.data.json();
-  const title = payload.title ?? "PPC Notification";
+  const title = payload.title ?? "Pleros notification";
   const options = {
     body: payload.body ?? "",
     icon: "/favicon.ico",
