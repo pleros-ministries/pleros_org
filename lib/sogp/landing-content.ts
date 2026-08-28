@@ -28,11 +28,11 @@ export const sogpLandingContent = {
     "Do you want to walk more in the strength and power of the Spirit to fulfil God’s purpose for you?",
   ],
   introVideo: {
-    id: "WaXgk9zqi78",
     title: "Welcome to the School of God’s Purpose",
     description:
       "Watch this short introduction to the journey you are about to begin.",
-    thumbnailSrc: "https://i.ytimg.com/vi/WaXgk9zqi78/maxresdefault.jpg",
+    src: "/site/sogp/sogp-welcome-WaXgk9zqi78.mp4",
+    posterSrc: "/site/sogp/sogp-welcome-WaXgk9zqi78.jpg",
   },
   outcomes: [
     "Gain clarity on difficult questions about God, His truth, and His Word",

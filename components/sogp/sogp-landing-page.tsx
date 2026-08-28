@@ -276,9 +276,9 @@ export function SogpLandingPage() {
               <SectionCta label={content.ctas.middle} inverse />
             </div>
             <SogpIntroVideo
-              videoId={content.introVideo.id}
+              src={content.introVideo.src}
               title={content.introVideo.title}
-              thumbnailSrc={content.introVideo.thumbnailSrc}
+              posterSrc={content.introVideo.posterSrc}
             />
           </div>
         </section>
