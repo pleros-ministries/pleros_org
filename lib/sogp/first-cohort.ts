@@ -83,12 +83,12 @@ export function buildFirstCohortTrackSelection(
     (lessonNumber, index) => ({
       levelId: 3 as const,
       lessonNumber,
-      dayNumber: required.length + index + 1,
+      dayNumber: null,
       weekNumber: index + 1,
       curriculumLevel: 3 as const,
       curriculumOrder: required.length + index + 1,
       isRequired: false,
-      liveSessionNumber: index + 1,
+      liveSessionNumber: null,
     }),
   );
 

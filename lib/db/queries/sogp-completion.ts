@@ -29,8 +29,6 @@ export async function getSogpCompletionForEnrollment(enrollmentId: number) {
     totalTracks: trackCompletion.requiredTotal,
     prayerDaysAttended: dashboard.prayerDaysAttended,
     prayerDaysAvailable,
-    podcastDaysLogged: dashboard.podcastDaysLogged,
-    podcastDaysAvailable: prayerDaysAvailable,
     liveClassesAttended: dashboard.liveClassesAttended,
     policy: dashboard.cohort.assessmentPolicy,
   });

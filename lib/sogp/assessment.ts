@@ -31,10 +31,6 @@ export function calculateSogpEligibility(
     input.prayerDaysAttended,
     input.prayerDaysAvailable,
   );
-  const podcastPercent = percent(
-    input.podcastDaysLogged,
-    input.podcastDaysAvailable,
-  );
   const unmet: SogpEligibilityResult["unmet"] = [];
 
   if (trackPercent < input.policy.requiredTrackCompletionPercent) {
@@ -45,10 +41,6 @@ export function calculateSogpEligibility(
     unmet.push("prayer_watch");
   }
 
-  if (podcastPercent < input.policy.requiredPodcastDailyPercent) {
-    unmet.push("podcast");
-  }
-
   if (input.liveClassesAttended < input.policy.requiredLiveClassCount) {
     unmet.push("live_classes");
   }
@@ -57,7 +49,6 @@ export function calculateSogpEligibility(
     eligible: unmet.length === 0,
     trackPercent,
     prayerPercent,
-    podcastPercent,
     unmet,
   };
 }

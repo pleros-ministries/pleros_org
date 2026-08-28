@@ -3,7 +3,7 @@ import { describe, expect, test } from "vitest";
 import { buildFirstCohortTrackSelection } from "./first-cohort";
 
 describe("buildFirstCohortTrackSelection", () => {
-  test("builds 20 required days and up to four optional practical tracks", () => {
+  test("builds 20 required calendar days and four calendar-free extras", () => {
     const tracks = buildFirstCohortTrackSelection({
       disciplineLessonNumber: 2,
       requiredPracticalLessonNumbers: [4, 8, 10, 18],
@@ -28,10 +28,11 @@ describe("buildFirstCohortTrackSelection", () => {
     ]);
     expect(tracks.slice(20)).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ dayNumber: 21, curriculumLevel: 3, isRequired: false, liveSessionNumber: 1 }),
-        expect.objectContaining({ dayNumber: 24, curriculumLevel: 3, isRequired: false, liveSessionNumber: 4 }),
+        expect.objectContaining({ dayNumber: null, curriculumLevel: 3, isRequired: false, liveSessionNumber: null }),
       ]),
     );
+    expect(tracks.slice(20).every((track) => track.dayNumber === null)).toBe(true);
+    expect(tracks.slice(20).every((track) => track.liveSessionNumber === null)).toBe(true);
   });
 
   test("requires four unique required and at most four optional practical tracks", () => {

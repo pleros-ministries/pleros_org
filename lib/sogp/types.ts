@@ -24,15 +24,13 @@ export type SogpLearnerState =
 export type SogpAssessmentPolicy = {
   requiredTrackCompletionPercent: number;
   requiredPrayerWatchPercent: number;
-  requiredPodcastDailyPercent: number;
   requiredLiveClassCount: number;
 };
 
 export const DEFAULT_SOGP_ASSESSMENT_POLICY: SogpAssessmentPolicy = {
   requiredTrackCompletionPercent: 100,
   requiredPrayerWatchPercent: 80,
-  requiredPodcastDailyPercent: 100,
-  requiredLiveClassCount: 0,
+  requiredLiveClassCount: 4,
 };
 
 export type SogpEligibilityInput = {
@@ -40,8 +38,6 @@ export type SogpEligibilityInput = {
   totalTracks: number;
   prayerDaysAttended: number;
   prayerDaysAvailable: number;
-  podcastDaysLogged: number;
-  podcastDaysAvailable: number;
   liveClassesAttended: number;
   policy: SogpAssessmentPolicy;
 };
@@ -50,8 +46,7 @@ export type SogpEligibilityResult = {
   eligible: boolean;
   trackPercent: number;
   prayerPercent: number;
-  podcastPercent: number;
-  unmet: Array<"tracks" | "prayer_watch" | "podcast" | "live_classes">;
+  unmet: Array<"tracks" | "prayer_watch" | "live_classes">;
 };
 
 export type SogpEnrollmentCreateInput = {
@@ -144,7 +139,6 @@ export type SogpDashboardData = {
     status: "scheduled" | "live" | "completed" | "cancelled";
   }>;
   prayerDaysAttended: number;
-  podcastDaysLogged: number;
   liveClassesAttended: number;
   certificate: { verificationCode: string; issuedAt: Date; revokedAt: Date | null } | null;
   rewards: Array<{ rewardKey: string; label: string; grantedAt: Date }>;

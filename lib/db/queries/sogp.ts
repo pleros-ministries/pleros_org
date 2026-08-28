@@ -12,7 +12,6 @@ import {
 import { db } from "@/lib/db";
 import { deriveSogpLearnerState } from "@/lib/sogp/status";
 import { normalizeSogpAssessmentPolicy } from "@/lib/sogp/assessment";
-import { countDistinctLagosActivityDays } from "@/lib/sogp/formation-progress";
 import { toLagosDateKey } from "@/lib/sogp/formation-progress";
 import type {
   SogpDashboardData,
@@ -172,7 +171,6 @@ export async function getSogpDashboardData(
     liveClasses,
     attendanceRows,
     prayerRows,
-    podcastRows,
     certificate,
     rewards,
     preparationRows,
@@ -234,16 +232,6 @@ export async function getSogpDashboardData(
               schema.prayerWatchAttendance.attendedDate,
               dateKey(row.cohort.endsAt),
             ),
-          ),
-        ),
-      db
-        .select({ listenedAt: schema.podcastEpisodeProgress.listenedAt })
-        .from(schema.podcastEpisodeProgress)
-        .where(
-          and(
-            eq(schema.podcastEpisodeProgress.userId, userId),
-            gte(schema.podcastEpisodeProgress.listenedAt, row.cohort.startsAt),
-            lte(schema.podcastEpisodeProgress.listenedAt, row.cohort.endsAt),
           ),
         ),
       db.query.sogpCertificates.findFirst({
@@ -352,9 +340,6 @@ export async function getSogpDashboardData(
     tracks,
     liveClasses,
     prayerDaysAttended: prayerRows[0]?.count ?? 0,
-    podcastDaysLogged: countDistinctLagosActivityDays(
-      podcastRows.map((row) => row.listenedAt),
-    ),
     liveClassesAttended: attendanceRows[0]?.count ?? 0,
     certificate: certificate
       ? {

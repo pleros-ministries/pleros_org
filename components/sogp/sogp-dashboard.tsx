@@ -15,7 +15,6 @@ import {
   Play,
   Radio,
   Sunrise,
-  Podcast,
 } from "lucide-react";
 
 import {
@@ -45,7 +44,6 @@ type DashboardPayload = {
     assessmentPolicy: {
       requiredTrackCompletionPercent: number;
       requiredPrayerWatchPercent: number;
-      requiredPodcastDailyPercent: number;
       requiredLiveClassCount: number;
     };
   };
@@ -72,7 +70,6 @@ type DashboardPayload = {
     status: "scheduled" | "live" | "completed" | "cancelled";
   }>;
   prayerDaysAttended: number;
-  podcastDaysLogged: number;
   liveClassesAttended: number;
   certificate: { verificationCode: string; issuedAt: string; revokedAt: string | null } | null;
   preparationDays: SogpPreparationDay[];
@@ -288,7 +285,7 @@ function ContextRail({ data }: { data: DashboardPayload }) {
   const trackCompletion = summarizeSogpTrackCompletion(data.tracks);
   const completed = trackCompletion.requiredCompleted;
   const prayerDays = Math.max(1, Math.round((new Date(data.cohort.endsAt).getTime() - new Date(data.cohort.startsAt).getTime()) / 86_400_000) + 1);
-  const eligibility = calculateSogpEligibility({ completedTracks: completed, totalTracks: trackCompletion.requiredTotal, prayerDaysAttended: data.prayerDaysAttended, prayerDaysAvailable: prayerDays, podcastDaysLogged: data.podcastDaysLogged, podcastDaysAvailable: prayerDays, liveClassesAttended: data.liveClassesAttended, policy: data.cohort.assessmentPolicy });
+  const eligibility = calculateSogpEligibility({ completedTracks: completed, totalTracks: trackCompletion.requiredTotal, prayerDaysAttended: data.prayerDaysAttended, prayerDaysAvailable: prayerDays, liveClassesAttended: data.liveClassesAttended, policy: data.cohort.assessmentPolicy });
   const telegramUrl = data.cohort.telegramDiscussionUrl ?? data.cohort.telegramChannelUrl ?? (data.cohort.telegramBotUsername ? `https://t.me/${data.cohort.telegramBotUsername.replace(/^@/, "")}` : null);
   return (
     <aside className="grid content-start gap-4">
@@ -303,7 +300,6 @@ function ContextRail({ data }: { data: DashboardPayload }) {
         <div className="mt-5 grid gap-4">{[
           ["Required tracks", `${completed}/${trackCompletion.requiredTotal || 20}`, !eligibility.unmet.includes("tracks")],
           ["Prayer Watch", `${eligibility.prayerPercent}%`, !eligibility.unmet.includes("prayer_watch")],
-          ["Daily podcast", `${data.podcastDaysLogged}/${prayerDays}`, !eligibility.unmet.includes("podcast")],
           ["Live classes", String(data.liveClassesAttended), !eligibility.unmet.includes("live_classes")],
         ].map(([label,value,ready])=><div key={String(label)} className="grid grid-cols-[1.25rem_1fr_auto] items-center gap-2"><span className={`grid size-5 place-items-center rounded-full ${ready?"bg-[var(--color-brand-lime)]":"border border-[var(--color-line-strong)]"}`}>{ready?<Check className="size-3 text-[var(--color-brand-blue)]"/>:<Circle className="size-2 text-[var(--color-text-muted)]"/>}</span><span className="text-xs font-medium text-[var(--color-text-strong)]">{label}</span><span className="text-xs text-[var(--color-text-muted)]">{value}</span></div>)}</div>
       </section>
@@ -332,14 +328,6 @@ function FormationProgress({ data }: { data: DashboardPayload }) {
       hint: `${data.cohort.assessmentPolicy.requiredPrayerWatchPercent}% required`,
       href: "/dashboard/prayer-watch",
       Icon: Sunrise,
-    },
-    {
-      title: "Daily Pleros Podcast",
-      description: "Listen to and log one distinct podcast episode every cohort day.",
-      value: `${data.podcastDaysLogged} / ${cohortDays}`,
-      hint: "100% required",
-      href: "/dashboard/podcast",
-      Icon: Podcast,
     },
   ];
 
