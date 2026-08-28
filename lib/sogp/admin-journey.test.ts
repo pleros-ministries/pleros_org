@@ -4,6 +4,7 @@ import { join } from "node:path";
 
 import {
   buildPreSogpSeed,
+  isSogpLessonContentReady,
   validateSogpLaunchReadiness,
 } from "./preparation-seed";
 
@@ -23,6 +24,20 @@ describe("Pre-SOGP seed", () => {
     expect(days[19]?.title).toBe("Salvation");
     expect(days.at(-1)?.publishDate).toBe("2026-10-31");
   });
+});
+
+test("requires complete teaching and assessment content before activation", () => {
+  const readyLesson = {
+    status: "published",
+    audioUrl: "https://example.com/audio.mp3",
+    notesContent: "Notes",
+    responsePrompt: "Respond",
+    responseMarkingGuide: "Guide",
+    hasQuiz: true,
+  };
+  expect(isSogpLessonContentReady(readyLesson)).toBe(true);
+  expect(isSogpLessonContentReady({ ...readyLesson, hasQuiz: false })).toBe(false);
+  expect(isSogpLessonContentReady({ ...readyLesson, responsePrompt: null })).toBe(false);
 });
 
 test("admin actions seed preparation and validate cohort activation", () => {
@@ -53,6 +68,17 @@ test("admin exposes scoped learner progress correction controls", () => {
   expect(controls).toContain("Preparation lesson");
   expect(controls).toContain("Prayer Watch date");
   expect(controls).toContain("Review session");
+});
+
+test("admin exposes cohort date and status controls", () => {
+  const source = readFileSync(
+    join(process.cwd(), "components", "ppc", "admin-sogp-cohort-controls.tsx"),
+    "utf8",
+  );
+  expect(source).toContain("Cohort dates and status");
+  expect(source).toContain("updateSogpCohort");
+  expect(source).toContain('type="datetime-local"');
+  expect(source).toContain("Activate cohort");
 });
 
 describe("SOGP launch readiness", () => {

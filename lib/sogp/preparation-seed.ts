@@ -61,3 +61,23 @@ export function validateSogpLaunchReadiness(input: {
   }
   return issues;
 }
+
+export function isSogpLessonContentReady(lesson: {
+  status: string;
+  audioUrl: string | null;
+  notesContent: string | null;
+  responsePrompt: string | null;
+  responseMarkingGuide: string | null;
+  hasQuiz: boolean;
+}) {
+  return (
+    lesson.status === "published" &&
+    Boolean(
+      lesson.audioUrl &&
+        lesson.notesContent &&
+        lesson.responsePrompt &&
+        lesson.responseMarkingGuide &&
+        lesson.hasQuiz,
+    )
+  );
+}

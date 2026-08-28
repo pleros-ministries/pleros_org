@@ -14,6 +14,7 @@ import {
 } from "@/lib/sogp/preparation-admin";
 import {
   buildPreSogpSeed,
+  isSogpLessonContentReady,
   validateSogpLaunchReadiness,
 } from "@/lib/sogp/preparation-seed";
 import {
@@ -111,12 +112,10 @@ export async function configureSogpCurriculum(input: {
   const quizLessonIds = new Set(quizRows.map((row) => row.lessonId));
   const unready = selectedLessons.filter(
     ({ lesson }) =>
-      lesson.status !== "published" ||
-      !lesson.audioUrl ||
-      !lesson.notesContent ||
-      !lesson.responsePrompt ||
-      !lesson.responseMarkingGuide ||
-      !quizLessonIds.has(lesson.id),
+      !isSogpLessonContentReady({
+        ...lesson,
+        hasQuiz: quizLessonIds.has(lesson.id),
+      }),
   );
   if (unready.length) {
     throw new Error(
@@ -169,12 +168,27 @@ export async function configureSogpCurriculum(input: {
 export async function updateSogpCohort(input: {
   cohortId: number;
   status?: (typeof schema.sogpCohorts.$inferSelect)["status"];
+  startsAt?: string;
+  endsAt?: string;
   telegramChannelUrl?: string | null;
   telegramDiscussionUrl?: string | null;
 }) {
   await requireAdmin();
+  const currentCohort = await db.query.sogpCohorts.findFirst({
+    where: (row, { eq: equal }) => equal(row.id, input.cohortId),
+  });
+  if (!currentCohort) throw new Error("SOGP cohort not found.");
+  const startsAt = input.startsAt ? new Date(input.startsAt) : currentCohort.startsAt;
+  const endsAt = input.endsAt ? new Date(input.endsAt) : currentCohort.endsAt;
+  if (
+    Number.isNaN(startsAt.getTime()) ||
+    Number.isNaN(endsAt.getTime()) ||
+    endsAt <= startsAt
+  ) {
+    throw new Error("Enter a valid cohort start and end date.");
+  }
   if (input.status === "active") {
-    const [preparationRows, trackRows, reviewRows] = await Promise.all([
+    const [preparationRows, trackRows, reviewRows, quizRows] = await Promise.all([
       db
         .select({
           dayId: schema.sogpPreparationDays.id,
@@ -206,13 +220,21 @@ export async function updateSogpCohort(input: {
             eq(schema.sogpLiveClasses.isRequired, true),
           ),
         ),
+      db
+        .select({ lessonId: schema.quizQuestions.lessonId })
+        .from(schema.quizQuestions),
     ]);
+    const lessonsWithQuiz = new Set(quizRows.map((row) => row.lessonId));
     const readinessIssues = validateSogpLaunchReadiness({
       preparationCount: new Set(preparationRows.map((row) => row.dayId)).size,
       uniquePreparationUrlCount: new Set(preparationRows.map((row) => row.url)).size,
       readyCoreTrackCount: trackRows.filter(
         ({ track, lesson }) =>
-          track.isRequired && lesson.status === "published" && Boolean(lesson.audioUrl),
+          track.isRequired &&
+          isSogpLessonContentReady({
+            ...lesson,
+            hasQuiz: lessonsWithQuiz.has(lesson.id),
+          }),
       ).length,
       extraTrackCount: trackRows.filter(({ track }) => !track.isRequired).length,
       requiredReviewCount: reviewRows.length,
@@ -223,6 +245,8 @@ export async function updateSogpCohort(input: {
     .update(schema.sogpCohorts)
     .set({
       ...(input.status ? { status: input.status } : {}),
+      ...(input.startsAt ? { startsAt } : {}),
+      ...(input.endsAt ? { endsAt } : {}),
       ...(input.telegramChannelUrl !== undefined
         ? { telegramChannelUrl: input.telegramChannelUrl }
         : {}),
