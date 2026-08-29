@@ -19,7 +19,7 @@ describe("SOGP landing content", () => {
 
   test("uses the supplied SOGP welcome video", () => {
     expect(sogpLandingContent.introVideo).toEqual({
-      title: "Welcome to the School of God’s Purpose",
+      title: "What is the School of God’s Purpose?",
       description:
         "Watch this short introduction to the journey you are about to begin.",
       src: "/site/sogp/sogp-welcome-WaXgk9zqi78.mp4",

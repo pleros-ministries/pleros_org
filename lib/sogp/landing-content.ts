@@ -28,7 +28,7 @@ export const sogpLandingContent = {
     "Do you want to walk more in the strength and power of the Spirit to fulfil God’s purpose for you?",
   ],
   introVideo: {
-    title: "Welcome to the School of God’s Purpose",
+    title: "What is the School of God’s Purpose?",
     description:
       "Watch this short introduction to the journey you are about to begin.",
     src: "/site/sogp/sogp-welcome-WaXgk9zqi78.mp4",
