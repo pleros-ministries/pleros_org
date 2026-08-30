@@ -9,6 +9,8 @@ describe("canAccessSogpDay", () => {
         learnerState: "active",
         now: new Date("2026-09-08T12:00:00Z"),
         releaseAt: new Date("2026-09-08T00:00:00Z"),
+        curriculumLevel: 1,
+        previousLevelComplete: true,
       }),
     ).toBe(true);
     expect(
@@ -16,6 +18,8 @@ describe("canAccessSogpDay", () => {
         learnerState: "active",
         now: new Date("2026-09-08T12:00:00Z"),
         releaseAt: new Date("2026-09-09T00:00:00Z"),
+        curriculumLevel: 1,
+        previousLevelComplete: true,
       }),
     ).toBe(false);
   });
@@ -26,7 +30,21 @@ describe("canAccessSogpDay", () => {
         learnerState: "carryover",
         now: new Date("2026-10-10T00:00:00Z"),
         releaseAt: new Date("2026-09-01T00:00:00Z"),
+        curriculumLevel: 3,
+        previousLevelComplete: true,
       }),
     ).toBe(true);
+  });
+
+  test("blocks a released track until the previous level is complete", () => {
+    expect(
+      canAccessSogpDay({
+        learnerState: "active",
+        now: new Date("2026-09-20T00:00:00Z"),
+        releaseAt: new Date("2026-09-14T00:00:00Z"),
+        curriculumLevel: 2,
+        previousLevelComplete: false,
+      }),
+    ).toBe(false);
   });
 });
