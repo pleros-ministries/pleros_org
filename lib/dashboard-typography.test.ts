@@ -9,7 +9,7 @@ describe("dashboard typography", () => {
       "utf8",
     );
     const welcomePackSource = readFileSync(
-      join(process.cwd(), "components", "dashboard", "welcome-pack-page.tsx"),
+      join(process.cwd(), "components", "dashboard", "welcome-pack-pages.tsx"),
       "utf8",
     );
 

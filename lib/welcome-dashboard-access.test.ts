@@ -71,21 +71,30 @@ describe("welcome dashboard access", () => {
     );
   });
 
-  test("welcome pack page still requires a session or welcome cookie", () => {
-    const packSource = source(
+  test("welcome pack routes share session-or-cookie access protection", () => {
+    const accessSource = source("lib", "welcome-pack-dashboard-access.ts");
+    const joinSource = source(
+      "app",
+      "(focused)",
+      "dashboard",
+      "welcomepack",
+      "join",
+      "page.tsx",
+    );
+    const giftsSource = source(
       "app",
       "(site)",
       "dashboard",
       "welcomepack",
+      "gifts",
       "page.tsx",
     );
 
-    expect(packSource).toContain("if (welcomeSession)");
-    expect(packSource).toContain(
-      "getWelcomePackLeadByEmail(welcomeSession.email)",
-    );
-    expect(packSource).not.toContain("/api/welcome-access/session");
-    expect(packSource).toContain('redirect("/welcome")');
+    expect(accessSource).toContain("readWelcomeAccessToken");
+    expect(accessSource).toContain("getAppSession");
+    expect(accessSource).toContain('redirect("/welcome")');
+    expect(joinSource).toContain("requireWelcomePackAccess");
+    expect(giftsSource).toContain("requireWelcomePackAccess");
   });
 
   test("dashboard routes provide immediate loading feedback during card navigation", () => {

@@ -104,16 +104,27 @@ describe("welcome pack completion wiring", () => {
     expect(pageSource).not.toContain("confirmWelcomePackShareAction");
   });
 
-  test("dashboard welcome pack displays the main gift and marks supplementary packs as pending", () => {
-    const routeSource = source("app", "(site)", "dashboard", "welcomepack", "page.tsx");
-    const pageSource = source("components", "dashboard", "welcome-pack-page.tsx");
+  test("Welcome Pack gifts page displays the main gift and marks supplementary packs as pending", () => {
+    const routeSource = source(
+      "app",
+      "(site)",
+      "dashboard",
+      "welcomepack",
+      "gifts",
+      "page.tsx",
+    );
+    const pageSource = source(
+      "components",
+      "dashboard",
+      "welcome-pack-pages.tsx",
+    );
 
-    expect(routeSource).toContain("getWelcomePackLeadByEmail");
+    expect(routeSource).toContain("requireWelcomePackAccess");
     expect(routeSource).toContain("extraGiftsUnlocked");
     expect(pageSource).toContain("mainGifts");
     expect(pageSource).toContain("extraGifts");
-    expect(pageSource).toContain("More resources are coming");
-    expect(pageSource).toContain("The supplementary packs are not ready yet");
+    expect(pageSource).toContain("Supplementary resources are being prepared.");
+    expect(pageSource).toContain("Coming soon");
     expect(pageSource).not.toContain("Locked until you share");
     expect(pageSource).not.toContain("confirmWelcomePackShareAction");
   });

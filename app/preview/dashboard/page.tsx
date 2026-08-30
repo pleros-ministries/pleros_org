@@ -14,6 +14,10 @@ export const metadata: Metadata = {
 const previewDashboardSections = welcomeDashboardSections.map((section) => ({
   ...section,
   cards: section.cards.map((card) => {
+    if (card.href === "/dashboard/welcomepack") {
+      return { ...card, href: "/preview/dashboard/welcomepack" };
+    }
+
     if (card.href === "/dashboard/prayer-watch") {
       return { ...card, href: "/preview/dashboard/prayer-watch" };
     }
