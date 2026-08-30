@@ -7,7 +7,10 @@ import { requireAdmin } from "@/lib/auth/require-role";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
 import { buildFirstCohortTrackSelection } from "@/lib/sogp/first-cohort";
-import { buildWeekdayReleaseDates } from "@/lib/sogp/schedule";
+import {
+  assertMondayCohortStart,
+  buildSogpTrackReleaseDates,
+} from "@/lib/sogp/schedule";
 import {
   normalizeSogpPreparationInput,
   type SogpPreparationInput,
@@ -68,16 +71,9 @@ export async function configureSogpTelegramWebhook() {
 
 export async function configureSogpCurriculum(input: {
   cohortId: number;
-  disciplineLessonNumber: number;
-  requiredPracticalLessonNumbers: number[];
-  optionalPracticalLessonNumbers: number[];
 }) {
   await requireAdmin();
-  const selection = buildFirstCohortTrackSelection({
-    disciplineLessonNumber: input.disciplineLessonNumber,
-    requiredPracticalLessonNumbers: input.requiredPracticalLessonNumbers,
-    optionalPracticalLessonNumbers: input.optionalPracticalLessonNumbers,
-  });
+  const selection = buildFirstCohortTrackSelection();
   const cohort = await db.query.sogpCohorts.findFirst({
     where: (row, { eq: equal }) => equal(row.id, input.cohortId),
   });
@@ -125,16 +121,8 @@ export async function configureSogpCurriculum(input: {
 
   const firstRelease = new Date(cohort.startsAt);
   firstRelease.setUTCHours(5, 0, 0, 0);
-  const releaseDates = buildWeekdayReleaseDates(firstRelease, 20);
-  const firstSaturday = new Date(firstRelease);
-  firstSaturday.setUTCDate(
-    firstSaturday.getUTCDate() + ((6 - firstSaturday.getUTCDay() + 7) % 7),
-  );
-  const saturdayReleaseDates = Array.from({ length: 4 }, (_, index) => {
-    const releaseAt = new Date(firstSaturday);
-    releaseAt.setUTCDate(firstSaturday.getUTCDate() + index * 7);
-    return releaseAt;
-  });
+  assertMondayCohortStart(firstRelease);
+  const releaseDates = buildSogpTrackReleaseDates(firstRelease);
 
   await db.transaction(async (tx) => {
     await tx
@@ -150,9 +138,7 @@ export async function configureSogpCurriculum(input: {
         curriculumOrder: selected.curriculumOrder,
         isRequired: selected.isRequired,
         liveSessionNumber: selected.liveSessionNumber,
-        releaseAt: selected.isRequired
-          ? releaseDates[selected.dayNumber! - 1]!
-          : saturdayReleaseDates[selected.curriculumOrder - 21]!,
+        releaseAt: releaseDates[selected.curriculumOrder - 1]!,
       })),
     );
   });
@@ -160,8 +146,7 @@ export async function configureSogpCurriculum(input: {
   revalidatePath("/admin/sogp");
 
   return {
-    requiredTrackCount: selection.filter((track) => track.isRequired).length,
-    optionalTrackCount: selection.filter((track) => !track.isRequired).length,
+    requiredTrackCount: selection.length,
   };
 }
 
@@ -187,6 +172,7 @@ export async function updateSogpCohort(input: {
   ) {
     throw new Error("Enter a valid cohort start and end date.");
   }
+  assertMondayCohortStart(startsAt);
   if (input.status === "active") {
     const [preparationRows, trackRows, reviewRows, quizRows] = await Promise.all([
       db
@@ -228,7 +214,7 @@ export async function updateSogpCohort(input: {
     const readinessIssues = validateSogpLaunchReadiness({
       preparationCount: new Set(preparationRows.map((row) => row.dayId)).size,
       uniquePreparationUrlCount: new Set(preparationRows.map((row) => row.url)).size,
-      readyCoreTrackCount: trackRows.filter(
+      readyTrackCount: trackRows.filter(
         ({ track, lesson }) =>
           track.isRequired &&
           isSogpLessonContentReady({
@@ -236,7 +222,6 @@ export async function updateSogpCohort(input: {
             hasQuiz: lessonsWithQuiz.has(lesson.id),
           }),
       ).length,
-      extraTrackCount: trackRows.filter(({ track }) => !track.isRequired).length,
       requiredReviewCount: reviewRows.length,
     });
     if (readinessIssues.length) throw new Error(readinessIssues.join(" "));

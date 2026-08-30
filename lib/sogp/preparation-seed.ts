@@ -42,19 +42,15 @@ export function buildPreSogpSeed(startsAt: Date) {
 export function validateSogpLaunchReadiness(input: {
   preparationCount: number;
   uniquePreparationUrlCount: number;
-  readyCoreTrackCount: number;
-  extraTrackCount: number;
+  readyTrackCount: number;
   requiredReviewCount: number;
 }) {
   const issues: string[] = [];
   if (input.preparationCount !== 30 || input.uniquePreparationUrlCount !== 30) {
     issues.push("Add exactly 30 unique Pre-SOGP lessons.");
   }
-  if (input.readyCoreTrackCount !== 20) {
-    issues.push("Publish 20 content-ready core teachings.");
-  }
-  if (input.extraTrackCount !== 4) {
-    issues.push("Assign four optional extra teachings.");
+  if (input.readyTrackCount !== 24) {
+    issues.push("Publish all 24 content-ready SOGP teachings.");
   }
   if (input.requiredReviewCount !== 4) {
     issues.push("Schedule four required review sessions.");

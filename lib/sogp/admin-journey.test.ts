@@ -82,19 +82,17 @@ test("admin exposes cohort date and status controls", () => {
 });
 
 describe("SOGP launch readiness", () => {
-  test("requires 30 preparation lessons, 20 core tracks, four extras, and four reviews", () => {
+  test("requires 30 preparation lessons, 24 ready tracks, and four reviews", () => {
     expect(
       validateSogpLaunchReadiness({
         preparationCount: 29,
         uniquePreparationUrlCount: 29,
-        readyCoreTrackCount: 19,
-        extraTrackCount: 3,
+        readyTrackCount: 23,
         requiredReviewCount: 3,
       }),
     ).toEqual([
       "Add exactly 30 unique Pre-SOGP lessons.",
-      "Publish 20 content-ready core teachings.",
-      "Assign four optional extra teachings.",
+      "Publish all 24 content-ready SOGP teachings.",
       "Schedule four required review sessions.",
     ]);
   });
@@ -104,10 +102,28 @@ describe("SOGP launch readiness", () => {
       validateSogpLaunchReadiness({
         preparationCount: 30,
         uniquePreparationUrlCount: 30,
-        readyCoreTrackCount: 20,
-        extraTrackCount: 4,
+        readyTrackCount: 24,
         requiredReviewCount: 4,
       }),
     ).toEqual([]);
   });
+});
+
+test("admin curriculum configuration uses the fixed canonical map", () => {
+  const actions = readFileSync(
+    join(process.cwd(), "app", "admin", "_actions", "sogp-actions.ts"),
+    "utf8",
+  );
+  const page = readFileSync(
+    join(process.cwd(), "components", "ppc", "admin-sogp-page.tsx"),
+    "utf8",
+  );
+
+  expect(actions).toContain("buildFirstCohortTrackSelection()");
+  expect(actions).toContain("buildSogpTrackReleaseDates");
+  expect(actions).toContain("assertMondayCohortStart");
+  expect(actions).not.toContain("optionalPracticalLessonNumbers");
+  expect(page).toContain("24 required teachings across four levels");
+  expect(page).not.toContain("Practical track placement");
+  expect(page).not.toContain("four Extras");
 });
