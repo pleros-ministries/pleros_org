@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, CalendarDays, Radio, Sparkles } from "lucide-react";
+import { ArrowLeft, CalendarDays, CircleCheck, Radio } from "lucide-react";
 
 import { HomepageFooter } from "@/components/home/homepage-footer";
 import { PublicSitePageShell } from "@/components/home/public-site-page-shell";
@@ -21,7 +21,7 @@ const summary = [
   {
     label: "Free enrolment",
     meta: "No payment required to join",
-    Icon: Sparkles,
+    Icon: CircleCheck,
   },
 ];
 
@@ -43,7 +43,7 @@ export function SogpEnrollmentPage({
                 <ArrowLeft className="size-3.5" aria-hidden="true" />
                 Back
               </Link>
-              <h1 className="site-hero-heading max-w-[12ch] text-[clamp(2.8rem,6vw,5rem)] text-[var(--color-brand-blue)]">Take your next step with SOGP</h1>
+              <h1 className="site-hero-heading max-w-none text-[clamp(2.3rem,9vw,2.8rem)] text-[var(--color-brand-blue)] md:max-w-[12ch] md:text-[clamp(2.8rem,6vw,5rem)]">Take your next step with SOGP</h1>
               <p className="site-section-intro max-w-[32rem] text-[var(--color-text-muted)]">Join a guided four-week journey into truth, spiritual growth, and God&apos;s purpose.</p>
             </div>
             <ul className="grid gap-3">
