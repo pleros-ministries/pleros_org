@@ -1,7 +1,6 @@
 import {
   CalendarCheckIcon,
   ExternalLinkIcon,
-  MessageCircleMoreIcon,
 } from "lucide-react";
 
 import type { SogpJourneyData } from "@/lib/db/queries/sogp-journey";
@@ -66,14 +65,6 @@ export function SogpContextSidebar({ data }: { data: SogpJourneyData }) {
         )}
       </section>
 
-      <section className="rounded-[var(--radius-md)] bg-[var(--color-brand-blue)] p-4 text-white">
-        <MessageCircleMoreIcon className="size-5 text-[var(--color-brand-lime)]" strokeWidth={2} />
-        <h2 className="mt-3 font-[var(--font-sen)] text-sm font-semibold text-white">Your SOGP community</h2>
-        <p className="mt-1 text-xs leading-[1.45] text-white/75">Stay connected for updates, voice notes, and cohort support.</p>
-        <a href={data.cohort.telegramUrl} target="_blank" rel="noreferrer" className="mt-3 inline-flex min-h-9 items-center gap-1.5 rounded-full bg-white px-3 text-[0.7rem] font-semibold text-[var(--color-brand-blue)] active:scale-[0.96]">
-          Open Telegram <ExternalLinkIcon className="size-3.5" strokeWidth={2} />
-        </a>
-      </section>
     </div>
   );
 }
