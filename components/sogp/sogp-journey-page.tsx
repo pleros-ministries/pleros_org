@@ -205,7 +205,6 @@ export function SogpJourneyPage({
           <section aria-label="Today’s activities" className="grid gap-5 md:gap-6">
             {selectedDay.track?.accessible ? (
               <SogpActivitySection
-                step="1"
                 title="Teaching"
                 description="Listen at your pace. Audio playback is not tracked."
                 icon={<BookOpenIcon className="size-4 text-[var(--color-brand-blue)]" strokeWidth={2} />}
@@ -221,7 +220,6 @@ export function SogpJourneyPage({
               </SogpActivitySection>
             ) : selectedDay.track ? (
               <SogpActivitySection
-                step="1"
                 title="Teaching and assessment"
                 description="Complete the preceding level to unlock this activity."
                 icon={<BookOpenIcon className="size-4 text-[var(--color-brand-blue)]" strokeWidth={2} />}
@@ -232,7 +230,6 @@ export function SogpJourneyPage({
             ) : null}
 
             <SogpActivitySection
-              step={selectedDay.track ? "2" : "1"}
               title="5:30 am Prayer Watch"
               description="Join live or use the replay, then confirm your attendance."
               icon={<Clock3Icon className="size-4 text-[var(--color-brand-blue)]" strokeWidth={2} />}
@@ -248,7 +245,6 @@ export function SogpJourneyPage({
 
             {selectedDay.track?.accessible ? (
               <SogpActivitySection
-                step="3"
                 title="Assessment"
                 description="Your assessment—not audio playback—completes this teaching."
                 icon={<FileQuestionIcon className="size-4 text-[var(--color-brand-blue)]" strokeWidth={2} />}
@@ -262,7 +258,6 @@ export function SogpJourneyPage({
 
             {selectedDay.review ? (
               <SogpActivitySection
-                step="2"
                 title="Required live review"
                 description="Join live when possible or complete the recording afterward."
                 icon={<CalendarCheckIcon className="size-4 text-[var(--color-brand-blue)]" strokeWidth={2} />}

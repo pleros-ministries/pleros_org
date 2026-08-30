@@ -6,7 +6,6 @@ import { SogpActivitySection } from "../../components/sogp/sogp-activity-section
 test("renders an expanded activity disclosure with a divided header", () => {
   const html = renderToStaticMarkup(
     <SogpActivitySection
-      step="1"
       title="Teaching"
       description="Listen at your pace."
       icon={<span>Icon</span>}
@@ -18,5 +17,7 @@ test("renders an expanded activity disclosure with a divided header", () => {
   expect(html).toContain('aria-expanded="true"');
   expect(html).toContain("data-activity-header");
   expect(html).toContain("border-b");
+  expect(html).toContain(" bg-[var(--color-surface-muted)] ");
+  expect(html).not.toContain("grid size-8 shrink-0 place-items-center");
   expect(html).toContain("Activity content");
 });

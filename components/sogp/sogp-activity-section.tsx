@@ -4,13 +4,11 @@ import { useId, useState, type ReactNode } from "react";
 import { ChevronDownIcon } from "lucide-react";
 
 export function SogpActivitySection({
-  step,
   title,
   description,
   icon,
   children,
 }: {
-  step: string;
   title: string;
   description: string;
   icon: ReactNode;
@@ -28,11 +26,8 @@ export function SogpActivitySection({
           aria-expanded={expanded}
           aria-controls={panelId}
           onClick={() => setExpanded((current) => !current)}
-          className="flex min-h-20 w-full items-start gap-3 border-b border-[var(--color-line)] px-4 py-4 text-left transition-colors duration-150 hover:bg-[var(--color-surface-muted)] md:px-5"
+          className="flex min-h-20 w-full items-start gap-3 border-b border-[var(--color-line)] bg-[var(--color-surface-muted)] px-4 py-4 text-left transition-colors duration-150 hover:bg-[var(--color-line)] md:px-5"
         >
-          <span className="grid size-8 shrink-0 place-items-center rounded-full bg-[var(--color-surface-muted)] font-[var(--font-sen)] text-xs font-semibold text-[var(--color-brand-blue)]">
-            {step}
-          </span>
           <span className="grid min-w-0 flex-1 gap-0.5">
             <span className="flex items-center gap-2">
               {icon}
