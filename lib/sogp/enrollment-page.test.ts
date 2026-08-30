@@ -21,6 +21,8 @@ test("keeps the enrolment page focused with a compact summary list", () => {
   expect(pageSource).not.toContain("aspect-square");
   expect(pageSource).not.toContain("grid-cols-2");
   expect(pageSource).toContain("<ul className=\"grid gap-3\">");
+  expect(pageSource).toContain("text-sm font-medium leading-tight");
+  expect(pageSource).not.toContain("text-sm font-semibold leading-tight");
   expect(formSource).toContain(">First name</label>");
   expect(formSource).toContain("text-sm font-medium");
   expect(formSource).not.toContain("text-sm font-semibold");

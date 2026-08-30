@@ -53,7 +53,7 @@ export function SogpEnrollmentPage({
                     <Icon className="size-4" aria-hidden="true" />
                   </span>
                   <span className="grid gap-0.5">
-                    <span className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold leading-tight text-[var(--color-text-strong)]">
+                    <span className="font-[var(--font-be-vietnam-pro)] text-sm font-medium leading-tight text-[var(--color-text-strong)]">
                       {label}
                     </span>
                     <span className="font-[var(--font-be-vietnam-pro)] text-xs leading-tight text-[var(--color-text-muted)]">
