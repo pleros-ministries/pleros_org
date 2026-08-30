@@ -15,7 +15,7 @@ function HubBackLink() {
   return (
     <Link
       href={hubPath}
-      className="inline-flex w-fit items-center gap-1.5 font-[var(--font-be-vietnam-pro)] text-xs font-semibold text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-brand-blue)]"
+      className="inline-flex w-fit items-center gap-1.5 font-[var(--font-be-vietnam-pro)] text-xs font-semibold uppercase tracking-[0.08em] text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-brand-blue)]"
     >
       <ArrowLeftIcon className="size-4" />
       Welcome Pack
@@ -124,7 +124,7 @@ export function WelcomePackHubPage({
                 className="absolute inset-0 bg-[linear-gradient(0deg,rgba(0,10,70,0.72)_0%,rgba(0,10,70,0.22)_62%,transparent_100%)]"
               />
               <span className="relative z-10 grid gap-1.5">
-                <strong className="font-[var(--font-sen)] text-xl leading-none">
+                <strong className="site-pathway-title text-xl font-semibold leading-none text-white">
                   {card.title}
                 </strong>
                 <span className="max-w-[28ch] font-[var(--font-be-vietnam-pro)] text-xs leading-[1.4] text-white/88">
@@ -205,9 +205,6 @@ export function WelcomePackOrientationPage({ videoSrc }: { videoSrc: string }) {
       <div className="container-pleros grid max-w-[42rem] gap-6 pb-12">
         <HubBackLink />
         <header className="grid gap-2">
-          <p className="site-hero-eyebrow text-[var(--color-brand-blue)]">
-            Welcome Pack
-          </p>
           <h1 className="site-hero-heading text-[clamp(2.5rem,7vw,4rem)] text-[var(--color-brand-blue)]">
             Orientation video
           </h1>
