@@ -178,22 +178,6 @@ export function SogpJourneyPage({
         </aside>
 
         <main data-sogp-section="daily-content" className="grid min-w-0 gap-5">
-          <section aria-label="SOGP levels" className="grid grid-cols-2 gap-2 md:grid-cols-4">
-            {data.levels.map((level) => (
-              <div
-                key={level.level}
-                className={`grid min-h-24 content-between gap-2 rounded-[var(--radius-md)] border p-3 ${level.status === "complete" ? "border-[var(--color-brand-lime)] bg-[var(--color-brand-lime)]/15" : level.status === "locked" ? "border-[var(--color-line)] bg-white opacity-60" : "border-[var(--color-brand-blue)] bg-[var(--color-brand-sky)]"}`}
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <strong className="font-[var(--font-sen)] text-sm text-[var(--color-text-strong)]">Level {level.level}</strong>
-                  <span className="text-[0.62rem] font-semibold uppercase tracking-[0.08em] text-[var(--color-brand-blue)]">{level.status.replaceAll("_", " ")}</span>
-                </div>
-                <p className="text-[0.68rem] leading-[1.35] text-[var(--color-text-muted)]">{level.title}</p>
-                <span className="text-xs font-semibold text-[var(--color-brand-blue)]">{level.completed}/{level.total}</span>
-              </div>
-            ))}
-          </section>
-
           <SogpLessonHeading
             metadata={`${selectedDay.track ? `Level ${selectedDay.track.curriculumLevel} · Track ${selectedDay.track.levelPosition}` : selectedDay.kind === "review" ? "Required review" : "Daily formation"} · ${selectedDay.dateKey}`}
             title={selectedDay.track?.title ?? selectedDay.review?.title ?? "Prayer Watch and devotion"}

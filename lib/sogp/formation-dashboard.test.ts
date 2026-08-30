@@ -36,8 +36,6 @@ test("renders a calendar-led four-level SOGP journey with required reviews", () 
   expect(source).toContain("Watch recording");
   expect(source).toContain("Today’s activities");
   expect(source).toContain("Mark Prayer Watch complete");
-  expect(source).toContain("Level {level.level}");
-  expect(source).toContain("level.status.replaceAll");
   expect(source).not.toContain("Extras");
   expect(source).not.toContain("excluded from SOGP completion");
   expect(source).not.toContain("Daily Pleros Podcast");

@@ -9,6 +9,7 @@ import {
 import type { SogpJourneyData } from "@/lib/db/queries/sogp-journey";
 
 import { SogpCalendar } from "./sogp-calendar";
+import { SogpLevelTracker } from "./sogp-level-tracker";
 
 export function SogpCourseSidebar({
   data,
@@ -29,6 +30,8 @@ export function SogpCourseSidebar({
           onSelect={onSelect}
         />
       </section>
+
+      <SogpLevelTracker levels={data.levels} />
 
       <nav aria-label="Course curriculum" className="hidden overflow-hidden rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white lg:block">
         <div className="px-4 pb-2 pt-4">
