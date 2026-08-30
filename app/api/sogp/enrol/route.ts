@@ -8,20 +8,22 @@ import {
 import { sendSogpEnrollmentEmail } from "@/lib/email/send";
 import {
   buildSogpEnrollmentRedirect,
+  formatSogpReferralSource,
   normalizeSogpEnrollment,
   validateSogpEnrollment,
   type SogpEnrollmentInput,
 } from "@/lib/sogp/enrollment";
 import { provisionWelcomeSession } from "@/lib/welcome-session";
 
+const cohortDateFormatter = new Intl.DateTimeFormat("en-GB", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  timeZone: "Africa/Lagos",
+});
+
 function formatCohortDates(startsAt: Date, endsAt: Date) {
-  const formatter = new Intl.DateTimeFormat("en-GB", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: "Africa/Lagos",
-  });
-  return `${formatter.format(startsAt)} – ${formatter.format(endsAt)}`;
+  return `${cohortDateFormatter.format(startsAt)} – ${cohortDateFormatter.format(endsAt)}`;
 }
 
 export async function POST(request: Request) {
@@ -48,8 +50,13 @@ export async function POST(request: Request) {
       requestHeaders: request.headers,
     });
     const userId = (await resolveDbUserId(authUser.email)) ?? authUser.id;
+    const { referralSource, referralSourceOther, ...persistedValues } = values;
     await upsertSogpEnrollment({
-      ...values,
+      ...persistedValues,
+      referralSource: formatSogpReferralSource({
+        referralSource,
+        referralSourceOther,
+      }),
       birthYear: values.birthYear ? Number(values.birthYear) : null,
       whatsappConsent: values.whatsappConsent === true,
       cohortId: cohort.id,

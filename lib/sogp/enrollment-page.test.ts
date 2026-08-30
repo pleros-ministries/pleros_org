@@ -13,6 +13,7 @@ test("keeps the enrolment page focused with a compact summary list", () => {
   );
 
   expect(pageSource).not.toContain("20 tracks");
+  expect(pageSource).not.toContain("Telegram community");
   expect(pageSource).not.toContain("HomepageNav");
   expect(pageSource).not.toContain("School of God&apos;s Purpose</p>");
   expect(pageSource).not.toContain("border-b border-[var(--color-line)] bg-[var(--color-brand-sky)]");
@@ -24,6 +25,7 @@ test("keeps the enrolment page focused with a compact summary list", () => {
   expect(formSource).toContain(">Surname</label>");
   expect(formSource).toContain(">State / province / region of residence</label>");
   expect(formSource).toContain(">How did you hear about us?</label>");
+  expect(formSource).toContain('id="referralSourceOther"');
   expect(formSource).not.toContain("What do you want to get out of SOGP?");
   expect(formSource).toMatch(/<select\s+id="birthYear"/);
   expect(formSource).not.toContain('type="checkbox"');

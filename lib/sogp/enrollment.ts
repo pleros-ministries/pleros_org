@@ -16,6 +16,7 @@ export type SogpEnrollmentValues = {
   region: string;
   birthYear: string;
   referralSource: string;
+  referralSourceOther: string;
   whatsappConsent: boolean | null;
   utmSource: string;
   utmMedium: string;
@@ -43,6 +44,7 @@ export type SogpEnrollmentErrors = Partial<
     | "region"
     | "birthYear"
     | "referralSource"
+    | "referralSourceOther"
     | "whatsappConsent",
     string
   >
@@ -135,6 +137,7 @@ export function normalizeSogpEnrollment(
     region: clean(input.region, 120),
     birthYear: clean(input.birthYear, 4).replace(/\D/g, ""),
     referralSource: clean(input.referralSource, 80),
+    referralSourceOther: clean(input.referralSourceOther, 120),
     whatsappConsent: normalizeWhatsappConsent(input.whatsappConsent),
     utmSource: clean(input.utmSource, 200),
     utmMedium: clean(input.utmMedium, 200),
@@ -176,9 +179,21 @@ export function validateSogpEnrollment(
   if (!SOGP_REFERRAL_VALUES.has(input.referralSource)) {
     errors.referralSource = "Select how you heard about us.";
   }
+  if (input.referralSource === "other" && !input.referralSourceOther) {
+    errors.referralSourceOther = "Tell us how you heard about us.";
+  }
   if (input.whatsappConsent === null) {
     errors.whatsappConsent = "Select whether you want WhatsApp reminders.";
   }
 
   return errors;
+}
+
+export function formatSogpReferralSource(input: Pick<
+  SogpEnrollmentValues,
+  "referralSource" | "referralSourceOther"
+>) {
+  return input.referralSource === "other"
+    ? `other: ${input.referralSourceOther}`
+    : input.referralSource;
 }

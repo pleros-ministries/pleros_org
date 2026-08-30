@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, CalendarDays, MessageCircleMore, Radio, Sparkles } from "lucide-react";
+import { ArrowLeft, CalendarDays, Radio, Sparkles } from "lucide-react";
 
 import { HomepageFooter } from "@/components/home/homepage-footer";
 import { PublicSitePageShell } from "@/components/home/public-site-page-shell";
@@ -10,18 +10,13 @@ import type { CountryCode } from "libphonenumber-js/min";
 const summary = [
   {
     label: "Four weeks",
-    meta: "24 guided tracks, Monday to Friday",
+    meta: "24 guided tracks, Monday to Saturday",
     Icon: CalendarDays,
   },
   {
-    label: "Live classes",
-    meta: "Weekend sessions with the cohort",
+    label: "Weekly reviews",
+    meta: "One required review every Sunday",
     Icon: Radio,
-  },
-  {
-    label: "Telegram community",
-    meta: "Updates and cohort connection",
-    Icon: MessageCircleMore,
   },
   {
     label: "Free enrolment",

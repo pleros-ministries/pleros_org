@@ -37,6 +37,7 @@ const FIELD_ORDER = [
   "region",
   "birthYear",
   "referralSource",
+  "referralSourceOther",
   "whatsappConsent",
 ] as const;
 
@@ -52,6 +53,7 @@ const FOCUS_TARGET: Partial<Record<FieldName, string>> = {
   region: "region",
   birthYear: "birthYear",
   referralSource: "referralSource",
+  referralSourceOther: "referralSourceOther",
   whatsappConsent: "whatsappConsent",
 };
 
@@ -87,6 +89,68 @@ function FieldError({ id, error }: { id: string; error?: string }) {
   ) : null;
 }
 
+function ReferralSourceFields({
+  source,
+  otherSource,
+  sourceError,
+  otherSourceError,
+  onSourceChange,
+  onOtherSourceChange,
+  onSourceBlur,
+  onOtherSourceBlur,
+}: {
+  source: string;
+  otherSource: string;
+  sourceError?: string;
+  otherSourceError?: string;
+  onSourceChange: (value: string) => void;
+  onOtherSourceChange: (value: string) => void;
+  onSourceBlur: () => void;
+  onOtherSourceBlur: () => void;
+}) {
+  return (
+    <div className="grid gap-2">
+      <label htmlFor="referralSource" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">How did you hear about us?</label>
+      <select
+        id="referralSource"
+        name="referralSource"
+        value={source}
+        onChange={(event) => onSourceChange(event.target.value)}
+        onBlur={onSourceBlur}
+        aria-invalid={Boolean(sourceError)}
+        aria-describedby={sourceError ? "referral-source-error" : undefined}
+        className="h-11 w-full rounded-[var(--radius-sm)] border border-[var(--color-line-strong)] bg-white px-4 text-sm text-[var(--color-text-strong)] outline-none transition focus-visible:border-[var(--color-brand-blue)] focus-visible:ring-4 focus-visible:ring-[var(--color-focus)]"
+      >
+        <option value="">Select an option</option>
+        {SOGP_REFERRAL_OPTIONS.map((option) => (
+          <option key={option.value} value={option.value}>{option.label}</option>
+        ))}
+      </select>
+      <FieldError id="referral-source-error" error={sourceError} />
+      {source === "other" ? (
+        <div className="grid gap-2 pt-1">
+          <label htmlFor="referralSourceOther" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">
+            Tell us how you heard about us
+          </label>
+          <Input
+            id="referralSourceOther"
+            name="referralSourceOther"
+            autoComplete="off"
+            maxLength={120}
+            value={otherSource}
+            onChange={(event) => onOtherSourceChange(event.target.value)}
+            onBlur={onOtherSourceBlur}
+            aria-invalid={Boolean(otherSourceError)}
+            aria-describedby={otherSourceError ? "referral-source-other-error" : undefined}
+            placeholder="Enter the source"
+          />
+          <FieldError id="referral-source-other-error" error={otherSourceError} />
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 export function SogpEnrollmentForm({
   defaultCountryCode,
 }: {
@@ -101,6 +165,7 @@ export function SogpEnrollmentForm({
     region: "",
     birthYear: "",
     referralSource: "",
+    referralSourceOther: "",
     whatsappConsent: "" as "" | "yes" | "no",
     phone: "",
     phoneCountryCode: defaultCountryCode as CountryCode,
@@ -173,6 +238,7 @@ export function SogpEnrollmentForm({
   const regionError = errorFor("region");
   const birthYearError = errorFor("birthYear");
   const referralSourceError = errorFor("referralSource");
+  const referralSourceOtherError = errorFor("referralSourceOther");
   const whatsappConsentError = errorFor("whatsappConsent");
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -314,25 +380,25 @@ export function SogpEnrollmentForm({
           <FieldError id="birth-year-error" error={birthYearError} />
         </div>
       </div>
-      <div className="grid gap-2">
-        <label htmlFor="referralSource" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">How did you hear about us?</label>
-        <select
-          id="referralSource"
-          name="referralSource"
-          value={values.referralSource}
-          onChange={(event) => update("referralSource", event.target.value)}
-          onBlur={() => markTouched("referralSource")}
-          aria-invalid={Boolean(referralSourceError)}
-          aria-describedby={referralSourceError ? "referral-source-error" : undefined}
-          className="h-11 w-full rounded-[var(--radius-sm)] border border-[var(--color-line-strong)] bg-white px-4 text-sm text-[var(--color-text-strong)] outline-none transition focus-visible:border-[var(--color-brand-blue)] focus-visible:ring-4 focus-visible:ring-[var(--color-focus)]"
-        >
-          <option value="">Select an option</option>
-          {SOGP_REFERRAL_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value}>{option.label}</option>
-          ))}
-        </select>
-        <FieldError id="referral-source-error" error={referralSourceError} />
-      </div>
+      <ReferralSourceFields
+        source={values.referralSource}
+        otherSource={values.referralSourceOther}
+        sourceError={referralSourceError}
+        otherSourceError={referralSourceOtherError}
+        onSourceChange={(referralSource) => {
+          setValues((current) => ({
+            ...current,
+            referralSource,
+            referralSourceOther:
+              referralSource === "other" ? current.referralSourceOther : "",
+          }));
+          clearServerError("referralSource");
+          clearServerError("referralSourceOther");
+        }}
+        onOtherSourceChange={(value) => update("referralSourceOther", value)}
+        onSourceBlur={() => markTouched("referralSource")}
+        onOtherSourceBlur={() => markTouched("referralSourceOther")}
+      />
       <div className="grid gap-2">
         <label htmlFor="whatsappConsent" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold leading-[1.45] text-[var(--color-text-strong)]">
           Would you like to receive SOGP updates and course reminders via WhatsApp?

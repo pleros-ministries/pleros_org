@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 
 import {
   buildSogpEnrollmentRedirect,
+  formatSogpReferralSource,
   getSogpBirthYearOptions,
   normalizeSogpEnrollment,
   validateSogpEnrollment,
@@ -168,6 +169,26 @@ describe("SOGP enrolment", () => {
 
     expect(validateSogpEnrollment(input).referralSource).toBe(
       "Select how you heard about us.",
+    );
+  });
+
+  test("requires and preserves a written source when Other is selected", () => {
+    const missingDetail = normalizeSogpEnrollment({
+      referralSource: "other",
+      referralSourceOther: "",
+    });
+    expect(validateSogpEnrollment(missingDetail).referralSourceOther).toBe(
+      "Tell us how you heard about us.",
+    );
+
+    const withDetail = normalizeSogpEnrollment({
+      referralSource: "other",
+      referralSourceOther: "  A conference in Abuja  ",
+    });
+    expect(withDetail.referralSourceOther).toBe("A conference in Abuja");
+    expect(validateSogpEnrollment(withDetail).referralSourceOther).toBeUndefined();
+    expect(formatSogpReferralSource(withDetail)).toBe(
+      "other: A conference in Abuja",
     );
   });
 });
