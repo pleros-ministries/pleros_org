@@ -1,0 +1,51 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { describe, expect, test } from "vitest";
+
+const source = (...parts: string[]) =>
+  readFileSync(join(process.cwd(), ...parts), "utf8");
+
+describe("SOGP dashboard previews", () => {
+  test("provides deterministic Pre-SOGP and SOGP fixture data", async () => {
+    const fixtures = await import("./preview-fixtures");
+
+    expect(fixtures.preSogpPreviewData.days).toHaveLength(30);
+    expect(fixtures.sogpPreviewData.days).toHaveLength(28);
+    expect(fixtures.sogpPreviewData.levels).toHaveLength(4);
+    expect(fixtures.sogpPreviewData.progress.coreTotal).toBe(24);
+    expect(fixtures.sogpPreviewData.levels.map((level) => level.status)).toEqual([
+      "complete",
+      "in_progress",
+      "locked",
+      "locked",
+    ]);
+  });
+
+  test("mounts both previews in local-only mode", () => {
+    const preRoute = source(
+      "app",
+      "preview",
+      "dashboard",
+      "pre-sogp",
+      "page.tsx",
+    );
+    const sogpRoute = source(
+      "app",
+      "preview",
+      "dashboard",
+      "sogp",
+      "page.tsx",
+    );
+    const prePage = source("components", "sogp", "pre-sogp-page.tsx");
+    const sogpPage = source("components", "sogp", "sogp-journey-page.tsx");
+
+    expect(preRoute).toContain("preSogpPreviewData");
+    expect(preRoute).toContain("preview");
+    expect(sogpRoute).toContain("sogpPreviewData");
+    expect(sogpRoute).toContain("preview");
+    expect(prePage).toContain("initialData?: PreSogpJourneyData");
+    expect(sogpPage).toContain("initialData?: SogpJourneyData");
+    expect(prePage).toContain("Preview mode");
+    expect(sogpPage).toContain("Preview mode");
+  });
+});

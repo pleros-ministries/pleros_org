@@ -59,8 +59,19 @@ function firstName(name: string) {
   return name.trim().split(/\s+/)[0] || "there";
 }
 
-export function SogpJourneyPage() {
-  const { data } = useSuspenseQuery({ queryKey, queryFn: fetchJourney });
+export function SogpJourneyPage({
+  initialData,
+  preview = false,
+}: {
+  initialData?: SogpJourneyData;
+  preview?: boolean;
+} = {}) {
+  const activeQueryKey = [...queryKey, preview ? "preview" : "live"] as const;
+  const { data } = useSuspenseQuery({
+    queryKey: activeQueryKey,
+    queryFn: initialData ? async () => initialData : fetchJourney,
+    initialData,
+  });
   const searchParams = useSearchParams();
   const requestedDate = searchParams.get("date");
   const initialDate =
@@ -73,11 +84,12 @@ export function SogpJourneyPage() {
   const isFuture = selectedDay.dateKey > data.todayKey;
 
   const mutation = useMutation({
-    mutationFn: saveDailyCompletion,
+    mutationFn: async (input: Parameters<typeof saveDailyCompletion>[0]) =>
+      preview ? input : saveDailyCompletion(input),
     onMutate: async (input) => {
-      await queryClient.cancelQueries({ queryKey });
-      const previous = queryClient.getQueryData<SogpJourneyData>(queryKey);
-      queryClient.setQueryData<SogpJourneyData>(queryKey, (current) => {
+      await queryClient.cancelQueries({ queryKey: activeQueryKey });
+      const previous = queryClient.getQueryData<SogpJourneyData>(activeQueryKey);
+      queryClient.setQueryData<SogpJourneyData>(activeQueryKey, (current) => {
         if (!current) return current;
         return {
           ...current,
@@ -123,9 +135,12 @@ export function SogpJourneyPage() {
       return { previous };
     },
     onError: (_error, _input, context) => {
-      if (context?.previous) queryClient.setQueryData(queryKey, context.previous);
+      if (context?.previous) queryClient.setQueryData(activeQueryKey, context.previous);
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey }),
+    onSettled: () =>
+      preview
+        ? Promise.resolve()
+        : queryClient.invalidateQueries({ queryKey: activeQueryKey }),
   });
 
   const reviewSource: "live" | "recording" = selectedDay.review?.recordingUrl
@@ -271,7 +286,11 @@ export function SogpJourneyPage() {
           />
           {mutation.error ? <p role="alert" className="text-sm text-red-700">{mutation.error.message}</p> : null}
 
-          <SogpPushPanel />
+          {preview ? (
+            <p className="rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white p-4 text-xs text-[var(--color-text-muted)]">Preview mode · Progress changes stay in this preview.</p>
+          ) : (
+            <SogpPushPanel />
+          )}
 
           <section className="grid gap-3 rounded-[var(--radius-md)] bg-[var(--color-brand-sky)] p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-brand-blue)]">SOGP progress</p>

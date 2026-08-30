@@ -47,8 +47,19 @@ async function saveCompletion(input: {
   return input;
 }
 
-export function PreSogpPage() {
-  const { data } = useSuspenseQuery({ queryKey, queryFn: fetchPreparation });
+export function PreSogpPage({
+  initialData,
+  preview = false,
+}: {
+  initialData?: PreSogpJourneyData;
+  preview?: boolean;
+} = {}) {
+  const activeQueryKey = [...queryKey, preview ? "preview" : "live"] as const;
+  const { data } = useSuspenseQuery({
+    queryKey: activeQueryKey,
+    queryFn: initialData ? async () => initialData : fetchPreparation,
+    initialData,
+  });
   const searchParams = useSearchParams();
   const requestedDate = searchParams.get("date");
   const initialDate =
@@ -62,11 +73,12 @@ export function PreSogpPage() {
     data.days.find((day) => day.dateKey === selectedDateKey) ?? data.days[0]!;
 
   const completionMutation = useMutation({
-    mutationFn: saveCompletion,
+    mutationFn: async (input: Parameters<typeof saveCompletion>[0]) =>
+      preview ? input : saveCompletion(input),
     onMutate: async (input) => {
-      await queryClient.cancelQueries({ queryKey });
-      const previous = queryClient.getQueryData<PreSogpJourneyData>(queryKey);
-      queryClient.setQueryData<PreSogpJourneyData>(queryKey, (current) => {
+      await queryClient.cancelQueries({ queryKey: activeQueryKey });
+      const previous = queryClient.getQueryData<PreSogpJourneyData>(activeQueryKey);
+      queryClient.setQueryData<PreSogpJourneyData>(activeQueryKey, (current) => {
         if (!current) return current;
         return {
           ...current,
@@ -95,9 +107,12 @@ export function PreSogpPage() {
       return { previous };
     },
     onError: (_error, _input, context) => {
-      if (context?.previous) queryClient.setQueryData(queryKey, context.previous);
+      if (context?.previous) queryClient.setQueryData(activeQueryKey, context.previous);
     },
-    onSettled: () => queryClient.invalidateQueries({ queryKey }),
+    onSettled: () =>
+      preview
+        ? Promise.resolve()
+        : queryClient.invalidateQueries({ queryKey: activeQueryKey }),
   });
 
   const completeDays = data.days.filter((day) => day.state === "complete").length;
@@ -185,7 +200,11 @@ export function PreSogpPage() {
           {completionMutation.error ? (
             <p role="alert" className="text-sm text-red-700">{completionMutation.error.message}</p>
           ) : null}
-          <SogpPushPanel />
+          {preview ? (
+            <p className="rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white p-4 text-xs text-[var(--color-text-muted)]">Preview mode · Completion changes stay in this preview.</p>
+          ) : (
+            <SogpPushPanel />
+          )}
         </main>
 
         <section

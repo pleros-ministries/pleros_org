@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 import { useSitePushSubscription } from "@/lib/push/use-site-push";
 
 const DISMISSED_KEY = "pleros-push-prompted";
 
 export function PushNotificationPrompt() {
+  const pathname = usePathname();
   const { isSupported, isSubscribed, isPending, subscribe } = useSitePushSubscription();
   const [dismissed, setDismissed] = useState(true);
 
@@ -21,7 +23,14 @@ export function PushNotificationPrompt() {
     setDismissed(true);
   };
 
-  if (!isSupported || isSubscribed || dismissed) return null;
+  if (
+    pathname.startsWith("/preview/") ||
+    !isSupported ||
+    isSubscribed ||
+    dismissed
+  ) {
+    return null;
+  }
 
   return (
     <div className="site-font-theme fixed inset-x-0 bottom-0 z-50 flex flex-col gap-2.5 border-t border-white/10 bg-[var(--color-brand-blue)] px-4 py-3 text-white shadow-[0_-8px_24px_rgba(1,21,133,0.28)] sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:px-6 sm:py-3.5">
