@@ -181,8 +181,8 @@ export function WelcomePackJoinPage({
 
         <div className="grid min-w-0 justify-items-center gap-3 text-center">
           <p className="min-w-0 max-w-full font-[var(--font-be-vietnam-pro)] text-sm leading-[1.6] text-white/82 sm:max-w-[32rem]">
-            Join the orientation group for your next steps, preparation, and
-            important SOGP updates.
+            Join your cohort community on Telegram for your orientation message
+            and for the next step in the SOGP journey.
           </p>
           <a
             href={telegramUrl}
