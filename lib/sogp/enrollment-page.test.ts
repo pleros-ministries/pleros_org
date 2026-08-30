@@ -30,6 +30,8 @@ test("keeps the enrolment page focused with a compact summary list", () => {
   expect(formSource).toContain('id="referralSourceOther"');
   expect(formSource).not.toContain("What do you want to get out of SOGP?");
   expect(formSource).toMatch(/<select\s+id="birthYear"/);
+  expect(formSource.match(/appearance-none/g)?.length ?? 0).toBeGreaterThanOrEqual(3);
+  expect(formSource.match(/right-4/g)?.length ?? 0).toBeGreaterThanOrEqual(3);
   expect(formSource).not.toContain('type="checkbox"');
   expect(formSource).toMatch(/<select\s+id="whatsappConsent"/);
   expect(formSource).toContain(

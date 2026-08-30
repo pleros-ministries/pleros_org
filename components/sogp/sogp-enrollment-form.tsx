@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { ArrowRight, LoaderCircle } from "lucide-react";
+import { ArrowRight, ChevronDown, LoaderCircle } from "lucide-react";
 import type { CountryCode } from "libphonenumber-js/min";
 
 import { Button } from "@/components/ui/button";
@@ -111,21 +111,24 @@ function ReferralSourceFields({
   return (
     <div className="grid gap-2">
       <label htmlFor="referralSource" className="font-[var(--font-be-vietnam-pro)] text-sm font-medium text-[var(--color-text-strong)]">How did you hear about us?</label>
-      <select
-        id="referralSource"
-        name="referralSource"
-        value={source}
-        onChange={(event) => onSourceChange(event.target.value)}
-        onBlur={onSourceBlur}
-        aria-invalid={Boolean(sourceError)}
-        aria-describedby={sourceError ? "referral-source-error" : undefined}
-        className="h-11 w-full rounded-[var(--radius-sm)] border border-[var(--color-line-strong)] bg-white px-4 text-sm text-[var(--color-text-strong)] outline-none transition focus-visible:border-[var(--color-brand-blue)] focus-visible:ring-4 focus-visible:ring-[var(--color-focus)]"
-      >
-        <option value="">Select an option</option>
-        {SOGP_REFERRAL_OPTIONS.map((option) => (
-          <option key={option.value} value={option.value}>{option.label}</option>
-        ))}
-      </select>
+      <div className="relative">
+        <select
+          id="referralSource"
+          name="referralSource"
+          value={source}
+          onChange={(event) => onSourceChange(event.target.value)}
+          onBlur={onSourceBlur}
+          aria-invalid={Boolean(sourceError)}
+          aria-describedby={sourceError ? "referral-source-error" : undefined}
+          className="h-11 w-full appearance-none rounded-[var(--radius-sm)] border border-[var(--color-line-strong)] bg-white px-4 pr-11 text-sm text-[var(--color-text-strong)] outline-none transition focus-visible:border-[var(--color-brand-blue)] focus-visible:ring-4 focus-visible:ring-[var(--color-focus)]"
+        >
+          <option value="">Select an option</option>
+          {SOGP_REFERRAL_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>{option.label}</option>
+          ))}
+        </select>
+        <ChevronDown className="pointer-events-none absolute right-4 top-1/2 size-4 -translate-y-1/2 text-[var(--color-brand-blue)]" aria-hidden="true" />
+      </div>
       <FieldError id="referral-source-error" error={sourceError} />
       {source === "other" ? (
         <div className="grid gap-2 pt-1">
@@ -361,22 +364,25 @@ export function SogpEnrollmentForm({
         </div>
         <div className="grid gap-2">
           <label htmlFor="birthYear" className="font-[var(--font-be-vietnam-pro)] text-sm font-medium text-[var(--color-text-strong)]">Year of birth</label>
-          <select
-            id="birthYear"
-            name="birthYear"
-            autoComplete="bday-year"
-            value={values.birthYear}
-            onChange={(event) => update("birthYear", event.target.value)}
-            onBlur={() => markTouched("birthYear")}
-            aria-invalid={Boolean(birthYearError)}
-            aria-describedby={birthYearError ? "birth-year-error" : undefined}
-            className="h-11 w-full rounded-[var(--radius-sm)] border border-[var(--color-line-strong)] bg-white px-4 text-sm text-[var(--color-text-strong)] outline-none transition focus-visible:border-[var(--color-brand-blue)] focus-visible:ring-4 focus-visible:ring-[var(--color-focus)]"
-          >
-            <option value="">Select year</option>
-            {BIRTH_YEAR_OPTIONS.map((year) => (
-              <option key={year} value={year}>{year}</option>
-            ))}
-          </select>
+          <div className="relative">
+            <select
+              id="birthYear"
+              name="birthYear"
+              autoComplete="bday-year"
+              value={values.birthYear}
+              onChange={(event) => update("birthYear", event.target.value)}
+              onBlur={() => markTouched("birthYear")}
+              aria-invalid={Boolean(birthYearError)}
+              aria-describedby={birthYearError ? "birth-year-error" : undefined}
+              className="h-11 w-full appearance-none rounded-[var(--radius-sm)] border border-[var(--color-line-strong)] bg-white px-4 pr-11 text-sm text-[var(--color-text-strong)] outline-none transition focus-visible:border-[var(--color-brand-blue)] focus-visible:ring-4 focus-visible:ring-[var(--color-focus)]"
+            >
+              <option value="">Select year</option>
+              {BIRTH_YEAR_OPTIONS.map((year) => (
+                <option key={year} value={year}>{year}</option>
+              ))}
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-4 top-1/2 size-4 -translate-y-1/2 text-[var(--color-brand-blue)]" aria-hidden="true" />
+          </div>
           <FieldError id="birth-year-error" error={birthYearError} />
         </div>
       </div>
@@ -403,20 +409,23 @@ export function SogpEnrollmentForm({
         <label htmlFor="whatsappConsent" className="font-[var(--font-be-vietnam-pro)] text-sm font-medium leading-[1.45] text-[var(--color-text-strong)]">
           Would you like to receive SOGP updates and course reminders via WhatsApp?
         </label>
-        <select
-          id="whatsappConsent"
-          name="whatsappConsent"
-          value={values.whatsappConsent}
-          onChange={(event) => update("whatsappConsent", event.target.value as "" | "yes" | "no")}
-          onBlur={() => markTouched("whatsappConsent")}
-          aria-invalid={Boolean(whatsappConsentError)}
-          aria-describedby={whatsappConsentError ? "whatsapp-consent-error" : undefined}
-          className="h-11 w-full rounded-[var(--radius-sm)] border border-[var(--color-line-strong)] bg-white px-4 text-sm text-[var(--color-text-strong)] outline-none transition focus-visible:border-[var(--color-brand-blue)] focus-visible:ring-4 focus-visible:ring-[var(--color-focus)]"
-        >
-          <option value="">Select an option</option>
-          <option value="yes">Yes</option>
-          <option value="no">No</option>
-        </select>
+        <div className="relative">
+          <select
+            id="whatsappConsent"
+            name="whatsappConsent"
+            value={values.whatsappConsent}
+            onChange={(event) => update("whatsappConsent", event.target.value as "" | "yes" | "no")}
+            onBlur={() => markTouched("whatsappConsent")}
+            aria-invalid={Boolean(whatsappConsentError)}
+            aria-describedby={whatsappConsentError ? "whatsapp-consent-error" : undefined}
+            className="h-11 w-full appearance-none rounded-[var(--radius-sm)] border border-[var(--color-line-strong)] bg-white px-4 pr-11 text-sm text-[var(--color-text-strong)] outline-none transition focus-visible:border-[var(--color-brand-blue)] focus-visible:ring-4 focus-visible:ring-[var(--color-focus)]"
+          >
+            <option value="">Select an option</option>
+            <option value="yes">Yes</option>
+            <option value="no">No</option>
+          </select>
+          <ChevronDown className="pointer-events-none absolute right-4 top-1/2 size-4 -translate-y-1/2 text-[var(--color-brand-blue)]" aria-hidden="true" />
+        </div>
         <FieldError id="whatsapp-consent-error" error={whatsappConsentError} />
       </div>
       {formError ? (
