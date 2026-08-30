@@ -33,7 +33,9 @@ test("renders a calendar-led four-level SOGP journey with required reviews", () 
   expect(dailyContent).toBeGreaterThan(calendar);
   expect(source).toContain("Assessment");
   expect(source).toContain("Required live review");
-  expect(source).toContain("Complete using recording");
+  expect(source).toContain("Watch recording");
+  expect(source).toContain("Today’s activities");
+  expect(source).toContain("Mark Prayer Watch complete");
   expect(source).toContain("Level {level.level}");
   expect(source).toContain("level.status.replaceAll");
   expect(source).not.toContain("Extras");

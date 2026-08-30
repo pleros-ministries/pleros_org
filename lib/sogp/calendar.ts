@@ -17,6 +17,20 @@ function addDays(dateKey: string, amount: number) {
   return date.toISOString().slice(0, 10);
 }
 
+export function getSogpLearningWeek<T extends { dateKey: string }>(
+  days: T[],
+  selectedDateKey: string,
+): Array<T | null> {
+  const selected = parseDateKey(selectedDateKey);
+  const daysSinceMonday = (selected.getUTCDay() + 6) % 7;
+  const monday = addDays(selectedDateKey, -daysSinceMonday);
+  const daysByDate = new Map(days.map((day) => [day.dateKey, day]));
+
+  return Array.from({ length: 7 }, (_, index) =>
+    daysByDate.get(addDays(monday, index)) ?? null,
+  );
+}
+
 export function buildPreparationDateKeys(startsAt: Date): string[] {
   const startDateKey = toLagosDateKey(startsAt);
   return Array.from({ length: 30 }, (_, index) =>
