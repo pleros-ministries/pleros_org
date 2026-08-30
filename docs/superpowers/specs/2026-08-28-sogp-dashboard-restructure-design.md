@@ -1,5 +1,9 @@
 # SOGP-centred dashboard restructure — design specification
 
+> The curriculum, active-SOGP schedule, progression, eligibility,
+> administration, and active-dashboard sections are superseded by
+> `2026-08-30-sogp-four-level-curriculum-design.md`.
+
 ## Objective
 
 Reorient the authenticated Pleros dashboard around School of God's Purpose (SOGP), retire PPC as a learner-facing product, add a 30-day enrolment-gated preparation journey, and make the active four-week SOGP experience calendar-led.
