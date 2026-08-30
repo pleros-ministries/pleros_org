@@ -235,9 +235,6 @@ export function WelcomePackGiftsPage({
       <div className="container-pleros grid max-w-[36rem] gap-9 pb-12">
         <HubBackLink />
         <header className="grid gap-2">
-          <p className="site-hero-eyebrow text-[var(--color-brand-blue)]">
-            Welcome Pack
-          </p>
           <h1 className="site-hero-heading text-[clamp(2.5rem,7vw,4rem)] text-[var(--color-brand-blue)]">
             Your gifts
           </h1>

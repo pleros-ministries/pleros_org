@@ -101,6 +101,7 @@ describe("focused Welcome Pack pages", () => {
     expect(orientationHtml).toContain("Orientation video");
     expect(orientationHtml).toContain("sogp-welcome-WaXgk9zqi78.mp4");
     expect(orientationHtml).not.toContain("site-hero-eyebrow");
+    expect(giftsHtml).not.toContain("site-hero-eyebrow");
     expect(orientationHtml).toContain("uppercase");
     expect(orientationHtml).toContain("Welcome Pack");
     expect(giftsHtml).toContain("Welcome to Purpose (ebook)");
