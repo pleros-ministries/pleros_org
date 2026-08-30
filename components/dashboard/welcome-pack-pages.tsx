@@ -147,13 +147,13 @@ export function WelcomePackJoinPage({
   videoSrc: string | null;
 }) {
   return (
-    <main className="site-font-theme grid min-h-screen place-items-center bg-[var(--color-brand-blue)] px-5 py-10 text-white">
-      <section className="grid w-full max-w-[34rem] gap-7">
-        <header className="grid gap-3 text-center">
+    <main className="site-font-theme grid min-h-screen grid-cols-[minmax(0,1fr)] place-items-center bg-[var(--color-brand-blue)] px-5 py-10 text-white">
+      <section className="grid min-w-0 w-full max-w-full gap-7 sm:max-w-[34rem]">
+        <header className="grid min-w-0 gap-3 text-center">
           <p className="site-hero-eyebrow justify-center text-[var(--color-brand-lime)]">
             Welcome to SOGP
           </p>
-          <h1 className="site-hero-heading text-[clamp(2.5rem,9vw,4rem)] text-white">
+          <h1 className="site-hero-heading min-w-0 text-[clamp(2.5rem,9vw,4rem)] text-white">
             Your journey starts here
           </h1>
         </header>
@@ -164,12 +164,12 @@ export function WelcomePackJoinPage({
             playsInline
             preload="metadata"
             src={videoSrc}
-            className="aspect-video w-full rounded-[var(--radius-md)] bg-black object-cover shadow-[var(--shadow-lg)]"
+            className="aspect-video w-full max-w-full rounded-[var(--radius-md)] bg-black object-cover shadow-[var(--shadow-lg)]"
           />
         ) : (
-          <div className="grid aspect-video place-items-center rounded-[var(--radius-md)] border border-white/18 bg-white/8 p-6 text-center">
+          <div className="grid min-w-0 aspect-video place-items-center rounded-[var(--radius-md)] border border-white/18 bg-white/8 p-5 text-center sm:p-6">
             <div className="grid gap-2">
-              <strong className="font-[var(--font-sen)] text-xl">
+              <strong className="break-words font-[var(--font-sen)] text-lg sm:text-xl">
                 Welcome message video coming soon
               </strong>
               <span className="font-[var(--font-be-vietnam-pro)] text-sm text-white/72">
@@ -179,8 +179,8 @@ export function WelcomePackJoinPage({
           </div>
         )}
 
-        <div className="grid justify-items-center gap-3 text-center">
-          <p className="max-w-[32rem] font-[var(--font-be-vietnam-pro)] text-sm leading-[1.6] text-white/82">
+        <div className="grid min-w-0 justify-items-center gap-3 text-center">
+          <p className="min-w-0 max-w-full font-[var(--font-be-vietnam-pro)] text-sm leading-[1.6] text-white/82 sm:max-w-[32rem]">
             Join the orientation group for your next steps, preparation, and
             important SOGP updates.
           </p>
@@ -188,9 +188,9 @@ export function WelcomePackJoinPage({
             href={telegramUrl}
             target="_blank"
             rel="noreferrer"
-            className="site-button-text inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-white px-7 text-sm font-semibold text-[var(--color-brand-blue)] transition-transform duration-150 hover:-translate-y-px"
+            className="site-button-text inline-flex min-h-12 max-w-full items-center justify-center gap-2 rounded-full bg-white px-5 text-center text-xs font-semibold text-[var(--color-brand-blue)] transition-transform duration-150 hover:-translate-y-px sm:px-7 sm:text-sm"
           >
-            <SendIcon className="size-4" />
+            <SendIcon className="size-4 shrink-0" />
             Join the orientation group
           </a>
         </div>

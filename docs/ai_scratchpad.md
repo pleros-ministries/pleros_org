@@ -212,6 +212,7 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - `/thankyou` callout share CTAs should keep the same text-to-button spacing rhythm as the first share appeal section.
 - For `/welcome`, `/thankyou`, and related public funnel pages, use shared public typography primitives (`site-hero-eyebrow`, `site-hero-heading`, `site-section-heading`, `site-section-intro`, `site-pathway-title`) before custom font-family, tracking, or arbitrary text-size classes.
 - Welcome-pack hero headings should avoid narrow mobile `ch` caps that create five-line wraps; widen the measure and use explicit breakpoint sizes rather than viewport-scaling text.
+- Focused Welcome Pack pages must use a zero-minimum grid track and `min-w-0`/`max-w-full` constraints on direct content; verify `/join`, hub, orientation, and gifts at both 320px and 375px so max-content text or CTAs cannot widen the viewport.
 - The welcome-pack orientation join page eyebrow should say `Welcome to SOGP`, matching the programme-specific journey and Telegram group.
 - Welcome-pack dashboard hero copy should stay lean; omit supporting paragraphs when the heading and gift sections already explain the page.
 - Welcome funnel greetings must prefer explicit submitted names from lead/cookie data and suppress names derived from email identifiers; stale Better Auth session names may predate the first-name modal.

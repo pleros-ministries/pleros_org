@@ -84,6 +84,9 @@ describe("focused Welcome Pack pages", () => {
     expect(html).toContain("Join the orientation group");
     expect(html).toContain("https://t.me/pleros_sogp");
     expect(html).toContain("Welcome message video coming soon");
+    expect(html).toContain("grid-cols-[minmax(0,1fr)]");
+    expect(html).toContain("min-w-0");
+    expect(html).toContain("max-w-full");
     expect(html).not.toContain("sogp-welcome-WaXgk9zqi78.mp4");
     expect(html).not.toContain("Orientation video");
     expect(html).not.toContain("Your gifts");
