@@ -7,10 +7,12 @@ import type { SogpJourneyData } from "@/lib/db/queries/sogp-journey";
 
 export function SogpLevelTracker({
   levels,
+  defaultExpanded = false,
 }: {
   levels: SogpJourneyData["levels"];
+  defaultExpanded?: boolean;
 }) {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(defaultExpanded);
 
   return (
     <section className="overflow-hidden rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white">
