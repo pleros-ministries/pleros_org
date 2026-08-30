@@ -23,6 +23,7 @@ import { PRAYER_WATCH_YOUTUBE_URL } from "@/lib/prayer-watch";
 
 import { SogpContextSidebar } from "./sogp-context-sidebar";
 import { SogpCourseSidebar } from "./sogp-course-sidebar";
+import { SogpActivitySection } from "./sogp-activity-section";
 import { SogpPushPanel } from "./sogp-push-panel";
 
 const queryKey = ["sogp", "journey"] as const;
@@ -201,16 +202,14 @@ export function SogpJourneyPage({
             </h2>
           </div>
 
-          <section aria-label="Today’s activities" className="grid gap-3">
+          <section aria-label="Today’s activities" className="grid gap-5 md:gap-6">
             {selectedDay.track?.accessible ? (
-              <article className="grid gap-4 rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white p-4 md:p-5">
-                <header className="flex items-start gap-3">
-                  <span className="grid size-8 shrink-0 place-items-center rounded-full bg-[var(--color-brand-blue)] font-[var(--font-sen)] text-xs font-semibold text-white">1</span>
-                  <div className="grid gap-0.5">
-                    <div className="flex items-center gap-2"><BookOpenIcon className="size-4 text-[var(--color-brand-blue)]" strokeWidth={2} /><h3 className="font-[var(--font-sen)] text-base font-semibold text-[var(--color-text-strong)]">Teaching</h3></div>
-                    <p className="text-xs text-[var(--color-text-muted)]">Listen at your pace. Audio playback is not tracked.</p>
-                  </div>
-                </header>
+              <SogpActivitySection
+                step="1"
+                title="Teaching"
+                description="Listen at your pace. Audio playback is not tracked."
+                icon={<BookOpenIcon className="size-4 text-[var(--color-brand-blue)]" strokeWidth={2} />}
+              >
                 {selectedDay.track.audioUrl ? (
                   <div className="grid gap-3">
                     <audio controls preload="metadata" src={selectedDay.track.audioUrl} className="w-full" />
@@ -219,23 +218,25 @@ export function SogpJourneyPage({
                     </a>
                   </div>
                 ) : <p className="text-sm text-[var(--color-text-muted)]">The teaching audio is being prepared.</p>}
-              </article>
+              </SogpActivitySection>
             ) : selectedDay.track ? (
-              <article className="grid gap-2 rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white p-4 md:p-5">
-                <p className="text-[0.68rem] font-semibold uppercase tracking-[0.1em] text-[var(--color-brand-blue)]">Teaching and assessment</p>
+              <SogpActivitySection
+                step="1"
+                title="Teaching and assessment"
+                description="Complete the preceding level to unlock this activity."
+                icon={<BookOpenIcon className="size-4 text-[var(--color-brand-blue)]" strokeWidth={2} />}
+              >
                 <h3 className="font-[var(--font-sen)] text-lg font-semibold text-[var(--color-text-strong)]">This track is locked</h3>
                 <p className="text-sm text-[var(--color-text-muted)]">{selectedDay.track.lockedReason}</p>
-              </article>
+              </SogpActivitySection>
             ) : null}
 
-            <article className="grid gap-4 rounded-[var(--radius-md)] bg-[var(--color-brand-sky)] p-4 md:p-5">
-              <header className="flex items-start gap-3">
-                <span className="grid size-8 shrink-0 place-items-center rounded-full bg-white font-[var(--font-sen)] text-xs font-semibold text-[var(--color-brand-blue)]">{selectedDay.track ? "2" : "1"}</span>
-                <div className="grid gap-0.5">
-                  <div className="flex items-center gap-2"><Clock3Icon className="size-4 text-[var(--color-brand-blue)]" strokeWidth={2} /><h3 className="font-[var(--font-sen)] text-base font-semibold text-[var(--color-text-strong)]">5:30 am Prayer Watch</h3></div>
-                  <p className="text-xs text-[var(--color-text-muted)]">Join live or use the replay, then confirm your attendance.</p>
-                </div>
-              </header>
+            <SogpActivitySection
+              step={selectedDay.track ? "2" : "1"}
+              title="5:30 am Prayer Watch"
+              description="Join live or use the replay, then confirm your attendance."
+              icon={<Clock3Icon className="size-4 text-[var(--color-brand-blue)]" strokeWidth={2} />}
+            >
               <div className="flex flex-wrap gap-2">
                 <a href={PRAYER_WATCH_YOUTUBE_URL} target="_blank" rel="noreferrer" className="inline-flex min-h-10 items-center gap-2 rounded-full bg-[var(--color-brand-blue)] px-4 text-xs font-semibold text-white active:scale-[0.96]">Open Pleros Live <ExternalLinkIcon className="size-3.5" strokeWidth={2} /></a>
                 <button type="button" disabled={isFuture || mutation.isPending} onClick={() => mutation.mutate({ kind: "prayer", dateKey: selectedDay.dateKey, complete: !selectedDay.prayerWatchComplete })} className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[var(--color-brand-blue)] bg-white px-4 text-xs font-semibold text-[var(--color-brand-blue)] active:scale-[0.96] disabled:cursor-not-allowed disabled:opacity-50">
@@ -243,35 +244,34 @@ export function SogpJourneyPage({
                   {selectedDay.prayerWatchComplete ? "Prayer Watch completed" : "Mark Prayer Watch complete"}
                 </button>
               </div>
-            </article>
+            </SogpActivitySection>
 
             {selectedDay.track?.accessible ? (
-              <article className="grid gap-4 rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white p-4 md:p-5">
-                <header className="flex items-start gap-3">
-                  <span className="grid size-8 shrink-0 place-items-center rounded-full bg-[var(--color-brand-lime)] font-[var(--font-sen)] text-xs font-semibold text-[var(--color-brand-blue)]">3</span>
-                  <div className="grid gap-0.5">
-                    <div className="flex items-center gap-2"><FileQuestionIcon className="size-4 text-[var(--color-brand-blue)]" strokeWidth={2} /><h3 className="font-[var(--font-sen)] text-base font-semibold text-[var(--color-text-strong)]">Assessment</h3></div>
-                    <p className="text-xs text-[var(--color-text-muted)]">Your assessment—not audio playback—completes this teaching.</p>
-                  </div>
-                </header>
+              <SogpActivitySection
+                step="3"
+                title="Assessment"
+                description="Your assessment—not audio playback—completes this teaching."
+                icon={<FileQuestionIcon className="size-4 text-[var(--color-brand-blue)]" strokeWidth={2} />}
+              >
                 <div className="flex flex-wrap items-center gap-3">
-                  <Link href={selectedDay.track.assessmentHref} onClick={(event) => { if (preview) event.preventDefault(); }} className="inline-flex min-h-10 items-center gap-2 rounded-full bg-[var(--color-brand-lime)] px-4 text-xs font-semibold text-[var(--color-brand-blue)] active:scale-[0.96]">{selectedDay.track.assessmentComplete ? "Review assessment" : "Start assessment"} <FileQuestionIcon className="size-3.5" strokeWidth={2} /></Link>
+                  <Link href={selectedDay.track.assessmentHref} onClick={(event) => { if (preview) event.preventDefault(); }} className="inline-flex min-h-10 items-center gap-2 rounded-full bg-[var(--color-brand-blue)] px-4 text-xs font-semibold text-white active:scale-[0.96]">{selectedDay.track.assessmentComplete ? "Review assessment" : "Start assessment"} <FileQuestionIcon className="size-3.5" strokeWidth={2} /></Link>
                   <span className="inline-flex items-center gap-1.5 text-xs text-[var(--color-text-muted)]">{selectedDay.track.assessmentComplete ? <CheckCircle2Icon className="size-4 text-[var(--color-brand-blue)]" strokeWidth={2} /> : <CircleIcon className="size-4" strokeWidth={2} />}{selectedDay.track.assessmentComplete ? "Complete" : "Not complete"}</span>
                 </div>
-              </article>
+              </SogpActivitySection>
             ) : null}
 
             {selectedDay.review ? (
-              <article className="grid gap-4 rounded-[var(--radius-md)] bg-[var(--color-brand-blue)] p-4 text-white md:p-5">
-                <header className="flex items-start gap-3">
-                  <span className="grid size-8 shrink-0 place-items-center rounded-full bg-[var(--color-brand-lime)] font-[var(--font-sen)] text-xs font-semibold text-[var(--color-brand-blue)]">2</span>
-                  <div className="grid gap-0.5"><div className="flex items-center gap-2"><CalendarCheckIcon className="size-4 text-[var(--color-brand-lime)]" strokeWidth={2} /><h3 className="font-[var(--font-sen)] text-base font-semibold">Required live review</h3></div><p className="text-xs text-white/75">Join live when possible or complete the recording afterward.</p></div>
-                </header>
+              <SogpActivitySection
+                step="2"
+                title="Required live review"
+                description="Join live when possible or complete the recording afterward."
+                icon={<CalendarCheckIcon className="size-4 text-[var(--color-brand-blue)]" strokeWidth={2} />}
+              >
                 <div className="flex flex-wrap gap-2">
-                  {(selectedDay.review.recordingUrl ?? selectedDay.review.liveUrl) ? <a href={selectedDay.review.recordingUrl ?? selectedDay.review.liveUrl ?? "#"} target="_blank" rel="noreferrer" className="inline-flex min-h-10 items-center gap-2 rounded-full bg-white px-4 text-xs font-semibold text-[var(--color-brand-blue)] active:scale-[0.96]">{selectedDay.review.recordingUrl ? "Watch recording" : "Join live review"} <ExternalLinkIcon className="size-3.5" strokeWidth={2} /></a> : null}
-                  <button type="button" disabled={isFuture || mutation.isPending || (!selectedDay.review.liveUrl && !selectedDay.review.recordingUrl)} onClick={() => mutation.mutate({ kind: "review", dateKey: selectedDay.dateKey, reviewId: selectedDay.review!.id, source: reviewSource, complete: !selectedDay.review!.complete })} className="inline-flex min-h-10 items-center gap-2 rounded-full border border-white/30 px-4 text-xs font-semibold text-white active:scale-[0.96] disabled:opacity-50">{selectedDay.review.complete ? <CheckCircle2Icon className="size-4" strokeWidth={2} /> : <CircleIcon className="size-4" strokeWidth={2} />}{selectedDay.review.complete ? "Review completed" : "Mark review complete"}</button>
+                  {(selectedDay.review.recordingUrl ?? selectedDay.review.liveUrl) ? <a href={selectedDay.review.recordingUrl ?? selectedDay.review.liveUrl ?? "#"} target="_blank" rel="noreferrer" className="inline-flex min-h-10 items-center gap-2 rounded-full bg-[var(--color-brand-blue)] px-4 text-xs font-semibold text-white active:scale-[0.96]">{selectedDay.review.recordingUrl ? "Watch recording" : "Join live review"} <ExternalLinkIcon className="size-3.5" strokeWidth={2} /></a> : null}
+                  <button type="button" disabled={isFuture || mutation.isPending || (!selectedDay.review.liveUrl && !selectedDay.review.recordingUrl)} onClick={() => mutation.mutate({ kind: "review", dateKey: selectedDay.dateKey, reviewId: selectedDay.review!.id, source: reviewSource, complete: !selectedDay.review!.complete })} className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[var(--color-brand-blue)] px-4 text-xs font-semibold text-[var(--color-brand-blue)] active:scale-[0.96] disabled:opacity-50">{selectedDay.review.complete ? <CheckCircle2Icon className="size-4" strokeWidth={2} /> : <CircleIcon className="size-4" strokeWidth={2} />}{selectedDay.review.complete ? "Review completed" : "Mark review complete"}</button>
                 </div>
-              </article>
+              </SogpActivitySection>
             ) : null}
           </section>
           {mutation.error ? <p role="alert" className="text-sm text-red-700">{mutation.error.message}</p> : null}
