@@ -24,6 +24,7 @@ import { PRAYER_WATCH_YOUTUBE_URL } from "@/lib/prayer-watch";
 import { SogpContextSidebar } from "./sogp-context-sidebar";
 import { SogpCourseSidebar } from "./sogp-course-sidebar";
 import { SogpActivitySection } from "./sogp-activity-section";
+import { SogpLessonHeading } from "./sogp-lesson-heading";
 import { SogpPushPanel } from "./sogp-push-panel";
 
 const queryKey = ["sogp", "journey"] as const;
@@ -193,14 +194,10 @@ export function SogpJourneyPage({
             ))}
           </section>
 
-          <div className="grid gap-1.5 border-b border-[var(--color-line)] pb-4">
-            <p className="text-[0.68rem] font-semibold uppercase tracking-[0.1em] text-[var(--color-brand-blue)]">
-              {selectedDay.track ? `Level ${selectedDay.track.curriculumLevel} · Track ${selectedDay.track.levelPosition}` : selectedDay.kind === "review" ? "Required review" : "Daily formation"} · {selectedDay.dateKey}
-            </p>
-            <h2 className="max-w-[42rem] font-[var(--font-sen)] text-[1.65rem] font-semibold leading-[1.08] tracking-[-0.045em] text-[var(--color-text-strong)] md:text-[1.9rem]">
-              {selectedDay.track?.title ?? selectedDay.review?.title ?? "Prayer Watch and devotion"}
-            </h2>
-          </div>
+          <SogpLessonHeading
+            metadata={`${selectedDay.track ? `Level ${selectedDay.track.curriculumLevel} · Track ${selectedDay.track.levelPosition}` : selectedDay.kind === "review" ? "Required review" : "Daily formation"} · ${selectedDay.dateKey}`}
+            title={selectedDay.track?.title ?? selectedDay.review?.title ?? "Prayer Watch and devotion"}
+          />
 
           <section aria-label="Today’s activities" className="grid gap-5 md:gap-6">
             {selectedDay.track?.accessible ? (
