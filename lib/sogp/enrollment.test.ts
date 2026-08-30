@@ -14,14 +14,14 @@ describe("SOGP enrolment", () => {
     expect(years.at(-1)).toBe("1900");
   });
 
-  test("redirects successful enrolments to the configured Telegram channel", () => {
+  test("redirects successful enrolments to the Welcome Pack introduction", () => {
     expect(
       buildSogpEnrollmentRedirect({
         cohortChannelUrl: " https://t.me/cohort_channel ",
         configuredChannelUrl: "https://t.me/default_channel",
       }),
     ).toEqual({
-      redirectTo: "https://t.me/cohort_channel",
+      redirectTo: "/dashboard/welcomepack/join",
       telegramUrl: "https://t.me/cohort_channel",
     });
     expect(
@@ -29,7 +29,7 @@ describe("SOGP enrolment", () => {
         configuredChannelUrl: " https://t.me/pleros_sogp ",
       }),
     ).toEqual({
-      redirectTo: "https://t.me/pleros_sogp",
+      redirectTo: "/dashboard/welcomepack/join",
       telegramUrl: "https://t.me/pleros_sogp",
     });
     expect(buildSogpEnrollmentRedirect({})).toBeNull();

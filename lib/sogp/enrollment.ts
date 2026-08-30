@@ -87,7 +87,7 @@ export function buildSogpEnrollmentRedirect(input: {
 
   return telegramUrl
     ? {
-        redirectTo: telegramUrl,
+        redirectTo: "/dashboard/welcomepack/join",
         telegramUrl,
       }
     : null;
