@@ -3,18 +3,20 @@ import { describe, expect, test } from "vitest";
 import { buildFirstCohortTrackSelection } from "./first-cohort";
 
 describe("buildFirstCohortTrackSelection", () => {
-  test("builds 20 required calendar days and four calendar-free extras", () => {
-    const tracks = buildFirstCohortTrackSelection({
-      disciplineLessonNumber: 2,
-      requiredPracticalLessonNumbers: [4, 8, 10, 18],
-      optionalPracticalLessonNumbers: [3, 5, 6, 7],
-    });
+  test("builds 24 required tracks across four levels", () => {
+    const tracks = buildFirstCohortTrackSelection();
 
     expect(tracks).toHaveLength(24);
-    expect(tracks.filter((track) => track.isRequired).map((track) => track.dayNumber)).toEqual(
-      Array.from({ length: 20 }, (_, index) => index + 1),
+    expect(tracks.map((track) => track.dayNumber)).toEqual(
+      Array.from({ length: 24 }, (_, index) => index + 1),
     );
-    expect(tracks.slice(0, 4).every((track) => track.levelId === 1)).toBe(true);
+    expect(tracks.every((track) => track.isRequired)).toBe(true);
+    expect(tracks.map((track) => track.curriculumLevel)).toEqual([
+      1, 1, 1, 1, 1, 1,
+      2, 2, 2, 2, 2, 2,
+      3, 3, 3, 3, 3, 3,
+      4, 4, 4, 4, 4, 4,
+    ]);
     expect(tracks[4]).toMatchObject({
       levelId: 3,
       lessonNumber: 2,
@@ -22,28 +24,17 @@ describe("buildFirstCohortTrackSelection", () => {
       dayNumber: 5,
       isRequired: true,
     });
-    expect(tracks.slice(5, 16).every((track) => track.levelId === 2)).toBe(true);
-    expect(tracks.slice(16, 20).map((track) => track.lessonNumber)).toEqual([
-      4, 8, 10, 18,
-    ]);
-    expect(tracks.slice(20)).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ dayNumber: null, curriculumLevel: 3, isRequired: false, liveSessionNumber: null }),
-      ]),
-    );
-    expect(tracks.slice(20).every((track) => track.dayNumber === null)).toBe(true);
-    expect(tracks.slice(20).every((track) => track.liveSessionNumber === null)).toBe(true);
-  });
-
-  test("requires four unique required and at most four optional practical tracks", () => {
-    expect(() => buildFirstCohortTrackSelection({ disciplineLessonNumber: 1, requiredPracticalLessonNumbers: [2, 3, 4], optionalPracticalLessonNumbers: [] })).toThrow(
-      "Select exactly four required practical tracks.",
-    );
-    expect(() => buildFirstCohortTrackSelection({ disciplineLessonNumber: 1, requiredPracticalLessonNumbers: [2, 3, 4, 5], optionalPracticalLessonNumbers: [6, 7, 8, 9, 10] })).toThrow(
-      "Select no more than four optional practical tracks.",
-    );
-    expect(() => buildFirstCohortTrackSelection({ disciplineLessonNumber: 1, requiredPracticalLessonNumbers: [1, 2, 3, 4], optionalPracticalLessonNumbers: [] })).toThrow(
-      "Practical track selections must be unique.",
-    );
+    expect(tracks[5]).toMatchObject({
+      levelId: 3,
+      lessonNumber: 1,
+      curriculumLevel: 1,
+      dayNumber: 6,
+    });
+    expect(tracks[17]).toMatchObject({
+      levelId: 3,
+      lessonNumber: 3,
+      curriculumLevel: 3,
+      dayNumber: 18,
+    });
   });
 });
