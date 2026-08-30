@@ -5,8 +5,7 @@ import {
   markLessonAudioListened,
   markLessonNotesRead,
 } from "@/lib/db/queries/lesson-progress";
-import { getSogpDayData } from "@/lib/db/queries/sogp";
-import { canAccessSogpDay } from "@/lib/sogp/day-access";
+import { requireSogpDayAccess } from "@/lib/sogp/server-access";
 
 export async function POST(
   request: Request,
@@ -20,8 +19,10 @@ export async function POST(
   if (!Number.isInteger(dayNumber) || !body || !["audio", "notes"].includes(body.signal ?? "")) {
     return NextResponse.json({ error: "Invalid progress signal" }, { status: 400 });
   }
-  const data = await getSogpDayData(session.user.id, dayNumber);
-  if (!data || !canAccessSogpDay({ learnerState: data.dashboard.learnerState, now: new Date(), releaseAt: data.track.releaseAt })) {
+  let data;
+  try {
+    data = await requireSogpDayAccess(session.user.id, dayNumber);
+  } catch {
     return NextResponse.json({ error: "Day is locked" }, { status: 403 });
   }
   if (body.signal === "audio") {

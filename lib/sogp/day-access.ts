@@ -6,13 +6,9 @@ export function canAccessSogpDay(input: {
   learnerState: SogpLearnerState;
   now: Date;
   releaseAt: Date;
-  curriculumLevel?: SogpCurriculumLevel;
-  previousLevelComplete?: boolean;
+  curriculumLevel: SogpCurriculumLevel;
+  previousLevelComplete: boolean;
 }) {
   if (input.learnerState === "withdrawn") return false;
-  return canAccessSogpTrack({
-    ...input,
-    curriculumLevel: input.curriculumLevel ?? 1,
-    previousLevelComplete: input.previousLevelComplete ?? true,
-  });
+  return canAccessSogpTrack(input);
 }

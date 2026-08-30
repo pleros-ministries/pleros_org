@@ -22,7 +22,7 @@ test("Prayer Watch mutations refresh SOGP progress", () => {
   expect(prayerActions).toContain('revalidatePath("/dashboard/sogp")');
 });
 
-test("renders a calendar-led SOGP journey with reviews and Extras", () => {
+test("renders a calendar-led four-level SOGP journey with required reviews", () => {
   const source = readFileSync(
     join(process.cwd(), "components", "sogp", "sogp-journey-page.tsx"),
     "utf8",
@@ -34,9 +34,23 @@ test("renders a calendar-led SOGP journey with reviews and Extras", () => {
   expect(source).toContain("Assessment");
   expect(source).toContain("Required live review");
   expect(source).toContain("Complete using recording");
-  expect(source).toContain("Extras");
-  expect(source).toContain("excluded from SOGP completion");
+  expect(source).toContain("Level {level.level}");
+  expect(source).toContain("level.status.replaceAll");
+  expect(source).not.toContain("Extras");
+  expect(source).not.toContain("excluded from SOGP completion");
   expect(source).not.toContain("Daily Pleros Podcast");
+});
+
+test("the journey query applies assessment and date gates to all 24 tracks", () => {
+  const source = readFileSync(
+    join(process.cwd(), "lib", "db", "queries", "sogp-journey.ts"),
+    "utf8",
+  );
+
+  expect(source).toContain("summarizeSogpLevels");
+  expect(source).toContain("canAccessSogpTrack");
+  expect(source).toContain("previousLevelComplete");
+  expect(source).not.toContain("extras:");
 });
 
 test("uses the calendar journey for certificate eligibility", () => {

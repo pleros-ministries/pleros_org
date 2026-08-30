@@ -34,7 +34,7 @@ describe("SOGP landing content", () => {
     expect(serialized).not.toContain('"Headline/Subheadline"');
   });
 
-  test("groups curriculum tracks into collapsible levels without resetting numbering", () => {
+  test("groups 24 curriculum tracks into four six-track levels", () => {
     const levels = getSogpCurriculumLevels();
 
     expect(
@@ -47,17 +47,22 @@ describe("SOGP landing content", () => {
       {
         value: "level-1",
         label: "Level 1",
-        numbers: [1, 2, 3, 4, 5],
+        numbers: [1, 2, 3, 4, 5, 6],
       },
       {
         value: "level-2",
         label: "Level 2",
-        numbers: [6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
+        numbers: [7, 8, 9, 10, 11, 12],
       },
       {
         value: "level-3",
         label: "Level 3",
-        numbers: [17, 18, 19, 20, 21, 22, 23, 24],
+        numbers: [13, 14, 15, 16, 17, 18],
+      },
+      {
+        value: "level-4",
+        label: "Level 4",
+        numbers: [19, 20, 21, 22, 23, 24],
       },
     ]);
   });

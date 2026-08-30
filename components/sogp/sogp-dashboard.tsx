@@ -229,7 +229,6 @@ function ActiveDashboard({ data }: { data: DashboardPayload }) {
   const nextClass = data.liveClasses.find(
     (item) => item.status !== "cancelled" && new Date(item.endsAt).getTime() > now,
   );
-  const optionalTracks = data.tracks.filter((track) => !track.isRequired);
 
   return (
     <div className="grid gap-5">
@@ -262,21 +261,6 @@ function ActiveDashboard({ data }: { data: DashboardPayload }) {
           <div className="mt-6 grid grid-cols-4 gap-3">{[1,2,3,4].map((week) => { const weekTracks=data.tracks.filter((track)=>track.isRequired&&track.weekNumber===week); const done=weekTracks.filter((track)=>track.completed).length; const value=weekTracks.length?Math.round(done/weekTracks.length*100):0; return <div key={week} className="grid justify-items-center gap-2"><div className={`grid size-10 place-items-center rounded-full border-2 ${value===100?"border-[var(--color-brand-lime)] bg-[var(--color-brand-lime)]":"border-[var(--color-line-strong)]"}`}><span className="text-xs font-semibold">{week}</span></div><span className="text-[0.65rem] text-[var(--color-text-muted)]">{value}%</span></div>;})}</div>
         </div>
       </section>
-      {optionalTracks.length ? (
-        <section className="grid gap-3 rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white p-5">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-brand-blue)]">Optional Level 3 listening</p>
-            <h2 className="mt-1 font-[var(--font-sen)] text-xl font-semibold tracking-[-0.04em] text-[var(--color-text-strong)]">Prepare for the Saturday live sessions</h2>
-          </div>
-          <div className="divide-y divide-[var(--color-line)] border-y border-[var(--color-line)]">
-            {optionalTracks.map((track) => {
-              const unlocked = new Date(track.releaseAt).getTime() <= now;
-              return <Link key={track.id} href={unlocked&&track.dayNumber!==null?`/dashboard/sogp/course/day/${track.dayNumber}`:"#"} aria-disabled={!unlocked} className={`flex items-center justify-between gap-4 py-3 text-sm ${unlocked?"text-[var(--color-text-strong)]":"pointer-events-none text-[var(--color-text-muted)] opacity-50"}`}><span>{track.lesson.title}</span><span className="text-xs text-[var(--color-brand-blue)]">Session {track.liveSessionNumber}</span></Link>;
-            })}
-          </div>
-          <p className="text-xs text-[var(--color-text-muted)]">Optional tracks enrich the live sessions and do not affect certification.</p>
-        </section>
-      ) : null}
     </div>
   );
 }
@@ -298,7 +282,7 @@ function ContextRail({ data }: { data: DashboardPayload }) {
       <section className="rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white p-5">
         <h2 className="font-[var(--font-sen)] text-lg font-semibold tracking-[-0.04em] text-[var(--color-text-strong)]">Assessment readiness</h2>
         <div className="mt-5 grid gap-4">{[
-          ["Required tracks", `${completed}/${trackCompletion.requiredTotal || 20}`, !eligibility.unmet.includes("tracks")],
+          ["Required tracks", `${completed}/${trackCompletion.requiredTotal || 24}`, !eligibility.unmet.includes("tracks")],
           ["Prayer Watch", `${eligibility.prayerPercent}%`, !eligibility.unmet.includes("prayer_watch")],
           ["Live classes", String(data.liveClassesAttended), !eligibility.unmet.includes("live_classes")],
         ].map(([label,value,ready])=><div key={String(label)} className="grid grid-cols-[1.25rem_1fr_auto] items-center gap-2"><span className={`grid size-5 place-items-center rounded-full ${ready?"bg-[var(--color-brand-lime)]":"border border-[var(--color-line-strong)]"}`}>{ready?<Check className="size-3 text-[var(--color-brand-blue)]"/>:<Circle className="size-2 text-[var(--color-text-muted)]"/>}</span><span className="text-xs font-medium text-[var(--color-text-strong)]">{label}</span><span className="text-xs text-[var(--color-text-muted)]">{value}</span></div>)}</div>

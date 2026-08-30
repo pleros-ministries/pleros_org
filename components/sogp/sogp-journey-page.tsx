@@ -157,6 +157,22 @@ export function SogpJourneyPage() {
         </aside>
 
         <main data-sogp-section="daily-content" className="grid gap-5">
+          <section aria-label="SOGP levels" className="grid grid-cols-2 gap-2 md:grid-cols-4">
+            {data.levels.map((level) => (
+              <div
+                key={level.level}
+                className={`grid gap-2 rounded-[var(--radius-md)] border p-3 ${level.status === "complete" ? "border-[var(--color-brand-lime)] bg-[var(--color-brand-lime)]/15" : level.status === "locked" ? "border-[var(--color-line)] bg-white opacity-60" : "border-[var(--color-brand-blue)] bg-[var(--color-brand-sky)]"}`}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <strong className="font-[var(--font-sen)] text-sm text-[var(--color-text-strong)]">Level {level.level}</strong>
+                  <span className="text-[0.62rem] font-semibold uppercase tracking-[0.08em] text-[var(--color-brand-blue)]">{level.status.replaceAll("_", " ")}</span>
+                </div>
+                <p className="text-[0.68rem] leading-[1.35] text-[var(--color-text-muted)]">{level.title}</p>
+                <span className="text-xs font-semibold text-[var(--color-brand-blue)]">{level.completed}/{level.total}</span>
+              </div>
+            ))}
+          </section>
+
           <div className="grid gap-1">
             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-brand-blue)]">
               {selectedDay.dateKey} · {selectedDay.kind === "weekday" ? "Teaching day" : selectedDay.kind === "review" ? "Review day" : "Weekend devotion"}
@@ -170,7 +186,7 @@ export function SogpJourneyPage() {
             Join Prayer Watch on Pleros Live <ExternalLinkIcon className="size-4" />
           </a>
 
-          {selectedDay.track ? (
+          {selectedDay.track?.accessible ? (
             <section className="grid gap-4 rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white p-5">
               <div className="flex items-center gap-2">
                 <RadioIcon className="size-5 text-[var(--color-brand-blue)]" />
@@ -192,6 +208,12 @@ export function SogpJourneyPage() {
               {selectedDay.track.reviewState ? (
                 <p className="text-xs text-[var(--color-text-muted)]">Written assessment: {selectedDay.track.reviewState.replaceAll("_", " ")}</p>
               ) : null}
+            </section>
+          ) : selectedDay.track ? (
+            <section className="grid gap-2 rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white p-5">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-brand-blue)]">Level {selectedDay.track.curriculumLevel} · Track {selectedDay.track.levelPosition}</p>
+              <h3 className="font-[var(--font-sen)] text-xl font-semibold text-[var(--color-text-strong)]">This teaching is locked</h3>
+              <p className="text-sm text-[var(--color-text-muted)]">{selectedDay.track.lockedReason}</p>
             </section>
           ) : null}
 
@@ -222,7 +244,7 @@ export function SogpJourneyPage() {
                 pending: mutation.isPending,
                 onToggle: () => mutation.mutate({ kind: "prayer", dateKey: selectedDay.dateKey, complete: !selectedDay.prayerWatchComplete }),
               },
-              ...(selectedDay.track
+              ...(selectedDay.track?.accessible
                 ? [{
                     id: "assessment",
                     title: "Teaching assessment",
@@ -254,27 +276,12 @@ export function SogpJourneyPage() {
           <section className="grid gap-3 rounded-[var(--radius-md)] bg-[var(--color-brand-sky)] p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-brand-blue)]">SOGP progress</p>
             <div className="grid grid-cols-3 gap-3 text-[var(--color-brand-blue)]">
-              <div><strong className="font-[var(--font-sen)] text-xl">{data.progress.coreCompleted}/{data.progress.coreTotal}</strong><p className="text-[0.65rem]">Core teachings</p></div>
+              <div><strong className="font-[var(--font-sen)] text-xl">{data.progress.coreCompleted}/{data.progress.coreTotal}</strong><p className="text-[0.65rem]">Teachings</p></div>
               <div><strong className="font-[var(--font-sen)] text-xl">{data.progress.prayerPercent}%</strong><p className="text-[0.65rem]">Prayer Watch</p></div>
               <div><strong className="font-[var(--font-sen)] text-xl">{data.progress.reviewsCompleted}/{data.progress.reviewsTotal}</strong><p className="text-[0.65rem]">Reviews</p></div>
             </div>
           </section>
 
-          <section className="grid gap-4 rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white p-5">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-brand-blue)]">Extras</p>
-              <h2 className="mt-1 font-[var(--font-sen)] text-2xl font-semibold tracking-[-0.045em] text-[var(--color-text-strong)]">Additional teachings</h2>
-              <p className="mt-1 text-xs text-[var(--color-text-muted)]">These four teachings are optional and excluded from SOGP completion.</p>
-            </div>
-            <div className="divide-y divide-[var(--color-line)]">
-              {data.extras.map((extra) => (
-                <article key={extra.id} className="grid gap-2 py-3 first:pt-0 last:pb-0 sm:grid-cols-[1fr_auto] sm:items-center">
-                  <h3 className="text-sm font-semibold text-[var(--color-text-strong)]">{extra.title}</h3>
-                  {extra.audioUrl ? <a href={extra.audioUrl} download className="inline-flex min-h-9 w-fit items-center gap-2 rounded-full border border-[var(--color-line-strong)] px-3 text-xs font-semibold text-[var(--color-brand-blue)]"><DownloadIcon className="size-3.5" /> Download</a> : null}
-                </article>
-              ))}
-            </div>
-          </section>
         </main>
       </div>
     </section>

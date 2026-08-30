@@ -10,10 +10,19 @@ import {
 import { toLagosDateKey } from "@/lib/sogp/formation-progress";
 import { calculateSogpEligibility } from "@/lib/sogp/assessment";
 import {
+  getSogpLevel,
+  type SogpCurriculumLevel,
+} from "@/lib/sogp/curriculum";
+import {
   getPreparationRequirements,
   getSogpDayRequirements,
   isDateWithinSogpWindow,
 } from "@/lib/sogp/journey";
+import {
+  canAccessSogpTrack,
+  summarizeSogpLevels,
+  type SogpLevelStatus,
+} from "@/lib/sogp/progression";
 import { getSogpDashboardData } from "./sogp";
 
 import * as schema from "../schema";
@@ -347,6 +356,15 @@ export type SogpJourneyData = {
     endsAt: string;
     telegramUrl: string;
   };
+  levels: Array<{
+    level: SogpCurriculumLevel;
+    title: string;
+    description: string;
+    status: SogpLevelStatus;
+    completed: number;
+    total: number;
+    unlocksAt: string;
+  }>;
   days: Array<{
     dateKey: string;
     kind: "weekday" | "weekend" | "review";
@@ -355,11 +373,15 @@ export type SogpJourneyData = {
     track: null | {
       id: number;
       dayNumber: number;
+      curriculumLevel: SogpCurriculumLevel;
+      levelPosition: number;
       title: string;
       audioUrl: string | null;
       assessmentComplete: boolean;
       assessmentHref: string;
       reviewState: string | null;
+      accessible: boolean;
+      lockedReason: string | null;
     };
     review: null | {
       id: number;
@@ -371,11 +393,6 @@ export type SogpJourneyData = {
       complete: boolean;
       completionSource: "live" | "recording" | null;
     };
-  }>;
-  extras: Array<{
-    id: number;
-    title: string;
-    audioUrl: string | null;
   }>;
   progress: {
     coreCompleted: number;
@@ -457,12 +474,21 @@ export async function getActiveSogpJourney(
   const requiredTracks = dashboard.tracks.filter(
     (track) => track.isRequired && track.dayNumber !== null,
   );
-  const coreCompleted = requiredTracks.filter((track) => {
+  const assessmentCompleteByTrack = new Map(requiredTracks.map((track) => {
     const writtenStatus = submissions.get(track.lesson.id);
     const writtenComplete =
       !track.lesson.responsePrompt || (writtenStatus !== undefined && writtenStatus !== "draft");
-    return track.progress.quizPassed && writtenComplete;
-  }).length;
+    return [track.id, track.progress.quizPassed && writtenComplete] as const;
+  }));
+  const coreCompleted = [...assessmentCompleteByTrack.values()].filter(Boolean).length;
+  const levelSummaries = summarizeSogpLevels({
+    tracks: requiredTracks.map((track) => ({
+      curriculumLevel: track.curriculumLevel,
+      assessmentComplete: assessmentCompleteByTrack.get(track.id) ?? false,
+    })),
+    startsAt: dashboard.cohort.startsAt,
+    now,
+  });
   const requiredReviews = dashboard.liveClasses.filter(
     (item) => item.isRequired && item.status !== "cancelled",
   );
@@ -484,9 +510,7 @@ export async function getActiveSogpJourney(
     );
     const writtenStatus = track ? submissions.get(track.lesson.id) : undefined;
     const assessmentComplete = track
-      ? track.progress.quizPassed &&
-        (!track.lesson.responsePrompt ||
-          (writtenStatus !== undefined && writtenStatus !== "draft"))
+      ? assessmentCompleteByTrack.get(track.id) ?? false
       : false;
     const prayerWatchComplete = prayerDates.has(dateKey);
     const completedReviewSource = review
@@ -507,6 +531,27 @@ export async function getActiveSogpJourney(
               reviewComplete: Boolean(completedReviewSource),
             })
           : getSogpDayRequirements({ kind, prayerWatchComplete });
+    const curriculumLevel = track
+      ? (track.curriculumLevel as SogpCurriculumLevel)
+      : null;
+    const previousLevelComplete = curriculumLevel
+      ? curriculumLevel === 1 ||
+        levelSummaries[curriculumLevel - 2]?.status === "complete"
+      : false;
+    const accessible = track && curriculumLevel
+      ? canAccessSogpTrack({
+          releaseAt: track.releaseAt,
+          curriculumLevel,
+          previousLevelComplete,
+          now,
+        })
+      : false;
+    const lockedReason = !track || accessible
+      ? null
+      : track.releaseAt.getTime() > now.getTime()
+        ? "This track opens on its scheduled day."
+        : `Complete all six Level ${curriculumLevel! - 1} assessments first.`;
+
     return {
       dateKey,
       kind,
@@ -516,6 +561,8 @@ export async function getActiveSogpJourney(
         ? {
             id: track.id,
             dayNumber: track.dayNumber!,
+            curriculumLevel: curriculumLevel!,
+            levelPosition: ((track.curriculumOrder - 1) % 6) + 1,
             title: track.lesson.title,
             audioUrl: track.lesson.audioUrl,
             assessmentComplete,
@@ -523,6 +570,8 @@ export async function getActiveSogpJourney(
               ? `/dashboard/sogp/course/day/${track.dayNumber}/response`
               : `/dashboard/sogp/course/day/${track.dayNumber}/quiz`,
             reviewState: writtenStatus ?? null,
+            accessible,
+            lockedReason,
           }
         : null,
       review: review
@@ -553,14 +602,16 @@ export async function getActiveSogpJourney(
         dashboard.cohort.telegramChannelUrl ??
         "https://t.me/pleros_sogp",
     },
+    levels: levelSummaries.map((summary) => {
+      const definition = getSogpLevel(summary.level);
+      return {
+        ...summary,
+        title: definition.title,
+        description: definition.description,
+        unlocksAt: summary.unlocksAt.toISOString(),
+      };
+    }),
     days,
-    extras: dashboard.tracks
-      .filter((track) => !track.isRequired)
-      .map((track) => ({
-        id: track.id,
-        title: track.lesson.title,
-        audioUrl: track.lesson.audioUrl,
-      })),
     progress: {
       coreCompleted,
       coreTotal: requiredTracks.length,

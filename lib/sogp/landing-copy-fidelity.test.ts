@@ -54,36 +54,50 @@ test("uses the approved curriculum, structure, and enrollment copy", () => {
     level: "Level 1",
     title: "Discipline – The Foundation of the Pursuit of Purpose",
   });
+  expect(sogpLandingContent.curriculum.tracks[5]).toEqual({
+    level: "Level 1",
+    title: "Baptism of the Holy Ghost",
+  });
   expect(
     sogpLandingContent.curriculum.tracks.filter(
       (track) => track.level === "Level 3",
     ),
   ).toEqual([
-    { level: "Level 3", title: "Baptism of the Holy Ghost" },
+    { level: "Level 3", title: "Christology" },
+    { level: "Level 3", title: "Redemption" },
+    { level: "Level 3", title: "Church and Its Mission" },
+    { level: "Level 3", title: "Eschatology" },
+    { level: "Level 3", title: "The New Creation" },
     { level: "Level 3", title: "The Walk of Faith" },
-    { level: "Level 3", title: "The Life of Prayer" },
-    { level: "Level 3", title: "Believer’s Authority" },
-    { level: "Level 3", title: "Healing in the Newness of Life" },
+  ]);
+  expect(
+    sogpLandingContent.curriculum.tracks.filter(
+      (track) => track.level === "Level 4",
+    ),
+  ).toEqual([
+    { level: "Level 4", title: "The Life of Prayer" },
+    { level: "Level 4", title: "Believer’s Authority" },
+    { level: "Level 4", title: "Healing in the Newness of Life" },
     {
-      level: "Level 3",
+      level: "Level 4",
       title: "Natural Assignment in the Newness of Life",
     },
     {
-      level: "Level 3",
+      level: "Level 4",
       title: "Spiritual Assignment in the Newness of Life",
     },
-    { level: "Level 3", title: "Supernatural in the Newness of Life" },
+    { level: "Level 4", title: "Supernatural in the Newness of Life" },
   ]);
   expect(sogpLandingContent.structure.schedule).toEqual([
     {
-      label: "Weekdays",
-      meta: "Monday–Friday",
+      label: "Teaching days",
+      meta: "Monday–Saturday",
       detail: "One guided track each day on the Pleros Dashboard",
     },
     {
-      label: "Weekends",
-      meta: "Saturday–Sunday",
-      detail: "Live classes and cohort engagement",
+      label: "Review day",
+      meta: "Sunday",
+      detail: "One required live review for each completed level",
     },
     {
       label: "Duration",

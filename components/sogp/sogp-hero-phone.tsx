@@ -177,7 +177,7 @@ export function SogpHeroPhone() {
             Daily formation
           </p>
           <p className="mt-0.5 font-[var(--font-sen)] text-[0.7rem] font-semibold leading-[1.15] tracking-[-0.02em] text-[var(--color-text-strong)]">
-            Prayer Watch and Podcast
+            Prayer Watch and teaching
           </p>
         </div>
       </div>

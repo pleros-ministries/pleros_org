@@ -1,4 +1,5 @@
 import { aboutPageMinisterFollow } from "../about-page-content";
+import { SOGP_LEVELS, SOGP_TRACKS } from "./curriculum";
 
 export const sogpLandingContent = {
   hero: {
@@ -60,49 +61,13 @@ export const sogpLandingContent = {
     title: "Curriculum of SOGP",
     description:
       "The curriculum of SOGP is paced to answer foundational questions, strengthen your overall doctrinal persuasion, and stir you into a practical walk with God and in His purpose.",
-    levels: {
-      "Level 1": "Foundational questions and truth",
-      "Level 2": "Doctrinal persuasion",
-      "Level 3": "Practical walk in the faith",
-    },
-    tracks: [
-      { level: "Level 1", title: "Gospel: The Word of Truth" },
-      { level: "Level 1", title: "God’s Purpose: Why We Exist" },
-      {
-        level: "Level 1",
-        title: "The New Creation: Who You Are in Christ",
-      },
-      { level: "Level 1", title: "Faith Stand: How to Grow in Christ" },
-      {
-        level: "Level 1",
-        title: "Discipline – The Foundation of the Pursuit of Purpose",
-      },
-      { level: "Level 2", title: "Introduction to Doctrinal Summaries" },
-      { level: "Level 2", title: "Bibliology" },
-      { level: "Level 2", title: "God and His Eternal Purpose" },
-      { level: "Level 2", title: "Biblical Origin and Ontology" },
-      { level: "Level 2", title: "Sin and Its Implication" },
-      { level: "Level 2", title: "God’s Wisdom Towards Redemption" },
-      { level: "Level 2", title: "Christology" },
-      { level: "Level 2", title: "Redemption" },
-      { level: "Level 2", title: "Church and Its Mission" },
-      { level: "Level 2", title: "Eschatology" },
-      { level: "Level 2", title: "The New Creation" },
-      { level: "Level 3", title: "Baptism of the Holy Ghost" },
-      { level: "Level 3", title: "The Walk of Faith" },
-      { level: "Level 3", title: "The Life of Prayer" },
-      { level: "Level 3", title: "Believer’s Authority" },
-      { level: "Level 3", title: "Healing in the Newness of Life" },
-      {
-        level: "Level 3",
-        title: "Natural Assignment in the Newness of Life",
-      },
-      {
-        level: "Level 3",
-        title: "Spiritual Assignment in the Newness of Life",
-      },
-      { level: "Level 3", title: "Supernatural in the Newness of Life" },
-    ],
+    levels: Object.fromEntries(
+      SOGP_LEVELS.map((level) => [`Level ${level.level}`, level.description]),
+    ),
+    tracks: SOGP_TRACKS.map((track) => ({
+      level: `Level ${track.curriculumLevel}`,
+      title: track.title,
+    })),
   },
   structure: {
     title: "The structure of SOGP",
@@ -110,14 +75,14 @@ export const sogpLandingContent = {
       "A fixed four-week rhythm gives you clarity and accountability while preserving enough flexibility for work, school, business, and family life.",
     schedule: [
       {
-        label: "Weekdays",
-        meta: "Monday–Friday",
+        label: "Teaching days",
+        meta: "Monday–Saturday",
         detail: "One guided track each day on the Pleros Dashboard",
       },
       {
-        label: "Weekends",
-        meta: "Saturday–Sunday",
-        detail: "Live classes and cohort engagement",
+        label: "Review day",
+        meta: "Sunday",
+        detail: "One required live review for each completed level",
       },
       {
         label: "Duration",
@@ -213,12 +178,14 @@ export const sogpLandingContent = {
     {
       question: "How do I earn certification?",
       answer:
-        "Complete required tracks and assessments, daily podcast logging, and at least 80% Morning Prayer Watch attendance.",
+        "Complete all 24 teaching assessments, at least 80% of Morning Prayer Watch, and all four required review sessions.",
     },
   ],
 } as const;
 
-const sogpCurriculumLevelLabels = ["Level 1", "Level 2", "Level 3"] as const;
+const sogpCurriculumLevelLabels = SOGP_LEVELS.map(
+  (level) => `Level ${level.level}`,
+);
 
 export function getSogpCurriculumLevels() {
   return sogpCurriculumLevelLabels.map((label, levelIndex) => ({

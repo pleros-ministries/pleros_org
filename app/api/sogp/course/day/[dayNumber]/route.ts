@@ -2,9 +2,8 @@ import { NextResponse } from "next/server";
 
 import { getAppSession } from "@/lib/app-session";
 import { getBestQuizScore } from "@/lib/db/queries/quizzes";
-import { getSogpDayData } from "@/lib/db/queries/sogp";
 import { getSubmission } from "@/lib/db/queries/submissions";
-import { canAccessSogpDay } from "@/lib/sogp/day-access";
+import { requireSogpDayAccess } from "@/lib/sogp/server-access";
 
 export async function GET(
   _request: Request,
@@ -18,16 +17,11 @@ export async function GET(
     return NextResponse.json({ error: "Invalid day" }, { status: 400 });
   }
 
-  const data = await getSogpDayData(session.user.id, dayNumber);
-  if (!data) return NextResponse.json({ error: "Day not found" }, { status: 404 });
   const generatedAt = new Date();
-  if (
-    !canAccessSogpDay({
-      learnerState: data.dashboard.learnerState,
-      now: generatedAt,
-      releaseAt: data.track.releaseAt,
-    }) || data.track.lesson.status !== "published"
-  ) {
+  let data;
+  try {
+    data = await requireSogpDayAccess(session.user.id, dayNumber);
+  } catch {
     return NextResponse.json({ error: "Day is locked" }, { status: 403 });
   }
 

@@ -35,7 +35,7 @@ test("provides the approved basic SOGP enrolment FAQs", () => {
     {
       question: "How do I earn certification?",
       answer:
-        "Complete required tracks and assessments, daily podcast logging, and at least 80% Morning Prayer Watch attendance.",
+        "Complete all 24 teaching assessments, at least 80% of Morning Prayer Watch, and all four required review sessions.",
     },
   ]);
 });
