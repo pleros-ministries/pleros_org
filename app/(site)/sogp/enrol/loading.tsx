@@ -21,7 +21,7 @@ export default function SogpEnrolLoading() {
             ))}
           </div>
         </div>
-        <div className="grid content-start gap-5 rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white p-5 shadow-[var(--shadow-md)] sm:p-7 md:p-8">
+        <div className="grid content-start gap-5 rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white p-5 shadow-[var(--shadow-sm)] sm:p-7 md:p-8">
           {[0, 1, 2, 3, 4, 5].map((item) => (
             <div key={item} className="grid gap-2">
               <span className="h-3 w-28 rounded bg-[var(--color-surface-muted)]" />

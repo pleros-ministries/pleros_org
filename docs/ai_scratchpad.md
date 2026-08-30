@@ -102,6 +102,7 @@ Consolidated 2026-07-04 from prior session notes. Keep this file concise and pat
 - When “Other” is selected for the SOGP referral source, reveal a required free-text source and persist it as `other: <detail>`; do not show Telegram community in the enrolment-page summary.
 - SOGP enrolment form field labels and the three enrolment-summary headings use medium weight, not semibold, so inputs and the page heading remain visually primary.
 - Native SOGP enrolment selects hide the browser arrow and use one custom chevron with 44px right padding and a 16px inset, matching the country selector.
+- Keep the SOGP enrolment form card restrained: retain its structural border but use the subtle small-shadow token rather than medium elevation.
 - Because `/sogp/enrol` reads IP-country headers and is dynamic, keep its route-level `loading.tsx` boundary and full prefetch on landing CTAs so navigation responds immediately.
 - Prayer Watch attendance is session-aware (`morning`, `afternoon`, `evening`); legacy undifferentiated records remain `unspecified` and do not count as SOGP morning attendance.
 - Vercel project uses Hobby cron limits: keep the enrolled SOGP browser-push cron once daily at `20 4 * * *` (05:20 WAT) for the 5:30 am Prayer Watch reminder. Use admin bot composer for immediate Telegram sends; higher-frequency automation needs Pro or an external scheduler.

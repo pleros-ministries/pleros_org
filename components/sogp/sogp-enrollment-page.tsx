@@ -64,7 +64,7 @@ export function SogpEnrollmentPage({
               ))}
             </ul>
           </div>
-          <div className="rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white p-5 shadow-[var(--shadow-md)] sm:p-7 md:p-8">
+          <div className="rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white p-5 shadow-[var(--shadow-sm)] sm:p-7 md:p-8">
             <SogpPublicQueryProvider>
               <SogpEnrollmentForm defaultCountryCode={defaultCountryCode} />
             </SogpPublicQueryProvider>
