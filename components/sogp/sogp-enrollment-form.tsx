@@ -110,7 +110,7 @@ function ReferralSourceFields({
 }) {
   return (
     <div className="grid gap-2">
-      <label htmlFor="referralSource" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">How did you hear about us?</label>
+      <label htmlFor="referralSource" className="font-[var(--font-be-vietnam-pro)] text-sm font-medium text-[var(--color-text-strong)]">How did you hear about us?</label>
       <select
         id="referralSource"
         name="referralSource"
@@ -129,7 +129,7 @@ function ReferralSourceFields({
       <FieldError id="referral-source-error" error={sourceError} />
       {source === "other" ? (
         <div className="grid gap-2 pt-1">
-          <label htmlFor="referralSourceOther" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">
+          <label htmlFor="referralSourceOther" className="font-[var(--font-be-vietnam-pro)] text-sm font-medium text-[var(--color-text-strong)]">
             Tell us how you heard about us
           </label>
           <Input
@@ -263,7 +263,7 @@ export function SogpEnrollmentForm({
     <form className="grid gap-5" noValidate onSubmit={handleSubmit}>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="grid gap-2">
-          <label htmlFor="firstName" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">First name</label>
+          <label htmlFor="firstName" className="font-[var(--font-be-vietnam-pro)] text-sm font-medium text-[var(--color-text-strong)]">First name</label>
           <Input
             id="firstName"
             name="firstName"
@@ -277,7 +277,7 @@ export function SogpEnrollmentForm({
           <FieldError id="first-name-error" error={firstNameError} />
         </div>
         <div className="grid gap-2">
-          <label htmlFor="lastName" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">Surname</label>
+          <label htmlFor="lastName" className="font-[var(--font-be-vietnam-pro)] text-sm font-medium text-[var(--color-text-strong)]">Surname</label>
           <Input
             id="lastName"
             name="lastName"
@@ -292,7 +292,7 @@ export function SogpEnrollmentForm({
         </div>
       </div>
       <div className="grid gap-2">
-        <label htmlFor="email" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">Email address</label>
+        <label htmlFor="email" className="font-[var(--font-be-vietnam-pro)] text-sm font-medium text-[var(--color-text-strong)]">Email address</label>
         <Input
           id="email"
           name="email"
@@ -307,7 +307,7 @@ export function SogpEnrollmentForm({
         <FieldError id="email-error" error={emailError} />
       </div>
       <div className="grid gap-2">
-        <label htmlFor="phone" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">Phone number</label>
+        <label htmlFor="phone" className="font-[var(--font-be-vietnam-pro)] text-sm font-medium text-[var(--color-text-strong)]">Phone number</label>
         <PhoneField
           defaultCountryCode={defaultCountryCode}
           invalid={Boolean(phoneError)}
@@ -326,7 +326,7 @@ export function SogpEnrollmentForm({
         <FieldError id="phone-error" error={phoneError} />
       </div>
       <div className="grid gap-2">
-        <label htmlFor="country" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">Country of residence</label>
+        <label htmlFor="country" className="font-[var(--font-be-vietnam-pro)] text-sm font-medium text-[var(--color-text-strong)]">Country of residence</label>
         <CountryCombobox
           defaultCountryCode={defaultCountryCode}
           invalid={Boolean(countryError)}
@@ -346,7 +346,7 @@ export function SogpEnrollmentForm({
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="grid gap-2">
-          <label htmlFor="region" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">State / province / region of residence</label>
+          <label htmlFor="region" className="font-[var(--font-be-vietnam-pro)] text-sm font-medium text-[var(--color-text-strong)]">State / province / region of residence</label>
           <Input
             id="region"
             name="region"
@@ -360,7 +360,7 @@ export function SogpEnrollmentForm({
           <FieldError id="region-error" error={regionError} />
         </div>
         <div className="grid gap-2">
-          <label htmlFor="birthYear" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold text-[var(--color-text-strong)]">Year of birth</label>
+          <label htmlFor="birthYear" className="font-[var(--font-be-vietnam-pro)] text-sm font-medium text-[var(--color-text-strong)]">Year of birth</label>
           <select
             id="birthYear"
             name="birthYear"
@@ -400,7 +400,7 @@ export function SogpEnrollmentForm({
         onOtherSourceBlur={() => markTouched("referralSourceOther")}
       />
       <div className="grid gap-2">
-        <label htmlFor="whatsappConsent" className="font-[var(--font-be-vietnam-pro)] text-sm font-semibold leading-[1.45] text-[var(--color-text-strong)]">
+        <label htmlFor="whatsappConsent" className="font-[var(--font-be-vietnam-pro)] text-sm font-medium leading-[1.45] text-[var(--color-text-strong)]">
           Would you like to receive SOGP updates and course reminders via WhatsApp?
         </label>
         <select
