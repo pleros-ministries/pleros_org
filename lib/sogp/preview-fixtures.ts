@@ -14,14 +14,15 @@ import { buildPreSogpSeed } from "./preparation-seed";
 
 const cohortStartsAt = new Date("2026-09-07T06:00:00+01:00");
 const cohortEndsAt = new Date("2026-10-04T20:00:00+01:00");
-const preparationTodayKey = "2026-08-23";
+const preparationStartsAt = new Date("2026-09-01T00:00:00+01:00");
+const preparationTodayKey = "2026-08-31";
 const sogpTodayKey = "2026-09-17";
 
-const preparationSeed = buildPreSogpSeed(cohortStartsAt);
-const preparationDates = buildPreparationDateKeys(cohortStartsAt);
+const preparationSeed = buildPreSogpSeed(preparationStartsAt);
+const preparationDates = buildPreparationDateKeys(preparationStartsAt);
 
 export const preSogpPreviewData: PreSogpJourneyData = {
-  generatedAt: "2026-08-23T12:00:00.000Z",
+  generatedAt: "2026-08-31T12:00:00.000Z",
   todayKey: preparationTodayKey,
   cohort: {
     id: 1,
@@ -30,8 +31,8 @@ export const preSogpPreviewData: PreSogpJourneyData = {
     telegramUrl: "https://t.me/pleros_sogp",
   },
   countdown: {
-    days: 15,
-    label: "15 days until SOGP begins",
+    days: 1,
+    label: "Pre-SOGP begins tomorrow",
     phase: "upcoming",
   },
   days: preparationDates.map((dateKey, index) => {

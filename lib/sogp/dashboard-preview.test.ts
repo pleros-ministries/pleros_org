@@ -13,14 +13,12 @@ describe("SOGP dashboard previews", () => {
       .filter((lesson) => lesson !== null);
 
     expect(fixtures.preSogpPreviewData.days).toHaveLength(30);
-    expect(new Set(availablePreparationLessons.map((lesson) => lesson.url)).size)
-      .toBe(availablePreparationLessons.length);
-    expect(availablePreparationLessons[0]?.title).toBe(
-      "What is God's Purpose? (Part 1)",
+    expect(fixtures.preSogpPreviewData.days[0]?.dateKey).toBe("2026-09-01");
+    expect(fixtures.preSogpPreviewData.days.at(-1)?.dateKey).toBe(
+      "2026-09-30",
     );
-    expect(availablePreparationLessons.at(-1)?.title).toBe(
-      "Gospel Answers Series 9",
-    );
+    expect(fixtures.preSogpPreviewData.countdown.phase).toBe("upcoming");
+    expect(availablePreparationLessons).toHaveLength(0);
     expect(fixtures.sogpPreviewData.days).toHaveLength(28);
     expect(fixtures.sogpPreviewData.levels).toHaveLength(4);
     expect(fixtures.sogpPreviewData.progress.coreTotal).toBe(24);
@@ -55,6 +53,8 @@ describe("SOGP dashboard previews", () => {
     expect(sogpRoute).toContain("sogpPreviewData");
     expect(sogpRoute).toContain("preview");
     expect(prePage).toContain("initialData?: PreSogpJourneyData");
+    expect(prePage).toContain("Pre-SOGP is coming soon");
+    expect(prePage).toContain('data-pre-sogp-section="coming-soon"');
     expect(sogpPage).toContain("initialData?: SogpJourneyData");
     expect(prePage).toContain("Preview mode");
     expect(sogpPage).toContain("Preview mode");

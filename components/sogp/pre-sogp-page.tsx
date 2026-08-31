@@ -20,6 +20,16 @@ import { SogpPushPanel } from "./sogp-push-panel";
 
 const queryKey = ["sogp", "preparation"] as const;
 
+function formatPreparationStartDate(dateKey: string) {
+  const [year, month, day] = dateKey.split("-").map(Number);
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(Date.UTC(year!, month! - 1, day)));
+}
+
 async function fetchPreparation() {
   const response = await fetch("/api/sogp/preparation", { credentials: "same-origin" });
   if (!response.ok) throw new Error("Your Pre-SOGP journey could not load.");
@@ -75,6 +85,11 @@ export function PreSogpPage({
   const queryClient = useQueryClient();
   const selectedDay =
     data.days.find((day) => day.dateKey === selectedDateKey) ?? data.days[0]!;
+  const preparationStartDateKey = data.days[0]?.dateKey ?? data.todayKey;
+  const isPreparationUpcoming = preparationStartDateKey > data.todayKey;
+  const preparationStartLabel = formatPreparationStartDate(
+    preparationStartDateKey,
+  );
 
   const completionMutation = useMutation({
     mutationFn: async (input: Parameters<typeof saveCompletion>[0]) =>
@@ -146,6 +161,24 @@ export function PreSogpPage({
           </p>
         </header>
 
+        {isPreparationUpcoming ? (
+          <section
+            data-pre-sogp-section="coming-soon"
+            className="grid gap-3 rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white p-6 md:p-8 lg:col-span-2"
+          >
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-text-muted)]">
+              Starts {preparationStartLabel}
+            </p>
+            <h2 className="font-[var(--font-sen)] text-2xl font-semibold tracking-[-0.035em] text-[var(--color-text-strong)]">
+              Pre-SOGP is coming soon
+            </h2>
+            <p className="max-w-2xl text-sm leading-[1.6] text-[var(--color-text-muted)]">
+              Video 1 opens at 12:00 am WAT. A new lesson will open each day
+              until Video 30.
+            </p>
+          </section>
+        ) : (
+          <>
         <aside
           data-pre-sogp-section="calendar"
           className="rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white p-4 lg:sticky lg:top-[4.5rem]"
@@ -232,6 +265,8 @@ export function PreSogpPage({
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-brand-blue)]">Preparation progress</p>
           <p className="font-[var(--font-sen)] text-xl font-semibold text-[var(--color-brand-blue)] md:text-2xl">{completeDays} of 30 days complete</p>
         </section>
+          </>
+        )}
       </div>
     </section>
   );

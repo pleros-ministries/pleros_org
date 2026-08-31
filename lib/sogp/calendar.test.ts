@@ -4,18 +4,34 @@ import {
   buildPreparationDateKeys,
   buildSogpDateKeys,
   deriveSogpCalendarState,
+  getPreSogpCountdown,
   getSogpCountdown,
 } from "./calendar";
 
 describe("buildPreparationDateKeys", () => {
-  test("builds 30 consecutive Lagos dates ending the day before SOGP", () => {
+  test("builds 30 consecutive Lagos dates from the preparation start", () => {
     const dates = buildPreparationDateKeys(
       new Date("2026-11-01T00:00:00+01:00"),
     );
 
     expect(dates).toHaveLength(30);
-    expect(dates[0]).toBe("2026-10-02");
-    expect(dates.at(-1)).toBe("2026-10-31");
+    expect(dates[0]).toBe("2026-11-01");
+    expect(dates.at(-1)).toBe("2026-11-30");
+  });
+});
+
+describe("getPreSogpCountdown", () => {
+  test("keeps preparation upcoming until its Lagos start date", () => {
+    expect(
+      getPreSogpCountdown(
+        new Date("2026-09-01T00:00:00+01:00"),
+        new Date("2026-08-31T20:00:00+01:00"),
+      ),
+    ).toEqual({
+      days: 1,
+      label: "Pre-SOGP begins tomorrow",
+      phase: "upcoming",
+    });
   });
 });
 

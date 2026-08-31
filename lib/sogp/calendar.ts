@@ -31,11 +31,21 @@ export function getSogpLearningWeek<T extends { dateKey: string }>(
   );
 }
 
-export function buildPreparationDateKeys(startsAt: Date): string[] {
-  const startDateKey = toLagosDateKey(startsAt);
+export function buildPreparationDateKeys(preparationStartsAt: Date): string[] {
+  const startDateKey = toLagosDateKey(preparationStartsAt);
   return Array.from({ length: 30 }, (_, index) =>
-    addDays(startDateKey, index - 30),
+    addDays(startDateKey, index),
   );
+}
+
+export function resolvePreparationStartsAt(
+  cohortStartsAt: Date,
+  preparationStartsAt: Date | null,
+) {
+  if (preparationStartsAt) return preparationStartsAt;
+  const fallback = new Date(cohortStartsAt);
+  fallback.setUTCDate(fallback.getUTCDate() - 30);
+  return fallback;
 }
 
 export function buildCoreWeekdayDateKeys(
@@ -100,6 +110,31 @@ export function getSogpCountdown(startsAt: Date, now = new Date()) {
   return {
     days,
     label: `${days} day${days === 1 ? "" : "s"} until SOGP begins`,
+    phase: "upcoming" as const,
+  };
+}
+
+export function getPreSogpCountdown(startsAt: Date, now = new Date()) {
+  const startDateKey = toLagosDateKey(startsAt);
+  const todayKey = toLagosDateKey(now);
+  const days = Math.max(
+    0,
+    Math.round(
+      (parseDateKey(startDateKey).getTime() - parseDateKey(todayKey).getTime()) /
+        86_400_000,
+    ),
+  );
+
+  if (days === 0) {
+    return { days, label: "Pre-SOGP is active", phase: "active" as const };
+  }
+
+  return {
+    days,
+    label:
+      days === 1
+        ? "Pre-SOGP begins tomorrow"
+        : `Pre-SOGP begins in ${days} days`,
     phase: "upcoming" as const,
   };
 }

@@ -12,6 +12,7 @@ import {
   assertMondayCohortStart,
   buildSogpTrackReleaseDates,
 } from "@/lib/sogp/schedule";
+import { resolvePreparationStartsAt } from "@/lib/sogp/calendar";
 import {
   normalizeSogpPreparationInput,
   type SogpPreparationInput,
@@ -254,7 +255,12 @@ export async function seedSogpPreparation(input: { cohortId: number }) {
     where: (row, { eq: equal }) => equal(row.id, input.cohortId),
   });
   if (!cohort) throw new Error("SOGP cohort not found.");
-  const seed = buildPreSogpSeed(cohort.startsAt);
+  const seed = buildPreSogpSeed(
+    resolvePreparationStartsAt(
+      cohort.startsAt,
+      cohort.preparationStartsAt,
+    ),
+  );
 
   await transactionDb.transaction(async (tx) => {
     for (const item of seed) {

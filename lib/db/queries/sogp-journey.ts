@@ -5,7 +5,8 @@ import {
   buildPreparationDateKeys,
   buildSogpDateKeys,
   deriveSogpCalendarState,
-  getSogpCountdown,
+  getPreSogpCountdown,
+  resolvePreparationStartsAt,
 } from "@/lib/sogp/calendar";
 import { toLagosDateKey } from "@/lib/sogp/formation-progress";
 import { calculateSogpEligibility } from "@/lib/sogp/assessment";
@@ -36,7 +37,7 @@ export type PreSogpJourneyData = {
     startsAt: string;
     telegramUrl: string;
   };
-  countdown: ReturnType<typeof getSogpCountdown>;
+  countdown: ReturnType<typeof getPreSogpCountdown>;
   days: Array<{
     id: number | null;
     dayNumber: number;
@@ -89,7 +90,11 @@ export async function getPreSogpJourney(
   const row = await getEnrollmentCohort(userId);
   if (!row) return null;
 
-  const dateKeys = buildPreparationDateKeys(row.cohort.startsAt);
+  const preparationStartsAt = resolvePreparationStartsAt(
+    row.cohort.startsAt,
+    row.cohort.preparationStartsAt,
+  );
+  const dateKeys = buildPreparationDateKeys(preparationStartsAt);
   const todayKey = toLagosDateKey(now);
   const [dayRows, completionRows, prayerRows] = await Promise.all([
     db
@@ -167,7 +172,7 @@ export async function getPreSogpJourney(
       startsAt: row.cohort.startsAt.toISOString(),
       telegramUrl,
     },
-    countdown: getSogpCountdown(row.cohort.startsAt, now),
+    countdown: getPreSogpCountdown(preparationStartsAt, now),
     days: dateKeys.map((dateKey, index) => {
       const day = dayByDate.get(dateKey) ?? null;
       const lessonComplete = day ? completedDayIds.has(day.id) : false;
@@ -261,7 +266,12 @@ export async function setSogpMorningPrayerComplete(input: {
 }) {
   const row = await getEnrollmentCohort(input.userId);
   if (!row) throw new Error("SOGP enrolment not found.");
-  const preparationDates = buildPreparationDateKeys(row.cohort.startsAt);
+  const preparationDates = buildPreparationDateKeys(
+    resolvePreparationStartsAt(
+      row.cohort.startsAt,
+      row.cohort.preparationStartsAt,
+    ),
+  );
   if (
     !isDateWithinSogpWindow({
       dateKey: input.dateKey,

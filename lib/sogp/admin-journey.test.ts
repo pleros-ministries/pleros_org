@@ -17,12 +17,12 @@ describe("Pre-SOGP seed", () => {
     expect(days).toHaveLength(30);
     expect(new Set(days.map((day) => day.url)).size).toBe(30);
     expect(days[0]).toMatchObject({
-      publishDate: "2026-10-02",
+      publishDate: "2026-11-01",
       title: "What is God's Purpose? (Part 1)",
     });
     expect(days[7]?.title).toBe("Gospel Answers Series 1");
     expect(days[19]?.title).toBe("Salvation");
-    expect(days.at(-1)?.publishDate).toBe("2026-10-31");
+    expect(days.at(-1)?.publishDate).toBe("2026-11-30");
   });
 });
 

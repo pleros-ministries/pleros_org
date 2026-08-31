@@ -31,6 +31,9 @@ describe("Pre-SOGP learner UI", () => {
     expect(page).toContain(
       'className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 lg:col-span-2"',
     );
+    expect(page).toContain("isPreparationUpcoming");
+    expect(page).toContain("Pre-SOGP is coming soon");
+    expect(page).toContain("Video 1 opens at 12:00 am WAT");
   });
 
   test("includes streaming teaching and manual daily requirements", () => {

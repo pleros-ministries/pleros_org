@@ -14,7 +14,7 @@ function seriesVideos(slug: string): SeedVideo[] {
   return questionsSeriesPages.find((series) => series.slug === slug)?.videos ?? [];
 }
 
-export function buildPreSogpSeed(startsAt: Date) {
+export function buildPreSogpSeed(preparationStartsAt: Date) {
   const candidates: SeedVideo[] = [
     ...purposePathwayVideos,
     ...seriesVideos("gospel-answers-simple-series"),
@@ -28,11 +28,11 @@ export function buildPreSogpSeed(startsAt: Date) {
   if (unique.length < 30) {
     throw new Error("At least 30 unique hosted teachings are required.");
   }
-  const dateKeys = buildPreparationDateKeys(startsAt);
+  const dateKeys = buildPreparationDateKeys(preparationStartsAt);
   return unique.slice(0, 30).map((video, index) => ({
     dayNumber: index + 1,
     publishDate: dateKeys[index]!,
-    countdownLabel: `${30 - index} day${30 - index === 1 ? "" : "s"} until SOGP begins`,
+    countdownLabel: `Day ${index + 1} of 30`,
     introduction: video.description,
     title: video.title,
     url: video.href,
