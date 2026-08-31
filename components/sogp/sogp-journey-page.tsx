@@ -155,12 +155,12 @@ export function SogpJourneyPage({
 
   return (
     <section className="site-font-theme min-h-screen bg-[var(--color-surface)] pb-16">
-      <nav aria-label="SOGP dashboard navigation" className="sticky top-0 z-30 border-b border-[var(--color-line)] bg-white/95 backdrop-blur-sm">
+      <nav aria-label="SOGP dashboard navigation" className="sticky top-0 z-30 border-b border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)] shadow-sm">
         <div className="site-shell-page sogp-shell-page flex min-h-14 items-center justify-between gap-4">
-          <Link href={preview ? "/preview/dashboard" : "/dashboard"} className="inline-flex min-h-10 items-center gap-2 rounded-full px-1 text-xs font-semibold text-[var(--color-text-muted)] transition-colors duration-150 hover:text-[var(--color-brand-blue)] active:scale-[0.96]">
+          <Link href={preview ? "/preview/dashboard" : "/dashboard"} className="inline-flex min-h-10 items-center gap-2 rounded-full px-1 text-xs font-semibold text-white/88 transition-colors duration-150 hover:text-white focus-visible:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white active:scale-[0.96]">
             <ArrowLeftIcon className="size-4" strokeWidth={2} /> Dashboard
           </Link>
-          <span className="font-[var(--font-sen)] text-xs font-semibold tracking-[0.12em] text-[var(--color-brand-blue)]">SOGP</span>
+          <span className="font-[var(--font-sen)] text-xs font-semibold tracking-[0.12em] text-[var(--color-brand-lime)]">SOGP</span>
         </div>
       </nav>
 

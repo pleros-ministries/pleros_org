@@ -64,5 +64,10 @@ describe("SOGP dashboard previews", () => {
       'href={preview ? "/preview/dashboard" : "/dashboard"}',
     );
     expect(sogpPage).toContain(">SOGP</span>");
+    expect(sogpPage).toContain(
+      "border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)]",
+    );
+    expect(sogpPage).toContain("text-white/88");
+    expect(sogpPage).toContain("text-[var(--color-brand-lime)]");
   });
 });
