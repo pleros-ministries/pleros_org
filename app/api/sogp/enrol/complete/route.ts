@@ -24,6 +24,7 @@ import {
   buildSogpEnrollmentRedirect,
   formatSogpReferralSource,
 } from "@/lib/sogp/enrollment";
+import { resolvePublicSiteUrl } from "@/lib/welcome-campaign";
 
 const cohortDateFormatter = new Intl.DateTimeFormat("en-GB", {
   day: "numeric",
@@ -126,7 +127,7 @@ export async function POST(request: NextRequest) {
       name: values.name,
       cohortTitle: cohort.title,
       cohortDates: formatCohortDates(cohort.startsAt, cohort.endsAt),
-      dashboardUrl: "https://pleros.org/dashboard/welcomepack/join",
+      dashboardUrl: `${resolvePublicSiteUrl(process.env)}/dashboard/welcomepack/join`,
     }).catch((error) => console.error("SOGP enrolment email failed:", error));
 
     const response = NextResponse.json({
