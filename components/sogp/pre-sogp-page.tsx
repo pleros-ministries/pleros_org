@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { ArrowLeftIcon, BookOpenIcon, DownloadIcon, ExternalLinkIcon } from "lucide-react";
+import { ArrowLeftIcon, BookOpenIcon, ExternalLinkIcon } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
@@ -174,9 +174,6 @@ export function PreSogpPage({
               {selectedDay.lesson.description ? (
                 <p className="text-sm leading-[1.55] text-[var(--color-text-muted)]">{selectedDay.lesson.description}</p>
               ) : null}
-              <a href={selectedDay.lesson.url} download className="inline-flex min-h-10 w-fit items-center gap-2 rounded-full border border-[var(--color-brand-blue)] px-4 text-xs font-semibold text-[var(--color-brand-blue)]">
-                <DownloadIcon className="size-4" /> Download teaching
-              </a>
             </SogpActivitySection>
           ) : (
             <p className="rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white p-4 text-sm text-[var(--color-text-muted)]">
@@ -203,7 +200,7 @@ export function PreSogpPage({
               {
                 id: "lesson",
                 title: "Preparation lesson",
-                description: "Watching or downloading does not complete the lesson automatically.",
+                description: "Watching the video does not complete the lesson automatically.",
                 complete: selectedDay.lessonComplete,
                 actionLabel: "Mark lesson complete",
                 disabled: isFuture || !selectedDay.id || !selectedDay.lesson,

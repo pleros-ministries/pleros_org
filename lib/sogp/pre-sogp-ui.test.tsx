@@ -33,14 +33,16 @@ describe("Pre-SOGP learner UI", () => {
     );
   });
 
-  test("includes downloadable teaching and manual daily requirements", () => {
+  test("includes streaming teaching and manual daily requirements", () => {
     const page = source("components/sogp/pre-sogp-page.tsx");
     expect(page).toContain("<SogpLessonHeading");
     expect(page).toContain('eyebrow="Current day"');
     expect(page).toContain("<SogpActivitySection");
     expect(page).toContain('title="Preparation lesson"');
     expect(page).not.toContain("text-3xl font-semibold");
-    expect(page).toContain("Download teaching");
+    expect(page).not.toContain("Download teaching");
+    expect(page).not.toContain("DownloadIcon");
+    expect(page).not.toContain("Watching or downloading");
     expect(page).toContain("Pleros Live");
     expect(page).toContain("I joined Prayer Watch");
     expect(page).toContain("Mark lesson complete");
