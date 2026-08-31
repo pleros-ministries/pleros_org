@@ -56,11 +56,14 @@ const EARLIEST_BIRTH_YEAR = 1900;
 const MINIMUM_AGE = 10;
 
 export const SOGP_REFERRAL_OPTIONS = [
+  { value: "facebook", label: "Facebook" },
+  { value: "instagram", label: "Instagram" },
+  { value: "tiktok", label: "TikTok" },
+  { value: "whatsapp", label: "WhatsApp" },
+  { value: "twitter", label: "Twitter" },
+  { value: "telegram", label: "Telegram" },
   { value: "friend_or_family", label: "Friend or family member" },
   { value: "church_or_pastor", label: "Church, pastor or minister" },
-  { value: "whatsapp", label: "WhatsApp" },
-  { value: "telegram", label: "Telegram" },
-  { value: "social_media", label: "Social media" },
   { value: "pleros_website", label: "Pleros website" },
   { value: "pleros_event", label: "Pleros programme or event" },
   { value: "search_engine", label: "Search engine" },

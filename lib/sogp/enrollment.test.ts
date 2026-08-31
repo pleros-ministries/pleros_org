@@ -48,7 +48,7 @@ describe("SOGP enrolment", () => {
         country: " Nigeria ",
         region: " Lagos ",
         birthYear: " 1998 ",
-        referralSource: "social_media",
+        referralSource: "instagram",
         whatsappConsent: "yes",
         utmSource: " meta ",
       }),
@@ -62,7 +62,7 @@ describe("SOGP enrolment", () => {
       country: "Nigeria",
       region: "Lagos",
       birthYear: "1998",
-      referralSource: "social_media",
+      referralSource: "instagram",
       whatsappConsent: true,
       utmSource: "meta",
     });

@@ -55,7 +55,7 @@ const FOCUS_TARGET: Partial<Record<FieldName, string>> = {
   birthYear: "birthYear",
   referralSource: "referralSource",
   referralSourceOther: "referralSourceOther",
-  whatsappConsent: "whatsappConsent",
+  whatsappConsent: "whatsappConsentYes",
 };
 
 const BIRTH_YEAR_OPTIONS = getSogpBirthYearOptions();
@@ -127,9 +127,9 @@ function ReferralSourceFields({
           aria-describedby={sourceError ? "referral-source-error" : undefined}
           className={`h-11 w-full appearance-none rounded-[var(--radius-sm)] border border-[var(--color-line-strong)] bg-white px-4 pr-11 [font-size:0.875rem] outline-none transition aria-invalid:border-[var(--destructive)] aria-invalid:ring-4 aria-invalid:ring-red-100 focus-visible:border-[var(--color-brand-blue)] focus-visible:ring-4 focus-visible:ring-[var(--color-focus)] ${source ? "text-[var(--color-text-strong)]" : "text-[var(--color-text-muted)]"}`}
         >
-          <option value="">Select an option</option>
+          <option value="" className="[font-size:0.8125rem]">Select an option</option>
           {SOGP_REFERRAL_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value}>{option.label}</option>
+            <option key={option.value} value={option.value} className="[font-size:0.8125rem]">{option.label}</option>
           ))}
         </select>
         <ChevronDown className={`pointer-events-none absolute right-4 top-1/2 size-4 -translate-y-1/2 ${source ? "text-[var(--color-brand-blue)]" : "text-[var(--color-text-muted)]"}`} aria-hidden="true" />
@@ -406,29 +406,39 @@ export function SogpEnrollmentForm({
         }}
         onOtherSourceChange={(value) => update("referralSourceOther", value)}
       />
-      <div className="grid gap-2">
-        <label htmlFor="whatsappConsent" className="font-[var(--font-be-vietnam-pro)] [font-size:0.8125rem] font-medium leading-[1.45] text-[var(--color-text-strong)]">
+      <fieldset
+        className="grid gap-2"
+        aria-invalid={Boolean(whatsappConsentError)}
+        aria-describedby={whatsappConsentError ? "whatsapp-consent-error" : undefined}
+      >
+        <legend className="font-[var(--font-be-vietnam-pro)] [font-size:0.8125rem] font-medium leading-[1.45] text-[var(--color-text-strong)]">
           Would you like to receive SOGP updates via WhatsApp?<RequiredMark />
-        </label>
-        <div className="relative">
-          <select
-            id="whatsappConsent"
-            name="whatsappConsent"
-            value={values.whatsappConsent}
-            onChange={(event) => update("whatsappConsent", event.target.value as "" | "yes" | "no")}
-            required
-            aria-invalid={Boolean(whatsappConsentError)}
-            aria-describedby={whatsappConsentError ? "whatsapp-consent-error" : undefined}
-            className={`h-11 w-full appearance-none rounded-[var(--radius-sm)] border border-[var(--color-line-strong)] bg-white px-4 pr-11 [font-size:0.875rem] outline-none transition aria-invalid:border-[var(--destructive)] aria-invalid:ring-4 aria-invalid:ring-red-100 focus-visible:border-[var(--color-brand-blue)] focus-visible:ring-4 focus-visible:ring-[var(--color-focus)] ${values.whatsappConsent ? "text-[var(--color-text-strong)]" : "text-[var(--color-text-muted)]"}`}
-          >
-            <option value="">Select an option</option>
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
-          </select>
-          <ChevronDown className={`pointer-events-none absolute right-4 top-1/2 size-4 -translate-y-1/2 ${values.whatsappConsent ? "text-[var(--color-brand-blue)]" : "text-[var(--color-text-muted)]"}`} aria-hidden="true" />
+        </legend>
+        <div className="grid grid-cols-2 gap-3">
+          {(["yes", "no"] as const).map((option) => (
+            <label
+              key={option}
+              htmlFor={`whatsappConsent${option === "yes" ? "Yes" : "No"}`}
+              className="flex min-h-11 cursor-pointer items-center gap-3 rounded-[var(--radius-sm)] border border-[var(--color-line-strong)] bg-white px-4 [font-size:0.875rem] font-medium text-[var(--color-text-strong)] transition-colors duration-150 has-[:checked]:border-[var(--color-brand-blue)] has-[:checked]:bg-[var(--color-brand-sky-soft)] has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-[var(--color-focus)]"
+            >
+              <input
+                id={`whatsappConsent${option === "yes" ? "Yes" : "No"}`}
+                type="radio"
+                name="whatsappConsent"
+                value={option}
+                checked={values.whatsappConsent === option}
+                onChange={() => update("whatsappConsent", option)}
+                required
+                aria-invalid={Boolean(whatsappConsentError)}
+                aria-describedby={whatsappConsentError ? "whatsapp-consent-error" : undefined}
+                className="size-4 shrink-0 accent-[var(--color-brand-blue)]"
+              />
+              <span>{option === "yes" ? "Yes" : "No"}</span>
+            </label>
+          ))}
         </div>
         <FieldError id="whatsapp-consent-error" error={whatsappConsentError} />
-      </div>
+      </fieldset>
       {formError ? (
         <div role="alert" className="rounded-[var(--radius-sm)] border border-red-200 bg-red-50 px-4 py-2.5 font-[var(--font-be-vietnam-pro)] [font-size:0.75rem] leading-[1.5] text-red-800">{formError}</div>
       ) : null}
