@@ -155,11 +155,17 @@ export function SogpJourneyPage({
 
   return (
     <section className="site-font-theme min-h-screen bg-[var(--color-surface)] pb-16">
-      <div className="site-shell-page sogp-shell-page grid gap-5 py-6 lg:grid-cols-[16.5rem_minmax(0,1fr)] lg:items-start xl:grid-cols-[16.5rem_minmax(0,1fr)_16.5rem]">
-        <header className="grid gap-2 lg:col-span-2 xl:col-span-3">
-          <Link href={preview ? "/preview/dashboard" : "/dashboard"} className="inline-flex min-h-10 w-fit items-center gap-2 rounded-full px-1 text-xs font-semibold text-[var(--color-text-muted)] transition-colors duration-150 hover:text-[var(--color-brand-blue)] active:scale-[0.96]">
+      <nav aria-label="SOGP dashboard navigation" className="sticky top-0 z-30 border-b border-[var(--color-line)] bg-white/95 backdrop-blur-sm">
+        <div className="site-shell-page sogp-shell-page flex min-h-14 items-center justify-between gap-4">
+          <Link href={preview ? "/preview/dashboard" : "/dashboard"} className="inline-flex min-h-10 items-center gap-2 rounded-full px-1 text-xs font-semibold text-[var(--color-text-muted)] transition-colors duration-150 hover:text-[var(--color-brand-blue)] active:scale-[0.96]">
             <ArrowLeftIcon className="size-4" strokeWidth={2} /> Dashboard
           </Link>
+          <span className="font-[var(--font-sen)] text-xs font-semibold tracking-[0.12em] text-[var(--color-brand-blue)]">SOGP</span>
+        </div>
+      </nav>
+
+      <div className="site-shell-page sogp-shell-page grid gap-5 pb-6 pt-4 lg:grid-cols-[16.5rem_minmax(0,1fr)] lg:items-start xl:grid-cols-[16.5rem_minmax(0,1fr)_16.5rem]">
+        <header className="grid gap-2 lg:col-span-2 xl:col-span-3">
           <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
             <h1 className="font-[var(--font-sen)] text-xl font-semibold tracking-[-0.04em] text-[var(--color-text-strong)] md:text-2xl">Welcome, {firstName(data.enrollment.name)}</h1>
             <p className="text-[0.62rem] font-semibold uppercase tracking-[0.1em] text-[var(--color-text-muted)]">{data.cohort.title}</p>
@@ -168,7 +174,7 @@ export function SogpJourneyPage({
 
         <aside
           data-sogp-section="calendar"
-          className="lg:sticky lg:top-5"
+          className="lg:sticky lg:top-[4.5rem]"
         >
           <SogpCourseSidebar
             data={data}
@@ -257,7 +263,7 @@ export function SogpJourneyPage({
           {mutation.error ? <p role="alert" className="text-sm text-red-700">{mutation.error.message}</p> : null}
         </main>
 
-        <aside className="grid content-start gap-3 lg:col-start-2 xl:sticky xl:top-5 xl:col-start-auto">
+        <aside className="grid content-start gap-3 lg:col-start-2 xl:sticky xl:top-[4.5rem] xl:col-start-auto">
           <SogpContextSidebar data={data} />
           {preview ? <p className="rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white p-4 text-xs text-[var(--color-text-muted)]">Preview mode · Progress changes stay in this preview.</p> : <SogpPushPanel />}
         </aside>

@@ -54,5 +54,15 @@ describe("SOGP dashboard previews", () => {
     expect(sogpPage).not.toContain(
       'className="grid gap-1">\n            <p',
     );
+    expect(sogpPage).toContain(
+      '<nav aria-label="SOGP dashboard navigation"',
+    );
+    expect(sogpPage.indexOf("SOGP dashboard navigation")).toBeLessThan(
+      sogpPage.indexOf("Welcome, {firstName"),
+    );
+    expect(sogpPage).toContain(
+      'href={preview ? "/preview/dashboard" : "/dashboard"}',
+    );
+    expect(sogpPage).toContain(">SOGP</span>");
   });
 });
