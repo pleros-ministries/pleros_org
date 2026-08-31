@@ -1,3 +1,8 @@
+export const WELCOME_PACK_JOIN_VIDEO_SRC =
+  "/site/sogp/sogp-welcome-page-20260831.mp4";
+export const WELCOME_PACK_JOIN_POSTER_SRC =
+  "/site/sogp/sogp-welcome-page-20260831.jpg";
+
 export type WelcomePackHubCard = {
   id: "join" | "orientation" | "gifts";
   title: string;

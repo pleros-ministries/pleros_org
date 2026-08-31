@@ -142,9 +142,11 @@ export function WelcomePackHubPage({
 export function WelcomePackJoinPage({
   telegramUrl,
   videoSrc,
+  videoPosterSrc,
 }: {
   telegramUrl: string;
   videoSrc: string | null;
+  videoPosterSrc?: string | null;
 }) {
   return (
     <main className="site-font-theme grid min-h-screen grid-cols-[minmax(0,1fr)] place-items-center bg-[var(--color-brand-blue)] px-5 py-10 text-white">
@@ -164,6 +166,7 @@ export function WelcomePackJoinPage({
             playsInline
             preload="metadata"
             src={videoSrc}
+            poster={videoPosterSrc ?? undefined}
             className="aspect-square w-full max-w-full rounded-[var(--radius-md)] bg-black object-contain shadow-[var(--shadow-lg)]"
           />
         ) : (

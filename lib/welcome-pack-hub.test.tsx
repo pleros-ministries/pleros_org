@@ -71,6 +71,46 @@ describe("Welcome Pack hub", () => {
 });
 
 describe("focused Welcome Pack pages", () => {
+  test("uses the bundled welcome media on live and preview join routes", () => {
+    const routeSources = [
+      join(
+        process.cwd(),
+        "app",
+        "(focused)",
+        "dashboard",
+        "welcomepack",
+        "join",
+        "page.tsx",
+      ),
+      join(
+        process.cwd(),
+        "app",
+        "(preview-focused)",
+        "preview",
+        "dashboard",
+        "welcomepack",
+        "join",
+        "page.tsx",
+      ),
+    ].map((path) => readFileSync(path, "utf8"));
+
+    for (const source of routeSources) {
+      expect(source).toContain("WELCOME_PACK_JOIN_VIDEO_SRC");
+      expect(source).toContain("WELCOME_PACK_JOIN_POSTER_SRC");
+    }
+
+    const componentSource = readFileSync(
+      join(
+        process.cwd(),
+        "components",
+        "dashboard",
+        "welcome-pack-pages.tsx",
+      ),
+      "utf8",
+    );
+    expect(componentSource).toContain("poster={videoPosterSrc ?? undefined}");
+  });
+
   test("preserves the square framing of the welcome video", () => {
     const html = renderToStaticMarkup(
       <WelcomePackJoinPage
