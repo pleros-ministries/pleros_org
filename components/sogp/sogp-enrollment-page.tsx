@@ -46,13 +46,13 @@ export function SogpEnrollmentPage({
                 </Link>
                 <Link
                   href="/login?returnTo=/dashboard/sogp"
-                  className="font-[var(--font-be-vietnam-pro)] text-xs font-medium text-[var(--color-brand-blue)] underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-brand-blue)]"
+                  className="font-[var(--font-be-vietnam-pro)] text-xs font-medium text-[var(--color-brand-blue)] underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-brand-blue)]"
                 >
                   Already enrolled? Log in
                 </Link>
               </div>
-              <h1 className="site-hero-heading max-w-none text-[clamp(2.3rem,9vw,2.8rem)] text-[var(--color-brand-blue)] md:max-w-[12ch] md:text-[clamp(2.8rem,6vw,5rem)]">Take your next step with SOGP</h1>
-              <p className="site-section-intro max-w-[32rem] text-[var(--color-text-muted)]">Join a guided four-week journey into truth, spiritual growth, and God&apos;s purpose.</p>
+              <h1 className="site-hero-heading max-w-none text-[clamp(2.1rem,8vw,2.35rem)] text-[var(--color-brand-blue)] md:max-w-[13ch] md:text-[clamp(2.5rem,4.5vw,3.5rem)]">Take your next step with SOGP</h1>
+              <p className="site-section-intro max-w-[32rem] [font-size:0.875rem] leading-[1.55] text-[var(--color-text-muted)]">Join a guided four-week journey into truth, spiritual growth, and God&apos;s purpose.</p>
             </div>
             <ul className="grid gap-3">
               {summary.map(({ label, meta, Icon }) => (
@@ -61,10 +61,10 @@ export function SogpEnrollmentPage({
                     <Icon className="size-4" aria-hidden="true" />
                   </span>
                   <span className="grid gap-0.5">
-                    <span className="font-[var(--font-be-vietnam-pro)] text-sm font-medium leading-tight text-[var(--color-text-strong)]">
+                    <span className="font-[var(--font-be-vietnam-pro)] [font-size:0.875rem] font-medium leading-tight text-[var(--color-text-strong)]">
                       {label}
                     </span>
-                    <span className="font-[var(--font-be-vietnam-pro)] text-xs leading-tight text-[var(--color-text-muted)]">
+                    <span className="font-[var(--font-be-vietnam-pro)] [font-size:0.75rem] leading-[1.35] text-[var(--color-text-muted)]">
                       {meta}
                     </span>
                   </span>

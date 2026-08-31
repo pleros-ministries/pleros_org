@@ -248,6 +248,11 @@ Unknown login emails receive the same browser response but no email, preventing 
 
 - Reuse the SOGP public Sen/Be Vietnam Pro typography and existing tokens.
 - Keep `/login`, `/signup` handoff, `/sogp/enrol`, and `/setup` mobile-first.
+- Use the calm compact auth scale consistently across `/login`, `/forgot-password`, `/reset-password`, and `/setup`: 24px headings, 14px body and button copy, 13px labels/actions/errors, 12px helper copy, and 16px input text to prevent iOS zoom.
+- On `/sogp/enrol`, use 14px selected-value text for native selects and the country combobox so dropdowns remain close to their 13px labels; keep free-text inputs at 16px.
+- Render empty/default select text and chevrons with the muted text token; once a value is chosen, use strong text and the brand-blue chevron.
+- Left-align enrolment privacy and support copy with the form fields.
+- Apply auth density locally; do not alter the shared public-site typography tokens to achieve it.
 - Render stable shells immediately with focused loading states.
 - Use visible labels, native controls, `aria-invalid`, `aria-describedby`, and first-error focus.
 - Make OTP and password steps keyboard-completable at 320px and 200% zoom.

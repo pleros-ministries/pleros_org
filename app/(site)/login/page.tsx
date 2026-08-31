@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 
 import { LearnerLoginForm } from "@/components/auth/learner-login-form";
 import { HomepageFooter } from "@/components/home/homepage-footer";
 import { PublicSitePageShell } from "@/components/home/public-site-page-shell";
-import { getAppSession } from "@/lib/app-session";
 import { normalizeLearnerReturnTo } from "@/lib/sogp/auth-flow";
 
 export const metadata: Metadata = {
@@ -19,8 +17,6 @@ export default async function LoginPage({
 }) {
   const params = await searchParams;
   const returnTo = normalizeLearnerReturnTo(params.returnTo);
-  const session = await getAppSession();
-  if (session) redirect(returnTo);
 
   return (
     <PublicSitePageShell>

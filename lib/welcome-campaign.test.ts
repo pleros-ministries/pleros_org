@@ -9,40 +9,15 @@ import {
 } from "./welcome-campaign";
 
 describe("welcome campaign pages", () => {
-  test("wires the welcome landing page to the manual drawer flow", () => {
+  test("permanently redirects the retired welcome route to SOGP", () => {
     const pageSource = readFileSync(
       join(process.cwd(), "app", "(site)", "welcome", "page.tsx"),
       "utf8",
     );
-    const viewSource = readFileSync(
-      join(process.cwd(), "components", "home", "welcome-landing-page.tsx"),
-      "utf8",
-    );
-    const drawerSource = readFileSync(
-      join(process.cwd(), "components", "home", "homepage-gift-drawer.tsx"),
-      "utf8",
-    );
 
-    expect(pageSource).toContain("WelcomeLandingPage");
-    expect(pageSource).toContain("getAppSession");
-    expect(pageSource).toContain("appSession || welcomeAccess");
-    expect(pageSource).toContain('redirect("/dashboard")');
-    expect(viewSource).toContain("Get your free book");
-    expect(viewSource).toContain('redirectTo="/thankyou"');
-    expect(viewSource).toContain("autoOpen={false}");
-    expect(viewSource).toContain('eyebrowLabel="Book access"');
-    expect(viewSource).toContain('headline="Enter your email to get access"');
-    expect(viewSource).toContain(
-      "Add your first name and email so we can grant you access now.",
-    );
-    expect(viewSource).toContain("HomepageCommunitySection");
-    expect(viewSource).toContain("<HomepageCommunitySection />");
-    expect(viewSource).not.toContain("homeWhatsappChannelUrl");
-    expect(drawerSource).toContain("headline = welcomePackModalCopy.headline");
-    expect(drawerSource).toContain("subheadline = welcomePackModalCopy.subheadline");
-    expect(drawerSource).toContain("redirectTo?: string");
-    expect(drawerSource).toContain("autoOpen?: boolean");
-    expect(drawerSource).toContain("returnTo: redirectTo");
+    expect(pageSource).toContain('permanentRedirect("/sogp")');
+    expect(pageSource).not.toContain("WelcomeLandingPage");
+    expect(pageSource).not.toContain("WELCOME_ACCESS_COOKIE_NAME");
   });
 
   test("uses the purpose book landing copy with a responsive public layout", () => {

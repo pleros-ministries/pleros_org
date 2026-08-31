@@ -120,7 +120,7 @@ describe("SOGP enrolment", () => {
       region: "State, province or region of residence is required.",
       birthYear: "Year of birth is required.",
       referralSource: "Select how you heard about us.",
-      whatsappConsent: "Select whether you want WhatsApp reminders.",
+      whatsappConsent: "Select whether you want WhatsApp updates.",
     });
   });
 

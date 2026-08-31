@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { ArrowRight, ChevronDown, LoaderCircle } from "lucide-react";
+import Link from "next/link";
 import type { CountryCode } from "libphonenumber-js/min";
 
 import { Button } from "@/components/ui/button";
@@ -83,10 +84,18 @@ async function submitEnrollment(body: Record<string, unknown>) {
 
 function FieldError({ id, error }: { id: string; error?: string }) {
   return error ? (
-    <p id={id} className="font-[var(--font-be-vietnam-pro)] text-xs text-[var(--destructive)]">
+    <p id={id} className="font-[var(--font-be-vietnam-pro)] [font-size:0.75rem] text-[var(--destructive)]">
       {error}
     </p>
   ) : null;
+}
+
+function RequiredMark() {
+  return (
+    <span aria-hidden="true" className="ml-0.5 text-[var(--destructive)]">
+      *
+    </span>
+  );
 }
 
 function ReferralSourceFields({
@@ -96,8 +105,6 @@ function ReferralSourceFields({
   otherSourceError,
   onSourceChange,
   onOtherSourceChange,
-  onSourceBlur,
-  onOtherSourceBlur,
 }: {
   source: string;
   otherSource: string;
@@ -105,35 +112,33 @@ function ReferralSourceFields({
   otherSourceError?: string;
   onSourceChange: (value: string) => void;
   onOtherSourceChange: (value: string) => void;
-  onSourceBlur: () => void;
-  onOtherSourceBlur: () => void;
 }) {
   return (
     <div className="grid gap-2">
-      <label htmlFor="referralSource" className="font-[var(--font-be-vietnam-pro)] text-sm font-medium text-[var(--color-text-strong)]">How did you hear about us?</label>
+      <label htmlFor="referralSource" className="font-[var(--font-be-vietnam-pro)] [font-size:0.8125rem] font-medium text-[var(--color-text-strong)]">How did you hear about us?<RequiredMark /></label>
       <div className="relative">
         <select
           id="referralSource"
           name="referralSource"
           value={source}
           onChange={(event) => onSourceChange(event.target.value)}
-          onBlur={onSourceBlur}
+          required
           aria-invalid={Boolean(sourceError)}
           aria-describedby={sourceError ? "referral-source-error" : undefined}
-          className="h-11 w-full appearance-none rounded-[var(--radius-sm)] border border-[var(--color-line-strong)] bg-white px-4 pr-11 text-sm text-[var(--color-text-strong)] outline-none transition focus-visible:border-[var(--color-brand-blue)] focus-visible:ring-4 focus-visible:ring-[var(--color-focus)]"
+          className={`h-11 w-full appearance-none rounded-[var(--radius-sm)] border border-[var(--color-line-strong)] bg-white px-4 pr-11 [font-size:0.875rem] outline-none transition aria-invalid:border-[var(--destructive)] aria-invalid:ring-4 aria-invalid:ring-red-100 focus-visible:border-[var(--color-brand-blue)] focus-visible:ring-4 focus-visible:ring-[var(--color-focus)] ${source ? "text-[var(--color-text-strong)]" : "text-[var(--color-text-muted)]"}`}
         >
           <option value="">Select an option</option>
           {SOGP_REFERRAL_OPTIONS.map((option) => (
             <option key={option.value} value={option.value}>{option.label}</option>
           ))}
         </select>
-        <ChevronDown className="pointer-events-none absolute right-4 top-1/2 size-4 -translate-y-1/2 text-[var(--color-brand-blue)]" aria-hidden="true" />
+        <ChevronDown className={`pointer-events-none absolute right-4 top-1/2 size-4 -translate-y-1/2 ${source ? "text-[var(--color-brand-blue)]" : "text-[var(--color-text-muted)]"}`} aria-hidden="true" />
       </div>
       <FieldError id="referral-source-error" error={sourceError} />
       {source === "other" ? (
         <div className="grid gap-2 pt-1">
-          <label htmlFor="referralSourceOther" className="font-[var(--font-be-vietnam-pro)] text-sm font-medium text-[var(--color-text-strong)]">
-            Tell us how you heard about us
+          <label htmlFor="referralSourceOther" className="font-[var(--font-be-vietnam-pro)] [font-size:0.8125rem] font-medium text-[var(--color-text-strong)]">
+            Tell us how you heard about us<RequiredMark />
           </label>
           <Input
             id="referralSourceOther"
@@ -142,10 +147,11 @@ function ReferralSourceFields({
             maxLength={120}
             value={otherSource}
             onChange={(event) => onOtherSourceChange(event.target.value)}
-            onBlur={onOtherSourceBlur}
+            required
             aria-invalid={Boolean(otherSourceError)}
             aria-describedby={otherSourceError ? "referral-source-other-error" : undefined}
             placeholder="Enter the source"
+            className="aria-invalid:border-[var(--destructive)] aria-invalid:ring-4 aria-invalid:ring-red-100"
           />
           <FieldError id="referral-source-other-error" error={otherSourceError} />
         </div>
@@ -175,7 +181,6 @@ export function SogpEnrollmentForm({
     country: initialCountry.label,
     countryCode: initialCountry.code as string,
   });
-  const [touched, setTouched] = useState<Partial<Record<FieldName, boolean>>>({});
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const [serverErrors, setServerErrors] = useState<SogpEnrollmentErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
@@ -221,15 +226,11 @@ export function SogpEnrollmentForm({
     clearServerError(key as keyof SogpEnrollmentErrors);
   }
 
-  function markTouched(field: FieldName) {
-    setTouched((current) => ({ ...current, [field]: true }));
-  }
-
-  // Show a field's error once it has been touched or a submit was attempted;
-  // a server-reported error always shows.
+  // Keep incomplete fields neutral until submit. Server-reported errors always
+  // show, and a submit attempt reveals all current client-side errors.
   function errorFor(field: keyof SogpEnrollmentErrors): string | undefined {
     if (serverErrors[field]) return serverErrors[field];
-    if (submitAttempted || touched[field as FieldName]) return clientErrors[field];
+    if (submitAttempted) return clientErrors[field];
     return undefined;
   }
 
@@ -266,36 +267,38 @@ export function SogpEnrollmentForm({
     <form className="grid gap-5" noValidate onSubmit={handleSubmit}>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="grid gap-2">
-          <label htmlFor="firstName" className="font-[var(--font-be-vietnam-pro)] text-sm font-medium text-[var(--color-text-strong)]">First name</label>
+          <label htmlFor="firstName" className="font-[var(--font-be-vietnam-pro)] [font-size:0.8125rem] font-medium text-[var(--color-text-strong)]">First name<RequiredMark /></label>
           <Input
             id="firstName"
             name="firstName"
             autoComplete="given-name"
             value={values.firstName}
             onChange={(event) => update("firstName", event.target.value)}
-            onBlur={() => markTouched("firstName")}
+            required
             aria-invalid={Boolean(firstNameError)}
             aria-describedby={firstNameError ? "first-name-error" : undefined}
+            className="aria-invalid:border-[var(--destructive)] aria-invalid:ring-4 aria-invalid:ring-red-100"
           />
           <FieldError id="first-name-error" error={firstNameError} />
         </div>
         <div className="grid gap-2">
-          <label htmlFor="lastName" className="font-[var(--font-be-vietnam-pro)] text-sm font-medium text-[var(--color-text-strong)]">Surname/Last Name</label>
+          <label htmlFor="lastName" className="font-[var(--font-be-vietnam-pro)] [font-size:0.8125rem] font-medium text-[var(--color-text-strong)]">Surname/Last name<RequiredMark /></label>
           <Input
             id="lastName"
             name="lastName"
             autoComplete="family-name"
             value={values.lastName}
             onChange={(event) => update("lastName", event.target.value)}
-            onBlur={() => markTouched("lastName")}
+            required
             aria-invalid={Boolean(lastNameError)}
             aria-describedby={lastNameError ? "last-name-error" : undefined}
+            className="aria-invalid:border-[var(--destructive)] aria-invalid:ring-4 aria-invalid:ring-red-100"
           />
           <FieldError id="last-name-error" error={lastNameError} />
         </div>
       </div>
       <div className="grid gap-2">
-        <label htmlFor="email" className="font-[var(--font-be-vietnam-pro)] text-sm font-medium text-[var(--color-text-strong)]">Email address</label>
+        <label htmlFor="email" className="font-[var(--font-be-vietnam-pro)] [font-size:0.8125rem] font-medium text-[var(--color-text-strong)]">Email address<RequiredMark /></label>
         <Input
           id="email"
           name="email"
@@ -303,14 +306,15 @@ export function SogpEnrollmentForm({
           autoComplete="email"
           value={values.email}
           onChange={(event) => update("email", event.target.value)}
-          onBlur={() => markTouched("email")}
+          required
           aria-invalid={Boolean(emailError)}
           aria-describedby={emailError ? "email-error" : undefined}
+          className="aria-invalid:border-[var(--destructive)] aria-invalid:ring-4 aria-invalid:ring-red-100"
         />
         <FieldError id="email-error" error={emailError} />
       </div>
       <div className="grid gap-2">
-        <label htmlFor="phone" className="font-[var(--font-be-vietnam-pro)] text-sm font-medium text-[var(--color-text-strong)]">Phone number</label>
+        <label htmlFor="phone" className="font-[var(--font-be-vietnam-pro)] [font-size:0.8125rem] font-medium text-[var(--color-text-strong)]">Phone number<RequiredMark /></label>
         <PhoneField
           defaultCountryCode={defaultCountryCode}
           invalid={Boolean(phoneError)}
@@ -323,13 +327,12 @@ export function SogpEnrollmentForm({
             }));
             clearServerError("phone");
           }}
-          onBlur={() => markTouched("phone")}
         />
-        <p id="phone-help" className="font-[var(--font-be-vietnam-pro)] text-xs leading-[1.45] text-[var(--color-text-muted)]">Use the number linked to your WhatsApp account.</p>
+        <p id="phone-help" className="font-[var(--font-be-vietnam-pro)] [font-size:0.75rem] leading-[1.45] text-[var(--color-text-muted)]">Use the number linked to your WhatsApp account.</p>
         <FieldError id="phone-error" error={phoneError} />
       </div>
       <div className="grid gap-2">
-        <label htmlFor="country" className="font-[var(--font-be-vietnam-pro)] text-sm font-medium text-[var(--color-text-strong)]">Country of residence</label>
+        <label htmlFor="country" className="font-[var(--font-be-vietnam-pro)] [font-size:0.8125rem] font-medium text-[var(--color-text-strong)]">Country of residence<RequiredMark /></label>
         <CountryCombobox
           defaultCountryCode={defaultCountryCode}
           invalid={Boolean(countryError)}
@@ -342,28 +345,28 @@ export function SogpEnrollmentForm({
             }));
             clearServerError("country");
             clearServerError("countryCode");
-            markTouched("country");
           }}
         />
         <FieldError id="country-error" error={countryError} />
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="grid gap-2">
-          <label htmlFor="region" className="font-[var(--font-be-vietnam-pro)] text-sm font-medium text-[var(--color-text-strong)]">State / province / region of residence</label>
+          <label htmlFor="region" className="font-[var(--font-be-vietnam-pro)] [font-size:0.8125rem] font-medium text-[var(--color-text-strong)]">State/Province/Region of residence<RequiredMark /></label>
           <Input
             id="region"
             name="region"
             autoComplete="address-level1"
             value={values.region}
             onChange={(event) => update("region", event.target.value)}
-            onBlur={() => markTouched("region")}
+            required
             aria-invalid={Boolean(regionError)}
             aria-describedby={regionError ? "region-error" : undefined}
+            className="aria-invalid:border-[var(--destructive)] aria-invalid:ring-4 aria-invalid:ring-red-100"
           />
           <FieldError id="region-error" error={regionError} />
         </div>
         <div className="grid gap-2">
-          <label htmlFor="birthYear" className="font-[var(--font-be-vietnam-pro)] text-sm font-medium text-[var(--color-text-strong)]">Year of birth</label>
+          <label htmlFor="birthYear" className="font-[var(--font-be-vietnam-pro)] [font-size:0.8125rem] font-medium text-[var(--color-text-strong)]">Year of birth<RequiredMark /></label>
           <div className="relative">
             <select
               id="birthYear"
@@ -371,17 +374,17 @@ export function SogpEnrollmentForm({
               autoComplete="bday-year"
               value={values.birthYear}
               onChange={(event) => update("birthYear", event.target.value)}
-              onBlur={() => markTouched("birthYear")}
+              required
               aria-invalid={Boolean(birthYearError)}
               aria-describedby={birthYearError ? "birth-year-error" : undefined}
-              className="h-11 w-full appearance-none rounded-[var(--radius-sm)] border border-[var(--color-line-strong)] bg-white px-4 pr-11 text-sm text-[var(--color-text-strong)] outline-none transition focus-visible:border-[var(--color-brand-blue)] focus-visible:ring-4 focus-visible:ring-[var(--color-focus)]"
+              className={`h-11 w-full appearance-none rounded-[var(--radius-sm)] border border-[var(--color-line-strong)] bg-white px-4 pr-11 [font-size:0.875rem] outline-none transition aria-invalid:border-[var(--destructive)] aria-invalid:ring-4 aria-invalid:ring-red-100 focus-visible:border-[var(--color-brand-blue)] focus-visible:ring-4 focus-visible:ring-[var(--color-focus)] ${values.birthYear ? "text-[var(--color-text-strong)]" : "text-[var(--color-text-muted)]"}`}
             >
               <option value="">Select year</option>
               {BIRTH_YEAR_OPTIONS.map((year) => (
                 <option key={year} value={year}>{year}</option>
               ))}
             </select>
-            <ChevronDown className="pointer-events-none absolute right-4 top-1/2 size-4 -translate-y-1/2 text-[var(--color-brand-blue)]" aria-hidden="true" />
+            <ChevronDown className={`pointer-events-none absolute right-4 top-1/2 size-4 -translate-y-1/2 ${values.birthYear ? "text-[var(--color-brand-blue)]" : "text-[var(--color-text-muted)]"}`} aria-hidden="true" />
           </div>
           <FieldError id="birth-year-error" error={birthYearError} />
         </div>
@@ -402,12 +405,10 @@ export function SogpEnrollmentForm({
           clearServerError("referralSourceOther");
         }}
         onOtherSourceChange={(value) => update("referralSourceOther", value)}
-        onSourceBlur={() => markTouched("referralSource")}
-        onOtherSourceBlur={() => markTouched("referralSourceOther")}
       />
       <div className="grid gap-2">
-        <label htmlFor="whatsappConsent" className="font-[var(--font-be-vietnam-pro)] text-sm font-medium leading-[1.45] text-[var(--color-text-strong)]">
-          Would you like to receive SOGP updates and course reminders via WhatsApp?
+        <label htmlFor="whatsappConsent" className="font-[var(--font-be-vietnam-pro)] [font-size:0.8125rem] font-medium leading-[1.45] text-[var(--color-text-strong)]">
+          Would you like to receive SOGP updates via WhatsApp?<RequiredMark />
         </label>
         <div className="relative">
           <select
@@ -415,29 +416,35 @@ export function SogpEnrollmentForm({
             name="whatsappConsent"
             value={values.whatsappConsent}
             onChange={(event) => update("whatsappConsent", event.target.value as "" | "yes" | "no")}
-            onBlur={() => markTouched("whatsappConsent")}
+            required
             aria-invalid={Boolean(whatsappConsentError)}
             aria-describedby={whatsappConsentError ? "whatsapp-consent-error" : undefined}
-            className="h-11 w-full appearance-none rounded-[var(--radius-sm)] border border-[var(--color-line-strong)] bg-white px-4 pr-11 text-sm text-[var(--color-text-strong)] outline-none transition focus-visible:border-[var(--color-brand-blue)] focus-visible:ring-4 focus-visible:ring-[var(--color-focus)]"
+            className={`h-11 w-full appearance-none rounded-[var(--radius-sm)] border border-[var(--color-line-strong)] bg-white px-4 pr-11 [font-size:0.875rem] outline-none transition aria-invalid:border-[var(--destructive)] aria-invalid:ring-4 aria-invalid:ring-red-100 focus-visible:border-[var(--color-brand-blue)] focus-visible:ring-4 focus-visible:ring-[var(--color-focus)] ${values.whatsappConsent ? "text-[var(--color-text-strong)]" : "text-[var(--color-text-muted)]"}`}
           >
             <option value="">Select an option</option>
             <option value="yes">Yes</option>
             <option value="no">No</option>
           </select>
-          <ChevronDown className="pointer-events-none absolute right-4 top-1/2 size-4 -translate-y-1/2 text-[var(--color-brand-blue)]" aria-hidden="true" />
+          <ChevronDown className={`pointer-events-none absolute right-4 top-1/2 size-4 -translate-y-1/2 ${values.whatsappConsent ? "text-[var(--color-brand-blue)]" : "text-[var(--color-text-muted)]"}`} aria-hidden="true" />
         </div>
         <FieldError id="whatsapp-consent-error" error={whatsappConsentError} />
       </div>
       {formError ? (
-        <div role="alert" className="rounded-[var(--radius-sm)] border border-red-200 bg-red-50 px-4 py-2.5 font-[var(--font-be-vietnam-pro)] text-xs leading-[1.5] text-red-800">{formError}</div>
+        <div role="alert" className="rounded-[var(--radius-sm)] border border-red-200 bg-red-50 px-4 py-2.5 font-[var(--font-be-vietnam-pro)] [font-size:0.75rem] leading-[1.5] text-red-800">{formError}</div>
       ) : null}
-      <Button type="submit" size="lg" disabled={mutation.isPending} className="min-h-12 w-full rounded-full bg-[var(--color-brand-blue)] text-white">
+      <Button type="submit" size="lg" disabled={mutation.isPending} className="mt-3 min-h-12 w-full rounded-full bg-[var(--color-brand-blue)] [font-size:0.875rem] text-white">
         {mutation.isPending ? <LoaderCircle className="size-4 animate-spin" /> : null}
-         {mutation.isPending ? "Sending verification code" : "Continue to email verification"}
+         {mutation.isPending ? "Sending verification code" : "Continue setup"}
         {!mutation.isPending ? <ArrowRight className="size-4" /> : null}
       </Button>
-      <p className="text-center font-[var(--font-be-vietnam-pro)] text-xs leading-[1.5] text-[var(--color-text-muted)]">
-        Your information is kept private and used only to manage your enrolment, learning experience, and relevant SOGP communications. We will not sell your personal information.
+      <Link
+        href="/login?returnTo=/dashboard/sogp"
+        className="text-center [font-size:0.8125rem] font-medium text-[var(--color-brand-blue)]"
+      >
+        Already enrolled? Log in
+      </Link>
+      <p className="font-[var(--font-be-vietnam-pro)] [font-size:0.75rem] leading-[1.5] text-[var(--color-text-muted)]">
+        Your information is kept private and used only to support your SOGP experience. We will not sell your personal information.
       </p>
     </form>
   );

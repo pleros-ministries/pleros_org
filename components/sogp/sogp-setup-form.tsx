@@ -118,16 +118,16 @@ export function SogpSetupForm({
           <span className="grid size-11 place-items-center rounded-full bg-[var(--color-brand-sky)] text-[var(--color-brand-blue)]">
             <MailCheck className="size-5" aria-hidden="true" />
           </span>
-          <h1 className="font-[var(--font-sen)] text-3xl font-semibold tracking-[-0.045em] text-[var(--color-text-strong)]">
+          <h1 className="font-[var(--font-sen)] text-2xl font-semibold tracking-[-0.04em] text-[var(--color-text-strong)]">
             Verify your email
           </h1>
-          <p className="font-[var(--font-be-vietnam-pro)] text-sm leading-[1.6] text-[var(--color-text-muted)]">
+          <p className="font-[var(--font-be-vietnam-pro)] [font-size:0.875rem] leading-[1.55] text-[var(--color-text-muted)]">
             Enter the six-digit code sent to {maskedEmail}.
           </p>
         </div>
 
         <div className="grid gap-2">
-          <label htmlFor="sogp-verification-code" className="font-[var(--font-be-vietnam-pro)] text-sm font-medium text-[var(--color-text-strong)]">
+          <label htmlFor="sogp-verification-code" className="font-[var(--font-be-vietnam-pro)] [font-size:0.8125rem] font-medium text-[var(--color-text-strong)]">
             Verification code
           </label>
           <Input
@@ -141,13 +141,13 @@ export function SogpSetupForm({
             maxLength={6}
             aria-invalid={Boolean(error)}
             aria-describedby={error ? "setup-error" : undefined}
-            className="h-14 text-center text-xl tracking-[0.3em]"
+            className="h-14 text-center text-lg tracking-[0.3em]"
           />
         </div>
 
-        {error ? <p id="setup-error" role="alert" className="text-sm text-red-700">{error}</p> : null}
+        {error ? <p id="setup-error" role="alert" className="[font-size:0.8125rem] text-red-700">{error}</p> : null}
 
-        <Button type="submit" size="lg" disabled={pending} className="min-h-12 w-full rounded-full bg-[var(--color-brand-blue)] text-white">
+        <Button type="submit" size="lg" disabled={pending} className="min-h-12 w-full rounded-full bg-[var(--color-brand-blue)] [font-size:0.875rem] text-white">
           {pending ? <LoaderCircle className="size-4 animate-spin" aria-hidden="true" /> : null}
           {pending ? "Verifying" : "Verify email"}
         </Button>
@@ -155,7 +155,7 @@ export function SogpSetupForm({
           type="button"
           disabled={pending || resendSeconds > 0}
           onClick={resendCode}
-          className="min-h-10 text-sm font-medium text-[var(--color-brand-blue)] disabled:text-[var(--color-text-muted)]"
+          className="min-h-10 [font-size:0.8125rem] font-medium text-[var(--color-brand-blue)] disabled:text-[var(--color-text-muted)]"
         >
           {resendSeconds > 0 ? `Send another code in ${resendSeconds}s` : "Send another code"}
         </button>
@@ -169,16 +169,16 @@ export function SogpSetupForm({
         <span className="grid size-11 place-items-center rounded-full bg-[var(--color-brand-sky)] text-[var(--color-brand-blue)]">
           <ShieldCheck className="size-5" aria-hidden="true" />
         </span>
-        <h1 className="font-[var(--font-sen)] text-3xl font-semibold tracking-[-0.045em] text-[var(--color-text-strong)]">
+        <h1 className="font-[var(--font-sen)] text-2xl font-semibold tracking-[-0.04em] text-[var(--color-text-strong)]">
           Create your password
         </h1>
-        <p className="font-[var(--font-be-vietnam-pro)] text-sm leading-[1.6] text-[var(--color-text-muted)]">
+        <p className="font-[var(--font-be-vietnam-pro)] [font-size:0.875rem] leading-[1.55] text-[var(--color-text-muted)]">
           Use this password whenever you return to your SOGP dashboard.
         </p>
       </div>
 
       <div className="grid gap-2">
-        <label htmlFor="sogp-password" className="text-sm font-medium text-[var(--color-text-strong)]">Password</label>
+        <label htmlFor="sogp-password" className="[font-size:0.8125rem] font-medium text-[var(--color-text-strong)]">Password</label>
         <div className="relative">
           <Input
             id="sogp-password"
@@ -199,12 +199,12 @@ export function SogpSetupForm({
             {showPassword ? <EyeOff className="size-4" aria-hidden="true" /> : <Eye className="size-4" aria-hidden="true" />}
           </button>
         </div>
-        <p id="password-help" className="text-xs text-[var(--color-text-muted)]">Use 8–128 characters.</p>
-        {fieldErrors.password ? <p id="password-error" className="text-xs text-red-700">{fieldErrors.password}</p> : null}
+        <p id="password-help" className="[font-size:0.75rem] text-[var(--color-text-muted)]">Use 8–128 characters.</p>
+        {fieldErrors.password ? <p id="password-error" className="[font-size:0.75rem] text-red-700">{fieldErrors.password}</p> : null}
       </div>
 
       <div className="grid gap-2">
-        <label htmlFor="sogp-password-confirmation" className="text-sm font-medium text-[var(--color-text-strong)]">Confirm password</label>
+        <label htmlFor="sogp-password-confirmation" className="[font-size:0.8125rem] font-medium text-[var(--color-text-strong)]">Confirm password</label>
         <Input
           id="sogp-password-confirmation"
           type={showPassword ? "text" : "password"}
@@ -214,11 +214,11 @@ export function SogpSetupForm({
           aria-invalid={Boolean(fieldErrors.confirmation)}
           aria-describedby={fieldErrors.confirmation ? "confirmation-error" : undefined}
         />
-        {fieldErrors.confirmation ? <p id="confirmation-error" className="text-xs text-red-700">{fieldErrors.confirmation}</p> : null}
+        {fieldErrors.confirmation ? <p id="confirmation-error" className="[font-size:0.75rem] text-red-700">{fieldErrors.confirmation}</p> : null}
       </div>
 
-      {error ? <p role="alert" className="text-sm text-red-700">{error}</p> : null}
-      <Button type="submit" size="lg" disabled={pending} className="min-h-12 w-full rounded-full bg-[var(--color-brand-blue)] text-white">
+      {error ? <p role="alert" className="[font-size:0.8125rem] text-red-700">{error}</p> : null}
+      <Button type="submit" size="lg" disabled={pending} className="min-h-12 w-full rounded-full bg-[var(--color-brand-blue)] [font-size:0.875rem] text-white">
         {pending ? <LoaderCircle className="size-4 animate-spin" aria-hidden="true" /> : null}
         {pending ? "Creating password" : "Create password and continue"}
       </Button>

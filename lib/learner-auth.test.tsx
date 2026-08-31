@@ -11,6 +11,8 @@ test("provides password and email-code learner login with SOGP signup", () => {
   const form = source("components", "auth", "learner-login-form.tsx");
 
   expect(page).toContain("normalizeLearnerReturnTo");
+  expect(page).not.toContain("getAppSession");
+  expect(page).not.toContain("redirect(returnTo)");
   expect(form).toContain("authClient.signIn.email");
   expect(form).toContain("authClient.emailOtp.sendVerificationOtp");
   expect(form).toContain("authClient.signIn.emailOtp");
@@ -19,6 +21,10 @@ test("provides password and email-code learner login with SOGP signup", () => {
   expect(form).toContain("New to SOGP?");
   expect(form).toContain("Enrol to create your account and access your dashboard.");
   expect(form).toContain('href="/signup"');
+  expect(form).toContain("text-2xl");
+  expect(form).toContain("[font-size:0.8125rem]");
+  expect(form).toContain("[font-size:0.875rem]");
+  expect(form).not.toContain("text-3xl");
 });
 
 test("provides code-based password recovery and friendly signup", () => {

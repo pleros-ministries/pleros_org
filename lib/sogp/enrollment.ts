@@ -183,7 +183,7 @@ export function validateSogpEnrollment(
     errors.referralSourceOther = "Tell us how you heard about us.";
   }
   if (input.whatsappConsent === null) {
-    errors.whatsappConsent = "Select whether you want WhatsApp reminders.";
+    errors.whatsappConsent = "Select whether you want WhatsApp updates.";
   }
 
   return errors;

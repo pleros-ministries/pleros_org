@@ -162,6 +162,8 @@ export function PhoneField({
         onChange={(event) => handleInput(event.target.value)}
         onBlur={onBlur}
         placeholder={placeholder}
+        required
+        aria-required="true"
         aria-invalid={invalid}
         aria-describedby={describedBy}
         className="sogp-field-input"

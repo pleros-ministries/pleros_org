@@ -5,7 +5,9 @@ Consolidated 2026-08-31. Keep this file short, current, pattern-focused, and fre
 ## Working rules
 
 - Use `npm`; `package-lock.json` is canonical. Keep Better Auth pinned exactly to the lockfile version.
+- Do not run tests, lint, builds, React Doctor, or post-edit browser verification unless the user explicitly asks for verification; report edits as unverified instead.
 - Read `AGENTS.md` and version-matched Next.js docs in `node_modules/next/dist/docs/`. Preserve the managed Next.js block.
+- Keep the current learner-auth route/flow, Welcome Pack compatibility seam, and form-density rules consolidated in `AGENTS.md` whenever that architecture changes.
 - Preserve unrelated worktree changes. For rollbacks, inspect the touched files, restore only the requested scope, remove only task-added files, and verify with `git status --short`. Stage explicit paths when committing.
 - Use ESM imports with `node --input-type=module` for inline Node scripts that use top-level `await`.
 - Use existing shells, tokens, fonts, and components before adding patterns. Do not redesign `app/globals.css` tokens.
@@ -67,8 +69,12 @@ Consolidated 2026-08-31. Keep this file short, current, pattern-focused, and fre
 ## SOGP public funnel and enrolment
 
 - Landing copy follows the `SOGP Landing Page` Google Doc plus Pastor corrections; preserve meaning/order and fix only obvious grammar. Use the public Sen/Be Vietnam Pro system.
-- Approved learner-auth design uses `/login`, `/signup` → `/sogp/enrol`, and a guarded `/setup` wizard. New learners verify a six-digit email code, then must create a password before final enrolment and `/dashboard/welcomepack/join`; login supports password plus email code, and public email-only forms must not create full app sessions.
-- The main homepage uses a dedicated one-time SOGP promotional sheet with no lead form; it links directly to `/sogp/enrol` and has dismissal state independent of Welcome Pack access. Keep the Welcome Pack email form unchanged on `/welcome`.
+- Approved learner-auth design uses `/login`, `/signup` → `/sogp/enrol`, and a guarded `/setup` wizard. `/login` always renders its form—even when a retained session exists—so an unenrolled or wrong-account session cannot bounce the learner back to enrolment. New learners verify a six-digit email code, then must create a password before final enrolment and `/dashboard/welcomepack/join`; login supports password plus email code, and public email-only forms must not create full app sessions.
+- Keep all learner-auth routes (`/login`, `/forgot-password`, `/reset-password`, `/setup`) and enrolment visually compact: auth headings 24px, enrolment hero about 38px/two lines on mobile, 13px labels/actions/errors, 14px body/button/select copy, 12px helper copy, and 16px free-text inputs. Dropdown text should sit only one step above its label. Apply this locally without changing shared public-site type tokens.
+- On `/sogp/enrol`, separate the primary action from the final field with extra top space and label it `Continue setup`; the following step explains email verification. Mark compulsory labels with asterisks, keep blank fields neutral on blur, and reveal red invalid states/messages only after an incomplete submit while focusing the first error.
+- Empty/default select states use muted text and chevrons for faster form scanning; selected values return to strong text and brand-blue chevrons.
+- Keep enrolment privacy/support copy left-aligned with the form fields rather than centred.
+- The main homepage uses a dedicated one-time SOGP promotional sheet with no lead form; it links directly to `/sogp/enrol` and has dismissal state independent of Welcome Pack access. `/welcome` is retired and permanently redirects to `/sogp`.
 - The landing page has no navbar: white hero, four-part headline, no pre-headline label, `Your doubts, Your questions, Your struggles.`, natural-height question rows, then `Our Answer and Solution for You`; its supporting line is `Watch to see the solution we are offering you.` and the section CTA follows the welcome video. Outcomes remain under `What is SOGP?`; only the footer links away.
 - Use contextual CTAs after persuasive sections; introduce `Enrol for free` only after free access is explained. Keep mobile type compact.
 - The welcome video is the versioned self-hosted square H.264/AAC MP4 with matching poster and immutable caching. Keep Welcome Pack orientation media separate.
@@ -117,13 +123,14 @@ Consolidated 2026-08-31. Keep this file short, current, pattern-focused, and fre
 - `/welcome`, `/thankyou`, and `/dashboard/welcomepack` form one stateful funnel: main access is immediate, extra gifts are trust-unlocked, and email failure never blocks access.
 - Contact submission may redirect to `/welcome` but does not mint welcome access or prefill the dashboard unless explicitly coupled. Treat all public input as untrusted and HTML-escape email values with regression coverage.
 - Verify required DB tables/indexes before persistence E2E tests. If migration history disagrees with objects, inspect actual schema first and repair migration records only after confirming objects exist.
-- `/welcome` is responsive: mobile stack plus tablet/desktop grids. Keep a white hero with visible realistic tablet/book art, restrained naturally wrapping type, 16px calm mobile body copy, no metadata or `Free purpose book` eyebrow, and concise burden/answer/free/gifts bands.
+- The retired Welcome landing design remains reference-only; `/welcome` must not render it or bootstrap access.
 - Welcome CTAs ask for email/book access and say `grant you access now`; homepage may use gift language. Use `welcome pack` as two words.
 - `/thankyou` starts with `Click here to access your book`, scrolling to access near the footer. Use section-level colour, heading-led purpose/reward content, and compact `Share this gift` jumps to `#share-gift`.
 - The share strip owns pill buttons, labels, `Copy your referral link`, and Instagram/TikTok inbox links. Do not promise supplementary gift unlocks while unavailable; provide the main download/email fallback.
 - Reuse `extraGifts` and assets from `lib/welcome-pack-gifts.ts`; prefer production covers in `public/assets/dashboard/free-gift-book-covers/`.
 - Focused Welcome Pack pages need zero-minimum grid tracks plus `min-w-0`/`max-w-full`; verify `/join`, hub, orientation, and gifts at 320px and 375px. Use public shell gutters.
-- `/join` eyebrow is `Welcome to SOGP`. Keep dashboard hero copy lean and locked actions visibly muted.
+- `/join` eyebrow is `Welcome to SOGP`; its heading is `Your journey of Purpose starts here`. Keep dashboard hero copy lean and locked actions visibly muted.
+- `/dashboard/welcomepack/join` support copy refers to the Telegram `orientation pack` and `the next steps to take`, not an orientation message; keep its orientation-group CTA text-only with no icon.
 - Reuse the shared community section and keep it flush with the footer. Keep its CTA close to copy, intro measure narrow on mobile, and image/overlay intact.
 - Greetings prefer explicit submitted names and suppress names inferred from email identifiers.
 - `/dashboard` accepts a valid app session or welcome-access cookie; otherwise redirect to `/welcome`. Render cookie-based navigation immediately and defer Better Auth provisioning until persistence is needed.

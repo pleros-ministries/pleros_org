@@ -70,9 +70,11 @@ export function CountryCombobox({
           autoComplete="off"
           spellCheck={false}
           placeholder="Search for your country"
+          required
+          aria-required="true"
           aria-invalid={invalid}
           aria-describedby={describedBy}
-          className="sogp-field-input"
+          className="sogp-field-input [font-size:0.875rem]"
         />
         <Combobox.Trigger
           className="sogp-field-trigger"
