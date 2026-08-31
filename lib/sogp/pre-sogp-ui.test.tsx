@@ -39,6 +39,9 @@ describe("Pre-SOGP learner UI", () => {
     expect(page).toContain('eyebrow="Current day"');
     expect(page).toContain("<SogpActivitySection");
     expect(page).toContain('title="Preparation lesson"');
+    expect(page).toContain("Watch today’s lesson, then mark it complete below.");
+    expect(page).toContain("<h3");
+    expect(page).toContain("{selectedDay.lesson.title}");
     expect(page).not.toContain("text-3xl font-semibold");
     expect(page).not.toContain("Download teaching");
     expect(page).not.toContain("DownloadIcon");

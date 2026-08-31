@@ -167,10 +167,13 @@ export function PreSogpPage({
           {selectedDay.lesson ? (
             <SogpActivitySection
               title="Preparation lesson"
-              description={selectedDay.lesson.title}
+              description="Watch today’s lesson, then mark it complete below."
               icon={<BookOpenIcon className="size-4 text-[var(--color-brand-blue)]" strokeWidth={2} />}
             >
               <video controls playsInline preload="metadata" src={selectedDay.lesson.url} className="aspect-video w-full rounded-[var(--radius-sm)] bg-black" />
+              <h3 className="font-[var(--font-sen)] text-lg font-semibold leading-[1.25] tracking-[-0.025em] text-[var(--color-text-strong)]">
+                {selectedDay.lesson.title}
+              </h3>
               {selectedDay.lesson.description ? (
                 <p className="text-sm leading-[1.55] text-[var(--color-text-muted)]">{selectedDay.lesson.description}</p>
               ) : null}
