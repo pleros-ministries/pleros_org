@@ -7,31 +7,30 @@ function source(...parts: string[]) {
 }
 
 describe("welcome dashboard access", () => {
-  test("dashboard layout requires either Better Auth session or welcome cookie", () => {
+  test("dashboard layout requires a Better Auth session", () => {
     const layoutSource = source("app", "(site)", "dashboard", "layout.tsx");
 
     expect(layoutSource).toContain("getAppSession");
-    expect(layoutSource).toContain("welcomePathAllowed");
     expect(layoutSource).toContain("const appSession = await getAppSession()");
+    expect(layoutSource).toContain("<AppShell authenticated>");
     expect(layoutSource).toContain('redirect(`/login?returnTo=');
+    expect(layoutSource).not.toContain("readWelcomeAccessToken");
     expect(layoutSource).not.toContain('redirect("/")');
   });
 
-  test("dashboard page uses welcome cookie directly for display-name source", () => {
+  test("dashboard page uses the authenticated identity for display name", () => {
     const dashboardSource = source("app", "(site)", "dashboard", "page.tsx");
 
-    expect(dashboardSource).toContain("if (welcomeSession)");
-    expect(dashboardSource).toContain(
-      "getWelcomePackLeadByEmail(welcomeSession.email)",
-    );
+    expect(dashboardSource).toContain("getAppSession");
+    expect(dashboardSource).toContain("appSession.user.email");
     expect(dashboardSource).toContain(
       "resolveWelcomeDisplayName",
     );
     expect(dashboardSource).toContain(
-      "return <WelcomeDashboardView name={displayName ?? undefined} />",
+      "sections={sections}",
     );
-    expect(dashboardSource).not.toContain("/api/welcome-access/session");
-    expect(dashboardSource).toContain('redirect("/welcome")');
+    expect(dashboardSource).not.toContain("readWelcomeAccessToken");
+    expect(dashboardSource).toContain('redirect("/login?returnTo=/dashboard")');
   });
 
   test("dashboard resolves SOGP card access from the authenticated enrolment", () => {
@@ -71,7 +70,7 @@ describe("welcome dashboard access", () => {
     );
   });
 
-  test("welcome pack routes share session-or-cookie access protection", () => {
+  test("welcome pack routes require a full app session", () => {
     const accessSource = source("lib", "welcome-pack-dashboard-access.ts");
     const joinSource = source(
       "app",
@@ -90,9 +89,9 @@ describe("welcome dashboard access", () => {
       "page.tsx",
     );
 
-    expect(accessSource).toContain("readWelcomeAccessToken");
     expect(accessSource).toContain("getAppSession");
-    expect(accessSource).toContain('redirect("/welcome")');
+    expect(accessSource).not.toContain("readWelcomeAccessToken");
+    expect(accessSource).toContain('redirect("/login?returnTo=/dashboard/welcomepack")');
     expect(joinSource).toContain("requireWelcomePackAccess");
     expect(giftsSource).toContain("requireWelcomePackAccess");
   });
@@ -120,11 +119,12 @@ describe("welcome dashboard access", () => {
     expect(schoolActionsSource).toContain("getDashboardActionSession");
   });
 
-  test("proxy refreshes the welcome cookie on dashboard visits", () => {
+  test("proxy expires the retired welcome cookie", () => {
     const proxySource = source("proxy.ts");
 
-    expect(proxySource).toContain("refreshWelcomeAccessCookie");
-    expect(proxySource).toContain('pathname.startsWith("/dashboard")');
-    expect(proxySource).toContain("WELCOME_ACCESS_MAX_AGE");
+    expect(proxySource).toContain("retireLegacyWelcomeAccessCookie");
+    expect(proxySource).toContain("WELCOME_ACCESS_COOKIE_NAME");
+    expect(proxySource).toContain("maxAge: 0");
+    expect(proxySource).not.toContain("WELCOME_ACCESS_MAX_AGE");
   });
 });

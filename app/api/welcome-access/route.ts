@@ -1,14 +1,7 @@
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 import { validateEmail } from "@/lib/welcome-flow";
-import {
-  createWelcomeAccessToken,
-  getWelcomeAccessSecret,
-  getWelcomeAccessCookieOptions,
-  resolveWelcomeAccessName,
-  WELCOME_ACCESS_COOKIE_NAME,
-} from "@/lib/welcome-access";
+import { resolveWelcomeAccessName } from "@/lib/welcome-access";
 import { sendWelcomePackAccessEmail } from "@/lib/email/send";
 import { upsertWelcomePackLead } from "@/lib/db/queries/welcome-pack-leads";
 import {
@@ -32,28 +25,16 @@ export async function POST(request: Request) {
 
   const name = body?.name?.trim() || resolveWelcomeAccessName(email);
 
-  const token = createWelcomeAccessToken(
-    {
-      email,
-      name,
-    },
-    getWelcomeAccessSecret(process.env),
-  );
-
-  const cookieStore = await cookies();
-  cookieStore.set(
-    WELCOME_ACCESS_COOKIE_NAME,
-    token,
-    getWelcomeAccessCookieOptions(),
-  );
-
   const leadResult = await upsertWelcomePackLead({
     email,
     name,
     source,
   });
 
-  const dashboardUrl = new URL("/dashboard/welcomepack", request.url).toString();
+  const dashboardUrl = new URL(
+    "/login?returnTo=/dashboard/welcomepack",
+    request.url,
+  ).toString();
 
   if (leadResult.created) {
     void sendWelcomePackAccessEmail({

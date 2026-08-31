@@ -199,7 +199,7 @@ export function SogpSetupForm({
             {showPassword ? <EyeOff className="size-4" aria-hidden="true" /> : <Eye className="size-4" aria-hidden="true" />}
           </button>
         </div>
-        <p id="password-help" className="[font-size:0.75rem] text-[var(--color-text-muted)]">Use 8–128 characters.</p>
+        <p id="password-help" className="[font-size:0.75rem] text-[var(--color-text-muted)]">Use at least 8 characters.</p>
         {fieldErrors.password ? <p id="password-error" className="[font-size:0.75rem] text-red-700">{fieldErrors.password}</p> : null}
       </div>
 

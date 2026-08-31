@@ -21,7 +21,6 @@ The completed experience must let:
 - Adding usernames, phone-number login, passkeys, or new social providers.
 - Merging accounts with different email addresses.
 - Moving SOGP enrolment data out of the existing SOGP tables.
-- Removing the Welcome Pack access-cookie flow from `/welcome`.
 
 ## Route map
 
@@ -159,7 +158,8 @@ Rules:
 
 - unauthenticated `/dashboard/sogp` → `/login?returnTo=/dashboard/sogp`;
 - unauthenticated `/dashboard/...` → `/login?returnTo=<requested dashboard path>`;
-- valid Welcome Pack access cookies may still open their allowed Welcome Pack surfaces;
+- authenticated dashboard navigation exposes sign out in the desktop navbar and mobile menu; signed-out mobile menus expose login, and successful sign-out returns to `/login`;
+- dashboard and Welcome Pack surfaces require a Better Auth app session;
 - a full learner action or SOGP surface requires a Better Auth app session;
 - a signed-in user without SOGP enrolment is sent to `/sogp/enrol`, not allowed into SOGP APIs.
 
@@ -210,8 +210,8 @@ Public possession of an email address must no longer create a Better Auth sessio
 
 - Remove `provisionWelcomeSession` from SOGP enrolment.
 - Stop public Welcome Pack endpoints from upgrading an email-only submission into a Better Auth session.
-- Keep the signed Welcome Pack access cookie as a narrowly scoped resource-access mechanism.
-- Remove or rewrite dashboard actions that silently promote a Welcome Pack cookie into a learner session.
+- Expire the signed Welcome Pack access cookie and remove it from every dashboard, Welcome Pack action, and download access decision.
+- Keep Welcome Pack lead records as administrative data only; they do not grant identity or resource access.
 - Require `/login` or the verified enrolment setup for app-user actions.
 
 This closes the existing boundary where an email-only public form can create a session for an already-existing auth user.
@@ -226,6 +226,8 @@ Add a SOGP verification-code email:
 - explicit ten-minute expiry;
 - “If you did not request this, you can ignore this email.”;
 - no dashboard or setup bearer link.
+
+All learner and staff authentication templates share the SOGP enrolment-confirmation visual system: table-based Outlook-compatible markup, soft-sky header, lime programme/account label, white content, brand-blue action, Sen headings, Be Vietnam Pro body text, medium weights, and Arial/Helvetica fallbacks. This applies to OTP, password reset, email verification, staff invite, and super-admin setup emails.
 
 Password-recovery copy becomes Pleros/SOGP copy rather than PPC copy. The existing SOGP enrolment confirmation email is sent only after setup completes.
 
@@ -287,13 +289,15 @@ Server logs include a request/flow identifier, never secrets or PII payloads.
 - exact email/session match before password update;
 - final enrolment persistence only after verification and password;
 - legacy-route redirects;
-- Welcome Pack cookie cannot become an app session.
+- retired Welcome Pack cookie cannot access dashboard resources or become an app session;
+- local loopback ports pass trusted-origin checks without weakening production origin validation.
 
 ### Browser flows
 
 - new learner: form → code → password → Welcome Pack;
 - existing learner: password login → requested dashboard;
 - existing legacy learner: email-code login → password creation/reset;
+- sign out → `/login`; direct dashboard revisit remains blocked;
 - invalid/expired code and resend;
 - refresh/back navigation during `/setup`;
 - unauthenticated dashboard return path;

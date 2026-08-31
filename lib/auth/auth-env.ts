@@ -3,6 +3,11 @@ const LOOPBACK_ORIGINS = [
   "http://127.0.0.1:3000",
 ] as const;
 
+const LOOPBACK_TRUSTED_ORIGIN_PATTERNS = [
+  "http://localhost:*",
+  "http://127.0.0.1:*",
+] as const;
+
 const KNOWN_PRODUCTION_ORIGINS = [
   "https://pleros.org",
   "https://www.pleros.org",
@@ -84,6 +89,9 @@ export function buildTrustedOrigins(env: AuthEnv): string[] {
 
   if (isLocalDevelopment(env)) {
     for (const origin of LOOPBACK_ORIGINS) {
+      origins.add(origin);
+    }
+    for (const origin of LOOPBACK_TRUSTED_ORIGIN_PATTERNS) {
       origins.add(origin);
     }
   }

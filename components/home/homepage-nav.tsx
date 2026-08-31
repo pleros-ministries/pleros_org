@@ -18,9 +18,10 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "../ui/sheet";
+import { DashboardSignOutButton } from "../auth/dashboard-sign-out-button";
 import { HomepageNavDropdown } from "./homepage-nav-dropdown";
 
-export function HomepageNav() {
+export function HomepageNav({ showSignOut = false }: { showSignOut?: boolean }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -53,6 +54,7 @@ export function HomepageNav() {
           {homeDesktopNavGroups.map((group) => (
             <HomepageNavDropdown key={group.label} group={group} />
           ))}
+          {showSignOut ? <DashboardSignOutButton /> : null}
         </nav>
 
         <div className="lg:hidden">
@@ -117,6 +119,21 @@ export function HomepageNav() {
                     </div>
                   ))}
                 </nav>
+                <div className="mt-auto border-t border-white/14 pt-5">
+                  {showSignOut ? (
+                    <div className="[&_button]:w-full">
+                      <DashboardSignOutButton />
+                    </div>
+                  ) : (
+                    <Link
+                      href="/login"
+                      onClick={() => setOpen(false)}
+                      className="inline-flex min-h-11 w-full items-center justify-center rounded-full bg-white px-5 font-[var(--font-be-vietnam-pro)] [font-size:0.8125rem] font-medium text-[var(--color-brand-blue)]"
+                    >
+                      Log in
+                    </Link>
+                  )}
+                </div>
               </div>
             </SheetContent>
           </Sheet>

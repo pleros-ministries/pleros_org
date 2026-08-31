@@ -43,16 +43,20 @@ Legacy friendly aliases permanently redirect to the canonical routes: `/sign-in`
 
 Never store or log passwords, OTPs, raw setup tokens, or full enrolment payloads outside the intended pending/final tables. Do not create a full app session from a public email-only form.
 
+All authentication emails—SOGP OTP, password reset, email verification, staff invite, and super-admin setup—use the shared branded table-based shell in `lib/email/templates.ts`: soft sky header, lime eyebrow, white content, brand-blue action, Sen headings, Be Vietnam Pro body copy, medium weights, safe font fallbacks, and Outlook/MSO support. Keep them visually aligned with the SOGP enrolment confirmation email.
+
 ### Existing learners and protected routes
 
 - Existing learners can use password login or an email code. Password creation/reset is available from the login form.
 - Dashboard layouts redirect missing app sessions to `/login?returnTo=<validated-dashboard-path>`.
+- The shared dashboard navbar shows sign out in the desktop navbar and inside the mobile menu for a full Better Auth session; signed-out mobile menus show `Log in`. Sign-out uses the server action in `app/_actions/auth-actions.ts` to clear the Better Auth session and redirect to `/login`.
+- Local development trusts HTTP loopback origins on any port while production origins remain explicit; keep CSRF/origin validation enabled.
 - SOGP dashboard/API access additionally requires an SOGP enrolment; a signed-in but unenrolled learner returns to `/sogp/enrol`.
 - Preserve `admin` and `super_admin` identities, accounts, roles, and sessions during auth migrations or cleanup. Super-admin access remains email-verified and fail-closed.
 
-### Welcome Pack compatibility seam
+### Retired Welcome Pack soft access
 
-The old signed Welcome Pack access cookie still exists in current code as a narrow compatibility path for `/dashboard` and `/dashboard/welcomepack/*`. It is resource access, not learner identity, and must not be accepted for SOGP learning APIs or expanded to new surfaces. `/welcome` itself is retired. When removing this seam, retain all app/auth users, enrolments, progress, and staff/admin identities; invalidate only the explicitly scoped legacy access/session material.
+Dashboard and Welcome Pack resources require a full Better Auth app session. The old `pleros_welcome_access_v2` cookie is expired by `proxy.ts` and is never accepted by dashboard layouts, focused Welcome Pack routes, dashboard resources/actions, or downloads. `/welcome` permanently redirects to `/sogp`. Keep existing users, enrolments, progress, lead records, and staff/admin identities intact; the retired cookie is not an identity source.
 
 ## Local commands and data
 

@@ -117,16 +117,17 @@ describe("welcome campaign pages", () => {
     expect(copyButtonSource).toContain("Copied link");
   });
 
-  test("uses the welcome session route only as a cookie bootstrap", () => {
+  test("retires the welcome session route into verified login", () => {
     const routeSource = readFileSync(
       join(process.cwd(), "app", "api", "welcome-access", "session", "route.ts"),
       "utf8",
     );
 
-    expect(routeSource).toContain('new URL("/welcome", request.url)');
-    expect(routeSource).toContain("getWelcomeAccessCookieOptions");
+    expect(routeSource).toContain('new URL("/login", request.url)');
+    expect(routeSource).toContain("WELCOME_ACCESS_COOKIE_NAME");
     expect(routeSource).toContain("response.cookies.set");
-    expect(routeSource).not.toContain("provisionWelcomeSession");
+    expect(routeSource).toContain("maxAge: 0");
+    expect(routeSource).not.toContain("readWelcomeAccessToken");
   });
 });
 

@@ -2,7 +2,13 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 
-import { sogpAuthCodeHtml } from "./templates";
+import {
+  emailVerificationHtml,
+  passwordResetHtml,
+  sogpAuthCodeHtml,
+  staffInviteHtml,
+  superAdminSetupHtml,
+} from "./templates";
 
 const sendEmail = vi.fn();
 const isEmailEnabled = vi.fn();
@@ -33,6 +39,40 @@ describe("SOGP authentication email", () => {
     expect(html).toContain("10 minutes");
     expect(html).toContain("If you did not request this");
     expect(html).not.toContain("dashboard/welcomepack");
+  });
+
+  test("uses one branded, email-safe design across authentication emails", () => {
+    const templates = [
+      sogpAuthCodeHtml({ otp: "123456", type: "sign-in" }),
+      passwordResetHtml({
+        name: "Ada",
+        resetUrl: "https://pleros.org/reset-password?token=abc",
+      }),
+      emailVerificationHtml({
+        name: "Ada",
+        verificationUrl: "https://pleros.org/verify?token=abc",
+      }),
+      staffInviteHtml({
+        role: "admin",
+        inviteUrl: "https://pleros.org/admin/invite/abc",
+      }),
+      superAdminSetupHtml({
+        name: "Ada",
+        setupUrl: "https://pleros.org/admin/setup/claim/abc",
+      }),
+    ];
+
+    for (const html of templates) {
+      expect(html).toContain("font-family:'Sen'");
+      expect(html).toContain("font-family:'Be Vietnam Pro'");
+      expect(html).toContain('bgcolor="#e0f3ff"');
+      expect(html).toContain("background:#e9ed01");
+      expect(html).toContain("#051480");
+      expect(html).toContain("font-weight:600");
+      expect(html).toContain('role="presentation"');
+      expect(html).toContain("Pleros Ministries &amp; Missions");
+      expect(html).toContain("<!--[if mso]>");
+    }
   });
 
   test("sends from the ministry identity", async () => {

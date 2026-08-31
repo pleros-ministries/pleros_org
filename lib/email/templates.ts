@@ -139,6 +139,124 @@ export type SuperAdminSetupProps = {
   setupUrl: string;
 };
 
+type BrandedAuthEmailProps = {
+  eyebrow: string;
+  title: string;
+  contentHtml: string;
+  action?: {
+    label: string;
+    url: string;
+  };
+  note?: string;
+};
+
+function brandedAuthEmailHtml({
+  eyebrow,
+  title,
+  contentHtml,
+  action,
+  note,
+}: BrandedAuthEmailProps): string {
+  const actionHtml = action
+    ? `
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="border-collapse:separate;">
+                <tr>
+                  <td align="center" bgcolor="#051480" style="background:#051480; border-radius:999px; mso-padding-alt:14px 22px;">
+                    <a class="email-button" href="${action.url}" style="display:inline-block; padding:14px 22px; font-family:'Sen','Trebuchet MS',Arial,sans-serif; font-size:14px; line-height:1.2; font-weight:500; color:#ffffff; text-decoration:none; border-radius:999px;">${action.label}</a>
+                  </td>
+                </tr>
+              </table>
+              <p style="font-family:'Be Vietnam Pro',Arial,Helvetica,sans-serif; font-size:12px; line-height:1.6; font-weight:400; color:#6876a0; margin:24px 0 0;">If the button does not work, copy and paste this link into your browser:<br /><a href="${action.url}" style="color:#051480; text-decoration:underline; word-break:break-all;">${action.url}</a></p>`
+    : "";
+  const noteHtml = note
+    ? `<p style="font-family:'Be Vietnam Pro',Arial,Helvetica,sans-serif; font-size:12px; line-height:1.6; font-weight:400; color:#6876a0; margin:24px 0 0;">${note}</p>`
+    : "";
+
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style type="text/css">
+    @media screen {
+      @font-face {
+        font-family: 'Sen';
+        font-style: normal;
+        font-weight: 500;
+        font-display: swap;
+        src: url('https://fonts.gstatic.com/s/sen/v12/6xKjdSxYI9_3nPWN.woff2') format('woff2');
+      }
+      @font-face {
+        font-family: 'Sen';
+        font-style: normal;
+        font-weight: 600;
+        font-display: swap;
+        src: url('https://fonts.gstatic.com/s/sen/v12/6xKjdSxYI9_3nPWN.woff2') format('woff2');
+      }
+      @font-face {
+        font-family: 'Be Vietnam Pro';
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+        src: url('https://fonts.gstatic.com/s/bevietnampro/v12/QdVPSTAyLFyeg_IDWvOJmVES_Hw3BXo.woff2') format('woff2');
+      }
+      @font-face {
+        font-family: 'Be Vietnam Pro';
+        font-style: normal;
+        font-weight: 600;
+        font-display: swap;
+        src: url('https://fonts.gstatic.com/s/bevietnampro/v12/QdVMSTAyLFyeg_IDWvOJmVES_HToIW81Rb0.woff2') format('woff2');
+      }
+    }
+    @media only screen and (max-width: 620px) {
+      .email-shell { padding:18px 10px !important; }
+      .email-header { padding:28px 22px 26px !important; }
+      .email-content { padding:28px 22px !important; }
+      .email-footer { padding:20px 22px !important; }
+      .email-heading { font-size:27px !important; }
+      .email-button { display:block !important; text-align:center !important; }
+    }
+  </style>
+  <!--[if mso]>
+  <style type="text/css">
+    .email-heading, .email-button, .email-body { font-family: Arial, sans-serif !important; }
+  </style>
+  <![endif]-->
+</head>
+<body class="email-body" style="font-family:'Be Vietnam Pro',Arial,Helvetica,sans-serif; background:#f4f9ff; margin:0; padding:0; color:#061056;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#f4f9ff" style="width:100%; background:#f4f9ff; border-collapse:collapse;">
+    <tr>
+      <td class="email-shell" align="center" style="padding:44px 16px;">
+        <!--[if mso]><table role="presentation" width="560" cellspacing="0" cellpadding="0" border="0"><tr><td><![endif]-->
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#ffffff" style="width:100%; max-width:560px; background:#ffffff; border:1px solid #d7e8f2; border-radius:20px; border-collapse:separate; overflow:hidden; box-shadow:0 12px 32px rgba(6,16,86,.06);">
+          <tr>
+            <td class="email-header" bgcolor="#e0f3ff" style="background:#e0f3ff; padding:34px 34px 30px;">
+              <span style="display:inline-block; background:#e9ed01; border-radius:999px; padding:7px 11px; font-family:'Be Vietnam Pro',Arial,Helvetica,sans-serif; font-size:11px; line-height:1; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:#061056;">${eyebrow}</span>
+              <h1 class="email-heading" style="font-family:'Sen','Trebuchet MS',Arial,sans-serif; font-size:30px; line-height:1.12; font-weight:600; letter-spacing:-.025em; color:#061056; margin:20px 0 0;">${title}</h1>
+            </td>
+          </tr>
+          <tr>
+            <td class="email-content email-body" style="font-family:'Be Vietnam Pro',Arial,Helvetica,sans-serif; padding:32px 34px; color:#061056;">
+              ${contentHtml}
+              ${actionHtml}
+              ${noteHtml}
+            </td>
+          </tr>
+          <tr>
+            <td class="email-footer email-body" bgcolor="#f8fbfd" style="font-family:'Be Vietnam Pro',Arial,Helvetica,sans-serif; background:#f8fbfd; border-top:1px solid #e4eef4; padding:20px 34px; color:#6876a0;">
+              <p style="font-size:12px; line-height:1.55; font-weight:400; margin:0;"><strong style="font-weight:600; color:#061056;">Pleros Ministries &amp; Missions</strong><br />Helping you fulfil God's purpose.</p>
+            </td>
+          </tr>
+        </table>
+        <!--[if mso]></td></tr></table><![endif]-->
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`.trim();
+}
+
 export function staffAssignmentHtml({
   staffName,
   itemLabel,
@@ -173,24 +291,16 @@ export function staffInviteHtml({
   const safeRole = escapeHtml(role === "admin" ? "admin" : "instructor");
   const safeInviteUrl = escapeHtml(inviteUrl);
 
-  return `
-<!DOCTYPE html>
-<html>
-<head><meta charset="utf-8" /></head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #142033; max-width: 520px; margin: 0 auto; padding: 32px 16px;">
-  <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #58657a;">Pleros admin</p>
-  <h1 style="font-size: 20px; margin: 12px 0 0;">You have been invited to Pleros admin</h1>
-  <p style="font-size: 14px; color: #58657a; line-height: 1.6;">
-    You have been invited as a <strong>${safeRole}</strong>. Use the link below to set your password and activate your staff access.
-  </p>
-  <a href="${safeInviteUrl}" style="display: inline-block; margin-top: 16px; padding: 10px 20px; background: #18181b; color: #fff; border-radius: 4px; font-size: 13px; font-weight: 600; text-decoration: none;">
-    Set password
-  </a>
-  <p style="font-size: 11px; color: #9ca3af; margin-top: 24px;">
-    This invite expires in 7 days. If you were not expecting this, you can ignore this email.
-  </p>
-</body>
-</html>`.trim();
+  return brandedAuthEmailHtml({
+    eyebrow: "Pleros admin",
+    title: "You have been invited to Pleros admin",
+    contentHtml: `<p style="font-family:'Be Vietnam Pro',Arial,Helvetica,sans-serif; font-size:16px; line-height:1.65; font-weight:400; margin:0 0 24px;">You have been invited as an <strong style="font-weight:600;">${safeRole}</strong>. Set your password to activate your staff access.</p>`,
+    action: {
+      label: "Set password",
+      url: safeInviteUrl,
+    },
+    note: "This invite expires in 7 days. If you were not expecting this, you can ignore this email.",
+  });
 }
 
 export function passwordResetHtml({
@@ -203,24 +313,16 @@ export function passwordResetHtml({
   const productLabel = isAdminReset ? "Pleros admin" : "School of God's Purpose";
   const accountLabel = isAdminReset ? "staff account" : "SOGP account";
 
-  return `
-<!DOCTYPE html>
-<html>
-<head><meta charset="utf-8" /></head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #142033; max-width: 520px; margin: 0 auto; padding: 32px 16px;">
-  <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #58657a;">${productLabel}</p>
-  <h1 style="font-size: 20px; margin: 12px 0 0;">Reset your password</h1>
-  <p style="font-size: 14px; color: #58657a; line-height: 1.6;">
-    Hi ${safeName}, use the link below to choose a new password for your ${accountLabel}.
-  </p>
-  <a href="${safeResetUrl}" style="display: inline-block; margin-top: 16px; padding: 10px 20px; background: #011585; color: #fff; border-radius: 4px; font-size: 13px; font-weight: 600; text-decoration: none;">
-    Reset password
-  </a>
-  <p style="font-size: 11px; color: #9ca3af; margin-top: 24px;">
-    This link expires in 1 hour. If you did not request a password reset, you can ignore this email.
-  </p>
-</body>
-</html>`.trim();
+  return brandedAuthEmailHtml({
+    eyebrow: productLabel,
+    title: "Reset your password",
+    contentHtml: `<p style="font-family:'Be Vietnam Pro',Arial,Helvetica,sans-serif; font-size:16px; line-height:1.65; font-weight:400; margin:0 0 24px;">Hi ${safeName}, use the secure link below to choose a new password for your ${accountLabel}.</p>`,
+    action: {
+      label: "Reset password",
+      url: safeResetUrl,
+    },
+    note: "This link expires in 1 hour. If you did not request a password reset, you can ignore this email.",
+  });
 }
 
 export function emailVerificationHtml({
@@ -230,24 +332,16 @@ export function emailVerificationHtml({
   const safeName = escapeHtml(name);
   const safeVerificationUrl = escapeHtml(verificationUrl);
 
-  return `
-<!DOCTYPE html>
-<html>
-<head><meta charset="utf-8" /></head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #142033; max-width: 520px; margin: 0 auto; padding: 32px 16px;">
-  <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #58657a;">Pleros account</p>
-  <h1 style="font-size: 20px; margin: 12px 0 0;">Verify your email</h1>
-  <p style="font-size: 14px; color: #58657a; line-height: 1.6;">
-    Hi ${safeName}, verify this email address to confirm ownership of your Pleros account.
-  </p>
-  <a href="${safeVerificationUrl}" style="display: inline-block; margin-top: 16px; padding: 10px 20px; background: #011585; color: #fff; border-radius: 4px; font-size: 13px; font-weight: 600; text-decoration: none;">
-    Verify email
-  </a>
-  <p style="font-size: 11px; color: #9ca3af; margin-top: 24px;">
-    If you did not create or update this account, you can ignore this email.
-  </p>
-</body>
-</html>`.trim();
+  return brandedAuthEmailHtml({
+    eyebrow: "Pleros account",
+    title: "Verify your email",
+    contentHtml: `<p style="font-family:'Be Vietnam Pro',Arial,Helvetica,sans-serif; font-size:16px; line-height:1.65; font-weight:400; margin:0 0 24px;">Hi ${safeName}, confirm this email address to finish securing your Pleros account.</p>`,
+    action: {
+      label: "Verify email",
+      url: safeVerificationUrl,
+    },
+    note: "If you did not create or update this account, you can ignore this email.",
+  });
 }
 
 export function superAdminSetupHtml({
@@ -257,24 +351,16 @@ export function superAdminSetupHtml({
   const safeName = escapeHtml(name);
   const safeSetupUrl = escapeHtml(setupUrl);
 
-  return `
-<!DOCTYPE html>
-<html>
-<head><meta charset="utf-8" /></head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #142033; max-width: 520px; margin: 0 auto; padding: 32px 16px;">
-  <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #58657a;">Pleros admin</p>
-  <h1 style="font-size: 20px; margin: 12px 0 0;">Create your admin password</h1>
-  <p style="font-size: 14px; color: #58657a; line-height: 1.6;">
-    Hi ${safeName}, use the secure link below to confirm this inbox and create your super admin password.
-  </p>
-  <a href="${safeSetupUrl}" style="display: inline-block; margin-top: 16px; padding: 10px 20px; background: #011585; color: #fff; border-radius: 4px; font-size: 13px; font-weight: 600; text-decoration: none;">
-    Create password
-  </a>
-  <p style="font-size: 11px; color: #9ca3af; margin-top: 24px;">
-    This link expires in 1 hour. If you were not setting up Pleros admin access, you can ignore this email.
-  </p>
-</body>
-</html>`.trim();
+  return brandedAuthEmailHtml({
+    eyebrow: "Pleros admin",
+    title: "Create your admin password",
+    contentHtml: `<p style="font-family:'Be Vietnam Pro',Arial,Helvetica,sans-serif; font-size:16px; line-height:1.65; font-weight:400; margin:0 0 24px;">Hi ${safeName}, use the secure link below to confirm this inbox and create your super admin password.</p>`,
+    action: {
+      label: "Create password",
+      url: safeSetupUrl,
+    },
+    note: "This link expires in 1 hour. If you were not setting up Pleros admin access, you can ignore this email.",
+  });
 }
 
 export type WelcomePackAccessProps = {
@@ -308,27 +394,15 @@ export function sogpAuthCodeHtml({ otp, type }: SogpAuthCodeProps): string {
         ? "log in to your dashboard"
         : "verify your email";
 
-  return `
-<!DOCTYPE html>
-<html lang="en">
-<head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /></head>
-<body style="font-family:Arial,Helvetica,sans-serif;background:#f4f9ff;margin:0;padding:32px 16px;color:#061056;">
-  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"><tr><td align="center">
-    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:520px;background:#ffffff;border:1px solid #d7e8f2;border-radius:18px;overflow:hidden;">
-      <tr><td style="background:#e0f3ff;padding:28px 30px;">
-        <p style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin:0 0 12px;">School of God's Purpose</p>
-        <h1 style="font-size:26px;line-height:1.15;margin:0;">Your verification code</h1>
-      </td></tr>
-      <tr><td style="padding:30px;">
-        <p style="font-size:15px;line-height:1.6;margin:0 0 20px;">Use this code to ${action}:</p>
-        <p style="font-size:34px;line-height:1;letter-spacing:.18em;font-weight:700;margin:0 0 22px;color:#051480;">${safeOtp}</p>
-        <p style="font-size:14px;line-height:1.6;color:#53617a;margin:0 0 16px;">This code expires in 10 minutes.</p>
-        <p style="font-size:13px;line-height:1.6;color:#6876a0;margin:0;">If you did not request this, you can ignore this email.</p>
-      </td></tr>
-    </table>
-  </td></tr></table>
-</body>
-</html>`.trim();
+  return brandedAuthEmailHtml({
+    eyebrow: "School of God's Purpose",
+    title: "Your verification code",
+    contentHtml: `
+              <p style="font-family:'Be Vietnam Pro',Arial,Helvetica,sans-serif; font-size:16px; line-height:1.65; font-weight:400; margin:0 0 22px;">Use this code to ${action}:</p>
+              <p style="font-family:'Sen','Trebuchet MS',Arial,sans-serif; font-size:36px; line-height:1; letter-spacing:.18em; font-weight:600; color:#051480; margin:0 0 24px;">${safeOtp}</p>
+              <p style="font-family:'Be Vietnam Pro',Arial,Helvetica,sans-serif; font-size:14px; line-height:1.6; font-weight:400; color:#40518a; margin:0;">This code expires in 10 minutes.</p>`,
+    note: "If you did not request this, you can ignore this email.",
+  });
 }
 
 export const SOGP_ENROLLMENT_SUBJECT =

@@ -43,6 +43,9 @@ describe("welcome pack completion wiring", () => {
     expect(apiSource).toContain("sendWelcomePackAccessEmail");
     expect(apiSource).toContain("leadResult.created");
     expect(apiSource).toContain("dashboardUrl");
+    expect(apiSource).toContain('"/login?returnTo=/dashboard/welcomepack"');
+    expect(apiSource).not.toContain("WELCOME_ACCESS_COOKIE_NAME");
+    expect(apiSource).not.toContain("createWelcomeAccessToken");
     expect(apiSource).not.toContain("buildWelcomePackDownloadUrl");
     expect(apiSource).not.toContain("downloadUrl");
     expect(querySource).toContain("onConflictDoNothing");
@@ -77,9 +80,9 @@ describe("welcome pack completion wiring", () => {
   test("download route protects the welcome pack file and serves it as an attachment", () => {
     const routeSource = source("app", "api", "welcome-pack", "download", "route.ts");
 
-    expect(routeSource).toContain("parseWelcomeAccessToken");
-    expect(routeSource).toContain("WELCOME_ACCESS_COOKIE_NAME");
     expect(routeSource).toContain("getAppSession");
+    expect(routeSource).not.toContain("parseWelcomeAccessToken");
+    expect(routeSource).not.toContain("WELCOME_ACCESS_COOKIE_NAME");
     expect(routeSource).toContain("resolveWelcomePackDownloadFilePath");
     expect(routeSource).toContain("Content-Disposition");
     expect(routeSource).toContain("attachment;");
