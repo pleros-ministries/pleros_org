@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { ArrowRight, ChevronDown, LoaderCircle } from "lucide-react";
+import { Select } from "@base-ui/react/select";
+import { ArrowRight, Check, ChevronDown, LoaderCircle } from "lucide-react";
 import Link from "next/link";
 import type { CountryCode } from "libphonenumber-js/min";
 
@@ -113,27 +114,64 @@ function ReferralSourceFields({
   onSourceChange: (value: string) => void;
   onOtherSourceChange: (value: string) => void;
 }) {
+  const selectedOption =
+    SOGP_REFERRAL_OPTIONS.find((option) => option.value === source) ?? null;
+
   return (
     <div className="grid gap-2">
       <label htmlFor="referralSource" className="font-[var(--font-be-vietnam-pro)] [font-size:0.8125rem] font-medium text-[var(--color-text-strong)]">How did you hear about us?<RequiredMark /></label>
-      <div className="relative">
-        <select
+      <Select.Root
+        items={SOGP_REFERRAL_OPTIONS}
+        value={selectedOption}
+        onValueChange={(value) => {
+          if (value) onSourceChange(value.value);
+        }}
+        itemToStringLabel={(option) => option.label}
+        itemToStringValue={(option) => option.value}
+        isItemEqualToValue={(left, right) => left.value === right.value}
+        name="referralSource"
+        required
+      >
+        <Select.Trigger
           id="referralSource"
-          name="referralSource"
-          value={source}
-          onChange={(event) => onSourceChange(event.target.value)}
-          required
           aria-invalid={Boolean(sourceError)}
           aria-describedby={sourceError ? "referral-source-error" : undefined}
-          className={`h-11 w-full appearance-none rounded-[var(--radius-sm)] border border-[var(--color-line-strong)] bg-white px-4 pr-11 [font-size:0.875rem] outline-none transition aria-invalid:border-[var(--destructive)] aria-invalid:ring-4 aria-invalid:ring-red-100 focus-visible:border-[var(--color-brand-blue)] focus-visible:ring-4 focus-visible:ring-[var(--color-focus)] ${source ? "text-[var(--color-text-strong)]" : "text-[var(--color-text-muted)]"}`}
+          className={`relative flex h-11 w-full items-center rounded-[var(--radius-sm)] border border-[var(--color-line-strong)] bg-white px-4 pr-11 text-left [font-size:0.875rem] outline-none transition aria-invalid:border-[var(--destructive)] aria-invalid:ring-4 aria-invalid:ring-red-100 focus-visible:border-[var(--color-brand-blue)] focus-visible:ring-4 focus-visible:ring-[var(--color-focus)] ${source ? "text-[var(--color-text-strong)]" : "text-[var(--color-text-muted)]"}`}
         >
-          <option value="" className="[font-size:0.8125rem]">Select an option</option>
+          <Select.Value placeholder="Select an option" />
+          <Select.Icon
+            render={
+              <ChevronDown
+                className={`pointer-events-none absolute right-4 top-1/2 size-4 -translate-y-1/2 ${source ? "text-[var(--color-brand-blue)]" : "text-[var(--color-text-muted)]"}`}
+                aria-hidden="true"
+              />
+            }
+          />
+        </Select.Trigger>
+        <Select.Portal>
+          <Select.Positioner sideOffset={6} className="sogp-popup-positioner">
+            <Select.Popup className="sogp-popup sogp-referral-popup">
+              <Select.List className="sogp-popup-list">
           {SOGP_REFERRAL_OPTIONS.map((option) => (
-            <option key={option.value} value={option.value} className="[font-size:0.8125rem]">{option.label}</option>
+                  <Select.Item
+                    key={option.value}
+                    value={option}
+                    label={option.label}
+                    className="sogp-popup-item sogp-referral-popup-item"
+                  >
+                    <Select.ItemText className="sogp-popup-item-label">
+                      {option.label}
+                    </Select.ItemText>
+                    <Select.ItemIndicator className="sogp-popup-item-check">
+                      <Check className="size-3.5" aria-hidden="true" />
+                    </Select.ItemIndicator>
+                  </Select.Item>
           ))}
-        </select>
-        <ChevronDown className={`pointer-events-none absolute right-4 top-1/2 size-4 -translate-y-1/2 ${source ? "text-[var(--color-brand-blue)]" : "text-[var(--color-text-muted)]"}`} aria-hidden="true" />
-      </div>
+              </Select.List>
+            </Select.Popup>
+          </Select.Positioner>
+        </Select.Portal>
+      </Select.Root>
       <FieldError id="referral-source-error" error={sourceError} />
       {source === "other" ? (
         <div className="grid gap-2 pt-1">
@@ -407,7 +445,7 @@ export function SogpEnrollmentForm({
         onOtherSourceChange={(value) => update("referralSourceOther", value)}
       />
       <fieldset
-        className="grid gap-2"
+        className="grid gap-3"
         aria-invalid={Boolean(whatsappConsentError)}
         aria-describedby={whatsappConsentError ? "whatsapp-consent-error" : undefined}
       >

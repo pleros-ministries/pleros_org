@@ -1587,6 +1587,15 @@
   color: var(--color-brand-blue);
 }
 
+.sogp-referral-popup {
+  max-height: min(24rem, var(--available-height, 24rem));
+}
+
+.sogp-referral-popup-item {
+  padding-block: 0.45rem;
+  font-size: 0.8125rem;
+}
+
 .sogp-popup-empty {
   display: flex;
   align-items: center;

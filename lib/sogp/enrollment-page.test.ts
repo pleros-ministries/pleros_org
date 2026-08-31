@@ -59,15 +59,18 @@ test("keeps the enrolment page focused with a compact summary list", () => {
   expect(pageSource).toContain("Already enrolled? Log in");
   expect(formSource).not.toContain("What do you want to get out of SOGP?");
   expect(formSource).toMatch(/<select\s+id="birthYear"/);
-  expect(formSource.match(/appearance-none/g)?.length ?? 0).toBeGreaterThanOrEqual(2);
+  expect(formSource.match(/appearance-none/g)?.length ?? 0).toBeGreaterThanOrEqual(1);
   expect(formSource.match(/right-4/g)?.length ?? 0).toBeGreaterThanOrEqual(2);
   expect(formSource).not.toContain('type="checkbox"');
+  expect(formSource).toContain("<Select.Root");
+  expect(formSource).toContain("sogp-referral-popup");
   expect(formSource.match(/type="radio"/g)?.length).toBe(1);
   expect(formSource).toContain('name="whatsappConsent"');
   expect(formSource).toContain('id={`whatsappConsent${option === "yes" ? "Yes" : "No"}`}');
   expect(formSource).toContain(
     "Would you like to receive SOGP updates via WhatsApp?",
   );
+  expect(formSource).toContain('className="grid gap-3"');
   expect(enrollmentSource.indexOf('label: "Facebook"')).toBeLessThan(
     enrollmentSource.indexOf('label: "Friend or family member"'),
   );
