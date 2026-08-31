@@ -10,7 +10,7 @@ export function SogpActivitySection({
   children,
 }: {
   title: string;
-  description: string;
+  description?: string;
   icon: ReactNode;
   children: ReactNode;
 }) {
@@ -26,7 +26,7 @@ export function SogpActivitySection({
           aria-expanded={expanded}
           aria-controls={panelId}
           onClick={() => setExpanded((current) => !current)}
-          className="flex min-h-20 w-full items-start gap-3 border-b border-[var(--color-line)] bg-[var(--color-surface-muted)] px-4 py-4 text-left transition-colors duration-150 hover:bg-[var(--color-line)] md:px-5"
+          className={`flex w-full gap-3 border-b border-[var(--color-line)] bg-[var(--color-surface-muted)] px-4 py-4 text-left transition-colors duration-150 hover:bg-[var(--color-line)] md:px-5 ${description ? "min-h-20 items-start" : "min-h-16 items-center"}`}
         >
           <span className="grid min-w-0 flex-1 gap-0.5">
             <span className="flex items-center gap-2">
@@ -35,12 +35,14 @@ export function SogpActivitySection({
                 {title}
               </span>
             </span>
-            <span className="text-xs leading-[1.45] text-[var(--color-text-muted)]">
-              {description}
-            </span>
+            {description ? (
+              <span className="text-xs leading-[1.45] text-[var(--color-text-muted)]">
+                {description}
+              </span>
+            ) : null}
           </span>
           <ChevronDownIcon
-            className={`mt-1 size-4 shrink-0 text-[var(--color-text-muted)] transition-transform duration-150 ${expanded ? "rotate-180" : ""}`}
+            className={`size-4 shrink-0 text-[var(--color-text-muted)] transition-transform duration-150 ${description ? "mt-1" : ""} ${expanded ? "rotate-180" : ""}`}
             strokeWidth={2}
             aria-hidden="true"
           />

@@ -21,3 +21,18 @@ test("renders an expanded activity disclosure with a divided header", () => {
   expect(html).not.toContain("grid size-8 shrink-0 place-items-center");
   expect(html).toContain("Activity content");
 });
+
+test("renders a compact single-line header when no description is supplied", () => {
+  const html = renderToStaticMarkup(
+    <SogpActivitySection
+      title="Preparation lesson 16"
+      icon={<span>Icon</span>}
+    >
+      <p>Activity content</p>
+    </SogpActivitySection>,
+  );
+
+  expect(html).toContain("Preparation lesson 16");
+  expect(html).toContain("min-h-16");
+  expect(html).not.toContain("min-h-20");
+});

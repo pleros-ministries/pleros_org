@@ -166,8 +166,7 @@ export function PreSogpPage({
 
           {selectedDay.lesson ? (
             <SogpActivitySection
-              title="Preparation lesson"
-              description="Watch today’s lesson, then mark it complete below."
+              title={`Preparation lesson ${selectedDay.dayNumber}`}
               icon={<BookOpenIcon className="size-4 text-[var(--color-brand-blue)]" strokeWidth={2} />}
             >
               <video controls playsInline preload="metadata" src={selectedDay.lesson.url} className="aspect-video w-full rounded-[var(--radius-sm)] bg-black" />
