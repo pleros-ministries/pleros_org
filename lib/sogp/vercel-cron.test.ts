@@ -52,5 +52,31 @@ test("caches the versioned self-hosted SOGP video assets", () => {
         },
       ],
     },
+    {
+      source: "/site/sogp/sogp-welcome-square-20260831.mp4",
+      headers: [
+        {
+          key: "Cache-Control",
+          value: "public, max-age=31536000, immutable",
+        },
+        {
+          key: "Vercel-CDN-Cache-Control",
+          value: "public, max-age=31536000, immutable",
+        },
+      ],
+    },
+    {
+      source: "/site/sogp/sogp-welcome-square-20260831.jpg",
+      headers: [
+        {
+          key: "Cache-Control",
+          value: "public, max-age=31536000, immutable",
+        },
+        {
+          key: "Vercel-CDN-Cache-Control",
+          value: "public, max-age=31536000, immutable",
+        },
+      ],
+    },
   ]);
 });

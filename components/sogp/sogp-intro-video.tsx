@@ -23,7 +23,7 @@ export function SogpIntroVideo({
   }
 
   return (
-    <div className="relative mx-auto aspect-[9/16] w-full max-w-[19rem] overflow-hidden rounded-[1.5rem] border-[6px] border-white/90 bg-black shadow-[0_26px_70px_rgba(0,0,0,0.28)] md:max-w-[21rem]">
+    <div className="relative mx-auto aspect-square w-full max-w-[32rem] overflow-hidden rounded-[1.5rem] border-[6px] border-white/90 bg-black shadow-[0_26px_70px_rgba(0,0,0,0.28)]">
       <video
         ref={videoRef}
         src={src}

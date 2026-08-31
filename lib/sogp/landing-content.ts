@@ -32,8 +32,8 @@ export const sogpLandingContent = {
     title: "What is the School of God’s Purpose?",
     description:
       "Watch this short introduction to the journey you are about to begin.",
-    src: "/site/sogp/sogp-welcome-WaXgk9zqi78.mp4",
-    posterSrc: "/site/sogp/sogp-welcome-WaXgk9zqi78.jpg",
+    src: "/site/sogp/sogp-welcome-square-20260831.mp4",
+    posterSrc: "/site/sogp/sogp-welcome-square-20260831.jpg",
   },
   outcomes: [
     "Gain clarity on difficult questions about God, His truth, and His Word",
