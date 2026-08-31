@@ -5,7 +5,7 @@ import { SogpLandingPage } from "@/components/sogp/sogp-landing-page";
 export const metadata: Metadata = {
   title: "School of God's Purpose",
   description:
-    "A free four-week school for truth, spiritual growth, and the fulfilment of God's purpose.",
+    "Find Truth, Discover God's Purpose and Grow to fulfill it at SOGP.",
 };
 
 export default function SogpPage() {
