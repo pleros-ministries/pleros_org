@@ -310,21 +310,100 @@ export function sogpEnrollmentHtml({
 
   return `
 <!DOCTYPE html>
-<html>
-<head><meta charset="utf-8" /></head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background:#f4f8fb; margin:0; padding:40px 16px; color:#101a3f;">
-  <div style="max-width:540px; margin:0 auto; background:#fff; border:1px solid #dfe7f1; overflow:hidden;">
-    <div style="background:#061056; padding:36px 32px; color:#fff;">
-      <p style="font-size:12px; letter-spacing:.14em; text-transform:uppercase; margin:0 0 12px; color:#cbe96b;">School of God's Purpose</p>
-      <h1 style="font-size:28px; line-height:1.05; margin:0;">Your enrolment is confirmed</h1>
-    </div>
-    <div style="padding:32px;">
-      <p style="font-size:16px; line-height:1.6; margin:0 0 18px;">Welcome, ${safeName}. Your enrolment in <strong>${safeCohortTitle}</strong> is confirmed.</p>
-      <p style="font-size:14px; color:#53617a; margin:0 0 24px;">${safeCohortDates}</p>
-      <p style="font-size:15px; line-height:1.65; margin:0 0 24px;"><strong>Visit your dashboard to get started.</strong> Your Welcome Pack contains your orientation message, gifts, and next steps for the SOGP journey.</p>
-      <a href="${safeDashboardUrl}" style="display:inline-block; background:#061056; color:#fff; padding:13px 22px; border-radius:999px; text-decoration:none; font-weight:600; font-size:14px;">Visit your dashboard to get started</a>
-    </div>
-  </div>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style type="text/css">
+    @media screen {
+      @font-face {
+        font-family: 'Sen';
+        font-style: normal;
+        font-weight: 500;
+        font-display: swap;
+        src: url('https://fonts.gstatic.com/s/sen/v12/6xKjdSxYI9_3nPWN.woff2') format('woff2');
+      }
+      @font-face {
+        font-family: 'Sen';
+        font-style: normal;
+        font-weight: 600;
+        font-display: swap;
+        src: url('https://fonts.gstatic.com/s/sen/v12/6xKjdSxYI9_3nPWN.woff2') format('woff2');
+      }
+      @font-face {
+        font-family: 'Be Vietnam Pro';
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+        src: url('https://fonts.gstatic.com/s/bevietnampro/v12/QdVPSTAyLFyeg_IDWvOJmVES_Hw3BXo.woff2') format('woff2');
+      }
+      @font-face {
+        font-family: 'Be Vietnam Pro';
+        font-style: normal;
+        font-weight: 600;
+        font-display: swap;
+        src: url('https://fonts.gstatic.com/s/bevietnampro/v12/QdVMSTAyLFyeg_IDWvOJmVES_HToIW81Rb0.woff2') format('woff2');
+      }
+    }
+    @media only screen and (max-width: 620px) {
+      .email-shell { padding: 18px 10px !important; }
+      .email-header { padding: 28px 22px 26px !important; }
+      .email-content { padding: 28px 22px !important; }
+      .email-footer { padding: 20px 22px !important; }
+      .email-heading { font-size: 27px !important; }
+      .email-button { display: block !important; text-align: center !important; }
+    }
+  </style>
+  <!--[if mso]>
+  <style type="text/css">
+    .email-heading, .email-button, .email-body { font-family: Arial, sans-serif !important; }
+  </style>
+  <![endif]-->
+</head>
+<body class="email-body" style="font-family:'Be Vietnam Pro',Arial,Helvetica,sans-serif; background:#f4f9ff; margin:0; padding:0; color:#061056;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#f4f9ff" style="width:100%; background:#f4f9ff; border-collapse:collapse;">
+    <tr>
+      <td class="email-shell" align="center" style="padding:44px 16px;">
+        <!--[if mso]><table role="presentation" width="560" cellspacing="0" cellpadding="0" border="0"><tr><td><![endif]-->
+        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#ffffff" style="width:100%; max-width:560px; background:#ffffff; border:1px solid #d7e8f2; border-radius:20px; border-collapse:separate; overflow:hidden; box-shadow:0 12px 32px rgba(6,16,86,.06);">
+          <tr>
+            <td class="email-header" bgcolor="#e0f3ff" style="background:#e0f3ff; padding:34px 34px 30px;">
+              <span style="display:inline-block; background:#e9ed01; border-radius:999px; padding:7px 11px; font-family:'Be Vietnam Pro',Arial,Helvetica,sans-serif; font-size:11px; line-height:1; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:#061056;">✓ School of God's Purpose</span>
+              <h1 class="email-heading" style="font-family:'Sen','Trebuchet MS',Arial,sans-serif; font-size:30px; line-height:1.12; font-weight:600; letter-spacing:-.025em; color:#061056; margin:20px 0 0;">Your enrolment is confirmed</h1>
+            </td>
+          </tr>
+          <tr>
+            <td class="email-content email-body" style="font-family:'Be Vietnam Pro',Arial,Helvetica,sans-serif; padding:32px 34px; color:#061056;">
+              <p style="font-family:'Be Vietnam Pro',Arial,Helvetica,sans-serif; font-size:16px; line-height:1.65; font-weight:400; margin:0 0 22px;">Welcome, ${safeName}. Your enrolment in <strong style="font-weight:600;">${safeCohortTitle}</strong> is confirmed.</p>
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#f4f9ff" style="width:100%; background:#f4f9ff; border:1px solid #dcecf5; border-radius:12px; border-collapse:separate;">
+                <tr>
+                  <td style="padding:15px 17px;">
+                    <p style="font-family:'Be Vietnam Pro',Arial,Helvetica,sans-serif; font-size:11px; line-height:1.2; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:#40518a; margin:0 0 5px;">Your cohort</p>
+                    <p style="font-family:'Be Vietnam Pro',Arial,Helvetica,sans-serif; font-size:14px; line-height:1.5; font-weight:400; color:#061056; margin:0;">${safeCohortDates}</p>
+                  </td>
+                </tr>
+              </table>
+              <p style="font-family:'Be Vietnam Pro',Arial,Helvetica,sans-serif; font-size:15px; line-height:1.7; font-weight:400; color:#40518a; margin:24px 0;"><strong style="font-weight:600; color:#061056;">Visit your dashboard to get started.</strong> Your Welcome Pack contains your orientation message, gifts, and next steps for the SOGP journey.</p>
+              <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="border-collapse:separate;">
+                <tr>
+                  <td align="center" bgcolor="#051480" style="background:#051480; border-radius:999px; mso-padding-alt:14px 22px;">
+                    <a class="email-button" href="${safeDashboardUrl}" style="display:inline-block; padding:14px 22px; font-family:'Sen','Trebuchet MS',Arial,sans-serif; font-size:14px; line-height:1.2; font-weight:500; color:#ffffff; text-decoration:none; border-radius:999px;">Visit your dashboard to get started</a>
+                  </td>
+                </tr>
+              </table>
+              <p style="font-family:'Be Vietnam Pro',Arial,Helvetica,sans-serif; font-size:12px; line-height:1.6; font-weight:400; color:#6876a0; margin:24px 0 0;">If the button does not work, copy and paste this link into your browser:<br /><a href="${safeDashboardUrl}" style="color:#051480; text-decoration:underline; word-break:break-all;">${safeDashboardUrl}</a></p>
+            </td>
+          </tr>
+          <tr>
+            <td class="email-footer email-body" bgcolor="#f8fbfd" style="font-family:'Be Vietnam Pro',Arial,Helvetica,sans-serif; background:#f8fbfd; border-top:1px solid #e4eef4; padding:20px 34px; color:#6876a0;">
+              <p style="font-size:12px; line-height:1.55; font-weight:400; margin:0;"><strong style="font-weight:600; color:#061056;">Pleros Ministries &amp; Missions</strong><br />Helping you fulfil God's purpose.</p>
+            </td>
+          </tr>
+        </table>
+        <!--[if mso]></td></tr></table><![endif]-->
+      </td>
+    </tr>
+  </table>
 </body>
 </html>`.trim();
 }
