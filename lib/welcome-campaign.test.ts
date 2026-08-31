@@ -151,6 +151,7 @@ describe("welcome campaign pages", () => {
     expect(routeSource).toContain('new URL("/welcome", request.url)');
     expect(routeSource).toContain("getWelcomeAccessCookieOptions");
     expect(routeSource).toContain("response.cookies.set");
+    expect(routeSource).not.toContain("provisionWelcomeSession");
   });
 });
 

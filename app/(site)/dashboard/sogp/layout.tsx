@@ -5,6 +5,6 @@ import { getAppSession } from "@/lib/app-session";
 
 export default async function SogpLayout({ children }: { children: React.ReactNode }) {
   const session = await getAppSession();
-  if (!session) redirect("/sogp/enrol");
+  if (!session) redirect("/login?returnTo=/dashboard/sogp");
   return <SogpQueryProvider>{children}</SogpQueryProvider>;
 }

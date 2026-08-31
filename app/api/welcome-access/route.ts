@@ -13,7 +13,6 @@ import { sendWelcomePackAccessEmail } from "@/lib/email/send";
 import { upsertWelcomePackLead } from "@/lib/db/queries/welcome-pack-leads";
 import {
   normalizeWelcomeReturnTo,
-  provisionWelcomeSession,
 } from "@/lib/welcome-session";
 
 export async function POST(request: Request) {
@@ -32,23 +31,6 @@ export async function POST(request: Request) {
   }
 
   const name = body?.name?.trim() || resolveWelcomeAccessName(email);
-
-  try {
-    await provisionWelcomeSession({
-      email,
-      name,
-      requestHeaders: request.headers,
-    });
-  } catch (error) {
-    console.error("Welcome Access Session Provision Error:", error);
-    return NextResponse.json(
-      {
-        error:
-          "We couldn't open your dashboard right now. Please try again in a moment.",
-      },
-      { status: 500 },
-    );
-  }
 
   const token = createWelcomeAccessToken(
     {

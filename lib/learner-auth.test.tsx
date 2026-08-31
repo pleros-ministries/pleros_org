@@ -30,3 +30,12 @@ test("provides code-based password recovery and friendly signup", () => {
   expect(recovery).toContain('autoComplete="one-time-code"');
   expect(signup).toContain('redirect(`/sogp/enrol');
 });
+
+test("keeps legacy friendly auth routes", () => {
+  expect(source("app", "(site)", "sign-in", "page.tsx")).toContain(
+    'permanentRedirect("/login")',
+  );
+  expect(source("app", "(site)", "sign-up", "page.tsx")).toContain(
+    'permanentRedirect("/signup")',
+  );
+});

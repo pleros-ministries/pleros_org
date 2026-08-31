@@ -1,5 +1,5 @@
 import { permanentRedirect } from "next/navigation";
 
-export default function RetiredPpcSignInPage() {
+export default function LegacySignInPage() {
   permanentRedirect("/login");
 }

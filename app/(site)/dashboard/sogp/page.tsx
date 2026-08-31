@@ -6,7 +6,7 @@ import { getSogpEnrollmentByUserId } from "@/lib/db/queries/sogp";
 
 export default async function SogpDashboardPage() {
   const session = await getAppSession();
-  if (!session) redirect("/sogp/enrol");
+  if (!session) redirect("/login?returnTo=/dashboard/sogp");
   const enrollment = await getSogpEnrollmentByUserId(session.user.id);
   if (!enrollment) redirect("/sogp/enrol");
   return <SogpDashboardBoundary />;

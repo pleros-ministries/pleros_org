@@ -8,7 +8,6 @@ import {
 } from "@/lib/welcome-access";
 import {
   normalizeWelcomeReturnTo,
-  provisionWelcomeSession,
 } from "@/lib/welcome-session";
 
 export async function GET(request: Request) {
@@ -22,18 +21,6 @@ export async function GET(request: Request) {
 
   if (!welcomeSession) {
     return NextResponse.redirect(new URL("/welcome", request.url));
-  }
-
-  try {
-    await provisionWelcomeSession({
-      email: welcomeSession.email,
-      name: welcomeSession.name,
-      requestHeaders: request.headers,
-    });
-  } catch {
-    return NextResponse.redirect(
-      new URL("/ppc/signup?returnTo=%2Fppc%2Fstudent", request.url),
-    );
   }
 
   const response = NextResponse.redirect(new URL(returnTo, request.url));

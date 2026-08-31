@@ -11,9 +11,9 @@ describe("welcome dashboard access", () => {
     const layoutSource = source("app", "(site)", "dashboard", "layout.tsx");
 
     expect(layoutSource).toContain("getAppSession");
-    expect(layoutSource).toContain("if (welcomeSession)");
+    expect(layoutSource).toContain("welcomePathAllowed");
     expect(layoutSource).toContain("const appSession = await getAppSession()");
-    expect(layoutSource).toContain('redirect("/welcome")');
+    expect(layoutSource).toContain('redirect(`/login?returnTo=');
     expect(layoutSource).not.toContain('redirect("/")');
   });
 
@@ -105,15 +105,16 @@ describe("welcome dashboard access", () => {
     expect(loadingSource).toContain("animate-pulse");
   });
 
-  test("dashboard mutations can provision a session from welcome access", () => {
+  test("dashboard mutations require a verified app session", () => {
     const actionSessionSource = source("lib", "dashboard-action-session.ts");
     const podcastActionsSource = source("app", "_actions", "podcast-progress-actions.ts");
     const prayerActionsSource = source("app", "_actions", "prayer-watch-actions.ts");
     const schoolActionsSource = source("app", "_actions", "school-of-purpose-actions.ts");
 
-    expect(actionSessionSource).toContain("provisionWelcomeSession");
-    expect(actionSessionSource).toContain("readWelcomeAccessToken");
-    expect(actionSessionSource).toContain("resolveDbUserId");
+    expect(actionSessionSource).toContain("getAppSession");
+    expect(actionSessionSource).not.toContain("provisionWelcomeSession");
+    expect(actionSessionSource).not.toContain("readWelcomeAccessToken");
+    expect(actionSessionSource).not.toContain("resolveDbUserId");
     expect(podcastActionsSource).toContain("getDashboardActionSession");
     expect(prayerActionsSource).toContain("getDashboardActionSession");
     expect(schoolActionsSource).toContain("getDashboardActionSession");
