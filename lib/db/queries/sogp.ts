@@ -147,10 +147,15 @@ export async function getPendingSogpEnrollmentByTokenHash(tokenHash: string) {
   );
 }
 
-export async function deletePendingSogpEnrollmentsForEmail(email: string) {
-  await db
-    .delete(schema.sogpPendingEnrollments)
-    .where(eq(schema.sogpPendingEnrollments.email, email.trim().toLowerCase()));
+export async function getLatestPendingSogpEnrollmentByEmail(email: string) {
+  const [pending] = await db
+    .select()
+    .from(schema.sogpPendingEnrollments)
+    .where(eq(schema.sogpPendingEnrollments.email, email.trim().toLowerCase()))
+    .orderBy(desc(schema.sogpPendingEnrollments.createdAt))
+    .limit(1);
+
+  return pending ?? null;
 }
 
 export async function recordPendingSogpCodeSent(id: number, sentAt = new Date()) {

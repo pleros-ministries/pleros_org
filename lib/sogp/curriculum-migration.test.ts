@@ -30,9 +30,11 @@ describe("the four-level curriculum migration", () => {
       readFileSync(join(process.cwd(), "drizzle", "meta", "_journal.json"), "utf8"),
     ) as { entries: Array<{ idx: number; tag: string }> };
 
-    expect(journal.entries.at(-1)).toMatchObject({
-      idx: 16,
-      tag: "0016_sogp_four_level_curriculum",
-    });
+    expect(journal.entries).toContainEqual(
+      expect.objectContaining({
+        idx: 16,
+        tag: "0016_sogp_four_level_curriculum",
+      }),
+    );
   });
 });

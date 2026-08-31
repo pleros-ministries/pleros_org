@@ -4,13 +4,14 @@ import { betterAuthServer } from "@/lib/auth/better-auth";
 import {
   createPendingSogpEnrollment,
   deleteExpiredPendingSogpEnrollments,
-  deletePendingSogpEnrollmentsForEmail,
+  getLatestPendingSogpEnrollmentByEmail,
   getOpenSogpCohort,
   recordPendingSogpCodeSent,
 } from "@/lib/db/queries/sogp";
 import {
   SOGP_SETUP_COOKIE,
   SOGP_SETUP_TTL_SECONDS,
+  canSendSogpCode,
   createSogpFlowToken,
   getSogpFlowSecret,
   getSogpSetupCookieOptions,
@@ -46,6 +47,19 @@ export async function POST(request: NextRequest) {
   try {
     const email = values.email.trim().toLowerCase();
     await deleteExpiredPendingSogpEnrollments();
+    const latestPending = await getLatestPendingSogpEnrollmentByEmail(email);
+    if (
+      latestPending &&
+      !canSendSogpCode({
+        sentAt: latestPending.codeSentAt,
+        sendCount: latestPending.codeSendCount,
+      })
+    ) {
+      return NextResponse.json(
+        { error: "Wait before requesting another verification code." },
+        { status: 429 },
+      );
+    }
     const authUser = await ensureSogpAuthUser({ email, name: values.name });
     const otpPurpose = getSogpOtpPurpose(authUser);
     const token = createSogpFlowToken();
@@ -54,7 +68,6 @@ export async function POST(request: NextRequest) {
       getSogpFlowSecret(process.env),
     );
 
-    await deletePendingSogpEnrollmentsForEmail(email);
     const pending = await createPendingSogpEnrollment({
       flowTokenHash: tokenHash,
       cohortId: cohort.id,
