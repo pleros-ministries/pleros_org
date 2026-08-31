@@ -32,7 +32,7 @@ export async function HomepageView() {
           question="Have questions on difficult matters about God and the Christian faith?"
           body="Learn, ask questions and grow to fulfil God&apos;s purpose."
           ctaLabel="Enrol for SOGP"
-          ctaHref="/sogp/enrol"
+          ctaHref="/sogp"
         />
         <HomepageNav />
         <HomepageHero />

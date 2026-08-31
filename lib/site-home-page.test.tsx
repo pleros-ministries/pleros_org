@@ -444,7 +444,7 @@ describe("site home page", () => {
       "Learn, ask questions and grow to fulfil God&apos;s purpose.",
     );
     expect(viewSource).toContain('ctaLabel="Enrol for SOGP"');
-    expect(viewSource).toContain('ctaHref="/sogp/enrol"');
+    expect(viewSource).toContain('ctaHref="/sogp"');
     expect(viewSource).not.toContain("HomepageGiftDrawer");
     expect(viewSource).not.toContain("readWelcomeAccessToken");
   });
