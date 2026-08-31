@@ -7,7 +7,7 @@ Consolidated 2026-08-31. Keep this file short, current, pattern-focused, and fre
 - Use `npm`; `package-lock.json` is canonical. Keep Better Auth pinned exactly to the lockfile version.
 - Do not run tests, lint, builds, React Doctor, or post-edit browser verification unless the user explicitly asks for verification; report edits as unverified instead.
 - Read `AGENTS.md` and version-matched Next.js docs in `node_modules/next/dist/docs/`. Preserve the managed Next.js block.
-- Keep the current learner-auth route/flow, Welcome Pack compatibility seam, and form-density rules consolidated in `AGENTS.md` whenever that architecture changes.
+- Keep the current learner-auth route/flow, retired Welcome Pack soft-access rule, and form-density guidance consolidated in `AGENTS.md` whenever that architecture changes.
 - Preserve unrelated worktree changes. For rollbacks, inspect the touched files, restore only the requested scope, remove only task-added files, and verify with `git status --short`. Stage explicit paths when committing.
 - Use ESM imports with `node --input-type=module` for inline Node scripts that use top-level `await`.
 - Use existing shells, tokens, fonts, and components before adding patterns. Do not redesign `app/globals.css` tokens.
@@ -51,7 +51,7 @@ Consolidated 2026-08-31. Keep this file short, current, pattern-focused, and fre
 
 ## SOGP programme
 
-- For SOGP orientation materials, agree the Markdown content before designing the PDF. Match the `/sogp` landing voice and use plain learner language such as learning, progress, prayer, and spiritual growth; avoid `formation`. In PDF treatments, centre cover-label text, use Sen 600 for the cover title, vertically centre header logos clear of divider rules, and remove draft markers before Telegram publication.
+- Keep the SOGP orientation guide concise and quick-reference. Match the `/sogp` voice, avoid `formation`, preserve exact course/certificate rules, link `https://pleros.org/dashboard`, start next steps with dashboard sign-in, omit Telegram from next steps, and remove draft markers before publication. PDF styling uses centred cover labels, Sen 600 titles, header logos clear of divider rules, and short schedule strips with breathing room and capitalised bullets.
 - Canonical routes: `/sogp`, `/sogp/enrol`, `/dashboard/sogp`, `/admin/sogp`. `/sogp/enroll` permanently redirects; old `school-of-purpose` aliases stay removed; learner `/ppc` routes redirect to `/sogp`.
 - Pre-SOGP is a gated 30-day consecutive calendar that opens from the cohort's configured preparation start in West Africa Time; for September 2026, Day 1 is 1 September and Day 30 is 30 September. Before Day 1, show only a calm coming-soon state. Match the SOGP dashboard shell with a sticky dark-blue nav/back action, lime PRE-SOGP identifier, compact lessons/countdown row, current-day indicator, provider-aware stream-only lesson media with no download action, a compact mobile progress total, and a collapsible Preparation lesson activity with a compact numbered single-line header and the lesson title above its description in the body. The preview must use the real 30-item seed order rather than repeated placeholder media. Seed only a verified target cohort, then post-check exactly 30 published days, resources, and unique URLs. Keep the desktop sticky offset below the nav. Each day requires a manually completed lesson and Morning Prayer Watch; past incomplete is red/recoverable, current/future incomplete grey, complete green. Calendar precedes content on mobile.
 - Core SOGP is four sequential Monday-Sunday levels, six teachings Monday-Saturday and Sunday review. Unlock by date plus all six prior assessments. No Extras.
@@ -85,6 +85,7 @@ Consolidated 2026-08-31. Keep this file short, current, pattern-focused, and fre
 - Use medium-weight labels/headings, a restrained bordered card, familiar outline icons, one custom select chevron with 44px right padding/16px inset, and a balanced two-line mobile hero.
 - Because enrolment reads request headers, retain route `loading.tsx` and full CTA prefetch for immediate acknowledgement.
 - Email sender is `Pleros Ministries & Missions`. Email uses soft sky/white, layout-safe Arial/Helvetica fallback, CTA weight 500, one short instruction plus `Open Dashboard`, no decorative emoji, and an MSO fallback.
+- Keep every auth email (OTP, password reset, email verification, staff invite, super-admin setup) on the shared SOGP enrolment-email visual shell: table layout, soft sky/lime/white/brand blue, Sen headings, Be Vietnam Pro body, medium weights, safe fallbacks, and Outlook/MSO support.
 
 ## Public-site system
 
@@ -120,7 +121,7 @@ Consolidated 2026-08-31. Keep this file short, current, pattern-focused, and fre
 
 ## Welcome, thank-you, and dashboard funnel
 
-- `/welcome`, `/thankyou`, and `/dashboard/welcomepack` form one stateful funnel: main access is immediate, extra gifts are trust-unlocked, and email failure never blocks access.
+- `/welcome` is retired; dashboard and Welcome Pack resources require Better Auth. Welcome lead records may remain for administration, but they are not an access mechanism.
 - Contact submission may redirect to `/welcome` but does not mint welcome access or prefill the dashboard unless explicitly coupled. Treat all public input as untrusted and HTML-escape email values with regression coverage.
 - Verify required DB tables/indexes before persistence E2E tests. If migration history disagrees with objects, inspect actual schema first and repair migration records only after confirming objects exist.
 - The retired Welcome landing design remains reference-only; `/welcome` must not render it or bootstrap access.
@@ -130,12 +131,13 @@ Consolidated 2026-08-31. Keep this file short, current, pattern-focused, and fre
 - Reuse `extraGifts` and assets from `lib/welcome-pack-gifts.ts`; prefer production covers in `public/assets/dashboard/free-gift-book-covers/`.
 - Focused Welcome Pack pages need zero-minimum grid tracks plus `min-w-0`/`max-w-full`; verify `/join`, hub, orientation, and gifts at 320px and 375px. Use public shell gutters.
 - `/join` eyebrow is `Welcome to SOGP`; its heading is `Your journey of Purpose starts here`. Keep dashboard hero copy lean and locked actions visibly muted.
+- The shared dashboard navbar exposes sign out in the desktop navbar and inside the mobile menu for full Better Auth sessions; signed-out mobile menus show `Log in`. Use the server-owned `signOutDashboardAction` to clear the session and redirect to `/login`; the client Better Auth wrapper proved unreliable for this navigation.
+- In local development, trust `http://localhost:*` and `http://127.0.0.1:*` while retaining Better Auth origin/CSRF checks; a fixed port rejects auth mutations when Next.js moves to another port.
 - `/dashboard/welcomepack/join` support copy refers to the Telegram `orientation pack` and `the next steps to take`, not an orientation message; keep its orientation-group CTA text-only with no icon.
 - Reuse the shared community section and keep it flush with the footer. Keep its CTA close to copy, intro measure narrow on mobile, and image/overlay intact.
 - Greetings prefer explicit submitted names and suppress names inferred from email identifiers.
-- `/dashboard` accepts a valid app session or welcome-access cookie; otherwise redirect to `/welcome`. Render cookie-based navigation immediately and defer Better Auth provisioning until persistence is needed.
-- Welcome cookies last 100 days and refresh on dashboard visits. Send access email only when durable state says the lead is newly created.
-- Welcome submission grants access then uses immediate browser navigation after `/api/welcome-access`; it neither auto-downloads nor waits on an App Router transition.
+- `/dashboard` and all Welcome Pack pages/actions/downloads accept only a valid app session; unauthenticated requests redirect to `/login` with a safe dashboard return path.
+- `proxy.ts` expires `pleros_welcome_access_v2` on every response. Never restore cookie-based dashboard admission or refresh.
 - Progress checkboxes update state directly; bulk completion is reversible. Podcast remains independent. Media hubs use compact series cards leading to vertical episode lists.
 - Dashboard church invitation is a full-width pre-footer strip with light blue surface, strong text, masked bottom-corner church logo, and `/fcc` CTA; keep it out of Start Here cards.
 

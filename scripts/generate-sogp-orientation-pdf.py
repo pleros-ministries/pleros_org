@@ -151,6 +151,11 @@ def normalise_text(value: str) -> str:
 
 def inline_markup(value: str) -> str:
     safe = html.escape(normalise_text(value), quote=False)
+    safe = re.sub(
+        r"\[([^\]]+)\]\((https?://[^)]+)\)",
+        r'<link href="\2" color="#051480"><u>\1</u></link>',
+        safe,
+    )
     return re.sub(
         r"\*\*(.+?)\*\*",
         r'<font name="BeVietnam-SemiBold">\1</font>',
@@ -211,6 +216,14 @@ def build_styles() -> dict[str, ParagraphStyle]:
             spaceBefore=8,
             spaceAfter=5,
             keepWithNext=True,
+        ),
+        "schedule_label": ParagraphStyle(
+            "ScheduleLabel",
+            parent=base["Normal"],
+            fontName="Sen-SemiBold",
+            fontSize=10.5,
+            leading=13,
+            textColor=WHITE,
         ),
         "body": ParagraphStyle(
             "Body",
@@ -416,6 +429,27 @@ def callout(value: str, styles: dict[str, ParagraphStyle], *, closing: bool = Fa
     return table
 
 
+def schedule_band(value: str, styles: dict[str, ParagraphStyle]) -> Table:
+    table = Table(
+        [[Paragraph(inline_markup(value), styles["schedule_label"])]],
+        colWidths=[PAGE_WIDTH - (2 * MARGIN_X)],
+    )
+    table.setStyle(
+        TableStyle(
+            [
+                ("BACKGROUND", (0, 0), (-1, -1), BLUE),
+                ("BOX", (0, 0), (-1, -1), 0, BLUE),
+                ("LEFTPADDING", (0, 0), (-1, -1), 12),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 12),
+                ("TOPPADDING", (0, 0), (-1, -1), 5),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+            ]
+        )
+    )
+    table.spaceAfter = 9
+    return table
+
+
 def draw_cover(canvas, doc) -> None:
     canvas.saveState()
     canvas.setFillColor(BLUE)
@@ -476,18 +510,21 @@ def apply_content_chrome(source: Path, output: Path) -> None:
     reader = PdfReader(str(source))
     writer = PdfWriter()
 
+    packet = BytesIO()
+    overlay_canvas = pdfcanvas.Canvas(
+        packet,
+        pagesize=(PAGE_WIDTH, PAGE_HEIGHT),
+    )
+    for page_number in range(1, len(reader.pages)):
+        draw_content_chrome(overlay_canvas, page_number)
+        overlay_canvas.showPage()
+    overlay_canvas.save()
+    packet.seek(0)
+    overlays = PdfReader(packet)
+
     for index, page in enumerate(reader.pages):
         if index > 0:
-            packet = BytesIO()
-            overlay_canvas = pdfcanvas.Canvas(
-                packet,
-                pagesize=(PAGE_WIDTH, PAGE_HEIGHT),
-            )
-            draw_content_chrome(overlay_canvas, index)
-            overlay_canvas.save()
-            packet.seek(0)
-            overlay = PdfReader(packet).pages[0]
-            page.merge_page(overlay, over=True)
+            page.merge_page(overlays.pages[index - 1], over=True)
         writer.add_page(page)
 
     if reader.metadata:
@@ -544,7 +581,13 @@ def build_story(styles: dict[str, ParagraphStyle]) -> list[Flowable]:
             story.extend([Spacer(1, 4), Paragraph(inline_markup(line[3:]), styles["h2"])])
             continue
         if line.startswith("### "):
-            story.append(Paragraph(inline_markup(line[4:]), styles["h3"]))
+            if line == "### Progress":
+                story.append(PageBreak())
+            heading = line[4:]
+            if heading in {"Monday to Saturday", "Sunday"}:
+                story.append(schedule_band(heading, styles))
+            else:
+                story.append(Paragraph(inline_markup(heading), styles["h3"]))
             continue
         ordered = re.match(r"(\d+)\.\s+(.+)", line)
         if ordered:
