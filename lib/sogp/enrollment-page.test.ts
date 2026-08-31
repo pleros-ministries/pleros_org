@@ -23,10 +23,12 @@ test("keeps the enrolment page focused with a compact summary list", () => {
   expect(pageSource).toContain("<ul className=\"grid gap-3\">");
   expect(pageSource).toContain("text-sm font-medium leading-tight");
   expect(pageSource).not.toContain("text-sm font-semibold leading-tight");
+  expect(pageSource).toContain('meta: "One live review on weekends"');
+  expect(pageSource).not.toContain("One required review every Sunday");
   expect(formSource).toContain(">First name</label>");
   expect(formSource).toContain("text-sm font-medium");
   expect(formSource).not.toContain("text-sm font-semibold");
-  expect(formSource).toContain(">Surname</label>");
+  expect(formSource).toContain(">Surname/Last Name</label>");
   expect(formSource).toContain(">State / province / region of residence</label>");
   expect(formSource).toContain(">How did you hear about us?</label>");
   expect(formSource).toContain('id="referralSourceOther"');

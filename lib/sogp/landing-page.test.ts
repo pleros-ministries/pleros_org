@@ -19,9 +19,9 @@ describe("SOGP landing content", () => {
 
   test("uses the supplied SOGP welcome video", () => {
     expect(sogpLandingContent.introVideo).toEqual({
-      title: "What is the School of God’s Purpose?",
+      title: "Our Answer and Solution for You",
       description:
-        "Watch this short introduction to the journey you are about to begin.",
+        "Watch to see the solution we are offering you.",
       src: "/site/sogp/sogp-welcome-square-20260831.mp4",
       posterSrc: "/site/sogp/sogp-welcome-square-20260831.jpg",
     });
@@ -81,6 +81,13 @@ describe("SOGP landing content", () => {
     expect(source).toContain('className="grid min-w-0 gap-7"');
     expect(source.match(/<SectionCta/g)?.length ?? 0).toBeGreaterThanOrEqual(12);
     expect(source).toContain("<SogpHeroPhone");
+    const introVideoIndex = source.indexOf("<SogpIntroVideo");
+    const introCtaIndex = source.indexOf(
+      '<SectionCta label={content.ctas.middle} inverse />',
+      introVideoIndex,
+    );
+    expect(introVideoIndex).toBeGreaterThan(-1);
+    expect(introCtaIndex).toBeGreaterThan(introVideoIndex);
     const definitionSection = source.slice(
       source.indexOf("content.definition.title"),
       source.indexOf("Who should join SOGP?"),

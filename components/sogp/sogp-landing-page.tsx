@@ -273,13 +273,15 @@ export function SogpLandingPage() {
               <p className="site-section-intro max-w-[34rem] text-white/82">
                 {content.introVideo.description}
               </p>
+            </div>
+            <div className="grid justify-items-center gap-6">
+              <SogpIntroVideo
+                src={content.introVideo.src}
+                title={content.introVideo.title}
+                posterSrc={content.introVideo.posterSrc}
+              />
               <SectionCta label={content.ctas.middle} inverse />
             </div>
-            <SogpIntroVideo
-              src={content.introVideo.src}
-              title={content.introVideo.title}
-              posterSrc={content.introVideo.posterSrc}
-            />
           </div>
         </section>
 

@@ -280,7 +280,7 @@ export function SogpEnrollmentForm({
           <FieldError id="first-name-error" error={firstNameError} />
         </div>
         <div className="grid gap-2">
-          <label htmlFor="lastName" className="font-[var(--font-be-vietnam-pro)] text-sm font-medium text-[var(--color-text-strong)]">Surname</label>
+          <label htmlFor="lastName" className="font-[var(--font-be-vietnam-pro)] text-sm font-medium text-[var(--color-text-strong)]">Surname/Last Name</label>
           <Input
             id="lastName"
             name="lastName"

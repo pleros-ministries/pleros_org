@@ -20,7 +20,7 @@ export const sogpLandingContent = {
     curriculum: "Enrol to start learning",
     free: "Enrol for free",
   },
-  questionsTitle: "What are you seeking?",
+  questionsTitle: "Your doubts, Your questions, Your struggles.",
   questions: [
     "Do you have doubts about your faith, beliefs, or religious worldview?",
     "Do you wonder what exactly your purpose in life is?",
@@ -29,9 +29,9 @@ export const sogpLandingContent = {
     "Do you want to walk more in the strength and power of the Spirit to fulfil God’s purpose for you?",
   ],
   introVideo: {
-    title: "What is the School of God’s Purpose?",
+    title: "Our Answer and Solution for You",
     description:
-      "Watch this short introduction to the journey you are about to begin.",
+      "Watch to see the solution we are offering you.",
     src: "/site/sogp/sogp-welcome-square-20260831.mp4",
     posterSrc: "/site/sogp/sogp-welcome-square-20260831.jpg",
   },

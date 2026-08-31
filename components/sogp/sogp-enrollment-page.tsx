@@ -15,7 +15,7 @@ const summary = [
   },
   {
     label: "Weekly reviews",
-    meta: "One required review every Sunday",
+    meta: "One live review on weekends",
     Icon: Radio,
   },
   {
