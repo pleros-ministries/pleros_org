@@ -10,12 +10,14 @@ import {
 } from "./calendar";
 import { SOGP_LEVELS, SOGP_TRACKS } from "./curriculum";
 import { getPreparationRequirements, getSogpDayRequirements } from "./journey";
+import { buildPreSogpSeed } from "./preparation-seed";
 
 const cohortStartsAt = new Date("2026-09-07T06:00:00+01:00");
 const cohortEndsAt = new Date("2026-10-04T20:00:00+01:00");
 const preparationTodayKey = "2026-08-23";
 const sogpTodayKey = "2026-09-17";
 
+const preparationSeed = buildPreSogpSeed(cohortStartsAt);
 const preparationDates = buildPreparationDateKeys(cohortStartsAt);
 
 export const preSogpPreviewData: PreSogpJourneyData = {
@@ -33,6 +35,7 @@ export const preSogpPreviewData: PreSogpJourneyData = {
     phase: "upcoming",
   },
   days: preparationDates.map((dateKey, index) => {
+    const seededLesson = preparationSeed[index]!;
     const lessonComplete = index < 10;
     const prayerWatchComplete = index < 10 || (index < 15 && index % 2 === 0);
     const available = dateKey <= preparationTodayKey;
@@ -52,10 +55,9 @@ export const preSogpPreviewData: PreSogpJourneyData = {
       prayerWatchComplete,
       lesson: available
         ? {
-            title: `Preparation teaching ${index + 1}`,
-            description:
-              "Build a steady foundation of truth, prayer, and readiness for SOGP.",
-            url: "/site/sogp/sogp-welcome-WaXgk9zqi78.mp4",
+            title: seededLesson.title,
+            description: seededLesson.introduction,
+            url: seededLesson.url,
           }
         : null,
     };

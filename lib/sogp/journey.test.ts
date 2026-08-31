@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 
+import * as journey from "./journey";
 import {
   getPreparationRequirements,
   getSogpDayRequirements,
@@ -42,5 +43,37 @@ describe("SOGP journey requirements", () => {
         reviewComplete: false,
       }),
     ).toEqual([true, false]);
+  });
+});
+
+test("classifies supported Pre-SOGP lesson media providers", () => {
+  const classify = (journey as Record<string, unknown>)[
+    "classifySogpLessonMediaUrl"
+  ];
+
+  expect(classify).toBeTypeOf("function");
+  if (typeof classify !== "function") return;
+
+  expect(classify("https://media.example.com/lesson.mp4")).toEqual({
+    kind: "video",
+    src: "https://media.example.com/lesson.mp4",
+  });
+  expect(
+    classify("https://www.youtube.com/embed/8iZGdhWZr-s?rel=0"),
+  ).toEqual({
+    kind: "embed",
+    src: "https://www.youtube.com/embed/8iZGdhWZr-s?rel=0",
+  });
+  expect(
+    classify(
+      "https://drive.google.com/file/d/111KUfwXwvnuOcK1X-IKlU7MH3e8Fn07n/preview",
+    ),
+  ).toEqual({
+    kind: "embed",
+    src: "https://drive.google.com/file/d/111KUfwXwvnuOcK1X-IKlU7MH3e8Fn07n/preview",
+  });
+  expect(classify("https://example.com/watch/lesson")).toEqual({
+    kind: "external",
+    src: "https://example.com/watch/lesson",
   });
 });

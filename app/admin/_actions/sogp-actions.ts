@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth/require-role";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
+import { transactionDb } from "@/lib/db/transaction";
 import { buildFirstCohortTrackSelection } from "@/lib/sogp/first-cohort";
 import {
   assertMondayCohortStart,
@@ -255,7 +256,7 @@ export async function seedSogpPreparation(input: { cohortId: number }) {
   if (!cohort) throw new Error("SOGP cohort not found.");
   const seed = buildPreSogpSeed(cohort.startsAt);
 
-  await db.transaction(async (tx) => {
+  await transactionDb.transaction(async (tx) => {
     for (const item of seed) {
       const [day] = await tx
         .insert(schema.sogpPreparationDays)

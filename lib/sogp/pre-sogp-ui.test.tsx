@@ -38,6 +38,10 @@ describe("Pre-SOGP learner UI", () => {
     expect(page).toContain("<SogpLessonHeading");
     expect(page).toContain('eyebrow="Current day"');
     expect(page).toContain("<SogpActivitySection");
+    expect(page).toContain("<SogpLessonMedia");
+    expect(page).not.toContain(
+      '<video controls playsInline preload="metadata" src={selectedDay.lesson.url}',
+    );
     expect(page).toContain(
       "title={`Preparation lesson ${selectedDay.dayNumber}`}",
     );

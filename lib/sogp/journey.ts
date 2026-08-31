@@ -5,6 +5,42 @@ export function getPreparationRequirements(input: {
   return [input.lessonComplete, input.prayerWatchComplete];
 }
 
+export type SogpLessonMedia = {
+  kind: "video" | "embed" | "external";
+  src: string;
+};
+
+export function classifySogpLessonMediaUrl(url: string): SogpLessonMedia {
+  if (url.startsWith("/")) return { kind: "video", src: url };
+
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return { kind: "external", src: url };
+  }
+
+  const isDirectVideo =
+    /\.(mp4|webm|ogg)$/i.test(parsed.pathname) ||
+    (parsed.hostname.endsWith(".ufs.sh") && parsed.pathname.startsWith("/f/"));
+  if (isDirectVideo) return { kind: "video", src: url };
+
+  const isYouTubeEmbed =
+    ["www.youtube.com", "youtube.com", "www.youtube-nocookie.com"].includes(
+      parsed.hostname,
+    ) && parsed.pathname.startsWith("/embed/");
+  const isGoogleDrivePreview =
+    parsed.hostname === "drive.google.com" &&
+    parsed.pathname.startsWith("/file/d/") &&
+    parsed.pathname.endsWith("/preview");
+
+  if (isYouTubeEmbed || isGoogleDrivePreview) {
+    return { kind: "embed", src: url };
+  }
+
+  return { kind: "external", src: url };
+}
+
 type SogpDayRequirementInput =
   | {
       kind: "weekday";

@@ -8,8 +8,19 @@ const source = (...parts: string[]) =>
 describe("SOGP dashboard previews", () => {
   test("provides deterministic Pre-SOGP and SOGP fixture data", async () => {
     const fixtures = await import("./preview-fixtures");
+    const availablePreparationLessons = fixtures.preSogpPreviewData.days
+      .map((day) => day.lesson)
+      .filter((lesson) => lesson !== null);
 
     expect(fixtures.preSogpPreviewData.days).toHaveLength(30);
+    expect(new Set(availablePreparationLessons.map((lesson) => lesson.url)).size)
+      .toBe(availablePreparationLessons.length);
+    expect(availablePreparationLessons[0]?.title).toBe(
+      "What is God's Purpose? (Part 1)",
+    );
+    expect(availablePreparationLessons.at(-1)?.title).toBe(
+      "Gospel Answers Series 9",
+    );
     expect(fixtures.sogpPreviewData.days).toHaveLength(28);
     expect(fixtures.sogpPreviewData.levels).toHaveLength(4);
     expect(fixtures.sogpPreviewData.progress.coreTotal).toBe(24);

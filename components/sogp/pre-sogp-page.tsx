@@ -15,6 +15,7 @@ import { SogpCalendar } from "./sogp-calendar";
 import { SogpActivitySection } from "./sogp-activity-section";
 import { SogpDailyRequirements } from "./sogp-daily-requirements";
 import { SogpLessonHeading } from "./sogp-lesson-heading";
+import { SogpLessonMedia } from "./sogp-lesson-media";
 import { SogpPushPanel } from "./sogp-push-panel";
 
 const queryKey = ["sogp", "preparation"] as const;
@@ -169,7 +170,10 @@ export function PreSogpPage({
               title={`Preparation lesson ${selectedDay.dayNumber}`}
               icon={<BookOpenIcon className="size-4 text-[var(--color-brand-blue)]" strokeWidth={2} />}
             >
-              <video controls playsInline preload="metadata" src={selectedDay.lesson.url} className="aspect-video w-full rounded-[var(--radius-sm)] bg-black" />
+              <SogpLessonMedia
+                title={selectedDay.lesson.title}
+                url={selectedDay.lesson.url}
+              />
               <h3 className="font-[var(--font-sen)] text-lg font-semibold leading-[1.25] tracking-[-0.025em] text-[var(--color-text-strong)]">
                 {selectedDay.lesson.title}
               </h3>

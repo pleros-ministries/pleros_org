@@ -47,6 +47,7 @@ test("admin actions seed preparation and validate cohort activation", () => {
   );
   expect(source).toContain("seedSogpPreparation");
   expect(source).toContain("buildPreSogpSeed");
+  expect(source).toContain("transactionDb.transaction");
   expect(source).toContain("validateSogpLaunchReadiness");
   expect(source).toContain("updateSogpLiveClass");
   expect(source).toContain('revalidatePath("/admin/sogp")');
