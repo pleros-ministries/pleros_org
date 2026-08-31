@@ -1,4 +1,4 @@
-import { ArrowLeftIcon, LockIcon, SendIcon } from "lucide-react";
+import { ArrowLeftIcon, LockIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -156,7 +156,7 @@ export function WelcomePackJoinPage({
             Welcome to SOGP
           </p>
           <h1 className="site-hero-heading min-w-0 text-[clamp(2.5rem,9vw,4rem)] text-white">
-            Your journey starts here
+            Your journey of Purpose starts here
           </h1>
         </header>
 
@@ -184,8 +184,8 @@ export function WelcomePackJoinPage({
 
         <div className="grid min-w-0 justify-items-center gap-3 text-center">
           <p className="min-w-0 max-w-full font-[var(--font-be-vietnam-pro)] text-sm leading-[1.6] text-white/82 sm:max-w-[32rem]">
-            Join your cohort community on Telegram for your orientation message
-            and for the next step in the SOGP journey.
+            Join your cohort community on Telegram for your orientation pack
+            and the next steps to take.
           </p>
           <a
             href={telegramUrl}
@@ -193,7 +193,6 @@ export function WelcomePackJoinPage({
             rel="noreferrer"
             className="site-button-text inline-flex min-h-12 max-w-full items-center justify-center gap-2 rounded-full bg-white px-5 text-center text-xs font-semibold text-[var(--color-brand-blue)] transition-transform duration-150 hover:-translate-y-px sm:px-7 sm:text-sm"
           >
-            <SendIcon className="size-4 shrink-0" />
             Join the orientation group
           </a>
         </div>

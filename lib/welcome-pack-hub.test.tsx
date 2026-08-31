@@ -135,7 +135,14 @@ describe("focused Welcome Pack pages", () => {
     expect(html.match(/<a /g)).toHaveLength(1);
     expect(html).toContain("Welcome to SOGP");
     expect(html).not.toContain("Welcome to Pleros");
+    expect(html).toContain("Your journey of Purpose starts here");
+    expect(html).not.toContain("Your journey starts here");
     expect(html).toContain("Join the orientation group");
+    expect(html).not.toContain("lucide-send");
+    expect(html).toContain(
+      "Join your cohort community on Telegram for your orientation pack and the next steps to take.",
+    );
+    expect(html).not.toContain("for your orientation message");
     expect(html).toContain("https://t.me/pleros_sogp");
     expect(html).toContain("Welcome message video coming soon");
     expect(html).toContain("grid-cols-[minmax(0,1fr)]");
