@@ -9,19 +9,37 @@ function source(relativePath: string) {
 describe("Pre-SOGP learner UI", () => {
   test("renders the calendar before selected-day content on mobile", () => {
     const page = source("components/sogp/pre-sogp-page.tsx");
+    const navigation = page.indexOf('aria-label="Pre-SOGP dashboard navigation"');
     const countdown = page.indexOf('data-pre-sogp-section="countdown"');
     const calendar = page.indexOf('data-pre-sogp-section="calendar"');
     const dailyContent = page.indexOf('data-pre-sogp-section="daily-content"');
     const progress = page.indexOf('data-pre-sogp-section="progress"');
 
+    expect(navigation).toBeGreaterThan(-1);
     expect(countdown).toBeGreaterThan(-1);
+    expect(countdown).toBeGreaterThan(navigation);
     expect(calendar).toBeGreaterThan(countdown);
     expect(dailyContent).toBeGreaterThan(calendar);
     expect(progress).toBeGreaterThan(dailyContent);
+    expect(page).toContain(
+      "border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)]",
+    );
+    expect(page).toContain(
+      'href={preview ? "/preview/dashboard" : "/dashboard"}',
+    );
+    expect(page).toContain(">PRE-SOGP</span>");
+    expect(page).toContain(
+      'className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 lg:col-span-2"',
+    );
   });
 
   test("includes downloadable teaching and manual daily requirements", () => {
     const page = source("components/sogp/pre-sogp-page.tsx");
+    expect(page).toContain("<SogpLessonHeading");
+    expect(page).toContain('eyebrow="Current day"');
+    expect(page).toContain("<SogpActivitySection");
+    expect(page).toContain('title="Preparation lesson"');
+    expect(page).not.toContain("text-3xl font-semibold");
     expect(page).toContain("Download teaching");
     expect(page).toContain("Pleros Live");
     expect(page).toContain("I joined Prayer Watch");

@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { DownloadIcon, ExternalLinkIcon } from "lucide-react";
+import { ArrowLeftIcon, BookOpenIcon, DownloadIcon, ExternalLinkIcon } from "lucide-react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
 import type { PreSogpJourneyData } from "@/lib/db/queries/sogp-journey";
@@ -11,7 +12,9 @@ import { getPreparationRequirements } from "@/lib/sogp/journey";
 import { PRAYER_WATCH_YOUTUBE_URL } from "@/lib/prayer-watch";
 
 import { SogpCalendar } from "./sogp-calendar";
+import { SogpActivitySection } from "./sogp-activity-section";
 import { SogpDailyRequirements } from "./sogp-daily-requirements";
+import { SogpLessonHeading } from "./sogp-lesson-heading";
 import { SogpPushPanel } from "./sogp-push-panel";
 
 const queryKey = ["sogp", "preparation"] as const;
@@ -120,22 +123,31 @@ export function PreSogpPage({
 
   return (
     <section className="site-font-theme min-h-screen bg-[var(--color-surface)] pb-16">
-      <div className="site-shell-page sogp-shell-page grid gap-6 py-7 lg:grid-cols-[19rem_minmax(0,1fr)] lg:items-start">
+      <nav aria-label="Pre-SOGP dashboard navigation" className="sticky top-0 z-30 border-b border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)] shadow-sm">
+        <div className="site-shell-page sogp-shell-page flex min-h-14 items-center justify-between gap-4">
+          <Link href={preview ? "/preview/dashboard" : "/dashboard"} className="inline-flex min-h-10 items-center gap-2 rounded-full px-1 text-xs font-semibold text-white/88 transition-colors duration-150 hover:text-white focus-visible:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white active:scale-[0.96]">
+            <ArrowLeftIcon className="size-4" strokeWidth={2} /> Dashboard
+          </Link>
+          <span className="font-[var(--font-sen)] text-xs font-semibold tracking-[0.12em] text-[var(--color-brand-lime)]">PRE-SOGP</span>
+        </div>
+      </nav>
+
+      <div className="site-shell-page sogp-shell-page grid gap-5 pb-6 pt-4 lg:grid-cols-[19rem_minmax(0,1fr)] lg:items-start">
         <header
           data-pre-sogp-section="countdown"
-          className="sticky top-0 z-20 -mx-[var(--site-shell-padding-x)] grid gap-1 border-b border-[var(--color-line)] bg-white/95 px-[var(--site-shell-padding-x)] py-4 backdrop-blur-sm md:-mx-[var(--site-shell-padding-x-md)] md:px-[var(--site-shell-padding-x-md)] lg:static lg:col-span-2 lg:mx-0 lg:rounded-[var(--radius-md)] lg:border lg:px-6"
+          className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 lg:col-span-2"
         >
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-brand-blue)]">
+          <h1 className="font-[var(--font-sen)] text-xl font-semibold tracking-[-0.04em] text-[var(--color-text-strong)] md:text-2xl">
             Pre-SOGP Lessons
-          </p>
-          <h1 className="font-[var(--font-sen)] text-2xl font-semibold tracking-[-0.045em] text-[var(--color-text-strong)]">
-            {data.countdown.label}
           </h1>
+          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.1em] text-[var(--color-text-muted)]">
+            {data.countdown.label}
+          </p>
         </header>
 
         <aside
           data-pre-sogp-section="calendar"
-          className="rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white p-4 lg:sticky lg:top-5"
+          className="rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white p-4 lg:sticky lg:top-[4.5rem]"
         >
           <SogpCalendar
             days={data.days}
@@ -146,28 +158,31 @@ export function PreSogpPage({
         </aside>
 
         <main data-pre-sogp-section="daily-content" className="grid gap-5">
-          <div className="grid gap-1">
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-brand-blue)]">
-              Day {selectedDay.dayNumber} · {selectedDay.dateKey}
-            </p>
-            <h2 className="font-[var(--font-sen)] text-3xl font-semibold tracking-[-0.055em] text-[var(--color-text-strong)]">
-              {selectedDay.lesson?.title ?? (isFuture ? "This lesson opens on its date" : "Today’s lesson is being prepared")}
-            </h2>
-          </div>
+          <SogpLessonHeading
+            eyebrow="Current day"
+            title={`Day ${selectedDay.dayNumber}`}
+            detail={selectedDay.dateKey}
+          />
 
           {selectedDay.lesson ? (
-            <section className="overflow-hidden rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white">
-              <video controls playsInline preload="metadata" src={selectedDay.lesson.url} className="aspect-video w-full bg-black" />
-              <div className="grid gap-3 p-4">
-                {selectedDay.lesson.description ? (
-                  <p className="text-sm leading-[1.55] text-[var(--color-text-muted)]">{selectedDay.lesson.description}</p>
-                ) : null}
-                <a href={selectedDay.lesson.url} download className="inline-flex min-h-10 w-fit items-center gap-2 rounded-full border border-[var(--color-brand-blue)] px-4 text-xs font-semibold text-[var(--color-brand-blue)]">
-                  <DownloadIcon className="size-4" /> Download teaching
-                </a>
-              </div>
-            </section>
-          ) : null}
+            <SogpActivitySection
+              title="Preparation lesson"
+              description={selectedDay.lesson.title}
+              icon={<BookOpenIcon className="size-4 text-[var(--color-brand-blue)]" strokeWidth={2} />}
+            >
+              <video controls playsInline preload="metadata" src={selectedDay.lesson.url} className="aspect-video w-full rounded-[var(--radius-sm)] bg-black" />
+              {selectedDay.lesson.description ? (
+                <p className="text-sm leading-[1.55] text-[var(--color-text-muted)]">{selectedDay.lesson.description}</p>
+              ) : null}
+              <a href={selectedDay.lesson.url} download className="inline-flex min-h-10 w-fit items-center gap-2 rounded-full border border-[var(--color-brand-blue)] px-4 text-xs font-semibold text-[var(--color-brand-blue)]">
+                <DownloadIcon className="size-4" /> Download teaching
+              </a>
+            </SogpActivitySection>
+          ) : (
+            <p className="rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white p-4 text-sm text-[var(--color-text-muted)]">
+              {isFuture ? "This lesson opens on its date." : "Today’s lesson is being prepared."}
+            </p>
+          )}
 
           <a href={PRAYER_WATCH_YOUTUBE_URL} target="_blank" rel="noreferrer" className="inline-flex min-h-11 w-fit items-center gap-2 rounded-full bg-[var(--color-brand-blue)] px-5 text-sm font-semibold text-white">
             Join Prayer Watch on Pleros Live <ExternalLinkIcon className="size-4" />
