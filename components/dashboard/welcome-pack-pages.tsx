@@ -164,7 +164,7 @@ export function WelcomePackJoinPage({
             playsInline
             preload="metadata"
             src={videoSrc}
-            className="aspect-video w-full max-w-full rounded-[var(--radius-md)] bg-black object-cover shadow-[var(--shadow-lg)]"
+            className="aspect-square w-full max-w-full rounded-[var(--radius-md)] bg-black object-contain shadow-[var(--shadow-lg)]"
           />
         ) : (
           <div className="grid min-w-0 aspect-video place-items-center rounded-[var(--radius-md)] border border-white/18 bg-white/8 p-5 text-center sm:p-6">

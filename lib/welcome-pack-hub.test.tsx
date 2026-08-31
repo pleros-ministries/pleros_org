@@ -71,6 +71,20 @@ describe("Welcome Pack hub", () => {
 });
 
 describe("focused Welcome Pack pages", () => {
+  test("preserves the square framing of the welcome video", () => {
+    const html = renderToStaticMarkup(
+      <WelcomePackJoinPage
+        telegramUrl="https://t.me/pleros_sogp"
+        videoSrc="/site/sogp/sogp-welcome-page-20260831.mp4"
+      />,
+    );
+
+    expect(html).toContain("sogp-welcome-page-20260831.mp4");
+    expect(html).toContain("aspect-square");
+    expect(html).toContain("object-contain");
+    expect(html).not.toContain("aspect-video");
+  });
+
   test("keeps the welcome message focused on one Telegram action", () => {
     const html = renderToStaticMarkup(
       <WelcomePackJoinPage

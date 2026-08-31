@@ -7,6 +7,7 @@ Consolidated 2026-08-31. Keep this file short, current, pattern-focused, and fre
 - Use `npm`; `package-lock.json` is canonical. Keep Better Auth pinned exactly to the lockfile version.
 - Read `AGENTS.md` and version-matched Next.js docs in `node_modules/next/dist/docs/`. Preserve the managed Next.js block.
 - Preserve unrelated worktree changes. For rollbacks, inspect the touched files, restore only the requested scope, remove only task-added files, and verify with `git status --short`. Stage explicit paths when committing.
+- Use ESM imports with `node --input-type=module` for inline Node scripts that use top-level `await`.
 - Use existing shells, tokens, fonts, and components before adding patterns. Do not redesign `app/globals.css` tokens.
 - Implement clear, annotated UI feedback directly; pause only when ambiguity would materially change the result.
 - Use sentence case and UK English in user-facing copy. Preserve technical identifiers, routes, schemas, events, and third-party names.
@@ -48,6 +49,7 @@ Consolidated 2026-08-31. Keep this file short, current, pattern-focused, and fre
 
 ## SOGP programme
 
+- For SOGP orientation materials, agree the Markdown content before designing the PDF. Match the `/sogp` landing voice and use plain learner language such as learning, progress, prayer, and spiritual growth; avoid `formation`. In PDF treatments, centre cover-label text, use Sen 600 for the cover title, vertically centre header logos clear of divider rules, and remove draft markers before Telegram publication.
 - Canonical routes: `/sogp`, `/sogp/enrol`, `/dashboard/sogp`, `/admin/sogp`. `/sogp/enroll` permanently redirects; old `school-of-purpose` aliases stay removed; learner `/ppc` routes redirect to `/sogp`.
 - Pre-SOGP is a gated 30-day consecutive calendar ending before cohort start. Match the SOGP dashboard shell with a sticky dark-blue nav/back action, lime PRE-SOGP identifier, compact lessons/countdown row, current-day indicator, stream-only video with no download action, a compact mobile progress total, and a collapsible Preparation lesson activity with a compact numbered single-line header and the lesson title above its description in the body. Keep the desktop sticky offset below the nav. Each day requires a manually completed lesson and Morning Prayer Watch; past incomplete is red/recoverable, current/future incomplete grey, complete green. Calendar precedes content on mobile.
 - Core SOGP is four sequential Monday-Sunday levels, six teachings Monday-Saturday and Sunday review. Unlock by date plus all six prior assessments. No Extras.
