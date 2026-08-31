@@ -37,10 +37,10 @@ describe("welcome dashboard content", () => {
 
   test("defines four two-card dashboard sections matching the mobile frame", () => {
     expect(welcomeDashboardSections.map((section) => section.title)).toEqual([
-      "Start here",
-      "Your rhythm",
-      "Your learning",
-      "Your next steps",
+      "Start Here",
+      "Your Devotion",
+      "Your Training",
+      "Your Commitment",
     ]);
 
     expect(welcomeDashboardSections.every((section) => section.cards.length === 2)).toBe(true);

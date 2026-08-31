@@ -28,7 +28,7 @@ export type WelcomeDashboardSection = {
 export const welcomeDashboardSections: WelcomeDashboardSection[] = [
   {
     id: "start-here",
-    title: "Start here",
+    title: "Start Here",
     cards: [
       {
         id: "welcome-pack",
@@ -54,7 +54,7 @@ export const welcomeDashboardSections: WelcomeDashboardSection[] = [
   },
   {
     id: "rhythm",
-    title: "Your rhythm",
+    title: "Your Devotion",
     cards: [
       {
         id: "podcast",
@@ -80,7 +80,7 @@ export const welcomeDashboardSections: WelcomeDashboardSection[] = [
   },
   {
     id: "learning",
-    title: "Your learning",
+    title: "Your Training",
     cards: [
       {
         id: "sogp",
@@ -106,7 +106,7 @@ export const welcomeDashboardSections: WelcomeDashboardSection[] = [
   },
   {
     id: "next-steps",
-    title: "Your next steps",
+    title: "Your Commitment",
     cards: [
       {
         id: "community",
