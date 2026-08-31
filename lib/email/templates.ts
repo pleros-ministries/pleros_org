@@ -294,6 +294,43 @@ export type SogpEnrollmentProps = {
   dashboardUrl: string;
 };
 
+export type SogpAuthCodeProps = {
+  otp: string;
+  type: "sign-in" | "email-verification" | "forget-password" | "change-email";
+};
+
+export function sogpAuthCodeHtml({ otp, type }: SogpAuthCodeProps): string {
+  const safeOtp = escapeHtml(otp);
+  const action =
+    type === "forget-password"
+      ? "reset your password"
+      : type === "sign-in"
+        ? "log in to your dashboard"
+        : "verify your email";
+
+  return `
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /></head>
+<body style="font-family:Arial,Helvetica,sans-serif;background:#f4f9ff;margin:0;padding:32px 16px;color:#061056;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"><tr><td align="center">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:520px;background:#ffffff;border:1px solid #d7e8f2;border-radius:18px;overflow:hidden;">
+      <tr><td style="background:#e0f3ff;padding:28px 30px;">
+        <p style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin:0 0 12px;">School of God's Purpose</p>
+        <h1 style="font-size:26px;line-height:1.15;margin:0;">Your verification code</h1>
+      </td></tr>
+      <tr><td style="padding:30px;">
+        <p style="font-size:15px;line-height:1.6;margin:0 0 20px;">Use this code to ${action}:</p>
+        <p style="font-size:34px;line-height:1;letter-spacing:.18em;font-weight:700;margin:0 0 22px;color:#051480;">${safeOtp}</p>
+        <p style="font-size:14px;line-height:1.6;color:#53617a;margin:0 0 16px;">This code expires in 10 minutes.</p>
+        <p style="font-size:13px;line-height:1.6;color:#6876a0;margin:0;">If you did not request this, you can ignore this email.</p>
+      </td></tr>
+    </table>
+  </td></tr></table>
+</body>
+</html>`.trim();
+}
+
 export const SOGP_ENROLLMENT_SUBJECT =
   "Your SOGP enrolment is confirmed — visit your dashboard";
 

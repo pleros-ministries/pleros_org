@@ -1,13 +1,19 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
+import { emailOTP } from "better-auth/plugins";
 import { twoFactor } from "better-auth/plugins/two-factor";
 
 import { db } from "@/lib/db";
 import * as authSchema from "@/lib/db/auth-schema";
 import { buildTrustedOrigins, resolveAuthBaseUrl } from "@/lib/auth/auth-env";
 import { ensureAppUserRecord } from "@/lib/app-user";
-import { sendEmailVerification, sendPasswordReset } from "@/lib/email/send";
+import {
+  sendEmailVerification,
+  sendPasswordReset,
+  sendSogpAuthCodeEmail,
+} from "@/lib/email/send";
+import { SOGP_OTP_TTL_SECONDS } from "@/lib/sogp/auth-flow";
 
 const googleConfigured =
   typeof process.env.GOOGLE_CLIENT_ID === "string" &&
@@ -16,7 +22,7 @@ const googleConfigured =
   process.env.GOOGLE_CLIENT_SECRET.length > 0;
 
 export const betterAuthServer = betterAuth({
-  appName: "Pleros PPC",
+  appName: "Pleros Ministries and Missions",
   baseURL: resolveAuthBaseUrl(process.env),
   secret:
     process.env.BETTER_AUTH_SECRET ??
@@ -74,7 +80,21 @@ export const betterAuthServer = betterAuth({
     : {},
   trustedOrigins: buildTrustedOrigins(process.env),
   plugins: [
-    twoFactor({ issuer: "Pleros PPC" }),
+    emailOTP({
+      disableSignUp: true,
+      otpLength: 6,
+      expiresIn: SOGP_OTP_TTL_SECONDS,
+      allowedAttempts: 3,
+      storeOTP: "hashed",
+      rateLimit: { window: 60, max: 3 },
+      async sendVerificationOTP({ email, otp, type }) {
+        const result = await sendSogpAuthCodeEmail({ to: email, otp, type });
+        if (!result) {
+          throw new Error("SOGP verification email delivery is unavailable.");
+        }
+      },
+    }),
+    twoFactor({ issuer: "Pleros" }),
     nextCookies(),
   ],
 });

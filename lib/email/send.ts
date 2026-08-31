@@ -12,6 +12,7 @@ import {
   welcomePackAccessHtml,
   welcomePackExtrasUnlockedHtml,
   SOGP_ENROLLMENT_SUBJECT,
+  sogpAuthCodeHtml,
   sogpEnrollmentHtml,
 } from "./templates";
 
@@ -276,5 +277,20 @@ export async function sendSogpEnrollmentEmail(opts: {
     to: opts.to,
     subject: SOGP_ENROLLMENT_SUBJECT,
     html: sogpEnrollmentHtml(opts),
+  });
+}
+
+export async function sendSogpAuthCodeEmail(opts: {
+  to: string;
+  otp: string;
+  type: "sign-in" | "email-verification" | "forget-password" | "change-email";
+}) {
+  if (!isEmailEnabled() || !resend) return null;
+
+  return resend.emails.send({
+    from: getSogpSender(process.env.EMAIL_FROM_PLEROS),
+    to: opts.to,
+    subject: "Your SOGP verification code",
+    html: sogpAuthCodeHtml({ otp: opts.otp, type: opts.type }),
   });
 }
