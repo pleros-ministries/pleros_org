@@ -55,6 +55,9 @@ describe("Pre-SOGP learner UI", () => {
     expect(page).toContain("Mark lesson complete");
     expect(page).toContain("onMutate");
     expect(page).toContain("onError");
+    expect(page).toContain(
+      'text-xl font-semibold text-[var(--color-brand-blue)] md:text-2xl',
+    );
   });
 
   test("calendar exposes text labels for every state", () => {

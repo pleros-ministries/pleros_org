@@ -226,7 +226,7 @@ export function PreSogpPage({
           className="grid gap-2 rounded-[var(--radius-md)] bg-[var(--color-brand-sky)] p-5 lg:col-start-2"
         >
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-brand-blue)]">Preparation progress</p>
-          <p className="font-[var(--font-sen)] text-2xl font-semibold text-[var(--color-brand-blue)]">{completeDays} of 30 days complete</p>
+          <p className="font-[var(--font-sen)] text-xl font-semibold text-[var(--color-brand-blue)] md:text-2xl">{completeDays} of 30 days complete</p>
         </section>
       </div>
     </section>
