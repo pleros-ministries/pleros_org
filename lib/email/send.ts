@@ -17,6 +17,15 @@ import {
 
 const FROM = process.env.EMAIL_FROM ?? "PPC <noreply@pleros.org>";
 
+function getSogpSender(configuredSender: string | undefined): string {
+  const configured = configuredSender?.trim();
+  const bracketedAddress = configured?.match(/<\s*([^<>]+)\s*>$/)?.[1]?.trim();
+  const plainAddress = configured?.match(/^[^\s<>]+@[^\s<>]+$/)?.[0];
+  const address = bracketedAddress ?? plainAddress ?? "noreply@pleros.org";
+
+  return `Pleros Ministries & Missions <${address}>`;
+}
+
 export async function sendInactivityReminder(opts: {
   to: string;
   studentName: string;
@@ -258,12 +267,12 @@ export async function sendSogpEnrollmentEmail(opts: {
   name: string;
   cohortTitle: string;
   cohortDates: string;
-  telegramUrl: string;
+  dashboardUrl: string;
 }) {
   if (!isEmailEnabled() || !resend) return null;
 
   return resend.emails.send({
-    from: process.env.EMAIL_FROM_PLEROS ?? FROM,
+    from: getSogpSender(process.env.EMAIL_FROM_PLEROS),
     to: opts.to,
     subject: SOGP_ENROLLMENT_SUBJECT,
     html: sogpEnrollmentHtml(opts),

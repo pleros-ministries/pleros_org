@@ -291,22 +291,22 @@ export type SogpEnrollmentProps = {
   name: string;
   cohortTitle: string;
   cohortDates: string;
-  telegramUrl: string;
+  dashboardUrl: string;
 };
 
 export const SOGP_ENROLLMENT_SUBJECT =
-  "Your SOGP enrolment is confirmed — join Telegram now";
+  "Your SOGP enrolment is confirmed — visit your dashboard";
 
 export function sogpEnrollmentHtml({
   name,
   cohortTitle,
   cohortDates,
-  telegramUrl,
+  dashboardUrl,
 }: SogpEnrollmentProps): string {
   const safeName = escapeHtml(name);
   const safeCohortTitle = escapeHtml(cohortTitle);
   const safeCohortDates = escapeHtml(cohortDates);
-  const safeTelegramUrl = escapeHtml(telegramUrl);
+  const safeDashboardUrl = escapeHtml(dashboardUrl);
 
   return `
 <!DOCTYPE html>
@@ -321,9 +321,8 @@ export function sogpEnrollmentHtml({
     <div style="padding:32px;">
       <p style="font-size:16px; line-height:1.6; margin:0 0 18px;">Welcome, ${safeName}. Your enrolment in <strong>${safeCohortTitle}</strong> is confirmed.</p>
       <p style="font-size:14px; color:#53617a; margin:0 0 24px;">${safeCohortDates}</p>
-      <p style="font-size:15px; line-height:1.65; margin:0 0 18px;"><strong>Kindly join your SOGP Telegram channel now</strong> to receive important information, gifts, reminders, and updates throughout your learning.</p>
-      <p style="font-size:14px; line-height:1.65; color:#53617a; margin:0 0 24px;">Your dashboard link will be shared in the Telegram channel. Open it there to begin your learning and transformation journey with us at SOGP.</p>
-      <a href="${safeTelegramUrl}" style="display:inline-block; background:#061056; color:#fff; padding:13px 22px; border-radius:999px; text-decoration:none; font-weight:600; font-size:14px;">Join the Telegram channel now</a>
+      <p style="font-size:15px; line-height:1.65; margin:0 0 24px;"><strong>Visit your dashboard to get started.</strong> Your Welcome Pack contains your orientation message, gifts, and next steps for the SOGP journey.</p>
+      <a href="${safeDashboardUrl}" style="display:inline-block; background:#061056; color:#fff; padding:13px 22px; border-radius:999px; text-decoration:none; font-weight:600; font-size:14px;">Visit your dashboard to get started</a>
     </div>
   </div>
 </body>

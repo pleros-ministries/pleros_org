@@ -14,6 +14,7 @@ import {
   type SogpEnrollmentInput,
 } from "@/lib/sogp/enrollment";
 import { provisionWelcomeSession } from "@/lib/welcome-session";
+import { resolvePublicSiteUrl } from "@/lib/welcome-campaign";
 
 const cohortDateFormatter = new Intl.DateTimeFormat("en-GB", {
   day: "numeric",
@@ -82,7 +83,7 @@ export async function POST(request: Request) {
       name: values.name,
       cohortTitle: cohort.title,
       cohortDates: formatCohortDates(cohort.startsAt, cohort.endsAt),
-      telegramUrl: redirect.telegramUrl,
+      dashboardUrl: `${resolvePublicSiteUrl(process.env)}/dashboard/welcomepack/join`,
     }).catch((error) => {
       console.error("SOGP enrolment email failed:", error);
     });
