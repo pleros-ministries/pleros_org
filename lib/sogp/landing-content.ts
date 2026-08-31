@@ -163,12 +163,12 @@ export const sogpLandingContent = {
     {
       question: "How long does it take?",
       answer:
-        "Four-week guided cohort: weekday tracks and weekend live classes.",
+        "SOGP was originally designed to take four weeks, but you can complete it at your own pace, with no pressure.",
     },
     {
       question: "Is it self-paced?",
       answer:
-        "Guided schedule, with flexibility to catch up and finish outstanding work.",
+        "Yes. SOGP is flexible and self-paced, so you can catch up and complete any outstanding work with the help you need along the way.",
     },
     {
       question: "What do I need?",
@@ -176,9 +176,9 @@ export const sogpLandingContent = {
         "Internet-enabled smartphone or laptop, Telegram, and Pleros Dashboard access.",
     },
     {
-      question: "How do I earn certification?",
+      question: "How do I earn a certificate?",
       answer:
-        "You earn a certificate if you meet the demands which you’re going to see in the orientation pack.",
+        "You earn a certificate by meeting the demands of SOGP. These will be explained during your orientation message.",
     },
   ],
 } as const;
