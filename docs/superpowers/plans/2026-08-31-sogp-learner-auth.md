@@ -14,7 +14,7 @@
 
 **Files:**
 - Modify: `lib/db/schema.ts`
-- Create: `drizzle/0016_sogp_pending_enrolments.sql`
+- Create: `drizzle/0017_sogp_pending_enrolments.sql`
 - Create: `lib/sogp/auth-flow.ts`
 - Create: `lib/sogp/auth-flow.test.ts`
 

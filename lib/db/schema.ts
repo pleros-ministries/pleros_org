@@ -12,6 +12,7 @@ import {
   date,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
+import type { SogpEnrollmentValues } from "../sogp/enrollment";
 import type { SogpAssessmentPolicy } from "../sogp/types";
 
 export const userRoleEnum = pgEnum("user_role", [
@@ -73,6 +74,11 @@ export const sogpEnrollmentStatusEnum = pgEnum("sogp_enrollment_status", [
   "carryover",
   "completed",
   "withdrawn",
+]);
+
+export const sogpSetupOtpPurposeEnum = pgEnum("sogp_setup_otp_purpose", [
+  "email_verification",
+  "sign_in",
 ]);
 
 export const sogpLiveClassStatusEnum = pgEnum("sogp_live_class_status", [
@@ -772,6 +778,37 @@ export const sogpEnrollments = pgTable(
     uniqueIndex("sogp_enrollments_cohort_email_idx").on(t.cohortId, t.email),
     index("sogp_enrollments_status_idx").on(t.status),
     index("sogp_enrollments_telegram_user_idx").on(t.telegramUserId),
+  ],
+);
+
+export const sogpPendingEnrollments = pgTable(
+  "sogp_pending_enrollments",
+  {
+    id: serial("id").primaryKey(),
+    flowTokenHash: text("flow_token_hash").notNull(),
+    cohortId: integer("cohort_id")
+      .notNull()
+      .references(() => sogpCohorts.id, { onDelete: "cascade" }),
+    email: text("email").notNull(),
+    payload: jsonb("payload").$type<SogpEnrollmentValues>().notNull(),
+    authUserId: text("auth_user_id"),
+    otpPurpose: sogpSetupOtpPurposeEnum("otp_purpose").notNull(),
+    codeSentAt: timestamp("code_sent_at", { withTimezone: true }),
+    codeSendCount: integer("code_send_count").notNull().default(0),
+    verifiedAt: timestamp("verified_at", { withTimezone: true }),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("sogp_pending_enrollments_token_idx").on(t.flowTokenHash),
+    index("sogp_pending_enrollments_email_idx").on(t.email),
+    index("sogp_pending_enrollments_expires_idx").on(t.expiresAt),
   ],
 );
 

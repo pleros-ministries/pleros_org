@@ -120,6 +120,13 @@
       "when": 1788119650000,
       "tag": "0016_sogp_four_level_curriculum",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1788172505000,
+      "tag": "0017_sogp_pending_enrolments",
+      "breakpoints": true
     }
   ]
 }
