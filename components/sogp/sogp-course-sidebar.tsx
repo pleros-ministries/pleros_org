@@ -5,7 +5,6 @@ import type { SogpJourneyData } from "@/lib/db/queries/sogp-journey";
 import { SogpCalendar } from "./sogp-calendar";
 import { SogpCourseOutline } from "./sogp-course-outline";
 import { SogpLevelTracker } from "./sogp-level-tracker";
-import { SogpMobileCourseSidebar } from "./sogp-mobile-course-sidebar";
 
 export function SogpCourseSidebar({
   data,
@@ -26,12 +25,6 @@ export function SogpCourseSidebar({
           onSelect={onSelect}
         />
       </section>
-
-      <SogpMobileCourseSidebar
-        data={data}
-        selectedDateKey={selectedDateKey}
-        onSelect={onSelect}
-      />
 
       <div className="hidden lg:block">
         <SogpLevelTracker levels={data.levels} />
