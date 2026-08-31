@@ -6,7 +6,9 @@ import {
   eq,
   gte,
   inArray,
+  lt,
   lte,
+  sql,
 } from "drizzle-orm";
 
 import { db } from "@/lib/db";
@@ -17,6 +19,8 @@ import type {
   SogpDashboardData,
   SogpEnrollmentCreateInput,
 } from "@/lib/sogp/types";
+import type { SogpEnrollmentValues } from "@/lib/sogp/enrollment";
+import type { SogpOtpPurpose } from "@/lib/sogp/enrollment-auth";
 
 import * as schema from "../schema";
 
@@ -44,6 +48,14 @@ export async function getSogpCohortBySlug(slug: string) {
   return (
     (await db.query.sogpCohorts.findFirst({
       where: (cohort, { eq: equal }) => equal(cohort.slug, slug),
+    })) ?? null
+  );
+}
+
+export async function getSogpCohortById(id: number) {
+  return (
+    (await db.query.sogpCohorts.findFirst({
+      where: (cohort, { eq: equal }) => equal(cohort.id, id),
     })) ?? null
   );
 }
@@ -106,6 +118,70 @@ export async function upsertSogpEnrollment(input: SogpEnrollmentCreateInput) {
 
   if (!enrollment) throw new Error("SOGP enrolment could not be saved.");
   return enrollment;
+}
+
+export async function createPendingSogpEnrollment(input: {
+  flowTokenHash: string;
+  cohortId: number;
+  email: string;
+  payload: SogpEnrollmentValues;
+  authUserId: string | null;
+  otpPurpose: SogpOtpPurpose;
+  expiresAt: Date;
+}) {
+  const [pending] = await db
+    .insert(schema.sogpPendingEnrollments)
+    .values(input)
+    .returning();
+
+  if (!pending) throw new Error("Pending SOGP enrolment could not be created.");
+  return pending;
+}
+
+export async function getPendingSogpEnrollmentByTokenHash(tokenHash: string) {
+  return (
+    (await db.query.sogpPendingEnrollments.findFirst({
+      where: (pending, { eq: equal }) =>
+        equal(pending.flowTokenHash, tokenHash),
+    })) ?? null
+  );
+}
+
+export async function deletePendingSogpEnrollmentsForEmail(email: string) {
+  await db
+    .delete(schema.sogpPendingEnrollments)
+    .where(eq(schema.sogpPendingEnrollments.email, email.trim().toLowerCase()));
+}
+
+export async function recordPendingSogpCodeSent(id: number, sentAt = new Date()) {
+  await db
+    .update(schema.sogpPendingEnrollments)
+    .set({
+      codeSentAt: sentAt,
+      codeSendCount: sql`${schema.sogpPendingEnrollments.codeSendCount} + 1`,
+      updatedAt: sentAt,
+    })
+    .where(eq(schema.sogpPendingEnrollments.id, id));
+}
+
+export async function markPendingSogpVerified(id: number, verifiedAt = new Date()) {
+  await db
+    .update(schema.sogpPendingEnrollments)
+    .set({ verifiedAt, updatedAt: verifiedAt })
+    .where(eq(schema.sogpPendingEnrollments.id, id));
+}
+
+export async function markPendingSogpCompleted(id: number, completedAt = new Date()) {
+  await db
+    .update(schema.sogpPendingEnrollments)
+    .set({ completedAt, updatedAt: completedAt })
+    .where(eq(schema.sogpPendingEnrollments.id, id));
+}
+
+export async function deleteExpiredPendingSogpEnrollments(now = new Date()) {
+  await db
+    .delete(schema.sogpPendingEnrollments)
+    .where(lt(schema.sogpPendingEnrollments.expiresAt, now));
 }
 
 export async function storeSogpTelegramLinkTokenHash(

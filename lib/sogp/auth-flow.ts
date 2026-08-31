@@ -6,6 +6,29 @@ export const SOGP_OTP_TTL_SECONDS = 10 * 60;
 export const SOGP_OTP_RESEND_SECONDS = 60;
 export const SOGP_OTP_MAX_SENDS = 5;
 
+export function getSogpFlowSecret(env: NodeJS.ProcessEnv): string {
+  return (
+    env.BETTER_AUTH_SECRET ??
+    "demo-only-better-auth-secret-change-in-production-12345"
+  );
+}
+
+export function getSogpSetupCookieOptions() {
+  return {
+    httpOnly: true,
+    sameSite: "lax" as const,
+    secure: process.env.NODE_ENV === "production",
+    path: "/",
+    maxAge: SOGP_SETUP_TTL_SECONDS,
+  };
+}
+
+export function maskEmail(email: string): string {
+  const [local = "", domain = ""] = email.split("@");
+  const visible = local.slice(0, Math.min(2, local.length));
+  return `${visible}${"•".repeat(Math.max(3, local.length - visible.length))}@${domain}`;
+}
+
 export function normalizeLearnerReturnTo(
   value: string | null | undefined,
   fallback = "/dashboard",
