@@ -98,15 +98,17 @@ export function HomepageSogpDrawer({
                 <SheetTitle className="font-[var(--font-sen)] text-[1.9rem] font-semibold leading-[0.98] tracking-[-0.045em] text-[var(--color-brand-blue)] md:text-[2.2rem]">
                   {headline}
                 </SheetTitle>
-                <SheetDescription className="max-w-[36ch] font-[var(--font-be-vietnam-pro)] text-[0.95rem] leading-[1.55] text-[rgba(6,16,86,0.76)]">
+                {/* <SheetDescription className="max-w-[36ch] font-[var(--font-be-vietnam-pro)] text-[0.95rem] leading-[1.55] text-[rgba(6,16,86,0.76)]">
                   {question}
-                </SheetDescription>
+                </SheetDescription> */}
               </div>
             </SheetHeader>
           </div>
 
           <div className="grid gap-5 px-6 pb-7 pt-6 md:px-8 md:pb-8 md:pt-7">
-            <p className="max-w-[38ch] font-[var(--font-be-vietnam-pro)] text-[0.95rem] leading-[1.6] text-[var(--color-text-muted)]">
+            <p className="max-w-[42ch] font-[var(--font-be-vietnam-pro)] text-[0.95rem] leading-[1.6] text-[var(--color-text-muted)]">
+              {question}
+              <br></br>
               {body}
             </p>
             <Link
