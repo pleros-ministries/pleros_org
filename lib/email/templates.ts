@@ -368,7 +368,7 @@ export function sogpEnrollmentHtml({
         <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#ffffff" style="width:100%; max-width:560px; background:#ffffff; border:1px solid #d7e8f2; border-radius:20px; border-collapse:separate; overflow:hidden; box-shadow:0 12px 32px rgba(6,16,86,.06);">
           <tr>
             <td class="email-header" bgcolor="#e0f3ff" style="background:#e0f3ff; padding:34px 34px 30px;">
-              <span style="display:inline-block; background:#e9ed01; border-radius:999px; padding:7px 11px; font-family:'Be Vietnam Pro',Arial,Helvetica,sans-serif; font-size:11px; line-height:1; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:#061056;">✓ School of God's Purpose</span>
+              <span style="display:inline-block; background:#e9ed01; border-radius:999px; padding:7px 11px; font-family:'Be Vietnam Pro',Arial,Helvetica,sans-serif; font-size:11px; line-height:1; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:#061056;">School of God's Purpose</span>
               <h1 class="email-heading" style="font-family:'Sen','Trebuchet MS',Arial,sans-serif; font-size:30px; line-height:1.12; font-weight:600; letter-spacing:-.025em; color:#061056; margin:20px 0 0;">Your enrolment is confirmed</h1>
             </td>
           </tr>
@@ -383,11 +383,11 @@ export function sogpEnrollmentHtml({
                   </td>
                 </tr>
               </table>
-              <p style="font-family:'Be Vietnam Pro',Arial,Helvetica,sans-serif; font-size:15px; line-height:1.7; font-weight:400; color:#40518a; margin:24px 0;"><strong style="font-weight:600; color:#061056;">Visit your dashboard to get started.</strong> Your Welcome Pack contains your orientation message, gifts, and next steps for the SOGP journey.</p>
+              <p style="font-family:'Be Vietnam Pro',Arial,Helvetica,sans-serif; font-size:15px; line-height:1.7; font-weight:400; color:#40518a; margin:24px 0;">Visit your dashboard for the welcome video and your next steps.</p>
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="border-collapse:separate;">
                 <tr>
                   <td align="center" bgcolor="#051480" style="background:#051480; border-radius:999px; mso-padding-alt:14px 22px;">
-                    <a class="email-button" href="${safeDashboardUrl}" style="display:inline-block; padding:14px 22px; font-family:'Sen','Trebuchet MS',Arial,sans-serif; font-size:14px; line-height:1.2; font-weight:500; color:#ffffff; text-decoration:none; border-radius:999px;">Visit your dashboard to get started</a>
+                    <a class="email-button" href="${safeDashboardUrl}" style="display:inline-block; padding:14px 22px; font-family:'Sen','Trebuchet MS',Arial,sans-serif; font-size:14px; line-height:1.2; font-weight:500; color:#ffffff; text-decoration:none; border-radius:999px;">Open Dashboard</a>
                   </td>
                 </tr>
               </table>

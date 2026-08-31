@@ -44,7 +44,13 @@ describe("SOGP enrolment email", () => {
     expect(html).toContain(
       'href="https://pleros.org/dashboard/welcomepack/join"',
     );
-    expect(html).toContain("Visit your dashboard to get started");
+    expect(html).toContain(
+      "Visit your dashboard for the welcome video and your next steps",
+    );
+    expect(html).toContain(">Open Dashboard</a>");
+    expect(html.match(/Visit your dashboard/g)).toHaveLength(1);
+    expect(html).not.toContain("Your Welcome Pack contains");
+    expect(html).not.toContain("✓");
     expect(html).not.toContain("Join the Telegram channel now");
     expect(html).not.toContain("dashboard link will be shared");
   });
