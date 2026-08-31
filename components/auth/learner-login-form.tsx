@@ -29,31 +29,39 @@ export function LearnerLoginForm({ returnTo }: { returnTo: string }) {
     event.preventDefault();
     setError(null);
     setPending(true);
-    const result = await authClient.signIn.email({ email, password });
-    setPending(false);
-
-    if (result.error) {
-      setError("Email or password is incorrect.");
-      return;
+    try {
+      const result = await authClient.signIn.email({ email, password });
+      if (result.error) {
+        setError("Email or password is incorrect.");
+        return;
+      }
+      finish();
+    } catch {
+      setError("Login is temporarily unavailable. Try again.");
+    } finally {
+      setPending(false);
     }
-    finish();
   }
 
   async function sendCode(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
     setPending(true);
-    const result = await authClient.emailOtp.sendVerificationOtp({
-      email,
-      type: "sign-in",
-    });
-    setPending(false);
-
-    if (result.error) {
+    try {
+      const result = await authClient.emailOtp.sendVerificationOtp({
+        email,
+        type: "sign-in",
+      });
+      if (result.error) {
+        setError("A sign-in code could not be sent. Try again shortly.");
+        return;
+      }
+      setCodeSent(true);
+    } catch {
       setError("A sign-in code could not be sent. Try again shortly.");
-      return;
+    } finally {
+      setPending(false);
     }
-    setCodeSent(true);
   }
 
   async function codeLogin(event: React.FormEvent<HTMLFormElement>) {
@@ -65,13 +73,18 @@ export function LearnerLoginForm({ returnTo }: { returnTo: string }) {
     }
 
     setPending(true);
-    const result = await authClient.signIn.emailOtp({ email, otp });
-    setPending(false);
-    if (result.error) {
-      setError("That code is invalid or expired.");
-      return;
+    try {
+      const result = await authClient.signIn.emailOtp({ email, otp });
+      if (result.error) {
+        setError("That code is invalid or expired.");
+        return;
+      }
+      finish();
+    } catch {
+      setError("Login is temporarily unavailable. Try again.");
+    } finally {
+      setPending(false);
     }
-    finish();
   }
 
   return (

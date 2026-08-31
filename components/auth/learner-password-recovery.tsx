@@ -26,13 +26,18 @@ export function LearnerPasswordRecovery({
     event.preventDefault();
     setError(null);
     setPending(true);
-    const result = await authClient.emailOtp.requestPasswordReset({ email });
-    setPending(false);
-    if (result.error) {
+    try {
+      const result = await authClient.emailOtp.requestPasswordReset({ email });
+      if (result.error) {
+        setError("A reset code could not be sent. Try again shortly.");
+        return;
+      }
+      setMode("reset");
+    } catch {
       setError("A reset code could not be sent. Try again shortly.");
-      return;
+    } finally {
+      setPending(false);
     }
-    setMode("reset");
   }
 
   async function resetPassword(event: React.FormEvent<HTMLFormElement>) {
@@ -52,17 +57,22 @@ export function LearnerPasswordRecovery({
     }
 
     setPending(true);
-    const result = await authClient.emailOtp.resetPassword({
-      email,
-      otp,
-      password,
-    });
-    setPending(false);
-    if (result.error) {
-      setError("That code is invalid or expired.");
-      return;
+    try {
+      const result = await authClient.emailOtp.resetPassword({
+        email,
+        otp,
+        password,
+      });
+      if (result.error) {
+        setError("That code is invalid or expired.");
+        return;
+      }
+      setSuccess(true);
+    } catch {
+      setError("Your password could not be updated. Try again.");
+    } finally {
+      setPending(false);
     }
-    setSuccess(true);
   }
 
   if (success) {

@@ -21,9 +21,11 @@ async function postJson(path: string, body: Record<string, unknown> = {}) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
-  const payload = (await response.json().catch(() => null)) as ApiError | null;
-  if (!response.ok) throw payload ?? { error: "Something went wrong. Try again." };
-  return payload ?? {};
+  if (!response.ok) {
+    const errorPayload = (await response.json().catch(() => null)) as ApiError | null;
+    throw errorPayload ?? { error: "Something went wrong. Try again." };
+  }
+  return ((await response.json().catch(() => null)) as ApiError | null) ?? {};
 }
 
 export function SogpSetupForm({
