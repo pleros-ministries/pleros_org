@@ -32,6 +32,9 @@ test("keeps the enrolment page focused with a compact summary list", () => {
   expect(formSource).toContain(">State / province / region of residence</label>");
   expect(formSource).toContain(">How did you hear about us?</label>");
   expect(formSource).toContain('id="referralSourceOther"');
+  expect(formSource).toContain('fetch("/api/sogp/enrol/start"');
+  expect(pageSource).toContain('href="/login?returnTo=/dashboard/sogp"');
+  expect(pageSource).toContain("Already enrolled? Log in");
   expect(formSource).not.toContain("What do you want to get out of SOGP?");
   expect(formSource).toMatch(/<select\s+id="birthYear"/);
   expect(formSource.match(/appearance-none/g)?.length ?? 0).toBeGreaterThanOrEqual(3);

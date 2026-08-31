@@ -36,13 +36,21 @@ export function SogpEnrollmentPage({
         <section className="site-shell-page sogp-shell-page grid gap-10 py-12 md:grid-cols-[minmax(0,0.85fr)_minmax(26rem,1fr)] md:items-start md:gap-16 md:py-20">
           <div className="grid gap-8 md:sticky md:top-24">
             <div className="grid gap-4">
-              <Link
-                href="/sogp"
-                className="inline-flex w-fit items-center gap-1 font-[var(--font-be-vietnam-pro)] text-xs font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-brand-blue)] focus-visible:text-[var(--color-brand-blue)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-brand-blue)]"
-              >
-                <ArrowLeft className="size-3.5" aria-hidden="true" />
-                Back
-              </Link>
+              <div className="flex items-center justify-between gap-4">
+                <Link
+                  href="/sogp"
+                  className="inline-flex w-fit items-center gap-1 font-[var(--font-be-vietnam-pro)] text-xs font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-brand-blue)] focus-visible:text-[var(--color-brand-blue)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-brand-blue)]"
+                >
+                  <ArrowLeft className="size-3.5" aria-hidden="true" />
+                  Back
+                </Link>
+                <Link
+                  href="/login?returnTo=/dashboard/sogp"
+                  className="font-[var(--font-be-vietnam-pro)] text-xs font-medium text-[var(--color-brand-blue)] underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-brand-blue)]"
+                >
+                  Already enrolled? Log in
+                </Link>
+              </div>
               <h1 className="site-hero-heading max-w-none text-[clamp(2.3rem,9vw,2.8rem)] text-[var(--color-brand-blue)] md:max-w-[12ch] md:text-[clamp(2.8rem,6vw,5rem)]">Take your next step with SOGP</h1>
               <p className="site-section-intro max-w-[32rem] text-[var(--color-text-muted)]">Join a guided four-week journey into truth, spiritual growth, and God&apos;s purpose.</p>
             </div>

@@ -64,7 +64,7 @@ const FILL_IN_MESSAGE =
 
 async function submitEnrollment(body: Record<string, unknown>) {
   const params = new URLSearchParams(window.location.search);
-  const response = await fetch("/api/sogp/enrol", {
+  const response = await fetch("/api/sogp/enrol/start", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -190,8 +190,8 @@ export function SogpEnrollmentForm({
   const mutation = useMutation({
     mutationFn: submitEnrollment,
     onSuccess(payload) {
-      trackSogpEvent("sogp_enrolment_completed");
-      window.location.assign(payload.redirectTo ?? "/dashboard/sogp");
+      trackSogpEvent("sogp_email_verification_sent");
+      window.location.assign(payload.redirectTo ?? "/setup");
     },
     onError(error: EnrollmentResponse) {
       const fieldErrors = error.errors ?? {};
@@ -201,7 +201,7 @@ export function SogpEnrollmentForm({
         error.error ??
           (Object.keys(fieldErrors).length > 0
             ? FILL_IN_MESSAGE
-            : "We could not complete your enrolment. Try again."),
+            : "We could not start account setup. Try again."),
       );
     },
   });
@@ -433,7 +433,7 @@ export function SogpEnrollmentForm({
       ) : null}
       <Button type="submit" size="lg" disabled={mutation.isPending} className="min-h-12 w-full rounded-full bg-[var(--color-brand-blue)] text-white">
         {mutation.isPending ? <LoaderCircle className="size-4 animate-spin" /> : null}
-        {mutation.isPending ? "Completing enrolment" : "Complete enrolment"}
+         {mutation.isPending ? "Sending verification code" : "Continue to email verification"}
         {!mutation.isPending ? <ArrowRight className="size-4" /> : null}
       </Button>
       <p className="text-center font-[var(--font-be-vietnam-pro)] text-xs leading-[1.5] text-[var(--color-text-muted)]">
