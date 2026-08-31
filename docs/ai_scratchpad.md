@@ -64,6 +64,7 @@ Consolidated 2026-08-31. Keep this file short, current, pattern-focused, and fre
 ## SOGP public funnel and enrolment
 
 - Landing copy follows the `SOGP Landing Page` Google Doc plus Pastor corrections; preserve meaning/order and fix only obvious grammar. Use the public Sen/Be Vietnam Pro system.
+- The main homepage uses a dedicated one-time SOGP promotional sheet with no lead form; it links directly to `/sogp/enrol` and has dismissal state independent of Welcome Pack access. Keep the Welcome Pack email form unchanged on `/welcome`.
 - The landing page has no navbar: white hero, four-part headline, no pre-headline label, `Your doubts, Your questions, Your struggles.`, natural-height question rows, then `Our Answer and Solution for You`; its supporting line is `Watch to see the solution we are offering you.` and the section CTA follows the welcome video. Outcomes remain under `What is SOGP?`; only the footer links away.
 - Use contextual CTAs after persuasive sections; introduce `Enrol for free` only after free access is explained. Keep mobile type compact.
 - The welcome video is the versioned self-hosted square H.264/AAC MP4 with matching poster and immutable caching. Keep Welcome Pack orientation media separate.

@@ -1,25 +1,15 @@
-import { cookies } from "next/headers";
-
-import { readWelcomeAccessToken, WELCOME_ACCESS_COOKIE_NAME } from "@/lib/welcome-access";
-
 import { HomepageCommunitySection } from "./homepage-community-section";
 import { HomepageFooter } from "./homepage-footer";
-import { HomepageGiftDrawer } from "./homepage-gift-drawer";
 import { HomepageHero } from "./homepage-hero";
 import { HomepageNav } from "./homepage-nav";
 import { HomepagePodcastSection } from "./homepage-podcast-section";
 import { HomepagePrayerWatchSection } from "./homepage-prayer-watch-section";
+import { HomepageSogpDrawer } from "./homepage-sogp-drawer";
 import { HomepageSocialSection } from "./homepage-social-section";
 import { getLatestYoutubeEpisode, getLatestYoutubeVideos } from "../../lib/homepage-feed";
 import type { HomeInstagramReel } from "../../lib/site-homepage-content";
 
 export async function HomepageView() {
-  const cookieStore = await cookies();
-  const welcomeAccess = readWelcomeAccessToken(
-    cookieStore.get(WELCOME_ACCESS_COOKIE_NAME)?.value,
-    process.env,
-  );
-
   const [episode, youtubeVideos] = await Promise.all([
     getLatestYoutubeEpisode(),
     getLatestYoutubeVideos(5),
@@ -37,7 +27,13 @@ export async function HomepageView() {
   return (
     <div className="bg-[#f3f7fb] px-0 md:px-0  md:py-0">
       <div className="mx-auto w-full max-w-none bg-[var(--color-bg)]">
-        <HomepageGiftDrawer hasWelcomeAccess={Boolean(welcomeAccess)} />
+        <HomepageSogpDrawer
+          headline="Want to grow and fulfil God&apos;s purpose for your life?"
+          question="Have questions on difficult matters about God and the Christian faith?"
+          body="Learn, ask questions and grow to fulfil God&apos;s purpose."
+          ctaLabel="Enrol for SOGP"
+          ctaHref="/sogp/enrol"
+        />
         <HomepageNav />
         <HomepageHero />
         <HomepageCommunitySection />

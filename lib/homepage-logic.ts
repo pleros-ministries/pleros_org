@@ -16,6 +16,11 @@ export type WelcomePackState =
   | WelcomePackCompletedState;
 
 export const WELCOME_PACK_STORAGE_KEY = "pleros.welcome-pack.state.v2";
+export const SOGP_PROMO_DISMISSED_KEY = "pleros.sogp-promo.dismissed.v1";
+
+export function shouldShowSogpPromo(raw: string | null): boolean {
+  return raw !== "1";
+}
 
 export function getNextCarouselIndex(current: number, total: number): number {
   if (total <= 0) {

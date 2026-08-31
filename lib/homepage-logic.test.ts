@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 
+import * as homepageLogic from "./homepage-logic";
 import {
   WELCOME_PACK_STORAGE_KEY,
   readWelcomePackState,
@@ -8,6 +9,19 @@ import {
 } from "./homepage-logic";
 
 describe("homepage welcome gift logic", () => {
+  test("uses an independent one-time dismissal state for the SOGP promotion", () => {
+    const sogpLogic = homepageLogic as unknown as {
+      SOGP_PROMO_DISMISSED_KEY?: string;
+      shouldShowSogpPromo?: (raw: string | null) => boolean;
+    };
+
+    expect(sogpLogic.SOGP_PROMO_DISMISSED_KEY).toBe(
+      "pleros.sogp-promo.dismissed.v1",
+    );
+    expect(sogpLogic.shouldShowSogpPromo?.(null)).toBe(true);
+    expect(sogpLogic.shouldShowSogpPromo?.("1")).toBe(false);
+  });
+
   test("keeps the public homepage storage key stable", () => {
     expect(WELCOME_PACK_STORAGE_KEY).toBe("pleros.welcome-pack.state.v2");
   });

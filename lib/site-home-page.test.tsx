@@ -426,37 +426,27 @@ describe("site home page", () => {
     expect(globalsSource).toContain('font-family: var(--font-sen), "Sen", var(--font-heading) !important;');
   });
 
-  test("wires a homepage-only free gift drawer as bottom sheet on mobile and centered modal on desktop", () => {
+  test("wires a homepage-only SOGP enrolment drawer", () => {
     const viewSource = readFileSync(
       join(process.cwd(), "components", "home", "homepage-view.tsx"),
       "utf8",
     );
-    const drawerSource = readFileSync(
-      join(process.cwd(), "components", "home", "homepage-gift-drawer.tsx"),
-      "utf8",
-    );
 
-    expect(viewSource).toContain("HomepageGiftDrawer");
-    expect(viewSource).toContain("<HomepageGiftDrawer hasWelcomeAccess={Boolean(welcomeAccess)} />");
-    expect(drawerSource).toContain('side="bottom"');
-    expect(drawerSource).toContain("md:top-1/2");
-    expect(drawerSource).toContain("md:left-1/2");
-    expect(drawerSource).toContain("md:data-open:-translate-x-1/2");
-    expect(drawerSource).toContain("md:data-open:-translate-y-1/2");
-    expect(drawerSource).toContain("welcomePackModalCopy.headline");
-    expect(drawerSource).toContain("welcomePackModalCopy.subheadline");
-    expect(drawerSource).toContain('placeholder="First name"');
-    expect(drawerSource).toContain('placeholder="Email address"');
-    expect(drawerSource).toContain("Enter your first name.");
-    expect(drawerSource).toContain("access welcome pack");
-    expect(drawerSource).toContain("rounded-t-[var(--radius-xl)]");
-    expect(drawerSource).not.toContain("Instant dashboard access");
-    expect(drawerSource).not.toContain("Private welcome pack");
-    expect(drawerSource).not.toContain("We&apos;ll take you straight into your dashboard after submit.");
-    expect(drawerSource).toContain("WELCOME_PACK_STORAGE_KEY");
-    expect(drawerSource).toContain('fetch("/api/welcome-access"');
-    expect(drawerSource).toContain("window.location.assign(payload.redirectTo)");
-    expect(drawerSource).not.toContain("useTransition");
+    expect(viewSource).toContain("HomepageSogpDrawer");
+    expect(viewSource).toContain("<HomepageSogpDrawer");
+    expect(viewSource).toContain(
+      "Want to grow and fulfil God&apos;s purpose for your life?",
+    );
+    expect(viewSource).toContain(
+      "Have questions on difficult matters about God and the Christian faith?",
+    );
+    expect(viewSource).toContain(
+      "Learn, ask questions and grow to fulfil God&apos;s purpose.",
+    );
+    expect(viewSource).toContain('ctaLabel="Enrol for SOGP"');
+    expect(viewSource).toContain('ctaHref="/sogp/enrol"');
+    expect(viewSource).not.toContain("HomepageGiftDrawer");
+    expect(viewSource).not.toContain("readWelcomeAccessToken");
   });
 
   test("wires the root route to the restored homepage instead of redirecting to PPC", () => {
