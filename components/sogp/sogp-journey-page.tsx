@@ -179,25 +179,29 @@ export function SogpJourneyPage({
 
         <main data-sogp-section="daily-content" className="grid min-w-0 gap-5">
           <SogpLessonHeading
-            metadata={`${selectedDay.track ? `Level ${selectedDay.track.curriculumLevel} · Track ${selectedDay.track.levelPosition}` : selectedDay.kind === "review" ? "Required review" : "Daily formation"} · ${selectedDay.dateKey}`}
-            title={selectedDay.track?.title ?? selectedDay.review?.title ?? "Prayer Watch and devotion"}
+            eyebrow={selectedDay.track ? "Current level" : "Current activity"}
+            title={selectedDay.track ? `Level ${selectedDay.track.curriculumLevel}` : selectedDay.review ? "Review day" : "Daily formation"}
+            detail={selectedDay.track ? `Track ${selectedDay.track.levelPosition} of 6` : selectedDay.dateKey}
           />
 
           <section aria-label="Today’s activities" className="grid gap-5 md:gap-6">
             {selectedDay.track?.accessible ? (
               <SogpActivitySection
                 title="Teaching"
-                description="Listen at your pace. Audio playback is not tracked."
+                description={selectedDay.track.title}
                 icon={<BookOpenIcon className="size-4 text-[var(--color-brand-blue)]" strokeWidth={2} />}
               >
-                {selectedDay.track.audioUrl ? (
-                  <div className="grid gap-3">
+                <div className="grid gap-3">
+                  <p className="text-xs text-[var(--color-text-muted)]">Listen at your pace. Audio playback is not tracked.</p>
+                  {selectedDay.track.audioUrl ? (
+                    <>
                     <audio controls preload="metadata" src={selectedDay.track.audioUrl} className="w-full" />
                     <a href={selectedDay.track.audioUrl} download className="inline-flex min-h-10 w-fit items-center gap-2 rounded-full border border-[var(--color-brand-blue)] px-4 text-xs font-semibold text-[var(--color-brand-blue)] active:scale-[0.96]">
                       <DownloadIcon className="size-4" strokeWidth={2} /> Download teaching
                     </a>
-                  </div>
-                ) : <p className="text-sm text-[var(--color-text-muted)]">The teaching audio is being prepared.</p>}
+                    </>
+                  ) : <p className="text-sm text-[var(--color-text-muted)]">The teaching audio is being prepared.</p>}
+                </div>
               </SogpActivitySection>
             ) : selectedDay.track ? (
               <SogpActivitySection

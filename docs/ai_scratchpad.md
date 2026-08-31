@@ -59,7 +59,7 @@ Consolidated 2026-08-31. Keep this file short, current, pattern-focused, and fre
 - Telegram bot broadcasts only; never post learner PII or promise discussion until a group is actually linked. Use admin composer for immediate sends.
 - Hobby cron permits the daily browser-push reminder at `20 4 * * *` (05:20 WAT); higher frequency needs Pro or an external scheduler.
 - Learner UI combines public typography/warmth with MOOC density. Mobile: keep the compact current-week calendar above activities and omit the course-menu trigger/drawer. Desktop: fixed left progress/outline rail, central activities, right progress/review rail.
-- Keep teaching titles restrained, metadata muted, and activity panels neutral, spaced, independently collapsible, with simple grey headers/dividers. Reserve colour for state and primary actions; omit a Telegram promo card from the context rail.
+- The daily content header is a compact current-level/track-position indicator, not a lesson-title banner; place the teaching name inside the Teaching activity. Keep metadata muted and activity panels neutral, spaced, independently collapsible, with simple grey headers/dividers. Reserve colour for state and primary actions; omit a Telegram promo card from the context rail.
 
 ## SOGP public funnel and enrolment
 
