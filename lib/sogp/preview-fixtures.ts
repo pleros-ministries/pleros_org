@@ -12,11 +12,11 @@ import { SOGP_LEVELS, SOGP_TRACKS } from "./curriculum";
 import { getPreparationRequirements, getSogpDayRequirements } from "./journey";
 import { buildPreSogpSeed } from "./preparation-seed";
 
-const cohortStartsAt = new Date("2026-09-07T06:00:00+01:00");
-const cohortEndsAt = new Date("2026-10-04T20:00:00+01:00");
+const cohortStartsAt = new Date("2026-09-14T06:00:00+01:00");
+const cohortEndsAt = new Date("2026-10-11T20:00:00+01:00");
 const preparationStartsAt = new Date("2026-09-01T00:00:00+01:00");
 const preparationTodayKey = "2026-08-31";
-const sogpTodayKey = "2026-09-17";
+const sogpTodayKey = "2026-09-24";
 
 const preparationSeed = buildPreSogpSeed(preparationStartsAt);
 const preparationDates = buildPreparationDateKeys(preparationStartsAt);
@@ -147,7 +147,7 @@ const sogpDays: SogpJourneyData["days"] = sogpDates.map((dateKey) => {
 });
 
 export const sogpPreviewData: SogpJourneyData = {
-  generatedAt: "2026-09-17T12:00:00.000Z",
+  generatedAt: "2026-09-24T12:00:00.000Z",
   todayKey: sogpTodayKey,
   enrollment: { name: "Daniel" },
   cohort: {

@@ -7,7 +7,7 @@ import {
 
 test("builds a released-track and upcoming-live-class message", () => {
   const events = buildSogpChannelReminderCandidates({
-    now: new Date("2026-09-07T05:10:00Z"),
+    now: new Date("2026-09-14T05:10:00Z"),
     cohort: {
       id: 1,
       title: "SOGP September 2026",
@@ -41,13 +41,13 @@ test("builds a released-track and upcoming-live-class message", () => {
 test("builds an enrolled 5:20 am Lagos Prayer Watch push", () => {
   expect(
     buildSogpPrayerWatchPushCandidate({
-      now: new Date("2026-09-07T04:20:00.000Z"),
+      now: new Date("2026-09-14T04:20:00.000Z"),
       userId: "user-1",
       cohortId: 4,
       cohortStatus: "preparing",
     }),
   ).toEqual({
-    key: "sogp:4:prayer:user-1:2026-09-07",
+    key: "sogp:4:prayer:user-1:2026-09-14",
     title: "Prayer Watch begins in 10 minutes",
     body: "Join the 5:30 am Prayer Watch on Pleros Live.",
     url: "/dashboard/pre-sogp?date=2026-09-14",
@@ -65,7 +65,7 @@ test("uses the active calendar link and rejects other dispatch times", () => {
   ).toBe("/dashboard/sogp?date=2026-09-14");
   expect(
     buildSogpPrayerWatchPushCandidate({
-      now: new Date("2026-09-07T04:40:00.000Z"),
+      now: new Date("2026-09-14T04:40:00.000Z"),
       userId: "user-1",
       cohortId: 4,
       cohortStatus: "active",

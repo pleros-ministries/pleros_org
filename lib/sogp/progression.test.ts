@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 
 import { canAccessSogpTrack, summarizeSogpLevels } from "./progression";
 
-const startsAt = new Date("2026-09-07T06:00:00+01:00");
+const startsAt = new Date("2026-09-14T06:00:00+01:00");
 
 function tracks(completedByLevel: number[]) {
   return Array.from({ length: 24 }, (_, index) => {
@@ -34,7 +34,7 @@ describe("summarizeSogpLevels", () => {
     const levels = summarizeSogpLevels({
       tracks: tracks([6, 0, 0, 0]),
       startsAt,
-      now: new Date("2026-09-12T12:00:00+01:00"),
+      now: new Date("2026-09-19T12:00:00+01:00"),
     });
 
     expect(levels[0]?.status).toBe("complete");
@@ -45,7 +45,7 @@ describe("summarizeSogpLevels", () => {
     const levels = summarizeSogpLevels({
       tracks: tracks([6, 2, 0, 0]),
       startsAt,
-      now: new Date("2026-09-16T12:00:00+01:00"),
+      now: new Date("2026-09-23T12:00:00+01:00"),
     });
 
     expect(levels[1]).toMatchObject({
@@ -59,7 +59,7 @@ describe("summarizeSogpLevels", () => {
     const levels = summarizeSogpLevels({
       tracks: tracks([6, 6, 0, 0]),
       startsAt,
-      now: new Date("2026-10-01T12:00:00+01:00"),
+      now: new Date("2026-10-08T12:00:00+01:00"),
     });
 
     expect(levels.map((level) => level.status)).toEqual([
@@ -73,8 +73,8 @@ describe("summarizeSogpLevels", () => {
 
 describe("canAccessSogpTrack", () => {
   test("combines release date and prior-level completion", () => {
-    const released = new Date("2026-09-14T06:00:00+01:00");
-    const now = new Date("2026-09-14T12:00:00+01:00");
+    const released = new Date("2026-09-21T06:00:00+01:00");
+    const now = new Date("2026-09-21T12:00:00+01:00");
 
     expect(
       canAccessSogpTrack({
