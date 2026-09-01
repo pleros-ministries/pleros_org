@@ -15,6 +15,7 @@ import {
   SOGP_REFERRAL_OPTIONS,
   validateSogpEnrollment,
   type SogpEnrollmentErrors,
+  type SogpReferralOption,
 } from "@/lib/sogp/enrollment";
 import { getSogpCountryOrDefault } from "@/lib/sogp/countries";
 import { CountryCombobox } from "./country-combobox";
@@ -114,7 +115,7 @@ function ReferralSourceFields({
   onSourceChange: (value: string) => void;
   onOtherSourceChange: (value: string) => void;
 }) {
-  const selectedOption =
+  const selectedOption: SogpReferralOption | null =
     SOGP_REFERRAL_OPTIONS.find((option) => option.value === source) ?? null;
 
   return (
@@ -123,12 +124,14 @@ function ReferralSourceFields({
       <Select.Root
         items={SOGP_REFERRAL_OPTIONS}
         value={selectedOption}
-        onValueChange={(value) => {
+        onValueChange={(value: SogpReferralOption | null) => {
           if (value) onSourceChange(value.value);
         }}
-        itemToStringLabel={(option) => option.label}
-        itemToStringValue={(option) => option.value}
-        isItemEqualToValue={(left, right) => left.value === right.value}
+        itemToStringLabel={(option: SogpReferralOption) => option.label}
+        itemToStringValue={(option: SogpReferralOption) => option.value}
+        isItemEqualToValue={(left: SogpReferralOption, right: SogpReferralOption) =>
+          left.value === right.value
+        }
         name="referralSource"
         required
       >

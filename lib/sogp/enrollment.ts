@@ -55,7 +55,9 @@ const EARLIEST_BIRTH_YEAR = 1900;
 /** SOGP is open to teenagers upwards, so anything younger reads as a typo. */
 const MINIMUM_AGE = 10;
 
-export const SOGP_REFERRAL_OPTIONS = [
+export type SogpReferralOption = { value: string; label: string };
+
+export const SOGP_REFERRAL_OPTIONS: readonly SogpReferralOption[] = [
   { value: "facebook", label: "Facebook" },
   { value: "instagram", label: "Instagram" },
   { value: "tiktok", label: "TikTok" },
@@ -68,7 +70,7 @@ export const SOGP_REFERRAL_OPTIONS = [
   { value: "pleros_event", label: "Pleros programme or event" },
   { value: "search_engine", label: "Search engine" },
   { value: "other", label: "Other" },
-] as const;
+];
 
 const SOGP_REFERRAL_VALUES = new Set<string>(
   SOGP_REFERRAL_OPTIONS.map((option) => option.value),
