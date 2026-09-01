@@ -32,7 +32,7 @@ describe("SOGP enrolment email", () => {
     const html = sogpEnrollmentHtml({
       name: '<img src=x onerror="alert(1)">',
       cohortTitle: "September 2026",
-      cohortDates: "7 September – 4 October 2026",
+      cohortDates: "14 September – 4 October 2026",
       dashboardUrl: "https://pleros.org/dashboard/welcomepack/join",
     });
 
@@ -62,7 +62,7 @@ describe("SOGP enrolment email", () => {
       to: "learner@example.com",
       name: "Ada",
       cohortTitle: "September 2026",
-      cohortDates: "7 September – 4 October 2026",
+      cohortDates: "14 September – 4 October 2026",
       dashboardUrl: "https://pleros.org/dashboard/welcomepack/join",
     });
 

@@ -15,7 +15,7 @@ function argument(name: string) {
 
 const slug = argument("slug") ?? "september-2026";
 const title = argument("title") ?? "SOGP September 2026";
-const starts = argument("starts") ?? "2026-09-07";
+const starts = argument("starts") ?? "2026-09-14";
 const selection = buildFirstCohortTrackSelection();
 const startsAt = new Date(`${starts}T00:00:00+01:00`);
 if (Number.isNaN(startsAt.getTime())) throw new Error("Invalid --starts date.");

@@ -5,6 +5,7 @@ import {
   welcomeDashboardSections,
   type WelcomeDashboardSection,
 } from "@/lib/welcome-dashboard-content";
+import { InstallAppCta } from "@/components/pwa/install-app-cta";
 import { cn } from "@/lib/utils";
 
 function getDashboardCardClasses(accent: "orange" | "blue") {
@@ -196,6 +197,8 @@ export function WelcomeDashboardView({
       </header>
 
       <div className="container-pleros grid max-w-[36rem] gap-10 pt-9 pb-12 sm:pt-10 sm:pb-14">
+        <InstallAppCta />
+
         <div className="grid gap-10">
           {sections.map((section) => (
             <section key={section.id} className="grid gap-4">
