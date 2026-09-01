@@ -143,7 +143,7 @@ export function PartnerPageView() {
         </div>
       </section>
 
-      <section className="bg-[var(--color-surface-muted)] px-[1.25rem] py-[4.25rem] md:px-8 md:py-16 xl:px-10">
+      <section id="partner" className="bg-[var(--color-surface-muted)] px-[1.25rem] py-[4.25rem] md:px-8 md:py-16 xl:px-10">
         <div className="mx-auto grid max-w-[58rem] gap-8 md:gap-10">
           <div className="grid gap-2 text-center">
             <p className="font-[var(--font-be-vietnam-pro)] text-[0.6875rem] font-semibold uppercase tracking-[0.22em] text-[var(--color-brand-blue)] md:text-[0.8125rem]">

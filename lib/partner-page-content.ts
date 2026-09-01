@@ -7,7 +7,7 @@ export const partnerPageHero = {
 } as const;
 
 export const partnerWhatsappHref =
-  "https://wa.me/2348164592183?text=Hello.%20I%20want%20to%20become%20a%20Pleros%20partner.%20How%20do%20I%20get%20started%3F" as const;
+  "#partner" as const;
 
 export const partnerReasons = [
   {
