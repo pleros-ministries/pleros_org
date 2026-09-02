@@ -16,8 +16,8 @@ export function SogpCourseSidebar({
   onSelect: (dateKey: string) => void;
 }) {
   return (
-    <div className="grid gap-3">
-      <section className="rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white p-3.5">
+    <div className="grid gap-4">
+      <section className="rounded-sm border border-zinc-200 bg-white p-3">
         <SogpCalendar
           days={data.days}
           selectedDateKey={selectedDateKey}

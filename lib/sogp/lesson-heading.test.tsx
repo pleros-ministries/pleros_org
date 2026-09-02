@@ -12,7 +12,7 @@ test("renders a compact level and track indicator instead of a lesson title", ()
     />,
   );
 
-  expect(html).toContain("text-[var(--color-text-muted)]");
+  expect(html).toContain("text-zinc-400");
   expect(html).not.toContain("text-[var(--color-brand-blue)]");
   expect(html).toContain("Current level");
   expect(html).toContain("Level 2");

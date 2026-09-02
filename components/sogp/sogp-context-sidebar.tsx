@@ -32,17 +32,19 @@ export function SogpContextSidebar({ data }: { data: SogpJourneyData }) {
   ];
 
   return (
-    <div className="grid gap-3">
-      <section className="rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white p-4">
-        <p className="text-[0.65rem] font-semibold uppercase tracking-[0.1em] text-[var(--color-brand-blue)]">Course progress</p>
-        <div className="mt-4 grid gap-4">
+    <div className="grid gap-4">
+      <section className="rounded-sm border border-zinc-200 bg-white">
+        <div className="border-b border-zinc-100 px-4 py-3">
+          <h2 className="ppc-heading text-sm font-semibold text-zinc-900">Course progress</h2>
+        </div>
+        <div className="grid gap-3.5 p-4">
           {metrics.map((metric) => (
             <div key={metric.label} className="grid gap-1.5">
               <div className="flex items-center justify-between gap-3 text-xs">
-                <span className="text-[var(--color-text-muted)]">{metric.label}</span>
-                <strong className="font-[var(--font-sen)] text-[var(--color-text-strong)]">{metric.value}</strong>
+                <span className="text-zinc-500">{metric.label}</span>
+                <strong className="ppc-heading font-semibold text-zinc-900">{metric.value}</strong>
               </div>
-              <div className="h-1.5 overflow-hidden rounded-full bg-[var(--color-surface-muted)]">
+              <div className="h-1.5 overflow-hidden rounded-full bg-zinc-100">
                 <div className="h-full rounded-full bg-[var(--color-brand-blue)]" style={{ width: `${Math.min(100, metric.percent)}%` }} />
               </div>
             </div>
@@ -50,21 +52,24 @@ export function SogpContextSidebar({ data }: { data: SogpJourneyData }) {
         </div>
       </section>
 
-      <section className="rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white p-4">
-        <CalendarCheckIcon className="size-5 text-[var(--color-brand-blue)]" strokeWidth={2} />
-        <h2 className="mt-3 font-[var(--font-sen)] text-sm font-semibold text-[var(--color-text-strong)]">Next required review</h2>
-        {nextReview ? (
-          <>
-            <p className="mt-1 text-xs leading-[1.45] text-[var(--color-text-muted)]">{nextReview.title}</p>
-            <a href={nextReview.liveUrl ?? "#"} target="_blank" rel="noreferrer" className="mt-3 inline-flex min-h-9 items-center gap-1.5 rounded-full border border-[var(--color-brand-blue)] px-3 text-[0.7rem] font-semibold text-[var(--color-brand-blue)] active:scale-[0.96]">
-              View review <ExternalLinkIcon className="size-3.5" strokeWidth={2} />
-            </a>
-          </>
-        ) : (
-          <p className="mt-1 text-xs text-[var(--color-text-muted)]">All currently scheduled reviews are complete.</p>
-        )}
+      <section className="rounded-sm border border-zinc-200 bg-white">
+        <div className="flex items-center gap-2 border-b border-zinc-100 px-4 py-3">
+          <CalendarCheckIcon className="size-4 text-[var(--color-brand-blue)]" strokeWidth={2} />
+          <h2 className="ppc-heading text-sm font-semibold text-zinc-900">Next required review</h2>
+        </div>
+        <div className="grid gap-3 p-4">
+          {nextReview ? (
+            <>
+              <p className="text-xs leading-[1.45] text-zinc-500">{nextReview.title}</p>
+              <a href={nextReview.liveUrl ?? "#"} target="_blank" rel="noreferrer" className="inline-flex h-8 w-fit items-center gap-1.5 rounded-[6px] border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-50 active:scale-[0.98]">
+                View review <ExternalLinkIcon className="size-3.5" strokeWidth={2} />
+              </a>
+            </>
+          ) : (
+            <p className="text-xs text-zinc-500">All currently scheduled reviews are complete.</p>
+          )}
+        </div>
       </section>
-
     </div>
   );
 }

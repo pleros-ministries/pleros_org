@@ -22,9 +22,9 @@ export function SogpCourseOutline({
   listClassName?: string;
 }) {
   return (
-    <nav aria-label="Course curriculum" className={`overflow-hidden rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white ${className}`}>
-      <div className="px-4 pb-2 pt-4">
-        <p className="text-[0.65rem] font-semibold uppercase tracking-[0.1em] text-[var(--color-brand-blue)]">Course outline</p>
+    <nav aria-label="Course curriculum" className={`overflow-hidden rounded-sm border border-zinc-200 bg-white ${className}`}>
+      <div className="border-b border-zinc-100 px-4 py-3">
+        <h2 className="ppc-heading text-sm font-semibold text-zinc-900">Course outline</h2>
       </div>
       <div className={`overflow-y-auto px-2 pb-3 ${listClassName}`}>
         {data.levels.map((level) => {
@@ -32,10 +32,10 @@ export function SogpCourseOutline({
             (day) => day.track?.curriculumLevel === level.level,
           );
           return (
-            <section key={level.level} className="border-t border-[var(--color-line)] py-3 first:border-t-0">
-              <div className="flex items-center justify-between gap-2 px-2 pb-2">
-                <strong className="font-[var(--font-sen)] text-xs text-[var(--color-text-strong)]">Level {level.level}</strong>
-                <span className="text-[0.6rem] font-semibold uppercase tracking-[0.06em] text-[var(--color-text-muted)]">{level.completed}/{level.total}</span>
+            <section key={level.level} className="border-t border-zinc-100 py-2.5 first:border-t-0">
+              <div className="flex items-center justify-between gap-2 px-2 pb-1.5">
+                <strong className="ppc-heading text-xs font-semibold text-zinc-900">Level {level.level}</strong>
+                <span className="text-[0.6rem] font-semibold uppercase tracking-[0.06em] text-zinc-400">{level.completed}/{level.total}</span>
               </div>
               <div className="grid gap-0.5">
                 {levelDays.map((day) => {
@@ -52,10 +52,10 @@ export function SogpCourseOutline({
                       type="button"
                       onClick={() => onSelect(day.dateKey)}
                       aria-current={selected ? "page" : undefined}
-                      className={`grid min-h-10 w-full grid-cols-[1rem_1fr] items-start gap-2 rounded-[0.45rem] px-2 py-2 text-left transition-colors duration-150 active:scale-[0.96] ${selected ? "bg-[var(--color-brand-sky)]" : "hover:bg-[var(--color-surface-muted)]"}`}
+                      className={`grid min-h-9 w-full grid-cols-[1rem_1fr] items-start gap-2 rounded-sm px-2 py-2 text-left transition-colors duration-150 active:scale-[0.98] ${selected ? "bg-[var(--color-brand-sky)] text-zinc-900" : "text-zinc-700 hover:bg-zinc-50"}`}
                     >
-                      <Icon className="mt-0.5 size-3.5 text-[var(--color-brand-blue)]" strokeWidth={2} />
-                      <span className="text-[0.7rem] leading-[1.35] text-[var(--color-text-strong)]">{track.levelPosition}. {track.title}</span>
+                      <Icon className={`mt-0.5 size-3.5 ${track.accessible || track.assessmentComplete ? "text-[var(--color-brand-blue)]" : "text-zinc-300"}`} strokeWidth={2} />
+                      <span className="text-[0.7rem] leading-[1.35]">{track.levelPosition}. {track.title}</span>
                     </button>
                   );
                 })}

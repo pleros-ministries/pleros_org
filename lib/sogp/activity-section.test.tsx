@@ -3,7 +3,7 @@ import { expect, test } from "vitest";
 
 import { SogpActivitySection } from "../../components/sogp/sogp-activity-section";
 
-test("renders an expanded activity disclosure with a divided header", () => {
+test("renders a labelled card with a divided header", () => {
   const html = renderToStaticMarkup(
     <SogpActivitySection
       title="Teaching"
@@ -14,25 +14,23 @@ test("renders an expanded activity disclosure with a divided header", () => {
     </SogpActivitySection>,
   );
 
-  expect(html).toContain('aria-expanded="true"');
-  expect(html).toContain("data-activity-header");
+  expect(html).toContain("Teaching");
+  expect(html).toContain("Listen at your pace.");
   expect(html).toContain("border-b");
-  expect(html).toContain(" bg-[var(--color-surface-muted)] ");
-  expect(html).not.toContain("grid size-8 shrink-0 place-items-center");
   expect(html).toContain("Activity content");
 });
 
-test("renders a compact single-line header when no description is supplied", () => {
+test("renders an optional header action when supplied", () => {
   const html = renderToStaticMarkup(
     <SogpActivitySection
       title="Preparation lesson 16"
       icon={<span>Icon</span>}
+      action={<button type="button">Header action</button>}
     >
       <p>Activity content</p>
     </SogpActivitySection>,
   );
 
   expect(html).toContain("Preparation lesson 16");
-  expect(html).toContain("min-h-16");
-  expect(html).not.toContain("min-h-20");
+  expect(html).toContain("Header action");
 });

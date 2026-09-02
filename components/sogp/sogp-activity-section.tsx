@@ -1,56 +1,39 @@
-"use client";
-
-import { useId, useState, type ReactNode } from "react";
-import { ChevronDownIcon } from "lucide-react";
+import type { ReactNode } from "react";
 
 export function SogpActivitySection({
+  id,
   title,
   description,
   icon,
+  action,
   children,
 }: {
+  id?: string;
   title: string;
   description?: string;
   icon: ReactNode;
+  action?: ReactNode;
   children: ReactNode;
 }) {
-  const [expanded, setExpanded] = useState(true);
-  const panelId = useId();
-
   return (
-    <section className="overflow-hidden rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white">
-      <header>
-        <button
-          type="button"
-          data-activity-header
-          aria-expanded={expanded}
-          aria-controls={panelId}
-          onClick={() => setExpanded((current) => !current)}
-          className={`flex w-full gap-3 border-b border-[var(--color-line)] bg-[var(--color-surface-muted)] px-4 py-4 text-left transition-colors duration-150 hover:bg-[var(--color-line)] md:px-5 ${description ? "min-h-20 items-start" : "min-h-16 items-center"}`}
-        >
-          <span className="grid min-w-0 flex-1 gap-0.5">
-            <span className="flex items-center gap-2">
-              {icon}
-              <span className="font-[var(--font-sen)] text-base font-semibold text-[var(--color-text-strong)]">
-                {title}
-              </span>
+    <section id={id} className="scroll-mt-20 rounded-sm border border-zinc-200 bg-white">
+      <header className="flex items-start justify-between gap-3 border-b border-zinc-100 px-4 py-3">
+        <span className="grid min-w-0 gap-0.5">
+          <span className="flex items-center gap-2">
+            {icon}
+            <span className="ppc-heading text-sm font-semibold text-zinc-900">
+              {title}
             </span>
-            {description ? (
-              <span className="text-xs leading-[1.45] text-[var(--color-text-muted)]">
-                {description}
-              </span>
-            ) : null}
           </span>
-          <ChevronDownIcon
-            className={`size-4 shrink-0 text-[var(--color-text-muted)] transition-transform duration-150 ${description ? "mt-1" : ""} ${expanded ? "rotate-180" : ""}`}
-            strokeWidth={2}
-            aria-hidden="true"
-          />
-        </button>
+          {description ? (
+            <span className="text-xs leading-[1.45] text-zinc-500">
+              {description}
+            </span>
+          ) : null}
+        </span>
+        {action ? <div className="shrink-0">{action}</div> : null}
       </header>
-      <div id={panelId} hidden={!expanded} className="grid gap-4 px-4 py-5 md:px-5 md:py-6">
-        {children}
-      </div>
+      <div className="grid gap-3 p-4">{children}</div>
     </section>
   );
 }

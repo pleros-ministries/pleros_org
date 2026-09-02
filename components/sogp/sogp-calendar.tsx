@@ -25,9 +25,9 @@ const stateClasses: Record<SogpCalendarState, string> = {
     "border-[var(--color-brand-lime)] bg-[var(--color-brand-lime)] text-[var(--color-brand-blue)]",
   missed: "border-red-200 bg-red-50 text-red-800",
   current:
-    "border-[var(--color-line-strong)] bg-white text-[var(--color-text-strong)]",
+    "border-zinc-300 bg-white text-zinc-900",
   future:
-    "border-[var(--color-line)] bg-[var(--color-surface-muted)] text-[var(--color-text-muted)]",
+    "border-zinc-200 bg-zinc-50 text-zinc-400",
 };
 
 const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -76,10 +76,10 @@ export function SogpCalendar({
         aria-label={`${day.dateKey}. ${stateLabels[day.state]}`}
         aria-pressed={selected}
         className={cn(
-          "relative grid aspect-square place-items-center rounded-[0.4rem] border text-xs font-semibold transition-transform duration-150 hover:-translate-y-px active:scale-[0.96] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-blue)]",
-          compact ? "min-h-9" : "min-h-10",
+          "relative grid place-items-center rounded-[0.4rem] border text-xs font-semibold transition-transform duration-150 hover:-translate-y-px active:scale-[0.96] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-blue)]",
+          compact ? "h-8" : "h-9",
           stateClasses[day.state],
-          selected && "ring-2 ring-[var(--color-brand-blue)] ring-offset-1",
+          selected && "ring-1 ring-[var(--color-brand-blue)]",
           today && "after:absolute after:inset-x-2 after:bottom-1 after:h-0.5 after:rounded-full after:bg-current",
         )}
       >
@@ -89,11 +89,11 @@ export function SogpCalendar({
   }
 
   return (
-    <div className="grid gap-3">
+    <div className="grid gap-2.5">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <CalendarDaysIcon className="size-4 text-[var(--color-brand-blue)]" strokeWidth={2} />
-          <h2 className="font-[var(--font-sen)] text-sm font-semibold text-[var(--color-text-strong)]">
+          <h2 className="ppc-heading text-sm font-semibold text-zinc-900">
             {expanded ? "Full calendar" : "This week"}
           </h2>
         </div>
@@ -101,7 +101,7 @@ export function SogpCalendar({
           type="button"
           onClick={() => setExpanded((current) => !current)}
           aria-expanded={expanded}
-          className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-[var(--color-line)] bg-white px-3 text-[0.68rem] font-semibold text-[var(--color-brand-blue)] transition-colors duration-150 hover:bg-[var(--color-brand-sky)] active:scale-[0.96]"
+          className="inline-flex h-7 items-center gap-1.5 rounded-[6px] border border-zinc-200 bg-white px-2.5 text-[0.68rem] font-medium text-zinc-600 transition-colors duration-150 hover:bg-zinc-50 active:scale-[0.98]"
         >
           {expanded ? "Collapse" : "Expand"}
           <ChevronDownIcon className={cn("size-3.5 transition-transform duration-150", expanded && "rotate-180")} strokeWidth={2} />
@@ -112,14 +112,14 @@ export function SogpCalendar({
         const first = new Date(`${monthDays[0]!.dateKey}T00:00:00.000Z`);
         return (
           <section key={key} aria-label={monthLabel(key)} className="grid gap-2.5">
-            <h2 className="font-[var(--font-sen)] text-sm font-semibold text-[var(--color-text-strong)]">
+            <h2 className="ppc-heading text-sm font-semibold text-zinc-900">
               {monthLabel(key)}
             </h2>
             <div className="grid grid-cols-7 gap-1 text-center">
               {weekdays.map((weekday) => (
                 <span
                   key={weekday}
-                  className="py-1 text-[0.58rem] font-semibold uppercase tracking-[0.06em] text-[var(--color-text-muted)]"
+                  className="py-0.5 text-[0.58rem] font-semibold uppercase tracking-[0.06em] text-zinc-400"
                 >
                   {weekday}
                 </span>
@@ -137,7 +137,7 @@ export function SogpCalendar({
         <section aria-label="Selected learning week" className="grid gap-1.5">
           <div className="grid grid-cols-7 gap-1 text-center">
             {learningWeekdays.map((weekday) => (
-              <span key={weekday} className="py-1 text-[0.55rem] font-semibold uppercase tracking-[0.05em] text-[var(--color-text-muted)]">
+              <span key={weekday} className="py-0.5 text-[0.55rem] font-semibold uppercase tracking-[0.05em] text-zinc-400">
                 {weekday}
               </span>
             ))}
@@ -147,14 +147,6 @@ export function SogpCalendar({
           </div>
         </section>
       )}
-      <div className="flex flex-wrap gap-x-4 gap-y-2 text-[0.65rem] text-[var(--color-text-muted)]">
-        {(Object.keys(stateLabels) as SogpCalendarState[]).map((state) => (
-          <span key={state} className="inline-flex items-center gap-1.5">
-            <span className={cn("size-2.5 rounded-sm border", stateClasses[state])} />
-            {stateLabels[state]}
-          </span>
-        ))}
-      </div>
     </div>
   );
 }

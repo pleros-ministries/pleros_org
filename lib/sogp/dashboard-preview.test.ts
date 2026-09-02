@@ -65,7 +65,7 @@ describe("SOGP dashboard previews", () => {
     expect(sogpPage).toContain(
       'className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1"',
     );
-    expect(sogpPage).toContain("text-xl font-semibold");
+    expect(sogpPage).toContain("ppc-heading text-lg font-semibold");
     expect(sogpPage).not.toContain(
       'className="grid gap-1">\n            <p',
     );
@@ -82,7 +82,7 @@ describe("SOGP dashboard previews", () => {
     expect(sogpPage).toContain(
       "border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)]",
     );
-    expect(sogpPage).toContain("text-white/88");
+    expect(sogpPage).toContain("text-white/85");
     expect(sogpPage).toContain("text-[var(--color-brand-lime)]");
   });
 });

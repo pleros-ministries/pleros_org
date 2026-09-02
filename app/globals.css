@@ -687,7 +687,7 @@
   }
 
   .site-font-theme .sogp-shell-page {
-    padding-inline: var(--site-shell-padding-x);
+    padding-inline: 1rem;
   }
 
   @media (min-width: 48rem) {
@@ -696,14 +696,14 @@
     }
 
     .site-font-theme .sogp-shell-page {
-      padding-inline: var(--site-shell-padding-x-md);
+      padding-inline: 1.25rem;
     }
   }
 
   @media (min-width: 64rem) {
     .site-font-theme .sogp-shell-page {
       max-width: none;
-      padding-inline: calc(var(--site-shell-padding-x-lg) + 1.5rem);
+      padding-inline: calc(var(--site-shell-padding-x-lg) + 0.5rem);
     }
   }
 
@@ -714,7 +714,7 @@
 
     .site-font-theme .sogp-shell-page {
       max-width: none;
-      padding-inline: calc(var(--site-shell-padding-x-xl) + 2rem);
+      padding-inline: calc(var(--site-shell-padding-x-xl) + 0.5rem);
     }
   }
 
@@ -1304,6 +1304,13 @@
   .ppc-heading {
     font-family: var(--font-sen), "Sen", sans-serif;
     letter-spacing: -0.02em;
+  }
+
+  /* Sen wins on ppc-heading inside the public font theme even when the element
+     also carries a body size class (.text-sm/.text-xs), whose scoped rule would
+     otherwise override the font family via higher specificity. */
+  .site-font-theme .ppc-heading {
+    font-family: var(--font-sen), "Sen", sans-serif;
   }
 
   /* PPC platform font bridge — applies the public site's body typeface across /ppc and /admin */

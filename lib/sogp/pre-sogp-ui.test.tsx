@@ -27,7 +27,6 @@ describe("Pre-SOGP learner UI", () => {
     expect(page).toContain(
       'href={preview ? "/preview/dashboard" : "/dashboard"}',
     );
-    expect(page).toContain(">PRE-SOGP</span>");
     expect(page).toContain(
       'className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 lg:col-span-2"',
     );
@@ -58,12 +57,13 @@ describe("Pre-SOGP learner UI", () => {
     expect(page).not.toContain("DownloadIcon");
     expect(page).not.toContain("Watching or downloading");
     expect(page).toContain("Pleros Live");
-    expect(page).toContain("I joined Prayer Watch");
-    expect(page).toContain("Mark lesson complete");
+    expect(page).toContain('actionLabel: "I joined"');
+    expect(page).toContain('actionLabel: "I\'ve watched lesson"');
     expect(page).toContain("onMutate");
     expect(page).toContain("onError");
+    expect(page).toContain("Preparation progress");
     expect(page).toContain(
-      'text-xl font-semibold text-[var(--color-brand-blue)] md:text-2xl',
+      "{completeDays} of {PRE_SOGP_PREPARATION_DAYS} days",
     );
   });
 

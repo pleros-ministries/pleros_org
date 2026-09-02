@@ -153,28 +153,33 @@ export function SogpJourneyPage({
     ? "recording"
     : "live";
 
+  const primaryButton =
+    "inline-flex h-8 items-center gap-1.5 rounded-[6px] bg-[var(--color-brand-blue)] px-3 text-xs font-medium text-white transition-colors active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50";
+  const secondaryButton =
+    "inline-flex h-8 items-center gap-1.5 rounded-[6px] border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-50 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50";
+
   return (
-    <section className="site-font-theme min-h-screen bg-[var(--color-surface)] pb-16">
+    <section className="site-font-theme min-h-screen bg-[#f6f5f1] pb-16 text-zinc-900">
       <nav aria-label="SOGP dashboard navigation" className="sticky top-0 z-30 border-b border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)] shadow-sm">
-        <div className="site-shell-page sogp-shell-page flex min-h-14 items-center justify-between gap-4">
-          <Link href={preview ? "/preview/dashboard" : "/dashboard"} className="inline-flex min-h-10 items-center gap-2 rounded-full px-1 text-xs font-semibold text-white/88 transition-colors duration-150 hover:text-white focus-visible:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white active:scale-[0.96]">
-            <ArrowLeftIcon className="size-4" strokeWidth={2} /> Dashboard
+        <div className="site-shell-page sogp-shell-page flex min-h-12 items-center justify-between gap-4">
+          <Link href={preview ? "/preview/dashboard" : "/dashboard"} className="inline-flex min-h-9 items-center gap-1.5 rounded-sm px-1 text-xs font-medium text-white/85 transition-colors duration-150 hover:text-white focus-visible:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white active:scale-[0.98]">
+            <ArrowLeftIcon className="size-3.5" strokeWidth={2} /> Dashboard
           </Link>
-          <span className="font-[var(--font-sen)] text-xs font-semibold tracking-[0.12em] text-[var(--color-brand-lime)]">SOGP</span>
+          <span className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-[var(--color-brand-lime)]">SOGP</span>
         </div>
       </nav>
 
-      <div className="site-shell-page sogp-shell-page grid gap-5 pb-6 pt-4 lg:grid-cols-[16.5rem_minmax(0,1fr)] lg:items-start xl:grid-cols-[16.5rem_minmax(0,1fr)_16.5rem]">
-        <header className="grid gap-2 lg:col-span-2 xl:col-span-3">
+      <div className="site-shell-page sogp-shell-page grid gap-4 pb-6 pt-5 lg:grid-cols-[15.5rem_minmax(0,1fr)] lg:items-start xl:grid-cols-[15.5rem_minmax(0,1fr)_15.5rem]">
+        <header className="lg:col-span-2 xl:col-span-3">
           <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-            <h1 className="font-[var(--font-sen)] text-xl font-semibold tracking-[-0.04em] text-[var(--color-text-strong)] md:text-2xl">Welcome, {firstName(data.enrollment.name)}</h1>
-            <p className="text-[0.62rem] font-semibold uppercase tracking-[0.1em] text-[var(--color-text-muted)]">{data.cohort.title}</p>
+            <h1 className="ppc-heading text-lg font-semibold text-zinc-900">Welcome, {firstName(data.enrollment.name)}</h1>
+            <p className="text-[0.62rem] font-semibold uppercase tracking-[0.1em] text-zinc-400">{data.cohort.title}</p>
           </div>
         </header>
 
         <aside
           data-sogp-section="calendar"
-          className="lg:sticky lg:top-[4.5rem]"
+          className="lg:sticky lg:top-[3.75rem]"
         >
           <SogpCourseSidebar
             data={data}
@@ -183,31 +188,29 @@ export function SogpJourneyPage({
           />
         </aside>
 
-        <main data-sogp-section="daily-content" className="grid min-w-0 gap-5">
+        <main data-sogp-section="daily-content" className="grid min-w-0 gap-4">
           <SogpLessonHeading
             eyebrow={selectedDay.track ? "Current level" : "Current activity"}
             title={selectedDay.track ? `Level ${selectedDay.track.curriculumLevel}` : selectedDay.review ? "Review day" : "Daily formation"}
             detail={selectedDay.track ? `Track ${selectedDay.track.levelPosition} of 6` : selectedDay.dateKey}
           />
 
-          <section aria-label="Today’s activities" className="grid gap-5 md:gap-6">
+          <section aria-label="Today’s activities" className="grid gap-4">
             {selectedDay.track?.accessible ? (
               <SogpActivitySection
                 title="Teaching"
                 description={selectedDay.track.title}
                 icon={<BookOpenIcon className="size-4 text-[var(--color-brand-blue)]" strokeWidth={2} />}
               >
-                <div className="grid gap-3">
-                  <p className="text-xs text-[var(--color-text-muted)]">Listen at your pace. Audio playback is not tracked.</p>
-                  {selectedDay.track.audioUrl ? (
-                    <>
+                <p className="text-xs text-zinc-500">Listen at your pace. Audio playback is not tracked.</p>
+                {selectedDay.track.audioUrl ? (
+                  <>
                     <audio controls preload="metadata" src={selectedDay.track.audioUrl} className="w-full" />
-                    <a href={selectedDay.track.audioUrl} download className="inline-flex min-h-10 w-fit items-center gap-2 rounded-full border border-[var(--color-brand-blue)] px-4 text-xs font-semibold text-[var(--color-brand-blue)] active:scale-[0.96]">
-                      <DownloadIcon className="size-4" strokeWidth={2} /> Download teaching
+                    <a href={selectedDay.track.audioUrl} download className={`${secondaryButton} w-fit`}>
+                      <DownloadIcon className="size-3.5" strokeWidth={2} /> Download teaching
                     </a>
-                    </>
-                  ) : <p className="text-sm text-[var(--color-text-muted)]">The teaching audio is being prepared.</p>}
-                </div>
+                  </>
+                ) : <p className="text-xs text-zinc-500">The teaching audio is being prepared.</p>}
               </SogpActivitySection>
             ) : selectedDay.track ? (
               <SogpActivitySection
@@ -215,8 +218,8 @@ export function SogpJourneyPage({
                 description="Complete the preceding level to unlock this activity."
                 icon={<BookOpenIcon className="size-4 text-[var(--color-brand-blue)]" strokeWidth={2} />}
               >
-                <h3 className="font-[var(--font-sen)] text-lg font-semibold text-[var(--color-text-strong)]">This track is locked</h3>
-                <p className="text-sm text-[var(--color-text-muted)]">{selectedDay.track.lockedReason}</p>
+                <h3 className="ppc-heading text-sm font-semibold text-zinc-900">This track is locked</h3>
+                <p className="text-xs leading-[1.5] text-zinc-500">{selectedDay.track.lockedReason}</p>
               </SogpActivitySection>
             ) : null}
 
@@ -226,9 +229,9 @@ export function SogpJourneyPage({
               icon={<Clock3Icon className="size-4 text-[var(--color-brand-blue)]" strokeWidth={2} />}
             >
               <div className="flex flex-wrap gap-2">
-                <a href={PRAYER_WATCH_YOUTUBE_URL} target="_blank" rel="noreferrer" className="inline-flex min-h-10 items-center gap-2 rounded-full bg-[var(--color-brand-blue)] px-4 text-xs font-semibold text-white active:scale-[0.96]">Open Pleros Live <ExternalLinkIcon className="size-3.5" strokeWidth={2} /></a>
-                <button type="button" disabled={isFuture || mutation.isPending} onClick={() => mutation.mutate({ kind: "prayer", dateKey: selectedDay.dateKey, complete: !selectedDay.prayerWatchComplete })} className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[var(--color-brand-blue)] bg-white px-4 text-xs font-semibold text-[var(--color-brand-blue)] active:scale-[0.96] disabled:cursor-not-allowed disabled:opacity-50">
-                  {selectedDay.prayerWatchComplete ? <CheckCircle2Icon className="size-4" strokeWidth={2} /> : <CircleIcon className="size-4" strokeWidth={2} />}
+                <a href={PRAYER_WATCH_YOUTUBE_URL} target="_blank" rel="noreferrer" className={primaryButton}>Open Pleros Live <ExternalLinkIcon className="size-3.5" strokeWidth={2} /></a>
+                <button type="button" disabled={isFuture || mutation.isPending} onClick={() => mutation.mutate({ kind: "prayer", dateKey: selectedDay.dateKey, complete: !selectedDay.prayerWatchComplete })} className={secondaryButton}>
+                  {selectedDay.prayerWatchComplete ? <CheckCircle2Icon className="size-4 text-[var(--color-brand-blue)]" strokeWidth={2} /> : <CircleIcon className="size-4 text-zinc-400" strokeWidth={2} />}
                   {selectedDay.prayerWatchComplete ? "Prayer Watch completed" : "Mark Prayer Watch complete"}
                 </button>
               </div>
@@ -241,8 +244,8 @@ export function SogpJourneyPage({
                 icon={<FileQuestionIcon className="size-4 text-[var(--color-brand-blue)]" strokeWidth={2} />}
               >
                 <div className="flex flex-wrap items-center gap-3">
-                  <Link href={selectedDay.track.assessmentHref} onClick={(event) => { if (preview) event.preventDefault(); }} className="inline-flex min-h-10 items-center gap-2 rounded-full bg-[var(--color-brand-blue)] px-4 text-xs font-semibold text-white active:scale-[0.96]">{selectedDay.track.assessmentComplete ? "Review assessment" : "Start assessment"} <FileQuestionIcon className="size-3.5" strokeWidth={2} /></Link>
-                  <span className="inline-flex items-center gap-1.5 text-xs text-[var(--color-text-muted)]">{selectedDay.track.assessmentComplete ? <CheckCircle2Icon className="size-4 text-[var(--color-brand-blue)]" strokeWidth={2} /> : <CircleIcon className="size-4" strokeWidth={2} />}{selectedDay.track.assessmentComplete ? "Complete" : "Not complete"}</span>
+                  <Link href={selectedDay.track.assessmentHref} onClick={(event) => { if (preview) event.preventDefault(); }} className={primaryButton}>{selectedDay.track.assessmentComplete ? "Review assessment" : "Start assessment"} <FileQuestionIcon className="size-3.5" strokeWidth={2} /></Link>
+                  <span className="inline-flex items-center gap-1.5 text-xs text-zinc-500">{selectedDay.track.assessmentComplete ? <CheckCircle2Icon className="size-4 text-[var(--color-brand-blue)]" strokeWidth={2} /> : <CircleIcon className="size-4 text-zinc-400" strokeWidth={2} />}{selectedDay.track.assessmentComplete ? "Complete" : "Not complete"}</span>
                 </div>
               </SogpActivitySection>
             ) : null}
@@ -254,8 +257,8 @@ export function SogpJourneyPage({
                 icon={<CalendarCheckIcon className="size-4 text-[var(--color-brand-blue)]" strokeWidth={2} />}
               >
                 <div className="flex flex-wrap gap-2">
-                  {(selectedDay.review.recordingUrl ?? selectedDay.review.liveUrl) ? <a href={selectedDay.review.recordingUrl ?? selectedDay.review.liveUrl ?? "#"} target="_blank" rel="noreferrer" className="inline-flex min-h-10 items-center gap-2 rounded-full bg-[var(--color-brand-blue)] px-4 text-xs font-semibold text-white active:scale-[0.96]">{selectedDay.review.recordingUrl ? "Watch recording" : "Join live review"} <ExternalLinkIcon className="size-3.5" strokeWidth={2} /></a> : null}
-                  <button type="button" disabled={isFuture || mutation.isPending || (!selectedDay.review.liveUrl && !selectedDay.review.recordingUrl)} onClick={() => mutation.mutate({ kind: "review", dateKey: selectedDay.dateKey, reviewId: selectedDay.review!.id, source: reviewSource, complete: !selectedDay.review!.complete })} className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[var(--color-brand-blue)] px-4 text-xs font-semibold text-[var(--color-brand-blue)] active:scale-[0.96] disabled:opacity-50">{selectedDay.review.complete ? <CheckCircle2Icon className="size-4" strokeWidth={2} /> : <CircleIcon className="size-4" strokeWidth={2} />}{selectedDay.review.complete ? "Review completed" : "Mark review complete"}</button>
+                  {(selectedDay.review.recordingUrl ?? selectedDay.review.liveUrl) ? <a href={selectedDay.review.recordingUrl ?? selectedDay.review.liveUrl ?? "#"} target="_blank" rel="noreferrer" className={primaryButton}>{selectedDay.review.recordingUrl ? "Watch recording" : "Join live review"} <ExternalLinkIcon className="size-3.5" strokeWidth={2} /></a> : null}
+                  <button type="button" disabled={isFuture || mutation.isPending || (!selectedDay.review.liveUrl && !selectedDay.review.recordingUrl)} onClick={() => mutation.mutate({ kind: "review", dateKey: selectedDay.dateKey, reviewId: selectedDay.review!.id, source: reviewSource, complete: !selectedDay.review!.complete })} className={secondaryButton}>{selectedDay.review.complete ? <CheckCircle2Icon className="size-4 text-[var(--color-brand-blue)]" strokeWidth={2} /> : <CircleIcon className="size-4 text-zinc-400" strokeWidth={2} />}{selectedDay.review.complete ? "Review completed" : "Mark review complete"}</button>
                 </div>
               </SogpActivitySection>
             ) : null}
@@ -263,9 +266,9 @@ export function SogpJourneyPage({
           {mutation.error ? <p role="alert" className="text-sm text-red-700">{mutation.error.message}</p> : null}
         </main>
 
-        <aside className="grid content-start gap-3 lg:col-start-2 xl:sticky xl:top-[4.5rem] xl:col-start-auto">
+        <aside className="grid content-start gap-4 lg:col-start-2 xl:sticky xl:top-[3.75rem] xl:col-start-auto">
           <SogpContextSidebar data={data} />
-          {preview ? <p className="rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white p-4 text-xs text-[var(--color-text-muted)]">Preview mode · Progress changes stay in this preview.</p> : <SogpPushPanel />}
+          {preview ? <p className="rounded-sm border border-zinc-200 bg-white p-4 text-xs text-zinc-500">Preview mode · Progress changes stay in this preview.</p> : <SogpPushPanel />}
         </aside>
       </div>
     </section>
