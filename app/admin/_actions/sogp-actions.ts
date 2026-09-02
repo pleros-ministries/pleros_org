@@ -1,6 +1,6 @@
 "use server";
 
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, notInArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 import { requireAdmin } from "@/lib/auth/require-role";
@@ -263,6 +263,19 @@ export async function seedSogpPreparation(input: { cohortId: number }) {
   );
 
   await transactionDb.transaction(async (tx) => {
+    // Drop any preparation days outside the current window (e.g. left over
+    // from a longer schedule); their resources and completions cascade.
+    await tx
+      .delete(schema.sogpPreparationDays)
+      .where(
+        and(
+          eq(schema.sogpPreparationDays.cohortId, input.cohortId),
+          notInArray(
+            schema.sogpPreparationDays.publishDate,
+            seed.map((item) => item.publishDate),
+          ),
+        ),
+      );
     for (const item of seed) {
       const [day] = await tx
         .insert(schema.sogpPreparationDays)

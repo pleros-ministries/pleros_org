@@ -12,7 +12,7 @@ SOGP will help you gain clarity about God’s truth, discover His purpose for yo
 
 ### Pre-SOGP
 
-Pre-SOGP begins 30 days before your cohort starts. Each day has two activities:
+Pre-SOGP begins 14 days before your cohort starts. Each day has two activities:
 
 - a preparation lesson;
 - 5:30 am Morning Prayer Watch, joined live or completed using the available replay.

@@ -11,6 +11,7 @@ import {
   setSogpPreparationStatus,
 } from "@/app/admin/_actions/sogp-actions";
 import { ADMIN_QUERY_KEYS, type AdminSogpData } from "@/lib/admin-query";
+import { PRE_SOGP_PREPARATION_DAYS } from "@/lib/sogp/calendar";
 import type { SogpPreparationResourceType } from "@/lib/sogp/types";
 
 const resourceTypes: SogpPreparationResourceType[] = [
@@ -141,9 +142,9 @@ export function AdminSogpPreparation({
           <p className="mt-0.5 text-xs text-zinc-500">Published days become visible on the learner dashboard on their Lagos calendar date.</p>
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <button type="button" disabled={!cohortId || seedMutation.isPending} onClick={() => seedMutation.mutate()} className="h-8 rounded-sm bg-[var(--color-brand-blue)] px-3 text-xs font-medium text-white disabled:opacity-50">
-              {seedMutation.isPending ? "Building 30-day schedule…" : "Build approved 30-day schedule"}
+              {seedMutation.isPending ? `Building ${PRE_SOGP_PREPARATION_DAYS}-day schedule…` : `Build approved ${PRE_SOGP_PREPARATION_DAYS}-day schedule`}
             </button>
-            <span className="text-[10px] text-zinc-500">{days.length}/30 preparation days</span>
+            <span className="text-[10px] text-zinc-500">{days.length}/{PRE_SOGP_PREPARATION_DAYS} preparation days</span>
           </div>
           {seedMutation.error ? <p className="mt-2 text-xs text-rose-700">{seedMutation.error.message}</p> : null}
         </div>

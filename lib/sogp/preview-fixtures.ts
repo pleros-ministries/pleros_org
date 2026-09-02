@@ -37,8 +37,8 @@ export const preSogpPreviewData: PreSogpJourneyData = {
   },
   days: preparationDates.map((dateKey, index) => {
     const seededLesson = preparationSeed[index]!;
-    const lessonComplete = index < 10;
-    const prayerWatchComplete = index < 10 || (index < 15 && index % 2 === 0);
+    const lessonComplete = index < 5;
+    const prayerWatchComplete = index < 5 || (index < 8 && index % 2 === 0);
     const available = dateKey <= preparationTodayKey;
     return {
       id: index + 1,

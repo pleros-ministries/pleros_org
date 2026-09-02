@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { updateSogpCohort } from "@/app/admin/_actions/sogp-actions";
 import { ADMIN_QUERY_KEYS, type AdminSogpData } from "@/lib/admin-query";
+import { PRE_SOGP_PREPARATION_DAYS } from "@/lib/sogp/calendar";
 
 function toLocalDateTime(value: string) {
   const date = new Date(value);
@@ -29,7 +30,7 @@ export function AdminSogpCohortControls({
     <section className="grid gap-4 rounded-sm border border-zinc-200 bg-white p-4">
       <div>
         <h2 className="ppc-heading text-sm font-semibold text-zinc-900">Cohort dates and status</h2>
-        <p className="mt-1 text-xs text-zinc-500">Changing the start date requires rebuilding the 30-day preparation schedule.</p>
+        <p className="mt-1 text-xs text-zinc-500">Changing the start date requires rebuilding the {PRE_SOGP_PREPARATION_DAYS}-day preparation schedule.</p>
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="grid gap-1 text-xs">Starts<input type="datetime-local" value={startsAt} onChange={(event) => setStartsAt(event.target.value)} className="h-8 rounded-sm border border-zinc-200 px-2" /></label>

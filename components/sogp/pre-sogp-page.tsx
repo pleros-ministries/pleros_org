@@ -7,7 +7,10 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
 import type { PreSogpJourneyData } from "@/lib/db/queries/sogp-journey";
-import { deriveSogpCalendarState } from "@/lib/sogp/calendar";
+import {
+  deriveSogpCalendarState,
+  PRE_SOGP_PREPARATION_DAYS,
+} from "@/lib/sogp/calendar";
 import { getPreparationRequirements } from "@/lib/sogp/journey";
 import { PRAYER_WATCH_YOUTUBE_URL } from "@/lib/prayer-watch";
 
@@ -174,7 +177,7 @@ export function PreSogpPage({
             </h2>
             <p className="max-w-2xl text-sm leading-[1.6] text-[var(--color-text-muted)]">
               Video 1 opens at 12:00 am WAT. A new lesson will open each day
-              until Video 30.
+              until Video {PRE_SOGP_PREPARATION_DAYS}.
             </p>
           </section>
         ) : (
@@ -263,7 +266,7 @@ export function PreSogpPage({
           className="grid gap-2 rounded-[var(--radius-md)] bg-[var(--color-brand-sky)] p-5 lg:col-start-2"
         >
           <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-brand-blue)]">Preparation progress</p>
-          <p className="font-[var(--font-sen)] text-xl font-semibold text-[var(--color-brand-blue)] md:text-2xl">{completeDays} of 30 days complete</p>
+          <p className="font-[var(--font-sen)] text-xl font-semibold text-[var(--color-brand-blue)] md:text-2xl">{completeDays} of {PRE_SOGP_PREPARATION_DAYS} days complete</p>
         </section>
           </>
         )}

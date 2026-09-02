@@ -2,6 +2,8 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, test } from "vitest";
 
+import { PRE_SOGP_PREPARATION_DAYS } from "./calendar";
+
 const source = (...parts: string[]) =>
   readFileSync(join(process.cwd(), ...parts), "utf8");
 
@@ -12,10 +14,12 @@ describe("SOGP dashboard previews", () => {
       .map((day) => day.lesson)
       .filter((lesson) => lesson !== null);
 
-    expect(fixtures.preSogpPreviewData.days).toHaveLength(30);
+    expect(fixtures.preSogpPreviewData.days).toHaveLength(
+      PRE_SOGP_PREPARATION_DAYS,
+    );
     expect(fixtures.preSogpPreviewData.days[0]?.dateKey).toBe("2026-09-01");
     expect(fixtures.preSogpPreviewData.days.at(-1)?.dateKey).toBe(
-      "2026-09-30",
+      "2026-09-14",
     );
     expect(fixtures.preSogpPreviewData.countdown.phase).toBe("upcoming");
     expect(availablePreparationLessons).toHaveLength(0);
