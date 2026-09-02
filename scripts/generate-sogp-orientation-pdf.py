@@ -345,11 +345,11 @@ def numbered_step(number: str, value: str, styles: dict[str, ParagraphStyle]) ->
     row.setStyle(
         TableStyle(
             [
-                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
                 ("LEFTPADDING", (0, 0), (-1, -1), 0),
                 ("RIGHTPADDING", (0, 0), (-1, -1), 0),
-                ("TOPPADDING", (0, 0), (-1, -1), 2),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+                ("TOPPADDING", (0, 0), (-1, -1), 4),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
             ]
         )
     )
@@ -563,7 +563,7 @@ def build_story(styles: dict[str, ParagraphStyle]) -> list[Flowable]:
         Spacer(1, 18),
         Paragraph("School of God’s<br/>Purpose", styles["cover_title"]),
         Paragraph(
-            "How the programme works and how to use your dashboard",
+            "Your journey through the School of God’s Purpose",
             styles["cover_subtitle"],
         ),
         NextPageTemplate("content"),
