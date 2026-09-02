@@ -36,6 +36,7 @@ function detectIos() {
 
 export function useInstallPrompt() {
   const [status, setStatus] = useState<InstallPromptStatus>("pending");
+  const [canShare, setCanShare] = useState(false);
   const deferredPrompt = useRef<BeforeInstallPromptEvent | null>(null);
 
   useEffect(() => {
@@ -56,6 +57,11 @@ export function useInstallPrompt() {
     // Defer the initial read so we don't setState synchronously in the effect
     // body, and so a `beforeinstallprompt` fired before hydration still wins.
     const timer = window.setTimeout(() => {
+      setCanShare(
+        typeof navigator !== "undefined" &&
+          typeof navigator.share === "function",
+      );
+
       if (detectInstalled()) {
         setStatus("installed");
       } else if (deferredPrompt.current) {
@@ -83,5 +89,27 @@ export function useInstallPrompt() {
     deferredPrompt.current = null;
   }, []);
 
-  return { status, promptInstall };
+  const shareApp = useCallback(async () => {
+    if (
+      typeof navigator === "undefined" ||
+      typeof navigator.share !== "function"
+    ) {
+      return;
+    }
+
+    try {
+      await navigator.share({
+        title: "Pleros",
+        text: "Pleros Ministries and Missions — helping you fulfil God's purpose.",
+        url: window.location.origin,
+      });
+    } catch (error) {
+      // Dismissing the share sheet rejects with AbortError — that is expected.
+      if ((error as DOMException)?.name !== "AbortError") {
+        console.error("Share failed:", error);
+      }
+    }
+  }, []);
+
+  return { status, promptInstall, canShare, shareApp };
 }
