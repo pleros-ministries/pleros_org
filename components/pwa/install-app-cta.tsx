@@ -34,7 +34,7 @@ export function InstallAppCta() {
             Add Pleros to your home screen
           </p>
           {status === "ios-manual" ? (
-            <p className="site-body-text flex flex-wrap items-center gap-1 text-[0.8125rem] leading-0.5 text-white/85">
+            <p className="site-body-text flex flex-wrap items-center gap-1 text-[0.8125rem] leading-snug text-white/85">
               Tap the
               {/* <Share className="size-3.5" aria-label="Share" /> */}
               Share icon, then choose &ldquo;Add to Home Screen&rdquo;.
