@@ -30,14 +30,14 @@ export function InstallAppCta() {
           <Download className="size-4.5" />
         </span> */}
         <div className="grid gap-1">
-          <p className="site-title-text text-[0.9375rem] font-semibold leading-snug text-white">
+          <p className="site-title-text text-[1.5rem] font-semibold leading-snug text-white">
             Add Pleros to your home screen
           </p>
           {status === "ios-manual" ? (
-            <p className="site-body-text flex flex-wrap items-center gap-1 text-[0.8125rem] leading-snug text-white/85">
+            <p className="site-body-text flex flex-wrap items-center gap-1 text-[0.8125rem] leading-7.5 text-white/85">
               Tap the
               {/* <Share className="size-3.5" aria-label="Share" /> */}
-              Share icon, then choose &ldquo;Add to Home Screen&rdquo;.
+              download button, then choose &ldquo;Add to Home Screen&rdquo;.
             </p>
           ) : (
             <p className="site-body-text text-[0.8125rem] leading-snug text-white/85">
@@ -73,7 +73,7 @@ export function InstallAppCta() {
           className="site-button-text inline-flex min-h-10 shrink-0 cursor-pointer items-center justify-center gap-1.5 self-start rounded-[var(--radius-pill)] bg-white px-4.5 py-2.5 text-[0.875rem] font-medium leading-none text-[var(--color-brand-blue)] transition-opacity duration-150 hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 sm:self-auto"
         >
           <Share className="size-4" />
-          Share
+          Download App
         </button>
       ) : null}
     </div>
