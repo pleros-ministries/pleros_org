@@ -74,7 +74,10 @@ export function PreSogpPage({
   const activeQueryKey = [...queryKey, preview ? "preview" : "live"] as const;
   const { data } = useSuspenseQuery({
     queryKey: activeQueryKey,
-    queryFn: initialData ? async () => initialData : fetchPreparation,
+    // Preview holds its fixture static; live seeds from server-provided
+    // initialData (so nothing fetches during SSR) but still refetches via the
+    // API on the client.
+    queryFn: preview ? async () => initialData! : fetchPreparation,
     initialData,
   });
   const searchParams = useSearchParams();
