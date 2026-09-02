@@ -24,6 +24,7 @@ TELEGRAM_SOGP_CHANNEL_ID=
 TELEGRAM_SOGP_CHANNEL_URL=
 TELEGRAM_SOGP_WEBHOOK_SECRET=
 TELEGRAM_SOGP_LINK_SECRET=
+TELEGRAM_SOGP_SIGNUP_CHAT_ID=
 CRON_SECRET=
 ```
 
@@ -66,6 +67,8 @@ curl --request POST "https://api.telegram.org/bot$TELEGRAM_SOGP_BOT_TOKEN/setWeb
 ```
 
 Verify with `getWebhookInfo`. Admin `/admin/sogp` can preview and send one-off channel broadcasts. Hobby-compatible daily cron runs at 05:00 UTC (06:00 WAT) and sends deduplicated preparation, newly released track, and next-24-hours live-class messages.
+
+Completed enrolments post a learner alert (running enrolment number, name, phone, country, state, age, referral, cohort) to the private ops chat `TELEGRAM_SOGP_SIGNUP_CHAT_ID` via `lib/telegram/sogp-signup-alert.ts`. This is a separate chat from the public `TELEGRAM_SOGP_CHANNEL_ID` broadcast channel; the bot must be an administrator of it. Unset the var to disable the alert (enrolment is unaffected).
 
 ## Launch checklist
 

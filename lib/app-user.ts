@@ -1,11 +1,20 @@
 import type { AppRole } from "./app-role";
+import { normalizeEmailList } from "./app-role";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
 
-export const SUPER_ADMIN_EMAILS = [
+const BUILT_IN_SUPER_ADMIN_EMAILS = [
   "akintyr@gmail.com",
   "adeyemodaniel10@gmail.com",
 ] as const;
+
+// Built-in defaults, plus any comma-separated addresses in SUPER_ADMIN_EMAILS.
+export const SUPER_ADMIN_EMAILS: readonly string[] = [
+  ...new Set([
+    ...BUILT_IN_SUPER_ADMIN_EMAILS,
+    ...normalizeEmailList(process.env.SUPER_ADMIN_EMAILS),
+  ]),
+];
 
 export const DEFAULT_SUPER_ADMIN_EMAIL = SUPER_ADMIN_EMAILS[0];
 
@@ -14,9 +23,7 @@ function normalizeEmail(email: string) {
 }
 
 export function isConfiguredSuperAdminEmail(email: string) {
-  return SUPER_ADMIN_EMAILS.includes(
-    normalizeEmail(email) as (typeof SUPER_ADMIN_EMAILS)[number],
-  );
+  return SUPER_ADMIN_EMAILS.includes(normalizeEmail(email));
 }
 
 export async function resolveDbUserId(email: string): Promise<string | null> {

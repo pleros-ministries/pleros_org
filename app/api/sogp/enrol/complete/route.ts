@@ -24,6 +24,7 @@ import {
   buildSogpEnrollmentRedirect,
   formatSogpReferralSource,
 } from "@/lib/sogp/enrollment";
+import { sendSogpSignupAlert } from "@/lib/telegram/sogp-signup-alert";
 import { resolvePublicSiteUrl } from "@/lib/welcome-campaign";
 
 const cohortDateFormatter = new Intl.DateTimeFormat("en-GB", {
@@ -89,7 +90,7 @@ export async function POST(request: NextRequest) {
     await betterAuthServer.api.revokeOtherSessions({ headers: request.headers });
 
     const values = pending.payload;
-    await upsertSogpEnrollment({
+    const enrollment = await upsertSogpEnrollment({
       cohortId: cohort.id,
       userId: session.user.id,
       firstName: values.firstName,
@@ -129,6 +130,22 @@ export async function POST(request: NextRequest) {
       cohortDates: formatCohortDates(cohort.startsAt, cohort.endsAt),
       dashboardUrl: `${resolvePublicSiteUrl(process.env)}/dashboard/welcomepack/join`,
     }).catch((error) => console.error("SOGP enrolment email failed:", error));
+    void sendSogpSignupAlert({
+      enrollmentId: enrollment.id,
+      firstName: values.firstName,
+      lastName: values.lastName,
+      phone: values.phone,
+      country: values.country,
+      region: values.region,
+      birthYear: values.birthYear ? Number(values.birthYear) : null,
+      referralSource: formatSogpReferralSource({
+        referralSource: values.referralSource,
+        referralSourceOther: values.referralSourceOther,
+      }),
+      cohortTitle: cohort.title,
+    }).catch((error) =>
+      console.error("SOGP signup Telegram alert failed:", error),
+    );
 
     const response = NextResponse.json({
       redirectTo: "/dashboard/welcomepack/join",
