@@ -30,13 +30,13 @@ export function InstallAppCta() {
           <Download className="size-4.5" />
         </span>
         <div className="grid gap-1">
-          <p className="site-button-text text-[0.9375rem] font-semibold leading-snug text-white">
+          <p className="site-title-text text-[0.9375rem] font-semibold leading-snug text-white">
             Add Pleros to your home screen
           </p>
           {status === "ios-manual" ? (
-            <p className="font-[var(--font-be-vietnam-pro)] flex flex-wrap items-center gap-1 text-[0.8125rem] leading-snug text-white/85">
+            <p className="site-body-text flex flex-wrap items-center gap-1 text-[0.8125rem] leading-snug text-white/85">
               Tap the
-              <Share className="size-3.5" aria-label="Share" />
+              {/* <Share className="size-3.5" aria-label="Share" /> */}
               Share icon, then choose &ldquo;Add to Home Screen&rdquo;.
             </p>
           ) : (
