@@ -12,9 +12,7 @@ Your SOGP journey has two phases: the Pre-SOGP phase and the SOGP phase itself.
 
 The Pre-SOGP phase begins the moment you enrol for SOGP, and your welcome message is your first lesson. It runs for the 14 days leading up to your cohort. Each day, as you count down to SOGP, you are expected to take part in:
 
-1. Morning Prayer Watch (5:30 am)
-2. Lesson for the day
-3. Podcast review
+Pre-SOGP begins 14 days before your cohort starts. Each day has two activities:
 
 ### The SOGP phase
 

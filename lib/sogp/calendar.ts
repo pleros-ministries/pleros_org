@@ -1,5 +1,12 @@
 import { toLagosDateKey } from "./formation-progress";
 
+/**
+ * Length of the Pre-SOGP preparation window, in days. Drives the number of
+ * dated preparation lessons, the calendar length, the seed size, and the
+ * cohort launch-readiness check.
+ */
+export const PRE_SOGP_PREPARATION_DAYS = 14;
+
 export type SogpCalendarState =
   | "future"
   | "current"
@@ -33,7 +40,7 @@ export function getSogpLearningWeek<T extends { dateKey: string }>(
 
 export function buildPreparationDateKeys(preparationStartsAt: Date): string[] {
   const startDateKey = toLagosDateKey(preparationStartsAt);
-  return Array.from({ length: 30 }, (_, index) =>
+  return Array.from({ length: PRE_SOGP_PREPARATION_DAYS }, (_, index) =>
     addDays(startDateKey, index),
   );
 }
@@ -44,7 +51,7 @@ export function resolvePreparationStartsAt(
 ) {
   if (preparationStartsAt) return preparationStartsAt;
   const fallback = new Date(cohortStartsAt);
-  fallback.setUTCDate(fallback.getUTCDate() - 30);
+  fallback.setUTCDate(fallback.getUTCDate() - PRE_SOGP_PREPARATION_DAYS);
   return fallback;
 }
 

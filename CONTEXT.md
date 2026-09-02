@@ -33,5 +33,5 @@ unlocking.
 _Avoid_: Assessment, track completion
 
 **Pre-SOGP**:
-The 30-day preparation journey immediately before a learner's SOGP cohort.
+The 14-day preparation journey immediately before a learner's SOGP cohort.
 _Avoid_: SOGP Level 0

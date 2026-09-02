@@ -2,6 +2,7 @@ import { describe, expect, test } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
+import { PRE_SOGP_PREPARATION_DAYS } from "./calendar";
 import {
   buildPreSogpSeed,
   isSogpLessonContentReady,
@@ -9,20 +10,21 @@ import {
 } from "./preparation-seed";
 
 describe("Pre-SOGP seed", () => {
-  test("builds 30 unique consecutive lessons in the approved content order", () => {
+  test("builds one unique consecutive lesson per preparation day in the approved content order", () => {
     const days = buildPreSogpSeed(
       new Date("2026-11-01T00:00:00+01:00"),
     );
 
-    expect(days).toHaveLength(30);
-    expect(new Set(days.map((day) => day.url)).size).toBe(30);
+    expect(days).toHaveLength(PRE_SOGP_PREPARATION_DAYS);
+    expect(new Set(days.map((day) => day.url)).size).toBe(
+      PRE_SOGP_PREPARATION_DAYS,
+    );
     expect(days[0]).toMatchObject({
       publishDate: "2026-11-01",
       title: "What is God's Purpose? (Part 1)",
     });
     expect(days[7]?.title).toBe("Gospel Answers Series 1");
-    expect(days[19]?.title).toBe("Salvation");
-    expect(days.at(-1)?.publishDate).toBe("2026-11-30");
+    expect(days.at(-1)?.publishDate).toBe("2026-11-14");
   });
 });
 
@@ -83,16 +85,16 @@ test("admin exposes cohort date and status controls", () => {
 });
 
 describe("SOGP launch readiness", () => {
-  test("requires 30 preparation lessons, 24 ready tracks, and four reviews", () => {
+  test("requires a full preparation window, 24 ready tracks, and four reviews", () => {
     expect(
       validateSogpLaunchReadiness({
-        preparationCount: 29,
-        uniquePreparationUrlCount: 29,
+        preparationCount: PRE_SOGP_PREPARATION_DAYS - 1,
+        uniquePreparationUrlCount: PRE_SOGP_PREPARATION_DAYS - 1,
         readyTrackCount: 23,
         requiredReviewCount: 3,
       }),
     ).toEqual([
-      "Add exactly 30 unique Pre-SOGP lessons.",
+      `Add exactly ${PRE_SOGP_PREPARATION_DAYS} unique Pre-SOGP lessons.`,
       "Publish all 24 content-ready SOGP teachings.",
       "Schedule four required review sessions.",
     ]);
@@ -101,8 +103,8 @@ describe("SOGP launch readiness", () => {
   test("accepts a complete cohort configuration", () => {
     expect(
       validateSogpLaunchReadiness({
-        preparationCount: 30,
-        uniquePreparationUrlCount: 30,
+        preparationCount: PRE_SOGP_PREPARATION_DAYS,
+        uniquePreparationUrlCount: PRE_SOGP_PREPARATION_DAYS,
         readyTrackCount: 24,
         requiredReviewCount: 4,
       }),

@@ -6,17 +6,18 @@ import {
   deriveSogpCalendarState,
   getPreSogpCountdown,
   getSogpCountdown,
+  PRE_SOGP_PREPARATION_DAYS,
 } from "./calendar";
 
 describe("buildPreparationDateKeys", () => {
-  test("builds 30 consecutive Lagos dates from the preparation start", () => {
+  test("builds one consecutive Lagos date per preparation day from the start", () => {
     const dates = buildPreparationDateKeys(
       new Date("2026-11-01T00:00:00+01:00"),
     );
 
-    expect(dates).toHaveLength(30);
+    expect(dates).toHaveLength(PRE_SOGP_PREPARATION_DAYS);
     expect(dates[0]).toBe("2026-11-01");
-    expect(dates.at(-1)).toBe("2026-11-30");
+    expect(dates.at(-1)).toBe("2026-11-14");
   });
 });
 
