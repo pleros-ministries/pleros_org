@@ -154,9 +154,9 @@ export function SogpJourneyPage({
     : "live";
 
   const primaryButton =
-    "inline-flex h-8 items-center gap-1.5 rounded-[6px] bg-[var(--color-brand-blue)] px-3 text-xs font-medium text-white transition-colors active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50";
+    "inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-[6px] bg-[var(--color-brand-blue)] px-3 text-xs font-medium text-white transition-colors active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50";
   const secondaryButton =
-    "inline-flex h-8 items-center gap-1.5 rounded-[6px] border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-50 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50";
+    "inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-[6px] border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-50 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50";
 
   return (
     <section className="site-font-theme min-h-screen bg-[#f6f5f1] pb-16 text-zinc-900">

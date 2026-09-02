@@ -23,14 +23,16 @@ test("every SOGP page shell applies responsive horizontal gutters", () => {
   }
 });
 
-test("SOGP gutter utility uses existing public shell tokens", () => {
+test("SOGP gutter utility applies reduced responsive gutters, deriving wide breakpoints from public shell tokens", () => {
   const globals = readFileSync(join(process.cwd(), "app/globals.css"), "utf8");
   expect(globals).toContain(".site-font-theme .sogp-shell-page");
-  expect(globals).toContain("padding-inline: var(--site-shell-padding-x)");
   expect(globals).toContain(
-    ".site-font-theme .sogp-shell-page {\n      max-width: none;\n      padding-inline: calc(var(--site-shell-padding-x-lg) + 1.5rem);",
+    ".site-font-theme .sogp-shell-page {\n    padding-inline: 1rem;",
   );
   expect(globals).toContain(
-    "padding-inline: calc(var(--site-shell-padding-x-xl) + 2rem);",
+    ".site-font-theme .sogp-shell-page {\n      max-width: none;\n      padding-inline: calc(var(--site-shell-padding-x-lg) + 0.5rem);",
+  );
+  expect(globals).toContain(
+    "padding-inline: calc(var(--site-shell-padding-x-xl) + 0.5rem);",
   );
 });

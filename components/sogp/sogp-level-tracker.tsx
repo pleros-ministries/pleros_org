@@ -20,7 +20,7 @@ export function SogpLevelTracker({
         type="button"
         aria-expanded={expanded}
         onClick={() => setExpanded((current) => !current)}
-        className="flex min-h-11 w-full items-center justify-between gap-3 border-b border-zinc-100 px-4 text-left lg:hidden"
+        className="flex min-h-11 w-full cursor-pointer items-center justify-between gap-3 border-b border-zinc-100 px-4 text-left lg:hidden"
       >
         <span className="ppc-heading text-sm font-semibold text-zinc-900">Level progress</span>
         <ChevronDownIcon className={`size-4 text-zinc-400 transition-transform duration-150 ${expanded ? "rotate-180" : ""}`} strokeWidth={2} />

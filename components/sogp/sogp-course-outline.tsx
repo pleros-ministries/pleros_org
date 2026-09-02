@@ -52,7 +52,7 @@ export function SogpCourseOutline({
                       type="button"
                       onClick={() => onSelect(day.dateKey)}
                       aria-current={selected ? "page" : undefined}
-                      className={`grid min-h-9 w-full grid-cols-[1rem_1fr] items-start gap-2 rounded-sm px-2 py-2 text-left transition-colors duration-150 active:scale-[0.98] ${selected ? "bg-[var(--color-brand-sky)] text-zinc-900" : "text-zinc-700 hover:bg-zinc-50"}`}
+                      className={`grid min-h-9 w-full cursor-pointer grid-cols-[1rem_1fr] items-start gap-2 rounded-sm px-2 py-2 text-left transition-colors duration-150 active:scale-[0.98] ${selected ? "bg-[var(--color-brand-sky)] text-zinc-900" : "text-zinc-700 hover:bg-zinc-50"}`}
                     >
                       <Icon className={`mt-0.5 size-3.5 ${track.accessible || track.assessmentComplete ? "text-[var(--color-brand-blue)]" : "text-zinc-300"}`} strokeWidth={2} />
                       <span className="text-[0.7rem] leading-[1.35]">{track.levelPosition}. {track.title}</span>

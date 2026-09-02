@@ -37,7 +37,7 @@ export function SogpPushPanel() {
             type="button"
             onClick={subscribe}
             disabled={isPending}
-            className="inline-flex h-8 w-fit items-center rounded-[6px] bg-[var(--color-brand-blue)] px-3 text-xs font-medium text-white disabled:opacity-55"
+            className="inline-flex h-8 w-fit cursor-pointer items-center rounded-[6px] bg-[var(--color-brand-blue)] px-3 text-xs font-medium text-white disabled:cursor-not-allowed disabled:opacity-55"
           >
             {isPending ? "Enabling…" : "Enable Prayer Watch reminders"}
           </button>

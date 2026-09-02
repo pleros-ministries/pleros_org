@@ -76,7 +76,7 @@ export function SogpCalendar({
         aria-label={`${day.dateKey}. ${stateLabels[day.state]}`}
         aria-pressed={selected}
         className={cn(
-          "relative grid place-items-center rounded-[0.4rem] border text-xs font-semibold transition-transform duration-150 hover:-translate-y-px active:scale-[0.96] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-blue)]",
+          "relative grid cursor-pointer place-items-center rounded-[0.4rem] border text-xs font-semibold transition-transform duration-150 hover:-translate-y-px active:scale-[0.96] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-brand-blue)]",
           compact ? "h-8" : "h-9",
           stateClasses[day.state],
           selected && "ring-1 ring-[var(--color-brand-blue)]",
@@ -101,7 +101,7 @@ export function SogpCalendar({
           type="button"
           onClick={() => setExpanded((current) => !current)}
           aria-expanded={expanded}
-          className="inline-flex h-7 items-center gap-1.5 rounded-[6px] border border-zinc-200 bg-white px-2.5 text-[0.68rem] font-medium text-zinc-600 transition-colors duration-150 hover:bg-zinc-50 active:scale-[0.98]"
+          className="inline-flex h-7 cursor-pointer items-center gap-1.5 rounded-[6px] border border-zinc-200 bg-white px-2.5 text-[0.68rem] font-medium text-zinc-600 transition-colors duration-150 hover:bg-zinc-50 active:scale-[0.98]"
         >
           {expanded ? "Collapse" : "Expand"}
           <ChevronDownIcon className={cn("size-3.5 transition-transform duration-150", expanded && "rotate-180")} strokeWidth={2} />
