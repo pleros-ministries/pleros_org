@@ -19,8 +19,8 @@ const baseInput: SogpSignupAlertInput = {
 };
 
 describe("formatSogpSignupAlert", () => {
-  test("lays out every field and derives age from birth year", () => {
-    const text = formatSogpSignupAlert(baseInput, new Date("2026-09-02T00:00:00Z"));
+  test("lays out every field including year of birth", () => {
+    const text = formatSogpSignupAlert(baseInput);
 
     expect(text).toBe(
       [
@@ -30,27 +30,25 @@ describe("formatSogpSignupAlert", () => {
         "Phone: +2348012345678",
         "Country: Nigeria",
         "State: Lagos",
-        "Age: 28",
+        "Year of birth: 1998",
         "Heard about us: Instagram",
         "Cohort: SOGP — September 2026",
       ].join("\n"),
     );
   });
 
-  test("omits the age line when birth year is missing", () => {
-    const text = formatSogpSignupAlert(
-      { ...baseInput, birthYear: null },
-      new Date("2026-09-02T00:00:00Z"),
-    );
+  test("omits the year-of-birth line when it is missing", () => {
+    const text = formatSogpSignupAlert({ ...baseInput, birthYear: null });
 
-    expect(text).not.toContain("Age:");
+    expect(text).not.toContain("Year of birth:");
   });
 
   test("falls back to an em dash for empty region and referral", () => {
-    const text = formatSogpSignupAlert(
-      { ...baseInput, region: "", referralSource: "" },
-      new Date("2026-09-02T00:00:00Z"),
-    );
+    const text = formatSogpSignupAlert({
+      ...baseInput,
+      region: "",
+      referralSource: "",
+    });
 
     expect(text).toContain("State: —");
     expect(text).toContain("Heard about us: —");
