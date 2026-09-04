@@ -10,6 +10,7 @@ import {
   index,
   pgEnum,
   date,
+  type AnyPgColumn,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import type { SogpEnrollmentValues } from "../sogp/enrollment";
@@ -757,6 +758,13 @@ export const sogpEnrollments = pgTable(
     }),
     reason: text("reason"),
     status: sogpEnrollmentStatusEnum("status").notNull().default("enrolled"),
+    // Per-student referral link code (minted lazily) and the enrolment that
+    // referred this one.
+    referralCode: text("referral_code"),
+    referredByEnrollmentId: integer("referred_by_enrollment_id").references(
+      (): AnyPgColumn => sogpEnrollments.id,
+      { onDelete: "set null" },
+    ),
     utmSource: text("utm_source"),
     utmMedium: text("utm_medium"),
     utmCampaign: text("utm_campaign"),
@@ -778,6 +786,10 @@ export const sogpEnrollments = pgTable(
     uniqueIndex("sogp_enrollments_cohort_email_idx").on(t.cohortId, t.email),
     index("sogp_enrollments_status_idx").on(t.status),
     index("sogp_enrollments_telegram_user_idx").on(t.telegramUserId),
+    uniqueIndex("sogp_enrollments_referral_code_idx")
+      .on(t.referralCode)
+      .where(sql`${t.referralCode} IS NOT NULL`),
+    index("sogp_enrollments_referred_by_idx").on(t.referredByEnrollmentId),
   ],
 );
 

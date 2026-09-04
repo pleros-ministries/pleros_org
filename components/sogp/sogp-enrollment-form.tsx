@@ -77,6 +77,7 @@ async function submitEnrollment(body: Record<string, unknown>) {
       utmCampaign: params.get("utm_campaign"),
       utmContent: params.get("utm_content"),
       utmTerm: params.get("utm_term"),
+      ref: params.get("ref"),
     }),
   });
   const payload = (await response.json()) as EnrollmentResponse;

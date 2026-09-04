@@ -208,6 +208,75 @@ export async function getPreSogpJourney(
   };
 }
 
+export type PublicPreparationPost = {
+  dayNumber: number;
+  dateKey: string;
+  countdownLabel: string;
+  introduction: string;
+  title: string | null;
+  cohortTitle: string;
+};
+
+/**
+ * Public (unauthenticated) view of a single Pre-SOGP preparation day, used by
+ * the shareable preview page. Returns only teaser copy — never resource URLs or
+ * the teaching media, which stay enrolment-gated. `null` when the date is
+ * outside the cohort's preparation window or has no published day.
+ */
+export async function getPublicPreparationPost(
+  cohort: typeof schema.sogpCohorts.$inferSelect,
+  dateKey: string,
+): Promise<PublicPreparationPost | null> {
+  const preparationStartsAt = resolvePreparationStartsAt(
+    cohort.startsAt,
+    cohort.preparationStartsAt,
+  );
+  const index = buildPreparationDateKeys(preparationStartsAt).indexOf(dateKey);
+  if (index === -1) return null;
+
+  const rows = await db
+    .select({
+      day: schema.sogpPreparationDays,
+      resource: schema.sogpPreparationResources,
+    })
+    .from(schema.sogpPreparationDays)
+    .leftJoin(
+      schema.sogpPreparationResources,
+      eq(
+        schema.sogpPreparationResources.preparationDayId,
+        schema.sogpPreparationDays.id,
+      ),
+    )
+    .where(
+      and(
+        eq(schema.sogpPreparationDays.cohortId, cohort.id),
+        eq(schema.sogpPreparationDays.status, "published"),
+        eq(schema.sogpPreparationDays.publishDate, dateKey),
+      ),
+    )
+    .orderBy(asc(schema.sogpPreparationResources.sortOrder));
+
+  const day = rows[0]?.day;
+  if (!day) return null;
+
+  const lessonResource = rows
+    .map((row) => row.resource)
+    .find((resource) =>
+      resource
+        ? resource.type === "video" || resource.type === "teaching"
+        : false,
+    );
+
+  return {
+    dayNumber: index + 1,
+    dateKey,
+    countdownLabel: day.countdownLabel,
+    introduction: day.introduction,
+    title: lessonResource?.title ?? null,
+    cohortTitle: cohort.title,
+  };
+}
+
 export async function setPreparationLessonComplete(input: {
   userId: string;
   preparationDayId: number;

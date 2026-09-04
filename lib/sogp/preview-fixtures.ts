@@ -2,6 +2,7 @@ import type {
   PreSogpJourneyData,
   SogpJourneyData,
 } from "@/lib/db/queries/sogp-journey";
+import type { ReferralsDashboardData } from "@/lib/db/queries/sogp-referrals";
 
 import {
   buildPreparationDateKeys,
@@ -183,4 +184,32 @@ export const sogpPreviewData: SogpJourneyData = {
     reviewsTotal: 4,
     eligible: false,
   },
+};
+
+
+export const referralsPreviewData: ReferralsDashboardData = {
+  referralCode: "a1b2c3d4",
+  referralUrl: "https://pleros.org/sogp/enrol?ref=a1b2c3d4",
+  referredCount: 3,
+  preparationDaysTotal: 14,
+  referred: [
+    {
+      firstName: "Grace",
+      joinedAt: "2026-08-28T09:00:00.000Z",
+      stage: "preparing",
+      preparationDaysComplete: 6,
+    },
+    {
+      firstName: "Samuel",
+      joinedAt: "2026-08-30T14:30:00.000Z",
+      stage: "enrolled",
+      preparationDaysComplete: 0,
+    },
+    {
+      firstName: "Blessing",
+      joinedAt: "2026-08-22T18:15:00.000Z",
+      stage: "in_course",
+      preparationDaysComplete: 14,
+    },
+  ],
 };

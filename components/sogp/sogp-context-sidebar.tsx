@@ -1,7 +1,9 @@
 import {
   CalendarCheckIcon,
   ExternalLinkIcon,
+  UsersIcon,
 } from "lucide-react";
+import Link from "next/link";
 
 import type { SogpJourneyData } from "@/lib/db/queries/sogp-journey";
 
@@ -68,6 +70,24 @@ export function SogpContextSidebar({ data }: { data: SogpJourneyData }) {
           ) : (
             <p className="text-xs text-zinc-500">All currently scheduled reviews are complete.</p>
           )}
+        </div>
+      </section>
+
+      <section className="rounded-sm border border-zinc-200 bg-white">
+        <div className="flex items-center gap-2 border-b border-zinc-100 px-4 py-3">
+          <UsersIcon className="size-4 text-[var(--color-brand-blue)]" strokeWidth={2} />
+          <h2 className="ppc-heading text-sm font-semibold text-zinc-900">Invite friends</h2>
+        </div>
+        <div className="grid gap-3 p-4">
+          <p className="text-xs leading-[1.45] text-zinc-500">
+            Share your referral link and follow how the people you invite are doing.
+          </p>
+          <Link
+            href="/dashboard/sogp/referrals"
+            className="inline-flex h-8 w-fit items-center gap-1.5 rounded-[6px] border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-50 active:scale-[0.98]"
+          >
+            Open referrals
+          </Link>
         </div>
       </section>
     </div>

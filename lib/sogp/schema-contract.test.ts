@@ -32,6 +32,8 @@ describe("SOGP schema", () => {
     expect(sogpEnrollments.countryCode).toBeDefined();
     expect(sogpEnrollments.region).toBeDefined();
     expect(sogpEnrollments.referralSource).toBeDefined();
+    expect(sogpEnrollments.referralCode).toBeDefined();
+    expect(sogpEnrollments.referredByEnrollmentId).toBeDefined();
     expect(sogpEnrollments.whatsappConsent).toBeDefined();
     expect(sogpEnrollments.whatsappOptedInAt).toBeDefined();
     expect(sogpCohortTracks.curriculumLevel).toBeDefined();

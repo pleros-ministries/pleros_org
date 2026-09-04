@@ -16,6 +16,7 @@ import { PRAYER_WATCH_YOUTUBE_URL } from "@/lib/prayer-watch";
 
 import { SogpCalendar } from "./sogp-calendar";
 import { SogpActivitySection } from "./sogp-activity-section";
+import { SharePreparationDay } from "./share-preparation-day";
 import { SogpDailyRequirements } from "./sogp-daily-requirements";
 import { SogpLessonHeading } from "./sogp-lesson-heading";
 import { SogpLessonMedia } from "./sogp-lesson-media";
@@ -238,6 +239,15 @@ export function PreSogpPage({
               id="lesson-video"
               title={`Preparation lesson ${selectedDay.dayNumber}`}
               icon={<BookOpenIcon className="size-4 text-[var(--color-brand-blue)]" strokeWidth={2} />}
+              action={
+                preview ? undefined : (
+                  <SharePreparationDay
+                    dateKey={selectedDay.dateKey}
+                    dayLabel={`Day ${selectedDay.dayNumber}`}
+                    title={selectedDay.lesson.title}
+                  />
+                )
+              }
             >
               <SogpLessonMedia
                 title={selectedDay.lesson.title}
@@ -268,10 +278,18 @@ export function PreSogpPage({
             <h2 className="ppc-heading text-sm font-semibold text-zinc-900">Preparation progress</h2>
             <span className="ppc-heading text-sm font-semibold text-[var(--color-brand-blue)]">{completeDays} of {PRE_SOGP_PREPARATION_DAYS} days</span>
           </div>
-          <div className="p-4">
+          <div className="grid gap-3 p-4">
             <div className="h-1.5 overflow-hidden rounded-full bg-zinc-100">
               <div className="h-full rounded-full bg-[var(--color-brand-blue)]" style={{ width: `${preparationPercent}%` }} />
             </div>
+            {preview ? null : (
+              <Link
+                href="/dashboard/sogp/referrals"
+                className="text-xs font-medium text-[var(--color-brand-blue)] underline underline-offset-4"
+              >
+                Invite friends and track their progress
+              </Link>
+            )}
           </div>
         </section>
           </>

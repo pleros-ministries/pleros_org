@@ -24,6 +24,8 @@ import {
 import { partitionSogpPreparationDays } from "@/lib/sogp/preparation";
 import type { SogpPreparationDay } from "@/lib/sogp/types";
 
+import { SharePreparationDay } from "./share-preparation-day";
+
 type DashboardPayload = {
   generatedAt: string;
   enrollment: {
@@ -180,6 +182,16 @@ function PreparingDashboard({ data }: { data: DashboardPayload }) {
             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-brand-blue)]">Today’s preparation</p>
             <h2 className="font-[var(--font-sen)] text-2xl font-semibold tracking-[-0.045em] text-[var(--color-text-strong)]">{preparation.today.countdownLabel}</h2>
             <p className="max-w-[44rem] text-sm leading-[1.6] text-[var(--color-text-muted)]">{preparation.today.introduction}</p>
+            <SharePreparationDay
+              dateKey={preparation.today.publishDate}
+              dayLabel={preparation.today.countdownLabel}
+              title={
+                preparation.today.resources.find(
+                  (resource) =>
+                    resource.type === "video" || resource.type === "teaching",
+                )?.title ?? preparation.today.countdownLabel
+              }
+            />
           </div>
           <div className="grid gap-3 md:grid-cols-2">{preparation.today.resources.map(resourceLink)}</div>
         </section>

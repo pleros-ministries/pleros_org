@@ -8,6 +8,10 @@ import {
   markPendingSogpCompleted,
   upsertSogpEnrollment,
 } from "@/lib/db/queries/sogp";
+import {
+  attributeSogpReferral,
+  ensureSogpReferralCode,
+} from "@/lib/db/queries/sogp-referrals";
 import { sendSogpEnrollmentEmail } from "@/lib/email/send";
 import {
   SOGP_SETUP_COOKIE,
@@ -123,6 +127,18 @@ export async function POST(request: NextRequest) {
     }
 
     await markPendingSogpCompleted(pending.id);
+
+    // Record who referred this enrolment, and give the new learner their own
+    // referral code. Neither is allowed to fail the enrolment.
+    void attributeSogpReferral({
+      enrolleeEnrollmentId: enrollment.id,
+      enrolleeUserId: session.user.id,
+      code: values.referredByCode,
+    }).catch((error) => console.error("SOGP referral attribution failed:", error));
+    void ensureSogpReferralCode(enrollment.id).catch((error) =>
+      console.error("SOGP referral code mint failed:", error),
+    );
+
     void sendSogpEnrollmentEmail({
       to: pending.email,
       name: values.name,

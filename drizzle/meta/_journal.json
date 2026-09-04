@@ -127,6 +127,13 @@
       "when": 1788172505000,
       "tag": "0017_sogp_pending_enrolments",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1788511940015,
+      "tag": "0018_sogp_referrals",
+      "breakpoints": true
     }
   ]
 }
