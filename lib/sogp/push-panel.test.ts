@@ -11,9 +11,16 @@ test("offers a user-initiated SOGP Prayer Watch reminder subscription", () => {
     join(process.cwd(), "lib", "push", "use-push.ts"),
     "utf8",
   );
+  const globalPrompt = readFileSync(
+    join(process.cwd(), "components", "push-notification-prompt.tsx"),
+    "utf8",
+  );
   expect(panel).toContain("Enable Prayer Watch reminders");
   expect(panel).toContain("onClick={subscribe}");
   expect(panel).not.toContain("Notification.requestPermission");
   expect(hook).toContain('/api/sogp/push/subscribe');
   expect(hook).not.toContain('/api/ppc/push/subscribe');
+  expect(globalPrompt).toContain(
+    'pathname === "/dashboard/welcomepack/join"',
+  );
 });
