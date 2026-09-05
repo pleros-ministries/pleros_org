@@ -2,9 +2,13 @@
 
 import type { ComponentType, SVGProps } from "react";
 import { useEffect, useState } from "react";
+import { Popover } from "@base-ui/react/popover";
 import { CheckIcon, CopyIcon, SendIcon, Share2Icon } from "lucide-react";
 
 import type { PreSogpShareIntentPlatform } from "@/lib/sogp/share";
+
+const shareButtonClassName =
+  "inline-flex min-h-8 items-center gap-1.5 rounded-full bg-[var(--color-brand-blue)] px-3 text-xs font-semibold text-white transition-transform duration-150 active:scale-[0.98]";
 
 type Glyph = ComponentType<SVGProps<SVGSVGElement>>;
 
@@ -86,18 +90,8 @@ export function ShareIntentButtons({
     }
   }
 
-  return (
-    <div className="flex flex-wrap items-center gap-1.5">
-      {nativeShare && canNativeShare ? (
-        <button
-          type="button"
-          onClick={handleNativeShare}
-          className="inline-flex min-h-8 items-center gap-1.5 rounded-full bg-[var(--color-brand-blue)] px-3 text-xs font-semibold text-white transition-transform duration-150 active:scale-[0.98]"
-        >
-          <Share2Icon className="size-3.5" strokeWidth={2} />
-          Share
-        </button>
-      ) : null}
+  const chipsAndCopy = (
+    <>
       {CHIPS.map(({ platform, label, bg, Glyph }) => (
         <a
           key={platform}
@@ -123,6 +117,35 @@ export function ShareIntentButtons({
           <CopyIcon className="size-4" />
         )}
       </button>
-    </div>
+    </>
+  );
+
+  // Native share covers every platform (plus copy) through the OS sheet, so a
+  // single tap is the whole interaction — no need to also show the chips.
+  if (nativeShare && canNativeShare) {
+    return (
+      <button type="button" onClick={handleNativeShare} className={shareButtonClassName}>
+        <Share2Icon className="size-3.5" strokeWidth={2} />
+        Share
+      </button>
+    );
+  }
+
+  // No native share (desktop): collapse the chips behind a single "Share"
+  // button that reveals them in a popover.
+  return (
+    <Popover.Root>
+      <Popover.Trigger className={shareButtonClassName}>
+        <Share2Icon className="size-3.5" strokeWidth={2} />
+        Share
+      </Popover.Trigger>
+      <Popover.Portal>
+        <Popover.Positioner sideOffset={8} align="start">
+          <Popover.Popup className="z-50 origin-top-left rounded-full border border-zinc-200 bg-white p-1.5 shadow-lg outline-none transition-[opacity,transform] duration-150 data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0">
+            <div className="flex items-center gap-1.5">{chipsAndCopy}</div>
+          </Popover.Popup>
+        </Popover.Positioner>
+      </Popover.Portal>
+    </Popover.Root>
   );
 }

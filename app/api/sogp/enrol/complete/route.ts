@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 
 import { getAppSession } from "@/lib/app-session";
 import { betterAuthServer } from "@/lib/auth/better-auth";
@@ -128,39 +128,50 @@ export async function POST(request: NextRequest) {
 
     await markPendingSogpCompleted(pending.id);
 
-    // Record who referred this enrolment, and give the new learner their own
-    // referral code. Neither is allowed to fail the enrolment.
-    void attributeSogpReferral({
-      enrolleeEnrollmentId: enrollment.id,
-      enrolleeUserId: session.user.id,
-      code: values.referredByCode,
-    }).catch((error) => console.error("SOGP referral attribution failed:", error));
-    void ensureSogpReferralCode(enrollment.id).catch((error) =>
-      console.error("SOGP referral code mint failed:", error),
+    // Record who referred this enrolment, give the new learner their own
+    // referral code, send the welcome email, and post the Telegram alert.
+    // None of these may fail the enrolment — and none may race the response:
+    // `after()` keeps the serverless function alive until each finishes,
+    // instead of the previous fire-and-forget `void ...` calls, which Vercel
+    // could (and did) cut off mid-flight as soon as the response was sent.
+    after(() =>
+      attributeSogpReferral({
+        enrolleeEnrollmentId: enrollment.id,
+        enrolleeUserId: session.user.id,
+        code: values.referredByCode,
+      }).catch((error) => console.error("SOGP referral attribution failed:", error)),
     );
-
-    void sendSogpEnrollmentEmail({
-      to: pending.email,
-      name: values.name,
-      cohortTitle: cohort.title,
-      cohortDates: formatCohortDates(cohort.startsAt, cohort.endsAt),
-      dashboardUrl: `${resolvePublicSiteUrl(process.env)}/dashboard/welcomepack/join`,
-    }).catch((error) => console.error("SOGP enrolment email failed:", error));
-    void sendSogpSignupAlert({
-      enrollmentId: enrollment.id,
-      firstName: values.firstName,
-      lastName: values.lastName,
-      phone: values.phone,
-      country: values.country,
-      region: values.region,
-      birthYear: values.birthYear ? Number(values.birthYear) : null,
-      referralSource: formatSogpReferralSource({
-        referralSource: values.referralSource,
-        referralSourceOther: values.referralSourceOther,
-      }),
-      cohortTitle: cohort.title,
-    }).catch((error) =>
-      console.error("SOGP signup Telegram alert failed:", error),
+    after(() =>
+      ensureSogpReferralCode(enrollment.id).catch((error) =>
+        console.error("SOGP referral code mint failed:", error),
+      ),
+    );
+    after(() =>
+      sendSogpEnrollmentEmail({
+        to: pending.email,
+        name: values.name,
+        cohortTitle: cohort.title,
+        cohortDates: formatCohortDates(cohort.startsAt, cohort.endsAt),
+        dashboardUrl: `${resolvePublicSiteUrl(process.env)}/dashboard/welcomepack/join`,
+      }).catch((error) => console.error("SOGP enrolment email failed:", error)),
+    );
+    after(() =>
+      sendSogpSignupAlert({
+        enrollmentId: enrollment.id,
+        firstName: values.firstName,
+        lastName: values.lastName,
+        phone: values.phone,
+        country: values.country,
+        region: values.region,
+        birthYear: values.birthYear ? Number(values.birthYear) : null,
+        referralSource: formatSogpReferralSource({
+          referralSource: values.referralSource,
+          referralSourceOther: values.referralSourceOther,
+        }),
+        cohortTitle: cohort.title,
+      }).catch((error) =>
+        console.error("SOGP signup Telegram alert failed:", error),
+      ),
     );
 
     const response = NextResponse.json({
