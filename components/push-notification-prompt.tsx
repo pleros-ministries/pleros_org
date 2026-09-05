@@ -25,6 +25,7 @@ export function PushNotificationPrompt() {
 
   if (
     pathname.startsWith("/preview/") ||
+    pathname === "/dashboard/welcomepack/join" ||
     !isSupported ||
     isSubscribed ||
     dismissed
