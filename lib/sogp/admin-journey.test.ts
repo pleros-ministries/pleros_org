@@ -23,7 +23,9 @@ describe("Pre-SOGP seed", () => {
       publishDate: "2026-11-01",
       title: "What is God's Purpose? (Part 1)",
     });
-    expect(days[7]?.title).toBe("Gospel Answers Series 1");
+    expect(days[5]?.title).toBe("What is God's Purpose? (Part 6)");
+    expect(days.every((day) => !day.title.includes("Part 7"))).toBe(true);
+    expect(days[6]?.title).toBe("Gospel Answers Series 1");
     expect(days.at(-1)?.publishDate).toBe("2026-11-14");
   });
 });

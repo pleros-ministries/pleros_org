@@ -19,7 +19,10 @@ function seriesVideos(slug: string): SeedVideo[] {
 
 export function buildPreSogpSeed(preparationStartsAt: Date) {
   const candidates: SeedVideo[] = [
-    ...purposePathwayVideos,
+    // "What is God's Purpose?" Part 7 is intentionally excluded from Pre-SOGP so
+    // the Gospel Answers series begins on Day 7. Part 7 still appears on the
+    // public "Discover Purpose" pathway page (that list is untouched).
+    ...purposePathwayVideos.slice(0, 6),
     ...seriesVideos("gospel-answers-simple-series"),
     ...discipleshipFoundationsVideos,
     ...seriesVideos("most-important-questions-series"),
