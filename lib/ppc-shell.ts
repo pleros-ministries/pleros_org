@@ -65,6 +65,12 @@ export const PPC_SHELL_NAV_ITEMS: PpcShellNavItem[] = [
     roles: ["super_admin", "admin"],
   },
   {
+    label: "Community",
+    path: "/community",
+    icon: "students",
+    roles: ["super_admin", "admin"],
+  },
+  {
     label: "Staff",
     path: "/staff",
     icon: "staff",
@@ -313,6 +319,13 @@ export function getPpcShellContext(pathname: string): PpcShellContext {
     return {
       label: "SOGP operations",
       description: "Cohorts, curriculum, enrolments, live classes, and completion",
+    };
+  }
+
+  if (logicalPath === "/community") {
+    return {
+      label: "Community",
+      description: "Location units, leaders, official posts, and moderation",
     };
   }
 

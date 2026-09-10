@@ -111,6 +111,13 @@ export const prayerWatchSessionEnum = pgEnum("prayer_watch_session", [
   "evening",
 ]);
 
+export const unitStatusEnum = pgEnum("unit_status", ["active", "archived"]);
+
+export const unitMemberRoleEnum = pgEnum("unit_member_role", [
+  "member",
+  "leader",
+]);
+
 // ─── Welcome pack leads ─────────────────────────────────────────────────────
 
 export const welcomePackLeads = pgTable(
@@ -1035,5 +1042,92 @@ export const sogpRewardGrants = pgTable(
       t.enrollmentId,
       t.rewardKey,
     ),
+  ],
+);
+
+// ─── Community: location units ──────────────────────────────────────────────
+
+export const units = pgTable(
+  "units",
+  {
+    id: serial("id").primaryKey(),
+    countryCode: text("country_code").notNull(),
+    /** Canonical state/province/region slug; null = country-level unit. */
+    regionKey: text("region_key"),
+    name: text("name").notNull(),
+    telegramUrl: text("telegram_url"),
+    status: unitStatusEnum("status").notNull().default("active"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    // One unit per (country, region). COALESCE keeps country-level units unique.
+    uniqueIndex("units_country_region_idx").on(
+      t.countryCode,
+      sql`coalesce(${t.regionKey}, '')`,
+    ),
+    index("units_status_idx").on(t.status),
+  ],
+);
+
+export const unitMembers = pgTable(
+  "unit_members",
+  {
+    id: serial("id").primaryKey(),
+    unitId: integer("unit_id")
+      .notNull()
+      .references(() => units.id, { onDelete: "cascade" }),
+    enrollmentId: integer("enrollment_id")
+      .notNull()
+      .references(() => sogpEnrollments.id, { onDelete: "cascade" }),
+    role: unitMemberRoleEnum("role").notNull().default("member"),
+    /** null = automatically assigned from enrolment location. */
+    assignedBy: text("assigned_by").references(() => users.id),
+    joinedAt: timestamp("joined_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("unit_members_unit_enrollment_idx").on(
+      t.unitId,
+      t.enrollmentId,
+    ),
+    // Exactly one membership per enrolment.
+    uniqueIndex("unit_members_enrollment_idx").on(t.enrollmentId),
+    index("unit_members_unit_role_idx").on(t.unitId, t.role),
+  ],
+);
+
+export const unitLeaderInvites = pgTable(
+  "unit_leader_invites",
+  {
+    id: serial("id").primaryKey(),
+    unitId: integer("unit_id")
+      .notNull()
+      .references(() => units.id, { onDelete: "cascade" }),
+    email: text("email").notNull(),
+    tokenHash: text("token_hash").notNull(),
+    invitedBy: text("invited_by")
+      .notNull()
+      .references(() => users.id),
+    acceptedBy: text("accepted_by").references(() => users.id),
+    acceptedAt: timestamp("accepted_at", { withTimezone: true }),
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index("unit_leader_invites_unit_idx").on(t.unitId),
+    index("unit_leader_invites_email_idx").on(t.email),
+    uniqueIndex("unit_leader_invites_token_hash_idx").on(t.tokenHash),
   ],
 );

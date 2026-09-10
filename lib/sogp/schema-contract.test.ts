@@ -11,6 +11,9 @@ import {
   sogpPreparationResources,
   sogpRewardGrants,
   prayerWatchAttendance,
+  units,
+  unitMembers,
+  unitLeaderInvites,
 } from "../db/schema";
 
 describe("SOGP schema", () => {
@@ -24,6 +27,15 @@ describe("SOGP schema", () => {
     expect(sogpPreparationResources).toBeDefined();
     expect(sogpCertificates).toBeDefined();
     expect(sogpRewardGrants).toBeDefined();
+  });
+
+  test("exports the community location-unit tables", () => {
+    expect(units.countryCode).toBeDefined();
+    expect(units.regionKey).toBeDefined();
+    expect(unitMembers.unitId).toBeDefined();
+    expect(unitMembers.enrollmentId).toBeDefined();
+    expect(unitMembers.role).toBeDefined();
+    expect(unitLeaderInvites.tokenHash).toBeDefined();
   });
 
   test("stores structured enrolment and curriculum metadata", () => {

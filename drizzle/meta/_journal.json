@@ -134,6 +134,13 @@
       "when": 1788511940015,
       "tag": "0018_sogp_referrals",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1788991516040,
+      "tag": "0019_community_units",
+      "breakpoints": true
     }
   ]
 }
