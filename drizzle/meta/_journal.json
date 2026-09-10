@@ -141,6 +141,13 @@
       "when": 1788991516040,
       "tag": "0019_community_units",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1789021630172,
+      "tag": "0020_community_posts",
+      "breakpoints": true
     }
   ]
 }

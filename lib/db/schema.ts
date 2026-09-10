@@ -118,6 +118,22 @@ export const unitMemberRoleEnum = pgEnum("unit_member_role", [
   "leader",
 ]);
 
+export const communityPostScopeEnum = pgEnum("community_post_scope", [
+  "global",
+  "unit",
+]);
+
+export const communityPostAuthorKindEnum = pgEnum(
+  "community_post_author_kind",
+  ["ministry", "leader"],
+);
+
+export const communityPostStatusEnum = pgEnum("community_post_status", [
+  "published",
+  "hidden",
+  "removed",
+]);
+
 // ─── Welcome pack leads ─────────────────────────────────────────────────────
 
 export const welcomePackLeads = pgTable(
@@ -1129,5 +1145,65 @@ export const unitLeaderInvites = pgTable(
     index("unit_leader_invites_unit_idx").on(t.unitId),
     index("unit_leader_invites_email_idx").on(t.email),
     uniqueIndex("unit_leader_invites_token_hash_idx").on(t.tokenHash),
+  ],
+);
+
+// ─── Community: official posts ──────────────────────────────────────────────
+
+export const communityPosts = pgTable(
+  "community_posts",
+  {
+    id: serial("id").primaryKey(),
+    scope: communityPostScopeEnum("scope").notNull(),
+    /** null for global posts. */
+    unitId: integer("unit_id").references(() => units.id, {
+      onDelete: "cascade",
+    }),
+    authorId: text("author_id")
+      .notNull()
+      .references(() => users.id),
+    authorKind: communityPostAuthorKindEnum("author_kind").notNull(),
+    title: text("title"),
+    body: text("body").notNull(),
+    pinned: boolean("pinned").notNull().default(false),
+    status: communityPostStatusEnum("status").notNull().default("published"),
+    publishedAt: timestamp("published_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index("community_posts_scope_published_idx").on(t.scope, t.publishedAt),
+    index("community_posts_unit_published_idx").on(t.unitId, t.publishedAt),
+    index("community_posts_status_idx").on(t.status),
+  ],
+);
+
+export const postReactions = pgTable(
+  "post_reactions",
+  {
+    id: serial("id").primaryKey(),
+    postId: integer("post_id")
+      .notNull()
+      .references(() => communityPosts.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    kind: text("kind").notNull().default("pray"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("post_reactions_post_user_kind_idx").on(
+      t.postId,
+      t.userId,
+      t.kind,
+    ),
   ],
 );

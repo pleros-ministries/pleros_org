@@ -12,6 +12,13 @@ import {
   setUnitStatus,
   setUnitTelegramUrl,
 } from "@/lib/db/queries/community-units";
+import {
+  createGlobalPost,
+  editPost,
+  setPostPinned,
+  setPostStatus,
+} from "@/lib/db/queries/community-posts";
+import { sendSogpChannelMessage } from "@/lib/telegram/sogp-broadcast";
 
 /**
  * Place every enrolment into its location unit. Idempotent — safe to re-run;
@@ -73,4 +80,66 @@ export async function mergeCommunityUnits(input: {
   const session = await requireAdmin();
   await mergeUnits({ ...input, assignedBy: session.user.id });
   revalidatePath("/admin/community");
+}
+
+// ─── Official posts ────────────────────────────────────────────────────────
+
+export async function publishGlobalPost(input: {
+  title: string;
+  body: string;
+  alsoTelegram: boolean;
+}) {
+  const session = await requireAdmin();
+  const body = input.body.trim();
+  if (!body) throw new Error("A post needs a body.");
+  const title = input.title.trim() || null;
+
+  await createGlobalPost({ authorId: session.user.id, title, body });
+
+  if (input.alsoTelegram) {
+    try {
+      await sendSogpChannelMessage({
+        kind: "general",
+        message: title ? `${title}\n\n${body}` : body,
+      });
+    } catch (error) {
+      console.error("Community post Telegram mirror failed:", error);
+    }
+  }
+
+  revalidatePath("/admin/community");
+  revalidatePath("/dashboard/community");
+}
+
+export async function updateGlobalPost(input: {
+  postId: number;
+  title: string;
+  body: string;
+}) {
+  await requireAdmin();
+  const body = input.body.trim();
+  if (!body) throw new Error("A post needs a body.");
+  await editPost({ postId: input.postId, title: input.title.trim() || null, body });
+  revalidatePath("/admin/community");
+  revalidatePath("/dashboard/community");
+}
+
+export async function togglePostPinned(input: {
+  postId: number;
+  pinned: boolean;
+}) {
+  await requireAdmin();
+  await setPostPinned(input.postId, input.pinned);
+  revalidatePath("/admin/community");
+  revalidatePath("/dashboard/community");
+}
+
+export async function moderatePost(input: {
+  postId: number;
+  status: "published" | "hidden" | "removed";
+}) {
+  await requireAdmin();
+  await setPostStatus(input.postId, input.status);
+  revalidatePath("/admin/community");
+  revalidatePath("/dashboard/community");
 }

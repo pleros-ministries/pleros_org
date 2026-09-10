@@ -4,18 +4,24 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 import type { UnitWithCounts } from "@/lib/db/queries/community-units";
+import type { AdminPost } from "@/lib/db/queries/community-posts";
 import {
   backfillCommunityUnits,
+  moderatePost,
+  publishGlobalPost,
+  togglePostPinned,
   updateUnitStatus,
   updateUnitTelegramUrl,
 } from "@/app/admin/_actions/community-actions";
 
 export function AdminCommunityPage({
   units,
+  posts,
   enrolmentCount,
   memberCount,
 }: {
   units: UnitWithCounts[];
+  posts: AdminPost[];
   enrolmentCount: number;
   memberCount: number;
 }) {
@@ -74,6 +80,79 @@ export function AdminCommunityPage({
           </span>
         ) : null}
       </div>
+
+      <section className="grid gap-3 rounded-sm border border-zinc-200 bg-white p-4">
+        <h2 className="ppc-heading text-sm font-semibold text-zinc-900">
+          Official post
+        </h2>
+        <GlobalPostComposer
+          disabled={pending}
+          onPublish={(input) =>
+            run(() => publishGlobalPost(input), "Official post published.")
+          }
+        />
+        {posts.length > 0 ? (
+          <ul className="grid gap-2 border-t border-zinc-100 pt-3">
+            {posts.map((post) => (
+              <li
+                key={post.id}
+                className="grid gap-1 text-xs text-zinc-600"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-zinc-900">
+                    {post.title ?? post.body.slice(0, 48)}
+                  </span>
+                  {post.pinned ? (
+                    <span className="text-[var(--color-brand-blue)]">pinned</span>
+                  ) : null}
+                  {post.status !== "published" ? (
+                    <span className="text-amber-700">{post.status}</span>
+                  ) : null}
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    disabled={pending}
+                    onClick={() =>
+                      run(
+                        () =>
+                          togglePostPinned({
+                            postId: post.id,
+                            pinned: !post.pinned,
+                          }),
+                        post.pinned ? "Unpinned." : "Pinned.",
+                      )
+                    }
+                    className="text-[var(--color-brand-blue)] underline underline-offset-2"
+                  >
+                    {post.pinned ? "Unpin" : "Pin"}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={pending}
+                    onClick={() =>
+                      run(
+                        () =>
+                          moderatePost({
+                            postId: post.id,
+                            status:
+                              post.status === "published"
+                                ? "hidden"
+                                : "published",
+                          }),
+                        post.status === "published" ? "Hidden." : "Restored.",
+                      )
+                    }
+                    className="text-[var(--color-brand-blue)] underline underline-offset-2"
+                  >
+                    {post.status === "published" ? "Hide" : "Restore"}
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+      </section>
 
       <div className="overflow-x-auto rounded-sm border border-zinc-200">
         <table className="w-full text-left text-xs">
@@ -140,6 +219,65 @@ export function AdminCommunityPage({
         </table>
       </div>
     </div>
+  );
+}
+
+function GlobalPostComposer({
+  disabled,
+  onPublish,
+}: {
+  disabled: boolean;
+  onPublish: (input: {
+    title: string;
+    body: string;
+    alsoTelegram: boolean;
+  }) => void;
+}) {
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+  const [alsoTelegram, setAlsoTelegram] = useState(false);
+
+  return (
+    <form
+      className="grid gap-2"
+      onSubmit={(event) => {
+        event.preventDefault();
+        if (!body.trim()) return;
+        onPublish({ title, body, alsoTelegram });
+        setTitle("");
+        setBody("");
+        setAlsoTelegram(false);
+      }}
+    >
+      <input
+        value={title}
+        onChange={(event) => setTitle(event.target.value)}
+        placeholder="Title (optional)"
+        className="h-9 rounded-sm border border-zinc-200 px-2 text-sm"
+      />
+      <textarea
+        value={body}
+        onChange={(event) => setBody(event.target.value)}
+        placeholder="Write an update for every enrolled learner…"
+        rows={3}
+        className="rounded-sm border border-zinc-200 p-2 text-sm"
+      />
+      <label className="flex items-center gap-2 text-xs text-zinc-600">
+        <input
+          type="checkbox"
+          checked={alsoTelegram}
+          onChange={(event) => setAlsoTelegram(event.target.checked)}
+        />
+        Also post to the SOGP Telegram channel
+      </label>
+      <button
+        type="submit"
+        disabled={disabled || !body.trim()}
+        className="inline-flex h-8 w-fit items-center rounded-sm bg-[var(--color-brand-blue)] px-3 text-xs font-semibold text-white disabled:opacity-50"
+      >
+        Publish
+      </button>
+    </form>
   );
 }
 
