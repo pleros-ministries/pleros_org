@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 import type { UnitWithCounts } from "@/lib/db/queries/community-units";
-import type { AdminPost } from "@/lib/db/queries/community-posts";
-import type { OpenFlag } from "@/lib/db/queries/community-discussion";
+import type { AdminPost, OpenFlag, PostImage } from "@/lib/db/queries/community-posts";
+import { useUploadThing } from "@/lib/upload/uploadthing-client";
 import {
   backfillCommunityUnits,
   moderatePost,
@@ -301,11 +301,24 @@ function GlobalPostComposer({
     title: string;
     body: string;
     alsoTelegram: boolean;
+    images: PostImage[];
   }) => void;
 }) {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [alsoTelegram, setAlsoTelegram] = useState(false);
+  const [images, setImages] = useState<PostImage[]>([]);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const { startUpload, isUploading } = useUploadThing("communityImage", {
+    onClientUploadComplete: (results) => {
+      const next = results.map((r) => ({
+        url: (r as { ufsUrl?: string; url: string }).ufsUrl ?? r.url,
+        key: r.key,
+      }));
+      setImages((current) => [...current, ...next].slice(0, 4));
+    },
+  });
 
   return (
     <form
@@ -313,10 +326,11 @@ function GlobalPostComposer({
       onSubmit={(event) => {
         event.preventDefault();
         if (!body.trim()) return;
-        onPublish({ title, body, alsoTelegram });
+        onPublish({ title, body, alsoTelegram, images });
         setTitle("");
         setBody("");
         setAlsoTelegram(false);
+        setImages([]);
       }}
     >
       <input
@@ -332,6 +346,44 @@ function GlobalPostComposer({
         rows={3}
         className="rounded-sm border border-zinc-200 p-2 text-sm"
       />
+      {images.length > 0 ? (
+        <div className="grid grid-cols-4 gap-1.5">
+          {images.map((img) => (
+            <div key={img.key} className="relative">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={img.url}
+                alt=""
+                className="h-16 w-full rounded-sm object-cover"
+              />
+              <button
+                type="button"
+                onClick={() =>
+                  setImages((c) => c.filter((x) => x.key !== img.key))
+                }
+                className="absolute -right-1.5 -top-1.5 inline-flex size-5 items-center justify-center rounded-full bg-zinc-900 text-xs text-white"
+                aria-label="Remove image"
+              >
+                ×
+              </button>
+            </div>
+          ))}
+        </div>
+      ) : null}
+      <input
+        ref={fileRef}
+        type="file"
+        accept="image/*"
+        multiple
+        hidden
+        onChange={(event) => {
+          const list = event.target.files;
+          if (list && list.length > 0) {
+            void startUpload(Array.from(list).slice(0, 4 - images.length));
+          }
+          event.target.value = "";
+        }}
+      />
       <label className="flex items-center gap-2 text-xs text-zinc-600">
         <input
           type="checkbox"
@@ -340,13 +392,23 @@ function GlobalPostComposer({
         />
         Also post to the SOGP Telegram channel
       </label>
-      <button
-        type="submit"
-        disabled={disabled || !body.trim()}
-        className="inline-flex h-8 w-fit items-center rounded-sm bg-[var(--color-brand-blue)] px-3 text-xs font-semibold text-white disabled:opacity-50"
-      >
-        Publish
-      </button>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          disabled={isUploading || images.length >= 4}
+          onClick={() => fileRef.current?.click()}
+          className="inline-flex h-8 items-center rounded-sm border border-zinc-200 px-2.5 text-xs font-medium text-zinc-600 disabled:opacity-50"
+        >
+          {isUploading ? "Uploading…" : "Add photo"}
+        </button>
+        <button
+          type="submit"
+          disabled={disabled || isUploading || !body.trim()}
+          className="inline-flex h-8 w-fit items-center rounded-sm bg-[var(--color-brand-blue)] px-3 text-xs font-semibold text-white disabled:opacity-50"
+        >
+          Publish
+        </button>
+      </div>
     </form>
   );
 }

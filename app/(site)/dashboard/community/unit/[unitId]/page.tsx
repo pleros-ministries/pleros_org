@@ -45,7 +45,7 @@ export default async function CommunityUnitRoute({
       detail={detail}
       posts={posts}
       isAdmin={ctx.isAdmin}
-      canLead={ownUnit && ctx.isUnitLeader}
+      canPost={ownUnit}
       adminMembers={adminMembers}
     />
   );

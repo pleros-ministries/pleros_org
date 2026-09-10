@@ -9,6 +9,7 @@ import type { FeedPost } from "@/lib/db/queries/community-posts";
 import type { UnitDetail } from "@/lib/db/queries/community-units";
 import { setCommunityUnitLeader } from "@/app/admin/_actions/community-actions";
 
+import { FeedComposer } from "./feed-composer";
 import { PostList } from "./post-list";
 
 type AdminMember = {
@@ -22,13 +23,13 @@ export function CommunityUnitPage({
   detail,
   posts,
   isAdmin,
-  canLead,
+  canPost,
   adminMembers,
 }: {
   detail: UnitDetail;
   posts: FeedPost[];
   isAdmin: boolean;
-  canLead: boolean;
+  canPost: boolean;
   adminMembers: AdminMember[];
 }) {
   return (
@@ -102,12 +103,22 @@ export function CommunityUnitPage({
           </ul>
         </section>
 
-        {canLead || isAdmin ? (
-          <h2 className="ppc-heading text-sm font-semibold text-zinc-900">
-            Unit posts
-          </h2>
+        <h2 className="ppc-heading text-sm font-semibold text-zinc-900">
+          Unit posts
+        </h2>
+        {canPost ? (
+          <FeedComposer
+            unitName={detail.name}
+            defaultScope="unit"
+            lockScope
+          />
         ) : null}
-        <PostList posts={posts} emptyText="No unit posts yet." />
+        <PostList
+          posts={posts}
+          viewerUnitName={canPost ? detail.name : null}
+          isAdmin={isAdmin}
+          emptyText="No unit posts yet."
+        />
 
         {isAdmin ? (
           <AdminLeaderControl unitId={detail.id} members={adminMembers} />

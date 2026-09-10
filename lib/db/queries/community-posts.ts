@@ -4,10 +4,7 @@ import { alias } from "drizzle-orm/pg-core";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
 import type { CommunityContext } from "@/lib/community/context";
-import {
-  assertCanComment,
-  assertCanCreatePost,
-} from "@/lib/community/rate-limit";
+import { assertCanCreatePost } from "@/lib/community/rate-limit";
 
 export type PostImage = { url: string; key: string };
 

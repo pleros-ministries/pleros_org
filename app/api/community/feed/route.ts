@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 
 import { canAccessCommunity, getCommunityContext } from "@/lib/community/context";
-import { getCommunityFeed } from "@/lib/db/queries/community-posts";
+import {
+  getCommunityFeed,
+  getCommunitySidebar,
+} from "@/lib/db/queries/community-posts";
 
 export async function GET() {
   const ctx = await getCommunityContext();
@@ -15,9 +18,13 @@ export async function GET() {
     );
   }
 
-  const posts = await getCommunityFeed(ctx);
+  const [posts, sidebar] = await Promise.all([
+    getCommunityFeed(ctx),
+    getCommunitySidebar(ctx),
+  ]);
   return NextResponse.json({
     posts,
+    sidebar,
     unit: ctx.unit,
     isUnitLeader: ctx.isUnitLeader,
     isAdmin: ctx.isAdmin,

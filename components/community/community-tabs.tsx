@@ -3,7 +3,7 @@ import { ArrowLeftIcon } from "lucide-react";
 
 import { NotificationBell } from "./notification-bell";
 
-type Tab = "feed" | "discussion" | "unit" | "leader";
+type Tab = "feed" | "unit" | "leader";
 
 export function CommunityTabs({
   current,
@@ -18,11 +18,6 @@ export function CommunityTabs({
 }) {
   const tabs: Array<{ key: Tab; label: string; href: string }> = [
     { key: "feed", label: "Feed", href: "/dashboard/community" },
-    {
-      key: "discussion",
-      label: "Discussion",
-      href: "/dashboard/community/discussion",
-    },
   ];
   if (unitId != null) {
     tabs.push({

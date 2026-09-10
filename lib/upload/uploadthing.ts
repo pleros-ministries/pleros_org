@@ -1,5 +1,9 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { getAppSession } from "@/lib/app-session";
+import {
+  canAccessCommunity,
+  getCommunityContext,
+} from "@/lib/community/context";
 
 const f = createUploadthing();
 
@@ -41,6 +45,20 @@ export const uploadRouter = {
         name: file.name,
         size: file.size,
       };
+    }),
+
+  communityImage: f({
+    image: { maxFileSize: "8MB", maxFileCount: 4 },
+  })
+    .middleware(async () => {
+      const ctx = await getCommunityContext();
+      if (!ctx || !canAccessCommunity(ctx)) {
+        throw new Error("Unauthorised");
+      }
+      return { userId: ctx.userId };
+    })
+    .onUploadComplete(({ file }) => {
+      return { url: file.ufsUrl, key: file.key, name: file.name };
     }),
 } satisfies FileRouter;
 

@@ -3,7 +3,10 @@ import { redirect } from "next/navigation";
 import { CommunityHub } from "@/components/community/community-hub";
 import { getAppSession } from "@/lib/app-session";
 import { canAccessCommunity, getCommunityContext } from "@/lib/community/context";
-import { getCommunityFeed } from "@/lib/db/queries/community-posts";
+import {
+  getCommunityFeed,
+  getCommunitySidebar,
+} from "@/lib/db/queries/community-posts";
 
 export default async function CommunityRoute() {
   const session = await getAppSession();
@@ -12,11 +15,15 @@ export default async function CommunityRoute() {
   const ctx = await getCommunityContext();
   if (!ctx || !canAccessCommunity(ctx)) redirect("/sogp/enrol");
 
-  const feed = await getCommunityFeed(ctx);
+  const [feed, sidebar] = await Promise.all([
+    getCommunityFeed(ctx),
+    getCommunitySidebar(ctx),
+  ]);
 
   return (
     <CommunityHub
       initialFeed={feed}
+      sidebar={sidebar}
       unit={ctx.unit}
       isUnitLeader={ctx.isUnitLeader}
       isAdmin={ctx.isAdmin}

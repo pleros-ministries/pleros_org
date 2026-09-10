@@ -17,10 +17,12 @@ function summarise(n: Notification): string {
   switch (n.kind) {
     case "official_post":
       return `New update: ${(n.payload.title as string) ?? "open the community"}`;
-    case "thread_reply":
-      return `New reply in "${(n.payload.title as string) ?? "a discussion"}"`;
-    case "message_reply":
-      return `Someone replied to you in "${(n.payload.title as string) ?? "a discussion"}"`;
+    case "post_comment":
+      return `New comment on "${(n.payload.title as string) ?? "your post"}"`;
+    case "comment_reply":
+      return `Someone replied to your comment${
+        n.payload.title ? ` on "${n.payload.title as string}"` : ""
+      }`;
     case "made_leader":
       return `You now lead ${(n.payload.unitName as string) ?? "your unit"}`;
     case "flag_resolved":
