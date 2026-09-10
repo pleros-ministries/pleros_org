@@ -125,7 +125,7 @@ export const communityPostScopeEnum = pgEnum("community_post_scope", [
 
 export const communityPostAuthorKindEnum = pgEnum(
   "community_post_author_kind",
-  ["ministry", "leader"],
+  ["ministry", "leader", "member"],
 );
 
 export const communityPostStatusEnum = pgEnum("community_post_status", [
@@ -134,12 +134,7 @@ export const communityPostStatusEnum = pgEnum("community_post_status", [
   "removed",
 ]);
 
-export const communityThreadStatusEnum = pgEnum("community_thread_status", [
-  "open",
-  "locked",
-  "removed",
-]);
-
+/** Also used by community_post_comments.status. */
 export const communityMessageStatusEnum = pgEnum("community_message_status", [
   "visible",
   "hidden",
@@ -150,6 +145,7 @@ export const contentFlagTargetEnum = pgEnum("content_flag_target", [
   "post",
   "thread",
   "message",
+  "comment",
 ]);
 
 export const contentFlagStatusEnum = pgEnum("content_flag_status", [
@@ -164,6 +160,8 @@ export const communityNotificationKindEnum = pgEnum(
     "official_post",
     "thread_reply",
     "message_reply",
+    "post_comment",
+    "comment_reply",
     "made_leader",
     "flag_resolved",
     "leader_nudge",
@@ -1201,9 +1199,24 @@ export const communityPosts = pgTable(
     authorKind: communityPostAuthorKindEnum("author_kind").notNull(),
     title: text("title"),
     body: text("body").notNull(),
+    /** Up to 4 uploaded images: `[{ url, key }]`. */
+    images: jsonb("images")
+      .$type<{ url: string; key: string }[]>()
+      .notNull()
+      .default(sql`'[]'::jsonb`),
     pinned: boolean("pinned").notNull().default(false),
     status: communityPostStatusEnum("status").notNull().default("published"),
+    commentCount: integer("comment_count").notNull().default(0),
+    shareCount: integer("share_count").notNull().default(0),
+    /** Set when this post is a repost; points at the original. */
+    sharedFromPostId: integer("shared_from_post_id").references(
+      (): AnyPgColumn => communityPosts.id,
+      { onDelete: "set null" },
+    ),
     publishedAt: timestamp("published_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    lastActivityAt: timestamp("last_activity_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
     createdAt: timestamp("created_at", { withTimezone: true })
@@ -1216,6 +1229,7 @@ export const communityPosts = pgTable(
   (t) => [
     index("community_posts_scope_published_idx").on(t.scope, t.publishedAt),
     index("community_posts_unit_published_idx").on(t.unitId, t.publishedAt),
+    index("community_posts_scope_activity_idx").on(t.scope, t.lastActivityAt),
     index("community_posts_status_idx").on(t.status),
   ],
 );
@@ -1244,58 +1258,25 @@ export const postReactions = pgTable(
   ],
 );
 
-// ─── Community: discussion ─────────────────────────────────────────────────
+// ─── Community: post comments ──────────────────────────────────────────────
 
-export const communityThreads = pgTable(
-  "community_threads",
+export const communityPostComments = pgTable(
+  "community_post_comments",
   {
     id: serial("id").primaryKey(),
-    scope: communityPostScopeEnum("scope").notNull(),
-    unitId: integer("unit_id").references(() => units.id, {
-      onDelete: "cascade",
-    }),
-    authorId: text("author_id")
+    postId: integer("post_id")
       .notNull()
-      .references(() => users.id),
-    title: text("title").notNull(),
-    status: communityThreadStatusEnum("status").notNull().default("open"),
-    lastMessageAt: timestamp("last_message_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
-    messageCount: integer("message_count").notNull().default(0),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
-  },
-  (t) => [
-    index("community_threads_scope_unit_last_idx").on(
-      t.scope,
-      t.unitId,
-      t.lastMessageAt,
-    ),
-    index("community_threads_status_idx").on(t.status),
-  ],
-);
-
-export const communityMessages = pgTable(
-  "community_messages",
-  {
-    id: serial("id").primaryKey(),
-    threadId: integer("thread_id")
-      .notNull()
-      .references(() => communityThreads.id, { onDelete: "cascade" }),
+      .references(() => communityPosts.id, { onDelete: "cascade" }),
     authorId: text("author_id")
       .notNull()
       .references(() => users.id),
     body: text("body").notNull(),
     status: communityMessageStatusEnum("status").notNull().default("visible"),
     /** One level of reply nesting. */
-    replyToId: integer("reply_to_id").references((): AnyPgColumn => communityMessages.id, {
-      onDelete: "set null",
-    }),
+    replyToId: integer("reply_to_id").references(
+      (): AnyPgColumn => communityPostComments.id,
+      { onDelete: "set null" },
+    ),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
@@ -1303,27 +1284,29 @@ export const communityMessages = pgTable(
       .notNull()
       .defaultNow(),
   },
-  (t) => [index("community_messages_thread_created_idx").on(t.threadId, t.createdAt)],
+  (t) => [
+    index("community_post_comments_post_created_idx").on(t.postId, t.createdAt),
+  ],
 );
 
-export const messageReactions = pgTable(
-  "message_reactions",
+export const commentReactions = pgTable(
+  "comment_reactions",
   {
     id: serial("id").primaryKey(),
-    messageId: integer("message_id")
+    commentId: integer("comment_id")
       .notNull()
-      .references(() => communityMessages.id, { onDelete: "cascade" }),
+      .references(() => communityPostComments.id, { onDelete: "cascade" }),
     userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    kind: text("kind").notNull().default("pray"),
+    kind: text("kind").notNull().default("like"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
   },
   (t) => [
-    uniqueIndex("message_reactions_message_user_kind_idx").on(
-      t.messageId,
+    uniqueIndex("comment_reactions_comment_user_kind_idx").on(
+      t.commentId,
       t.userId,
       t.kind,
     ),

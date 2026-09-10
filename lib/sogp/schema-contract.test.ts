@@ -16,9 +16,8 @@ import {
   unitLeaderInvites,
   communityPosts,
   postReactions,
-  communityThreads,
-  communityMessages,
-  messageReactions,
+  communityPostComments,
+  commentReactions,
   contentFlags,
   communityNotifications,
 } from "../db/schema";
@@ -49,16 +48,19 @@ describe("SOGP schema", () => {
     expect(communityPosts.scope).toBeDefined();
     expect(communityPosts.authorKind).toBeDefined();
     expect(communityPosts.status).toBeDefined();
+    expect(communityPosts.images).toBeDefined();
+    expect(communityPosts.commentCount).toBeDefined();
+    expect(communityPosts.shareCount).toBeDefined();
+    expect(communityPosts.sharedFromPostId).toBeDefined();
+    expect(communityPosts.lastActivityAt).toBeDefined();
     expect(postReactions.postId).toBeDefined();
   });
 
-  test("exports the community discussion + moderation tables", () => {
-    expect(communityThreads.scope).toBeDefined();
-    expect(communityThreads.status).toBeDefined();
-    expect(communityThreads.messageCount).toBeDefined();
-    expect(communityMessages.threadId).toBeDefined();
-    expect(communityMessages.replyToId).toBeDefined();
-    expect(messageReactions.messageId).toBeDefined();
+  test("exports the community comment + moderation tables", () => {
+    expect(communityPostComments.postId).toBeDefined();
+    expect(communityPostComments.status).toBeDefined();
+    expect(communityPostComments.replyToId).toBeDefined();
+    expect(commentReactions.commentId).toBeDefined();
     expect(contentFlags.targetType).toBeDefined();
     expect(contentFlags.status).toBeDefined();
   });
