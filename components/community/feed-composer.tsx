@@ -1,10 +1,11 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useRef, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ImagePlusIcon, XIcon } from "lucide-react";
 
 import type { PostImage } from "@/lib/db/queries/community-posts";
+import { communityKeys } from "@/lib/community/query-keys";
 import { createPost } from "@/app/(site)/dashboard/community/_actions/feed-actions";
 import { useUploadThing } from "@/lib/upload/uploadthing-client";
 
@@ -23,8 +24,7 @@ export function FeedComposer({
   defaultScope?: "global" | "unit";
   lockScope?: boolean;
 }) {
-  const router = useRouter();
-  const [pending, startTransition] = useTransition();
+  const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const [body, setBody] = useState("");
   const [scope, setScope] = useState<"global" | "unit">(defaultScope);
@@ -51,6 +51,17 @@ export function FeedComposer({
     setOpen(false);
   }
 
+  const postMutation = useMutation({
+    mutationFn: () => createPost({ scope, body, images }),
+    onSuccess: () => {
+      reset();
+      queryClient.invalidateQueries({ queryKey: communityKeys.feed() });
+    },
+    onError: (e) =>
+      setError(e instanceof Error ? e.message : "Could not post."),
+  });
+  const pending = postMutation.isPending;
+
   function pickFiles(list: FileList | null) {
     if (!list || list.length === 0) return;
     const room = MAX_IMAGES - images.length;
@@ -60,7 +71,7 @@ export function FeedComposer({
 
   if (!open) {
     return (
-      <div className="flex items-center gap-3 rounded-2xl border border-zinc-200/80 bg-white p-3 shadow-[0_1px_3px_rgba(24,24,27,0.06)]">
+      <div className="flex items-center gap-3 rounded-2xl border border-(--color-line-strong) bg-white p-3 shadow-(--shadow-sm)">
         <Avatar name={viewerName} size={40} />
         <button
           type="button"
@@ -75,18 +86,10 @@ export function FeedComposer({
 
   return (
     <form
-      className="grid gap-3 rounded-2xl border border-zinc-200/80 bg-white p-4 shadow-[0_1px_3px_rgba(24,24,27,0.06)]"
+      className="grid gap-3 rounded-2xl border border-(--color-line-strong) bg-white p-4 shadow-(--shadow-sm)"
       action={() => {
         setError(null);
-        startTransition(async () => {
-          try {
-            await createPost({ scope, body, images });
-            reset();
-            router.refresh();
-          } catch (e) {
-            setError(e instanceof Error ? e.message : "Could not post.");
-          }
-        });
+        postMutation.mutate();
       }}
     >
       <div className="flex items-start gap-3">

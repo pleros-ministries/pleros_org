@@ -8,30 +8,18 @@ function snippet(post: { title: string | null; body: string }) {
 }
 
 const card =
-  "rounded-2xl border border-zinc-200/80 bg-white p-5 shadow-[0_1px_3px_rgba(24,24,27,0.06)]";
+  "rounded-2xl border border-(--color-line-strong) bg-white p-5 shadow-(--shadow-sm)";
 
 export function CommunitySidebar({
   data,
-  unit,
+  className = "",
 }: {
   data: SidebarData;
-  unit: { id: number; name: string } | null;
+  className?: string;
 }) {
   return (
-    <aside className="hidden lg:block">
-      <div className="sticky top-16 grid gap-4">
-        {unit ? (
-          <Link
-            href={`/dashboard/community/unit/${unit.id}`}
-            className={`${card} block transition-colors hover:border-zinc-300`}
-          >
-            <p className="text-xs font-medium text-zinc-500">Your unit</p>
-            <p className="mt-1 text-sm font-semibold text-zinc-900">
-              {unit.name}
-            </p>
-          </Link>
-        ) : null}
-
+    <aside className={className}>
+      <div className="grid gap-4 lg:sticky lg:top-16">
         <section className={card}>
           <h2 className="text-sm font-semibold text-zinc-900">Latest posts</h2>
           {data.latest.length === 0 ? (

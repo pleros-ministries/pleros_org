@@ -1,8 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useState, useTransition } from "react";
+import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { BellIcon } from "lucide-react";
 
+import { communityKeys } from "@/lib/community/query-keys";
 import { markCommunityNotificationsRead } from "@/app/(site)/dashboard/community/_actions/leader-actions";
 
 type Notification = {
@@ -12,6 +14,17 @@ type Notification = {
   readAt: string | null;
   createdAt: string;
 };
+
+async function fetchNotifications(): Promise<{
+  notifications: Notification[];
+  unread: number;
+}> {
+  const res = await fetch("/api/community/notifications", {
+    credentials: "same-origin",
+  });
+  if (!res.ok) throw new Error("Failed to load notifications");
+  return res.json();
+}
 
 function summarise(n: Notification): string {
   switch (n.kind) {
@@ -34,45 +47,42 @@ function summarise(n: Notification): string {
   }
 }
 
-export function NotificationBell() {
+export function NotificationBell({
+  tone = "dark",
+}: {
+  tone?: "dark" | "light";
+}) {
+  const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [items, setItems] = useState<Notification[]>([]);
-  const [unread, setUnread] = useState(0);
-  const [, startTransition] = useTransition();
 
-  const load = useCallback(async () => {
-    try {
-      const res = await fetch("/api/community/notifications", {
-        credentials: "same-origin",
-      });
-      if (!res.ok) return;
-      const data = (await res.json()) as {
+  const { data } = useQuery({
+    queryKey: communityKeys.notifications(),
+    queryFn: fetchNotifications,
+    refetchInterval: 30_000,
+  });
+  const items = data?.notifications ?? [];
+  const unread = data?.unread ?? 0;
+
+  const markReadMutation = useMutation({
+    mutationFn: () => markCommunityNotificationsRead(),
+    onMutate: () => {
+      queryClient.setQueryData<{
         notifications: Notification[];
         unread: number;
-      };
-      setItems(data.notifications);
-      setUnread(data.unread);
-    } catch {
-      /* ignore */
-    }
-  }, []);
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => {
-      void load();
-    }, 0);
-    return () => window.clearTimeout(timer);
-  }, [load]);
+      }>(communityKeys.notifications(), (old) =>
+        old ? { ...old, unread: 0 } : old,
+      );
+    },
+    onSettled: () =>
+      queryClient.invalidateQueries({
+        queryKey: communityKeys.notifications(),
+      }),
+  });
 
   function toggle() {
     const next = !open;
     setOpen(next);
-    if (next && unread > 0) {
-      setUnread(0);
-      startTransition(async () => {
-        await markCommunityNotificationsRead().catch(() => {});
-      });
-    }
+    if (next && unread > 0) markReadMutation.mutate();
   }
 
   return (
@@ -81,11 +91,21 @@ export function NotificationBell() {
         type="button"
         onClick={toggle}
         aria-label="Community notifications"
-        className="relative inline-flex size-8 items-center justify-center rounded-full text-white/85 hover:text-white"
+        className={`relative inline-flex size-8 items-center justify-center rounded-full ${
+          tone === "light"
+            ? "text-zinc-500 hover:text-zinc-900"
+            : "text-white/85 hover:text-white"
+        }`}
       >
         <BellIcon className="size-4" strokeWidth={2} />
         {unread > 0 ? (
-          <span className="absolute -right-0.5 -top-0.5 grid min-w-4 place-items-center rounded-full bg-[var(--color-brand-lime)] px-1 text-[0.6rem] font-bold text-[var(--color-brand-blue)]">
+          <span
+            className={`absolute -right-0.5 -top-0.5 grid min-w-4 place-items-center rounded-full px-1 text-[0.6rem] font-bold ${
+              tone === "light"
+                ? "bg-[var(--color-brand-blue)] text-white"
+                : "bg-[var(--color-brand-lime)] text-[var(--color-brand-blue)]"
+            }`}
+          >
             {unread > 9 ? "9+" : unread}
           </span>
         ) : null}

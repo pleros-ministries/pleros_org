@@ -4,7 +4,16 @@ import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
 import { buildUnitName, canonicalRegionKey } from "@/lib/community/units";
 import { toPeerMember, type PeerMember } from "@/lib/community/visibility";
-import { PRE_SOGP_PREPARATION_DAYS } from "@/lib/sogp/calendar";
+import {
+  PRE_SOGP_PREPARATION_DAYS,
+  SOGP_TOTAL_WEEKS,
+  getSogpCohortWeek,
+} from "@/lib/sogp/calendar";
+import {
+  countryCodeToFlag,
+  getSogpCountry,
+  resolveSogpCountryCode,
+} from "@/lib/sogp/countries";
 
 export type Unit = typeof schema.units.$inferSelect;
 
@@ -207,6 +216,88 @@ export async function getUnitDetail(unitId: number): Promise<UnitDetail | null> 
       : null,
     members,
     preparationDaysTotal: PRE_SOGP_PREPARATION_DAYS,
+  };
+}
+
+export type UnitRailCard = {
+  id: number;
+  name: string;
+  /** Regional-indicator flag emoji, or "" when the code is unusable. */
+  flag: string;
+  countryLabel: string | null;
+  memberCount: number;
+  leaderFirstName: string | null;
+  /** null when the viewer has no enrolment / cohort. */
+  cohort: {
+    phase: "preparation" | "active" | "complete";
+    week: number | null;
+    total: number;
+  } | null;
+};
+
+/** Compact "Your unit" payload for the community left rail. */
+export async function getUnitRailCard(
+  unitId: number,
+  enrollmentId: number | null,
+): Promise<UnitRailCard | null> {
+  const [row] = await db
+    .select({
+      id: schema.units.id,
+      name: schema.units.name,
+      countryCode: schema.units.countryCode,
+      memberCount: sql<number>`count(${schema.unitMembers.id})::int`,
+      leaderFirstName: sql<
+        string | null
+      >`max(case when ${schema.unitMembers.role} = 'leader' then ${schema.sogpEnrollments.firstName} end)`,
+    })
+    .from(schema.units)
+    .leftJoin(
+      schema.unitMembers,
+      eq(schema.unitMembers.unitId, schema.units.id),
+    )
+    .leftJoin(
+      schema.sogpEnrollments,
+      eq(schema.sogpEnrollments.id, schema.unitMembers.enrollmentId),
+    )
+    .where(eq(schema.units.id, unitId))
+    .groupBy(schema.units.id)
+    .limit(1);
+  if (!row) return null;
+
+  let cohort: UnitRailCard["cohort"] = null;
+  if (enrollmentId != null) {
+    const [c] = await db
+      .select({
+        startsAt: schema.sogpCohorts.startsAt,
+        endsAt: schema.sogpCohorts.endsAt,
+      })
+      .from(schema.sogpEnrollments)
+      .innerJoin(
+        schema.sogpCohorts,
+        eq(schema.sogpCohorts.id, schema.sogpEnrollments.cohortId),
+      )
+      .where(eq(schema.sogpEnrollments.id, enrollmentId))
+      .limit(1);
+    if (c) {
+      const week = getSogpCohortWeek(c.startsAt, c.endsAt);
+      cohort = { ...week, total: SOGP_TOTAL_WEEKS };
+    }
+  }
+
+  const flag =
+    row.countryCode?.trim().length === 2
+      ? countryCodeToFlag(row.countryCode)
+      : "";
+
+  return {
+    id: row.id,
+    name: row.name,
+    flag,
+    countryLabel:
+      getSogpCountry(resolveSogpCountryCode(row.countryCode))?.label ?? null,
+    memberCount: row.memberCount,
+    leaderFirstName: row.leaderFirstName,
+    cohort,
   };
 }
 

@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, gt, inArray, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, or, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 
 import { db } from "@/lib/db";
@@ -85,6 +85,11 @@ function feedColumns(ctx: CommunityContext) {
       where ${schema.postReactions.postId} = ${schema.communityPosts.id}
         and ${schema.postReactions.userId} = ${ctx.userId}
     )`,
+    commentCount: sql<number>`(
+      select count(*) from ${schema.communityPostComments}
+      where ${schema.communityPostComments.postId} = ${schema.communityPosts.id}
+        and ${schema.communityPostComments.status} <> 'removed'
+    )::int`,
   } as const;
 }
 
@@ -100,6 +105,7 @@ type FeedRow = {
   srcAuthorName: string | null;
   reactionCount: number;
   reactedByMe: boolean;
+  commentCount: number;
 };
 
 function mapFeedRow(row: FeedRow, ctx: CommunityContext): FeedPost {
@@ -131,7 +137,7 @@ function mapFeedRow(row: FeedRow, ctx: CommunityContext): FeedPost {
     lastActivityAt: row.post.lastActivityAt.toISOString(),
     reactionCount: row.reactionCount,
     reactedByMe: row.reactedByMe,
-    commentCount: row.post.commentCount,
+    commentCount: row.commentCount,
     shareCount: row.post.shareCount,
     sharedFrom,
     isMine: row.post.authorId === ctx.userId,
@@ -153,9 +159,16 @@ function baseFeedQuery(ctx: CommunityContext) {
     .leftJoin(srcAuthor, eq(srcAuthor.id, srcPost.authorId));
 }
 
+/** Default page size for the paginated community feed. */
+export const COMMUNITY_FEED_PAGE_SIZE = 20;
+
 /** Global posts + the learner's own-unit posts, pinned first then most active. */
 export async function getCommunityFeed(
   ctx: CommunityContext,
+  {
+    limit = COMMUNITY_FEED_PAGE_SIZE,
+    offset = 0,
+  }: { limit?: number; offset?: number } = {},
 ): Promise<FeedPost[]> {
   const scopeFilter = ctx.unit
     ? or(
@@ -172,8 +185,10 @@ export async function getCommunityFeed(
     .orderBy(
       desc(schema.communityPosts.pinned),
       desc(schema.communityPosts.lastActivityAt),
+      desc(schema.communityPosts.id),
     )
-    .limit(100);
+    .limit(limit)
+    .offset(offset);
 
   return rows.map((row) => mapFeedRow(row as FeedRow, ctx));
 }
@@ -244,13 +259,19 @@ export async function getCommunitySidebar(
       )
     : eq(schema.communityPosts.scope, "global");
 
+  const commentCountSql = sql<number>`(
+    select count(*) from ${schema.communityPostComments}
+    where ${schema.communityPostComments.postId} = ${schema.communityPosts.id}
+      and ${schema.communityPostComments.status} <> 'removed'
+  )::int`;
+
   const cols = {
     id: schema.communityPosts.id,
     title: schema.communityPosts.title,
     body: schema.communityPosts.body,
     authorKind: schema.communityPosts.authorKind,
     authorName: schema.users.name,
-    commentCount: schema.communityPosts.commentCount,
+    commentCount: commentCountSql,
   } as const;
 
   const [latestRows, activeRows] = await Promise.all([
@@ -274,7 +295,11 @@ export async function getCommunitySidebar(
       .where(
         and(
           eq(schema.communityPosts.status, "published"),
-          gt(schema.communityPosts.commentCount, 0),
+          sql`exists (
+            select 1 from ${schema.communityPostComments}
+            where ${schema.communityPostComments.postId} = ${schema.communityPosts.id}
+              and ${schema.communityPostComments.status} <> 'removed'
+          )`,
           scopeFilter,
         ),
       )

@@ -21,14 +21,14 @@ export function PostList({
 }) {
   if (posts.length === 0) {
     return (
-      <p className="rounded-2xl border border-zinc-200/80 bg-white p-5 text-sm text-zinc-500">
+      <p className="rounded-2xl border border-(--color-line-strong) bg-white p-5 text-sm text-zinc-500 shadow-(--shadow-sm)">
         {emptyText}
       </p>
     );
   }
 
   return (
-    <div className="grid gap-4">
+    <div className="grid gap-5 sm:gap-4">
       {posts.map((post) => (
         <PostCard
           key={post.id}

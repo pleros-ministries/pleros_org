@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { eq } from "drizzle-orm";
 
 import { db } from "@/lib/db";
@@ -18,12 +19,7 @@ export type CommunityContext = {
   isUnitLeader: boolean;
 };
 
-/**
- * The single gate for every community route, action, and query. A learner with
- * `enrollmentId === null` has no community access; `isUnitLeader` is authority
- * over `unit.id` only.
- */
-export async function getCommunityContext(): Promise<CommunityContext | null> {
+async function loadCommunityContext(): Promise<CommunityContext | null> {
   const session = await getAppSession();
   if (!session) return null;
 
@@ -66,6 +62,13 @@ export async function getCommunityContext(): Promise<CommunityContext | null> {
     isUnitLeader: row?.membershipRole === "leader",
   };
 }
+
+/**
+ * The single gate for every community route, action, and query. A learner with
+ * `enrollmentId === null` has no community access; `isUnitLeader` is authority
+ * over `unit.id` only. Request-cached so the layout and page share one query.
+ */
+export const getCommunityContext = cache(loadCommunityContext);
 
 /** True when the learner may see any community surface. */
 export function canAccessCommunity(ctx: CommunityContext | null): boolean {

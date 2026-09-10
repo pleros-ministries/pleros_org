@@ -125,10 +125,7 @@ export async function addComment(
 
   await db
     .update(schema.communityPosts)
-    .set({
-      commentCount: sql`${schema.communityPosts.commentCount} + 1`,
-      lastActivityAt: now,
-    })
+    .set({ lastActivityAt: now })
     .where(eq(schema.communityPosts.id, input.postId));
 
   return {

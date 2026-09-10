@@ -1,8 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import Link from "next/link";
+import {
+  useMutation,
+  useQuery,
+  useQueryClient,
+  type InfiniteData,
+} from "@tanstack/react-query";
 import {
   CopyIcon,
   MessageCircleIcon,
@@ -16,12 +21,12 @@ import { Popover } from "@base-ui/react/popover";
 
 import type { FeedPost, PostImage } from "@/lib/db/queries/community-posts";
 import type { PostComment } from "@/lib/db/queries/community-comments";
+import type { FeedPage } from "@/lib/community/feed";
+import { communityKeys } from "@/lib/community/query-keys";
 import {
   commentOnPost,
-  loadComments,
   moderateComment,
   moderatePost,
-  reportContent,
   sharePostToFeed,
   toggleCommentLike,
   toggleCommunityReaction,
@@ -30,6 +35,7 @@ import { togglePostPinned } from "@/app/admin/_actions/community-actions";
 
 import { Avatar } from "./avatar";
 import { ImageLightbox } from "./image-lightbox";
+import { PostBody } from "./post-body";
 
 function relativeTime(iso: string): string {
   const diff = Date.now() - new Date(iso).getTime();
@@ -55,10 +61,15 @@ function ImageGrid({
   onOpen: (src: string) => void;
 }) {
   if (images.length === 0) return null;
+  const three = images.length === 3;
   return (
     <div
       className={`grid gap-1 overflow-hidden rounded-xl ${
-        images.length === 1 ? "grid-cols-1" : "grid-cols-2"
+        images.length === 1
+          ? "grid-cols-1"
+          : three
+            ? "h-96 grid-cols-2 grid-rows-2"
+            : "grid-cols-2"
       }`}
     >
       {images.map((img, i) => (
@@ -66,8 +77,8 @@ function ImageGrid({
           key={img.key}
           type="button"
           onClick={() => onOpen(img.url)}
-          className={`relative block ${
-            images.length === 3 && i === 0 ? "col-span-2" : ""
+          className={`relative block ${three ? "h-full" : ""} ${
+            three && i === 0 ? "row-span-2" : ""
           }`}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -75,7 +86,9 @@ function ImageGrid({
             src={img.url}
             alt=""
             loading="lazy"
-            className="h-full max-h-[28rem] w-full object-cover"
+            className={`w-full object-cover ${
+              three ? "h-full" : "h-full max-h-[28rem]"
+            }`}
           />
         </button>
       ))}
@@ -120,53 +133,121 @@ export function PostCard({
   isAdmin: boolean;
   startExpanded?: boolean;
 }) {
-  const router = useRouter();
-  const [pending, startTransition] = useTransition();
+  const queryClient = useQueryClient();
   const [lightbox, setLightbox] = useState<string | null>(null);
   const [showComments, setShowComments] = useState(startExpanded);
 
-  const [reacted, setReacted] = useState(post.reactedByMe);
-  const [reactionCount, setReactionCount] = useState(post.reactionCount);
+  const reacted = post.reactedByMe;
+  const reactionCount = post.reactionCount;
 
-  function refresh() {
-    startTransition(() => router.refresh());
+  function invalidateFeed() {
+    queryClient.invalidateQueries({ queryKey: communityKeys.feed() });
   }
+
+  const reactionMutation = useMutation({
+    mutationFn: () => toggleCommunityReaction(post.id),
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: communityKeys.feed() });
+      const prev = queryClient.getQueryData<InfiniteData<FeedPage>>(
+        communityKeys.feed(),
+      );
+      queryClient.setQueryData<InfiniteData<FeedPage>>(
+        communityKeys.feed(),
+        (old) =>
+          old
+            ? {
+                ...old,
+                pages: old.pages.map((pg) => ({
+                  ...pg,
+                  posts: pg.posts.map((p) =>
+                    p.id === post.id
+                      ? {
+                          ...p,
+                          reactedByMe: !p.reactedByMe,
+                          reactionCount:
+                            p.reactionCount + (p.reactedByMe ? -1 : 1),
+                        }
+                      : p,
+                  ),
+                })),
+              }
+            : old,
+      );
+      return { prev };
+    },
+    onError: (_e, _v, context) => {
+      if (context?.prev)
+        queryClient.setQueryData(communityKeys.feed(), context.prev);
+    },
+    onSettled: invalidateFeed,
+  });
+  const moderateMutation = useMutation({
+    mutationFn: (action: "hide" | "restore") =>
+      moderatePost({ postId: post.id, action }),
+    onSettled: invalidateFeed,
+  });
+  const pinMutation = useMutation({
+    mutationFn: (pinned: boolean) =>
+      togglePostPinned({ postId: post.id, pinned }),
+    onSettled: invalidateFeed,
+  });
+
+  const pending =
+    reactionMutation.isPending ||
+    moderateMutation.isPending ||
+    pinMutation.isPending;
 
   function like() {
-    setReacted((v) => !v);
-    setReactionCount((n) => n + (reacted ? -1 : 1));
-    startTransition(async () => {
-      try {
-        await toggleCommunityReaction(post.id);
-      } finally {
-        router.refresh();
-      }
-    });
+    reactionMutation.mutate();
   }
 
-  const scopeLabel =
-    post.scope === "unit" ? post.unitName ?? "Unit" : "Community";
+  const isUnit = post.scope === "unit";
+  const scopeLabel = isUnit ? (post.unitName ?? "Unit") : "Community";
+  const railClass = isUnit
+    ? "before:bg-(--fulfil-accent)"
+    : "before:bg-(--color-brand-blue)";
+  const pillClass = isUnit
+    ? "bg-(--fulfil-accent-soft) text-(--fulfil-accent)"
+    : "bg-(--muted) text-(--color-brand-blue)";
+  const roleLabel =
+    post.authorKind === "leader"
+      ? isUnit
+        ? "Unit leader"
+        : "Leader"
+      : post.authorKind === "member"
+        ? isUnit
+          ? "Unit member"
+          : "Member"
+        : null;
 
   const actionButton =
     "flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-sm font-medium transition-colors";
 
   return (
-    <article className="overflow-hidden rounded-2xl border border-zinc-200/80 bg-white shadow-[0_1px_3px_rgba(24,24,27,0.06)]">
+    <article
+      className={`group relative overflow-hidden rounded-2xl border border-(--color-line-strong) bg-white shadow-[0_2px_12px_rgba(6,16,86,0.09)] transition-[transform,box-shadow] duration-150 ease-out hover:-translate-y-px hover:shadow-(--shadow-md) sm:shadow-(--shadow-sm) before:pointer-events-none before:absolute before:inset-y-0 before:left-0 before:w-1 before:content-[''] sm:before:w-0.75 ${railClass}`}
+    >
       <div className="grid gap-3 p-4 sm:p-5">
         <div className="flex items-start gap-3">
           <Avatar name={post.authorName} size={40} />
           <div className="min-w-0 flex-1">
-            <p className="flex items-center gap-1.5 text-sm font-semibold text-zinc-900">
+            <p className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-sm font-semibold text-zinc-900">
               {post.authorName}
-              {post.pinned ? (
-                <PinIcon
-                  className="size-3.5 text-[var(--color-brand-blue)]"
-                  strokeWidth={2}
-                />
-              ) : null}
+              <span
+                className={`inline-flex items-center rounded-full px-2 py-0.5 text-[0.7rem] font-medium ${pillClass}`}
+              >
+                {scopeLabel}
+              </span>
             </p>
-            <p className="text-xs text-zinc-500">
-              {scopeLabel} · {relativeTime(post.lastActivityAt)}
+            <p className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-zinc-500">
+              {post.pinned ? (
+                <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[0.7rem] font-medium text-amber-700">
+                  <PinIcon className="size-3" strokeWidth={2} />
+                  Pinned
+                </span>
+              ) : null}
+              {roleLabel ? <span>{roleLabel} ·</span> : null}
+              {relativeTime(post.lastActivityAt)}
             </p>
           </div>
         </div>
@@ -178,9 +259,7 @@ export function PostCard({
         ) : null}
 
         {post.body ? (
-          <p className="whitespace-pre-line text-[15px] leading-relaxed text-zinc-800">
-            {post.body}
-          </p>
+          <PostBody body={post.body} expanded={startExpanded} />
         ) : null}
 
         <ImageGrid images={post.images} onOpen={setLightbox} />
@@ -206,7 +285,8 @@ export function PostCard({
                   onClick={() => setShowComments(true)}
                   className="hover:underline"
                 >
-                  {post.commentCount} comment{post.commentCount === 1 ? "" : "s"}
+                  {post.commentCount} comment
+                  {post.commentCount === 1 ? "" : "s"}
                 </button>
               ) : null}
               {post.shareCount > 0 ? (
@@ -250,26 +330,18 @@ export function PostCard({
           post={post}
           viewerUnitName={viewerUnitName}
           canRepost={canPost}
-          onShared={refresh}
+          onShared={invalidateFeed}
           className={`${actionButton} text-zinc-600 hover:bg-zinc-50`}
         />
       </div>
 
-      {post.canManage || isAdmin || !post.isMine ? (
+      {post.canManage || isAdmin ? (
         <div className="flex items-center gap-4 px-4 pb-2 text-[0.7rem] text-zinc-400 sm:px-5">
           {post.canManage ? (
             <button
               type="button"
               disabled={pending}
-              onClick={() =>
-                startTransition(async () => {
-                  await moderatePost({
-                    postId: post.id,
-                    action: "hide",
-                  }).catch(() => {});
-                  router.refresh();
-                })
-              }
+              onClick={() => moderateMutation.mutate("hide")}
               className="hover:text-zinc-600 hover:underline"
             >
               Hide
@@ -279,36 +351,10 @@ export function PostCard({
             <button
               type="button"
               disabled={pending}
-              onClick={() =>
-                startTransition(async () => {
-                  await togglePostPinned({
-                    postId: post.id,
-                    pinned: !post.pinned,
-                  }).catch(() => {});
-                  router.refresh();
-                })
-              }
+              onClick={() => pinMutation.mutate(!post.pinned)}
               className="hover:text-zinc-600 hover:underline"
             >
               {post.pinned ? "Unpin" : "Pin"}
-            </button>
-          ) : null}
-          {!post.isMine ? (
-            <button
-              type="button"
-              disabled={pending}
-              onClick={() =>
-                startTransition(async () => {
-                  await reportContent({
-                    targetType: "post",
-                    targetId: post.id,
-                    reason: "Reported from feed",
-                  }).catch(() => {});
-                })
-              }
-              className="hover:text-zinc-600 hover:underline"
-            >
-              Report
             </button>
           ) : null}
         </div>
@@ -348,11 +394,25 @@ function ShareMenu({
   onShared: () => void;
   className?: string;
 }) {
-  const [pending, startTransition] = useTransition();
   const [mode, setMode] = useState<"menu" | "repost">("menu");
   const [note, setNote] = useState("");
   const [scope, setScope] = useState<"global" | "unit">("global");
   const [copied, setCopied] = useState(false);
+
+  const shareMutation = useMutation({
+    mutationFn: () =>
+      sharePostToFeed({
+        sourcePostId: post.sharedFrom?.id ?? post.id,
+        scope,
+        note,
+      }),
+    onSuccess: () => {
+      setNote("");
+      setMode("menu");
+      onShared();
+    },
+  });
+  const pending = shareMutation.isPending;
 
   const link =
     typeof window !== "undefined"
@@ -429,18 +489,7 @@ function ShareMenu({
             ) : (
               <form
                 className="grid gap-2 p-1"
-                action={() => {
-                  startTransition(async () => {
-                    await sharePostToFeed({
-                      sourcePostId: post.sharedFrom?.id ?? post.id,
-                      scope,
-                      note,
-                    }).catch(() => {});
-                    setNote("");
-                    setMode("menu");
-                    onShared();
-                  });
-                }}
+                action={() => shareMutation.mutate()}
               >
                 <textarea
                   value={note}
@@ -477,6 +526,15 @@ function ShareMenu({
   );
 }
 
+async function fetchComments(postId: number): Promise<PostComment[]> {
+  const res = await fetch(`/api/community/posts/${postId}/comments`, {
+    credentials: "same-origin",
+  });
+  if (!res.ok) throw new Error("Failed to load comments");
+  const data = (await res.json()) as { comments: PostComment[] };
+  return data.comments;
+}
+
 export function CommentThread({
   postId,
   viewerName = "You",
@@ -486,56 +544,135 @@ export function CommentThread({
   viewerName?: string;
   isAdmin: boolean;
 }) {
-  const router = useRouter();
-  const [comments, setComments] = useState<PostComment[] | null>(null);
-  const [pending, startTransition] = useTransition();
+  const queryClient = useQueryClient();
   const [body, setBody] = useState("");
   const [replyTo, setReplyTo] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const loadedFor = useRef<number | null>(null);
 
-  const reload = useCallback(() => {
-    loadComments(postId)
-      .then((rows) => setComments(rows))
-      .catch(() => setComments([]));
-  }, [postId]);
+  const commentsKey = communityKeys.comments(postId);
 
-  useEffect(() => {
-    if (loadedFor.current === postId) return;
-    loadedFor.current = postId;
-    const timer = window.setTimeout(reload, 0);
-    return () => window.clearTimeout(timer);
-  }, [postId, reload]);
+  const {
+    data: comments = [],
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
+    queryKey: commentsKey,
+    queryFn: () => fetchComments(postId),
+    refetchInterval: 20_000,
+  });
+
+  function patch(next: (list: PostComment[]) => PostComment[]) {
+    queryClient.setQueryData<PostComment[]>(commentsKey, (old) =>
+      next(old ?? []),
+    );
+  }
+  function invalidateThread() {
+    queryClient.invalidateQueries({ queryKey: commentsKey });
+  }
+  function invalidateFeed() {
+    queryClient.invalidateQueries({ queryKey: communityKeys.feed() });
+  }
+
+  const commentMutation = useMutation({
+    mutationFn: (vars: { body: string; replyToId: number | null }) =>
+      commentOnPost({ postId, body: vars.body, replyToId: vars.replyToId }),
+    onMutate: async (vars) => {
+      await queryClient.cancelQueries({ queryKey: commentsKey });
+      const prev = queryClient.getQueryData<PostComment[]>(commentsKey);
+      const optimistic: PostComment = {
+        id: -Date.now(),
+        body: vars.body,
+        authorName: viewerName.trim().split(/\s+/)[0] || "You",
+        authorId: "optimistic",
+        isMine: true,
+        replyToId: vars.replyToId,
+        createdAt: new Date().toISOString(),
+        status: "visible",
+        reactionCount: 0,
+        reactedByMe: false,
+        canModerate: false,
+      };
+      patch((list) => [...list, optimistic]);
+      return { prev };
+    },
+    onError: (_e, _v, context) => {
+      if (context?.prev) queryClient.setQueryData(commentsKey, context.prev);
+      setError("Could not post your comment. Try again.");
+    },
+    onSuccess: () => setError(null),
+    onSettled: () => {
+      invalidateThread();
+      invalidateFeed();
+    },
+  });
+
+  const likeMutation = useMutation({
+    mutationFn: (commentId: number) => toggleCommentLike(commentId),
+    onMutate: async (commentId) => {
+      await queryClient.cancelQueries({ queryKey: commentsKey });
+      const prev = queryClient.getQueryData<PostComment[]>(commentsKey);
+      patch((list) =>
+        list.map((c) =>
+          c.id === commentId
+            ? {
+                ...c,
+                reactedByMe: !c.reactedByMe,
+                reactionCount: c.reactionCount + (c.reactedByMe ? -1 : 1),
+              }
+            : c,
+        ),
+      );
+      return { prev };
+    },
+    onError: (_e, _v, context) => {
+      if (context?.prev) queryClient.setQueryData(commentsKey, context.prev);
+    },
+    onSettled: invalidateThread,
+  });
+
+  const moderateMutation = useMutation({
+    mutationFn: (vars: { commentId: number; action: "hide" | "restore" }) =>
+      moderateComment(vars),
+    onMutate: async (vars) => {
+      if (vars.action !== "hide") return { prev: undefined };
+      await queryClient.cancelQueries({ queryKey: commentsKey });
+      const prev = queryClient.getQueryData<PostComment[]>(commentsKey);
+      patch((list) =>
+        list.map((c) =>
+          c.id === vars.commentId
+            ? { ...c, body: null, status: "hidden" as const }
+            : c,
+        ),
+      );
+      return { prev };
+    },
+    onError: (_e, _v, context) => {
+      if (context?.prev) queryClient.setQueryData(commentsKey, context.prev);
+    },
+    onSettled: () => {
+      invalidateThread();
+      invalidateFeed();
+    },
+  });
+
+  const pending =
+    commentMutation.isPending ||
+    likeMutation.isPending ||
+    moderateMutation.isPending;
 
   function submit() {
     const text = body.trim();
     if (!text) return;
-    const parent = replyTo;
+    setError(null);
+    commentMutation.mutate({ body: text, replyToId: replyTo });
     setBody("");
     setReplyTo(null);
-    setError(null);
-    startTransition(async () => {
-      try {
-        await commentOnPost({ postId, body: text, replyToId: parent });
-        reload();
-        router.refresh();
-      } catch (e) {
-        setError(e instanceof Error ? e.message : "Could not comment.");
-      }
-    });
   }
 
-  function act(run: () => Promise<unknown>) {
-    startTransition(async () => {
-      await run().catch(() => {});
-      reload();
-      router.refresh();
-    });
-  }
-
-  const topLevel = (comments ?? []).filter((c) => c.replyToId == null);
+  const topLevel = comments.filter((c) => c.replyToId == null);
   const repliesByParent = new Map<number, PostComment[]>();
-  for (const c of comments ?? []) {
+  for (const c of comments) {
     if (c.replyToId != null) {
       repliesByParent.set(c.replyToId, [
         ...(repliesByParent.get(c.replyToId) ?? []),
@@ -577,14 +714,23 @@ export function CommentThread({
               Post
             </button>
           </div>
-          {error ? (
-            <p className="mt-1 text-xs text-red-700">{error}</p>
-          ) : null}
+          {error ? <p className="mt-1 text-xs text-red-700">{error}</p> : null}
         </div>
       </form>
 
-      {comments == null ? (
+      {isLoading ? (
         <p className="text-xs text-zinc-400">Loading comments…</p>
+      ) : isError ? (
+        <p className="text-xs text-zinc-500">
+          Couldn&apos;t load comments.{" "}
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className="underline underline-offset-2 hover:text-zinc-700"
+          >
+            Retry
+          </button>
+        </p>
       ) : comments.length === 0 ? (
         <p className="text-xs text-zinc-400">No comments yet. Be the first.</p>
       ) : (
@@ -596,18 +742,9 @@ export function CommentThread({
                 isAdmin={isAdmin}
                 pending={pending}
                 onReply={() => setReplyTo(comment.id)}
-                onLike={() => act(() => toggleCommentLike(comment.id))}
-                onReport={() =>
-                  act(() =>
-                    reportContent({
-                      targetType: "comment",
-                      targetId: comment.id,
-                      reason: "Reported from feed",
-                    }),
-                  )
-                }
+                onLike={() => likeMutation.mutate(comment.id)}
                 onModerate={(action) =>
-                  act(() => moderateComment({ commentId: comment.id, action }))
+                  moderateMutation.mutate({ commentId: comment.id, action })
                 }
               />
               {(repliesByParent.get(comment.id) ?? []).map((reply) => (
@@ -616,20 +753,9 @@ export function CommentThread({
                     comment={reply}
                     isAdmin={isAdmin}
                     pending={pending}
-                    onLike={() => act(() => toggleCommentLike(reply.id))}
-                    onReport={() =>
-                      act(() =>
-                        reportContent({
-                          targetType: "comment",
-                          targetId: reply.id,
-                          reason: "Reported from feed",
-                        }),
-                      )
-                    }
+                    onLike={() => likeMutation.mutate(reply.id)}
                     onModerate={(action) =>
-                      act(() =>
-                        moderateComment({ commentId: reply.id, action }),
-                      )
+                      moderateMutation.mutate({ commentId: reply.id, action })
                     }
                   />
                 </div>
@@ -648,7 +774,6 @@ function CommentRow({
   pending,
   onReply,
   onLike,
-  onReport,
   onModerate,
 }: {
   comment: PostComment;
@@ -656,7 +781,6 @@ function CommentRow({
   pending: boolean;
   onReply?: () => void;
   onLike: () => void;
-  onReport: () => void;
   onModerate: (action: "hide" | "restore") => void;
 }) {
   const canModerate = comment.canModerate || isAdmin;
@@ -693,25 +817,13 @@ function CommentRow({
             Like{comment.reactionCount > 0 ? ` (${comment.reactionCount})` : ""}
           </button>
           {onReply ? (
-            <button
-              type="button"
-              onClick={onReply}
-              className="hover:underline"
-            >
+            <button type="button" onClick={onReply} className="hover:underline">
               Reply
             </button>
           ) : null}
-          <span className="text-zinc-400">{relativeTime(comment.createdAt)}</span>
-          {!comment.isMine && comment.body != null ? (
-            <button
-              type="button"
-              disabled={pending}
-              onClick={onReport}
-              className="text-zinc-400 hover:underline"
-            >
-              Report
-            </button>
-          ) : null}
+          <span className="text-zinc-400">
+            {relativeTime(comment.createdAt)}
+          </span>
           {canModerate && comment.body != null ? (
             <button
               type="button"
