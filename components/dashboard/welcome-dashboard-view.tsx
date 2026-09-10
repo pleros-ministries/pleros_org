@@ -184,14 +184,14 @@ export function WelcomeDashboardView({
   return (
     <section className="site-font-theme bg-[var(--color-surface)]">
       <header className="relative overflow-hidden bg-[var(--color-brand-blue)]">
-        <div className="container-pleros flex min-h-[11.8125rem] max-w-[36rem] flex-col justify-end pb-7 pt-9 text-white sm:min-h-[15rem] sm:pb-8 sm:pt-10">
+        <div className="container-pleros flex min-h-[5.8125rem] max-w-[36rem] flex-col justify-end pb-7 pt-9 text-white sm:min-h-[15rem] sm:pb-8 sm:pt-10">
           <div className="grid max-w-[19rem] gap-3">
-            <h1 className="site-hero-heading max-w-[16ch] text-[clamp(2.25rem,7vw,4.1rem)] text-white">
+            <h1 className="site-hero-heading max-w-[16ch] text-[clamp(1.875rem,6vw,3.725rem)] text-white">
               {name ? `Welcome, ${name}` : "Welcome to your Pleros Dashboard"}
             </h1>
-            <p className="font-[var(--font-be-vietnam-pro)] max-w-[28ch] text-[0.9375rem] leading-[1.35] tracking-[-0.02em] text-white/88 sm:text-[1.05rem]">
+            {/* <p className="font-[var(--font-be-vietnam-pro)] max-w-[28ch] text-[0.8375rem] leading-[1.35] tracking-[-0.02em] text-white/88 sm:text-[1.05rem]">
               Start with SOGP and keep the resources for your spiritual growth, your walk, and the fulfilment of God&apos;s purpose close.
-            </p>
+            </p> */}
           </div>
         </div>
       </header>
