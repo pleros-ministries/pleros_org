@@ -9,6 +9,7 @@ import {
   hideUnitPost,
   toggleCommunityReaction,
 } from "@/app/(site)/dashboard/community/_actions/community-learner-actions";
+import { reportContent } from "@/app/(site)/dashboard/community/_actions/discussion-actions";
 
 const dateFmt = new Intl.DateTimeFormat("en-GB", {
   day: "numeric",
@@ -117,6 +118,23 @@ export function PostList({
                 Hide
               </button>
             ) : null}
+            <button
+              type="button"
+              disabled={pending}
+              onClick={() =>
+                startTransition(async () => {
+                  await reportContent({
+                    targetType: "post",
+                    targetId: post.id,
+                    reason: "Reported from feed",
+                  }).catch(() => {});
+                  router.refresh();
+                })
+              }
+              className="text-xs text-zinc-400 underline underline-offset-2"
+            >
+              Report
+            </button>
           </div>
         </li>
       ))}

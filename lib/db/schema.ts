@@ -134,6 +134,30 @@ export const communityPostStatusEnum = pgEnum("community_post_status", [
   "removed",
 ]);
 
+export const communityThreadStatusEnum = pgEnum("community_thread_status", [
+  "open",
+  "locked",
+  "removed",
+]);
+
+export const communityMessageStatusEnum = pgEnum("community_message_status", [
+  "visible",
+  "hidden",
+  "removed",
+]);
+
+export const contentFlagTargetEnum = pgEnum("content_flag_target", [
+  "post",
+  "thread",
+  "message",
+]);
+
+export const contentFlagStatusEnum = pgEnum("content_flag_status", [
+  "open",
+  "actioned",
+  "dismissed",
+]);
+
 // ─── Welcome pack leads ─────────────────────────────────────────────────────
 
 export const welcomePackLeads = pgTable(
@@ -1204,6 +1228,120 @@ export const postReactions = pgTable(
       t.postId,
       t.userId,
       t.kind,
+    ),
+  ],
+);
+
+// ─── Community: discussion ─────────────────────────────────────────────────
+
+export const communityThreads = pgTable(
+  "community_threads",
+  {
+    id: serial("id").primaryKey(),
+    scope: communityPostScopeEnum("scope").notNull(),
+    unitId: integer("unit_id").references(() => units.id, {
+      onDelete: "cascade",
+    }),
+    authorId: text("author_id")
+      .notNull()
+      .references(() => users.id),
+    title: text("title").notNull(),
+    status: communityThreadStatusEnum("status").notNull().default("open"),
+    lastMessageAt: timestamp("last_message_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    messageCount: integer("message_count").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index("community_threads_scope_unit_last_idx").on(
+      t.scope,
+      t.unitId,
+      t.lastMessageAt,
+    ),
+    index("community_threads_status_idx").on(t.status),
+  ],
+);
+
+export const communityMessages = pgTable(
+  "community_messages",
+  {
+    id: serial("id").primaryKey(),
+    threadId: integer("thread_id")
+      .notNull()
+      .references(() => communityThreads.id, { onDelete: "cascade" }),
+    authorId: text("author_id")
+      .notNull()
+      .references(() => users.id),
+    body: text("body").notNull(),
+    status: communityMessageStatusEnum("status").notNull().default("visible"),
+    /** One level of reply nesting. */
+    replyToId: integer("reply_to_id").references((): AnyPgColumn => communityMessages.id, {
+      onDelete: "set null",
+    }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [index("community_messages_thread_created_idx").on(t.threadId, t.createdAt)],
+);
+
+export const messageReactions = pgTable(
+  "message_reactions",
+  {
+    id: serial("id").primaryKey(),
+    messageId: integer("message_id")
+      .notNull()
+      .references(() => communityMessages.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    kind: text("kind").notNull().default("pray"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("message_reactions_message_user_kind_idx").on(
+      t.messageId,
+      t.userId,
+      t.kind,
+    ),
+  ],
+);
+
+export const contentFlags = pgTable(
+  "content_flags",
+  {
+    id: serial("id").primaryKey(),
+    targetType: contentFlagTargetEnum("target_type").notNull(),
+    targetId: integer("target_id").notNull(),
+    reporterId: text("reporter_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    reason: text("reason").notNull(),
+    status: contentFlagStatusEnum("status").notNull().default("open"),
+    handledBy: text("handled_by").references(() => users.id),
+    handledAt: timestamp("handled_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index("content_flags_status_idx").on(t.status),
+    index("content_flags_target_idx").on(t.targetType, t.targetId),
+    uniqueIndex("content_flags_reporter_target_idx").on(
+      t.reporterId,
+      t.targetType,
+      t.targetId,
     ),
   ],
 );

@@ -19,6 +19,12 @@ import {
   setPostPinned,
   setPostStatus,
 } from "@/lib/db/queries/community-posts";
+import {
+  messageThreadId,
+  resolveFlag,
+  setMessageStatus,
+  setThreadStatus,
+} from "@/lib/db/queries/community-discussion";
 import { sendSogpChannelMessage } from "@/lib/telegram/sogp-broadcast";
 
 /**
@@ -153,4 +159,43 @@ export async function moderatePost(input: {
   await setPostStatus(input.postId, input.status);
   revalidatePath("/admin/community");
   revalidatePath("/dashboard/community");
+}
+
+// ─── Moderation queue ─────────────────────────────────────────────────────
+
+export async function resolveContentFlag(input: {
+  flagId: number;
+  targetType: "post" | "thread" | "message";
+  targetId: number;
+  action: "hide" | "dismiss";
+}) {
+  const session = await requireAdmin();
+
+  if (input.action === "hide") {
+    if (input.targetType === "post") {
+      await setPostStatus(input.targetId, "hidden");
+    } else if (input.targetType === "thread") {
+      await setThreadStatus(input.targetId, "removed");
+    } else {
+      await setMessageStatus(input.targetId, "hidden");
+    }
+  }
+
+  await resolveFlag({
+    flagId: input.flagId,
+    handledBy: session.user.id,
+    status: input.action === "hide" ? "actioned" : "dismissed",
+  });
+
+  revalidatePath("/admin/community");
+  revalidatePath("/dashboard/community");
+  if (input.targetType === "message") {
+    const threadId = await messageThreadId(input.targetId);
+    if (threadId != null) {
+      revalidatePath(`/dashboard/community/discussion/${threadId}`);
+    }
+  }
+  if (input.targetType === "thread") {
+    revalidatePath("/dashboard/community/discussion");
+  }
 }

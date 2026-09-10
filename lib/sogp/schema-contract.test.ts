@@ -16,6 +16,10 @@ import {
   unitLeaderInvites,
   communityPosts,
   postReactions,
+  communityThreads,
+  communityMessages,
+  messageReactions,
+  contentFlags,
 } from "../db/schema";
 
 describe("SOGP schema", () => {
@@ -45,6 +49,17 @@ describe("SOGP schema", () => {
     expect(communityPosts.authorKind).toBeDefined();
     expect(communityPosts.status).toBeDefined();
     expect(postReactions.postId).toBeDefined();
+  });
+
+  test("exports the community discussion + moderation tables", () => {
+    expect(communityThreads.scope).toBeDefined();
+    expect(communityThreads.status).toBeDefined();
+    expect(communityThreads.messageCount).toBeDefined();
+    expect(communityMessages.threadId).toBeDefined();
+    expect(communityMessages.replyToId).toBeDefined();
+    expect(messageReactions.messageId).toBeDefined();
+    expect(contentFlags.targetType).toBeDefined();
+    expect(contentFlags.status).toBeDefined();
   });
 
   test("stores structured enrolment and curriculum metadata", () => {

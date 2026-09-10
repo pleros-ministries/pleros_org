@@ -5,10 +5,12 @@ import { useRouter } from "next/navigation";
 
 import type { UnitWithCounts } from "@/lib/db/queries/community-units";
 import type { AdminPost } from "@/lib/db/queries/community-posts";
+import type { OpenFlag } from "@/lib/db/queries/community-discussion";
 import {
   backfillCommunityUnits,
   moderatePost,
   publishGlobalPost,
+  resolveContentFlag,
   togglePostPinned,
   updateUnitStatus,
   updateUnitTelegramUrl,
@@ -17,11 +19,13 @@ import {
 export function AdminCommunityPage({
   units,
   posts,
+  flags,
   enrolmentCount,
   memberCount,
 }: {
   units: UnitWithCounts[];
   posts: AdminPost[];
+  flags: OpenFlag[];
   enrolmentCount: number;
   memberCount: number;
 }) {
@@ -152,6 +156,72 @@ export function AdminCommunityPage({
             ))}
           </ul>
         ) : null}
+      </section>
+
+      <section className="grid gap-2 rounded-sm border border-zinc-200 bg-white p-4">
+        <h2 className="ppc-heading text-sm font-semibold text-zinc-900">
+          Moderation queue{flags.length > 0 ? ` (${flags.length})` : ""}
+        </h2>
+        {flags.length === 0 ? (
+          <p className="text-xs text-zinc-500">No open flags.</p>
+        ) : (
+          <ul className="grid gap-2">
+            {flags.map((flag) => (
+              <li
+                key={flag.id}
+                className="grid gap-1 border-t border-zinc-100 pt-2 text-xs first:border-0 first:pt-0"
+              >
+                <div className="text-zinc-900">
+                  <span className="font-semibold">{flag.targetType}</span>{" "}
+                  {flag.preview ? `— ${flag.preview}` : ""}
+                </div>
+                <div className="text-zinc-500">
+                  “{flag.reason}” · reported by {flag.reporterName}
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    disabled={pending}
+                    onClick={() =>
+                      run(
+                        () =>
+                          resolveContentFlag({
+                            flagId: flag.id,
+                            targetType: flag.targetType,
+                            targetId: flag.targetId,
+                            action: "hide",
+                          }),
+                        "Content hidden, flag closed.",
+                      )
+                    }
+                    className="text-red-700 underline underline-offset-2"
+                  >
+                    Hide content
+                  </button>
+                  <button
+                    type="button"
+                    disabled={pending}
+                    onClick={() =>
+                      run(
+                        () =>
+                          resolveContentFlag({
+                            flagId: flag.id,
+                            targetType: flag.targetType,
+                            targetId: flag.targetId,
+                            action: "dismiss",
+                          }),
+                        "Flag dismissed.",
+                      )
+                    }
+                    className="text-zinc-500 underline underline-offset-2"
+                  >
+                    Dismiss
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       <div className="overflow-x-auto rounded-sm border border-zinc-200">

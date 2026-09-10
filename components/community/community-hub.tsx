@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeftIcon, SendIcon } from "lucide-react";
+import { SendIcon } from "lucide-react";
 
 import type { FeedPost } from "@/lib/db/queries/community-posts";
 import { createLeaderUnitPost } from "@/app/(site)/dashboard/community/_actions/community-learner-actions";
 
+import { CommunityTabs } from "./community-tabs";
 import { PostList } from "./post-list";
 
 type HubUnit = { id: number; name: string; telegramUrl: string | null } | null;
@@ -25,38 +25,13 @@ export function CommunityHub({
 }) {
   return (
     <section className="site-font-theme min-h-screen bg-[#f6f5f1] pb-16 text-zinc-900">
-      <nav
-        aria-label="Community navigation"
-        className="sticky top-0 z-30 border-b border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)] shadow-sm"
-      >
-        <div className="site-shell-page sogp-shell-page flex min-h-12 items-center justify-between gap-4">
-          <Link
-            href="/dashboard"
-            className="inline-flex min-h-9 items-center gap-1.5 rounded-sm px-1 text-xs font-medium text-white/85 transition-colors duration-150 hover:text-white"
-          >
-            <ArrowLeftIcon className="size-3.5" strokeWidth={2} /> Dashboard
-          </Link>
-          <span className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-[var(--color-brand-lime)]">
-            Community
-          </span>
-        </div>
-      </nav>
+      <CommunityTabs
+        current="feed"
+        unitId={unit?.id ?? null}
+        title={unit ? unit.name : "Community"}
+      />
 
-      <div className="site-shell-page sogp-shell-page grid gap-4 pb-6 pt-5">
-        <header className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-          <h1 className="ppc-heading text-lg font-semibold text-zinc-900">
-            {unit ? unit.name : "Community"}
-          </h1>
-          {unit ? (
-            <Link
-              href={`/dashboard/community/unit/${unit.id}`}
-              className="text-xs font-medium text-[var(--color-brand-blue)] underline underline-offset-4"
-            >
-              Your unit
-            </Link>
-          ) : null}
-        </header>
-
+      <div className="site-shell-page sogp-shell-page grid gap-4 pb-6 pt-4">
         {unit && (isUnitLeader || isAdmin) ? <LeaderComposer /> : null}
 
         <PostList
