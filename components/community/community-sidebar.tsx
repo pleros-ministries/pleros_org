@@ -18,7 +18,7 @@ export function CommunitySidebar({
   unit: { id: number; name: string } | null;
 }) {
   return (
-    <aside className="hidden w-72 shrink-0 lg:block">
+    <aside className="hidden lg:block">
       <div className="sticky top-16 grid gap-4">
         {unit ? (
           <Link

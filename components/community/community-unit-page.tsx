@@ -54,7 +54,8 @@ export function CommunityUnitPage({
         </div>
       </nav>
 
-      <div className="site-shell-page sogp-shell-page grid gap-5 pb-6 pt-5">
+      <div className="site-shell-page sogp-shell-page pb-6 pt-5">
+       <div className="mx-auto grid max-w-2xl gap-5">
         <header className="grid gap-1">
           <h1 className="ppc-heading text-lg font-semibold text-zinc-900">
             {detail.name}
@@ -129,6 +130,7 @@ export function CommunityUnitPage({
         {isAdmin ? (
           <AdminLeaderControl unitId={detail.id} members={adminMembers} />
         ) : null}
+       </div>
       </div>
     </section>
   );

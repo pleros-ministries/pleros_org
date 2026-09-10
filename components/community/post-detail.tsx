@@ -33,7 +33,7 @@ export function PostDetail({
       </nav>
 
       <div className="site-shell-page sogp-shell-page pb-6 pt-5">
-        <div className="mx-auto max-w-2xl">
+        <div className="mx-auto max-w-xl">
           <PostCard
             post={post}
             viewerName={viewerName}

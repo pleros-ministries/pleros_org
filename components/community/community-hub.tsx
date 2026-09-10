@@ -35,7 +35,7 @@ export function CommunityHub({
       />
 
       <div className="site-shell-page sogp-shell-page pb-6 pt-4">
-        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_18rem]">
+        <div className="mx-auto grid w-full max-w-xl gap-6 lg:max-w-[54rem] lg:grid-cols-[minmax(0,1fr)_17rem] lg:items-start">
           <div className="grid gap-4">
             <FeedComposer
               viewerName={viewerName}
