@@ -65,7 +65,7 @@ export function FeedComposer({
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="h-10 flex-1 rounded-full bg-zinc-100 px-4 text-left text-sm text-zinc-500 transition-colors hover:bg-zinc-200/70"
+          className="h-10 flex-1 rounded-full bg-zinc-100 px-4 text-left text-xs text-zinc-500 transition-colors hover:bg-zinc-200/70"
         >
           Share something with the community…
         </button>
