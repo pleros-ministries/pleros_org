@@ -8,7 +8,7 @@ function snippet(post: { title: string | null; body: string }) {
 }
 
 const card =
-  "rounded-2xl border border-zinc-200/80 bg-white p-4 shadow-[0_1px_3px_rgba(24,24,27,0.06)]";
+  "rounded-2xl border border-zinc-200/80 bg-white p-5 shadow-[0_1px_3px_rgba(24,24,27,0.06)]";
 
 export function CommunitySidebar({
   data,
