@@ -93,9 +93,7 @@ export function CommunityHub({
           ) : null}
         </header>
 
-        {isUnitLeader || isAdmin ? (
-          <LeaderComposer />
-        ) : null}
+        {unit && (isUnitLeader || isAdmin) ? <LeaderComposer /> : null}
 
         {feed.length === 0 ? (
           <p className="rounded-sm border border-zinc-200 bg-white p-4 text-xs text-zinc-500">
