@@ -38,7 +38,7 @@ function DashboardCard({
   statusLabel?: string;
 }) {
   const className = cn(
-    "group relative flex min-h-[14.625rem] flex-col justify-end overflow-hidden rounded-[var(--radius-md)] border p-3 pb-4 shadow-[var(--shadow-sm)] transition-transform duration-150 ease-out sm:min-h-[15.5rem] sm:p-4 sm:pb-5",
+    "group relative flex min-h-[11rem] flex-col justify-end overflow-hidden rounded-[var(--radius-md)] border p-3 pb-3.5 shadow-[var(--shadow-sm)] transition-transform duration-150 ease-out sm:min-h-[12.5rem] sm:p-4 sm:pb-4",
     href && "hover:-translate-y-px",
     status === "coming_soon" && "cursor-default saturate-[0.72]",
     backgroundImageSrc
@@ -80,13 +80,13 @@ function DashboardCard({
           backgroundSize: "16px 16px",
         }}
       />
-      <div className="relative z-10 grid gap-1.5">
+      <div className="relative z-10 grid gap-1">
         {statusLabel ? (
           <span className="mb-1 inline-flex w-fit rounded-full bg-white/92 px-2.5 py-1 font-[var(--font-be-vietnam-pro)] text-[0.6rem] font-semibold text-[var(--color-brand-blue)]">
             {statusLabel}
           </span>
         ) : null}
-        <h2 className="site-pathway-title max-w-[13ch] text-[1rem] text-white">
+        <h2 className="site-pathway-title max-w-[13ch] text-[0.95rem] text-white sm:text-[1rem]">
           {title}
         </h2>
         <p className="font-[var(--font-be-vietnam-pro)] max-w-[18ch] text-[0.6875rem] leading-[1.15] tracking-[-0.01em] text-white/92 sm:text-[0.8125rem]">
@@ -119,7 +119,7 @@ function DashboardChurchMinistryStrip() {
   return (
     <section
       aria-labelledby="dashboard-church-ministry-title"
-      className="relative mt-12 overflow-hidden bg-[linear-gradient(180deg,#f4fcff_0%,#dff5ff_100%)] px-[1.25rem] py-14 text-[var(--color-brand-blue)] sm:mt-14 sm:px-8 sm:py-16"
+      className="relative mt-8 overflow-hidden bg-[linear-gradient(180deg,#f4fcff_0%,#dff5ff_100%)] px-[1.25rem] py-10 text-[var(--color-brand-blue)] sm:mt-10 sm:px-8 sm:py-12"
     >
       <div
         aria-hidden="true"
@@ -184,7 +184,7 @@ export function WelcomeDashboardView({
   return (
     <section className="site-font-theme bg-[var(--color-surface)]">
       <header className="relative overflow-hidden bg-[var(--color-brand-blue)]">
-        <div className="container-pleros flex min-h-[17.8125rem] max-w-[36rem] flex-col justify-end pb-8 pt-10 text-white sm:min-h-[21rem] sm:pb-10 sm:pt-12">
+        <div className="container-pleros flex min-h-[11.8125rem] max-w-[36rem] flex-col justify-end pb-7 pt-9 text-white sm:min-h-[15rem] sm:pb-8 sm:pt-10">
           <div className="grid max-w-[19rem] gap-3">
             <h1 className="site-hero-heading max-w-[16ch] text-[clamp(2.25rem,7vw,4.1rem)] text-white">
               {name ? `Welcome, ${name}` : "Welcome to your Pleros Dashboard"}
@@ -196,20 +196,20 @@ export function WelcomeDashboardView({
         </div>
       </header>
 
-      <div className="container-pleros grid max-w-[36rem] gap-10 pt-9 pb-12 sm:pt-10 sm:pb-14">
+      <div className="container-pleros grid max-w-[36rem] gap-7 pt-7 pb-10 sm:pt-8 sm:pb-12">
         <InstallAppCta />
 
-        <div className="grid gap-10">
+        <div className="grid gap-6">
           {sections.map((section) => (
-            <section key={section.id} className="grid gap-4">
-              <div className="grid gap-2">
+            <section key={section.id} className="grid gap-3">
+              <div className="grid gap-1.5">
                 <h2 className="site-section-heading text-[1.1rem] text-[var(--color-brand-blue)] sm:text-[1.35rem]">
                   {section.title}
                 </h2>
                 <div className="h-px w-full bg-[rgba(1,21,133,0.3)]" />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 {section.cards.map((card) => (
                   <DashboardCard
                     key={card.id}
