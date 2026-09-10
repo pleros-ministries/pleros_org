@@ -28,11 +28,11 @@ import {
 } from "@/app/(site)/dashboard/community/_actions/feed-actions";
 import { togglePostPinned } from "@/app/admin/_actions/community-actions";
 
+import { Avatar } from "./avatar";
 import { ImageLightbox } from "./image-lightbox";
 
 function relativeTime(iso: string): string {
-  const then = new Date(iso).getTime();
-  const diff = Date.now() - then;
+  const diff = Date.now() - new Date(iso).getTime();
   const min = Math.round(diff / 60_000);
   if (min < 1) return "just now";
   if (min < 60) return `${min}m`;
@@ -57,7 +57,7 @@ function ImageGrid({
   if (images.length === 0) return null;
   return (
     <div
-      className={`grid gap-1 overflow-hidden rounded-sm ${
+      className={`grid gap-1 overflow-hidden rounded-xl ${
         images.length === 1 ? "grid-cols-1" : "grid-cols-2"
       }`}
     >
@@ -75,7 +75,7 @@ function ImageGrid({
             src={img.url}
             alt=""
             loading="lazy"
-            className="h-full max-h-80 w-full object-cover"
+            className="h-full max-h-[28rem] w-full object-cover"
           />
         </button>
       ))}
@@ -87,16 +87,17 @@ function QuotedPost({ post }: { post: NonNullable<FeedPost["sharedFrom"]> }) {
   return (
     <Link
       href={`/dashboard/community/post/${post.id}`}
-      className="block rounded-sm border border-zinc-200 bg-zinc-50 p-3 transition-colors hover:border-zinc-300"
+      className="mt-1 block rounded-xl border border-zinc-200 bg-zinc-50/70 p-3 transition-colors hover:bg-zinc-100/70"
     >
-      <p className="text-[0.65rem] font-semibold uppercase tracking-[0.08em] text-zinc-400">
-        {post.authorName}
-      </p>
-      <p className="mt-1 line-clamp-4 whitespace-pre-line text-xs leading-[1.6] text-zinc-600">
+      <div className="flex items-center gap-2">
+        <Avatar name={post.authorName} size={24} />
+        <p className="text-xs font-semibold text-zinc-700">{post.authorName}</p>
+      </div>
+      <p className="mt-1.5 line-clamp-4 whitespace-pre-line text-sm leading-relaxed text-zinc-600">
         {post.body}
       </p>
       {post.images.length > 0 ? (
-        <p className="mt-1 text-[0.65rem] text-zinc-400">
+        <p className="mt-1 text-xs text-zinc-400">
           {post.images.length} photo{post.images.length === 1 ? "" : "s"}
         </p>
       ) : null}
@@ -106,11 +107,13 @@ function QuotedPost({ post }: { post: NonNullable<FeedPost["sharedFrom"]> }) {
 
 export function PostCard({
   post,
+  viewerName = "You",
   viewerUnitName,
   isAdmin,
   startExpanded = false,
 }: {
   post: FeedPost;
+  viewerName?: string;
   viewerUnitName: string | null;
   isAdmin: boolean;
   startExpanded?: boolean;
@@ -142,140 +145,181 @@ export function PostCard({
   const scopeLabel =
     post.scope === "unit" ? post.unitName ?? "Unit" : "Community";
 
+  const actionButton =
+    "flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-sm font-medium transition-colors";
+
   return (
-    <article className="grid gap-2 rounded-sm border border-zinc-200 bg-white p-4">
-      <div className="flex flex-wrap items-center gap-2 text-[0.65rem] font-semibold uppercase tracking-[0.08em] text-zinc-400">
-        {post.pinned ? (
-          <PinIcon className="size-3 text-[var(--color-brand-blue)]" />
+    <article className="overflow-hidden rounded-2xl border border-zinc-200/80 bg-white shadow-[0_1px_3px_rgba(24,24,27,0.06)]">
+      <div className="grid gap-3 p-4 sm:p-5">
+        <div className="flex items-start gap-3">
+          <Avatar name={post.authorName} size={40} />
+          <div className="min-w-0 flex-1">
+            <p className="flex items-center gap-1.5 text-sm font-semibold text-zinc-900">
+              {post.authorName}
+              {post.pinned ? (
+                <PinIcon
+                  className="size-3.5 text-[var(--color-brand-blue)]"
+                  strokeWidth={2}
+                />
+              ) : null}
+            </p>
+            <p className="text-xs text-zinc-500">
+              {scopeLabel} · {relativeTime(post.lastActivityAt)}
+            </p>
+          </div>
+        </div>
+
+        {post.title ? (
+          <h2 className="ppc-heading text-base font-semibold text-zinc-900">
+            {post.title}
+          </h2>
         ) : null}
-        <span className="text-zinc-600">{post.authorName}</span>
-        <span>· {scopeLabel}</span>
-        <span className="font-normal normal-case tracking-normal">
-          · {relativeTime(post.lastActivityAt)}
-        </span>
+
+        {post.body ? (
+          <p className="whitespace-pre-line text-[15px] leading-relaxed text-zinc-800">
+            {post.body}
+          </p>
+        ) : null}
+
+        <ImageGrid images={post.images} onOpen={setLightbox} />
+
+        {post.sharedFrom ? <QuotedPost post={post.sharedFrom} /> : null}
+
+        {reactionCount > 0 || post.commentCount > 0 || post.shareCount > 0 ? (
+          <div className="flex items-center justify-between text-xs text-zinc-500">
+            <span className="flex items-center gap-1.5">
+              {reactionCount > 0 ? (
+                <>
+                  <span className="inline-flex size-4 items-center justify-center rounded-full bg-[var(--color-brand-blue)] text-white">
+                    <ThumbsUpIcon className="size-2.5" strokeWidth={2.5} />
+                  </span>
+                  {reactionCount}
+                </>
+              ) : null}
+            </span>
+            <span className="flex gap-3">
+              {post.commentCount > 0 ? (
+                <button
+                  type="button"
+                  onClick={() => setShowComments(true)}
+                  className="hover:underline"
+                >
+                  {post.commentCount} comment{post.commentCount === 1 ? "" : "s"}
+                </button>
+              ) : null}
+              {post.shareCount > 0 ? (
+                <span>
+                  {post.shareCount} share{post.shareCount === 1 ? "" : "s"}
+                </span>
+              ) : null}
+            </span>
+          </div>
+        ) : null}
       </div>
 
-      {post.title ? (
-        <h2 className="ppc-heading text-sm font-semibold text-zinc-900">
-          {post.title}
-        </h2>
-      ) : null}
-
-      {post.body ? (
-        <p className="whitespace-pre-line text-sm leading-[1.6] text-zinc-700">
-          {post.body}
-        </p>
-      ) : null}
-
-      <ImageGrid images={post.images} onOpen={setLightbox} />
-
-      {post.sharedFrom ? <QuotedPost post={post.sharedFrom} /> : null}
-
-      <div className="mt-1 flex items-center justify-between border-t border-zinc-100 pt-2 text-xs text-zinc-500">
-        <span>
-          {reactionCount > 0
-            ? `${reactionCount} like${reactionCount === 1 ? "" : "s"}`
-            : ""}
-        </span>
-        <span className="flex gap-3">
-          {post.commentCount > 0 ? (
-            <span>
-              {post.commentCount} comment{post.commentCount === 1 ? "" : "s"}
-            </span>
-          ) : null}
-          {post.shareCount > 0 ? (
-            <span>
-              {post.shareCount} share{post.shareCount === 1 ? "" : "s"}
-            </span>
-          ) : null}
-        </span>
-      </div>
-
-      <div className="flex items-center gap-1 border-t border-zinc-100 pt-1">
+      <div className="mx-3 flex items-center gap-1 border-t border-zinc-100 py-1">
         <button
           type="button"
           disabled={pending}
           onClick={like}
           aria-pressed={reacted}
-          className={`inline-flex flex-1 items-center justify-center gap-1.5 rounded-sm py-1.5 text-xs font-medium transition-colors ${
+          className={`${actionButton} ${
             reacted
               ? "text-[var(--color-brand-blue)]"
               : "text-zinc-600 hover:bg-zinc-50"
           }`}
         >
-          <ThumbsUpIcon className="size-4" strokeWidth={2} /> Like
+          <ThumbsUpIcon
+            className="size-[18px]"
+            strokeWidth={reacted ? 2.5 : 2}
+            fill={reacted ? "currentColor" : "none"}
+          />
+          Like
         </button>
         <button
           type="button"
           onClick={() => setShowComments((v) => !v)}
-          className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-sm py-1.5 text-xs font-medium text-zinc-600 transition-colors hover:bg-zinc-50"
+          className={`${actionButton} text-zinc-600 hover:bg-zinc-50`}
         >
-          <MessageCircleIcon className="size-4" strokeWidth={2} /> Comment
+          <MessageCircleIcon className="size-[18px]" strokeWidth={2} />
+          Comment
         </button>
         <ShareMenu
           post={post}
           viewerUnitName={viewerUnitName}
           onShared={refresh}
+          className={`${actionButton} text-zinc-600 hover:bg-zinc-50`}
         />
       </div>
 
-      <div className="flex items-center gap-3 text-[0.7rem] text-zinc-400">
-        {post.canManage ? (
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() =>
-              startTransition(async () => {
-                await moderatePost({ postId: post.id, action: "hide" }).catch(
-                  () => {},
-                );
-                router.refresh();
-              })
-            }
-            className="underline underline-offset-2"
-          >
-            Hide
-          </button>
-        ) : null}
-        {isAdmin ? (
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() =>
-              startTransition(async () => {
-                await togglePostPinned({
-                  postId: post.id,
-                  pinned: !post.pinned,
-                }).catch(() => {});
-                router.refresh();
-              })
-            }
-            className="underline underline-offset-2"
-          >
-            {post.pinned ? "Unpin" : "Pin"}
-          </button>
-        ) : null}
-        {!post.isMine ? (
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() =>
-              startTransition(async () => {
-                await reportContent({
-                  targetType: "post",
-                  targetId: post.id,
-                  reason: "Reported from feed",
-                }).catch(() => {});
-              })
-            }
-            className="underline underline-offset-2"
-          >
-            Report
-          </button>
-        ) : null}
-      </div>
+      {post.canManage || isAdmin || !post.isMine ? (
+        <div className="flex items-center gap-4 px-4 pb-2 text-[0.7rem] text-zinc-400 sm:px-5">
+          {post.canManage ? (
+            <button
+              type="button"
+              disabled={pending}
+              onClick={() =>
+                startTransition(async () => {
+                  await moderatePost({
+                    postId: post.id,
+                    action: "hide",
+                  }).catch(() => {});
+                  router.refresh();
+                })
+              }
+              className="hover:text-zinc-600 hover:underline"
+            >
+              Hide
+            </button>
+          ) : null}
+          {isAdmin ? (
+            <button
+              type="button"
+              disabled={pending}
+              onClick={() =>
+                startTransition(async () => {
+                  await togglePostPinned({
+                    postId: post.id,
+                    pinned: !post.pinned,
+                  }).catch(() => {});
+                  router.refresh();
+                })
+              }
+              className="hover:text-zinc-600 hover:underline"
+            >
+              {post.pinned ? "Unpin" : "Pin"}
+            </button>
+          ) : null}
+          {!post.isMine ? (
+            <button
+              type="button"
+              disabled={pending}
+              onClick={() =>
+                startTransition(async () => {
+                  await reportContent({
+                    targetType: "post",
+                    targetId: post.id,
+                    reason: "Reported from feed",
+                  }).catch(() => {});
+                })
+              }
+              className="hover:text-zinc-600 hover:underline"
+            >
+              Report
+            </button>
+          ) : null}
+        </div>
+      ) : null}
 
-      {showComments ? <CommentThread postId={post.id} isAdmin={isAdmin} /> : null}
+      {showComments ? (
+        <div className="border-t border-zinc-100 bg-zinc-50/50 px-4 py-4 sm:px-5">
+          <CommentThread
+            postId={post.id}
+            viewerName={viewerName}
+            isAdmin={isAdmin}
+          />
+        </div>
+      ) : null}
 
       {lightbox ? (
         <ImageLightbox
@@ -292,10 +336,12 @@ function ShareMenu({
   post,
   viewerUnitName,
   onShared,
+  className = "",
 }: {
   post: FeedPost;
   viewerUnitName: string | null;
   onShared: () => void;
+  className?: string;
 }) {
   const [pending, startTransition] = useTransition();
   const [mode, setMode] = useState<"menu" | "repost">("menu");
@@ -319,6 +365,9 @@ function ShareMenu({
     );
   }
 
+  const menuItem =
+    "flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-zinc-700 transition-colors hover:bg-zinc-50";
+
   return (
     <Popover.Root
       onOpenChange={(open) => {
@@ -328,49 +377,48 @@ function ShareMenu({
         }
       }}
     >
-      <Popover.Trigger className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-sm py-1.5 text-xs font-medium text-zinc-600 transition-colors hover:bg-zinc-50">
-        <Share2Icon className="size-4" strokeWidth={2} /> Share
+      <Popover.Trigger className={className}>
+        <Share2Icon className="size-[18px]" strokeWidth={2} /> Share
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner sideOffset={8} align="end">
-          <Popover.Popup className="z-50 w-60 rounded-sm border border-zinc-200 bg-white p-2 text-xs shadow-lg outline-none">
+          <Popover.Popup className="z-50 w-64 rounded-xl border border-zinc-200 bg-white p-1.5 text-sm shadow-lg outline-none">
             {mode === "menu" ? (
-              <div className="grid gap-1">
+              <div className="grid gap-0.5">
                 <button
                   type="button"
                   onClick={() => setMode("repost")}
-                  className="flex items-center gap-2 rounded-sm px-2 py-1.5 text-left text-zinc-700 hover:bg-zinc-50"
+                  className={menuItem}
                 >
-                  <Repeat2Icon className="size-4" strokeWidth={2} /> Share to feed
+                  <Repeat2Icon className="size-4 text-zinc-400" strokeWidth={2} />
+                  Share to feed
                 </button>
-                <button
-                  type="button"
-                  onClick={copy}
-                  className="flex items-center gap-2 rounded-sm px-2 py-1.5 text-left text-zinc-700 hover:bg-zinc-50"
-                >
-                  <CopyIcon className="size-4" strokeWidth={2} />
+                <button type="button" onClick={copy} className={menuItem}>
+                  <CopyIcon className="size-4 text-zinc-400" strokeWidth={2} />
                   {copied ? "Link copied" : "Copy link"}
                 </button>
                 <a
                   href={`https://wa.me/?text=${encodeURIComponent(`${text} ${link}`)}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-2 rounded-sm px-2 py-1.5 text-left text-zinc-700 hover:bg-zinc-50"
+                  className={menuItem}
                 >
-                  <SendIcon className="size-4" strokeWidth={2} /> WhatsApp
+                  <SendIcon className="size-4 text-zinc-400" strokeWidth={2} />
+                  WhatsApp
                 </a>
                 <a
                   href={`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(text)}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="flex items-center gap-2 rounded-sm px-2 py-1.5 text-left text-zinc-700 hover:bg-zinc-50"
+                  className={menuItem}
                 >
-                  <SendIcon className="size-4" strokeWidth={2} /> Telegram
+                  <SendIcon className="size-4 text-zinc-400" strokeWidth={2} />
+                  Telegram
                 </a>
               </div>
             ) : (
               <form
-                className="grid gap-2"
+                className="grid gap-2 p-1"
                 action={() => {
                   startTransition(async () => {
                     await sharePostToFeed({
@@ -389,7 +437,7 @@ function ShareMenu({
                   onChange={(e) => setNote(e.target.value)}
                   placeholder="Say something about this…"
                   rows={3}
-                  className="rounded-sm border border-zinc-200 p-2 text-xs"
+                  className="rounded-lg border border-zinc-200 p-2 text-sm"
                 />
                 {viewerUnitName ? (
                   <select
@@ -397,7 +445,7 @@ function ShareMenu({
                     onChange={(e) =>
                       setScope(e.target.value as "global" | "unit")
                     }
-                    className="h-8 rounded-sm border border-zinc-200 px-1 text-xs"
+                    className="h-9 rounded-lg border border-zinc-200 px-2 text-sm"
                   >
                     <option value="global">To the community</option>
                     <option value="unit">To {viewerUnitName}</option>
@@ -406,7 +454,7 @@ function ShareMenu({
                 <button
                   type="submit"
                   disabled={pending}
-                  className="inline-flex h-8 items-center justify-center rounded-sm bg-[var(--color-brand-blue)] px-3 text-xs font-semibold text-white disabled:opacity-50"
+                  className="inline-flex h-9 items-center justify-center rounded-lg bg-[var(--color-brand-blue)] px-3 text-sm font-semibold text-white disabled:opacity-50"
                 >
                   {pending ? "Sharing…" : "Share"}
                 </button>
@@ -421,9 +469,11 @@ function ShareMenu({
 
 export function CommentThread({
   postId,
+  viewerName = "You",
   isAdmin,
 }: {
   postId: number;
+  viewerName?: string;
   isAdmin: boolean;
 }) {
   const router = useRouter();
@@ -485,52 +535,52 @@ export function CommentThread({
   }
 
   return (
-    <div className="grid gap-2 border-t border-zinc-100 pt-3">
-      <form
-        className="grid gap-1.5"
-        action={() => submit()}
-      >
-        {replyTo != null ? (
-          <p className="text-[0.7rem] text-zinc-500">
-            Replying ·{" "}
+    <div className="grid gap-3">
+      <form className="flex items-start gap-2" action={() => submit()}>
+        <Avatar name={viewerName} size={32} className="mt-0.5" />
+        <div className="min-w-0 flex-1">
+          {replyTo != null ? (
+            <p className="mb-1 text-xs text-zinc-500">
+              Replying ·{" "}
+              <button
+                type="button"
+                onClick={() => setReplyTo(null)}
+                className="underline underline-offset-2"
+              >
+                cancel
+              </button>
+            </p>
+          ) : null}
+          <div className="flex items-end gap-2">
+            <textarea
+              value={body}
+              onChange={(e) => setBody(e.target.value)}
+              placeholder="Write a comment…"
+              rows={1}
+              className="min-h-9 flex-1 resize-none rounded-2xl border border-zinc-200 bg-white px-3 py-2 text-sm outline-none focus:border-zinc-300"
+            />
             <button
-              type="button"
-              onClick={() => setReplyTo(null)}
-              className="underline underline-offset-2"
+              type="submit"
+              disabled={pending}
+              className="inline-flex h-9 shrink-0 items-center rounded-full bg-[var(--color-brand-blue)] px-4 text-sm font-semibold text-white disabled:opacity-50"
             >
-              cancel
+              Post
             </button>
-          </p>
-        ) : null}
-        <div className="flex items-start gap-2">
-          <textarea
-            value={body}
-            onChange={(e) => setBody(e.target.value)}
-            placeholder="Write a comment…"
-            rows={1}
-            className="min-h-8 flex-1 rounded-sm border border-zinc-200 p-2 text-xs"
-          />
-          <button
-            type="submit"
-            disabled={pending}
-            className="inline-flex h-8 items-center rounded-sm bg-[var(--color-brand-blue)] px-3 text-xs font-semibold text-white disabled:opacity-50"
-          >
-            Post
-          </button>
+          </div>
+          {error ? (
+            <p className="mt-1 text-xs text-red-700">{error}</p>
+          ) : null}
         </div>
-        {error ? <p className="text-[0.7rem] text-red-700">{error}</p> : null}
       </form>
 
       {comments == null ? (
-        <p className="text-[0.7rem] text-zinc-400">Loading comments…</p>
+        <p className="text-xs text-zinc-400">Loading comments…</p>
       ) : comments.length === 0 ? (
-        <p className="text-[0.7rem] text-zinc-400">
-          No comments yet. Be the first.
-        </p>
+        <p className="text-xs text-zinc-400">No comments yet. Be the first.</p>
       ) : (
-        <ul className="grid gap-2">
+        <ul className="grid gap-3">
           {topLevel.map((comment) => (
-            <li key={comment.id} className="grid gap-2">
+            <li key={comment.id} className="grid gap-3">
               <CommentRow
                 comment={comment}
                 isAdmin={isAdmin}
@@ -551,7 +601,7 @@ export function CommentThread({
                 }
               />
               {(repliesByParent.get(comment.id) ?? []).map((reply) => (
-                <div key={reply.id} className="ml-5">
+                <div key={reply.id} className="ml-10">
                   <CommentRow
                     comment={reply}
                     isAdmin={isAdmin}
@@ -599,82 +649,80 @@ function CommentRow({
   onReport: () => void;
   onModerate: (action: "hide" | "restore") => void;
 }) {
+  const canModerate = comment.canModerate || isAdmin;
   return (
-    <div className="rounded-sm bg-zinc-50 p-2.5">
-      <div className="flex items-center justify-between gap-2 text-[0.65rem] font-semibold uppercase tracking-[0.08em] text-zinc-400">
-        <span className="text-zinc-600">{comment.authorName}</span>
-        <span className="font-normal normal-case tracking-normal">
-          {new Intl.DateTimeFormat("en-GB", {
-            day: "numeric",
-            month: "short",
-            hour: "2-digit",
-            minute: "2-digit",
-            timeZone: "Africa/Lagos",
-          }).format(new Date(comment.createdAt))}
-        </span>
-      </div>
-      {comment.body == null ? (
-        <p className="mt-1 text-xs italic text-zinc-400">
-          This comment was hidden.
-        </p>
-      ) : (
-        <p className="mt-1 whitespace-pre-line text-xs leading-[1.6] text-zinc-700">
-          {comment.body}
-        </p>
-      )}
-      <div className="mt-1 flex flex-wrap items-center gap-3 text-[0.7rem]">
-        <button
-          type="button"
-          disabled={pending}
-          onClick={onLike}
-          aria-pressed={comment.reactedByMe}
-          className={
-            comment.reactedByMe
-              ? "font-semibold text-[var(--color-brand-blue)]"
-              : "text-zinc-500 underline underline-offset-2"
-          }
-        >
-          Like{comment.reactionCount > 0 ? ` (${comment.reactionCount})` : ""}
-        </button>
-        {onReply ? (
-          <button
-            type="button"
-            onClick={onReply}
-            className="text-zinc-500 underline underline-offset-2"
-          >
-            Reply
-          </button>
-        ) : null}
-        {!comment.isMine && comment.body != null ? (
+    <div className="flex items-start gap-2">
+      <Avatar name={comment.authorName} size={32} />
+      <div className="min-w-0 flex-1">
+        {comment.body == null ? (
+          <p className="rounded-2xl bg-zinc-100 px-3 py-2 text-sm italic text-zinc-400">
+            This comment was hidden.
+          </p>
+        ) : (
+          <div className="inline-block max-w-full rounded-2xl bg-zinc-100 px-3 py-2">
+            <p className="text-xs font-semibold text-zinc-900">
+              {comment.authorName}
+            </p>
+            <p className="whitespace-pre-line break-words text-sm leading-relaxed text-zinc-800">
+              {comment.body}
+            </p>
+          </div>
+        )}
+        <div className="mt-1 flex flex-wrap items-center gap-3 pl-3 text-xs text-zinc-500">
           <button
             type="button"
             disabled={pending}
-            onClick={onReport}
-            className="text-zinc-400 underline underline-offset-2"
+            onClick={onLike}
+            aria-pressed={comment.reactedByMe}
+            className={
+              comment.reactedByMe
+                ? "font-semibold text-[var(--color-brand-blue)]"
+                : "hover:underline"
+            }
           >
-            Report
+            Like{comment.reactionCount > 0 ? ` (${comment.reactionCount})` : ""}
           </button>
-        ) : null}
-        {(comment.canModerate || isAdmin) && comment.body != null ? (
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => onModerate("hide")}
-            className="text-red-700 underline underline-offset-2"
-          >
-            Hide
-          </button>
-        ) : null}
-        {(comment.canModerate || isAdmin) && comment.body == null ? (
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => onModerate("restore")}
-            className="text-[var(--color-brand-blue)] underline underline-offset-2"
-          >
-            Restore
-          </button>
-        ) : null}
+          {onReply ? (
+            <button
+              type="button"
+              onClick={onReply}
+              className="hover:underline"
+            >
+              Reply
+            </button>
+          ) : null}
+          <span className="text-zinc-400">{relativeTime(comment.createdAt)}</span>
+          {!comment.isMine && comment.body != null ? (
+            <button
+              type="button"
+              disabled={pending}
+              onClick={onReport}
+              className="text-zinc-400 hover:underline"
+            >
+              Report
+            </button>
+          ) : null}
+          {canModerate && comment.body != null ? (
+            <button
+              type="button"
+              disabled={pending}
+              onClick={() => onModerate("hide")}
+              className="text-red-700 hover:underline"
+            >
+              Hide
+            </button>
+          ) : null}
+          {canModerate && comment.body == null ? (
+            <button
+              type="button"
+              disabled={pending}
+              onClick={() => onModerate("restore")}
+              className="text-[var(--color-brand-blue)] hover:underline"
+            >
+              Restore
+            </button>
+          ) : null}
+        </div>
       </div>
     </div>
   );

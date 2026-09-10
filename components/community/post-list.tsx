@@ -6,29 +6,32 @@ import { PostCard } from "./post-card";
 
 export function PostList({
   posts,
+  viewerName = "You",
   viewerUnitName = null,
   isAdmin = false,
   emptyText = "No posts yet.",
 }: {
   posts: FeedPost[];
+  viewerName?: string;
   viewerUnitName?: string | null;
   isAdmin?: boolean;
   emptyText?: string;
 }) {
   if (posts.length === 0) {
     return (
-      <p className="rounded-sm border border-zinc-200 bg-white p-4 text-xs text-zinc-500">
+      <p className="rounded-2xl border border-zinc-200/80 bg-white p-5 text-sm text-zinc-500">
         {emptyText}
       </p>
     );
   }
 
   return (
-    <div className="grid gap-3">
+    <div className="grid gap-4">
       {posts.map((post) => (
         <PostCard
           key={post.id}
           post={post}
+          viewerName={viewerName}
           viewerUnitName={viewerUnitName}
           isAdmin={isAdmin}
         />

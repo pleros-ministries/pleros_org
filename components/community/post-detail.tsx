@@ -7,10 +7,12 @@ import { PostCard } from "./post-card";
 
 export function PostDetail({
   post,
+  viewerName,
   viewerUnitName,
   isAdmin,
 }: {
   post: FeedPost;
+  viewerName: string;
   viewerUnitName: string | null;
   isAdmin: boolean;
 }) {
@@ -34,6 +36,7 @@ export function PostDetail({
         <div className="mx-auto max-w-2xl">
           <PostCard
             post={post}
+            viewerName={viewerName}
             viewerUnitName={viewerUnitName}
             isAdmin={isAdmin}
             startExpanded

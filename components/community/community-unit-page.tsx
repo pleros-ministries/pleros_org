@@ -9,6 +9,7 @@ import type { FeedPost } from "@/lib/db/queries/community-posts";
 import type { UnitDetail } from "@/lib/db/queries/community-units";
 import { setCommunityUnitLeader } from "@/app/admin/_actions/community-actions";
 
+import { Avatar } from "./avatar";
 import { FeedComposer } from "./feed-composer";
 import { PostList } from "./post-list";
 
@@ -22,12 +23,14 @@ type AdminMember = {
 export function CommunityUnitPage({
   detail,
   posts,
+  viewerName = "You",
   isAdmin,
   canPost,
   adminMembers,
 }: {
   detail: UnitDetail;
   posts: FeedPost[];
+  viewerName?: string;
   isAdmin: boolean;
   canPost: boolean;
   adminMembers: AdminMember[];
@@ -51,12 +54,12 @@ export function CommunityUnitPage({
         </div>
       </nav>
 
-      <div className="site-shell-page sogp-shell-page grid gap-4 pb-6 pt-5">
+      <div className="site-shell-page sogp-shell-page grid gap-5 pb-6 pt-5">
         <header className="grid gap-1">
           <h1 className="ppc-heading text-lg font-semibold text-zinc-900">
             {detail.name}
           </h1>
-          <p className="text-xs text-zinc-500">
+          <p className="text-sm text-zinc-500">
             {detail.memberCount} member{detail.memberCount === 1 ? "" : "s"}
             {detail.leader ? ` · led by ${detail.leader.firstName}` : " · no leader yet"}
             {detail.status === "archived" ? " · archived" : ""}
@@ -66,14 +69,14 @@ export function CommunityUnitPage({
               href={detail.telegramUrl}
               target="_blank"
               rel="noreferrer"
-              className="w-fit text-xs font-medium text-[var(--color-brand-blue)] underline underline-offset-4"
+              className="w-fit text-sm font-medium text-[var(--color-brand-blue)] underline underline-offset-4"
             >
               Open this unit&apos;s Telegram
             </a>
           ) : null}
         </header>
 
-        <section className="grid gap-2 rounded-sm border border-zinc-200 bg-white">
+        <section className="overflow-hidden rounded-2xl border border-zinc-200/80 bg-white shadow-[0_1px_3px_rgba(24,24,27,0.06)]">
           <div className="flex items-center gap-2 border-b border-zinc-100 px-4 py-3">
             <UsersIcon className="size-4 text-[var(--color-brand-blue)]" strokeWidth={2} />
             <h2 className="ppc-heading text-sm font-semibold text-zinc-900">
@@ -84,17 +87,18 @@ export function CommunityUnitPage({
             {detail.members.map((member, index) => (
               <li
                 key={`${member.firstName}-${index}`}
-                className="flex items-center justify-between gap-3 px-4 py-2.5 text-xs"
+                className="flex items-center justify-between gap-3 px-4 py-3 text-sm"
               >
-                <span className="font-medium text-zinc-900">
+                <span className="flex items-center gap-2.5 font-medium text-zinc-900">
+                  <Avatar name={member.firstName} size={28} />
                   {member.firstName}
                   {member.isLeader ? (
-                    <span className="ml-1.5 text-[0.6rem] font-semibold uppercase tracking-[0.08em] text-[var(--color-brand-blue)]">
+                    <span className="text-[0.6rem] font-semibold uppercase tracking-[0.08em] text-[var(--color-brand-blue)]">
                       leader
                     </span>
                   ) : null}
                 </span>
-                <span className="flex items-center gap-3 text-zinc-500">
+                <span className="flex items-center gap-3 text-xs text-zinc-500">
                   <span>{member.stageLabel}</span>
                   <span className="text-zinc-400">joined {member.joinedMonth}</span>
                 </span>
@@ -108,6 +112,7 @@ export function CommunityUnitPage({
         </h2>
         {canPost ? (
           <FeedComposer
+            viewerName={viewerName}
             unitName={detail.name}
             defaultScope="unit"
             lockScope
@@ -115,6 +120,7 @@ export function CommunityUnitPage({
         ) : null}
         <PostList
           posts={posts}
+          viewerName={viewerName}
           viewerUnitName={canPost ? detail.name : null}
           isAdmin={isAdmin}
           emptyText="No unit posts yet."

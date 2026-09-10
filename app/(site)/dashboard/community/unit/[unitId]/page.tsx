@@ -44,6 +44,7 @@ export default async function CommunityUnitRoute({
     <CommunityUnitPage
       detail={detail}
       posts={posts}
+      viewerName={session.user.name ?? "You"}
       isAdmin={ctx.isAdmin}
       canPost={ownUnit}
       adminMembers={adminMembers}

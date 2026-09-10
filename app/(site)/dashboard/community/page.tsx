@@ -24,6 +24,7 @@ export default async function CommunityRoute() {
     <CommunityHub
       initialFeed={feed}
       sidebar={sidebar}
+      viewerName={session.user.name ?? "You"}
       unit={ctx.unit}
       isUnitLeader={ctx.isUnitLeader}
       isAdmin={ctx.isAdmin}

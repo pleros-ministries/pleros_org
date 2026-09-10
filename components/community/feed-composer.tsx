@@ -8,13 +8,17 @@ import type { PostImage } from "@/lib/db/queries/community-posts";
 import { createPost } from "@/app/(site)/dashboard/community/_actions/feed-actions";
 import { useUploadThing } from "@/lib/upload/uploadthing-client";
 
+import { Avatar } from "./avatar";
+
 const MAX_IMAGES = 4;
 
 export function FeedComposer({
+  viewerName = "You",
   unitName,
   defaultScope = "global",
   lockScope = false,
 }: {
+  viewerName?: string;
   unitName: string | null;
   defaultScope?: "global" | "unit";
   lockScope?: boolean;
@@ -56,19 +60,22 @@ export function FeedComposer({
 
   if (!open) {
     return (
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="w-full rounded-sm border border-zinc-200 bg-white px-4 py-3 text-left text-sm text-zinc-400 transition-colors hover:border-zinc-300"
-      >
-        Share something with the community…
-      </button>
+      <div className="flex items-center gap-3 rounded-2xl border border-zinc-200/80 bg-white p-3 shadow-[0_1px_3px_rgba(24,24,27,0.06)]">
+        <Avatar name={viewerName} size={40} />
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="h-10 flex-1 rounded-full bg-zinc-100 px-4 text-left text-sm text-zinc-500 transition-colors hover:bg-zinc-200/70"
+        >
+          Share something with the community…
+        </button>
+      </div>
     );
   }
 
   return (
     <form
-      className="grid gap-2 rounded-sm border border-zinc-200 bg-white p-4"
+      className="grid gap-3 rounded-2xl border border-zinc-200/80 bg-white p-4 shadow-[0_1px_3px_rgba(24,24,27,0.06)]"
       action={() => {
         setError(null);
         startTransition(async () => {
@@ -82,24 +89,27 @@ export function FeedComposer({
         });
       }}
     >
-      <textarea
-        value={body}
-        onChange={(e) => setBody(e.target.value)}
-        placeholder="What would you like to share?"
-        rows={4}
-        autoFocus
-        className="rounded-sm border border-zinc-200 p-2 text-sm"
-      />
+      <div className="flex items-start gap-3">
+        <Avatar name={viewerName} size={40} />
+        <textarea
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
+          placeholder="What would you like to share?"
+          rows={4}
+          autoFocus
+          className="flex-1 resize-none rounded-xl border border-zinc-200 p-3 text-[15px] leading-relaxed outline-none focus:border-zinc-300"
+        />
+      </div>
 
       {images.length > 0 ? (
-        <div className="grid grid-cols-4 gap-1.5">
+        <div className="grid grid-cols-4 gap-2 pl-13">
           {images.map((img) => (
             <div key={img.key} className="relative">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={img.url}
                 alt=""
-                className="h-16 w-full rounded-sm object-cover"
+                className="h-16 w-full rounded-lg object-cover"
               />
               <button
                 type="button"
@@ -116,9 +126,9 @@ export function FeedComposer({
         </div>
       ) : null}
 
-      {error ? <p className="text-xs text-red-700">{error}</p> : null}
+      {error ? <p className="pl-13 text-xs text-red-700">{error}</p> : null}
 
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2 pl-13">
         <input
           ref={fileRef}
           type="file"
@@ -134,9 +144,9 @@ export function FeedComposer({
           type="button"
           disabled={isUploading || images.length >= MAX_IMAGES}
           onClick={() => fileRef.current?.click()}
-          className="inline-flex h-8 items-center gap-1.5 rounded-sm border border-zinc-200 px-2.5 text-xs font-medium text-zinc-600 disabled:opacity-50"
+          className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-zinc-200 px-3 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-50 disabled:opacity-50"
         >
-          <ImagePlusIcon className="size-3.5" strokeWidth={2} />
+          <ImagePlusIcon className="size-4" strokeWidth={2} />
           {isUploading ? "Uploading…" : "Photo"}
         </button>
 
@@ -144,25 +154,25 @@ export function FeedComposer({
           <select
             value={scope}
             onChange={(e) => setScope(e.target.value as "global" | "unit")}
-            className="h-8 rounded-sm border border-zinc-200 px-1 text-xs"
+            className="h-9 rounded-lg border border-zinc-200 px-2 text-sm"
           >
             <option value="global">To the community</option>
             <option value="unit">To {unitName}</option>
           </select>
         ) : null}
 
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-3">
           <button
             type="button"
             onClick={reset}
-            className="text-xs text-zinc-500 underline underline-offset-2"
+            className="text-sm text-zinc-500 hover:underline"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={pending || isUploading}
-            className="inline-flex h-8 items-center rounded-sm bg-[var(--color-brand-blue)] px-3 text-xs font-semibold text-white disabled:opacity-50"
+            className="inline-flex h-9 items-center rounded-lg bg-[var(--color-brand-blue)] px-4 text-sm font-semibold text-white disabled:opacity-50"
           >
             {pending ? "Posting…" : "Post"}
           </button>

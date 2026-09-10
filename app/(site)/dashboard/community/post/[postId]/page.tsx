@@ -28,6 +28,7 @@ export default async function CommunityPostRoute({
   return (
     <PostDetail
       post={post}
+      viewerName={session.user.name ?? "You"}
       viewerUnitName={ctx.unit?.name ?? null}
       isAdmin={ctx.isAdmin}
     />

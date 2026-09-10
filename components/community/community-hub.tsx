@@ -13,12 +13,14 @@ type HubUnit = { id: number; name: string; telegramUrl: string | null } | null;
 export function CommunityHub({
   initialFeed,
   sidebar,
+  viewerName,
   unit,
   isUnitLeader,
   isAdmin,
 }: {
   initialFeed: FeedPost[];
   sidebar: SidebarData;
+  viewerName: string;
   unit: HubUnit;
   isUnitLeader: boolean;
   isAdmin: boolean;
@@ -33,11 +35,15 @@ export function CommunityHub({
       />
 
       <div className="site-shell-page sogp-shell-page pb-6 pt-4">
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]">
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_18rem]">
           <div className="grid gap-4">
-            <FeedComposer unitName={unit?.name ?? null} />
+            <FeedComposer
+              viewerName={viewerName}
+              unitName={unit?.name ?? null}
+            />
             <PostList
               posts={initialFeed}
+              viewerName={viewerName}
               viewerUnitName={unit?.name ?? null}
               isAdmin={isAdmin}
               emptyText="No posts yet. Be the first to share something."
