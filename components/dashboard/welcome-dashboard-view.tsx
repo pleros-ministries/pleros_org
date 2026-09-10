@@ -38,7 +38,7 @@ function DashboardCard({
   statusLabel?: string;
 }) {
   const className = cn(
-    "group relative flex min-h-[11rem] flex-col justify-end overflow-hidden rounded-[var(--radius-md)] border p-3 pb-3.5 shadow-[var(--shadow-sm)] transition-transform duration-150 ease-out sm:min-h-[12.5rem] sm:p-4 sm:pb-4",
+    "group relative flex min-h-[9.25rem] flex-col justify-end overflow-hidden rounded-[var(--radius-md)] border p-3 pb-3.5 shadow-[var(--shadow-sm)] transition-transform duration-150 ease-out sm:min-h-[10.75rem] sm:p-4 sm:pb-4",
     href && "hover:-translate-y-px",
     status === "coming_soon" && "cursor-default saturate-[0.72]",
     backgroundImageSrc
@@ -184,7 +184,7 @@ export function WelcomeDashboardView({
   return (
     <section className="site-font-theme bg-[var(--color-surface)]">
       <header className="relative overflow-hidden bg-[var(--color-brand-blue)]">
-        <div className="container-pleros flex min-h-[5.8125rem] max-w-[36rem] flex-col justify-end pb-7 pt-9 text-white sm:min-h-[15rem] sm:pb-8 sm:pt-10">
+        <div className="container-pleros flex min-h-[4rem] max-w-[36rem] flex-col justify-end pb-5 pt-7 text-white sm:min-h-[15rem] sm:pb-8 sm:pt-10">
           <div className="grid max-w-[19rem] gap-3">
             <h1 className="site-hero-heading max-w-[16ch] text-[clamp(1.875rem,6vw,3.725rem)] text-white">
               {name ? `Welcome, ${name}` : "Welcome to your Pleros Dashboard"}
