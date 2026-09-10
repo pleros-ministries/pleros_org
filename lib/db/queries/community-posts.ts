@@ -7,6 +7,7 @@ import type { CommunityContext } from "@/lib/community/context";
 export type FeedPost = {
   id: number;
   scope: "global" | "unit";
+  unitId: number | null;
   unitName: string | null;
   authorKind: "ministry" | "leader";
   authorName: string;
@@ -67,6 +68,7 @@ export async function getCommunityFeed(
   return rows.map((row) => ({
     id: row.post.id,
     scope: row.post.scope,
+    unitId: row.post.unitId,
     unitName: row.post.scope === "unit" ? row.unitName : null,
     authorKind: row.post.authorKind,
     authorName:
@@ -84,6 +86,61 @@ export async function getCommunityFeed(
       (ctx.isUnitLeader &&
         row.post.scope === "unit" &&
         row.post.unitId === ctx.unit?.id),
+  }));
+}
+
+/** Published posts belonging to one unit only. */
+export async function getUnitPosts(
+  unitId: number,
+  ctx: CommunityContext,
+): Promise<FeedPost[]> {
+  const rows = await db
+    .select({
+      post: schema.communityPosts,
+      authorName: schema.users.name,
+      unitName: schema.units.name,
+      reactionCount: sql<number>`(
+        select count(*) from ${schema.postReactions}
+        where ${schema.postReactions.postId} = ${schema.communityPosts.id}
+      )::int`,
+      reactedByMe: sql<boolean>`exists (
+        select 1 from ${schema.postReactions}
+        where ${schema.postReactions.postId} = ${schema.communityPosts.id}
+          and ${schema.postReactions.userId} = ${ctx.userId}
+      )`,
+    })
+    .from(schema.communityPosts)
+    .innerJoin(schema.users, eq(schema.users.id, schema.communityPosts.authorId))
+    .leftJoin(schema.units, eq(schema.units.id, schema.communityPosts.unitId))
+    .where(
+      and(
+        eq(schema.communityPosts.status, "published"),
+        eq(schema.communityPosts.scope, "unit"),
+        eq(schema.communityPosts.unitId, unitId),
+      ),
+    )
+    .orderBy(
+      desc(schema.communityPosts.pinned),
+      desc(schema.communityPosts.publishedAt),
+    )
+    .limit(50);
+
+  return rows.map((row) => ({
+    id: row.post.id,
+    scope: row.post.scope,
+    unitId: row.post.unitId,
+    unitName: row.unitName,
+    authorKind: row.post.authorKind,
+    authorName:
+      row.post.authorKind === "ministry" ? "Pleros" : firstName(row.authorName),
+    title: row.post.title,
+    body: row.post.body,
+    pinned: row.post.pinned,
+    publishedAt: row.post.publishedAt.toISOString(),
+    reactionCount: row.reactionCount,
+    reactedByMe: row.reactedByMe,
+    canManage:
+      ctx.isAdmin || (ctx.isUnitLeader && row.post.unitId === ctx.unit?.id),
   }));
 }
 

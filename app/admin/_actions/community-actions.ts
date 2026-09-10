@@ -9,6 +9,7 @@ import {
   assignEnrollmentToUnit,
   mergeUnits,
   reassignMember,
+  setUnitLeader,
   setUnitStatus,
   setUnitTelegramUrl,
 } from "@/lib/db/queries/community-units";
@@ -62,6 +63,16 @@ export async function updateUnitStatus(input: {
   await requireAdmin();
   await setUnitStatus(input.unitId, input.status);
   revalidatePath("/admin/community");
+}
+
+export async function setCommunityUnitLeader(input: {
+  unitId: number;
+  enrollmentId: number | null;
+}) {
+  await requireAdmin();
+  await setUnitLeader(input);
+  revalidatePath("/admin/community");
+  revalidatePath(`/dashboard/community/unit/${input.unitId}`);
 }
 
 export async function reassignUnitMember(input: {

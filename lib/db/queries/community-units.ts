@@ -1,8 +1,10 @@
-import { and, eq, isNull, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull, sql } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
 import { buildUnitName, canonicalRegionKey } from "@/lib/community/units";
+import { toPeerMember, type PeerMember } from "@/lib/community/visibility";
+import { PRE_SOGP_PREPARATION_DAYS } from "@/lib/sogp/calendar";
 
 export type Unit = typeof schema.units.$inferSelect;
 
@@ -128,6 +130,130 @@ export async function setUnitStatus(id: number, status: "active" | "archived") {
     .update(schema.units)
     .set({ status, updatedAt: new Date() })
     .where(eq(schema.units.id, id));
+}
+
+export type UnitDetail = {
+  id: number;
+  name: string;
+  telegramUrl: string | null;
+  status: "active" | "archived";
+  memberCount: number;
+  leader: { firstName: string } | null;
+  members: PeerMember[];
+  preparationDaysTotal: number;
+};
+
+/** Peer-safe member directory for a unit (first name + join month + stage). */
+export async function getUnitDetail(unitId: number): Promise<UnitDetail | null> {
+  const unit = await getUnit(unitId);
+  if (!unit) return null;
+
+  const memberRows = await db
+    .select({
+      role: schema.unitMembers.role,
+      joinedAt: schema.unitMembers.joinedAt,
+      name: schema.sogpEnrollments.name,
+      firstName: schema.sogpEnrollments.firstName,
+      enrollmentId: schema.sogpEnrollments.id,
+      enrollmentStatus: schema.sogpEnrollments.status,
+      cohortStatus: schema.sogpCohorts.status,
+    })
+    .from(schema.unitMembers)
+    .innerJoin(
+      schema.sogpEnrollments,
+      eq(schema.sogpEnrollments.id, schema.unitMembers.enrollmentId),
+    )
+    .innerJoin(
+      schema.sogpCohorts,
+      eq(schema.sogpCohorts.id, schema.sogpEnrollments.cohortId),
+    )
+    .where(eq(schema.unitMembers.unitId, unitId))
+    .orderBy(asc(schema.unitMembers.joinedAt));
+
+  const ids = memberRows.map((row) => row.enrollmentId);
+  const prepCounts = new Map<number, number>();
+  if (ids.length > 0) {
+    const rows = await db
+      .select({
+        enrollmentId: schema.sogpPreparationCompletions.enrollmentId,
+        completed: sql<number>`count(*)::int`,
+      })
+      .from(schema.sogpPreparationCompletions)
+      .where(inArray(schema.sogpPreparationCompletions.enrollmentId, ids))
+      .groupBy(schema.sogpPreparationCompletions.enrollmentId);
+    for (const row of rows) prepCounts.set(row.enrollmentId, row.completed);
+  }
+
+  const members = memberRows.map((row) =>
+    toPeerMember({
+      name: row.name,
+      firstName: row.firstName,
+      joinedAt: row.joinedAt,
+      role: row.role,
+      cohortStatus: row.cohortStatus,
+      enrollmentStatus: row.enrollmentStatus,
+      preparationDaysComplete: prepCounts.get(row.enrollmentId) ?? 0,
+    }),
+  );
+
+  return {
+    id: unit.id,
+    name: unit.name,
+    telegramUrl: unit.telegramUrl,
+    status: unit.status,
+    memberCount: members.length,
+    leader: members.find((m) => m.isLeader)
+      ? { firstName: members.find((m) => m.isLeader)!.firstName }
+      : null,
+    members,
+    preparationDaysTotal: PRE_SOGP_PREPARATION_DAYS,
+  };
+}
+
+/** Admin: make one member the unit's leader, demoting any current leader. */
+export async function setUnitLeader(input: {
+  unitId: number;
+  enrollmentId: number | null;
+}) {
+  await db
+    .update(schema.unitMembers)
+    .set({ role: "member" })
+    .where(
+      and(
+        eq(schema.unitMembers.unitId, input.unitId),
+        eq(schema.unitMembers.role, "leader"),
+      ),
+    );
+
+  if (input.enrollmentId != null) {
+    await db
+      .update(schema.unitMembers)
+      .set({ role: "leader" })
+      .where(
+        and(
+          eq(schema.unitMembers.unitId, input.unitId),
+          eq(schema.unitMembers.enrollmentId, input.enrollmentId),
+        ),
+      );
+  }
+}
+
+/** Enrolments in a unit, with names — admin-only (not peer-safe). */
+export async function listUnitMembersForAdmin(unitId: number) {
+  return db
+    .select({
+      enrollmentId: schema.sogpEnrollments.id,
+      name: schema.sogpEnrollments.name,
+      email: schema.sogpEnrollments.email,
+      role: schema.unitMembers.role,
+    })
+    .from(schema.unitMembers)
+    .innerJoin(
+      schema.sogpEnrollments,
+      eq(schema.sogpEnrollments.id, schema.unitMembers.enrollmentId),
+    )
+    .where(eq(schema.unitMembers.unitId, unitId))
+    .orderBy(asc(schema.sogpEnrollments.name));
 }
 
 /** Move one member to another unit (admin action). */

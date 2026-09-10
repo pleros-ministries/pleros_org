@@ -1,7 +1,10 @@
 "use server";
 
+import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
+import { db } from "@/lib/db";
+import * as schema from "@/lib/db/schema";
 import { canAccessCommunity, getCommunityContext } from "@/lib/community/context";
 import {
   createUnitPost,
@@ -37,12 +40,28 @@ export async function createLeaderUnitPost(input: {
   revalidatePath("/dashboard/community");
 }
 
-/** A unit leader hides one of their own unit's posts. */
-export async function hideUnitPost(input: { postId: number; unitId: number }) {
+/** A unit leader hides one of their own unit's posts (admins hide anything). */
+export async function hideUnitPost(input: { postId: number }) {
   const ctx = await getCommunityContext();
   if (!ctx) throw new Error("Forbidden");
-  const allowed = ctx.isAdmin || (ctx.isUnitLeader && ctx.unit?.id === input.unitId);
+
+  const [post] = await db
+    .select({
+      scope: schema.communityPosts.scope,
+      unitId: schema.communityPosts.unitId,
+    })
+    .from(schema.communityPosts)
+    .where(eq(schema.communityPosts.id, input.postId))
+    .limit(1);
+  if (!post) throw new Error("Post not found");
+
+  const allowed =
+    ctx.isAdmin ||
+    (ctx.isUnitLeader &&
+      post.scope === "unit" &&
+      post.unitId === ctx.unit?.id);
   if (!allowed) throw new Error("Forbidden");
+
   await setPostStatus(input.postId, "hidden");
   revalidatePath("/dashboard/community");
 }
