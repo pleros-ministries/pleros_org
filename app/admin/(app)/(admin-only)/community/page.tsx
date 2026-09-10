@@ -5,8 +5,7 @@ import { requireAdmin } from "@/lib/auth/require-role";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
 import { listUnits } from "@/lib/db/queries/community-units";
-import { listGlobalPosts } from "@/lib/db/queries/community-posts";
-import { listOpenFlags } from "@/lib/db/queries/community-discussion";
+import { listGlobalPosts, listOpenFlags } from "@/lib/db/queries/community-posts";
 import { getCommunityContext } from "@/lib/community/context";
 
 export default async function AdminCommunityRoute() {

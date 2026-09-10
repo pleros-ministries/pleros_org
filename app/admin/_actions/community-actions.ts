@@ -23,15 +23,15 @@ import {
 import {
   createGlobalPost,
   editPost,
+  resolveFlag,
   setPostPinned,
   setPostStatus,
 } from "@/lib/db/queries/community-posts";
 import {
-  messageThreadId,
-  resolveFlag,
-  setMessageStatus,
-  setThreadStatus,
-} from "@/lib/db/queries/community-discussion";
+  commentPostId,
+  setCommentStatus,
+} from "@/lib/db/queries/community-comments";
+import type { PostImage } from "@/lib/db/queries/community-posts";
 import { sendSogpChannelMessage } from "@/lib/telegram/sogp-broadcast";
 
 /**
@@ -131,6 +131,7 @@ export async function publishGlobalPost(input: {
   title: string;
   body: string;
   alsoTelegram: boolean;
+  images?: PostImage[];
 }) {
   const session = await requireAdmin();
   const body = input.body.trim();
@@ -141,6 +142,7 @@ export async function publishGlobalPost(input: {
     authorId: session.user.id,
     title,
     body,
+    images: input.images ?? [],
   });
   if (post) {
     after(() =>
@@ -173,11 +175,17 @@ export async function updateGlobalPost(input: {
   postId: number;
   title: string;
   body: string;
+  images?: PostImage[];
 }) {
   await requireAdmin();
   const body = input.body.trim();
   if (!body) throw new Error("A post needs a body.");
-  await editPost({ postId: input.postId, title: input.title.trim() || null, body });
+  await editPost({
+    postId: input.postId,
+    title: input.title.trim() || null,
+    body,
+    images: input.images,
+  });
   revalidatePath("/admin/community");
   revalidatePath("/dashboard/community");
 }
@@ -206,7 +214,7 @@ export async function moderatePost(input: {
 
 export async function resolveContentFlag(input: {
   flagId: number;
-  targetType: "post" | "thread" | "message";
+  targetType: "post" | "comment";
   targetId: number;
   action: "hide" | "dismiss";
 }) {
@@ -215,10 +223,8 @@ export async function resolveContentFlag(input: {
   if (input.action === "hide") {
     if (input.targetType === "post") {
       await setPostStatus(input.targetId, "hidden");
-    } else if (input.targetType === "thread") {
-      await setThreadStatus(input.targetId, "removed");
     } else {
-      await setMessageStatus(input.targetId, "hidden");
+      await setCommentStatus(input.targetId, "hidden");
     }
   }
 
@@ -247,13 +253,10 @@ export async function resolveContentFlag(input: {
 
   revalidatePath("/admin/community");
   revalidatePath("/dashboard/community");
-  if (input.targetType === "message") {
-    const threadId = await messageThreadId(input.targetId);
-    if (threadId != null) {
-      revalidatePath(`/dashboard/community/discussion/${threadId}`);
+  if (input.targetType === "comment") {
+    const postId = await commentPostId(input.targetId);
+    if (postId != null) {
+      revalidatePath(`/dashboard/community/post/${postId}`);
     }
-  }
-  if (input.targetType === "thread") {
-    revalidatePath("/dashboard/community/discussion");
   }
 }

@@ -6,16 +6,16 @@ import { sendPushToUser } from "@/lib/push/send";
 
 type Kind =
   | "official_post"
-  | "thread_reply"
-  | "message_reply"
+  | "post_comment"
+  | "comment_reply"
   | "made_leader"
   | "flag_resolved"
   | "leader_nudge";
 
 const PUSH_COPY: Record<Kind, { title: string }> = {
   official_post: { title: "New Pleros update" },
-  thread_reply: { title: "New reply in your discussion" },
-  message_reply: { title: "Someone replied to you" },
+  post_comment: { title: "New comment on your post" },
+  comment_reply: { title: "Someone replied to you" },
   made_leader: { title: "You're now a unit leader" },
   flag_resolved: { title: "Your report was reviewed" },
   leader_nudge: { title: "A note from your unit leader" },
@@ -78,31 +78,42 @@ export async function notifyGlobalPost(input: {
   });
 }
 
-/** Notify the thread author + the replied-to author of a new message. */
-export async function notifyThreadReply(input: {
-  threadId: number;
-  threadTitle: string;
+/** Notify a post's author that someone commented on it. */
+export async function notifyPostComment(input: {
+  postId: number;
+  postTitle: string | null;
+  postAuthorId: string;
   actorId: string;
-  replyToAuthorId?: string | null;
 }) {
-  const [thread] = await db
-    .select({ authorId: schema.communityThreads.authorId })
-    .from(schema.communityThreads)
-    .where(eq(schema.communityThreads.id, input.threadId))
-    .limit(1);
-
-  const targets = new Set<string>();
-  if (thread?.authorId) targets.add(thread.authorId);
-  if (input.replyToAuthorId) targets.add(input.replyToAuthorId);
-  targets.delete(input.actorId);
-  if (targets.size === 0) return;
-
+  if (!input.postAuthorId || input.postAuthorId === input.actorId) return;
   await notify({
-    userIds: [...targets],
-    kind: input.replyToAuthorId ? "message_reply" : "thread_reply",
-    payload: { threadId: input.threadId, title: input.threadTitle },
-    pushBody: `In "${input.threadTitle}"`,
-    pushUrl: `/dashboard/community/discussion/${input.threadId}`,
+    userIds: [input.postAuthorId],
+    kind: "post_comment",
+    payload: { postId: input.postId, title: input.postTitle },
+    pushBody: input.postTitle
+      ? `On "${input.postTitle}"`
+      : "Someone commented on your post.",
+    pushUrl: `/dashboard/community/post/${input.postId}`,
+    exclude: input.actorId,
+  });
+}
+
+/** Notify the author of a comment that someone replied to it. */
+export async function notifyCommentReply(input: {
+  postId: number;
+  postTitle: string | null;
+  parentAuthorId: string | null;
+  actorId: string;
+}) {
+  if (!input.parentAuthorId || input.parentAuthorId === input.actorId) return;
+  await notify({
+    userIds: [input.parentAuthorId],
+    kind: "comment_reply",
+    payload: { postId: input.postId, title: input.postTitle },
+    pushBody: input.postTitle
+      ? `On "${input.postTitle}"`
+      : "Someone replied to your comment.",
+    pushUrl: `/dashboard/community/post/${input.postId}`,
     exclude: input.actorId,
   });
 }
