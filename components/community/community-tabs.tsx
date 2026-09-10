@@ -1,16 +1,20 @@
 import Link from "next/link";
 import { ArrowLeftIcon } from "lucide-react";
 
-type Tab = "feed" | "discussion" | "unit";
+import { NotificationBell } from "./notification-bell";
+
+type Tab = "feed" | "discussion" | "unit" | "leader";
 
 export function CommunityTabs({
   current,
   unitId,
   title,
+  showLeaderTab = false,
 }: {
   current: Tab;
   unitId: number | null;
   title: string;
+  showLeaderTab?: boolean;
 }) {
   const tabs: Array<{ key: Tab; label: string; href: string }> = [
     { key: "feed", label: "Feed", href: "/dashboard/community" },
@@ -27,6 +31,13 @@ export function CommunityTabs({
       href: `/dashboard/community/unit/${unitId}`,
     });
   }
+  if (showLeaderTab) {
+    tabs.push({
+      key: "leader",
+      label: "Leader",
+      href: "/dashboard/community/leader",
+    });
+  }
 
   return (
     <>
@@ -41,9 +52,12 @@ export function CommunityTabs({
           >
             <ArrowLeftIcon className="size-3.5" strokeWidth={2} /> Dashboard
           </Link>
-          <span className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-[var(--color-brand-lime)]">
-            Community
-          </span>
+          <div className="flex items-center gap-3">
+            <span className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-[var(--color-brand-lime)]">
+              Community
+            </span>
+            <NotificationBell />
+          </div>
         </div>
       </nav>
 

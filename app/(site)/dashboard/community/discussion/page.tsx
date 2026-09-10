@@ -19,6 +19,7 @@ export default async function CommunityDiscussionRoute() {
       threads={threads}
       unitId={ctx.unit?.id ?? null}
       unitName={ctx.unit?.name ?? null}
+      showLeaderTab={ctx.isUnitLeader || ctx.isAdmin}
     />
   );
 }

@@ -1,10 +1,17 @@
 "use server";
 
+import { after } from "next/server";
 import { revalidatePath } from "next/cache";
+import { eq } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
 import { requireAdmin } from "@/lib/auth/require-role";
+import {
+  notifyFlagResolved,
+  notifyGlobalPost,
+  notifyMadeLeader,
+} from "@/lib/community/notify";
 import {
   assignEnrollmentToUnit,
   mergeUnits,
@@ -77,6 +84,25 @@ export async function setCommunityUnitLeader(input: {
 }) {
   await requireAdmin();
   await setUnitLeader(input);
+
+  if (input.enrollmentId != null) {
+    const [unit] = await db
+      .select({ name: schema.units.name })
+      .from(schema.units)
+      .where(eq(schema.units.id, input.unitId))
+      .limit(1);
+    if (unit) {
+      after(() =>
+        notifyMadeLeader({
+          enrollmentId: input.enrollmentId!,
+          unitName: unit.name,
+        }).catch((error) =>
+          console.error("Made-leader notification failed:", error),
+        ),
+      );
+    }
+  }
+
   revalidatePath("/admin/community");
   revalidatePath(`/dashboard/community/unit/${input.unitId}`);
 }
@@ -111,7 +137,22 @@ export async function publishGlobalPost(input: {
   if (!body) throw new Error("A post needs a body.");
   const title = input.title.trim() || null;
 
-  await createGlobalPost({ authorId: session.user.id, title, body });
+  const post = await createGlobalPost({
+    authorId: session.user.id,
+    title,
+    body,
+  });
+  if (post) {
+    after(() =>
+      notifyGlobalPost({
+        postId: post.id,
+        title,
+        authorId: session.user.id,
+      }).catch((error) =>
+        console.error("Community post notification failed:", error),
+      ),
+    );
+  }
 
   if (input.alsoTelegram) {
     try {
@@ -181,11 +222,28 @@ export async function resolveContentFlag(input: {
     }
   }
 
+  const [flag] = await db
+    .select({ reporterId: schema.contentFlags.reporterId })
+    .from(schema.contentFlags)
+    .where(eq(schema.contentFlags.id, input.flagId))
+    .limit(1);
+
   await resolveFlag({
     flagId: input.flagId,
     handledBy: session.user.id,
     status: input.action === "hide" ? "actioned" : "dismissed",
   });
+
+  if (flag) {
+    after(() =>
+      notifyFlagResolved({
+        reporterId: flag.reporterId,
+        outcome: input.action === "hide" ? "actioned" : "dismissed",
+      }).catch((error) =>
+        console.error("Flag-resolved notification failed:", error),
+      ),
+    );
+  }
 
   revalidatePath("/admin/community");
   revalidatePath("/dashboard/community");

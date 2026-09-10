@@ -29,6 +29,7 @@ export function CommunityHub({
         current="feed"
         unitId={unit?.id ?? null}
         title={unit ? unit.name : "Community"}
+        showLeaderTab={isUnitLeader || isAdmin}
       />
 
       <div className="site-shell-page sogp-shell-page grid gap-4 pb-6 pt-4">

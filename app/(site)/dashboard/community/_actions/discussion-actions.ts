@@ -1,8 +1,13 @@
 "use server";
 
+import { after } from "next/server";
+import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
+import { db } from "@/lib/db";
+import * as schema from "@/lib/db/schema";
 import { canAccessCommunity, getCommunityContext } from "@/lib/community/context";
+import { notifyThreadReply } from "@/lib/community/notify";
 import {
   assertCanModerateThread,
   createThread,
@@ -39,6 +44,34 @@ export async function replyInThread(input: {
 }) {
   const ctx = await requireCommunity();
   await postMessage(ctx, input);
+
+  const [thread] = await db
+    .select({ title: schema.communityThreads.title })
+    .from(schema.communityThreads)
+    .where(eq(schema.communityThreads.id, input.threadId))
+    .limit(1);
+  let replyToAuthorId: string | null = null;
+  if (input.replyToId) {
+    const [parent] = await db
+      .select({ authorId: schema.communityMessages.authorId })
+      .from(schema.communityMessages)
+      .where(eq(schema.communityMessages.id, input.replyToId))
+      .limit(1);
+    replyToAuthorId = parent?.authorId ?? null;
+  }
+  if (thread) {
+    after(() =>
+      notifyThreadReply({
+        threadId: input.threadId,
+        threadTitle: thread.title,
+        actorId: ctx.userId,
+        replyToAuthorId,
+      }).catch((error) =>
+        console.error("Thread-reply notification failed:", error),
+      ),
+    );
+  }
+
   revalidatePath(`/dashboard/community/discussion/${input.threadId}`);
 }
 

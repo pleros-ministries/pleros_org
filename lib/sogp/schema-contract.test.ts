@@ -20,6 +20,7 @@ import {
   communityMessages,
   messageReactions,
   contentFlags,
+  communityNotifications,
 } from "../db/schema";
 
 describe("SOGP schema", () => {
@@ -60,6 +61,12 @@ describe("SOGP schema", () => {
     expect(messageReactions.messageId).toBeDefined();
     expect(contentFlags.targetType).toBeDefined();
     expect(contentFlags.status).toBeDefined();
+  });
+
+  test("exports the community notifications table", () => {
+    expect(communityNotifications.userId).toBeDefined();
+    expect(communityNotifications.kind).toBeDefined();
+    expect(communityNotifications.readAt).toBeDefined();
   });
 
   test("stores structured enrolment and curriculum metadata", () => {

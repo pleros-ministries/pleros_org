@@ -21,14 +21,21 @@ export function DiscussionList({
   threads,
   unitId,
   unitName,
+  showLeaderTab = false,
 }: {
   threads: ThreadSummary[];
   unitId: number | null;
   unitName: string | null;
+  showLeaderTab?: boolean;
 }) {
   return (
     <section className="site-font-theme min-h-screen bg-[#f6f5f1] pb-16 text-zinc-900">
-      <CommunityTabs current="discussion" unitId={unitId} title="Discussion" />
+      <CommunityTabs
+        current="discussion"
+        unitId={unitId}
+        title="Discussion"
+        showLeaderTab={showLeaderTab}
+      />
 
       <div className="site-shell-page sogp-shell-page grid gap-4 pb-6 pt-4">
         <NewThread unitName={unitName} />

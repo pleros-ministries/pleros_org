@@ -158,6 +158,18 @@ export const contentFlagStatusEnum = pgEnum("content_flag_status", [
   "dismissed",
 ]);
 
+export const communityNotificationKindEnum = pgEnum(
+  "community_notification_kind",
+  [
+    "official_post",
+    "thread_reply",
+    "message_reply",
+    "made_leader",
+    "flag_resolved",
+    "leader_nudge",
+  ],
+);
+
 // ─── Welcome pack leads ─────────────────────────────────────────────────────
 
 export const welcomePackLeads = pgTable(
@@ -1342,6 +1354,30 @@ export const contentFlags = pgTable(
       t.reporterId,
       t.targetType,
       t.targetId,
+    ),
+  ],
+);
+
+// ─── Community: notifications ──────────────────────────────────────────────
+
+export const communityNotifications = pgTable(
+  "community_notifications",
+  {
+    id: serial("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    kind: communityNotificationKindEnum("kind").notNull(),
+    payload: jsonb("payload").$type<Record<string, unknown>>().notNull(),
+    readAt: timestamp("read_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index("community_notifications_user_created_idx").on(
+      t.userId,
+      t.createdAt,
     ),
   ],
 );
