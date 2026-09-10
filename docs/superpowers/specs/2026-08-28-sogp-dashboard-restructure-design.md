@@ -259,7 +259,7 @@ Release verification includes focused tests, the full test suite, lint, producti
 ## Out of scope
 
 - A public-homepage redesign.
-- Native community discussion or messaging.
+- Native community discussion or messaging — now specified in `2026-09-09-sogp-community-section-design.md`.
 - Advanced SOGP content or access.
 - Automatic proof that downloaded media was watched or heard.
 - Podcast participation as an SOGP requirement.

@@ -8,6 +8,7 @@ import {
   markPendingSogpCompleted,
   upsertSogpEnrollment,
 } from "@/lib/db/queries/sogp";
+import { assignEnrollmentToUnit } from "@/lib/db/queries/community-units";
 import {
   attributeSogpReferral,
   ensureSogpReferralCode,
@@ -144,6 +145,11 @@ export async function POST(request: NextRequest) {
     after(() =>
       ensureSogpReferralCode(enrollment.id).catch((error) =>
         console.error("SOGP referral code mint failed:", error),
+      ),
+    );
+    after(() =>
+      assignEnrollmentToUnit(enrollment.id).catch((error) =>
+        console.error("SOGP community unit assignment failed:", error),
       ),
     );
     after(() =>

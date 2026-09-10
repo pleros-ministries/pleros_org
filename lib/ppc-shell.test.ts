@@ -51,6 +51,12 @@ describe("ppc shell helpers", () => {
         roles: ["super_admin", "admin"],
       },
       {
+        label: "Community",
+        path: "/community",
+        icon: "students",
+        roles: ["super_admin", "admin"],
+      },
+      {
         label: "Staff",
         path: "/staff",
         icon: "staff",
@@ -103,6 +109,7 @@ describe("ppc shell helpers", () => {
       "/platform",
       "/content",
       "/sogp",
+      "/community",
       "/staff",
       "/students",
       "/review",
@@ -115,6 +122,7 @@ describe("ppc shell helpers", () => {
       "/platform",
       "/content",
       "/sogp",
+      "/community",
       "/students",
       "/review",
       "/qa",

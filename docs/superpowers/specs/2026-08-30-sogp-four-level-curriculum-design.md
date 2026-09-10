@@ -263,5 +263,5 @@ Automated coverage must prove:
 - Publishing incomplete PPC Level 3 content.
 - Changing Pre-SOGP's 30-day curriculum.
 - Changing the 80% Prayer Watch threshold.
-- Native community discussion.
+- Native community discussion — now specified in `2026-09-09-sogp-community-section-design.md`.
 - Advanced SOGP.

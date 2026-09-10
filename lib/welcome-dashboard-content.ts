@@ -111,10 +111,10 @@ export const welcomeDashboardSections: WelcomeDashboardSection[] = [
       {
         id: "community",
         title: "Community",
-        description: "Stay connected with the wider Pleros community.",
+        description: "Your location unit, official updates, and discussion.",
         href: undefined,
-        status: "coming_soon",
-        statusLabel: "Coming soon",
+        status: "enrolment_required",
+        statusLabel: "Enrolment required",
         accent: "orange",
         backgroundImageSrc: "/site/home/assets/dashboard-cards/7-assignment-bg-v2.webp",
       },
@@ -143,13 +143,25 @@ export function resolveWelcomeDashboardSections({
   return welcomeDashboardSections.map((section) => ({
     ...section,
     cards: section.cards.map((card) => {
-      const isJourneyCard = card.id === "pre-sogp" || card.id === "sogp";
+      const isJourneyCard =
+        card.id === "pre-sogp" ||
+        card.id === "sogp" ||
+        card.id === "community";
       if (!isSogpEnrolled || !isJourneyCard) return { ...card };
 
       if (card.id === "pre-sogp") {
         return {
           ...card,
           href: "/dashboard/pre-sogp",
+          status: "available" as const,
+          statusLabel: undefined,
+        };
+      }
+
+      if (card.id === "community") {
+        return {
+          ...card,
+          href: "/dashboard/community",
           status: "available" as const,
           statusLabel: undefined,
         };
