@@ -5,6 +5,10 @@ import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
 import type { CommunityContext } from "@/lib/community/context";
 import { assertCanCreatePost } from "@/lib/community/rate-limit";
+import {
+  canPostToCommunity,
+  canPostToUnit,
+} from "@/lib/community/permissions";
 
 export type PostImage = { url: string; key: string };
 
@@ -303,6 +307,21 @@ function authorKindFor(ctx: CommunityContext): FeedPost["authorKind"] {
   return "member";
 }
 
+/** Only admins post community-wide; only a unit's leader (or an admin) posts to it. */
+function assertCanPostTo(
+  ctx: CommunityContext,
+  scope: "global" | "unit",
+  unitId: number | null,
+) {
+  const allowed =
+    scope === "global"
+      ? canPostToCommunity(ctx)
+      : unitId != null && canPostToUnit(ctx, unitId);
+  if (!allowed) {
+    throw new Error("Only leaders and admins can post here.");
+  }
+}
+
 /**
  * The one create path used by every learner. `scope: "unit"` requires the
  * caller to be in that unit (or an admin).
@@ -328,10 +347,8 @@ export async function createFeedPost(input: {
   if (input.scope === "unit") {
     unitId = input.unitId ?? ctx.unit?.id ?? null;
     if (!unitId) throw new Error("You are not in a unit yet.");
-    if (!ctx.isAdmin && unitId !== ctx.unit?.id) {
-      throw new Error("You can only post to your own unit.");
-    }
   }
+  assertCanPostTo(ctx, input.scope, unitId);
 
   const [post] = await db
     .insert(schema.communityPosts)
@@ -412,10 +429,8 @@ export async function sharePost(input: {
   if (input.scope === "unit") {
     unitId = input.unitId ?? ctx.unit?.id ?? null;
     if (!unitId) throw new Error("You are not in a unit yet.");
-    if (!ctx.isAdmin && unitId !== ctx.unit?.id) {
-      throw new Error("You can only post to your own unit.");
-    }
   }
+  assertCanPostTo(ctx, input.scope, unitId);
 
   const [post] = await db
     .insert(schema.communityPosts)

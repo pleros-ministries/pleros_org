@@ -4,6 +4,7 @@ import { after } from "next/server";
 import { revalidatePath } from "next/cache";
 
 import { canAccessCommunity, getCommunityContext } from "@/lib/community/context";
+import { canPostAnywhere } from "@/lib/community/permissions";
 import {
   notifyCommentReply,
   notifyPostComment,
@@ -35,6 +36,15 @@ async function requireCommunity(): Promise<CommunityContext> {
   return ctx;
 }
 
+/** Community access + authority to create a post somewhere (leader or admin). */
+async function requirePoster(): Promise<CommunityContext> {
+  const ctx = await requireCommunity();
+  if (!canPostAnywhere(ctx)) {
+    throw new Error("Only leaders and admins can post here.");
+  }
+  return ctx;
+}
+
 // ─── Posts ────────────────────────────────────────────────────────────────
 
 export async function createPost(input: {
@@ -43,7 +53,7 @@ export async function createPost(input: {
   body: string;
   images?: PostImage[];
 }) {
-  const ctx = await requireCommunity();
+  const ctx = await requirePoster();
   const post = await createFeedPost({
     ctx,
     scope: input.scope,
@@ -69,7 +79,7 @@ export async function sharePostToFeed(input: {
   scope: "global" | "unit";
   note: string;
 }) {
-  const ctx = await requireCommunity();
+  const ctx = await requirePoster();
   const post = await sharePost({
     ctx,
     sourcePostId: input.sourcePostId,

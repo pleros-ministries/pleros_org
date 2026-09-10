@@ -46,7 +46,7 @@ export default async function CommunityUnitRoute({
       posts={posts}
       viewerName={session.user.name ?? "You"}
       isAdmin={ctx.isAdmin}
-      canPost={ownUnit}
+      canPost={ownUnit && (ctx.isUnitLeader || ctx.isAdmin)}
       adminMembers={adminMembers}
     />
   );

@@ -37,16 +37,21 @@ export function CommunityHub({
       <div className="site-shell-page sogp-shell-page pb-6 pt-4">
         <div className="mx-auto grid w-full max-w-xl gap-6 lg:max-w-[56rem] lg:grid-cols-[minmax(0,1fr)_19rem] lg:items-start">
           <div className="grid gap-4">
-            <FeedComposer
-              viewerName={viewerName}
-              unitName={unit?.name ?? null}
-            />
+            {isAdmin || isUnitLeader ? (
+              <FeedComposer
+                viewerName={viewerName}
+                unitName={unit?.name ?? null}
+                defaultScope={isAdmin ? "global" : "unit"}
+                lockScope={!isAdmin}
+              />
+            ) : null}
             <PostList
               posts={initialFeed}
               viewerName={viewerName}
               viewerUnitName={unit?.name ?? null}
+              canPost={isAdmin || isUnitLeader}
               isAdmin={isAdmin}
-              emptyText="No posts yet. Be the first to share something."
+              emptyText="No posts yet. Check back soon for updates."
             />
           </div>
           <CommunitySidebar

@@ -123,6 +123,7 @@ export function CommunityUnitPage({
           posts={posts}
           viewerName={viewerName}
           viewerUnitName={canPost ? detail.name : null}
+          canPost={canPost}
           isAdmin={isAdmin}
           emptyText="No unit posts yet."
         />

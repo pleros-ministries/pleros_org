@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { PostDetail } from "@/components/community/post-detail";
 import { getAppSession } from "@/lib/app-session";
 import { canAccessCommunity, getCommunityContext } from "@/lib/community/context";
+import { canPostAnywhere } from "@/lib/community/permissions";
 import { getPost } from "@/lib/db/queries/community-posts";
 
 export default async function CommunityPostRoute({
@@ -30,6 +31,7 @@ export default async function CommunityPostRoute({
       post={post}
       viewerName={session.user.name ?? "You"}
       viewerUnitName={ctx.unit?.name ?? null}
+      canPost={canPostAnywhere(ctx)}
       isAdmin={ctx.isAdmin}
     />
   );

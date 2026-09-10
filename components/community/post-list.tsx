@@ -8,12 +8,14 @@ export function PostList({
   posts,
   viewerName = "You",
   viewerUnitName = null,
+  canPost = false,
   isAdmin = false,
   emptyText = "No posts yet.",
 }: {
   posts: FeedPost[];
   viewerName?: string;
   viewerUnitName?: string | null;
+  canPost?: boolean;
   isAdmin?: boolean;
   emptyText?: string;
 }) {
@@ -33,6 +35,7 @@ export function PostList({
           post={post}
           viewerName={viewerName}
           viewerUnitName={viewerUnitName}
+          canPost={canPost}
           isAdmin={isAdmin}
         />
       ))}

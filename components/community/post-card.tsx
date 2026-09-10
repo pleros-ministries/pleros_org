@@ -109,12 +109,14 @@ export function PostCard({
   post,
   viewerName = "You",
   viewerUnitName,
+  canPost = false,
   isAdmin,
   startExpanded = false,
 }: {
   post: FeedPost;
   viewerName?: string;
   viewerUnitName: string | null;
+  canPost?: boolean;
   isAdmin: boolean;
   startExpanded?: boolean;
 }) {
@@ -247,6 +249,7 @@ export function PostCard({
         <ShareMenu
           post={post}
           viewerUnitName={viewerUnitName}
+          canRepost={canPost}
           onShared={refresh}
           className={`${actionButton} text-zinc-600 hover:bg-zinc-50`}
         />
@@ -335,11 +338,13 @@ export function PostCard({
 function ShareMenu({
   post,
   viewerUnitName,
+  canRepost,
   onShared,
   className = "",
 }: {
   post: FeedPost;
   viewerUnitName: string | null;
+  canRepost: boolean;
   onShared: () => void;
   className?: string;
 }) {
@@ -385,14 +390,19 @@ function ShareMenu({
           <Popover.Popup className="z-50 w-64 rounded-xl border border-zinc-200 bg-white p-1.5 text-sm shadow-lg outline-none">
             {mode === "menu" ? (
               <div className="grid gap-0.5">
-                <button
-                  type="button"
-                  onClick={() => setMode("repost")}
-                  className={menuItem}
-                >
-                  <Repeat2Icon className="size-4 text-zinc-400" strokeWidth={2} />
-                  Share to feed
-                </button>
+                {canRepost ? (
+                  <button
+                    type="button"
+                    onClick={() => setMode("repost")}
+                    className={menuItem}
+                  >
+                    <Repeat2Icon
+                      className="size-4 text-zinc-400"
+                      strokeWidth={2}
+                    />
+                    Share to feed
+                  </button>
+                ) : null}
                 <button type="button" onClick={copy} className={menuItem}>
                   <CopyIcon className="size-4 text-zinc-400" strokeWidth={2} />
                   {copied ? "Link copied" : "Copy link"}

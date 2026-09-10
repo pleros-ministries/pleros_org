@@ -9,11 +9,13 @@ export function PostDetail({
   post,
   viewerName,
   viewerUnitName,
+  canPost,
   isAdmin,
 }: {
   post: FeedPost;
   viewerName: string;
   viewerUnitName: string | null;
+  canPost: boolean;
   isAdmin: boolean;
 }) {
   return (
@@ -38,6 +40,7 @@ export function PostDetail({
             post={post}
             viewerName={viewerName}
             viewerUnitName={viewerUnitName}
+            canPost={canPost}
             isAdmin={isAdmin}
             startExpanded
           />
