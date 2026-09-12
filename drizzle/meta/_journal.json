@@ -169,6 +169,27 @@
       "when": 1789030021199,
       "tag": "0023_community_feed_redesign",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1789216035311,
+      "tag": "0024_old_victor_mancha",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1789222902371,
+      "tag": "0025_kind_tinkerer",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1789225841544,
+      "tag": "0026_robust_talon",
+      "breakpoints": true
     }
   ]
 }

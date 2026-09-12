@@ -28,6 +28,14 @@ export async function requireStudent(): Promise<AppSession> {
   return requireRole("student");
 }
 
+export async function requirePastor(): Promise<AppSession> {
+  return requireRole("pastor");
+}
+
+export async function requirePastorOrAdmin(): Promise<AppSession> {
+  return requireRole("super_admin", "admin", "pastor");
+}
+
 export async function requireAuth(): Promise<AppSession> {
-  return requireRole("super_admin", "admin", "instructor", "student");
+  return requireRole("super_admin", "admin", "instructor", "student", "pastor");
 }

@@ -57,6 +57,18 @@ describe("ppc shell helpers", () => {
         roles: ["super_admin", "admin"],
       },
       {
+        label: "Pastors",
+        path: "/pastors",
+        icon: "pastors",
+        roles: ["super_admin", "admin"],
+      },
+      {
+        label: "My Enrollees",
+        path: "/my-enrollees",
+        icon: "students",
+        roles: ["super_admin", "admin", "pastor"],
+      },
+      {
         label: "Staff",
         path: "/staff",
         icon: "staff",
@@ -110,6 +122,8 @@ describe("ppc shell helpers", () => {
       "/content",
       "/sogp",
       "/community",
+      "/pastors",
+      "/my-enrollees",
       "/staff",
       "/students",
       "/review",
@@ -123,6 +137,8 @@ describe("ppc shell helpers", () => {
       "/content",
       "/sogp",
       "/community",
+      "/pastors",
+      "/my-enrollees",
       "/students",
       "/review",
       "/qa",
@@ -134,6 +150,9 @@ describe("ppc shell helpers", () => {
     ).toEqual(["/", "/students", "/review", "/qa", "/contact", "/notifications"]);
     expect(getVisiblePpcShellNavItems("student").map((item) => item.path)).toEqual([
       "/student",
+    ]);
+    expect(getVisiblePpcShellNavItems("pastor").map((item) => item.path)).toEqual([
+      "/my-enrollees",
     ]);
   });
 

@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { describe, expect, test } from "vitest";
 
 describe("dashboard typography", () => {
-  test("reuses the home page heading classes for dashboard headings", () => {
+  test("keeps the dashboard hero on the shared home page heading class, cards on the dashboard scale", () => {
     const dashboardSource = readFileSync(
       join(process.cwd(), "components", "dashboard", "welcome-dashboard-view.tsx"),
       "utf8",
@@ -13,16 +13,19 @@ describe("dashboard typography", () => {
       "utf8",
     );
 
+    // The hero greeting still reuses the home page's display heading.
     expect(dashboardSource).toContain("site-hero-heading");
-    expect(dashboardSource).toContain("site-section-heading");
-    expect(dashboardSource).toContain("site-pathway-title");
+    // Cards are icon-led and intentionally use the dashboard-specific type
+    // scale (defined in app/globals.css) rather than the marketing
+    // site-pathway-title / site-section-heading classes.
+    expect(dashboardSource).toContain("site-dashboard-card-title");
+    expect(dashboardSource).toContain("site-dashboard-card-body");
+    expect(dashboardSource).not.toContain("site-pathway-title");
+
+    // Welcome Pack is a separate, untouched surface — still on the shared
+    // marketing heading classes.
     expect(welcomePackSource).toContain("site-hero-heading");
     expect(welcomePackSource).toContain("site-section-heading");
-    expect(dashboardSource).not.toContain("site-dashboard-hero-heading");
-    expect(dashboardSource).not.toContain("site-dashboard-section-heading");
-    expect(dashboardSource).not.toContain("site-dashboard-card-title");
-    expect(welcomePackSource).not.toContain("site-dashboard-hero-heading");
-    expect(welcomePackSource).not.toContain("site-dashboard-section-heading");
   });
 
   test("uses Be Vietnam Pro explicitly for dashboard body copy", () => {
@@ -34,13 +37,14 @@ describe("dashboard typography", () => {
     expect(dashboardSource).toContain("font-[var(--font-be-vietnam-pro)]");
   });
 
-  test("keeps dashboard card titles at sixteen pixels", () => {
+  test("keeps dashboard card titles on the dashboard type scale", () => {
     const dashboardSource = readFileSync(
       join(process.cwd(), "components", "dashboard", "welcome-dashboard-view.tsx"),
       "utf8",
     );
 
-    expect(dashboardSource).toContain("site-pathway-title max-w-[13ch] text-[1rem]");
-    expect(dashboardSource).not.toContain("text-[1.05rem] text-white sm:text-[1.4rem]");
+    expect(dashboardSource).toContain(
+      "site-dashboard-card-title max-w-[16ch] text-[0.9rem]",
+    );
   });
 });

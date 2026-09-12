@@ -9,6 +9,7 @@ import {
   upsertSogpEnrollment,
 } from "@/lib/db/queries/sogp";
 import { assignEnrollmentToUnit } from "@/lib/db/queries/community-units";
+import { autoAssignPastorForEnrollment } from "@/lib/db/queries/pastor-followups";
 import {
   attributeSogpReferral,
   ensureSogpReferralCode,
@@ -148,9 +149,15 @@ export async function POST(request: NextRequest) {
       ),
     );
     after(() =>
-      assignEnrollmentToUnit(enrollment.id).catch((error) =>
-        console.error("SOGP community unit assignment failed:", error),
-      ),
+      assignEnrollmentToUnit(enrollment.id)
+        .then((result) =>
+          result
+            ? autoAssignPastorForEnrollment(enrollment.id, result.unitId)
+            : null,
+        )
+        .catch((error) =>
+          console.error("SOGP community unit/pastor assignment failed:", error),
+        ),
     );
     after(() =>
       sendSogpEnrollmentEmail({

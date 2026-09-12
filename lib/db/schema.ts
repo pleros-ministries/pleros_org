@@ -21,6 +21,7 @@ export const userRoleEnum = pgEnum("user_role", [
   "admin",
   "instructor",
   "student",
+  "pastor",
 ]);
 
 export const lessonStatusEnum = pgEnum("lesson_status", [
@@ -203,6 +204,8 @@ export const users = pgTable(
     name: text("name").notNull(),
     email: text("email").notNull(),
     role: userRoleEnum("role").notNull().default("student"),
+    /** Lets an admin/super_admin also hold pastor assignments without a role change. */
+    isPastor: boolean("is_pastor").notNull().default(false),
     emailVerified: boolean("email_verified").notNull().default(false),
     startingLevel: integer("starting_level").notNull().default(1),
     location: text("location"),
@@ -1179,6 +1182,54 @@ export const unitLeaderInvites = pgTable(
     index("unit_leader_invites_unit_idx").on(t.unitId),
     index("unit_leader_invites_email_idx").on(t.email),
     uniqueIndex("unit_leader_invites_token_hash_idx").on(t.tokenHash),
+  ],
+);
+
+// ─── Pastor follow-up ────────────────────────────────────────────────────────
+
+export const pastorAssignments = pgTable(
+  "pastor_assignments",
+  {
+    id: serial("id").primaryKey(),
+    enrollmentId: integer("enrollment_id")
+      .notNull()
+      .references(() => sogpEnrollments.id, { onDelete: "cascade" }),
+    pastorUserId: text("pastor_user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    assignedBy: text("assigned_by").references(() => users.id),
+    assignedAt: timestamp("assigned_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    lastContactedAt: timestamp("last_contacted_at", { withTimezone: true }),
+    contactCount: integer("contact_count").notNull().default(0),
+  },
+  (t) => [
+    // Exactly one pastor per enrolment.
+    uniqueIndex("pastor_assignments_enrollment_idx").on(t.enrollmentId),
+    index("pastor_assignments_pastor_idx").on(t.pastorUserId),
+  ],
+);
+
+/** Which pastor covers which region (unit) — one pastor per region. */
+export const pastorRegions = pgTable(
+  "pastor_regions",
+  {
+    id: serial("id").primaryKey(),
+    unitId: integer("unit_id")
+      .notNull()
+      .references(() => units.id, { onDelete: "cascade" }),
+    pastorUserId: text("pastor_user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    assignedBy: text("assigned_by").references(() => users.id),
+    assignedAt: timestamp("assigned_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("pastor_regions_unit_idx").on(t.unitId),
+    index("pastor_regions_pastor_idx").on(t.pastorUserId),
   ],
 );
 

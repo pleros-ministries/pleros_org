@@ -6,7 +6,7 @@ export const STAFF_INVITE_TOKEN_BYTES = 32;
 export const STAFF_INVITE_EXPIRY_DAYS = 7;
 
 export function isStaffInviteRole(role: AppRole | string): role is StaffInviteRole {
-  return role === "admin" || role === "instructor";
+  return role === "admin" || role === "instructor" || role === "pastor";
 }
 
 export function createStaffInviteToken() {

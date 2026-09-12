@@ -1,13 +1,19 @@
-export type AppRole = "super_admin" | "admin" | "instructor" | "student";
+export type AppRole =
+  | "super_admin"
+  | "admin"
+  | "instructor"
+  | "student"
+  | "pastor";
 
-export type StaffInviteRole = "admin" | "instructor";
+export type StaffInviteRole = "admin" | "instructor" | "pastor";
 
 export function isAppRole(value: string): value is AppRole {
   return (
     value === "super_admin" ||
     value === "admin" ||
     value === "instructor" ||
-    value === "student"
+    value === "student" ||
+    value === "pastor"
   );
 }
 
@@ -34,6 +40,10 @@ export function getAppRoleLabel(role: AppRole | string): string {
 
   if (role === "student") {
     return "Student";
+  }
+
+  if (role === "pastor") {
+    return "Pastor";
   }
 
   return role;

@@ -1,6 +1,6 @@
 import { and, desc, eq, isNull } from "drizzle-orm";
 
-import type { StaffInviteRole } from "@/lib/app-role";
+import type { AppRole, StaffInviteRole } from "@/lib/app-role";
 import { db } from "@/lib/db";
 import * as authSchema from "@/lib/db/auth-schema";
 import * as schema from "@/lib/db/schema";
@@ -77,9 +77,15 @@ export async function getAuthUserByEmail(email: string) {
 export async function listStaffUsers() {
   return db.query.users.findMany({
     where: (user, { inArray }) =>
-      inArray(user.role, ["super_admin", "admin", "instructor"]),
+      inArray(user.role, ["super_admin", "admin", "instructor", "pastor"]),
     orderBy: (user, { asc }) => [asc(user.role), asc(user.email)],
   });
+}
+
+/** Direct role edit — used to grant an existing account staff access, or to
+ * demote one (e.g. removing pastor access) back to "student". */
+export async function setUserStaffRole(userId: string, role: AppRole) {
+  await db.update(schema.users).set({ role }).where(eq(schema.users.id, userId));
 }
 
 export async function listStaffInvites() {

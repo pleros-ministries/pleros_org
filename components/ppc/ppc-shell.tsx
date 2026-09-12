@@ -77,6 +77,7 @@ const iconMap: Record<PpcShellIcon, React.ComponentType<{ className?: string }>>
   notifications: BellRing,
   learning: NotebookPen,
   waitlist: ClipboardList,
+  pastors: Users,
 };
 
 const PREFETCHED_ADMIN_PATHS = new Set([
