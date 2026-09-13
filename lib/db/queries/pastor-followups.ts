@@ -1,7 +1,6 @@
 import { and, asc, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
 
 import { db } from "@/lib/db";
-import { transactionDb } from "@/lib/db/transaction";
 import * as schema from "@/lib/db/schema";
 import { PRE_SOGP_PREPARATION_DAYS } from "@/lib/sogp/calendar";
 
@@ -10,16 +9,21 @@ import { PRE_SOGP_PREPARATION_DAYS } from "@/lib/sogp/calendar";
  * flag was turned off, or their `role` was demoted away from `"pastor"`.
  * Frees every enrollee and region assigned to them so an admin can hand
  * those off to someone else; a no-op if they held none.
+ *
+ * Deliberately uses the plain HTTP `db` client, not the WebSocket-pool
+ * `transactionDb` — this module gets imported by staff/admin actions that
+ * have nothing to do with pastors (e.g. creating a plain admin invite), and
+ * those shouldn't fail if the pool driver ever has trouble in a serverless
+ * environment. Both deletes are independently idempotent, so doing them
+ * sequentially instead of in a transaction costs nothing in practice.
  */
 export async function unassignAllForPastor(pastorUserId: string): Promise<void> {
-  await transactionDb.transaction(async (tx) => {
-    await tx
-      .delete(schema.pastorAssignments)
-      .where(eq(schema.pastorAssignments.pastorUserId, pastorUserId));
-    await tx
-      .delete(schema.pastorRegions)
-      .where(eq(schema.pastorRegions.pastorUserId, pastorUserId));
-  });
+  await db
+    .delete(schema.pastorAssignments)
+    .where(eq(schema.pastorAssignments.pastorUserId, pastorUserId));
+  await db
+    .delete(schema.pastorRegions)
+    .where(eq(schema.pastorRegions.pastorUserId, pastorUserId));
 }
 
 export type PastorSummary = {
