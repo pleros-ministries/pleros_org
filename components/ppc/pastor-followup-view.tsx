@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { recordFollowUpContact } from "@/app/admin/(app)/(pastor-only)/_actions/pastor-followup-actions";
@@ -31,11 +32,66 @@ function digitsOnly(phone: string) {
   return phone.replace(/\D/g, "");
 }
 
+const CSV_COLUMNS: Array<{ header: string; value: (enrollee: PastorEnrollee) => string | number }> = [
+  { header: "Name", value: (e) => e.name },
+  { header: "Email", value: (e) => e.email },
+  { header: "Phone", value: (e) => e.phone },
+  { header: "Country", value: (e) => e.country },
+  { header: "Region", value: (e) => e.region },
+  { header: "Birth year", value: (e) => e.birthYear ?? "" },
+  { header: "Cohort", value: (e) => e.cohortTitle },
+  { header: "Status", value: (e) => e.status.replaceAll("_", " ") },
+  { header: "Referral source", value: (e) => e.referralSource },
+  { header: "Assigned at", value: (e) => e.assignedAt },
+  { header: "Contact count", value: (e) => e.contactCount },
+  { header: "Last contacted at", value: (e) => e.lastContactedAt ?? "" },
+  { header: "WhatsApp consent", value: (e) => (e.whatsappConsent ? "Yes" : "No") },
+  { header: "Prep days complete", value: (e) => e.preparationDaysComplete },
+  { header: "Prep days total", value: (e) => e.preparationDaysTotal },
+  { header: "Morning prayer days", value: (e) => e.morningPrayerDays },
+  { header: "Review sessions complete", value: (e) => e.reviewSessionsComplete },
+  { header: "Quizzes passed", value: (e) => e.quizzesPassed },
+  { header: "Quizzes total", value: (e) => e.quizzesTotal },
+  { header: "Responses approved", value: (e) => e.responsesApproved },
+  { header: "Certificate issued", value: (e) => (e.certificateIssued ? "Yes" : "No") },
+  { header: "Referred count", value: (e) => e.referredCount },
+];
+
+function csvCell(value: string | number): string {
+  const text = String(value);
+  return /[",\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
+}
+
+function enrolleesToCsv(enrollees: PastorEnrollee[]): string {
+  const rows = [
+    CSV_COLUMNS.map((column) => csvCell(column.header)).join(","),
+    ...enrollees.map((enrollee) =>
+      CSV_COLUMNS.map((column) => csvCell(column.value(enrollee))).join(","),
+    ),
+  ];
+  return rows.join("\n");
+}
+
+function downloadEnrolleesCsv(enrollees: PastorEnrollee[]) {
+  const csv = enrolleesToCsv(enrollees);
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  const date = new Date().toISOString().slice(0, 10);
+  link.href = url;
+  link.download = `enrollees-${date}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
 function progressScore(enrollee: PastorEnrollee): number {
   return (
     enrollee.preparationDaysComplete / enrollee.preparationDaysTotal +
     (enrollee.morningPrayerDays > 0 ? 1 : 0) +
-    (enrollee.reviewSessionsComplete > 0 ? 1 : 0)
+    (enrollee.reviewSessionsComplete > 0 ? 1 : 0) +
+    (enrollee.quizzesTotal > 0 ? enrollee.quizzesPassed / enrollee.quizzesTotal : 0)
   );
 }
 
@@ -71,22 +127,50 @@ function ProgressSummary({ enrollees }: { enrollees: PastorEnrollee[] }) {
   const summary = useMemo(() => {
     const buckets = { none: 0, some: 0, done: 0 };
     let morningPrayerActive = 0;
+    let quizzesDone = 0;
+    let responsesApproved = 0;
+    let certified = 0;
+    let referring = 0;
+    let notContacted = 0;
+    let completed = 0;
     for (const enrollee of enrollees) {
       if (enrollee.preparationDaysComplete === 0) buckets.none += 1;
       else if (enrollee.preparationDaysComplete >= enrollee.preparationDaysTotal)
         buckets.done += 1;
       else buckets.some += 1;
       if (enrollee.morningPrayerDays > 0) morningPrayerActive += 1;
+      if (enrollee.quizzesTotal > 0 && enrollee.quizzesPassed >= enrollee.quizzesTotal)
+        quizzesDone += 1;
+      if (enrollee.responsesApproved > 0) responsesApproved += 1;
+      if (enrollee.certificateIssued) certified += 1;
+      if (enrollee.referredCount > 0) referring += 1;
+      if (enrollee.contactCount === 0) notContacted += 1;
+      if (enrollee.status === "completed") completed += 1;
     }
-    return { buckets, morningPrayerActive };
+    return {
+      buckets,
+      morningPrayerActive,
+      quizzesDone,
+      responsesApproved,
+      certified,
+      referring,
+      notContacted,
+      completed,
+    };
   }, [enrollees]);
 
   return (
-    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+    <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
       <Stat label="Assigned" value={enrollees.length} />
       <Stat label="Prep complete" value={summary.buckets.done} />
       <Stat label="Prep started" value={summary.buckets.some} />
       <Stat label="Morning prayer active" value={summary.morningPrayerActive} />
+      <Stat label="Quizzes passed" value={summary.quizzesDone} />
+      <Stat label="Responses approved" value={summary.responsesApproved} />
+      <Stat label="Certified" value={summary.certified} />
+      <Stat label="Referring" value={summary.referring} />
+      <Stat label="Not yet contacted" value={summary.notContacted} />
+      <Stat label="Completed SOGP" value={summary.completed} />
     </div>
   );
 }
@@ -118,9 +202,12 @@ function EnrolleeRow({
   return (
     <div className="grid gap-3 border-b border-zinc-100 p-4 last:border-b-0 sm:grid-cols-[1fr_auto] sm:items-start">
       <div className="grid gap-1 text-xs">
-        <p className="ppc-heading text-sm font-semibold text-zinc-900">
+        <Link
+          href={`/admin/my-enrollees/${enrollee.enrollmentId}`}
+          className="ppc-heading w-fit text-sm font-semibold text-zinc-900 hover:underline"
+        >
           {enrollee.name}
-        </p>
+        </Link>
         <p className="text-zinc-500">
           {enrollee.email} · {enrollee.phone}
         </p>
@@ -141,6 +228,12 @@ function EnrolleeRow({
           {enrollee.reviewSessionsComplete}
         </p>
         <p className="text-zinc-500">
+          Quizzes: {enrollee.quizzesPassed}/{enrollee.quizzesTotal} · Responses
+          approved: {enrollee.responsesApproved} · Certificate:{" "}
+          {enrollee.certificateIssued ? "Issued" : "Not yet"} · Referred:{" "}
+          {enrollee.referredCount}
+        </p>
+        <p className="text-zinc-500">
           WhatsApp: {enrollee.whatsappConsent ? "Opted in" : "Not opted in"} ·{" "}
           {enrollee.contactCount > 0
             ? `Contacted ${enrollee.contactCount}x, last ${relativeTime(enrollee.lastContactedAt!)}`
@@ -149,6 +242,12 @@ function EnrolleeRow({
       </div>
 
       <div className="flex flex-wrap items-start gap-2">
+        <Link
+          href={`/admin/my-enrollees/${enrollee.enrollmentId}`}
+          className={contactButton}
+        >
+          Review assignments
+        </Link>
         {enrollee.whatsappConsent ? (
           <a
             href={`https://wa.me/${digitsOnly(enrollee.phone)}`}
@@ -241,20 +340,30 @@ export function PastorFollowupView({
             placeholder="Search name, email, phone…"
             className="h-8 rounded-sm border border-zinc-200 px-2.5"
           />
-          <label className="flex items-center gap-1.5">
-            Sort by
-            <select
-              value={sortKey}
-              onChange={(event) => setSortKey(event.target.value as SortKey)}
-              className="h-8 rounded-sm border border-zinc-200 px-2"
+          <div className="flex items-center gap-3">
+            <label className="flex items-center gap-1.5">
+              Sort by
+              <select
+                value={sortKey}
+                onChange={(event) => setSortKey(event.target.value as SortKey)}
+                className="h-8 rounded-sm border border-zinc-200 px-2"
+              >
+                {Object.entries(SORT_LABELS).map(([key, label]) => (
+                  <option key={key} value={key}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <button
+              type="button"
+              onClick={() => downloadEnrolleesCsv(visible)}
+              disabled={visible.length === 0}
+              className="h-8 rounded-sm border border-zinc-200 bg-white px-3 font-medium text-zinc-700 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {Object.entries(SORT_LABELS).map(([key, label]) => (
-                <option key={key} value={key}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </label>
+              Export CSV
+            </button>
+          </div>
         </div>
 
         {visible.length === 0 ? (

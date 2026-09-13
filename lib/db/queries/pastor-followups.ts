@@ -33,6 +33,9 @@ export type PastorSummary = {
   assignedCount: number;
   contactedCount: number;
   lastContactedAt: string | null;
+  /** Written responses this pastor has approved/requested revision on. */
+  reviewedCount: number;
+  lastReviewedAt: string | null;
 };
 
 /**
@@ -48,14 +51,20 @@ export async function listPastors(): Promise<PastorSummary[]> {
       id: schema.users.id,
       name: schema.users.name,
       email: schema.users.email,
-      assignedCount: sql<number>`count(${schema.pastorAssignments.id})::int`,
-      contactedCount: sql<number>`count(*) filter (where ${schema.pastorAssignments.contactCount} > 0)::int`,
+      assignedCount: sql<number>`count(distinct ${schema.pastorAssignments.id})::int`,
+      contactedCount: sql<number>`count(distinct ${schema.pastorAssignments.id}) filter (where ${schema.pastorAssignments.contactCount} > 0)::int`,
       lastContactedAt: sql<string | null>`max(${schema.pastorAssignments.lastContactedAt})`,
+      reviewedCount: sql<number>`count(distinct ${schema.writtenSubmissions.id}) filter (where ${schema.writtenSubmissions.reviewedBy} is not null)::int`,
+      lastReviewedAt: sql<string | null>`max(${schema.writtenSubmissions.reviewedAt})`,
     })
     .from(schema.users)
     .leftJoin(
       schema.pastorAssignments,
       eq(schema.pastorAssignments.pastorUserId, schema.users.id),
+    )
+    .leftJoin(
+      schema.writtenSubmissions,
+      eq(schema.writtenSubmissions.reviewedBy, schema.users.id),
     )
     .where(
       or(eq(schema.users.role, "pastor"), eq(schema.users.isPastor, true)),
@@ -67,6 +76,9 @@ export async function listPastors(): Promise<PastorSummary[]> {
     ...row,
     lastContactedAt: row.lastContactedAt
       ? new Date(row.lastContactedAt).toISOString()
+      : null,
+    lastReviewedAt: row.lastReviewedAt
+      ? new Date(row.lastReviewedAt).toISOString()
       : null,
   }));
 }
@@ -373,55 +385,81 @@ export type PastorEnrollee = {
   morningPrayerDays: number;
   /** Required live review sessions attended. */
   reviewSessionsComplete: number;
+  /** Quizzes passed (score >= 70%), out of quiz-bearing lessons in their cohort. */
+  quizzesPassed: number;
+  quizzesTotal: number;
+  /** Written responses a reviewer has approved. */
+  responsesApproved: number;
+  /** Whether they currently hold a valid (non-revoked) SOGP certificate. */
+  certificateIssued: boolean;
+  /** How many other enrollees they've personally referred in. */
+  referredCount: number;
 };
 
-/**
- * A pastor's own "my enrollees" list — full record for each assignment, plus
- * SOGP progress (preparation, morning prayer, live-class attendance), the
- * same metrics used in the admin SOGP completion view
- * (`app/admin/_actions/read-actions.ts`) and the community leader report
- * (`lib/db/queries/community-reports.ts`).
- */
-export async function getPastorEnrollees(
-  pastorUserId: string,
-  { limit = 50, offset = 0 }: { limit?: number; offset?: number } = {},
-): Promise<PastorEnrollee[]> {
-  const rows = await db
-    .select({
-      enrollmentId: schema.sogpEnrollments.id,
-      userId: schema.sogpEnrollments.userId,
-      name: schema.sogpEnrollments.name,
-      email: schema.sogpEnrollments.email,
-      phone: schema.sogpEnrollments.phone,
-      country: schema.sogpEnrollments.country,
-      region: schema.sogpEnrollments.region,
-      birthYear: schema.sogpEnrollments.birthYear,
-      referralSource: schema.sogpEnrollments.referralSource,
-      status: schema.sogpEnrollments.status,
-      whatsappConsent: schema.sogpEnrollments.whatsappConsent,
-      cohortTitle: schema.sogpCohorts.title,
-      assignedAt: schema.pastorAssignments.assignedAt,
-      lastContactedAt: schema.pastorAssignments.lastContactedAt,
-      contactCount: schema.pastorAssignments.contactCount,
-    })
-    .from(schema.pastorAssignments)
-    .innerJoin(
-      schema.sogpEnrollments,
-      eq(schema.sogpEnrollments.id, schema.pastorAssignments.enrollmentId),
-    )
-    .innerJoin(
-      schema.sogpCohorts,
-      eq(schema.sogpCohorts.id, schema.sogpEnrollments.cohortId),
-    )
-    .where(eq(schema.pastorAssignments.pastorUserId, pastorUserId))
-    .orderBy(desc(schema.pastorAssignments.assignedAt))
-    .limit(limit)
-    .offset(offset);
+type PastorEnrolleeBaseRow = {
+  enrollmentId: number;
+  userId: string;
+  cohortId: number;
+  name: string;
+  email: string;
+  phone: string;
+  country: string;
+  region: string;
+  birthYear: number | null;
+  referralSource: string;
+  status: (typeof schema.sogpEnrollmentStatusEnum.enumValues)[number];
+  whatsappConsent: boolean;
+  cohortTitle: string;
+  assignedAt: Date;
+  lastContactedAt: Date | null;
+  contactCount: number;
+};
 
+const pastorEnrolleeColumns = {
+  enrollmentId: schema.sogpEnrollments.id,
+  userId: schema.sogpEnrollments.userId,
+  cohortId: schema.sogpEnrollments.cohortId,
+  name: schema.sogpEnrollments.name,
+  email: schema.sogpEnrollments.email,
+  phone: schema.sogpEnrollments.phone,
+  country: schema.sogpEnrollments.country,
+  region: schema.sogpEnrollments.region,
+  birthYear: schema.sogpEnrollments.birthYear,
+  referralSource: schema.sogpEnrollments.referralSource,
+  status: schema.sogpEnrollments.status,
+  whatsappConsent: schema.sogpEnrollments.whatsappConsent,
+  cohortTitle: schema.sogpCohorts.title,
+  assignedAt: schema.pastorAssignments.assignedAt,
+  lastContactedAt: schema.pastorAssignments.lastContactedAt,
+  contactCount: schema.pastorAssignments.contactCount,
+} as const;
+
+/**
+ * Attach SOGP progress (preparation, morning prayer, live-class attendance)
+ * to a batch of enrollee rows — the same metrics used in the admin SOGP
+ * completion view (`app/admin/_actions/read-actions.ts`) and the community
+ * leader report (`lib/db/queries/community-reports.ts`). Shared by both
+ * `getPastorEnrollees` (a pastor's whole list) and `getPastorEnrolleeById`
+ * (one enrollee's detail page) so the three progress queries live in one
+ * place.
+ */
+async function enrichWithProgress(
+  rows: PastorEnrolleeBaseRow[],
+): Promise<PastorEnrollee[]> {
   const enrollmentIds = rows.map((row) => row.enrollmentId);
   const userIds = rows.map((row) => row.userId);
+  const cohortIds = [...new Set(rows.map((row) => row.cohortId))];
 
-  const [prepRows, prayerRows, reviewRows] = await Promise.all([
+  const [
+    prepRows,
+    prayerRows,
+    reviewRows,
+    quizPassedRows,
+    quizTotalRows,
+    approvedRows,
+    certificateRows,
+    referredRows,
+  ] = await Promise.all([
     enrollmentIds.length
       ? db
           .select({
@@ -462,13 +500,92 @@ export async function getPastorEnrollees(
           .where(inArray(schema.sogpLiveClassAttendance.userId, userIds))
           .groupBy(schema.sogpLiveClassAttendance.userId)
       : Promise.resolve([]),
+    userIds.length
+      ? db
+          .select({
+            userId: schema.studentProgress.userId,
+            passed: sql<number>`count(*)::int`,
+          })
+          .from(schema.studentProgress)
+          .where(
+            and(
+              inArray(schema.studentProgress.userId, userIds),
+              eq(schema.studentProgress.quizPassed, true),
+            ),
+          )
+          .groupBy(schema.studentProgress.userId)
+      : Promise.resolve([]),
+    cohortIds.length
+      ? db
+          .select({
+            cohortId: schema.sogpCohortTracks.cohortId,
+            total: sql<number>`count(distinct ${schema.lessons.id})::int`,
+          })
+          .from(schema.sogpCohortTracks)
+          .innerJoin(
+            schema.lessons,
+            eq(schema.lessons.id, schema.sogpCohortTracks.lessonId),
+          )
+          .innerJoin(
+            schema.quizQuestions,
+            eq(schema.quizQuestions.lessonId, schema.lessons.id),
+          )
+          .where(inArray(schema.sogpCohortTracks.cohortId, cohortIds))
+          .groupBy(schema.sogpCohortTracks.cohortId)
+      : Promise.resolve([]),
+    userIds.length
+      ? db
+          .select({
+            userId: schema.writtenSubmissions.userId,
+            approved: sql<number>`count(*)::int`,
+          })
+          .from(schema.writtenSubmissions)
+          .where(
+            and(
+              inArray(schema.writtenSubmissions.userId, userIds),
+              eq(schema.writtenSubmissions.status, "approved"),
+            ),
+          )
+          .groupBy(schema.writtenSubmissions.userId)
+      : Promise.resolve([]),
+    enrollmentIds.length
+      ? db
+          .select({ enrollmentId: schema.sogpCertificates.enrollmentId })
+          .from(schema.sogpCertificates)
+          .where(
+            and(
+              inArray(schema.sogpCertificates.enrollmentId, enrollmentIds),
+              sql`${schema.sogpCertificates.revokedAt} is null`,
+            ),
+          )
+      : Promise.resolve([]),
+    enrollmentIds.length
+      ? db
+          .select({
+            referredByEnrollmentId: schema.sogpEnrollments.referredByEnrollmentId,
+            referred: sql<number>`count(*)::int`,
+          })
+          .from(schema.sogpEnrollments)
+          .where(
+            inArray(schema.sogpEnrollments.referredByEnrollmentId, enrollmentIds),
+          )
+          .groupBy(schema.sogpEnrollments.referredByEnrollmentId)
+      : Promise.resolve([]),
   ]);
 
   const prepByEnrollment = new Map(prepRows.map((r) => [r.enrollmentId, r.completed]));
   const prayerByUser = new Map(prayerRows.map((r) => [r.userId, r.days]));
   const reviewByUser = new Map(reviewRows.map((r) => [r.userId, r.attended]));
-
-  return rows.map(({ userId, ...row }) => ({
+  const quizPassedByUser = new Map(quizPassedRows.map((r) => [r.userId, r.passed]));
+  const quizTotalByCohort = new Map(quizTotalRows.map((r) => [r.cohortId, r.total]));
+  const approvedByUser = new Map(approvedRows.map((r) => [r.userId, r.approved]));
+  const certifiedEnrollments = new Set(certificateRows.map((r) => r.enrollmentId));
+  const referredByEnrollment = new Map(
+    referredRows
+      .filter((r) => r.referredByEnrollmentId != null)
+      .map((r) => [r.referredByEnrollmentId as number, r.referred]),
+  );
+  return rows.map(({ userId, cohortId, ...row }) => ({
     ...row,
     assignedAt: new Date(row.assignedAt).toISOString(),
     lastContactedAt: row.lastContactedAt
@@ -478,6 +595,159 @@ export async function getPastorEnrollees(
     preparationDaysTotal: PRE_SOGP_PREPARATION_DAYS,
     morningPrayerDays: prayerByUser.get(userId) ?? 0,
     reviewSessionsComplete: reviewByUser.get(userId) ?? 0,
+    quizzesPassed: quizPassedByUser.get(userId) ?? 0,
+    quizzesTotal: quizTotalByCohort.get(cohortId) ?? 0,
+    responsesApproved: approvedByUser.get(userId) ?? 0,
+    certificateIssued: certifiedEnrollments.has(row.enrollmentId),
+    referredCount: referredByEnrollment.get(row.enrollmentId) ?? 0,
+  }));
+}
+
+/**
+ * A pastor's own "my enrollees" list — full record for each assignment, plus
+ * SOGP progress.
+ */
+export async function getPastorEnrollees(
+  pastorUserId: string,
+  { limit = 50, offset = 0 }: { limit?: number; offset?: number } = {},
+): Promise<PastorEnrollee[]> {
+  const rows = await db
+    .select(pastorEnrolleeColumns)
+    .from(schema.pastorAssignments)
+    .innerJoin(
+      schema.sogpEnrollments,
+      eq(schema.sogpEnrollments.id, schema.pastorAssignments.enrollmentId),
+    )
+    .innerJoin(
+      schema.sogpCohorts,
+      eq(schema.sogpCohorts.id, schema.sogpEnrollments.cohortId),
+    )
+    .where(eq(schema.pastorAssignments.pastorUserId, pastorUserId))
+    .orderBy(desc(schema.pastorAssignments.assignedAt))
+    .limit(limit)
+    .offset(offset);
+
+  return enrichWithProgress(rows);
+}
+
+/** One enrollee's full record, regardless of which pastor holds it — powers
+ * the enrollee detail/review page. Callers must check
+ * `isPastorAssignedToEnrollment` themselves before showing this to a pastor. */
+export async function getPastorEnrolleeById(
+  enrollmentId: number,
+): Promise<PastorEnrollee | null> {
+  const rows = await db
+    .select(pastorEnrolleeColumns)
+    .from(schema.pastorAssignments)
+    .innerJoin(
+      schema.sogpEnrollments,
+      eq(schema.sogpEnrollments.id, schema.pastorAssignments.enrollmentId),
+    )
+    .innerJoin(
+      schema.sogpCohorts,
+      eq(schema.sogpCohorts.id, schema.sogpEnrollments.cohortId),
+    )
+    .where(eq(schema.pastorAssignments.enrollmentId, enrollmentId))
+    .limit(1);
+
+  if (rows.length === 0) return null;
+  const [enrollee] = await enrichWithProgress(rows);
+  return enrollee ?? null;
+}
+
+/** Ownership check — does this enrollment currently belong to this pastor? */
+export async function isPastorAssignedToEnrollment(
+  pastorUserId: string,
+  enrollmentId: number,
+): Promise<boolean> {
+  const [row] = await db
+    .select({ id: schema.pastorAssignments.id })
+    .from(schema.pastorAssignments)
+    .where(
+      and(
+        eq(schema.pastorAssignments.pastorUserId, pastorUserId),
+        eq(schema.pastorAssignments.enrollmentId, enrollmentId),
+      ),
+    )
+    .limit(1);
+  return Boolean(row);
+}
+
+export type PastorEnrolleeSubmission = {
+  lessonId: number;
+  lessonTitle: string;
+  lessonNumber: number;
+  dayNumber: number | null;
+  weekNumber: number;
+  responsePrompt: string | null;
+  responseMarkingGuide: string | null;
+  submissionId: number | null;
+  content: string | null;
+  status: (typeof schema.submissionStatusEnum.enumValues)[number] | null;
+  reviewerNote: string | null;
+  submittedAt: string | null;
+  reviewedAt: string | null;
+};
+
+/**
+ * Every SOGP curriculum day for this enrollee's cohort that has a written
+ * response prompt, left-joined to whatever the enrollee has actually
+ * submitted (if anything) — mirrors `getReviewQueue()`'s join shape
+ * (`lib/db/queries/submissions.ts`) but walks the curriculum first, so an
+ * untouched lesson still shows up as "not submitted" rather than being
+ * absent from the list.
+ */
+export async function getPastorEnrolleeSubmissions(
+  enrollmentId: number,
+): Promise<PastorEnrolleeSubmission[]> {
+  const [enrollment] = await db
+    .select({
+      userId: schema.sogpEnrollments.userId,
+      cohortId: schema.sogpEnrollments.cohortId,
+    })
+    .from(schema.sogpEnrollments)
+    .where(eq(schema.sogpEnrollments.id, enrollmentId))
+    .limit(1);
+  if (!enrollment) return [];
+
+  const submission = schema.writtenSubmissions;
+  const rows = await db
+    .select({
+      lessonId: schema.lessons.id,
+      lessonTitle: schema.lessons.title,
+      lessonNumber: schema.lessons.lessonNumber,
+      dayNumber: schema.sogpCohortTracks.dayNumber,
+      weekNumber: schema.sogpCohortTracks.weekNumber,
+      responsePrompt: schema.lessons.responsePrompt,
+      responseMarkingGuide: schema.lessons.responseMarkingGuide,
+      submissionId: submission.id,
+      content: submission.content,
+      status: submission.status,
+      reviewerNote: submission.reviewerNote,
+      submittedAt: submission.submittedAt,
+      reviewedAt: submission.reviewedAt,
+    })
+    .from(schema.sogpCohortTracks)
+    .innerJoin(schema.lessons, eq(schema.lessons.id, schema.sogpCohortTracks.lessonId))
+    .leftJoin(
+      submission,
+      and(
+        eq(submission.lessonId, schema.lessons.id),
+        eq(submission.userId, enrollment.userId),
+      ),
+    )
+    .where(
+      and(
+        eq(schema.sogpCohortTracks.cohortId, enrollment.cohortId),
+        sql`${schema.lessons.responsePrompt} is not null`,
+      ),
+    )
+    .orderBy(asc(schema.sogpCohortTracks.curriculumOrder));
+
+  return rows.map((row) => ({
+    ...row,
+    submittedAt: row.submittedAt ? new Date(row.submittedAt).toISOString() : null,
+    reviewedAt: row.reviewedAt ? new Date(row.reviewedAt).toISOString() : null,
   }));
 }
 

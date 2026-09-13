@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import {
@@ -28,6 +29,12 @@ function relativeTime(iso: string | null): string {
   const hr = Math.round(min / 60);
   if (hr < 24) return `${hr}h ago`;
   return `${Math.round(hr / 24)}d ago`;
+}
+
+function latestOf(a: string | null, b: string | null): string | null {
+  if (!a) return b;
+  if (!b) return a;
+  return a > b ? a : b;
 }
 
 function PastorAssignCell({
@@ -227,13 +234,14 @@ export function AdminPastorsPage({
               <th className="px-4 py-3">Pastor</th>
               <th className="px-4 py-3">Assigned</th>
               <th className="px-4 py-3">Contacted</th>
+              <th className="px-4 py-3">Reviewed</th>
               <th className="px-4 py-3">Last activity</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-100">
             {pastors.length === 0 ? (
               <tr>
-                <td colSpan={4} className="px-4 py-10 text-center text-zinc-500">
+                <td colSpan={5} className="px-4 py-10 text-center text-zinc-500">
                   No pastors yet. Invite one from Staff.
                 </td>
               </tr>
@@ -241,12 +249,20 @@ export function AdminPastorsPage({
               pastors.map((pastor) => (
                 <tr key={pastor.id}>
                   <td className="px-4 py-3">
-                    <p className="font-medium text-zinc-900">{pastor.name}</p>
+                    <Link
+                      href={`/admin/my-enrollees?pastorId=${pastor.id}`}
+                      className="font-medium text-zinc-900 hover:underline"
+                    >
+                      {pastor.name}
+                    </Link>
                     <p className="mt-0.5 text-[10px] text-zinc-500">{pastor.email}</p>
                   </td>
                   <td className="px-4 py-3">{pastor.assignedCount}</td>
                   <td className="px-4 py-3">{pastor.contactedCount}</td>
-                  <td className="px-4 py-3">{relativeTime(pastor.lastContactedAt)}</td>
+                  <td className="px-4 py-3">{pastor.reviewedCount}</td>
+                  <td className="px-4 py-3">
+                    {relativeTime(latestOf(pastor.lastContactedAt, pastor.lastReviewedAt))}
+                  </td>
                 </tr>
               ))
             )}
