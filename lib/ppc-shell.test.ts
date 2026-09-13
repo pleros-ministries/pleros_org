@@ -72,7 +72,7 @@ describe("ppc shell helpers", () => {
         label: "Staff",
         path: "/staff",
         icon: "staff",
-        roles: ["super_admin"],
+        roles: ["super_admin", "admin"],
       },
       {
         label: "Registrants",
@@ -139,6 +139,7 @@ describe("ppc shell helpers", () => {
       "/community",
       "/pastors",
       "/my-enrollees",
+      "/staff",
       "/students",
       "/review",
       "/qa",

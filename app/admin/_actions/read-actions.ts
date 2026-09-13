@@ -1,6 +1,6 @@
 "use server";
 
-import { requireAdmin, requireStaff, requireSuperAdmin } from "@/lib/auth/require-role";
+import { requireAdmin, requireStaff } from "@/lib/auth/require-role";
 import type { AdminRegistrantSummary } from "@/lib/admin-registrants";
 import type {
   AdminDashboardData,
@@ -436,7 +436,7 @@ export async function getAdminPlatformData(): Promise<AdminPlatformData> {
 }
 
 export async function getAdminStaffData(): Promise<AdminStaffData> {
-  await requireSuperAdmin();
+  await requireAdmin();
   const [staffUsers, invites] = await Promise.all([
     listStaffUsers(),
     listStaffInvites(),

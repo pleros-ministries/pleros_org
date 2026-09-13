@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 
-import { requireSuperAdmin } from "@/lib/auth/require-role";
+import { requireAdmin } from "@/lib/auth/require-role";
 import { getAppRoleLabel } from "@/lib/app-role";
 import {
   acceptStaffInvite,
@@ -39,7 +39,7 @@ import {
 // action below returns `{ error: string }` for expected failures instead, so
 // the real message actually reaches the admin. See
 // https://nextjs.org/docs/app/getting-started/error-handling — auth-gate
-// calls like `requireSuperAdmin()` are left as throws on purpose: those mean
+// calls like `requireAdmin()` are left as throws on purpose: those mean
 // "you shouldn't be able to call this at all," not a normal validation case.
 
 function revalidateStaffSurfaces() {
@@ -55,7 +55,7 @@ export async function createStaffInviteAction(data: {
   email: string;
   role: string;
 }) {
-  const session = await requireSuperAdmin();
+  const session = await requireAdmin();
   const email = normalizeEmail(data.email);
 
   if (!email || !email.includes("@")) {
@@ -147,7 +147,7 @@ export async function acceptStaffInviteAction(data: { token: string }) {
 }
 
 export async function revokeStaffInviteAction(inviteId: number) {
-  await requireSuperAdmin();
+  await requireAdmin();
   const invite = await revokeStaffInvite(inviteId);
   revalidateStaffSurfaces();
 
@@ -160,7 +160,7 @@ export async function revokeStaffInviteAction(inviteId: number) {
 /** Search registered accounts by name or email — for picking who to grant
  * staff/pastor access to, without needing to know their exact email. */
 export async function searchStaffCandidatesAction(query: string) {
-  await requireSuperAdmin();
+  await requireAdmin();
   if (!query.trim()) return [];
   return searchAppUsers(query, 8);
 }
@@ -176,7 +176,7 @@ export async function grantExistingUserStaffRole(input: {
   userId: string;
   role: string;
 }) {
-  await requireSuperAdmin();
+  await requireAdmin();
 
   if (!isStaffInviteRole(input.role)) {
     return { error: "Choose admin, instructor, or pastor." };
@@ -232,7 +232,7 @@ export async function grantExistingUserStaffRole(input: {
 
 /** Remove someone's pastor (or other staff) access — reverts to "student". */
 export async function removeStaffRole(input: { userId: string }) {
-  await requireSuperAdmin();
+  await requireAdmin();
   await setUserStaffRole(input.userId, "student");
   await unassignAllForPastor(input.userId);
   revalidateStaffSurfaces();

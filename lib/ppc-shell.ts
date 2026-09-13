@@ -89,7 +89,7 @@ export const PPC_SHELL_NAV_ITEMS: PpcShellNavItem[] = [
     label: "Staff",
     path: "/staff",
     icon: "staff",
-    roles: ["super_admin"],
+    roles: ["super_admin", "admin"],
   },
   {
     label: "Registrants",
