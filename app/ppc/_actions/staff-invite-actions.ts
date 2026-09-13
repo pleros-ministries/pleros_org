@@ -33,6 +33,15 @@ import {
   isStaffInviteRole,
 } from "@/lib/staff-invites";
 
+// Next.js treats a `throw` from a Server Action as an uncaught exception: in
+// production the message is redacted to a generic one (the "digest" error /
+// React error #441), even for a deliberate, safe validation message. Every
+// action below returns `{ error: string }` for expected failures instead, so
+// the real message actually reaches the admin. See
+// https://nextjs.org/docs/app/getting-started/error-handling — auth-gate
+// calls like `requireSuperAdmin()` are left as throws on purpose: those mean
+// "you shouldn't be able to call this at all," not a normal validation case.
+
 function revalidateStaffSurfaces() {
   revalidatePath("/admin", "layout");
   revalidatePath("/admin/staff");
@@ -50,18 +59,19 @@ export async function createStaffInviteAction(data: {
   const email = normalizeEmail(data.email);
 
   if (!email || !email.includes("@")) {
-    throw new Error("Enter a valid staff email.");
+    return { error: "Enter a valid staff email." };
   }
 
   if (!isStaffInviteRole(data.role)) {
-    throw new Error("Staff invites can only be for admins, instructors, or pastors.");
+    return { error: "Staff invites can only be for admins, instructors, or pastors." };
   }
 
   const existingAuthUser = await getAuthUserByEmail(email);
   if (existingAuthUser) {
-    throw new Error(
-      'An account already exists for this email — use "Grant access to an existing account" below instead of an invite.',
-    );
+    return {
+      error:
+        'An account already exists for this email — use "Grant access to an existing account" below instead of an invite.',
+    };
   }
 
   const token = createStaffInviteToken();
@@ -83,6 +93,7 @@ export async function createStaffInviteAction(data: {
   revalidateStaffSurfaces();
 
   return {
+    error: null as string | null,
     id: invite.id,
     email: invite.email,
     role: invite.role,
@@ -92,31 +103,29 @@ export async function createStaffInviteAction(data: {
   };
 }
 
-export async function acceptStaffInviteAction(data: {
-  token: string;
-}) {
+export async function acceptStaffInviteAction(data: { token: string }) {
   const invite = await getStaffInviteByToken(data.token);
 
   if (!invite) {
-    throw new Error("Invite not found.");
+    return { error: "Invite not found." };
   }
 
   const status = getStaffInviteStatus(invite);
   if (status !== "pending") {
-    throw new Error(`Invite is ${status}.`);
+    return { error: `Invite is ${status}.` };
   }
 
   if (!isStaffInviteRole(invite.role)) {
-    throw new Error("Invite role is invalid.");
+    return { error: "Invite role is invalid." };
   }
 
   const authUser = await getAuthUserByEmail(invite.email);
   if (!authUser) {
-    throw new Error("Create your account before accepting this invite.");
+    return { error: "Create your account before accepting this invite." };
   }
 
   if (!authUser.emailVerified) {
-    throw new Error("Verify your email before accepting this staff invite.");
+    return { error: "Verify your email before accepting this staff invite." };
   }
 
   const userId = await ensureAppUserRecord({
@@ -131,6 +140,7 @@ export async function acceptStaffInviteAction(data: {
   revalidateStaffSurfaces();
 
   return {
+    error: null as string | null,
     success: true,
     redirectTo: "/admin",
   };
@@ -169,12 +179,12 @@ export async function grantExistingUserStaffRole(input: {
   await requireSuperAdmin();
 
   if (!isStaffInviteRole(input.role)) {
-    throw new Error("Choose admin, instructor, or pastor.");
+    return { error: "Choose admin, instructor, or pastor." };
   }
 
   const user = await getAppUserById(input.userId);
   if (!user) {
-    throw new Error("That account no longer exists.");
+    return { error: "That account no longer exists." };
   }
 
   // Emails in SUPER_ADMIN_EMAILS have their `role` pinned to "super_admin" on
@@ -185,9 +195,9 @@ export async function grantExistingUserStaffRole(input: {
   // pastor" admin toggle uses, which that pinning never touches.
   const isFixedSuperAdmin = isConfiguredSuperAdminEmail(user.email);
   if (isFixedSuperAdmin && input.role !== "pastor") {
-    throw new Error(
-      `${user.name} is a permanent super admin and already has full access — there's nothing to grant.`,
-    );
+    return {
+      error: `${user.name} is a permanent super admin and already has full access — there's nothing to grant.`,
+    };
   }
 
   if (isFixedSuperAdmin) {
@@ -217,7 +227,7 @@ export async function grantExistingUserStaffRole(input: {
 
   revalidateStaffSurfaces();
 
-  return { granted: true, emailVerified: user.emailVerified };
+  return { error: null as string | null, granted: true, emailVerified: user.emailVerified };
 }
 
 /** Remove someone's pastor (or other staff) access — reverts to "student". */

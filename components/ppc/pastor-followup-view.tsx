@@ -101,13 +101,16 @@ function EnrolleeRow({
   const [pending, startTransition] = useTransition();
 
   function logContact(channel: "whatsapp" | "call" | "email") {
-    startTransition(() =>
-      recordFollowUpContact({
+    startTransition(async () => {
+      const result = await recordFollowUpContact({
         enrollmentId: enrollee.enrollmentId,
         channel,
         pastorUserId: pastorUserId ?? undefined,
-      }),
-    );
+      });
+      if (result.error) {
+        console.error("Could not log contact:", result.error);
+      }
+    });
   }
 
   const contactButton = `inline-flex h-8 items-center gap-1.5 rounded-sm border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 hover:bg-zinc-50 ${pending ? "opacity-60" : ""}`;

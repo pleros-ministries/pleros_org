@@ -125,6 +125,13 @@ export function StaffManagementClient({
     startTransition(async () => {
       try {
         const invite = await createStaffInviteAction({ email, role });
+        if (invite.error || !invite.email) {
+          setFeedback({
+            tone: "error",
+            message: invite.error ?? "Invite could not be created.",
+          });
+          return;
+        }
         await queryClient.invalidateQueries({ queryKey: ADMIN_QUERY_KEYS.staff });
         setEmail("");
         setRole("admin");
@@ -193,6 +200,10 @@ export function StaffManagementClient({
           userId: grantSelected.id,
           role: grantRole,
         });
+        if (result.error) {
+          setGrantFeedback({ tone: "error", message: result.error });
+          return;
+        }
         await queryClient.invalidateQueries({ queryKey: ADMIN_QUERY_KEYS.staff });
         handleClearCandidate();
         setGrantFeedback({

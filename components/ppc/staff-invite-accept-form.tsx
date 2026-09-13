@@ -48,6 +48,10 @@ export function StaffInviteAcceptForm({
 
       try {
         const accepted = await acceptStaffInviteAction({ token });
+        if (accepted.error || !accepted.redirectTo) {
+          setError(accepted.error ?? "Invite could not be accepted.");
+          return;
+        }
         router.push(accepted.redirectTo);
         router.refresh();
       } catch (acceptError) {

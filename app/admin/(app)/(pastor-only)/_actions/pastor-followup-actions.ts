@@ -18,14 +18,15 @@ export async function recordFollowUpContact(input: {
     session.user.role === "pastor" ? session.user.id : input.pastorUserId;
 
   if (!pastorUserId) {
-    throw new Error("A pastor must be specified.");
+    return { error: "A pastor must be specified." };
   }
 
   if (!hasAdminAccess(session.user.role) && pastorUserId !== session.user.id) {
-    throw new Error("Forbidden");
+    return { error: "Forbidden" };
   }
 
   await recordPastorContact(input.enrollmentId, pastorUserId);
   revalidatePath("/admin/my-enrollees");
   revalidatePath("/admin/pastors");
+  return { error: null as string | null };
 }
