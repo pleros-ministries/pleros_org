@@ -26,14 +26,14 @@ function revalidateSubmissionSurfaces() {
 async function assertSubmissionCanBeGraded(submissionId: number) {
   const submission = await getSubmissionById(submissionId);
   if (!submission) {
-    throw new Error("Submission not found");
+    return { error: "Submission not found", submission: null, lesson: null };
   }
 
   const lesson = await db.query.lessons.findFirst({
     where: (lesson, { eq }) => eq(lesson.id, submission.lessonId),
   });
   if (!lesson) {
-    throw new Error("Lesson not found");
+    return { error: "Lesson not found", submission: null, lesson: null };
   }
 
   const readiness = getReviewGradingReadiness({
@@ -44,10 +44,10 @@ async function assertSubmissionCanBeGraded(submissionId: number) {
   });
 
   if (!readiness.canGrade) {
-    throw new Error(readiness.detail);
+    return { error: readiness.detail, submission: null, lesson: null };
   }
 
-  return { submission, lesson };
+  return { error: null, submission, lesson };
 }
 
 export async function saveDraft(lessonId: number, content: string) {
@@ -69,7 +69,9 @@ export async function submitWrittenResponse(lessonId: number) {
 export async function approveWrittenSubmission(submissionId: number) {
   const session = await requireStaff();
   const { reviewerId } = getStaffActor(session);
-  const { lesson } = await assertSubmissionCanBeGraded(submissionId);
+  const graded = await assertSubmissionCanBeGraded(submissionId);
+  if (graded.error) return { error: graded.error };
+  const lesson = graded.lesson!;
   const updated = await approveSubmission(submissionId, reviewerId);
   revalidateSubmissionSurfaces();
 
@@ -87,12 +89,15 @@ export async function approveWrittenSubmission(submissionId: number) {
       }
     } catch { /* email is best-effort */ }
   }
+  return { error: null as string | null };
 }
 
 export async function requestSubmissionRevision(submissionId: number, note: string) {
   const session = await requireStaff();
   const { reviewerId } = getStaffActor(session);
-  const { lesson } = await assertSubmissionCanBeGraded(submissionId);
+  const graded = await assertSubmissionCanBeGraded(submissionId);
+  if (graded.error) return { error: graded.error };
+  const lesson = graded.lesson!;
   const updated = await requestRevision(submissionId, reviewerId, note);
   revalidateSubmissionSurfaces();
 
@@ -111,6 +116,7 @@ export async function requestSubmissionRevision(submissionId: number, note: stri
       }
     } catch { /* email is best-effort */ }
   }
+  return { error: null as string | null };
 }
 
 export async function updateSubmissionAssignment(
@@ -120,7 +126,7 @@ export async function updateSubmissionAssignment(
   const session = await requireStaff();
   const submission = await getSubmissionById(submissionId);
   if (!submission) {
-    throw new Error("Submission not found");
+    return { error: "Submission not found" };
   }
 
   const actingUserId = session.user.id;
@@ -143,17 +149,17 @@ export async function updateSubmissionAssignment(
       })) ?? null;
 
     if (!assignee || !isStaffRole(assignee.role)) {
-      throw new Error("Assignee must be a staff member");
+      return { error: "Assignee must be a staff member" };
     }
   }
 
   if (!hasAdminAccess(actingRole)) {
     if (assignedToId && assignedToId !== actingUserId) {
-      throw new Error("Forbidden: instructors can only assign submissions to themselves");
+      return { error: "Forbidden: instructors can only assign submissions to themselves" };
     }
 
     if (assignedToId == null && submission.assignedTo !== actingUserId) {
-      throw new Error("Forbidden: instructors can only clear their own assignments");
+      return { error: "Forbidden: instructors can only clear their own assignments" };
     }
   }
 
@@ -184,4 +190,5 @@ export async function updateSubmissionAssignment(
   }
 
   revalidateSubmissionSurfaces();
+  return { error: null as string | null };
 }

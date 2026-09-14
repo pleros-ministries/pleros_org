@@ -133,7 +133,7 @@ export async function createNewLevel(data: {
   await requireAdmin();
   const title = data.title.trim();
   if (!title) {
-    throw new Error("Level title is required.");
+    return { error: "Level title is required." };
   }
 
   const levels = await getLevels();
@@ -143,7 +143,7 @@ export async function createNewLevel(data: {
     sortOrder: getNextLevelSortOrder(levels),
   });
   revalidateContentSurfaces();
-  return level;
+  return { error: null as string | null, ...level };
 }
 
 export async function updateLevelContent(
@@ -157,7 +157,7 @@ export async function updateLevelContent(
   await requireAdmin();
   const existingLevel = await getLevelById(levelId);
   if (!existingLevel) {
-    throw new Error("Level not found.");
+    return { error: "Level not found." };
   }
 
   const normalizedTitle = data.title?.trim();
@@ -165,14 +165,14 @@ export async function updateLevelContent(
     data.description == null ? data.description : data.description.trim() || null;
 
   if (normalizedTitle !== undefined && !normalizedTitle) {
-    throw new Error("Level title is required.");
+    return { error: "Level title is required." };
   }
 
   if (
     data.sortOrder != null &&
     (!Number.isInteger(data.sortOrder) || data.sortOrder < 1)
   ) {
-    throw new Error("Level order must be a whole number greater than zero.");
+    return { error: "Level order must be a whole number greater than zero." };
   }
 
   if (
@@ -182,7 +182,7 @@ export async function updateLevelContent(
       description: normalizedDescription ?? existingLevel.description ?? "",
     })
   ) {
-    return existingLevel;
+    return { error: null as string | null, ...existingLevel };
   }
 
   const updatedLevel = await updateLevel(levelId, {
@@ -204,26 +204,28 @@ export async function updateLevelContent(
   }
 
   revalidateContentSurfaces();
-  return getLevelById(updatedLevel.id);
+  const refreshedLevel = await getLevelById(updatedLevel.id);
+  return { error: null as string | null, ...refreshedLevel };
 }
 
 export async function removeLevelAction(levelId: number) {
   await requireAdmin();
   const level = await getLevelById(levelId);
   if (!level) {
-    throw new Error("Level not found.");
+    return { error: "Level not found." };
   }
 
   const levelLessons = await getAllLessonsByLevel(levelId);
   const deletionState = getLevelDeletionState(levelLessons.length);
   if (!deletionState.canDelete) {
-    throw new Error(deletionState.detail);
+    return { error: deletionState.detail };
   }
 
   await deleteLevel(levelId);
   const remainingLevels = await getLevels();
   await renumberLevels(removeLevelFromOrder(remainingLevels, levelId));
   revalidateContentSurfaces();
+  return { error: null as string | null };
 }
 
 export async function updateLessonContent(
@@ -244,14 +246,14 @@ export async function updateLessonContent(
   await requireAdmin();
   const existingLesson = await getLessonById(lessonId);
   if (!existingLesson) {
-    throw new Error("Lesson not found.");
+    return { error: "Lesson not found." };
   }
 
   if (
     data.lessonNumber != null &&
     (!Number.isInteger(data.lessonNumber) || data.lessonNumber < 1)
   ) {
-    throw new Error("Lesson number must be a whole number greater than zero.");
+    return { error: "Lesson number must be a whole number greater than zero." };
   }
 
   const normalizedAudio = normalizeLessonAudioFields(data);
@@ -283,31 +285,32 @@ export async function updateLessonContent(
   });
   await deleteManagedLessonAudio(cleanupKey);
   revalidateContentSurfaces();
-  return serializeLessonForClient(refreshedLesson ?? lesson);
+  return { error: null as string | null, ...serializeLessonForClient(refreshedLesson ?? lesson) };
 }
 
 export async function removeLessonAction(lessonId: number) {
   await requireAdmin();
   const lesson = await getLessonById(lessonId);
   if (!lesson) {
-    throw new Error("Lesson not found.");
+    return { error: "Lesson not found." };
   }
 
   const deletionState = getLessonDeletionState(lesson.status);
   if (!deletionState.canDelete) {
-    throw new Error(deletionState.detail);
+    return { error: deletionState.detail };
   }
 
   await deleteLesson(lessonId);
   await deleteManagedLessonAudio(lesson.audioUploadKey ?? null);
   revalidateContentSurfaces();
+  return { error: null as string | null };
 }
 
 export async function publishLessonAction(lessonId: number) {
   await requireAdmin();
   const lessonData = await getLessonForEdit(lessonId);
   if (!lessonData) {
-    throw new Error("Lesson not found.");
+    return { error: "Lesson not found." };
   }
 
   const readiness = getLessonPublishReadiness({
@@ -328,21 +331,22 @@ export async function publishLessonAction(lessonId: number) {
     const blockingRequirement = readiness.requirements.find(
       (requirement) => !requirement.met,
     );
-    throw new Error(
-      blockingRequirement?.detail ?? blockingRequirement?.label ?? "Lesson is not ready to publish.",
-    );
+    return {
+      error:
+        blockingRequirement?.detail ?? blockingRequirement?.label ?? "Lesson is not ready to publish.",
+    };
   }
 
   const lesson = await publishLesson(lessonId);
   revalidateContentSurfaces();
-  return serializeLessonForClient(lesson);
+  return { error: null as string | null, ...serializeLessonForClient(lesson) };
 }
 
 export async function unpublishLessonAction(lessonId: number) {
   await requireAdmin();
   const lesson = await unpublishLesson(lessonId);
   revalidateContentSurfaces();
-  return serializeLessonForClient(lesson);
+  return { error: null as string | null, ...serializeLessonForClient(lesson) };
 }
 
 export async function addQuizQuestion(data: {

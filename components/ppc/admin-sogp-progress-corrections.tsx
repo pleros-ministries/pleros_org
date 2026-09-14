@@ -17,9 +17,9 @@ export function AdminSogpProgressCorrections({ data }: { data: AdminSogpData }) 
   const [dateKey, setDateKey] = useState("");
   const [liveClassId, setLiveClassId] = useState(data.liveClasses.find((item) => item.isRequired)?.id ?? 0);
   const refresh = () => queryClient.invalidateQueries({ queryKey: ADMIN_QUERY_KEYS.sogp });
-  const preparationMutation = useMutation({ mutationFn: (complete: boolean) => correctSogpPreparationCompletion({ enrollmentId, preparationDayId, complete }), onSuccess: refresh });
-  const prayerMutation = useMutation({ mutationFn: (complete: boolean) => correctSogpPrayerCompletion({ enrollmentId, dateKey, complete }), onSuccess: refresh });
-  const reviewMutation = useMutation({ mutationFn: (complete: boolean) => correctSogpReviewCompletion({ enrollmentId, liveClassId, complete, source: "recording" }), onSuccess: refresh });
+  const preparationMutation = useMutation({ mutationFn: async (complete: boolean) => { const result = await correctSogpPreparationCompletion({ enrollmentId, preparationDayId, complete }); if (result.error) throw new Error(result.error); return result; }, onSuccess: refresh });
+  const prayerMutation = useMutation({ mutationFn: async (complete: boolean) => { const result = await correctSogpPrayerCompletion({ enrollmentId, dateKey, complete }); if (result.error) throw new Error(result.error); return result; }, onSuccess: refresh });
+  const reviewMutation = useMutation({ mutationFn: async (complete: boolean) => { const result = await correctSogpReviewCompletion({ enrollmentId, liveClassId, complete, source: "recording" }); if (result.error) throw new Error(result.error); return result; }, onSuccess: refresh });
   const error = preparationMutation.error ?? prayerMutation.error ?? reviewMutation.error;
 
   return (

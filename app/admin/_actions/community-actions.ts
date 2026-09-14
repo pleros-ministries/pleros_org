@@ -135,7 +135,7 @@ export async function publishGlobalPost(input: {
 }) {
   const session = await requireAdmin();
   const body = input.body.trim();
-  if (!body) throw new Error("A post needs a body.");
+  if (!body) return { error: "A post needs a body." };
   const title = input.title.trim() || null;
 
   const post = await createGlobalPost({
@@ -169,6 +169,7 @@ export async function publishGlobalPost(input: {
 
   revalidatePath("/admin/community");
   revalidatePath("/dashboard/community");
+  return { error: null as string | null };
 }
 
 export async function updateGlobalPost(input: {
@@ -179,7 +180,7 @@ export async function updateGlobalPost(input: {
 }) {
   await requireAdmin();
   const body = input.body.trim();
-  if (!body) throw new Error("A post needs a body.");
+  if (!body) return { error: "A post needs a body." };
   await editPost({
     postId: input.postId,
     title: input.title.trim() || null,
@@ -188,6 +189,7 @@ export async function updateGlobalPost(input: {
   });
   revalidatePath("/admin/community");
   revalidatePath("/dashboard/community");
+  return { error: null as string | null };
 }
 
 export async function togglePostPinned(input: {

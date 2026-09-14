@@ -14,7 +14,7 @@ export async function submitQuiz(lessonId: number, answers: Record<string, strin
   const questions = await getQuizQuestions(lessonId);
 
   if (!canSubmitQuizAnswers(questions, answers)) {
-    throw new Error("Answer every question before submitting.");
+    return { error: "Answer every question before submitting." };
   }
 
   const mcQuestions = questions.filter((q) => q.questionType === "multiple_choice");
@@ -40,6 +40,7 @@ export async function submitQuiz(lessonId: number, answers: Record<string, strin
   revalidatePath("/ppc", "layout");
 
   return {
+    error: null,
     score,
     passed: score >= 70,
     attemptNumber: attemptCount + 1,

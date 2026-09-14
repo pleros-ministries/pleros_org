@@ -22,7 +22,11 @@ export function AdminSogpCohortControls({
   const [startsAt, setStartsAt] = useState(() => toLocalDateTime(cohort.startsAt));
   const [endsAt, setEndsAt] = useState(() => toLocalDateTime(cohort.endsAt));
   const mutation = useMutation({
-    mutationFn: updateSogpCohort,
+    mutationFn: async (input: Parameters<typeof updateSogpCohort>[0]) => {
+      const result = await updateSogpCohort(input);
+      if (result.error) throw new Error(result.error);
+      return result;
+    },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ADMIN_QUERY_KEYS.sogp }),
   });
 

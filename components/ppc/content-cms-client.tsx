@@ -555,6 +555,12 @@ export function ContentCmsClient({
         responsePrompt: editResponsePrompt.trim() || null,
         responseMarkingGuide: editMarkingGuide.trim() || null,
       });
+      if (savedLesson.error) {
+        setLessonFeedback(savedLesson.error);
+        setLessonFeedbackTone("error");
+        router.refresh();
+        return;
+      }
       if (savedLesson) {
         const lesson = normalizeLessonRecord(savedLesson);
         const reorderedLessons =
@@ -635,42 +641,36 @@ export function ContentCmsClient({
   const handlePublishToggle = () => {
     if (!selectedLesson) return;
     startTransition(async () => {
-      try {
-        const lesson =
-          selectedLesson.status === "published"
-            ? await unpublishLessonAction(selectedLesson.id)
-            : await publishLessonAction(selectedLesson.id);
-        if (lesson) {
-          setLevelRecords((prev) =>
-            prev.map((level) =>
-              recalculateLevelCounts({
-                ...level,
-                lessons: level.lessons.map((item) =>
-                  item.id === lesson.id
-                    ? {
-                        ...item,
-                        status: lesson.status,
-                      }
-                    : item,
-                ),
-              }),
-            ),
-          );
-          setLessonFeedback(
-            lesson.status === "published"
-              ? "Lesson published."
-              : "Lesson returned to draft.",
-          );
-          setLessonFeedbackTone("default");
-          setDeleteConfirmLessonId(null);
-        }
-      } catch (error) {
-        setLessonFeedback(
-          error instanceof Error
-            ? error.message
-            : "Lesson could not be published yet.",
-        );
+      const lesson =
+        selectedLesson.status === "published"
+          ? await unpublishLessonAction(selectedLesson.id)
+          : await publishLessonAction(selectedLesson.id);
+      if (lesson.error) {
+        setLessonFeedback(lesson.error);
         setLessonFeedbackTone("error");
+      } else if (lesson) {
+        setLevelRecords((prev) =>
+          prev.map((level) =>
+            recalculateLevelCounts({
+              ...level,
+              lessons: level.lessons.map((item) =>
+                item.id === lesson.id
+                  ? {
+                      ...item,
+                      status: lesson.status,
+                    }
+                  : item,
+              ),
+            }),
+          ),
+        );
+        setLessonFeedback(
+          lesson.status === "published"
+            ? "Lesson published."
+            : "Lesson returned to draft.",
+        );
+        setLessonFeedbackTone("default");
+        setDeleteConfirmLessonId(null);
       }
       router.refresh();
     });
@@ -880,16 +880,14 @@ export function ContentCmsClient({
     }
 
     startTransition(async () => {
-      try {
-        const createdLevel = await createNewLevel({
-          title: newLevelTitle.trim(),
-          description: newLevelDescription.trim() || null,
-        });
+      const createdLevel = await createNewLevel({
+        title: newLevelTitle.trim(),
+        description: newLevelDescription.trim() || null,
+      });
 
-        if (!createdLevel) {
-          return;
-        }
-
+      if (createdLevel.error) {
+        setNewLevelError(createdLevel.error);
+      } else {
         const nextLevel: Level = {
           id: createdLevel.id,
           title: createdLevel.title,
@@ -913,10 +911,6 @@ export function ContentCmsClient({
         setNewLevelError(null);
         setWorkspaceFeedback("New level created.");
         setWorkspaceFeedbackTone("default");
-      } catch (error) {
-        setNewLevelError(
-          error instanceof Error ? error.message : "Level could not be created.",
-        );
       }
 
       router.refresh();
@@ -940,17 +934,16 @@ export function ContentCmsClient({
     }
 
     startTransition(async () => {
-      try {
-        const savedLevel = await updateLevelContent(activeLevel.id, {
-          title: editLevelTitle.trim(),
-          description: editLevelDescription.trim() || null,
-          sortOrder: parsedSortOrder,
-        });
+      const savedLevel = await updateLevelContent(activeLevel.id, {
+        title: editLevelTitle.trim(),
+        description: editLevelDescription.trim() || null,
+        sortOrder: parsedSortOrder,
+      });
 
-        if (!savedLevel) {
-          return;
-        }
-
+      if (savedLevel.error) {
+        setWorkspaceFeedback(savedLevel.error);
+        setWorkspaceFeedbackTone("error");
+      } else {
         const reorderedLevels =
           parsedSortOrder !== activeLevel.sortOrder
             ? renumberLevelsForTarget(levelRecords, activeLevel.id, parsedSortOrder)
@@ -971,11 +964,6 @@ export function ContentCmsClient({
         setActiveLevelId(savedLevel.id);
         setWorkspaceFeedback("Level details saved.");
         setWorkspaceFeedbackTone("default");
-      } catch (error) {
-        setWorkspaceFeedback(
-          error instanceof Error ? error.message : "Level could not be saved.",
-        );
-        setWorkspaceFeedbackTone("error");
       }
 
       router.refresh();
@@ -992,9 +980,12 @@ export function ContentCmsClient({
     }
 
     startTransition(async () => {
-      try {
-        await removeLevelAction(activeLevel.id);
+      const result = await removeLevelAction(activeLevel.id);
 
+      if (result.error) {
+        setWorkspaceFeedback(result.error);
+        setWorkspaceFeedbackTone("error");
+      } else {
         const currentIndex = levelRecords.findIndex(
           (level) => level.id === activeLevel.id,
         );
@@ -1024,11 +1015,6 @@ export function ContentCmsClient({
           setWorkspaceFeedback("Deleted the last level. Create a new level to keep authoring.");
         }
         setWorkspaceFeedbackTone("default");
-      } catch (error) {
-        setWorkspaceFeedback(
-          error instanceof Error ? error.message : "Level could not be deleted.",
-        );
-        setWorkspaceFeedbackTone("error");
       }
 
       router.refresh();
@@ -1045,9 +1031,12 @@ export function ContentCmsClient({
     }
 
     startTransition(async () => {
-      try {
-        await removeLessonAction(selectedLesson.id);
+      const removalResult = await removeLessonAction(selectedLesson.id);
 
+      if (removalResult.error) {
+        setLessonFeedback(removalResult.error);
+        setLessonFeedbackTone("error");
+      } else {
         const lessonIndex = activeLevel.lessons.findIndex(
           (lesson) => lesson.id === selectedLesson.id,
         );
@@ -1104,11 +1093,6 @@ export function ContentCmsClient({
           setIsCreateLessonOpen(true);
           resetAudioUploadState();
         }
-      } catch (error) {
-        setLessonFeedback(
-          error instanceof Error ? error.message : "Lesson could not be deleted.",
-        );
-        setLessonFeedbackTone("error");
       }
 
       router.refresh();

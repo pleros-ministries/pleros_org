@@ -47,6 +47,7 @@ export function QaThreadList({
   const [activeThreadId, setActiveThreadId] = useState<number | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [replyText, setReplyText] = useState("");
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const [isCreating, startCreateTransition] = useTransition();
   const [isLoadingThread, startLoadTransition] = useTransition();
@@ -71,8 +72,12 @@ export function QaThreadList({
     (threadId: number) => {
       setActiveThreadId(threadId);
       startLoadTransition(async () => {
-        const msgs = await fetchThreadMessages(threadId);
-        setMessages(msgs as Message[]);
+        const result = await fetchThreadMessages(threadId);
+        if (result.error) {
+          setActionError(result.error);
+          return;
+        }
+        setMessages(result.messages as Message[]);
       });
     },
     [],
@@ -81,13 +86,22 @@ export function QaThreadList({
   const handleReply = () => {
     if (!replyText.trim() || activeThreadId === null) return;
     startReplyTransition(async () => {
-      await replyToThread({
+      const replyResult = await replyToThread({
         threadId: activeThreadId,
         content: replyText.trim(),
       });
+      if (replyResult.error) {
+        setActionError(replyResult.error);
+        return;
+      }
+      setActionError(null);
       setReplyText("");
-      const msgs = await fetchThreadMessages(activeThreadId);
-      setMessages(msgs as Message[]);
+      const result = await fetchThreadMessages(activeThreadId);
+      if (result.error) {
+        setActionError(result.error);
+        return;
+      }
+      setMessages(result.messages as Message[]);
       router.refresh();
     });
   };
@@ -131,6 +145,8 @@ export function QaThreadList({
         ) : (
           <ThreadView messages={messages} currentUserRole={userRole} />
         )}
+
+        {actionError && <p className="text-xs text-rose-700">{actionError}</p>}
 
         <div className="space-y-2">
           <textarea

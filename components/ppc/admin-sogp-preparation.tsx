@@ -64,9 +64,9 @@ export function AdminSogpPreparation({
   }
 
   const saveMutation = useMutation({
-    mutationFn: () => {
+    mutationFn: async () => {
       if (!cohortId) throw new Error("Create a cohort first.");
-      return saveSogpPreparationDay({
+      const result = await saveSogpPreparationDay({
         id: editingId,
         cohortId,
         publishDate,
@@ -74,6 +74,8 @@ export function AdminSogpPreparation({
         introduction,
         resources,
       });
+      if (result.error) throw new Error(result.error);
+      return result;
     },
     async onSuccess() {
       reset();
@@ -81,17 +83,27 @@ export function AdminSogpPreparation({
     },
   });
   const statusMutation = useMutation({
-    mutationFn: setSogpPreparationStatus,
+    mutationFn: async (input: Parameters<typeof setSogpPreparationStatus>[0]) => {
+      const result = await setSogpPreparationStatus(input);
+      if (result.error) throw new Error(result.error);
+      return result;
+    },
     onSuccess: refresh,
   });
   const deleteMutation = useMutation({
-    mutationFn: deleteSogpPreparationDay,
+    mutationFn: async (input: Parameters<typeof deleteSogpPreparationDay>[0]) => {
+      const result = await deleteSogpPreparationDay(input);
+      if (result.error) throw new Error(result.error);
+      return result;
+    },
     onSuccess: refresh,
   });
   const seedMutation = useMutation({
-    mutationFn: () => {
+    mutationFn: async () => {
       if (!cohortId) throw new Error("Create a cohort first.");
-      return seedSogpPreparation({ cohortId });
+      const result = await seedSogpPreparation({ cohortId });
+      if (result.error) throw new Error(result.error);
+      return result;
     },
     onSuccess: refresh,
   });
