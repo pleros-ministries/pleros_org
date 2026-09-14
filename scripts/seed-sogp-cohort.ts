@@ -1,11 +1,13 @@
 import { asc, eq, inArray } from "drizzle-orm";
 
 import { db } from "../lib/db";
+import { transactionDb } from "../lib/db/transaction";
 import * as schema from "../lib/db/schema";
 import { buildFirstCohortTrackSelection } from "../lib/sogp/first-cohort";
 import {
   assertMondayCohortStart,
   buildSogpTrackReleaseDates,
+  resolveFirstReleaseAt,
 } from "../lib/sogp/schedule";
 
 function argument(name: string) {
@@ -81,10 +83,9 @@ const [cohort] = await db
   })
   .returning();
 if (!cohort) throw new Error("Cohort could not be created.");
-const firstRelease = new Date(startsAt);
-firstRelease.setUTCHours(5, 0, 0, 0);
+const firstRelease = resolveFirstReleaseAt(startsAt);
 const dates = buildSogpTrackReleaseDates(firstRelease);
-await db.transaction(async (tx) => {
+await transactionDb.transaction(async (tx) => {
   await tx
     .delete(schema.sogpCohortTracks)
     .where(eq(schema.sogpCohortTracks.cohortId, cohort.id));

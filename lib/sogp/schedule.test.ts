@@ -4,6 +4,7 @@ import {
   assertMondayCohortStart,
   buildSogpReviewDates,
   buildSogpTrackReleaseDates,
+  resolveFirstReleaseAt,
 } from "./schedule";
 
 const monday = new Date("2026-09-14T06:00:00+01:00");
@@ -26,6 +27,15 @@ test("builds one Sunday review after each teaching week", () => {
   expect(reviews).toHaveLength(4);
   expect(reviews[0]?.toISOString()).toBe("2026-09-20T05:00:00.000Z");
   expect(reviews[3]?.toISOString()).toBe("2026-10-11T05:00:00.000Z");
+});
+
+test("resolves the Lagos calendar date even when startsAt is stored as prior-day UTC midnight", () => {
+  // A cohort starting 2026-09-14T00:00 Lagos is stored as 2026-09-13T23:00Z.
+  const storedStartsAt = new Date("2026-09-13T23:00:00.000Z");
+  const resolved = resolveFirstReleaseAt(storedStartsAt);
+
+  expect(resolved.toISOString()).toBe("2026-09-14T05:00:00.000Z");
+  expect(() => assertMondayCohortStart(resolved)).not.toThrow();
 });
 
 test("requires cohorts to start on Monday in Lagos", () => {

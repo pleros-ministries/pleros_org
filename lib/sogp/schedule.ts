@@ -17,6 +17,23 @@ function addDays(date: Date, days: number) {
   return new Date(date.getTime() + days * DAY_IN_MILLISECONDS);
 }
 
+// A cohort's `startsAt` is stored as the UTC instant of Lagos midnight,
+// which can fall on the previous UTC calendar day (e.g. 2026-09-14T00:00
+// Lagos is 2026-09-13T23:00 UTC). Naively calling `setUTCHours` on that
+// value keeps the UTC date component and silently shifts the release
+// schedule a day earlier, tripping `assertMondayCohortStart`. Resolve the
+// Lagos calendar date first, then anchor releases to 05:00 UTC that day.
+export function resolveFirstReleaseAt(startsAt: Date) {
+  const lagosDate = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Africa/Lagos",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(startsAt);
+
+  return new Date(`${lagosDate}T05:00:00Z`);
+}
+
 export function assertMondayCohortStart(startsAt: Date) {
   const weekday = new Intl.DateTimeFormat("en-US", {
     timeZone: "Africa/Lagos",
