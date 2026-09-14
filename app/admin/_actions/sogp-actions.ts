@@ -84,13 +84,18 @@ export async function configureSogpTelegramWebhook() {
 export async function configureSogpCurriculum(input: {
   cohortId: number;
   levels?: (1 | 2 | 3 | 4)[];
+  curriculumOrders?: number[];
 }) {
   await requireAdmin();
-  const levels = input.levels ?? [1, 2, 3, 4];
-  const selection = buildFirstCohortTrackSelection().filter((track) =>
-    levels.includes(track.curriculumLevel),
-  );
-  if (!selection.length) return { error: "Choose at least one level to push." };
+  const allTracks = buildFirstCohortTrackSelection();
+  const selection = input.curriculumOrders?.length
+    ? allTracks.filter((track) =>
+        input.curriculumOrders!.includes(track.curriculumOrder),
+      )
+    : allTracks.filter((track) =>
+        (input.levels ?? [1, 2, 3, 4]).includes(track.curriculumLevel),
+      );
+  if (!selection.length) return { error: "Choose at least one teaching to push." };
   const cohort = await db.query.sogpCohorts.findFirst({
     where: (row, { eq: equal }) => equal(row.id, input.cohortId),
   });
@@ -155,13 +160,15 @@ export async function configureSogpCurriculum(input: {
     };
   }
 
+  const selectedOrders = selection.map((selected) => selected.curriculumOrder);
+
   await transactionDb.transaction(async (tx) => {
     await tx
       .delete(schema.sogpCohortTracks)
       .where(
         and(
           eq(schema.sogpCohortTracks.cohortId, input.cohortId),
-          inArray(schema.sogpCohortTracks.curriculumLevel, levels),
+          inArray(schema.sogpCohortTracks.curriculumOrder, selectedOrders),
         ),
       );
     await tx.insert(schema.sogpCohortTracks).values(

@@ -25,7 +25,7 @@ import { AdminSogpProgressCorrections } from "@/components/ppc/admin-sogp-progre
 import { AdminSogpCohortControls } from "@/components/ppc/admin-sogp-cohort-controls";
 import { ADMIN_QUERY_KEYS } from "@/lib/admin-query";
 import { PRE_SOGP_PREPARATION_DAYS } from "@/lib/sogp/calendar";
-import { SOGP_LEVELS } from "@/lib/sogp/curriculum";
+import { SOGP_LEVELS, SOGP_TRACKS } from "@/lib/sogp/curriculum";
 import type { SogpBroadcastKind } from "@/lib/telegram/sogp-broadcast";
 
 const tabs = ["Overview", "Cohorts", "Curriculum", "Preparation", "Enrolments", "Live classes", "Completion"] as const;
@@ -54,14 +54,16 @@ export function AdminSogpPage() {
   const queryClient = useQueryClient();
   const { data } = useSuspenseQuery({ queryKey: ADMIN_QUERY_KEYS.sogp, queryFn: getAdminSogpData });
   const [tab, setTab] = useState<Tab>("Overview");
-  const [curriculumLevels, setCurriculumLevels] = useState<(1 | 2 | 3 | 4)[]>([1, 2, 3, 4]);
+  const [curriculumOrders, setCurriculumOrders] = useState<number[]>(
+    SOGP_TRACKS.map((track) => track.curriculumOrder),
+  );
   const current = data.cohorts[0] ?? null;
   const currentTracks = current ? data.tracks.filter((track)=>track.cohortId===current.id) : [];
   const requiredTracks = currentTracks.filter((track)=>track.isRequired);
   const readyTracks = requiredTracks.filter((track)=>track.ready).length;
   const preparationDays = current ? data.preparationDays.filter((day)=>day.cohortId===current.id) : [];
   const requiredReviews = current ? data.liveClasses.filter((item)=>item.cohortId===current.id&&item.isRequired) : [];
-  const curriculumMutation = useMutation({ mutationFn: async ()=>{ if(!current) throw new Error("Create a cohort first."); const result = await configureSogpCurriculum({cohortId:current.id,levels:curriculumLevels}); if(result.error) throw new Error(result.error); return result;}, async onSuccess(){await queryClient.invalidateQueries({queryKey:ADMIN_QUERY_KEYS.sogp});} });
+  const curriculumMutation = useMutation({ mutationFn: async ()=>{ if(!current) throw new Error("Create a cohort first."); const result = await configureSogpCurriculum({cohortId:current.id,curriculumOrders:curriculumOrders}); if(result.error) throw new Error(result.error); return result;}, async onSuccess(){await queryClient.invalidateQueries({queryKey:ADMIN_QUERY_KEYS.sogp});} });
   const liveClassMutation = useMutation({ mutationFn: async (formData:FormData)=>{if(!current) throw new Error("Create a cohort first."); const result = await createSogpLiveClass({cohortId:current.id,title:String(formData.get("title")??""),startsAt:String(formData.get("startsAt")??""),endsAt:String(formData.get("endsAt")??""),youtubeLiveUrl:String(formData.get("youtubeUrl")??""),recordingUrl:String(formData.get("recordingUrl")??""),isRequired:formData.get("isRequired")==="on"}); if(result.error) throw new Error(result.error); return result;}, async onSuccess(){await queryClient.invalidateQueries({queryKey:ADMIN_QUERY_KEYS.sogp});} });
   const certificateMutation = useMutation({ mutationFn: async (enrollmentId:number)=>{const result = await issueSogpCertificate({enrollmentId}); if(result.error) throw new Error(result.error); return result;}, async onSuccess(){await queryClient.invalidateQueries({queryKey:ADMIN_QUERY_KEYS.sogp});} });
   const webhookMutation = useMutation({ mutationFn: async ()=>{const result = await configureSogpTelegramWebhook(); if(result.error) throw new Error(result.error); return result;} });
@@ -76,12 +78,11 @@ export function AdminSogpPage() {
     </div>
     <aside className="rounded-sm border border-zinc-200 bg-white p-4">
       <h3 className="ppc-heading text-sm font-semibold">Fixed level map</h3>
-      <div className="mt-4 grid gap-3">{SOGP_LEVELS.map((level)=><div key={level.level} className="rounded-sm border border-zinc-200 p-3"><p className="text-xs font-semibold text-zinc-900">Level {level.level}</p><p className="mt-1 text-[10px] leading-4 text-zinc-500">{level.tracks.map((track)=>track.title).join(" · ")}</p></div>)}</div>
-      <p className="mt-3 text-[10px] text-zinc-500">Saving replaces the selected levels’ tracks for this cohort. Push levels independently as their lessons become ready.</p>
-      <div className="mt-3 flex flex-wrap gap-1.5">{([1,2,3,4] as const).map((level)=><button key={level} type="button" onClick={()=>setCurriculumLevels((current)=>current.includes(level)?current.filter((item)=>item!==level):[...current,level].sort())} className={`h-7 rounded-sm border px-2 text-[11px] font-medium ${curriculumLevels.includes(level)?"border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)]/10 text-[var(--color-brand-blue)]":"border-zinc-200 text-zinc-500"}`}>Level {level}</button>)}</div>
+      <p className="mt-1 text-[10px] text-zinc-500">Pick individual days to push, or use a level&rsquo;s toggle to select/clear all its days. Saving replaces exactly the checked days for this cohort — untouched days keep their existing schedule.</p>
+      <div className="mt-4 grid gap-3">{SOGP_LEVELS.map((level)=>{const levelOrders=level.tracks.map((track)=>track.curriculumOrder);const allChecked=levelOrders.every((order)=>curriculumOrders.includes(order));return <div key={level.level} className="rounded-sm border border-zinc-200 p-3"><label className="flex items-center gap-2 text-xs font-semibold text-zinc-900"><input type="checkbox" checked={allChecked} onChange={()=>setCurriculumOrders((current)=>allChecked?current.filter((order)=>!levelOrders.includes(order)):Array.from(new Set([...current,...levelOrders])).sort((a,b)=>a-b))}/>Level {level.level}</label><div className="mt-2 grid gap-1.5 pl-5">{level.tracks.map((track)=><label key={track.curriculumOrder} className="flex items-center gap-2 text-[11px] text-zinc-700"><input type="checkbox" checked={curriculumOrders.includes(track.curriculumOrder)} onChange={()=>setCurriculumOrders((current)=>current.includes(track.curriculumOrder)?current.filter((order)=>order!==track.curriculumOrder):[...current,track.curriculumOrder].sort((a,b)=>a-b))}/>Day {track.curriculumOrder} · {track.title}</label>)}</div></div>;})}</div>
       {curriculumMutation.error?<p className="mt-3 text-xs text-rose-700">{curriculumMutation.error.message}</p>:null}
       {curriculumMutation.data?<p className="mt-3 text-xs text-emerald-700">Pushed {curriculumMutation.data.requiredTrackCount} track(s).</p>:null}
-      <button type="button" disabled={!current||!curriculumLevels.length||curriculumMutation.isPending} onClick={()=>curriculumMutation.mutate()} className="mt-4 h-8 rounded-sm bg-[var(--color-brand-blue)] px-3 text-xs font-medium text-white disabled:opacity-50">{curriculumMutation.isPending?"Configuring":`Save curriculum (Level${curriculumLevels.length===1?"":"s"} ${curriculumLevels.join(", ")})`}</button>
+      <button type="button" disabled={!current||!curriculumOrders.length||curriculumMutation.isPending} onClick={()=>curriculumMutation.mutate()} className="mt-4 h-8 rounded-sm bg-[var(--color-brand-blue)] px-3 text-xs font-medium text-white disabled:opacity-50">{curriculumMutation.isPending?"Configuring":`Save curriculum (${curriculumOrders.length} day${curriculumOrders.length===1?"":"s"})`}</button>
     </aside>
   </section>:null}
   {tab==="Preparation"?<AdminSogpPreparation cohortId={current?.id??null} days={current?data.preparationDays.filter((day)=>day.cohortId===current.id):[]}/>:null}
