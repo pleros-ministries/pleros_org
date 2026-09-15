@@ -143,7 +143,7 @@ export async function createNewLevel(data: {
     sortOrder: getNextLevelSortOrder(levels),
   });
   revalidateContentSurfaces();
-  return { error: null as string | null, ...level };
+  return { error: null, ...level };
 }
 
 export async function updateLevelContent(
@@ -182,7 +182,7 @@ export async function updateLevelContent(
       description: normalizedDescription ?? existingLevel.description ?? "",
     })
   ) {
-    return { error: null as string | null, ...existingLevel };
+    return { error: null, ...existingLevel };
   }
 
   const updatedLevel = await updateLevel(levelId, {
@@ -205,7 +205,7 @@ export async function updateLevelContent(
 
   revalidateContentSurfaces();
   const refreshedLevel = await getLevelById(updatedLevel.id);
-  return { error: null as string | null, ...refreshedLevel };
+  return { error: null, ...(refreshedLevel ?? updatedLevel) };
 }
 
 export async function removeLevelAction(levelId: number) {
@@ -285,7 +285,7 @@ export async function updateLessonContent(
   });
   await deleteManagedLessonAudio(cleanupKey);
   revalidateContentSurfaces();
-  return { error: null as string | null, ...serializeLessonForClient(refreshedLesson ?? lesson) };
+  return { error: null, ...serializeLessonForClient(refreshedLesson ?? lesson) };
 }
 
 export async function removeLessonAction(lessonId: number) {
@@ -339,14 +339,14 @@ export async function publishLessonAction(lessonId: number) {
 
   const lesson = await publishLesson(lessonId);
   revalidateContentSurfaces();
-  return { error: null as string | null, ...serializeLessonForClient(lesson) };
+  return { error: null, ...serializeLessonForClient(lesson) };
 }
 
 export async function unpublishLessonAction(lessonId: number) {
   await requireAdmin();
   const lesson = await unpublishLesson(lessonId);
   revalidateContentSurfaces();
-  return { error: null as string | null, ...serializeLessonForClient(lesson) };
+  return { error: null, ...serializeLessonForClient(lesson) };
 }
 
 export async function addQuizQuestion(data: {

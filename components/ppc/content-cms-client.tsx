@@ -555,7 +555,7 @@ export function ContentCmsClient({
         responsePrompt: editResponsePrompt.trim() || null,
         responseMarkingGuide: editMarkingGuide.trim() || null,
       });
-      if (savedLesson.error) {
+      if (savedLesson.error !== null) {
         setLessonFeedback(savedLesson.error);
         setLessonFeedbackTone("error");
         router.refresh();
@@ -645,7 +645,7 @@ export function ContentCmsClient({
         selectedLesson.status === "published"
           ? await unpublishLessonAction(selectedLesson.id)
           : await publishLessonAction(selectedLesson.id);
-      if (lesson.error) {
+      if (lesson.error !== null) {
         setLessonFeedback(lesson.error);
         setLessonFeedbackTone("error");
       } else if (lesson) {
@@ -885,7 +885,7 @@ export function ContentCmsClient({
         description: newLevelDescription.trim() || null,
       });
 
-      if (createdLevel.error) {
+      if (createdLevel.error !== null) {
         setNewLevelError(createdLevel.error);
       } else {
         const nextLevel: Level = {
@@ -940,7 +940,7 @@ export function ContentCmsClient({
         sortOrder: parsedSortOrder,
       });
 
-      if (savedLevel.error) {
+      if (savedLevel.error !== null) {
         setWorkspaceFeedback(savedLevel.error);
         setWorkspaceFeedbackTone("error");
       } else {

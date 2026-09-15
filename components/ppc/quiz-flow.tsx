@@ -52,7 +52,7 @@ export function QuizFlow({ lessonId, questions, bestScore }: QuizFlowProps) {
   const handleSubmit = () => {
     startTransition(async () => {
       const res = await submitQuiz(lessonId, answers);
-      if (res.error) {
+      if (res.error !== null) {
         setError(res.error);
         return;
       }
