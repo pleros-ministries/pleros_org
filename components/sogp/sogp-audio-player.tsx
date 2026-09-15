@@ -51,7 +51,24 @@ export function SogpAudioPlayer({
           }
         }}
       />
-      <p className="mt-3 text-xs leading-[1.45] text-[var(--color-text-muted)]">Your listening step completes automatically after 90% playback.</p>
+      {listened ? (
+        <p className="mt-3 text-xs leading-[1.45] text-[var(--color-text-muted)]">Your listening step completes automatically after 90% playback.</p>
+      ) : (
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+          <p className="text-xs leading-[1.45] text-[var(--color-text-muted)]">Completes automatically after 90% playback, or downloaded the audio to listen elsewhere?</p>
+          <button
+            type="button"
+            disabled={mutation.isPending}
+            onClick={() => {
+              notified.current = true;
+              mutation.mutate();
+            }}
+            className="inline-flex h-8 shrink-0 items-center rounded-full border border-[var(--color-brand-blue)] px-3 text-xs font-semibold text-[var(--color-brand-blue)] disabled:opacity-50"
+          >
+            {mutation.isPending ? "Marking…" : "I've listened to this"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -103,7 +103,7 @@ export function SogpDayView({ dayNumber }: { dayNumber: number }) {
     ["Teaching listened", data.track.progress.audioListened],
     ["Notes read", data.track.progress.notesRead],
     ["Quiz passed", data.track.progress.quizPassed],
-    ["Written response approved", data.track.progress.writtenApproved],
+    ["Written response submitted", data.track.progress.writtenApproved],
   ] as const;
 
   return (
