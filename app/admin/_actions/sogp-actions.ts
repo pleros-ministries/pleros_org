@@ -201,6 +201,7 @@ export async function updateSogpCohort(input: {
   endsAt?: string;
   telegramChannelUrl?: string | null;
   telegramDiscussionUrl?: string | null;
+  enrollmentClosesAt?: string | null;
 }) {
   await requireAdmin();
   const currentCohort = await db.query.sogpCohorts.findFirst({
@@ -261,16 +262,16 @@ export async function updateSogpCohort(input: {
         .from(schema.quizQuestions),
     ]);
     const lessonsWithQuiz = new Set(quizRows.map((row) => row.lessonId));
+    const requiredTrackRows = trackRows.filter(({ track }) => track.isRequired);
     const readinessIssues = validateSogpLaunchReadiness({
       preparationCount: new Set(preparationRows.map((row) => row.dayId)).size,
       uniquePreparationUrlCount: new Set(preparationRows.map((row) => row.url)).size,
-      readyTrackCount: trackRows.filter(
-        ({ track, lesson }) =>
-          track.isRequired &&
-          isSogpLessonContentReady({
-            ...lesson,
-            hasQuiz: lessonsWithQuiz.has(lesson.id),
-          }),
+      requiredTrackCount: requiredTrackRows.length,
+      readyTrackCount: requiredTrackRows.filter(({ lesson }) =>
+        isSogpLessonContentReady({
+          ...lesson,
+          hasQuiz: lessonsWithQuiz.has(lesson.id),
+        }),
       ).length,
       requiredReviewCount: reviewRows.length,
     });
@@ -287,6 +288,9 @@ export async function updateSogpCohort(input: {
         : {}),
       ...(input.telegramDiscussionUrl !== undefined
         ? { telegramDiscussionUrl: input.telegramDiscussionUrl }
+        : {}),
+      ...(input.enrollmentClosesAt !== undefined
+        ? { enrollmentClosesAt: input.enrollmentClosesAt ? new Date(input.enrollmentClosesAt) : null }
         : {}),
       updatedAt: new Date(),
     })

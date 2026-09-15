@@ -17,6 +17,7 @@ export type AdminSogpData = {
     status: string;
     startsAt: string;
     endsAt: string;
+    enrollmentClosesAt: string | null;
     telegramChannelUrl: string | null;
     telegramDiscussionUrl: string | null;
     telegramBotUsername: string | null;

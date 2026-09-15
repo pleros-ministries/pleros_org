@@ -4,10 +4,13 @@ import {
   count,
   desc,
   eq,
+  gt,
   gte,
   inArray,
+  isNull,
   lt,
   lte,
+  or,
   sql,
 } from "drizzle-orm";
 
@@ -33,10 +36,16 @@ export async function getOpenSogpCohort() {
     .select()
     .from(schema.sogpCohorts)
     .where(
-      inArray(schema.sogpCohorts.status, [
-        "enrollment_open",
-        "preparing",
-      ]),
+      and(
+        inArray(schema.sogpCohorts.status, [
+          "enrollment_open",
+          "preparing",
+        ]),
+        or(
+          isNull(schema.sogpCohorts.enrollmentClosesAt),
+          gt(schema.sogpCohorts.enrollmentClosesAt, new Date()),
+        ),
+      ),
     )
     .orderBy(asc(schema.sogpCohorts.startsAt))
     .limit(1);
