@@ -457,8 +457,8 @@ export type SogpJourneyData = {
       title: string;
       audioUrl: string | null;
       assessmentComplete: boolean;
-      assessmentHref: string;
-      reviewState: string | null;
+      quizPassed: boolean;
+      writtenResponseStatus: string | null;
       accessible: boolean;
       lockedReason: string | null;
     };
@@ -600,16 +600,15 @@ export async function getActiveSogpJourney(
       : track
         ? ("weekday" as const)
         : ("weekend" as const);
-    const requirements =
-      kind === "weekday"
-        ? getSogpDayRequirements({ kind, prayerWatchComplete, assessmentComplete })
-        : kind === "review"
-          ? getSogpDayRequirements({
-              kind,
-              prayerWatchComplete,
-              reviewComplete: Boolean(completedReviewSource),
-            })
-          : getSogpDayRequirements({ kind, prayerWatchComplete });
+    // A day can carry a track, a review, both, or neither — every one
+    // present must be complete, not just whichever `kind` picks as the
+    // day's label (a review scheduled on a teaching day still requires
+    // that day's assessment).
+    const requirements = getSogpDayRequirements({
+      prayerWatchComplete,
+      assessmentComplete: track ? assessmentComplete : undefined,
+      reviewComplete: review ? Boolean(completedReviewSource) : undefined,
+    });
     const curriculumLevel = track
       ? (track.curriculumLevel as SogpCurriculumLevel)
       : null;
@@ -645,10 +644,8 @@ export async function getActiveSogpJourney(
             title: track.lesson.title,
             audioUrl: track.lesson.audioUrl,
             assessmentComplete,
-            assessmentHref: track.progress.quizPassed
-              ? `/dashboard/sogp/course/day/${track.dayNumber}/response`
-              : `/dashboard/sogp/course/day/${track.dayNumber}/quiz`,
-            reviewState: writtenStatus ?? null,
+            quizPassed: track.progress.quizPassed,
+            writtenResponseStatus: writtenStatus ?? null,
             accessible,
             lockedReason,
           }

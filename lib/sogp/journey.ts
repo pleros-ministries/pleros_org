@@ -41,30 +41,21 @@ export function classifySogpLessonMediaUrl(url: string): SogpLessonMedia {
   return { kind: "external", src: url };
 }
 
-type SogpDayRequirementInput =
-  | {
-      kind: "weekday";
-      prayerWatchComplete: boolean;
-      assessmentComplete: boolean;
-    }
-  | {
-      kind: "weekend";
-      prayerWatchComplete: boolean;
-    }
-  | {
-      kind: "review";
-      prayerWatchComplete: boolean;
-      reviewComplete: boolean;
-    };
+type SogpDayRequirementInput = {
+  prayerWatchComplete: boolean;
+  // Omit when the day has no teaching track / no scheduled review — a day
+  // can have either, both (a review scheduled on a teaching day), or
+  // neither (a plain weekend), and every requirement present must be met
+  // for the day to count as complete.
+  assessmentComplete?: boolean;
+  reviewComplete?: boolean;
+};
 
 export function getSogpDayRequirements(input: SogpDayRequirementInput) {
-  if (input.kind === "weekday") {
-    return [input.prayerWatchComplete, input.assessmentComplete];
-  }
-  if (input.kind === "review") {
-    return [input.prayerWatchComplete, input.reviewComplete];
-  }
-  return [input.prayerWatchComplete];
+  const requirements = [input.prayerWatchComplete];
+  if (input.assessmentComplete !== undefined) requirements.push(input.assessmentComplete);
+  if (input.reviewComplete !== undefined) requirements.push(input.reviewComplete);
+  return requirements;
 }
 
 const DATE_KEY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;

@@ -34,6 +34,7 @@ export function SogpWrittenResponse({ dayNumber }: { dayNumber: number }) {
         queryClient.invalidateQueries({ queryKey: ["sogp", "response", dayNumber] }),
         queryClient.invalidateQueries({ queryKey: ["sogp", "day", dayNumber] }),
         queryClient.invalidateQueries({ queryKey: ["sogp", "dashboard"] }),
+        queryClient.invalidateQueries({ queryKey: ["sogp", "journey"] }),
       ]);
     },
   });

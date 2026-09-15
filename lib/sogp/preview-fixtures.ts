@@ -84,7 +84,6 @@ const sogpDays: SogpJourneyData["days"] = sogpDates.map((dateKey) => {
         dateKey,
         todayKey: sogpTodayKey,
         requirements: getSogpDayRequirements({
-          kind: "review",
           prayerWatchComplete,
           reviewComplete: complete,
         }),
@@ -118,7 +117,6 @@ const sogpDays: SogpJourneyData["days"] = sogpDates.map((dateKey) => {
       dateKey,
       todayKey: sogpTodayKey,
       requirements: getSogpDayRequirements({
-        kind: "weekday",
         prayerWatchComplete,
         assessmentComplete,
       }),
@@ -134,8 +132,8 @@ const sogpDays: SogpJourneyData["days"] = sogpDates.map((dateKey) => {
         ? "https://res.cloudinary.com/dxajhzf4d/video/upload/v1786094111/samples/Music/Audio%20Book/wtp-1_fnvl3n.mp3"
         : null,
       assessmentComplete,
-      assessmentHref: "#",
-      reviewState: assessmentComplete ? "approved" : null,
+      quizPassed: assessmentComplete,
+      writtenResponseStatus: assessmentComplete ? "approved" : null,
       accessible,
       lockedReason: accessible
         ? null

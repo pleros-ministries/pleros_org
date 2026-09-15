@@ -9,9 +9,7 @@ import {
   CheckCircle2Icon,
   CircleIcon,
   Clock3Icon,
-  DownloadIcon,
   ExternalLinkIcon,
-  FileQuestionIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -65,6 +63,21 @@ function firstName(name: string) {
   return name.trim().split(/\s+/)[0] || "there";
 }
 
+function writtenResponseCopy(status: string | null) {
+  switch (status) {
+    case "draft":
+      return { button: "Continue response", status: "Draft saved", complete: false };
+    case "submitted":
+      return { button: "View response", status: "Submitted for review", complete: true };
+    case "approved":
+      return { button: "View response", status: "Approved", complete: true };
+    case "needs_revision":
+      return { button: "Revise response", status: "Needs revision", complete: false };
+    default:
+      return { button: "Write response", status: "Not started", complete: false };
+  }
+}
+
 export function SogpJourneyPage({
   initialData,
   preview = false,
@@ -111,20 +124,11 @@ export function SogpJourneyPage({
                     completionSource: input.complete ? input.source ?? "live" : null,
                   }
                 : day.review;
-            const requirements =
-              day.kind === "weekday"
-                ? getSogpDayRequirements({
-                    kind: "weekday",
-                    prayerWatchComplete,
-                    assessmentComplete: day.track?.assessmentComplete ?? false,
-                  })
-                : day.kind === "review"
-                  ? getSogpDayRequirements({
-                      kind: "review",
-                      prayerWatchComplete,
-                      reviewComplete: review?.complete ?? false,
-                    })
-                  : getSogpDayRequirements({ kind: "weekend", prayerWatchComplete });
+            const requirements = getSogpDayRequirements({
+              prayerWatchComplete,
+              assessmentComplete: day.track ? day.track.assessmentComplete : undefined,
+              reviewComplete: review ? review.complete : undefined,
+            });
             return {
               ...day,
               prayerWatchComplete,
@@ -202,15 +206,18 @@ export function SogpJourneyPage({
                 description={selectedDay.track.title}
                 icon={<BookOpenIcon className="size-4 text-[var(--color-brand-blue)]" strokeWidth={2} />}
               >
-                <p className="text-xs text-zinc-500">Listen at your pace. Audio playback is not tracked.</p>
-                {selectedDay.track.audioUrl ? (
-                  <>
-                    <audio controls preload="metadata" src={selectedDay.track.audioUrl} className="w-full" />
-                    <a href={selectedDay.track.audioUrl} download className={`${secondaryButton} w-fit`}>
-                      <DownloadIcon className="size-3.5" strokeWidth={2} /> Download teaching
-                    </a>
-                  </>
-                ) : <p className="text-xs text-zinc-500">The teaching audio is being prepared.</p>}
+                <div className="flex flex-wrap items-center gap-3">
+                  <Link href={`/dashboard/sogp/course/day/${selectedDay.track.dayNumber}`} onClick={(event) => { if (preview) event.preventDefault(); }} className={primaryButton}>{selectedDay.track.assessmentComplete ? "Review lesson" : "Open lesson"}</Link>
+                  <span className="inline-flex items-center gap-1.5 text-xs text-zinc-500">{selectedDay.track.assessmentComplete ? <CheckCircle2Icon className="size-4 text-[var(--color-brand-blue)]" strokeWidth={2} /> : <CircleIcon className="size-4 text-zinc-400" strokeWidth={2} />}{selectedDay.track.assessmentComplete ? "Assessment complete" : "Assessment not complete"}</span>
+                </div>
+                <div className="flex flex-wrap items-center gap-3">
+                  <Link href={`/dashboard/sogp/course/day/${selectedDay.track.dayNumber}/quiz`} onClick={(event) => { if (preview) event.preventDefault(); }} className={secondaryButton}>{selectedDay.track.quizPassed ? "Review quiz" : "Take quiz"}</Link>
+                  <span className="inline-flex items-center gap-1.5 text-xs text-zinc-500">{selectedDay.track.quizPassed ? <CheckCircle2Icon className="size-4 text-[var(--color-brand-blue)]" strokeWidth={2} /> : <CircleIcon className="size-4 text-zinc-400" strokeWidth={2} />}{selectedDay.track.quizPassed ? "Quiz passed" : "Quiz not passed"}</span>
+                </div>
+                <div className="flex flex-wrap items-center gap-3">
+                  <Link href={`/dashboard/sogp/course/day/${selectedDay.track.dayNumber}/response`} onClick={(event) => { if (preview) event.preventDefault(); }} className={secondaryButton}>{writtenResponseCopy(selectedDay.track.writtenResponseStatus).button}</Link>
+                  <span className="inline-flex items-center gap-1.5 text-xs text-zinc-500">{writtenResponseCopy(selectedDay.track.writtenResponseStatus).complete ? <CheckCircle2Icon className="size-4 text-[var(--color-brand-blue)]" strokeWidth={2} /> : <CircleIcon className="size-4 text-zinc-400" strokeWidth={2} />}{writtenResponseCopy(selectedDay.track.writtenResponseStatus).status}</span>
+                </div>
               </SogpActivitySection>
             ) : selectedDay.track ? (
               <SogpActivitySection
@@ -236,19 +243,6 @@ export function SogpJourneyPage({
                 </button>
               </div>
             </SogpActivitySection>
-
-            {selectedDay.track?.accessible ? (
-              <SogpActivitySection
-                title="Assessment"
-                description="Your assessment—not audio playback—completes this teaching."
-                icon={<FileQuestionIcon className="size-4 text-[var(--color-brand-blue)]" strokeWidth={2} />}
-              >
-                <div className="flex flex-wrap items-center gap-3">
-                  <Link href={selectedDay.track.assessmentHref} onClick={(event) => { if (preview) event.preventDefault(); }} className={primaryButton}>{selectedDay.track.assessmentComplete ? "Review assessment" : "Start assessment"} <FileQuestionIcon className="size-3.5" strokeWidth={2} /></Link>
-                  <span className="inline-flex items-center gap-1.5 text-xs text-zinc-500">{selectedDay.track.assessmentComplete ? <CheckCircle2Icon className="size-4 text-[var(--color-brand-blue)]" strokeWidth={2} /> : <CircleIcon className="size-4 text-zinc-400" strokeWidth={2} />}{selectedDay.track.assessmentComplete ? "Complete" : "Not complete"}</span>
-                </div>
-              </SogpActivitySection>
-            ) : null}
 
             {selectedDay.review ? (
               <SogpActivitySection
