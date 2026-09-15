@@ -275,6 +275,7 @@ export async function getAdminSogpData(): Promise<AdminSogpData> {
       status: cohort.status,
       startsAt: cohort.startsAt.toISOString(),
       endsAt: cohort.endsAt.toISOString(),
+      enrollmentClosesAt: cohort.enrollmentClosesAt?.toISOString() ?? null,
       telegramChannelUrl: cohort.telegramChannelUrl,
       telegramDiscussionUrl: cohort.telegramDiscussionUrl,
       telegramBotUsername: cohort.telegramBotUsername,
