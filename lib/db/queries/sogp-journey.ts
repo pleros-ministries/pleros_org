@@ -83,6 +83,15 @@ export async function getSogpDashboardAccess(userId: string) {
       };
 }
 
+export async function getSogpEnrollmentTelegramUrl(userId: string) {
+  const row = await getEnrollmentCohort(userId);
+  return (
+    row?.cohort.telegramDiscussionUrl ??
+    row?.cohort.telegramChannelUrl ??
+    "https://t.me/pleros_sogp"
+  );
+}
+
 export async function getPreSogpJourney(
   userId: string,
   now = new Date(),

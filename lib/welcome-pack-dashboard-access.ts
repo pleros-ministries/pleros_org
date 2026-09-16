@@ -10,6 +10,7 @@ export async function requireWelcomePackAccess() {
   if (!appSession) redirect("/login?returnTo=/dashboard/welcomepack");
   const lead = await getWelcomePackLeadByEmail(appSession.user.email);
   return {
+    userId: appSession.user.id,
     email: appSession.user.email,
     extraGiftsUnlocked: lead?.extraGiftsUnlocked ?? false,
   };
