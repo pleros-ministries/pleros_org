@@ -1,6 +1,9 @@
 import { WelcomePackJoinPage } from "@/components/dashboard/welcome-pack-pages";
 import { requireWelcomePackAccess } from "@/lib/welcome-pack-dashboard-access";
-import { getSogpEnrollmentTelegramUrl } from "@/lib/db/queries/sogp-journey";
+import {
+  getOrientationSurveyStatus,
+  getSogpEnrollmentTelegramUrl,
+} from "@/lib/db/queries/sogp-journey";
 import {
   WELCOME_PACK_JOIN_POSTER_SRC,
   WELCOME_PACK_JOIN_VIDEO_SRC,
@@ -8,7 +11,10 @@ import {
 
 export default async function DashboardWelcomePackJoinPage() {
   const { userId } = await requireWelcomePackAccess();
-  const telegramUrl = await getSogpEnrollmentTelegramUrl(userId);
+  const [telegramUrl, surveyStatus] = await Promise.all([
+    getSogpEnrollmentTelegramUrl(userId),
+    getOrientationSurveyStatus(userId),
+  ]);
   const configuredVideoSrc = process.env.WELCOME_PACK_JOIN_VIDEO_URL?.trim();
   const videoSrc = configuredVideoSrc || WELCOME_PACK_JOIN_VIDEO_SRC;
 
@@ -19,6 +25,7 @@ export default async function DashboardWelcomePackJoinPage() {
       videoPosterSrc={
         configuredVideoSrc ? null : WELCOME_PACK_JOIN_POSTER_SRC
       }
+      surveyCompleted={surveyStatus.completed}
     />
   );
 }

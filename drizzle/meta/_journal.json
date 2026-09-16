@@ -190,6 +190,13 @@
       "when": 1789225841544,
       "tag": "0026_robust_talon",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1789531312861,
+      "tag": "0027_fuzzy_vargas",
+      "breakpoints": true
     }
   ]
 }

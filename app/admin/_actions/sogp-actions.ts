@@ -500,6 +500,28 @@ export async function updateSogpLiveClass(input: {
   return { error: null as string | null, ...updated };
 }
 
+export async function respondToOrientationSurvey(input: {
+  surveyId: number;
+  response: string;
+}) {
+  const session = await requireAdmin();
+  const response = input.response.trim();
+  if (!response) return { error: "Write a response before saving." };
+  const [updated] = await db
+    .update(schema.sogpOrientationSurveys)
+    .set({
+      adminResponse: response,
+      respondedBy: session.user.id,
+      respondedAt: new Date(),
+      updatedAt: new Date(),
+    })
+    .where(eq(schema.sogpOrientationSurveys.id, input.surveyId))
+    .returning();
+  if (!updated) return { error: "Orientation survey response not found." };
+  revalidatePath("/admin/sogp");
+  return { error: null as string | null, ...updated };
+}
+
 async function findSogpEnrollmentForCorrection(enrollmentId: number) {
   const enrollment = await db.query.sogpEnrollments.findFirst({
     where: (row, { eq: equal }) => equal(row.id, enrollmentId),

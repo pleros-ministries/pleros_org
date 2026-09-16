@@ -92,6 +92,19 @@ export async function getSogpEnrollmentTelegramUrl(userId: string) {
   );
 }
 
+export async function getOrientationSurveyStatus(userId: string) {
+  const row = await getEnrollmentCohort(userId);
+  if (!row) return { enrollmentId: null, completed: false };
+
+  const [survey] = await db
+    .select({ id: schema.sogpOrientationSurveys.id })
+    .from(schema.sogpOrientationSurveys)
+    .where(eq(schema.sogpOrientationSurveys.enrollmentId, row.enrollment.id))
+    .limit(1);
+
+  return { enrollmentId: row.enrollment.id, completed: Boolean(survey) };
+}
+
 export async function getPreSogpJourney(
   userId: string,
   now = new Date(),

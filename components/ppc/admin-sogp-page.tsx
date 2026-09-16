@@ -15,6 +15,7 @@ import {
   configureSogpCurriculum,
   configureSogpTelegramWebhook,
   createSogpLiveClass,
+  respondToOrientationSurvey,
   sendAdminSogpBroadcast,
   updateSogpLiveClass,
 } from "@/app/admin/_actions/sogp-actions";
@@ -27,9 +28,10 @@ import { AdminSogpCohortControls } from "@/components/ppc/admin-sogp-cohort-cont
 import { ADMIN_QUERY_KEYS } from "@/lib/admin-query";
 import { PRE_SOGP_PREPARATION_DAYS } from "@/lib/sogp/calendar";
 import { SOGP_LEVELS, SOGP_TRACKS } from "@/lib/sogp/curriculum";
+import { orientationReasonLabel } from "@/lib/sogp/orientation-survey";
 import type { SogpBroadcastKind } from "@/lib/telegram/sogp-broadcast";
 
-const tabs = ["Overview", "Cohorts", "Curriculum", "Preparation", "Enrolments", "Live classes", "Completion"] as const;
+const tabs = ["Overview", "Cohorts", "Curriculum", "Preparation", "Enrolments", "Orientation Survey", "Live classes", "Completion"] as const;
 type Tab = (typeof tabs)[number];
 
 function formatDate(value: string) {
@@ -75,6 +77,26 @@ function LiveClassLinks({ item, onSaved }: { item: { id: number; youtubeLiveUrl:
   </div>;
 }
 
+function OrientationSurveyResponseEditor({ survey, onSaved }: { survey: { id: number; adminResponse: string | null; respondedAt: string | null }; onSaved: () => Promise<unknown> }) {
+  const [response, setResponse] = useState(survey.adminResponse ?? "");
+  const mutation = useMutation({
+    mutationFn: async () => {
+      const result = await respondToOrientationSurvey({ surveyId: survey.id, response });
+      if (result.error) throw new Error(result.error);
+      return result;
+    },
+    async onSuccess() { await onSaved(); },
+  });
+  return <div className="grid gap-2">
+    <textarea value={response} onChange={(event) => setResponse(event.target.value)} rows={3} placeholder="Write a private response…" className="w-full resize-y rounded-sm border border-zinc-200 p-2 text-xs"/>
+    {mutation.error ? <p className="text-[10px] text-rose-700">{mutation.error.message}</p> : null}
+    <div className="flex items-center gap-3">
+      <button type="button" disabled={!response.trim() || mutation.isPending} onClick={() => mutation.mutate()} className="h-7 w-fit rounded-sm bg-[var(--color-brand-blue)] px-3 text-[11px] font-medium text-white disabled:opacity-50">{mutation.isPending ? "Saving" : survey.respondedAt ? "Update response" : "Send response"}</button>
+      {survey.respondedAt ? <span className="text-[10px] text-emerald-700">Responded {formatDate(survey.respondedAt)}</span> : null}
+    </div>
+  </div>;
+}
+
 export function AdminSogpPage() {
   const queryClient = useQueryClient();
   const { data } = useSuspenseQuery({ queryKey: ADMIN_QUERY_KEYS.sogp, queryFn: getAdminSogpData });
@@ -112,6 +134,7 @@ export function AdminSogpPage() {
   </section>:null}
   {tab==="Preparation"?<AdminSogpPreparation cohortId={current?.id??null} days={current?data.preparationDays.filter((day)=>day.cohortId===current.id):[]}/>:null}
   {tab==="Enrolments"?<section className="overflow-x-auto rounded-sm border border-zinc-200 bg-white"><table className="min-w-full text-left text-xs"><thead className="bg-zinc-50 text-zinc-500"><tr><th className="px-4 py-3">Name</th><th className="px-4 py-3">Phone number</th><th className="px-4 py-3">Location</th><th className="px-4 py-3">Heard via</th><th className="px-4 py-3">Telegram</th><th className="px-4 py-3">Status</th><th className="px-4 py-3">Enrolled</th></tr></thead><tbody className="divide-y divide-zinc-100">{data.enrollments.map((item)=><tr key={item.id}><td className="px-4 py-3"><p className="font-medium text-zinc-900">{item.firstName} {item.lastName}</p><p className="mt-0.5 text-[10px] text-zinc-500">{item.email}{item.birthYear?` · Born ${item.birthYear}`:""}</p></td><td className="px-4 py-3"><p>{item.phone}</p><p className="mt-0.5 text-[10px] text-zinc-500">WhatsApp reminders: {item.whatsappConsent?"Opted in":"Not opted in"}</p></td><td className="px-4 py-3"><p>{item.region}</p><p className="mt-0.5 text-[10px] text-zinc-500">{item.country}</p></td><td className="px-4 py-3">{item.referralSource.replaceAll("_"," ")||"—"}</td><td className="px-4 py-3">{item.telegramLinkedAt?"Linked":"Pending"}</td><td className="px-4 py-3">{item.status}</td><td className="px-4 py-3">{formatDate(item.createdAt)}</td></tr>)}</tbody></table></section>:null}
+  {tab==="Orientation Survey"?<section className="grid gap-3">{data.orientationSurveys.length?data.orientationSurveys.map((survey)=>{const enrollment=data.enrollments.find((item)=>item.id===survey.enrollmentId);return <div key={survey.id} className="grid gap-3 rounded-sm border border-zinc-200 bg-white p-4 text-xs"><div className="flex flex-wrap items-baseline justify-between gap-2"><div><p className="font-medium text-zinc-900">{enrollment?`${enrollment.firstName} ${enrollment.lastName}`:`Enrolment #${survey.enrollmentId}`}</p><p className="mt-0.5 text-[10px] text-zinc-500">{enrollment?.email}</p></div><span className="text-[10px] text-zinc-500">Submitted {formatDate(survey.createdAt)}</span></div><div className="flex flex-wrap gap-1.5">{survey.reasons.map((reason)=><span key={reason} className="rounded-full bg-zinc-100 px-2.5 py-1 text-[10px] font-medium text-zinc-700">{orientationReasonLabel(reason)}</span>)}</div><div className="rounded-sm bg-zinc-50 p-3"><p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-500">Question</p><p className="mt-1 whitespace-pre-wrap text-zinc-800">{survey.question||"No question asked."}</p></div><OrientationSurveyResponseEditor survey={survey} onSaved={()=>queryClient.invalidateQueries({queryKey:ADMIN_QUERY_KEYS.sogp})}/></div>;}):<p className="px-4 py-10 text-center text-xs text-zinc-500">No orientation survey submissions yet.</p>}</section>:null}
   {tab==="Live classes"?<section className="grid gap-4 lg:grid-cols-[1fr_22rem]"><div className="rounded-sm border border-zinc-200 bg-white"><div className="border-b border-zinc-100 px-4 py-3"><h2 className="ppc-heading text-sm font-semibold">Scheduled review sessions</h2></div><div className="divide-y divide-zinc-100">{data.liveClasses.length?data.liveClasses.map((item)=><div key={item.id} className="grid gap-2 px-4 py-3 text-xs"><div className="grid gap-2 sm:grid-cols-[1fr_auto] sm:items-center"><div><p className="font-medium text-zinc-900">{item.title}</p><p className="mt-1 text-zinc-500">{formatDate(item.startsAt)} · {item.isRequired?"Required":"Optional"}</p><p className="mt-1 text-[10px] text-zinc-500">Recording: {item.recordingUrl?"Ready":"Not added"}</p></div>{item.youtubeLiveUrl?<a href={item.youtubeLiveUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-[var(--color-brand-blue)]">YouTube <ExternalLink className="size-3"/></a>:<span className="text-amber-700">Live link missing</span>}</div><LiveClassLinks item={item} onSaved={()=>queryClient.invalidateQueries({queryKey:ADMIN_QUERY_KEYS.sogp})}/></div>):<p className="px-4 py-10 text-center text-xs text-zinc-500">No review sessions scheduled.</p>}</div></div><form className="grid gap-3 rounded-sm border border-zinc-200 bg-white p-4" onSubmit={(event)=>{event.preventDefault();liveClassMutation.mutate(new FormData(event.currentTarget));}}><h3 className="ppc-heading text-sm font-semibold">Schedule review</h3><label className="grid gap-1 text-xs">Title<input name="title" required className="h-8 rounded-sm border border-zinc-200 px-2"/></label><label className="grid gap-1 text-xs">Starts<input name="startsAt" type="datetime-local" required className="h-8 rounded-sm border border-zinc-200 px-2"/></label><label className="grid gap-1 text-xs">Ends<input name="endsAt" type="datetime-local" required className="h-8 rounded-sm border border-zinc-200 px-2"/></label><label className="grid gap-1 text-xs">YouTube live URL<input name="youtubeUrl" type="url" className="h-8 rounded-sm border border-zinc-200 px-2"/></label><label className="grid gap-1 text-xs">Recording URL<input name="recordingUrl" type="url" className="h-8 rounded-sm border border-zinc-200 px-2"/></label><label className="flex items-center gap-2 text-xs"><input name="isRequired" type="checkbox" defaultChecked/> Required for SOGP completion</label>{liveClassMutation.error?<p className="text-xs text-rose-700">{liveClassMutation.error.message}</p>:null}<button type="submit" disabled={liveClassMutation.isPending} className="h-8 rounded-sm bg-[var(--color-brand-blue)] px-3 text-xs font-medium text-white disabled:opacity-50">Schedule review</button></form></section>:null}
   {tab==="Completion"?<section className="overflow-hidden rounded-sm border border-zinc-200 bg-white"><div className="border-b border-zinc-100 px-4 py-3"><h2 className="ppc-heading text-sm font-semibold">Completion and certificates</h2><p className="mt-0.5 text-xs text-zinc-500">{data.certificates.length} digital certificate{data.certificates.length===1?"":"s"} issued.</p></div>{certificateMutation.error?<p className="border-b border-rose-100 bg-rose-50 px-4 py-3 text-xs text-rose-700">{certificateMutation.error.message}</p>:null}<div className="divide-y divide-zinc-100">{data.enrollments.map((enrollment)=>{const issued=data.certificates.some((certificate)=>certificate.enrollmentId===enrollment.id&&!certificate.revokedAt);return <div key={enrollment.id} className="grid gap-3 px-4 py-3 text-xs sm:grid-cols-[1fr_auto] sm:items-center"><div><p className="font-medium text-zinc-900">{enrollment.name}</p><p className="mt-0.5 text-zinc-500">{enrollment.email} · {enrollment.status}</p><div className="mt-2 flex flex-wrap gap-3 text-[10px] text-zinc-600"><span>Pre-SOGP: {enrollment.preparationDaysComplete}/30</span><span>Morning Prayer Watch: {enrollment.morningPrayerDays} days</span><span>Reviews: {enrollment.reviewSessionsComplete}/4</span></div></div>{issued?<span className="text-emerald-700">Certificate issued</span>:<button type="button" disabled={certificateMutation.isPending} onClick={()=>certificateMutation.mutate(enrollment.id)} className="h-8 rounded-sm border border-zinc-200 bg-white px-3 font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-50">Check eligibility and issue</button>}</div>;})}</div><AdminSogpProgressCorrections data={data}/></section>:null}
   </div>;

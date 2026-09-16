@@ -496,6 +496,7 @@ export async function getAdminSogpData() {
     liveClasses,
     certificates,
     preparationRows,
+    orientationSurveys,
   ] =
     await Promise.all([
       db.select().from(schema.sogpCohorts).orderBy(desc(schema.sogpCohorts.startsAt)),
@@ -527,6 +528,10 @@ export async function getAdminSogpData() {
           desc(schema.sogpPreparationDays.publishDate),
           asc(schema.sogpPreparationResources.sortOrder),
         ),
+      db
+        .select()
+        .from(schema.sogpOrientationSurveys)
+        .orderBy(desc(schema.sogpOrientationSurveys.createdAt)),
     ]);
 
   const preparationDays = Array.from(
@@ -548,5 +553,6 @@ export async function getAdminSogpData() {
     liveClasses,
     certificates,
     preparationDays,
+    orientationSurveys,
   };
 }

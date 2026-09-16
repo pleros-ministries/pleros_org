@@ -106,6 +106,17 @@ export type AdminSogpData = {
     botConfigured: boolean;
     webhookSecretConfigured: boolean;
   };
+  orientationSurveys: Array<{
+    id: number;
+    enrollmentId: number;
+    userId: string;
+    reasons: string[];
+    question: string | null;
+    adminResponse: string | null;
+    respondedBy: string | null;
+    respondedAt: string | null;
+    createdAt: string;
+  }>;
 };
 
 export const ADMIN_QUERY_DEFAULTS = {

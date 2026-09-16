@@ -378,6 +378,17 @@ export async function getAdminSogpData(): Promise<AdminSogpData> {
       botConfigured: Boolean(process.env.TELEGRAM_SOGP_BOT_TOKEN),
       webhookSecretConfigured: Boolean(process.env.TELEGRAM_SOGP_WEBHOOK_SECRET),
     },
+    orientationSurveys: data.orientationSurveys.map((survey) => ({
+      id: survey.id,
+      enrollmentId: survey.enrollmentId,
+      userId: survey.userId,
+      reasons: survey.reasons,
+      question: survey.question,
+      adminResponse: survey.adminResponse,
+      respondedBy: survey.respondedBy,
+      respondedAt: serializeDate(survey.respondedAt),
+      createdAt: survey.createdAt.toISOString(),
+    })),
   };
 }
 

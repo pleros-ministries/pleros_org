@@ -78,6 +78,16 @@ export const sogpEnrollmentStatusEnum = pgEnum("sogp_enrollment_status", [
   "withdrawn",
 ]);
 
+export const sogpOrientationReasonEnum = pgEnum("sogp_orientation_reason", [
+  "faith_answers",
+  "gods_purpose",
+  "spiritual_growth_freedom",
+  "divine_healing",
+  "ministry_supernatural_empowerment",
+  "wisdom_career_business_finance",
+  "stronger_walk_fulfilling_purpose",
+]);
+
 export const sogpSetupOtpPurposeEnum = pgEnum("sogp_setup_otp_purpose", [
   "email_verification",
   "sign_in",
@@ -850,6 +860,34 @@ export const sogpEnrollments = pgTable(
       .on(t.referralCode)
       .where(sql`${t.referralCode} IS NOT NULL`),
     index("sogp_enrollments_referred_by_idx").on(t.referredByEnrollmentId),
+  ],
+);
+
+export const sogpOrientationSurveys = pgTable(
+  "sogp_orientation_surveys",
+  {
+    id: serial("id").primaryKey(),
+    enrollmentId: integer("enrollment_id")
+      .notNull()
+      .references(() => sogpEnrollments.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    reasons: jsonb("reasons").$type<string[]>().notNull(),
+    question: text("question"),
+    adminResponse: text("admin_response"),
+    respondedBy: text("responded_by").references(() => users.id),
+    respondedAt: timestamp("responded_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("sogp_orientation_surveys_enrollment_idx").on(t.enrollmentId),
+    index("sogp_orientation_surveys_user_idx").on(t.userId),
   ],
 );
 
