@@ -9,7 +9,7 @@ export const SOGP_ORIENTATION_REASONS = [
   },
   {
     value: "spiritual_growth_freedom",
-    label: "Spiritual growth and freedom from addictions",
+    label: "Character transformation and habit reformation",
   },
   {
     value: "divine_healing",
@@ -65,7 +65,9 @@ export function validateOrientationSurvey(input: {
   }
 
   const trimmedQuestion = input.question?.trim() || "";
-  if (trimmedQuestion.length > MAX_QUESTION_LENGTH) {
+  if (!trimmedQuestion) {
+    errors.question = "Write a question, or write \"nil\" if you don't have one.";
+  } else if (trimmedQuestion.length > MAX_QUESTION_LENGTH) {
     errors.question = `Keep your question under ${MAX_QUESTION_LENGTH} characters.`;
   }
 

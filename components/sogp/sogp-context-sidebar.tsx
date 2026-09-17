@@ -1,17 +1,22 @@
+import { useState } from "react";
 import {
   CalendarCheckIcon,
   ExternalLinkIcon,
+  Share2Icon,
   UsersIcon,
 } from "lucide-react";
 import Link from "next/link";
 
 import type { SogpJourneyData } from "@/lib/db/queries/sogp-journey";
 
+import { ShareLearningProgressDialog } from "./share-learning-progress-dialog";
+
 function progressPercent(completed: number, total: number) {
   return total ? Math.round((completed / total) * 100) : 0;
 }
 
 export function SogpContextSidebar({ data }: { data: SogpJourneyData }) {
+  const [shareOpen, setShareOpen] = useState(false);
   const nextReview = data.days.find(
     (day) => day.review && !day.review.complete && day.dateKey >= data.todayKey,
   )?.review;
@@ -90,6 +95,27 @@ export function SogpContextSidebar({ data }: { data: SogpJourneyData }) {
           </Link>
         </div>
       </section>
+
+      <section className="rounded-sm border border-zinc-200 bg-white">
+        <div className="flex items-center gap-2 border-b border-zinc-100 px-4 py-3">
+          <Share2Icon className="size-4 text-[var(--color-brand-blue)]" strokeWidth={2} />
+          <h2 className="ppc-heading text-sm font-semibold text-zinc-900">Share your progress</h2>
+        </div>
+        <div className="grid gap-3 p-4">
+          <p className="text-xs leading-[1.45] text-zinc-500">
+            Turn a short reflection into a shareable card and invite others to join SOGP.
+          </p>
+          <button
+            type="button"
+            onClick={() => setShareOpen(true)}
+            className="inline-flex h-8 w-fit items-center gap-1.5 rounded-[6px] border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-50 active:scale-[0.98]"
+          >
+            Share your progress
+          </button>
+        </div>
+      </section>
+
+      <ShareLearningProgressDialog open={shareOpen} onOpenChange={setShareOpen} track="sogp" />
     </div>
   );
 }

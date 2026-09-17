@@ -17,6 +17,7 @@ import { PRAYER_WATCH_YOUTUBE_URL } from "@/lib/prayer-watch";
 import { SogpCalendar } from "./sogp-calendar";
 import { SogpActivitySection } from "./sogp-activity-section";
 import { SharePreparationDay } from "./share-preparation-day";
+import { ShareLearningProgressDialog } from "./share-learning-progress-dialog";
 import { SogpDailyRequirements } from "./sogp-daily-requirements";
 import { SogpLessonHeading } from "./sogp-lesson-heading";
 import { SogpLessonMedia } from "./sogp-lesson-media";
@@ -89,6 +90,8 @@ export function PreSogpPage({
     [...data.days].reverse().find((day) => day.dateKey <= data.todayKey)?.dateKey ??
     data.days[0]!.dateKey;
   const [selectedDateKey, setSelectedDateKey] = useState(initialDate);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [shareDayNumber, setShareDayNumber] = useState<number | undefined>(undefined);
   const queryClient = useQueryClient();
   const selectedDay =
     data.days.find((day) => day.dateKey === selectedDateKey) ?? data.days[0]!;
@@ -131,6 +134,14 @@ export function PreSogpPage({
         };
       });
       return { previous };
+    },
+    onSuccess: (_result, input) => {
+      if (input.kind === "lesson" && input.complete) {
+        setShareDayNumber(
+          data.days.find((day) => day.dateKey === input.dateKey)?.dayNumber,
+        );
+        setShareOpen(true);
+      }
     },
     onError: (_error, _input, context) => {
       if (context?.previous) queryClient.setQueryData(activeQueryKey, context.previous);
@@ -201,10 +212,22 @@ export function PreSogpPage({
         </aside>
 
         <main data-pre-sogp-section="daily-content" className="grid gap-4">
-          <SogpLessonHeading
-            eyebrow="Current day"
-            title={`Day ${selectedDay.dayNumber}/${PRE_SOGP_PREPARATION_DAYS}`}
-          />
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <SogpLessonHeading
+              eyebrow="Current day"
+              title={`Day ${selectedDay.dayNumber}/${PRE_SOGP_PREPARATION_DAYS}`}
+            />
+            <button
+              type="button"
+              onClick={() => {
+                setShareDayNumber(selectedDay.dayNumber);
+                setShareOpen(true);
+              }}
+              className="inline-flex min-h-8 shrink-0 items-center rounded-sm border border-[var(--color-brand-blue)] px-3 text-xs font-semibold text-[var(--color-brand-blue)]"
+            >
+              Share your progress
+            </button>
+          </div>
 
           <SogpDailyRequirements
             items={[
@@ -295,6 +318,12 @@ export function PreSogpPage({
           </>
         )}
       </div>
+      <ShareLearningProgressDialog
+        open={shareOpen}
+        onOpenChange={setShareOpen}
+        track="pre_sogp"
+        dayNumber={shareDayNumber}
+      />
     </section>
   );
 }

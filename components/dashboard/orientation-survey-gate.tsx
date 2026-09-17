@@ -49,7 +49,12 @@ export function OrientationSurveyGate({
   }
 
   async function handleSubmit() {
-    if (reasons.length !== REQUIRED_REASON_COUNT || submitting) return;
+    if (
+      reasons.length !== REQUIRED_REASON_COUNT ||
+      !question.trim() ||
+      submitting
+    )
+      return;
     setSubmitting(true);
     setError(null);
     try {
@@ -120,7 +125,7 @@ export function OrientationSurveyGate({
           onChange={(event) => setQuestion(event.target.value)}
           rows={4}
           maxLength={2000}
-          placeholder="Optional — share what's on your heart"
+          placeholder="If no question you can write nill"
           className="w-full resize-y rounded-[var(--radius-md)] border border-white/18 bg-white/8 p-3.5 font-[var(--font-be-vietnam-pro)] text-sm leading-[1.6] text-white placeholder:text-white/50 outline-none focus-visible:border-white/50"
         />
       </label>
@@ -134,7 +139,11 @@ export function OrientationSurveyGate({
       <div className="grid justify-items-center gap-1">
         <button
           type="button"
-          disabled={reasons.length !== REQUIRED_REASON_COUNT || submitting}
+          disabled={
+            reasons.length !== REQUIRED_REASON_COUNT ||
+            !question.trim() ||
+            submitting
+          }
           onClick={handleSubmit}
           className="site-button-text inline-flex min-h-12 max-w-full items-center justify-center gap-2 rounded-full bg-white px-7 text-center text-xs font-semibold text-[var(--color-brand-blue)] transition-transform duration-150 hover:-translate-y-px disabled:opacity-45 sm:text-sm"
         >

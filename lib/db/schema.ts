@@ -891,6 +891,32 @@ export const sogpOrientationSurveys = pgTable(
   ],
 );
 
+export const sogpLearningProgressTrackEnum = pgEnum(
+  "sogp_learning_progress_track",
+  ["sogp", "pre_sogp"],
+);
+
+export const sogpLearningProgressShares = pgTable(
+  "sogp_learning_progress_shares",
+  {
+    id: serial("id").primaryKey(),
+    enrollmentId: integer("enrollment_id")
+      .notNull()
+      .references(() => sogpEnrollments.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    track: sogpLearningProgressTrackEnum("track").notNull(),
+    dayNumber: integer("day_number"),
+    quote: text("quote").notNull(),
+    authorName: text("author_name").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [index("sogp_learning_progress_shares_user_idx").on(t.userId)],
+);
+
 export const sogpPendingEnrollments = pgTable(
   "sogp_pending_enrollments",
   {

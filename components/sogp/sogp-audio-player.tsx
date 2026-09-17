@@ -1,8 +1,10 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check, Headphones } from "lucide-react";
+
+import { ShareLearningProgressDialog } from "./share-learning-progress-dialog";
 
 export function SogpAudioPlayer({
   dayNumber,
@@ -14,6 +16,8 @@ export function SogpAudioPlayer({
   listened: boolean;
 }) {
   const notified = useRef(listened);
+  const wasAlreadyListened = useRef(listened);
+  const [shareOpen, setShareOpen] = useState(false);
   const queryClient = useQueryClient();
   const mutation = useMutation({
     mutationFn: async () => {
@@ -25,6 +29,7 @@ export function SogpAudioPlayer({
       if (!response.ok) throw new Error("Audio progress could not be saved");
     },
     async onSuccess() {
+      if (!wasAlreadyListened.current) setShareOpen(true);
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["sogp", "day", dayNumber] }),
         queryClient.invalidateQueries({ queryKey: ["sogp", "dashboard"] }),
@@ -69,6 +74,12 @@ export function SogpAudioPlayer({
           </button>
         </div>
       )}
+      <ShareLearningProgressDialog
+        open={shareOpen}
+        onOpenChange={setShareOpen}
+        track="sogp"
+        dayNumber={dayNumber}
+      />
     </div>
   );
 }
