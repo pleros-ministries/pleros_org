@@ -13,6 +13,7 @@ export async function POST(request: Request) {
     track?: string;
     dayNumber?: number;
     quote?: string;
+    template?: string;
   } | null;
 
   if (!body || (body.track !== "sogp" && body.track !== "pre_sogp")) {
@@ -24,6 +25,7 @@ export async function POST(request: Request) {
     dayNumber:
       typeof body.dayNumber === "number" ? body.dayNumber : null,
     quote: body.quote ?? "",
+    template: body.template,
   });
 
   if ("error" in result) {

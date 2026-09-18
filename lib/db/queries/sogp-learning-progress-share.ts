@@ -3,7 +3,12 @@ import { and, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { ensureSogpReferralCode } from "@/lib/db/queries/sogp-referrals";
 import { buildReferralUrl } from "@/lib/sogp/referral";
-import { validateLearningProgressQuote } from "@/lib/sogp/learning-progress-share";
+import {
+  DEFAULT_LEARNING_PROGRESS_SHARE_TEMPLATE,
+  isLearningProgressShareTemplate,
+  validateLearningProgressQuote,
+  type LearningProgressShareTemplate,
+} from "@/lib/sogp/learning-progress-share";
 import { resolvePublicSiteUrl } from "@/lib/welcome-campaign";
 
 import * as schema from "../schema";
@@ -12,6 +17,7 @@ async function getLatestEnrollment(userId: string) {
   const [row] = await db
     .select({
       id: schema.sogpEnrollments.id,
+      cohortId: schema.sogpEnrollments.cohortId,
       name: schema.sogpEnrollments.name,
     })
     .from(schema.sogpEnrollments)
@@ -21,12 +27,34 @@ async function getLatestEnrollment(userId: string) {
   return row ?? null;
 }
 
+async function getLessonTitleForDay(
+  cohortId: number,
+  dayNumber: number,
+): Promise<string | null> {
+  const [row] = await db
+    .select({ title: schema.lessons.title })
+    .from(schema.sogpCohortTracks)
+    .innerJoin(
+      schema.lessons,
+      eq(schema.sogpCohortTracks.lessonId, schema.lessons.id),
+    )
+    .where(
+      and(
+        eq(schema.sogpCohortTracks.cohortId, cohortId),
+        eq(schema.sogpCohortTracks.dayNumber, dayNumber),
+      ),
+    )
+    .limit(1);
+  return row?.title ?? null;
+}
+
 export async function createLearningProgressShare(
   userId: string,
   input: {
     track: "sogp" | "pre_sogp";
     dayNumber?: number | null;
     quote: string;
+    template?: string | null;
   },
 ): Promise<
   | { error: string }
@@ -36,6 +64,7 @@ export async function createLearningProgressShare(
       authorName: string;
       track: "sogp" | "pre_sogp";
       referralUrl: string;
+      template: LearningProgressShareTemplate;
     }
 > {
   const enrollment = await getLatestEnrollment(userId);
@@ -48,6 +77,15 @@ export async function createLearningProgressShare(
     return { error: error ?? "Invalid submission." };
   }
 
+  const template = isLearningProgressShareTemplate(input.template)
+    ? input.template
+    : DEFAULT_LEARNING_PROGRESS_SHARE_TEMPLATE;
+
+  const lessonTitle =
+    input.track === "sogp" && input.dayNumber
+      ? await getLessonTitleForDay(enrollment.cohortId, input.dayNumber)
+      : null;
+
   const [row] = await db
     .insert(schema.sogpLearningProgressShares)
     .values({
@@ -57,6 +95,8 @@ export async function createLearningProgressShare(
       dayNumber: input.dayNumber ?? null,
       quote,
       authorName: enrollment.name,
+      template,
+      lessonTitle,
     })
     .returning({ id: schema.sogpLearningProgressShares.id });
 
@@ -76,6 +116,7 @@ export async function createLearningProgressShare(
     authorName: enrollment.name,
     track: input.track,
     referralUrl,
+    template,
   };
 }
 
@@ -88,8 +129,11 @@ export async function getLearningProgressShareForOwner(
       id: schema.sogpLearningProgressShares.id,
       userId: schema.sogpLearningProgressShares.userId,
       track: schema.sogpLearningProgressShares.track,
+      dayNumber: schema.sogpLearningProgressShares.dayNumber,
       quote: schema.sogpLearningProgressShares.quote,
       authorName: schema.sogpLearningProgressShares.authorName,
+      template: schema.sogpLearningProgressShares.template,
+      lessonTitle: schema.sogpLearningProgressShares.lessonTitle,
     })
     .from(schema.sogpLearningProgressShares)
     .where(

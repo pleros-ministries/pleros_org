@@ -27,7 +27,7 @@ const levelDefinitions = [
       [1, 2, "God’s Purpose: Why We Exist"],
       [1, 3, "The New Creation: Who You Are in Christ"],
       [1, 4, "Faith Stand: How to Grow in Christ"],
-      [3, 2, "Discipline – The Foundation of the Pursuit of Purpose"],
+      [3, 2, "Discipline – The Drive of the Spirit"],
       [3, 1, "Baptism of the Holy Ghost"],
     ],
   },

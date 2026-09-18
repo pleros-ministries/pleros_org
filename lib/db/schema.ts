@@ -896,6 +896,11 @@ export const sogpLearningProgressTrackEnum = pgEnum(
   ["sogp", "pre_sogp"],
 );
 
+export const sogpLearningProgressShareTemplateEnum = pgEnum(
+  "sogp_learning_progress_share_template",
+  ["light-card", "dark-open", "dark-card"],
+);
+
 export const sogpLearningProgressShares = pgTable(
   "sogp_learning_progress_shares",
   {
@@ -910,6 +915,12 @@ export const sogpLearningProgressShares = pgTable(
     dayNumber: integer("day_number"),
     quote: text("quote").notNull(),
     authorName: text("author_name").notNull(),
+    template: sogpLearningProgressShareTemplateEnum("template")
+      .notNull()
+      .default("light-card"),
+    // Snapshot of the day's lesson title at share time, for tracks/designs
+    // that print it (e.g. the "dark-card" template's headline).
+    lessonTitle: text("lesson_title"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),

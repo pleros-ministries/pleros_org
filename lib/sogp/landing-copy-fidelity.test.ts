@@ -54,7 +54,7 @@ test("uses the approved curriculum, structure, and enrollment copy", () => {
   );
   expect(sogpLandingContent.curriculum.tracks[4]).toEqual({
     level: "Level 1",
-    title: "Discipline – The Foundation of the Pursuit of Purpose",
+    title: "Discipline – The Drive of the Spirit",
   });
   expect(sogpLandingContent.curriculum.tracks[5]).toEqual({
     level: "Level 1",

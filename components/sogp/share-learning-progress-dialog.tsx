@@ -13,10 +13,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
+  DEFAULT_LEARNING_PROGRESS_SHARE_TEMPLATE,
+  LEARNING_PROGRESS_SHARE_TEMPLATES,
   MAX_LEARNING_PROGRESS_WORDS,
   buildLearningProgressShareMessage,
   countWords,
   validateLearningProgressQuote,
+  type LearningProgressShareTemplate,
 } from "@/lib/sogp/learning-progress-share";
 import {
   PRE_SOGP_SHARE_PLATFORMS,
@@ -37,6 +40,7 @@ async function submitShare(input: {
   track: "sogp" | "pre_sogp";
   dayNumber?: number;
   quote: string;
+  template: LearningProgressShareTemplate;
 }): Promise<ShareResult> {
   const response = await fetch("/api/sogp/learning-progress-shares", {
     method: "POST",
@@ -64,6 +68,9 @@ export function ShareLearningProgressDialog({
   dayNumber?: number;
 }) {
   const [quote, setQuote] = useState("");
+  const [template, setTemplate] = useState<LearningProgressShareTemplate>(
+    DEFAULT_LEARNING_PROGRESS_SHARE_TEMPLATE,
+  );
   const [share, setShare] = useState<ShareResult | null>(null);
   const [imageBlob, setImageBlob] = useState<Blob | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -83,6 +90,7 @@ export function ShareLearningProgressDialog({
       objectUrlRef.current = null;
     }
     setQuote("");
+    setTemplate(DEFAULT_LEARNING_PROGRESS_SHARE_TEMPLATE);
     setShare(null);
     setImageBlob(null);
     setImageUrl(null);
@@ -188,6 +196,46 @@ export function ShareLearningProgressDialog({
 
         {!share ? (
           <div className="grid gap-3">
+            <div className="grid gap-2">
+              <span className="text-xs font-semibold text-[var(--color-text-muted)]">
+                Choose a design
+              </span>
+              <div className="grid grid-cols-3 gap-2">
+                {LEARNING_PROGRESS_SHARE_TEMPLATES.map((option) => (
+                  <button
+                    key={option.id}
+                    type="button"
+                    onClick={() => setTemplate(option.id)}
+                    aria-pressed={template === option.id}
+                    className={`grid gap-1.5 rounded-[var(--radius-sm)] p-1.5 outline-none ${
+                      template === option.id
+                        ? "ring-2 ring-[var(--color-brand-blue)] ring-offset-2"
+                        : "ring-1 ring-[var(--color-line)]"
+                    }`}
+                  >
+                    <span
+                      className="grid aspect-square w-full place-items-end rounded-[calc(var(--radius-sm)-4px)] p-2"
+                      style={{ backgroundColor: option.background }}
+                    >
+                      <span
+                        className="h-2/5 w-full rounded-[3px]"
+                        style={{
+                          backgroundColor:
+                            option.id === "light-card" ? "#ffffff" : "transparent",
+                          border:
+                            option.id === "dark-card"
+                              ? "2px solid #ffffff"
+                              : undefined,
+                        }}
+                      />
+                    </span>
+                    <span className="text-[0.65rem] font-semibold text-[var(--color-text-strong)]">
+                      {option.label}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
             <label className="grid gap-2 text-sm">
               <textarea
                 value={quote}
@@ -216,7 +264,12 @@ export function ShareLearningProgressDialog({
                 disabled={!canSubmit || mutation.isPending}
                 onClick={() => {
                   setError(null);
-                  mutation.mutate({ track, dayNumber, quote: quote.trim() });
+                  mutation.mutate({
+                    track,
+                    dayNumber,
+                    quote: quote.trim(),
+                    template,
+                  });
                 }}
                 className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[var(--color-brand-blue)] px-5 text-sm font-semibold text-white disabled:opacity-50"
               >
