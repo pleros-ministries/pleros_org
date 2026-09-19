@@ -2,6 +2,7 @@ export const ADMIN_QUERY_KEYS = {
   dashboard: ["admin", "dashboard"] as const,
   schoolOfPurposeWaitlist: ["admin", "school-of-purpose", "waitlist"] as const,
   sogp: ["admin", "sogp"] as const,
+  sogpReport: ["admin", "sogp", "report"] as const,
   registrants: ["admin", "registrants"] as const,
   platform: ["admin", "platform"] as const,
   staff: ["admin", "staff"] as const,
@@ -117,6 +118,75 @@ export type AdminSogpData = {
     respondedAt: string | null;
     createdAt: string;
   }>;
+};
+
+export type AdminSogpReportLeftBehindFlag = "behind_pace" | "inactive_7_days";
+
+export type AdminSogpReportWeek = {
+  week: number;
+  startsAt: string;
+  endsAt: string;
+  activeEnrollments: number;
+  completedAtLeastOneRequiredTrack: number;
+  completedAllRequiredTracksForWeek: number;
+  trackCompletionPercent: number;
+  liveClassAttendance: number;
+  liveClassAttendancePercent: number;
+  prayerWatchDistinctDays: number;
+  prayerWatchParticipationPercent: number;
+};
+
+export type AdminSogpReportCohort = {
+  id: number;
+  slug: string;
+  title: string;
+  status: string;
+  startsAt: string;
+  endsAt: string;
+  totalEnrollments: number;
+  statusBreakdown: Record<string, number>;
+  averageCompletionPercent: number;
+  prepPhaseCompletionRate: number;
+  liveClassAttendanceRate: number;
+  prayerWatchParticipationRate: number;
+  certificatesIssued: number;
+  weeklyParticipation: AdminSogpReportWeek[];
+};
+
+export type AdminSogpReportLeftBehindEntry = {
+  enrollmentId: number;
+  cohortId: number;
+  cohortTitle: string;
+  name: string;
+  email: string;
+  currentWeek: number | null;
+  expectedTrackCount: number;
+  completedTrackCount: number;
+  completionPercent: number;
+  lastActivityAt: string | null;
+  daysSinceLastActivity: number | null;
+  flags: AdminSogpReportLeftBehindFlag[];
+};
+
+export type AdminSogpReportParticipant = {
+  enrollmentId: number;
+  cohortId: number;
+  cohortTitle: string;
+  name: string;
+  email: string;
+  status: string;
+  weeklyTrackCompletion: Array<{ week: number; completed: number; total: number }>;
+  liveClassesAttended: number;
+  liveClassesRequired: number;
+  prayerWatchDays: number;
+  completionPercent: number;
+};
+
+export type AdminSogpReportData = {
+  generatedAt: string;
+  cohorts: AdminSogpReportCohort[];
+  participants: AdminSogpReportParticipant[];
+  leftBehind: AdminSogpReportLeftBehindEntry[];
 };
 
 export const ADMIN_QUERY_DEFAULTS = {

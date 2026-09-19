@@ -30,11 +30,11 @@ function DetailRow({
         <span className="ppc-heading text-sm font-semibold text-zinc-900">{title}</span>
         <span className="text-xs leading-[1.45] text-zinc-500">{description}</span>
       </span>
-      <ChevronRightIcon className="size-4 shrink-0 text-zinc-300" />
+      <ChevronRightIcon className="size-4 shrink-0 text-[var(--color-brand-blue)]" />
     </>
   );
   const className =
-    "flex items-center justify-between gap-3 rounded-[var(--radius-md)] border border-zinc-200 bg-white p-4 text-left transition-colors hover:bg-zinc-50";
+    "flex items-center justify-between gap-3 rounded-[var(--radius-md)] bg-[var(--color-brand-sky)] p-4 text-left transition-[filter] hover:brightness-95";
   return href ? (
     <Link href={href} className={className}>
       {content}
@@ -51,7 +51,7 @@ function PrayerWatchReminderCard() {
   const isConfigured = Boolean(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY);
 
   return (
-    <div className="grid gap-3 rounded-[var(--radius-md)] border border-zinc-200 bg-white p-4">
+    <div className="grid gap-3 rounded-[var(--radius-md)] bg-[var(--color-brand-sky)] p-4">
       <div className="flex items-center gap-2">
         <BellIcon className="size-4 text-[var(--color-brand-blue)]" />
         <h3 className="ppc-heading text-sm font-semibold text-zinc-900">Prayer Watch reminder</h3>
@@ -112,12 +112,12 @@ export function SogpOtherDetails({
   ];
 
   return (
-    <section className="rounded-[var(--radius-md)] bg-[var(--color-brand-sky-soft)] p-4 md:p-5">
+    <section className="relative left-1/2 right-1/2 w-screen -mx-[50vw] rounded-none bg-[var(--color-brand-sky-soft)] p-4 md:p-5 lg:static lg:left-auto lg:right-auto lg:mx-0 lg:w-auto lg:rounded-[var(--radius-md)]">
       <p className="mb-3 text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[var(--color-brand-blue)]">
         Other details
       </p>
       <div className="grid gap-3">
-        <div className="grid gap-3.5 rounded-[var(--radius-md)] border border-zinc-200 bg-white p-4">
+        <div className="grid gap-3.5 rounded-[var(--radius-md)] bg-[var(--color-brand-sky)] p-4">
           <h3 className="ppc-heading text-sm font-semibold text-zinc-900">Course progress</h3>
           {metrics.map((metric) => (
             <div key={metric.label} className="grid gap-1.5">
@@ -148,7 +148,7 @@ export function SogpOtherDetails({
         />
 
         {preview ? (
-          <p className="rounded-[var(--radius-md)] border border-zinc-200 bg-white p-4 text-xs text-zinc-500">
+          <p className="rounded-[var(--radius-md)] bg-[var(--color-brand-sky)] p-4 text-xs text-zinc-500">
             Preview mode · Prayer Watch reminders are unavailable in this preview.
           </p>
         ) : (

@@ -25,5 +25,11 @@ export default async function DashboardLayout({
     visitorType: "user",
   });
 
+  // The SOGP journey page has its own header and navigation, so it skips
+  // the generic site nav/footer that wraps every other dashboard route.
+  if (pathname === "/dashboard/sogp") {
+    return children;
+  }
+
   return <AppShell authenticated>{children}</AppShell>;
 }

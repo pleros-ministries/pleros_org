@@ -25,6 +25,7 @@ import { trackSogpEvent } from "./sogp-analytics";
 
 type EnrollmentResponse = {
   redirectTo?: string;
+  alreadyEnrolled?: boolean;
   errors?: SogpEnrollmentErrors;
   error?: string;
 };
@@ -238,7 +239,9 @@ export function SogpEnrollmentForm({
   const mutation = useMutation({
     mutationFn: submitEnrollment,
     onSuccess(payload) {
-      trackSogpEvent("sogp_email_verification_sent");
+      trackSogpEvent(
+        payload.alreadyEnrolled ? "sogp_already_enrolled" : "sogp_email_verification_sent",
+      );
       window.location.assign(payload.redirectTo ?? "/setup");
     },
     onError(error: EnrollmentResponse) {

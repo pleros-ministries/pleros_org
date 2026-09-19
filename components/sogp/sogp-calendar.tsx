@@ -20,15 +20,22 @@ const stateLabels: Record<SogpCalendarState, string> = {
   future: "Upcoming",
 };
 
-const stateClasses: Record<SogpCalendarState, string> = {
-  complete:
-    "border-[var(--color-brand-lime)] bg-[var(--color-brand-lime)] text-[var(--color-brand-blue)]",
-  missed: "border-red-200 bg-red-50 text-red-800",
-  current:
-    "border-zinc-300 bg-white text-zinc-900",
-  future:
-    "border-zinc-200 bg-zinc-50 text-zinc-400",
-};
+function getStateClasses(tinted: boolean): Record<SogpCalendarState, string> {
+  return {
+    complete:
+      "border-[var(--color-brand-lime)] bg-[var(--color-brand-lime)] text-[var(--color-brand-blue)]",
+    missed: "border-red-200 bg-red-50 text-red-800",
+    current:
+      "border-zinc-300 bg-white text-zinc-900",
+    // Upcoming days have no other meaningful state color, so they're the
+    // only cell tinted to match a blue-themed page (e.g. the SOGP journey
+    // page's sidebar). Complete/missed/current stay put everywhere — those
+    // already carry state that shouldn't be flattened.
+    future: tinted
+      ? "border-[var(--color-brand-sky)] bg-[var(--color-brand-sky-soft)] text-[var(--color-brand-blue)]/50"
+      : "border-zinc-200 bg-zinc-50 text-zinc-400",
+  };
+}
 
 const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const learningWeekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -51,13 +58,16 @@ export function SogpCalendar({
   selectedDateKey,
   todayKey,
   onSelect,
+  tinted = false,
 }: {
   days: SogpCalendarDay[];
   selectedDateKey: string;
   todayKey: string;
   onSelect: (dateKey: string) => void;
+  tinted?: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const stateClasses = getStateClasses(tinted);
   const months = days.reduce<Map<string, SogpCalendarDay[]>>((result, day) => {
     const key = monthKey(day.dateKey);
     result.set(key, [...(result.get(key) ?? []), day]);
@@ -104,7 +114,7 @@ export function SogpCalendar({
           className="inline-flex h-7 cursor-pointer items-center gap-1.5 rounded-[6px] border border-zinc-200 bg-white px-2.5 text-[0.68rem] font-medium text-zinc-600 transition-colors duration-150 hover:bg-zinc-50 active:scale-[0.98]"
         >
           {expanded ? "Collapse" : "Expand"}
-          <ChevronDownIcon className={cn("size-3.5 transition-transform duration-150", expanded && "rotate-180")} strokeWidth={2} />
+          <ChevronDownIcon className={cn("size-3.5 text-[var(--color-brand-blue)] transition-transform duration-150", expanded && "rotate-180")} strokeWidth={2} />
         </button>
       </div>
 

@@ -69,11 +69,11 @@ describe("SOGP dashboard previews", () => {
     );
     expect(sogpPage).toContain("SOGP");
 
-    // Header: light-blue background with brand-blue text throughout, less
-    // vertical chrome — per the September 2026 dashboard redesign.
-    expect(sogpPage).toContain("bg-[var(--color-brand-sky)] text-[var(--color-brand-blue)]");
+    // Header: navy background with white text throughout, less vertical
+    // chrome — per the September 2026 dashboard redesign.
+    expect(sogpPage).toContain("bg-[var(--color-brand-blue)] text-white");
     expect(sogpPage).toContain("Welcome, {firstName");
-    expect(sogpPage.indexOf("bg-[var(--color-brand-sky)] text-[var(--color-brand-blue)]")).toBeLessThan(
+    expect(sogpPage.indexOf("bg-[var(--color-brand-blue)] text-white")).toBeLessThan(
       sogpPage.indexOf("Welcome, {firstName"),
     );
 

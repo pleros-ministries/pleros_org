@@ -134,34 +134,34 @@ export function SogpJourneyPage({
 
   return (
     <section className="site-font-theme min-h-screen bg-[var(--color-surface-muted)] pb-16 text-zinc-900">
-      <header className="bg-[var(--color-brand-sky)] text-[var(--color-brand-blue)]">
+      <header className="bg-[var(--color-brand-blue)] text-white">
         <div className="site-shell-page sogp-shell-page flex items-center justify-between gap-4 py-2.5">
           <Link
             href={preview ? "/preview/dashboard" : "/dashboard"}
-            className="inline-flex min-h-8 items-center gap-1.5 rounded-sm px-1 text-xs font-medium text-[var(--color-brand-blue)]/75 transition-colors duration-150 hover:text-[var(--color-brand-blue)] focus-visible:text-[var(--color-brand-blue)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--color-brand-blue)] active:scale-[0.98]"
+            className="inline-flex min-h-8 items-center gap-1.5 rounded-sm px-1 text-xs font-medium text-white/85 transition-colors duration-150 hover:text-white focus-visible:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white active:scale-[0.98]"
           >
             <ArrowLeftIcon className="size-3.5" strokeWidth={2} /> Dashboard
           </Link>
-          <span className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-[var(--color-brand-blue)]">
+          <span className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-white">
             SOGP
           </span>
         </div>
         <div className="site-shell-page sogp-shell-page grid gap-1 pb-4 pt-1">
-          <p className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-[var(--color-brand-blue)]/75">
+          <p className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-white/75">
             {data.cohort.title}
           </p>
-          <h1 className="ppc-heading text-2xl font-semibold tracking-[-0.02em] text-[var(--color-brand-blue)] md:text-3xl">
+          <h1 className="ppc-heading text-2xl font-semibold tracking-[-0.02em] text-white md:text-3xl">
             Welcome, {firstName(data.enrollment.name)}
           </h1>
           {selectedDay.track ? (
-            <p className="text-xs font-medium text-[var(--color-brand-blue)]/75">
+            <p className="text-xs font-medium text-white/75">
               Level {selectedDay.track.curriculumLevel} · Track {selectedDay.track.levelPosition} of 6
             </p>
           ) : null}
         </div>
       </header>
 
-      <div className="site-shell-page sogp-shell-page grid gap-4 pb-6 pt-4 lg:grid-cols-[15.5rem_minmax(0,1fr)] lg:items-start xl:grid-cols-[15.5rem_minmax(0,1fr)_15.5rem]">
+      <div className="site-shell-page sogp-shell-page grid gap-4 pb-6 lg:grid-cols-[15.5rem_minmax(0,1fr)] lg:items-start xl:grid-cols-[15.5rem_minmax(0,1fr)_15.5rem]">
         <aside data-sogp-section="calendar" className="lg:sticky lg:top-4">
           <SogpCourseSidebar
             data={data}

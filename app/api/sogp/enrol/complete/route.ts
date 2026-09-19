@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse, after } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 import { getAppSession } from "@/lib/app-session";
 import { betterAuthServer } from "@/lib/auth/better-auth";
@@ -8,13 +8,6 @@ import {
   markPendingSogpCompleted,
   upsertSogpEnrollment,
 } from "@/lib/db/queries/sogp";
-import { assignEnrollmentToUnit } from "@/lib/db/queries/community-units";
-import { autoAssignPastorForEnrollment } from "@/lib/db/queries/pastor-followups";
-import {
-  attributeSogpReferral,
-  ensureSogpReferralCode,
-} from "@/lib/db/queries/sogp-referrals";
-import { sendSogpEnrollmentEmail } from "@/lib/email/send";
 import {
   SOGP_SETUP_COOKIE,
   getSogpFlowSecret,
@@ -30,19 +23,7 @@ import {
   buildSogpEnrollmentRedirect,
   formatSogpReferralSource,
 } from "@/lib/sogp/enrollment";
-import { sendSogpSignupAlert } from "@/lib/telegram/sogp-signup-alert";
-import { resolvePublicSiteUrl } from "@/lib/welcome-campaign";
-
-const cohortDateFormatter = new Intl.DateTimeFormat("en-GB", {
-  day: "numeric",
-  month: "long",
-  year: "numeric",
-  timeZone: "Africa/Lagos",
-});
-
-function formatCohortDates(startsAt: Date, endsAt: Date) {
-  return `${cohortDateFormatter.format(startsAt)} – ${cohortDateFormatter.format(endsAt)}`;
-}
+import { runSogpPostEnrollmentSideEffects } from "@/lib/sogp/enrollment-side-effects";
 
 export async function POST(request: NextRequest) {
   const token = request.cookies.get(SOGP_SETUP_COOKIE)?.value;
@@ -130,62 +111,12 @@ export async function POST(request: NextRequest) {
 
     await markPendingSogpCompleted(pending.id);
 
-    // Record who referred this enrolment, give the new learner their own
-    // referral code, send the welcome email, and post the Telegram alert.
-    // None of these may fail the enrolment — and none may race the response:
-    // `after()` keeps the serverless function alive until each finishes,
-    // instead of the previous fire-and-forget `void ...` calls, which Vercel
-    // could (and did) cut off mid-flight as soon as the response was sent.
-    after(() =>
-      attributeSogpReferral({
-        enrolleeEnrollmentId: enrollment.id,
-        enrolleeUserId: session.user.id,
-        code: values.referredByCode,
-      }).catch((error) => console.error("SOGP referral attribution failed:", error)),
-    );
-    after(() =>
-      ensureSogpReferralCode(enrollment.id).catch((error) =>
-        console.error("SOGP referral code mint failed:", error),
-      ),
-    );
-    after(() =>
-      assignEnrollmentToUnit(enrollment.id)
-        .then((result) =>
-          result
-            ? autoAssignPastorForEnrollment(enrollment.id, result.unitId)
-            : null,
-        )
-        .catch((error) =>
-          console.error("SOGP community unit/pastor assignment failed:", error),
-        ),
-    );
-    after(() =>
-      sendSogpEnrollmentEmail({
-        to: pending.email,
-        name: values.name,
-        cohortTitle: cohort.title,
-        cohortDates: formatCohortDates(cohort.startsAt, cohort.endsAt),
-        dashboardUrl: `${resolvePublicSiteUrl(process.env)}/dashboard/welcomepack/join`,
-      }).catch((error) => console.error("SOGP enrolment email failed:", error)),
-    );
-    after(() =>
-      sendSogpSignupAlert({
-        enrollmentId: enrollment.id,
-        firstName: values.firstName,
-        lastName: values.lastName,
-        phone: values.phone,
-        country: values.country,
-        region: values.region,
-        birthYear: values.birthYear ? Number(values.birthYear) : null,
-        referralSource: formatSogpReferralSource({
-          referralSource: values.referralSource,
-          referralSourceOther: values.referralSourceOther,
-        }),
-        cohortTitle: cohort.title,
-      }).catch((error) =>
-        console.error("SOGP signup Telegram alert failed:", error),
-      ),
-    );
+    runSogpPostEnrollmentSideEffects({
+      enrollment,
+      cohort,
+      userId: session.user.id,
+      values: { ...values, email: pending.email },
+    });
 
     const response = NextResponse.json({
       redirectTo: "/dashboard/welcomepack/join",

@@ -7,11 +7,14 @@ import type {
   AdminPlatformData,
   AdminSchoolOfPurposeWaitlistEntry,
   AdminSogpData,
+  AdminSogpReportData,
   AdminStaffData,
 } from "@/lib/admin-query";
 import { getAdminRegistrantList } from "@/lib/db/queries/admin-registrants";
 import { getSchoolOfPurposeWaitlistEntries } from "@/lib/db/queries/school-of-purpose-waitlist";
 import { getAdminSogpData as getSogpOperationsData } from "@/lib/db/queries/sogp";
+import { getSogpReportData } from "@/lib/db/queries/sogp-report";
+import { buildSogpReport } from "@/lib/sogp/report";
 import { getSuperAdminOverviewMetrics } from "@/lib/db/queries/admin-analytics";
 import { getStudentPlatformList } from "@/lib/db/queries/students";
 import { getAllThreads } from "@/lib/db/queries/qa";
@@ -390,6 +393,12 @@ export async function getAdminSogpData(): Promise<AdminSogpData> {
       createdAt: survey.createdAt.toISOString(),
     })),
   };
+}
+
+export async function getAdminSogpReportData(): Promise<AdminSogpReportData> {
+  await requireAdmin();
+  const raw = await getSogpReportData();
+  return buildSogpReport(raw);
 }
 
 export async function getAdminRegistrants(): Promise<AdminRegistrantSummary[]> {
