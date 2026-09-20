@@ -204,7 +204,11 @@ export function SogpJourneyPage({
         </div>
 
         <div className="grid content-start gap-4 lg:col-start-2 xl:sticky xl:top-4 xl:col-start-auto">
-          <SogpOtherDetails data={data} preview={preview} />
+          <SogpOtherDetails
+            data={data}
+            dayNumber={selectedDay.track?.dayNumber}
+            preview={preview}
+          />
         </div>
       </div>
     </section>

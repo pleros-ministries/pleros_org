@@ -15,9 +15,8 @@ import {
 import {
   DEFAULT_LEARNING_PROGRESS_SHARE_TEMPLATE,
   LEARNING_PROGRESS_SHARE_TEMPLATES,
-  MAX_LEARNING_PROGRESS_WORDS,
+  MAX_LEARNING_PROGRESS_CHARS,
   buildLearningProgressShareMessage,
-  countWords,
   validateLearningProgressQuote,
   type LearningProgressShareTemplate,
 } from "@/lib/sogp/learning-progress-share";
@@ -131,7 +130,6 @@ export function ShareLearningProgressDialog({
     },
   });
 
-  const words = countWords(quote);
   const { error: validationError } = validateLearningProgressQuote(quote);
   const canSubmit = quote.trim().length > 0 && !validationError;
 
@@ -240,17 +238,17 @@ export function ShareLearningProgressDialog({
               <textarea
                 value={quote}
                 onChange={(event) => setQuote(event.target.value)}
-                rows={5}
-                placeholder="What has this SOGP journey been teaching you?"
+                rows={3}
+                placeholder="Sum up today's lesson in one sentence…"
                 className="w-full resize-y rounded-[var(--radius-sm)] border border-[var(--color-line-strong)] p-3 text-sm leading-[1.6] outline-none focus-visible:border-[var(--color-brand-blue)]"
               />
               <span
-                className={`justify-self-end text-xs ${words > MAX_LEARNING_PROGRESS_WORDS
+                className={`justify-self-end text-xs ${quote.length > MAX_LEARNING_PROGRESS_CHARS
                     ? "text-red-600"
                     : "text-[var(--color-text-muted)]"
                   }`}
               >
-                {words} / {MAX_LEARNING_PROGRESS_WORDS} words
+                {quote.length} / {MAX_LEARNING_PROGRESS_CHARS} characters
               </span>
             </label>
             {error ? (

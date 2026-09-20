@@ -3,6 +3,7 @@ import { and, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { ensureSogpReferralCode } from "@/lib/db/queries/sogp-referrals";
 import { buildReferralUrl } from "@/lib/sogp/referral";
+import { toLagosDateKey } from "@/lib/sogp/formation-progress";
 import {
   DEFAULT_LEARNING_PROGRESS_SHARE_TEMPLATE,
   isLearningProgressShareTemplate,
@@ -25,6 +26,26 @@ async function getLatestEnrollment(userId: string) {
     .orderBy(schema.sogpEnrollments.createdAt)
     .limit(1);
   return row ?? null;
+}
+
+async function getCurrentDayNumberForCohort(cohortId: number): Promise<number | null> {
+  const rows = await db
+    .select({
+      dayNumber: schema.sogpCohortTracks.dayNumber,
+      releaseAt: schema.sogpCohortTracks.releaseAt,
+    })
+    .from(schema.sogpCohortTracks)
+    .where(
+      and(
+        eq(schema.sogpCohortTracks.cohortId, cohortId),
+        eq(schema.sogpCohortTracks.isRequired, true),
+      ),
+    );
+  const todayKey = toLagosDateKey(new Date());
+  const match = rows.find(
+    (row) => row.dayNumber != null && toLagosDateKey(row.releaseAt) === todayKey,
+  );
+  return match?.dayNumber ?? null;
 }
 
 async function getLessonTitleForDay(
@@ -81,9 +102,18 @@ export async function createLearningProgressShare(
     ? input.template
     : DEFAULT_LEARNING_PROGRESS_SHARE_TEMPLATE;
 
+  // The caller doesn't always know which day it is (e.g. the generic "Share
+  // your progress" entry points have no specific lesson in context) — fall
+  // back to today's scheduled day for the learner's cohort, the same way the
+  // dashboard resolves "today" (see getActiveSogpJourney).
+  const effectiveDayNumber =
+    input.track === "sogp"
+      ? (input.dayNumber ?? (await getCurrentDayNumberForCohort(enrollment.cohortId)))
+      : (input.dayNumber ?? null);
+
   const lessonTitle =
-    input.track === "sogp" && input.dayNumber
-      ? await getLessonTitleForDay(enrollment.cohortId, input.dayNumber)
+    input.track === "sogp" && effectiveDayNumber
+      ? await getLessonTitleForDay(enrollment.cohortId, effectiveDayNumber)
       : null;
 
   const [row] = await db
@@ -92,7 +122,7 @@ export async function createLearningProgressShare(
       enrollmentId: enrollment.id,
       userId,
       track: input.track,
-      dayNumber: input.dayNumber ?? null,
+      dayNumber: effectiveDayNumber,
       quote,
       authorName: enrollment.name,
       template,

@@ -14,10 +14,15 @@ export const runtime = "nodejs";
 const SIZE = { width: 1080, height: 1080 };
 const PADDING = 64;
 
-const NAVY = "#051480";
-const SKY = "#d2f1ff";
-const ACCENT_ON_LIGHT = "#3f7a17";
-const ACCENT_ON_DARK = "#a6e34d";
+const NAVY = "#0A1A6E";
+const SKY = "#DBF0FC";
+const PATTERN_BLUE = "#133FD4";
+const ACCENT_LIGHT = "#7BA253";
+const ACCENT_DARK = "#A8C98A";
+const WHAT_I_LEARNT_GREEN = "#4E6E33";
+
+const SANS = "Poppins";
+const SERIF = "Newsreader";
 
 function loadDataUri(relativePath: string): Promise<string> {
   return readFile(join(process.cwd(), relativePath)).then(
@@ -33,27 +38,49 @@ function getPatternDataUri(): Promise<string> {
   return patternDataUriPromise;
 }
 
-const WORDMARK_WIDTH = 84;
-const WORDMARK_HEIGHT = 40;
-
-let whiteWordmarkDataUriPromise: Promise<string> | null = null;
-function getWhiteWordmarkDataUri(): Promise<string> {
-  if (!whiteWordmarkDataUriPromise) {
-    whiteWordmarkDataUriPromise = loadDataUri(
-      "public/site/sogp/pleros-wordmark-white.png",
-    );
+let darkLogoDataUriPromise: Promise<string> | null = null;
+function getDarkLogoDataUri(): Promise<string> {
+  if (!darkLogoDataUriPromise) {
+    darkLogoDataUriPromise = loadDataUri("public/site/sogp/pleros-logo-dark.png");
   }
-  return whiteWordmarkDataUriPromise;
+  return darkLogoDataUriPromise;
 }
 
-let navyWordmarkDataUriPromise: Promise<string> | null = null;
-function getNavyWordmarkDataUri(): Promise<string> {
-  if (!navyWordmarkDataUriPromise) {
-    navyWordmarkDataUriPromise = loadDataUri(
-      "public/site/sogp/pleros-wordmark-navy.png",
-    );
+let whiteLogoDataUriPromise: Promise<string> | null = null;
+function getWhiteLogoDataUri(): Promise<string> {
+  if (!whiteLogoDataUriPromise) {
+    whiteLogoDataUriPromise = loadDataUri("public/site/sogp/pleros-logo-white.png");
   }
-  return navyWordmarkDataUriPromise;
+  return whiteLogoDataUriPromise;
+}
+
+function loadFontFile(relativePath: string): Promise<Buffer> {
+  return readFile(join(process.cwd(), relativePath));
+}
+
+let cardFontsPromise: ReturnType<typeof buildCardFonts> | null = null;
+function buildCardFonts() {
+  return Promise.all([
+    loadFontFile("public/fonts/sogp-share/Poppins-Medium.ttf"),
+    loadFontFile("public/fonts/sogp-share/Poppins-SemiBold.ttf"),
+    loadFontFile("public/fonts/sogp-share/Poppins-Bold.ttf"),
+    loadFontFile("public/fonts/sogp-share/Newsreader-Medium.ttf"),
+    loadFontFile("public/fonts/sogp-share/Newsreader-MediumItalic.ttf"),
+  ]).then(
+    ([poppinsMedium, poppinsSemiBold, poppinsBold, newsreaderMedium, newsreaderMediumItalic]) => [
+      { name: SANS, data: poppinsMedium, weight: 500 as const, style: "normal" as const },
+      { name: SANS, data: poppinsSemiBold, weight: 600 as const, style: "normal" as const },
+      { name: SANS, data: poppinsBold, weight: 700 as const, style: "normal" as const },
+      { name: SERIF, data: newsreaderMedium, weight: 500 as const, style: "normal" as const },
+      { name: SERIF, data: newsreaderMediumItalic, weight: 500 as const, style: "italic" as const },
+    ],
+  );
+}
+function getCardFonts() {
+  if (!cardFontsPromise) {
+    cardFontsPromise = buildCardFonts();
+  }
+  return cardFontsPromise;
 }
 
 type ShareRenderData = {
@@ -64,18 +91,20 @@ type ShareRenderData = {
   lessonTitle: string | null;
 };
 
-function getEyebrowParts(share: ShareRenderData) {
-  const dayText = share.dayNumber
-    ? `DAY ${share.dayNumber}`
+function getDayText(share: ShareRenderData): string {
+  return share.dayNumber
+    ? `Day ${share.dayNumber}`
     : share.track === "pre_sogp"
-      ? "PRE-SOGP"
+      ? "Pre-SOGP"
       : "SOGP";
-  const detailText = share.lessonTitle
-    ? `TEACHING · ${share.lessonTitle.toUpperCase()}`
+}
+
+function getTeachingLabel(share: ShareRenderData): string {
+  return share.lessonTitle
+    ? "Teaching"
     : share.track === "pre_sogp"
-      ? "PRE-SOGP PREPARATION"
-      : "LEARNING PROGRESS";
-  return { dayText, detailText };
+      ? "Pre-SOGP preparation"
+      : "Learning progress";
 }
 
 function getHeadline(share: ShareRenderData): string {
@@ -85,23 +114,38 @@ function getHeadline(share: ShareRenderData): string {
     : "My SOGP Learning Progress";
 }
 
+// Reflection quotes are capped at MAX_LEARNING_PROGRESS_CHARS (120) at
+// submission time, so the top tiers below cover the real range; the last
+// tier is only a safety net for shares created before that limit was
+// lowered from 700 characters.
 function getQuoteFontSize(quote: string, base: number, min: number): number {
   const length = quote.length;
-  if (length <= 70) return base;
-  if (length <= 160) return Math.round(base * 0.85);
-  if (length <= 280) return Math.round(base * 0.72);
-  if (length <= 420) return Math.round(base * 0.6);
+  if (length <= 60) return base;
+  if (length <= 90) return Math.round(base * 0.85);
+  if (length <= 120) return Math.round(base * 0.72);
   return min;
 }
 
-function CardHeader({
-  tone,
-  wordmarkSrc,
-}: {
-  tone: "light" | "dark";
-  wordmarkSrc: string;
-}) {
-  const color = tone === "light" ? NAVY : "#ffffff";
+function ArrowIcon({ color }: { color: string }) {
+  return (
+    <svg
+      width={40}
+      height={40}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <line x1={4} y1={12} x2={19} y2={12} />
+      <polyline points="12 5 19 12 12 19" />
+    </svg>
+  );
+}
+
+function CardHeader({ tone, logoSrc }: { tone: "light" | "dark"; logoSrc: string }) {
+  const color = tone === "light" ? NAVY : "#FFFFFF";
   return (
     <div
       style={{
@@ -109,94 +153,177 @@ function CardHeader({
         width: "100%",
         alignItems: "flex-start",
         justifyContent: "space-between",
+        gap: 32,
       }}
     >
       <div
         style={{
           display: "flex",
           flexDirection: "column",
+          fontFamily: SANS,
+          fontWeight: 700,
           fontSize: 30,
-          fontWeight: 800,
-          lineHeight: 1.2,
-          letterSpacing: -0.5,
+          lineHeight: 1.16,
+          letterSpacing: "0.01em",
+          textTransform: "uppercase",
           color,
         }}
       >
-        <span>SCHOOL OF</span>
-        <span>GOD&rsquo;S PURPOSE</span>
+        <span>School of</span>
+        <span>God&rsquo;s Purpose</span>
       </div>
       {/* eslint-disable-next-line @next/next/no-img-element -- satori (ImageResponse) requires a plain <img>, not next/image */}
-      <img
-        src={wordmarkSrc}
-        width={WORDMARK_WIDTH}
-        height={WORDMARK_HEIGHT}
-        alt=""
-      />
+      <img src={logoSrc} height={72} alt="" />
     </div>
   );
 }
 
-function Divider({ tone }: { tone: "light" | "dark" }) {
+function Divider({ color }: { color: string }) {
+  return <div style={{ display: "flex", width: "100%", height: 1, background: color }} />;
+}
+
+function DayBadge({
+  tone,
+  dayText,
+  teachingLabel,
+  accent,
+}: {
+  tone: "light" | "dark";
+  dayText: string;
+  teachingLabel: string;
+  accent: string;
+}) {
   return (
-    <div
-      style={{
-        display: "flex",
-        width: "100%",
-        height: 1,
-        marginTop: 28,
-        marginBottom: 28,
-        backgroundColor:
-          tone === "light" ? "rgba(5,20,128,0.15)" : "rgba(255,255,255,0.25)",
-      }}
-    />
+    <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
+      <span
+        style={{
+          display: "flex",
+          alignItems: "center",
+          height: 66,
+          padding: "0 34px",
+          borderRadius: 999,
+          backgroundColor: tone === "light" ? NAVY : SKY,
+          color: tone === "light" ? "#FFFFFF" : NAVY,
+          fontFamily: SANS,
+          fontWeight: 700,
+          fontSize: 30,
+          letterSpacing: "0.12em",
+          textTransform: "uppercase",
+        }}
+      >
+        {dayText}
+      </span>
+      <span
+        style={{ display: "flex", width: 7, height: 7, borderRadius: 999, backgroundColor: accent }}
+      />
+      <span
+        style={{
+          fontFamily: SANS,
+          fontWeight: 600,
+          fontSize: 19,
+          letterSpacing: "0.16em",
+          textTransform: "uppercase",
+          color: tone === "light" ? WHAT_I_LEARNT_GREEN : ACCENT_DARK,
+        }}
+      >
+        {teachingLabel}
+      </span>
+    </div>
   );
 }
 
-function WhatILearntLabel({ tone }: { tone: "light" | "dark" }) {
+function Headline({ tone, text, fontSize = 60 }: { tone: "light" | "dark"; text: string; fontSize?: number }) {
   return (
-    <div style={{ display: "flex", width: "100%", alignItems: "center", gap: 16 }}>
+    <h1
+      style={{
+        margin: "18px 0 0 0",
+        fontFamily: SERIF,
+        fontWeight: 500,
+        fontSize,
+        lineHeight: 1.12,
+        letterSpacing: "-0.012em",
+        color: tone === "light" ? NAVY : "#FFFFFF",
+      }}
+    >
+      {text}
+    </h1>
+  );
+}
+
+function WhatILearntRow({ labelColor, lineColor }: { labelColor: string; lineColor: string }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
       <span
         style={{
+          fontFamily: SANS,
+          fontWeight: 700,
           fontSize: 17,
-          fontWeight: 800,
-          letterSpacing: 2,
+          letterSpacing: "0.2em",
           textTransform: "uppercase",
-          color: tone === "light" ? ACCENT_ON_LIGHT : ACCENT_ON_DARK,
+          color: labelColor,
         }}
       >
         What I learnt
       </span>
-      <div
-        style={{
-          display: "flex",
-          flexGrow: 1,
-          height: 1,
-          backgroundColor: tone === "light" ? "#e2e2e2" : "rgba(255,255,255,0.3)",
-        }}
-      />
+      <span style={{ display: "flex", flexGrow: 1, height: 1, backgroundColor: lineColor }} />
     </div>
   );
 }
 
-function VisitBar({ tone }: { tone: "onDark" | "onLight" }) {
-  const bg = tone === "onDark" ? NAVY : "#ffffff";
-  const fg = tone === "onDark" ? "#ffffff" : NAVY;
+function Avatar({ bg, color, initials }: { bg: string; color: string; initials: string }) {
+  return (
+    <span
+      style={{
+        display: "flex",
+        width: 52,
+        height: 52,
+        flexShrink: 0,
+        borderRadius: 999,
+        backgroundColor: bg,
+        color,
+        alignItems: "center",
+        justifyContent: "center",
+        fontFamily: SANS,
+        fontWeight: 600,
+        fontSize: 19,
+        letterSpacing: "0.02em",
+      }}
+    >
+      {initials}
+    </span>
+  );
+}
+
+function VisitBar({
+  bg,
+  color,
+  marginTop,
+  shadow,
+}: {
+  bg: string;
+  color: string;
+  marginTop: number;
+  shadow?: string;
+}) {
   return (
     <div
       style={{
         display: "flex",
-        marginTop: 28,
+        marginTop,
+        height: 96,
+        flexShrink: 0,
+        borderRadius: 24,
+        backgroundColor: bg,
         alignItems: "center",
         justifyContent: "space-between",
-        backgroundColor: bg,
-        borderRadius: 999,
-        padding: "20px 34px",
+        padding: "0 40px",
+        ...(shadow ? { boxShadow: shadow } : {}),
       }}
     >
-      <span style={{ color: fg, fontSize: 24, fontWeight: 800 }}>
+      <span style={{ fontFamily: SANS, fontWeight: 600, fontSize: 32, letterSpacing: "0.005em", color }}>
         Visit pleros.org/sogp
       </span>
-      <span style={{ color: fg, fontSize: 26, fontWeight: 800 }}>→</span>
+      <ArrowIcon color={color} />
     </div>
   );
 }
@@ -204,201 +331,142 @@ function VisitBar({ tone }: { tone: "onDark" | "onLight" }) {
 function LightCardTemplate({
   share,
   initials,
-  wordmarkSrc,
+  logoSrc,
 }: {
   share: ShareRenderData;
   initials: string;
-  wordmarkSrc: string;
+  logoSrc: string;
 }) {
-  const { dayText, detailText } = getEyebrowParts(share);
-  const quoteFontSize = getQuoteFontSize(share.quote, 44, 28);
+  const quoteFontSize = getQuoteFontSize(share.quote, 54, 32);
   return (
     <div
       style={{
-        height: "100%",
         width: "100%",
+        height: "100%",
+        boxSizing: "border-box",
+        padding: PADDING,
         display: "flex",
         flexDirection: "column",
         backgroundColor: SKY,
-        padding: PADDING,
-        fontFamily: "sans-serif",
+        fontFamily: SANS,
       }}
     >
-      <CardHeader tone="light" wordmarkSrc={wordmarkSrc} />
-      <Divider tone="light" />
-      <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-        <div
-          style={{
-            display: "flex",
-            backgroundColor: NAVY,
-            color: "#ffffff",
-            fontSize: 19,
-            fontWeight: 800,
-            padding: "10px 22px",
-            borderRadius: 999,
-          }}
-        >
-          {dayText}
-        </div>
-        <span
-          style={{
-            fontSize: 17,
-            fontWeight: 700,
-            letterSpacing: 1,
-            color: ACCENT_ON_LIGHT,
-          }}
-        >
-          {detailText}
-        </span>
+      <CardHeader tone="light" logoSrc={logoSrc} />
+      <div style={{ marginTop: 36, display: "flex", flexDirection: "column" }}>
+        <Divider color="rgba(10, 26, 110, 0.18)" />
       </div>
+      <div style={{ marginTop: 40, display: "flex", flexDirection: "column" }}>
+        <DayBadge
+          tone="light"
+          dayText={getDayText(share)}
+          teachingLabel={getTeachingLabel(share)}
+          accent={ACCENT_LIGHT}
+        />
+      </div>
+      <Headline tone="light" text={getHeadline(share)} />
       <div
         style={{
-          display: "flex",
-          flexDirection: "column",
+          marginTop: 36,
           flexGrow: 1,
-          marginTop: 28,
-          backgroundColor: "#ffffff",
+          backgroundColor: "#FFFFFF",
           borderRadius: 28,
           padding: 48,
-          justifyContent: "space-between",
-          overflow: "hidden",
+          display: "flex",
+          flexDirection: "column",
+          boxShadow: "0 18px 44px rgba(10, 26, 110, 0.10)",
         }}
       >
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <WhatILearntLabel tone="light" />
-          <span
+        <WhatILearntRow labelColor={WHAT_I_LEARNT_GREEN} lineColor={ACCENT_LIGHT} />
+        <div style={{ flexGrow: 1, display: "flex", alignItems: "center", padding: "26px 0" }}>
+          <p
             style={{
-              marginTop: 26,
-              fontSize: quoteFontSize,
+              margin: 0,
+              fontFamily: SERIF,
+              fontWeight: 500,
               fontStyle: "italic",
-              fontWeight: 600,
+              fontSize: quoteFontSize,
+              lineHeight: 1.28,
+              letterSpacing: "-0.015em",
               color: NAVY,
-              lineHeight: 1.4,
             }}
           >
-            {share.quote}
-          </span>
+            &ldquo;{share.quote}&rdquo;
+          </p>
         </div>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 18,
-            paddingTop: 28,
-            borderTop: "1px solid #eeeeee",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              width: 58,
-              height: 58,
-              borderRadius: 999,
-              backgroundColor: NAVY,
-              color: "#ffffff",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 22,
-              fontWeight: 800,
-            }}
-          >
-            {initials}
-          </div>
-          <span style={{ fontSize: 23, fontWeight: 800, color: NAVY }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 18, marginTop: 32 }}>
+          <Avatar bg={NAVY} color="#FFFFFF" initials={initials} />
+          <span style={{ fontFamily: SANS, fontWeight: 600, fontSize: 24, lineHeight: 1.2, color: NAVY }}>
             {share.authorName}
           </span>
         </div>
       </div>
-      <VisitBar tone="onDark" />
+      <VisitBar bg={NAVY} color="#FFFFFF" marginTop={32} />
     </div>
   );
 }
 
 function DarkOpenTemplate({
   share,
-  patternSrc,
-  wordmarkSrc,
+  initials,
+  logoSrc,
 }: {
   share: ShareRenderData;
-  patternSrc: string;
-  wordmarkSrc: string;
+  initials: string;
+  logoSrc: string;
 }) {
-  const { dayText, detailText } = getEyebrowParts(share);
-  const quoteFontSize = getQuoteFontSize(share.quote, 50, 30);
+  const quoteFontSize = getQuoteFontSize(share.quote, 58, 34);
   return (
     <div
       style={{
-        height: "100%",
         width: "100%",
+        height: "100%",
+        boxSizing: "border-box",
+        padding: PADDING,
         display: "flex",
         flexDirection: "column",
-        backgroundImage: `url(${patternSrc})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        padding: PADDING,
-        fontFamily: "sans-serif",
+        backgroundColor: NAVY,
+        fontFamily: SANS,
       }}
     >
-      <CardHeader tone="dark" wordmarkSrc={wordmarkSrc} />
-      <Divider tone="dark" />
-      <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-        <div
-          style={{
-            display: "flex",
-            border: "2px solid rgba(255,255,255,0.6)",
-            borderRadius: 999,
-            padding: "9px 20px",
-          }}
-        >
-          <span style={{ fontSize: 19, fontWeight: 800, color: "#ffffff" }}>
-            {dayText}
-          </span>
-        </div>
-        <span
-          style={{
-            fontSize: 17,
-            fontWeight: 700,
-            letterSpacing: 1,
-            color: "rgba(255,255,255,0.85)",
-          }}
-        >
-          {detailText}
-        </span>
+      <CardHeader tone="dark" logoSrc={logoSrc} />
+      <div style={{ marginTop: 36, display: "flex", flexDirection: "column" }}>
+        <Divider color="rgba(219, 240, 252, 0.28)" />
       </div>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          flexGrow: 1,
-          marginTop: 40,
-          justifyContent: "space-between",
-          overflow: "hidden",
-        }}
-      >
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <WhatILearntLabel tone="dark" />
-          <span
+      <div style={{ marginTop: 40, display: "flex", flexDirection: "column" }}>
+        <DayBadge
+          tone="dark"
+          dayText={getDayText(share)}
+          teachingLabel={getTeachingLabel(share)}
+          accent={ACCENT_DARK}
+        />
+      </div>
+      <Headline tone="dark" text={getHeadline(share)} />
+      <div style={{ marginTop: 40, flexGrow: 1, display: "flex", flexDirection: "column" }}>
+        <WhatILearntRow labelColor={ACCENT_DARK} lineColor={ACCENT_DARK} />
+        <div style={{ flexGrow: 1, display: "flex", alignItems: "center", padding: "28px 0" }}>
+          <p
             style={{
-              marginTop: 30,
-              fontSize: quoteFontSize,
+              margin: 0,
+              fontFamily: SERIF,
               fontWeight: 500,
-              color: "#ffffff",
-              lineHeight: 1.35,
+              fontStyle: "italic",
+              fontSize: quoteFontSize,
+              lineHeight: 1.3,
+              letterSpacing: "-0.015em",
+              color: "#FFFFFF",
             }}
           >
-            {share.quote}
-          </span>
+            &ldquo;{share.quote}&rdquo;
+          </p>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <span style={{ fontSize: 30, fontWeight: 800, color: ACCENT_ON_DARK }}>
-            —
-          </span>
-          <span style={{ fontSize: 25, fontWeight: 800, color: "#ffffff" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 18, marginTop: 32 }}>
+          <Avatar bg={SKY} color={NAVY} initials={initials} />
+          <span style={{ fontFamily: SANS, fontWeight: 600, fontSize: 24, lineHeight: 1.2, color: "#FFFFFF" }}>
             {share.authorName}
           </span>
         </div>
       </div>
-      <VisitBar tone="onLight" />
+      <VisitBar bg={SKY} color={NAVY} marginTop={36} />
     </div>
   );
 }
@@ -407,115 +475,85 @@ function DarkCardTemplate({
   share,
   initials,
   patternSrc,
-  wordmarkSrc,
+  logoSrc,
 }: {
   share: ShareRenderData;
   initials: string;
   patternSrc: string;
-  wordmarkSrc: string;
+  logoSrc: string;
 }) {
-  const { dayText, detailText } = getEyebrowParts(share);
-  const headline = getHeadline(share);
-  const quoteFontSize = getQuoteFontSize(share.quote, 38, 24);
+  const quoteFontSize = getQuoteFontSize(share.quote, 54, 32);
   return (
     <div
       style={{
-        height: "100%",
         width: "100%",
+        height: "100%",
+        boxSizing: "border-box",
+        padding: PADDING,
         display: "flex",
         flexDirection: "column",
         backgroundImage: `url(${patternSrc})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
-        padding: PADDING,
-        fontFamily: "sans-serif",
+        backgroundColor: PATTERN_BLUE,
+        fontFamily: SANS,
       }}
     >
-      <CardHeader tone="dark" wordmarkSrc={wordmarkSrc} />
-      <Divider tone="dark" />
-      <div
-        style={{
-          display: "flex",
-          backgroundColor: "#ffffff",
-          color: NAVY,
-          fontSize: 19,
-          fontWeight: 800,
-          padding: "10px 22px",
-          borderRadius: 999,
-        }}
-      >
-        {share.lessonTitle ? `${dayText} • TEACHING` : `${dayText} • ${detailText}`}
+      <CardHeader tone="dark" logoSrc={logoSrc} />
+      <div style={{ marginTop: 36, display: "flex", flexDirection: "column" }}>
+        <Divider color="rgba(255, 255, 255, 0.35)" />
       </div>
-      <span
-        style={{
-          marginTop: 26,
-          fontSize: 46,
-          fontWeight: 700,
-          color: "#ffffff",
-          lineHeight: 1.15,
-        }}
-      >
-        {headline}
-      </span>
+      <div style={{ marginTop: 40, display: "flex", flexDirection: "column" }}>
+        <DayBadge
+          tone="dark"
+          dayText={getDayText(share)}
+          teachingLabel={getTeachingLabel(share)}
+          accent={ACCENT_DARK}
+        />
+      </div>
+      <Headline tone="dark" text={getHeadline(share)} />
       <div
         style={{
+          marginTop: 36,
+          flexGrow: 1,
+          backgroundColor: "#FFFFFF",
+          borderRadius: 28,
+          padding: 48,
           display: "flex",
           flexDirection: "column",
-          flexGrow: 1,
-          marginTop: 32,
-          backgroundColor: "#ffffff",
-          borderRadius: 28,
-          padding: 44,
-          justifyContent: "space-between",
-          overflow: "hidden",
+          boxShadow: "0 24px 56px rgba(4, 22, 92, 0.24)",
         }}
       >
-        <div style={{ display: "flex", flexDirection: "column" }}>
-          <WhatILearntLabel tone="light" />
-          <span
+        <WhatILearntRow labelColor={WHAT_I_LEARNT_GREEN} lineColor={ACCENT_DARK} />
+        <div style={{ flexGrow: 1, display: "flex", alignItems: "center", padding: "26px 0" }}>
+          <p
             style={{
-              marginTop: 24,
-              fontSize: quoteFontSize,
+              margin: 0,
+              fontFamily: SERIF,
+              fontWeight: 500,
               fontStyle: "italic",
-              fontWeight: 600,
+              fontSize: quoteFontSize,
+              lineHeight: 1.28,
+              letterSpacing: "-0.015em",
               color: NAVY,
-              lineHeight: 1.4,
             }}
           >
-            {share.quote}
-          </span>
+            &ldquo;{share.quote}&rdquo;
+          </p>
         </div>
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 18,
-            paddingTop: 24,
-            borderTop: "1px solid #eeeeee",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              width: 54,
-              height: 54,
-              borderRadius: 999,
-              backgroundColor: NAVY,
-              color: "#ffffff",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 20,
-              fontWeight: 800,
-            }}
-          >
-            {initials}
-          </div>
-          <span style={{ fontSize: 22, fontWeight: 800, color: NAVY }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 18, marginTop: 32 }}>
+          <Avatar bg={PATTERN_BLUE} color="#FFFFFF" initials={initials} />
+          <span style={{ fontFamily: SANS, fontWeight: 600, fontSize: 24, lineHeight: 1.2, color: NAVY }}>
             {share.authorName}
           </span>
         </div>
       </div>
-      <VisitBar tone="onDark" />
+      <VisitBar
+        bg={NAVY}
+        color="#FFFFFF"
+        marginTop={32}
+        shadow="0 16px 36px rgba(4, 22, 92, 0.22)"
+      />
     </div>
   );
 }
@@ -554,32 +592,26 @@ export async function GET(
 
   let element: ReactElement;
   if (share.template === "dark-open") {
-    const [patternSrc, wordmarkSrc] = await Promise.all([
-      getPatternDataUri(),
-      getWhiteWordmarkDataUri(),
-    ]);
-    element = (
-      <DarkOpenTemplate share={renderData} patternSrc={patternSrc} wordmarkSrc={wordmarkSrc} />
-    );
+    const logoSrc = await getWhiteLogoDataUri();
+    element = <DarkOpenTemplate share={renderData} initials={initials} logoSrc={logoSrc} />;
   } else if (share.template === "dark-card") {
-    const [patternSrc, wordmarkSrc] = await Promise.all([
+    const [patternSrc, logoSrc] = await Promise.all([
       getPatternDataUri(),
-      getWhiteWordmarkDataUri(),
+      getWhiteLogoDataUri(),
     ]);
     element = (
       <DarkCardTemplate
         share={renderData}
         initials={initials}
         patternSrc={patternSrc}
-        wordmarkSrc={wordmarkSrc}
+        logoSrc={logoSrc}
       />
     );
   } else {
-    const wordmarkSrc = await getNavyWordmarkDataUri();
-    element = (
-      <LightCardTemplate share={renderData} initials={initials} wordmarkSrc={wordmarkSrc} />
-    );
+    const logoSrc = await getDarkLogoDataUri();
+    element = <LightCardTemplate share={renderData} initials={initials} logoSrc={logoSrc} />;
   }
 
-  return new ImageResponse(element, { ...SIZE });
+  const fonts = await getCardFonts();
+  return new ImageResponse(element, { ...SIZE, fonts });
 }
