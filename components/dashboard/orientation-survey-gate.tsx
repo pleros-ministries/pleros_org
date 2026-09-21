@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { SOGP_ORIENTATION_REASONS } from "../../lib/sogp/orientation-survey";
 
@@ -13,6 +14,7 @@ export function OrientationSurveyGate({
   telegramUrl: string;
   initialCompleted: boolean;
 }) {
+  const router = useRouter();
   const [completed, setCompleted] = useState(initialCompleted);
   const [reasons, setReasons] = useState<string[]>([]);
   const [question, setQuestion] = useState("");
@@ -30,6 +32,7 @@ export function OrientationSurveyGate({
           href={telegramUrl}
           target="_blank"
           rel="noreferrer"
+          onClick={() => router.push("/dashboard/pre-sogp")}
           className="site-button-text inline-flex min-h-12 max-w-full items-center justify-center gap-2 rounded-full bg-white px-5 text-center text-xs font-semibold text-[var(--color-brand-blue)] transition-transform duration-150 hover:-translate-y-px sm:px-7 sm:text-sm"
         >
           Join the orientation group
