@@ -110,7 +110,7 @@ export function SogpContextSidebar({ data }: { data: SogpJourneyData }) {
             onClick={() => setShareOpen(true)}
             className="inline-flex h-8 w-fit items-center gap-1.5 rounded-[6px] border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 transition-colors hover:bg-zinc-50 active:scale-[0.98]"
           >
-            Share your progress
+            Share what you learnt today
           </button>
         </div>
       </section>

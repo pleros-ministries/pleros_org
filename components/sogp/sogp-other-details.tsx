@@ -147,7 +147,7 @@ export function SogpOtherDetails({
         {preview ? null : <LeaderboardWidget />}
 
         <DetailRow
-          title="Share your progress"
+          title="Share what you learnt today"
           description="Turn a reflection into a card and invite others to SOGP."
           onClick={() => setShareOpen(true)}
         />

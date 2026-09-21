@@ -199,122 +199,122 @@ export function PreSogpPage({
           </section>
         ) : (
           <>
-        <aside
-          data-pre-sogp-section="calendar"
-          className="rounded-sm border border-zinc-200 bg-white p-3 lg:sticky lg:top-[3.75rem]"
-        >
-          <SogpCalendar
-            days={data.days}
-            selectedDateKey={selectedDateKey}
-            todayKey={data.todayKey}
-            onSelect={setSelectedDateKey}
-          />
-        </aside>
-
-        <main data-pre-sogp-section="daily-content" className="grid gap-4">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <SogpLessonHeading
-              eyebrow="Current day"
-              title={`Day ${selectedDay.dayNumber}/${PRE_SOGP_PREPARATION_DAYS}`}
-            />
-            <button
-              type="button"
-              onClick={() => {
-                setShareDayNumber(selectedDay.dayNumber);
-                setShareOpen(true);
-              }}
-              className="inline-flex min-h-8 shrink-0 items-center rounded-sm border border-[var(--color-brand-blue)] px-3 text-xs font-semibold text-[var(--color-brand-blue)]"
+            <aside
+              data-pre-sogp-section="calendar"
+              className="rounded-sm border border-zinc-200 bg-white p-3 lg:sticky lg:top-[3.75rem]"
             >
-              Share your progress
-            </button>
-          </div>
-
-          <SogpDailyRequirements
-            items={[
-              {
-                id: "prayer",
-                title: "5:30 am Prayer Watch",
-                description: "Confirm after joining live or completing the available replay.",
-                complete: selectedDay.prayerWatchComplete,
-                actionLabel: "I joined",
-                disabled: isFuture,
-                onToggle: () => completionMutation.mutate({ kind: "prayer", dayId: selectedDay.id, dateKey: selectedDay.dateKey, complete: !selectedDay.prayerWatchComplete }),
-                link: { href: PRAYER_WATCH_YOUTUBE_URL, label: "Join on Pleros Live" },
-              },
-              {
-                id: "lesson",
-                title: "Preparation lesson",
-                description: "Mark the lesson as watched — watching the video does not complete it automatically.",
-                complete: selectedDay.lessonComplete,
-                actionLabel: "I've watched lesson",
-                disabled: isFuture || !selectedDay.id || !selectedDay.lesson,
-                onToggle: () => completionMutation.mutate({ kind: "lesson", dayId: selectedDay.id, dateKey: selectedDay.dateKey, complete: !selectedDay.lessonComplete }),
-                link: selectedDay.lesson ? { href: "#lesson-video", label: "Watch video" } : undefined,
-              },
-            ]}
-          />
-          {completionMutation.error ? (
-            <p role="alert" className="text-sm text-red-700">{completionMutation.error.message}</p>
-          ) : null}
-
-          {selectedDay.lesson ? (
-            <SogpActivitySection
-              id="lesson-video"
-              title={`Preparation lesson ${selectedDay.dayNumber}`}
-              icon={<BookOpenIcon className="size-4 text-[var(--color-brand-blue)]" strokeWidth={2} />}
-              action={
-                preview ? undefined : (
-                  <SharePreparationDay
-                    dateKey={selectedDay.dateKey}
-                    dayLabel={`Day ${selectedDay.dayNumber}`}
-                    title={selectedDay.lesson.title}
-                  />
-                )
-              }
-            >
-              <SogpLessonMedia
-                title={selectedDay.lesson.title}
-                url={selectedDay.lesson.url}
+              <SogpCalendar
+                days={data.days}
+                selectedDateKey={selectedDateKey}
+                todayKey={data.todayKey}
+                onSelect={setSelectedDateKey}
               />
-              <h3 className="ppc-heading text-sm font-semibold leading-[1.3] text-zinc-900">
-                {selectedDay.lesson.title}
-              </h3>
-            </SogpActivitySection>
-          ) : (
-            <p className="rounded-sm border border-zinc-200 bg-white p-4 text-xs text-zinc-500">
-              {isFuture ? "This lesson opens on its date." : "Today’s lesson is being prepared."}
-            </p>
-          )}
+            </aside>
 
-          {preview ? (
-            <p className="rounded-sm border border-zinc-200 bg-white p-4 text-xs text-zinc-500">Preview mode · Completion changes stay in this preview.</p>
-          ) : (
-            <SogpPushPanel />
-          )}
-        </main>
+            <main data-pre-sogp-section="daily-content" className="grid gap-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <SogpLessonHeading
+                  eyebrow="Current day"
+                  title={`Day ${selectedDay.dayNumber}/${PRE_SOGP_PREPARATION_DAYS}`}
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShareDayNumber(selectedDay.dayNumber);
+                    setShareOpen(true);
+                  }}
+                  className="inline-flex min-h-8 shrink-0 items-center rounded-sm border border-[var(--color-brand-blue)] px-3 text-xs font-semibold text-[var(--color-brand-blue)]"
+                >
+                  Share what you learnt today
+                </button>
+              </div>
 
-        <section
-          data-pre-sogp-section="progress"
-          className="rounded-sm border border-zinc-200 bg-white lg:col-start-2"
-        >
-          <div className="flex items-center justify-between gap-3 border-b border-zinc-100 px-4 py-3">
-            <h2 className="ppc-heading text-sm font-semibold text-zinc-900">Preparation progress</h2>
-            <span className="ppc-heading text-sm font-semibold text-[var(--color-brand-blue)]">{completeDays} of {PRE_SOGP_PREPARATION_DAYS} days</span>
-          </div>
-          <div className="grid gap-3 p-4">
-            <div className="h-1.5 overflow-hidden rounded-full bg-zinc-100">
-              <div className="h-full rounded-full bg-[var(--color-brand-blue)]" style={{ width: `${preparationPercent}%` }} />
-            </div>
-            {preview ? null : (
-              <Link
-                href="/dashboard/sogp/referrals"
-                className="text-xs font-medium text-[var(--color-brand-blue)] underline underline-offset-4"
-              >
-                Invite friends and track their progress
-              </Link>
-            )}
-          </div>
-        </section>
+              <SogpDailyRequirements
+                items={[
+                  {
+                    id: "prayer",
+                    title: "5:30 am Prayer Watch",
+                    description: "Confirm after joining live or completing the available replay.",
+                    complete: selectedDay.prayerWatchComplete,
+                    actionLabel: "I joined",
+                    disabled: isFuture,
+                    onToggle: () => completionMutation.mutate({ kind: "prayer", dayId: selectedDay.id, dateKey: selectedDay.dateKey, complete: !selectedDay.prayerWatchComplete }),
+                    link: { href: PRAYER_WATCH_YOUTUBE_URL, label: "Join on Pleros Live" },
+                  },
+                  {
+                    id: "lesson",
+                    title: "Preparation lesson",
+                    description: "Mark the lesson as watched — watching the video does not complete it automatically.",
+                    complete: selectedDay.lessonComplete,
+                    actionLabel: "I've watched lesson",
+                    disabled: isFuture || !selectedDay.id || !selectedDay.lesson,
+                    onToggle: () => completionMutation.mutate({ kind: "lesson", dayId: selectedDay.id, dateKey: selectedDay.dateKey, complete: !selectedDay.lessonComplete }),
+                    link: selectedDay.lesson ? { href: "#lesson-video", label: "Watch video" } : undefined,
+                  },
+                ]}
+              />
+              {completionMutation.error ? (
+                <p role="alert" className="text-sm text-red-700">{completionMutation.error.message}</p>
+              ) : null}
+
+              {selectedDay.lesson ? (
+                <SogpActivitySection
+                  id="lesson-video"
+                  title={`Preparation lesson ${selectedDay.dayNumber}`}
+                  icon={<BookOpenIcon className="size-4 text-[var(--color-brand-blue)]" strokeWidth={2} />}
+                  action={
+                    preview ? undefined : (
+                      <SharePreparationDay
+                        dateKey={selectedDay.dateKey}
+                        dayLabel={`Day ${selectedDay.dayNumber}`}
+                        title={selectedDay.lesson.title}
+                      />
+                    )
+                  }
+                >
+                  <SogpLessonMedia
+                    title={selectedDay.lesson.title}
+                    url={selectedDay.lesson.url}
+                  />
+                  <h3 className="ppc-heading text-sm font-semibold leading-[1.3] text-zinc-900">
+                    {selectedDay.lesson.title}
+                  </h3>
+                </SogpActivitySection>
+              ) : (
+                <p className="rounded-sm border border-zinc-200 bg-white p-4 text-xs text-zinc-500">
+                  {isFuture ? "This lesson opens on its date." : "Today’s lesson is being prepared."}
+                </p>
+              )}
+
+              {preview ? (
+                <p className="rounded-sm border border-zinc-200 bg-white p-4 text-xs text-zinc-500">Preview mode · Completion changes stay in this preview.</p>
+              ) : (
+                <SogpPushPanel />
+              )}
+            </main>
+
+            <section
+              data-pre-sogp-section="progress"
+              className="rounded-sm border border-zinc-200 bg-white lg:col-start-2"
+            >
+              <div className="flex items-center justify-between gap-3 border-b border-zinc-100 px-4 py-3">
+                <h2 className="ppc-heading text-sm font-semibold text-zinc-900">Preparation progress</h2>
+                <span className="ppc-heading text-sm font-semibold text-[var(--color-brand-blue)]">{completeDays} of {PRE_SOGP_PREPARATION_DAYS} days</span>
+              </div>
+              <div className="grid gap-3 p-4">
+                <div className="h-1.5 overflow-hidden rounded-full bg-zinc-100">
+                  <div className="h-full rounded-full bg-[var(--color-brand-blue)]" style={{ width: `${preparationPercent}%` }} />
+                </div>
+                {preview ? null : (
+                  <Link
+                    href="/dashboard/sogp/referrals"
+                    className="text-xs font-medium text-[var(--color-brand-blue)] underline underline-offset-4"
+                  >
+                    Invite friends and track their progress
+                  </Link>
+                )}
+              </div>
+            </section>
           </>
         )}
       </div>
