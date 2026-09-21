@@ -1,4 +1,4 @@
-import { and, asc, eq, inArray } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 
@@ -12,7 +12,11 @@ export type SogpRosterEnrollment = {
   status: string;
 };
 
-async function getSogpCohortEnrollmentsForRoster(cohortId: number): Promise<SogpRosterEnrollment[]> {
+// pastorId: undefined = everyone, "unassigned" = no pastor, otherwise that pastor's enrollees.
+async function getSogpCohortEnrollmentsForRoster(
+  cohortId: number,
+  pastorId?: string,
+): Promise<SogpRosterEnrollment[]> {
   const rows = await db
     .select({
       id: schema.sogpEnrollments.id,
@@ -22,7 +26,20 @@ async function getSogpCohortEnrollmentsForRoster(cohortId: number): Promise<Sogp
       status: schema.sogpEnrollments.status,
     })
     .from(schema.sogpEnrollments)
-    .where(eq(schema.sogpEnrollments.cohortId, cohortId))
+    .leftJoin(
+      schema.pastorAssignments,
+      eq(schema.pastorAssignments.enrollmentId, schema.sogpEnrollments.id),
+    )
+    .where(
+      and(
+        eq(schema.sogpEnrollments.cohortId, cohortId),
+        !pastorId
+          ? undefined
+          : pastorId === "unassigned"
+            ? isNull(schema.pastorAssignments.id)
+            : eq(schema.pastorAssignments.pastorUserId, pastorId),
+      ),
+    )
     .orderBy(asc(schema.sogpEnrollments.name));
 
   return rows.map((row) => ({
@@ -42,8 +59,12 @@ export type SogpLessonRosterEntry = SogpRosterEnrollment & {
   writtenApproved: boolean;
 };
 
-export async function getSogpLessonRoster(cohortId: number, lessonId: number): Promise<SogpLessonRosterEntry[]> {
-  const enrollments = await getSogpCohortEnrollmentsForRoster(cohortId);
+export async function getSogpLessonRoster(
+  cohortId: number,
+  lessonId: number,
+  pastorId?: string,
+): Promise<SogpLessonRosterEntry[]> {
+  const enrollments = await getSogpCohortEnrollmentsForRoster(cohortId, pastorId);
   const userIds = enrollments.map((enrollment) => enrollment.userId);
   if (!userIds.length) return [];
 
@@ -68,8 +89,12 @@ export async function getSogpLessonRoster(cohortId: number, lessonId: number): P
 
 export type SogpPrayerWatchRosterEntry = SogpRosterEnrollment & { attended: boolean };
 
-export async function getSogpPrayerWatchRoster(cohortId: number, date: string): Promise<SogpPrayerWatchRosterEntry[]> {
-  const enrollments = await getSogpCohortEnrollmentsForRoster(cohortId);
+export async function getSogpPrayerWatchRoster(
+  cohortId: number,
+  date: string,
+  pastorId?: string,
+): Promise<SogpPrayerWatchRosterEntry[]> {
+  const enrollments = await getSogpCohortEnrollmentsForRoster(cohortId, pastorId);
   const userIds = enrollments.map((enrollment) => enrollment.userId);
   if (!userIds.length) return [];
 
@@ -100,8 +125,9 @@ export type SogpLiveClassRosterEntry = SogpRosterEnrollment & {
 export async function getSogpLiveClassRoster(
   cohortId: number,
   liveClassId: number,
+  pastorId?: string,
 ): Promise<SogpLiveClassRosterEntry[]> {
-  const enrollments = await getSogpCohortEnrollmentsForRoster(cohortId);
+  const enrollments = await getSogpCohortEnrollmentsForRoster(cohortId, pastorId);
   const userIds = enrollments.map((enrollment) => enrollment.userId);
   if (!userIds.length) return [];
 

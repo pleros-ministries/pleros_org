@@ -3,6 +3,7 @@ import { describe, expect, test } from "vitest";
 import { SOGP_TOTAL_WEEKS } from "./calendar";
 import {
   buildLastActivityIndex,
+  buildSignupTrend,
   buildSogpReport,
   computeCohortWeekDateRanges,
   deriveTrackCompleted,
@@ -198,6 +199,15 @@ describe("buildSogpReport", () => {
     preparationDays: [],
     preparationCompletions: [],
     certificates: [{ enrollmentId: 5, issuedAt: now, revokedAt: null }],
+    pastors: [
+      { id: "pastor-a", name: "Pastor A", email: "a@example.com" },
+      { id: "pastor-b", name: "Pastor B", email: "b@example.com" },
+    ],
+    pastorAssignments: [
+      { enrollmentId: 1, pastorUserId: "pastor-a", assignedAt: startsAt, lastContactedAt: null, contactCount: 0 },
+      { enrollmentId: 2, pastorUserId: "pastor-a", assignedAt: startsAt, lastContactedAt: now, contactCount: 3 },
+      { enrollmentId: 3, pastorUserId: "pastor-b", assignedAt: startsAt, lastContactedAt: null, contactCount: 0 },
+    ],
   };
 
   const report = buildSogpReport(raw, now);
@@ -254,5 +264,55 @@ describe("buildSogpReport", () => {
       { week: 3, completed: 2, total: 2 },
     ]);
     expect(caughtUp?.weeklyTrackCompletion[3]).toEqual({ week: 4, completed: 0, total: 2 });
+  });
+
+  test("pastor filter scopes cohort totals, participants and left-behind, but not the breakdown", () => {
+    const filtered = buildSogpReport(raw, now, { pastorId: "pastor-a" });
+    expect(filtered.cohorts[0]?.totalEnrollments).toBe(2);
+    expect(filtered.participants.map((p) => p.enrollmentId).sort()).toEqual([1, 2]);
+    expect(filtered.leftBehind.map((entry) => entry.enrollmentId)).toEqual([2]);
+    expect(filtered.leftBehind[0]?.pastorName).toBe("Pastor A");
+    expect(filtered.pastorBreakdown).toEqual(report.pastorBreakdown);
+    expect(filtered.pastors).toEqual([
+      { id: "pastor-a", name: "Pastor A", email: "a@example.com", assignedCount: 2 },
+      { id: "pastor-b", name: "Pastor B", email: "b@example.com", assignedCount: 1 },
+    ]);
+  });
+
+  test("the unassigned filter returns only enrollments with no pastor", () => {
+    const filtered = buildSogpReport(raw, now, { pastorId: "unassigned" });
+    expect(filtered.participants.map((p) => p.enrollmentId).sort()).toEqual([4, 5]);
+    expect(report.unassignedCount).toBe(2);
+  });
+
+  test("pastor breakdown rolls up participation and contact attempts per pastor", () => {
+    const rows = report.pastorBreakdown;
+    const pastorA = rows.find((row) => row.pastorId === "pastor-a");
+    expect(pastorA).toMatchObject({
+      enrollees: 2,
+      leftBehindCount: 1,
+      contactedCount: 1,
+      neverContactedCount: 1,
+    });
+    expect(pastorA?.lastContactAttemptAt).toBe(now.toISOString());
+    expect(pastorA?.averageCompletionPercent).toBeCloseTo((75 + 0) / 2);
+    const unassigned = rows.find((row) => row.pastorId === null);
+    expect(unassigned).toMatchObject({ pastorName: "Unassigned", enrollees: 2, neverContactedCount: 0 });
+  });
+});
+
+describe("buildSignupTrend", () => {
+  test("buckets by Monday week in Lagos time, fills empty weeks, and accumulates", () => {
+    const trend = buildSignupTrend([
+      new Date("2026-08-03T10:00:00.000Z"), // Mon
+      new Date("2026-08-09T23:30:00.000Z"), // Sun 23:30 UTC = Mon 00:30 Lagos -> next week
+      new Date("2026-08-19T10:00:00.000Z"), // Wed, two weeks later
+    ]);
+    expect(trend).toEqual([
+      { weekStart: "2026-08-03", signups: 1, cumulative: 1 },
+      { weekStart: "2026-08-10", signups: 1, cumulative: 2 },
+      { weekStart: "2026-08-17", signups: 1, cumulative: 3 },
+    ]);
+    expect(buildSignupTrend([])).toEqual([]);
   });
 });

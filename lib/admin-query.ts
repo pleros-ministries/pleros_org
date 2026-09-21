@@ -151,6 +151,13 @@ export type AdminSogpReportCohort = {
   prayerWatchParticipationRate: number;
   certificatesIssued: number;
   weeklyParticipation: AdminSogpReportWeek[];
+  signupTrend: AdminSogpReportSignupPoint[];
+};
+
+export type AdminSogpReportSignupPoint = {
+  weekStart: string;
+  signups: number;
+  cumulative: number;
 };
 
 export type AdminSogpReportLeftBehindEntry = {
@@ -166,6 +173,8 @@ export type AdminSogpReportLeftBehindEntry = {
   lastActivityAt: string | null;
   daysSinceLastActivity: number | null;
   flags: AdminSogpReportLeftBehindFlag[];
+  pastorId: string | null;
+  pastorName: string | null;
 };
 
 export type AdminSogpReportParticipant = {
@@ -179,7 +188,31 @@ export type AdminSogpReportParticipant = {
   liveClassesAttended: number;
   liveClassesRequired: number;
   prayerWatchDays: number;
+  prayerWatchRate: number;
   completionPercent: number;
+  pastorId: string | null;
+  pastorName: string | null;
+};
+
+export type AdminSogpReportPastorBreakdown = {
+  cohortId: number;
+  pastorId: string | null;
+  pastorName: string;
+  enrollees: number;
+  averageCompletionPercent: number;
+  liveClassAttendanceRate: number;
+  prayerWatchParticipationRate: number;
+  leftBehindCount: number;
+  contactedCount: number;
+  neverContactedCount: number;
+  lastContactAttemptAt: string | null;
+};
+
+export type AdminSogpReportPastor = {
+  id: string;
+  name: string;
+  email: string;
+  assignedCount: number;
 };
 
 export type AdminSogpReportData = {
@@ -187,7 +220,12 @@ export type AdminSogpReportData = {
   cohorts: AdminSogpReportCohort[];
   participants: AdminSogpReportParticipant[];
   leftBehind: AdminSogpReportLeftBehindEntry[];
+  pastors: AdminSogpReportPastor[];
+  unassignedCount: number;
+  pastorBreakdown: AdminSogpReportPastorBreakdown[];
 };
+
+export const UNASSIGNED_PASTOR_FILTER = "unassigned";
 
 export const ADMIN_QUERY_DEFAULTS = {
   staleTime: 30_000,

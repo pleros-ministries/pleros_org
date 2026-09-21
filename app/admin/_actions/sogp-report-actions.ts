@@ -22,9 +22,10 @@ export type AdminSogpLessonRosterEntry = {
 export async function getAdminSogpLessonRoster(
   cohortId: number,
   lessonId: number,
+  pastorId?: string,
 ): Promise<AdminSogpLessonRosterEntry[]> {
   await requireAdmin();
-  const roster = await getSogpLessonRoster(cohortId, lessonId);
+  const roster = await getSogpLessonRoster(cohortId, lessonId, pastorId);
   return roster.map((entry) => ({
     enrollmentId: entry.enrollmentId,
     name: entry.name,
@@ -49,9 +50,10 @@ export type AdminSogpPrayerWatchRosterEntry = {
 export async function getAdminSogpPrayerWatchRoster(
   cohortId: number,
   date: string,
+  pastorId?: string,
 ): Promise<AdminSogpPrayerWatchRosterEntry[]> {
   await requireAdmin();
-  return getSogpPrayerWatchRoster(cohortId, date);
+  return getSogpPrayerWatchRoster(cohortId, date, pastorId);
 }
 
 export type AdminSogpLiveClassRosterEntry = {
@@ -67,9 +69,10 @@ export type AdminSogpLiveClassRosterEntry = {
 export async function getAdminSogpLiveClassRoster(
   cohortId: number,
   liveClassId: number,
+  pastorId?: string,
 ): Promise<AdminSogpLiveClassRosterEntry[]> {
   await requireAdmin();
-  const roster = await getSogpLiveClassRoster(cohortId, liveClassId);
+  const roster = await getSogpLiveClassRoster(cohortId, liveClassId, pastorId);
   return roster.map((entry) => ({
     enrollmentId: entry.enrollmentId,
     name: entry.name,

@@ -828,6 +828,7 @@ export const sogpEnrollments = pgTable(
     }),
     reason: text("reason"),
     status: sogpEnrollmentStatusEnum("status").notNull().default("enrolled"),
+    leaderboardOptOut: boolean("leaderboard_opt_out").notNull().default(false),
     // Per-student referral link code (minted lazily) and the enrolment that
     // referred this one.
     referralCode: text("referral_code"),

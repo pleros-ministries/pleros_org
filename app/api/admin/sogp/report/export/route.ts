@@ -18,8 +18,10 @@ export async function GET(request: Request) {
   const cohortIdParam = searchParams.get("cohortId");
   const cohortId = cohortIdParam && cohortIdParam !== "all" ? Number(cohortIdParam) : null;
 
+  const pastorId = searchParams.get("pastorId");
+
   const raw = await getSogpReportData();
-  const report = buildSogpReport(raw);
+  const report = buildSogpReport(raw, new Date(), { pastorId: pastorId && pastorId !== "all" ? pastorId : undefined });
   const buffer = buildSogpReportWorkbook(report, cohortId);
 
   return new NextResponse(new Uint8Array(buffer), {

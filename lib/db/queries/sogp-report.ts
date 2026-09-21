@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, inArray } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, or } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 
@@ -39,6 +39,14 @@ export type SogpReportRawData = {
     issuedAt: Date;
     revokedAt: Date | null;
   }>;
+  pastorAssignments: Array<{
+    enrollmentId: number;
+    pastorUserId: string;
+    assignedAt: Date;
+    lastContactedAt: Date | null;
+    contactCount: number;
+  }>;
+  pastors: Array<{ id: string; name: string; email: string }>;
 };
 
 export async function getSogpReportData(): Promise<SogpReportRawData> {
@@ -72,6 +80,8 @@ export async function getSogpReportData(): Promise<SogpReportRawData> {
     preparationDays,
     preparationCompletions,
     certificates,
+    pastorAssignments,
+    pastors,
   ] = await Promise.all([
     lessonIds.length
       ? db
@@ -150,6 +160,24 @@ export async function getSogpReportData(): Promise<SogpReportRawData> {
         revokedAt: schema.sogpCertificates.revokedAt,
       })
       .from(schema.sogpCertificates),
+    db
+      .select({
+        enrollmentId: schema.pastorAssignments.enrollmentId,
+        pastorUserId: schema.pastorAssignments.pastorUserId,
+        assignedAt: schema.pastorAssignments.assignedAt,
+        lastContactedAt: schema.pastorAssignments.lastContactedAt,
+        contactCount: schema.pastorAssignments.contactCount,
+      })
+      .from(schema.pastorAssignments),
+    db
+      .select({
+        id: schema.users.id,
+        name: schema.users.name,
+        email: schema.users.email,
+      })
+      .from(schema.users)
+      .where(or(eq(schema.users.role, "pastor"), eq(schema.users.isPastor, true)))
+      .orderBy(asc(schema.users.name)),
   ]);
 
   return {
@@ -165,5 +193,7 @@ export async function getSogpReportData(): Promise<SogpReportRawData> {
     preparationDays,
     preparationCompletions,
     certificates,
+    pastorAssignments,
+    pastors,
   };
 }

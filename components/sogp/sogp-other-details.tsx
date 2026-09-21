@@ -7,6 +7,7 @@ import Link from "next/link";
 import type { SogpJourneyData } from "@/lib/db/queries/sogp-journey";
 import { usePushSubscription } from "@/lib/push/use-push";
 
+import { LeaderboardWidget } from "./leaderboard-widget";
 import { ShareLearningProgressDialog } from "./share-learning-progress-dialog";
 
 function progressPercent(completed: number, total: number) {
@@ -142,6 +143,8 @@ export function SogpOtherDetails({
           description="Share your referral link and follow their progress."
           href="/dashboard/sogp/referrals"
         />
+
+        {preview ? null : <LeaderboardWidget />}
 
         <DetailRow
           title="Share your progress"

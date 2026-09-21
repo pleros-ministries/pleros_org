@@ -1,13 +1,15 @@
 "use client";
 
 import { useMemo, useState, type ReactNode } from "react";
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import {
   Bar,
   BarChart,
   CartesianGrid,
   Cell,
+  ComposedChart,
   Legend,
+  Line,
   Pie,
   PieChart,
   ResponsiveContainer,
@@ -27,7 +29,14 @@ import {
   type AdminSogpPrayerWatchRosterEntry,
 } from "@/app/admin/_actions/sogp-report-actions";
 import { ADMIN_QUERY_KEYS } from "@/lib/admin-query";
-import type { AdminSogpData, AdminSogpReportCohort, AdminSogpReportData } from "@/lib/admin-query";
+import { UNASSIGNED_PASTOR_FILTER } from "@/lib/admin-query";
+import type {
+  AdminSogpData,
+  AdminSogpReportCohort,
+  AdminSogpReportData,
+  AdminSogpReportPastorBreakdown,
+  AdminSogpReportSignupPoint,
+} from "@/lib/admin-query";
 import { Metric } from "@/components/ppc/admin-sogp-page";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
@@ -53,7 +62,7 @@ function pct(value: number) {
   return `${Math.round(value)}%`;
 }
 
-function ExportButton({ cohortId }: { cohortId: number | "all" }) {
+function ExportButton({ cohortId, pastorFilter }: { cohortId: number | "all"; pastorFilter: string }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -61,7 +70,7 @@ function ExportButton({ cohortId }: { cohortId: number | "all" }) {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`/api/admin/sogp/report/export?cohortId=${cohortId}`);
+      const response = await fetch(`/api/admin/sogp/report/export?cohortId=${cohortId}&pastorId=${pastorFilter}`);
       if (!response.ok) {
         const body = await response.json().catch(() => null);
         throw new Error(body?.error ?? "Export failed");
@@ -175,6 +184,7 @@ function LeftBehindTable({ entries }: { entries: AdminSogpReportData["leftBehind
         <tr>
           <th className="px-4 py-3">Name</th>
           <th className="px-4 py-3">Cohort</th>
+          <th className="px-4 py-3">Pastor</th>
           <th className="px-4 py-3">Week</th>
           <th className="px-4 py-3">Completion</th>
           <th className="px-4 py-3">Last activity</th>
@@ -189,6 +199,7 @@ function LeftBehindTable({ entries }: { entries: AdminSogpReportData["leftBehind
               <p className="mt-0.5 text-[10px] text-zinc-500">{entry.email}</p>
             </td>
             <td className="px-4 py-3">{entry.cohortTitle}</td>
+            <td className="px-4 py-3">{entry.pastorName ?? <span className="text-zinc-400">Unassigned</span>}</td>
             <td className="px-4 py-3">{entry.currentWeek ?? "Cohort ended"}</td>
             <td className="px-4 py-3">
               {entry.completedTrackCount}/{entry.expectedTrackCount} ({pct(entry.completionPercent)})
@@ -249,16 +260,18 @@ function BoolMark({ value }: { value: boolean }) {
 
 function LessonRosterDialog({
   cohortId,
+  pastorId,
   lesson,
   onClose,
 }: {
   cohortId: number;
+  pastorId?: string;
   lesson: { lessonId: number; title: string; dayNumber: number | null } | null;
   onClose: () => void;
 }) {
   const { data, isLoading, error } = useQuery<AdminSogpLessonRosterEntry[]>({
-    queryKey: ["admin", "sogp", "report", "lesson-roster", cohortId, lesson?.lessonId],
-    queryFn: () => getAdminSogpLessonRoster(cohortId, lesson!.lessonId),
+    queryKey: ["admin", "sogp", "report", "lesson-roster", cohortId, pastorId ?? "all", lesson?.lessonId],
+    queryFn: () => getAdminSogpLessonRoster(cohortId, lesson!.lessonId, pastorId),
     enabled: Boolean(lesson),
   });
 
@@ -362,16 +375,18 @@ function AttendanceLists({
 
 function LiveClassRosterDialog({
   cohortId,
+  pastorId,
   liveClass,
   onClose,
 }: {
   cohortId: number;
+  pastorId?: string;
   liveClass: { id: number; title: string; startsAt: string } | null;
   onClose: () => void;
 }) {
   const { data, isLoading, error } = useQuery<AdminSogpLiveClassRosterEntry[]>({
-    queryKey: ["admin", "sogp", "report", "live-class-roster", cohortId, liveClass?.id],
-    queryFn: () => getAdminSogpLiveClassRoster(cohortId, liveClass!.id),
+    queryKey: ["admin", "sogp", "report", "live-class-roster", cohortId, pastorId ?? "all", liveClass?.id],
+    queryFn: () => getAdminSogpLiveClassRoster(cohortId, liveClass!.id, pastorId),
     enabled: Boolean(liveClass),
   });
 
@@ -391,15 +406,15 @@ function LiveClassRosterDialog({
   );
 }
 
-function PrayerWatchSection({ cohort }: { cohort: AdminSogpReportCohort }) {
+function PrayerWatchSection({ cohort, pastorId }: { cohort: AdminSogpReportCohort; pastorId?: string }) {
   const today = new Date().toISOString().slice(0, 10);
   const minDate = cohort.startsAt.slice(0, 10);
   const maxDate = cohort.endsAt.slice(0, 10);
   const [date, setDate] = useState(() => (today < minDate ? minDate : today > maxDate ? maxDate : today));
 
   const { data, isLoading, error } = useQuery<AdminSogpPrayerWatchRosterEntry[]>({
-    queryKey: ["admin", "sogp", "report", "prayer-watch-roster", cohort.id, date],
-    queryFn: () => getAdminSogpPrayerWatchRoster(cohort.id, date),
+    queryKey: ["admin", "sogp", "report", "prayer-watch-roster", cohort.id, pastorId ?? "all", date],
+    queryFn: () => getAdminSogpPrayerWatchRoster(cohort.id, date, pastorId),
   });
 
   return (
@@ -431,9 +446,11 @@ function PrayerWatchSection({ cohort }: { cohort: AdminSogpReportCohort }) {
 
 function TeachingSection({
   cohortId,
+  pastorId,
   tracks,
 }: {
   cohortId: number;
+  pastorId?: string;
   tracks: AdminSogpData["tracks"];
 }) {
   const [openLesson, setOpenLesson] = useState<{ lessonId: number; title: string; dayNumber: number | null } | null>(
@@ -471,16 +488,18 @@ function TeachingSection({
           </button>
         ))}
       </div>
-      <LessonRosterDialog cohortId={cohortId} lesson={openLesson} onClose={() => setOpenLesson(null)} />
+      <LessonRosterDialog cohortId={cohortId} pastorId={pastorId} lesson={openLesson} onClose={() => setOpenLesson(null)} />
     </section>
   );
 }
 
 function ReviewsSection({
   cohortId,
+  pastorId,
   liveClasses,
 }: {
   cohortId: number;
+  pastorId?: string;
   liveClasses: AdminSogpData["liveClasses"];
 }) {
   const [openLiveClass, setOpenLiveClass] = useState<{ id: number; title: string; startsAt: string } | null>(null);
@@ -514,7 +533,133 @@ function ReviewsSection({
           </button>
         ))}
       </div>
-      <LiveClassRosterDialog cohortId={cohortId} liveClass={openLiveClass} onClose={() => setOpenLiveClass(null)} />
+      <LiveClassRosterDialog cohortId={cohortId} pastorId={pastorId} liveClass={openLiveClass} onClose={() => setOpenLiveClass(null)} />
+    </section>
+  );
+}
+
+function PastorBreakdownSection({
+  rows,
+  onSelectPastor,
+}: {
+  rows: AdminSogpReportPastorBreakdown[];
+  onSelectPastor: (pastorId: string | null) => void;
+}) {
+  if (!rows.length) return null;
+  const chartData = rows.map((row) => ({
+    name: row.pastorName,
+    "Average completion %": Math.round(row.averageCompletionPercent),
+  }));
+
+  return (
+    <section className="rounded-sm border border-zinc-200 bg-white">
+      <div className="border-b border-zinc-100 px-4 py-3">
+        <h3 className="ppc-heading text-sm font-semibold text-zinc-900">By pastor — enrollee participation</h3>
+        <p className="mt-0.5 text-xs text-zinc-500">
+          Click a pastor to filter the whole report. Contact attempts are clicks on WhatsApp/Call/Email, not confirmed
+          conversations.
+        </p>
+      </div>
+      <div className="h-64 w-full p-4">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={chartData} layout="vertical" margin={{ top: 4, right: 16, left: 8, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" />
+            <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 11 }} stroke="#a1a1aa" />
+            <YAxis type="category" dataKey="name" width={120} tick={{ fontSize: 11 }} stroke="#a1a1aa" />
+            <Tooltip contentStyle={{ fontSize: 12 }} />
+            <Bar dataKey="Average completion %" fill="#2563eb" radius={[0, 3, 3, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="min-w-full text-left text-xs">
+          <thead className="bg-zinc-50 text-zinc-500">
+            <tr>
+              <th className="px-4 py-3">Pastor</th>
+              <th className="px-4 py-3">Enrollees</th>
+              <th className="px-4 py-3">Avg completion</th>
+              <th className="px-4 py-3">Reviews</th>
+              <th className="px-4 py-3">Prayer watch</th>
+              <th className="px-4 py-3">Left behind</th>
+              <th className="px-4 py-3">Contact attempted</th>
+              <th className="px-4 py-3">Last attempt</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-zinc-100">
+            {rows.map((row) => (
+              <tr
+                key={row.pastorId ?? "unassigned"}
+                onClick={() => onSelectPastor(row.pastorId)}
+                className="cursor-pointer hover:bg-zinc-50"
+              >
+                <td className="px-4 py-3 font-medium text-zinc-900">{row.pastorName}</td>
+                <td className="px-4 py-3">{row.enrollees}</td>
+                <td className="px-4 py-3">{pct(row.averageCompletionPercent)}</td>
+                <td className="px-4 py-3">{pct(row.liveClassAttendanceRate)}</td>
+                <td className="px-4 py-3">{pct(row.prayerWatchParticipationRate)}</td>
+                <td className="px-4 py-3">{row.leftBehindCount}</td>
+                <td className="px-4 py-3">
+                  {row.pastorId ? (
+                    <>
+                      {row.contactedCount}/{row.enrollees}
+                      {row.neverContactedCount ? (
+                        <span className="ml-1 text-[10px] text-amber-700">({row.neverContactedCount} never)</span>
+                      ) : null}
+                    </>
+                  ) : (
+                    <span className="text-zinc-400">n/a</span>
+                  )}
+                </td>
+                <td className="px-4 py-3">
+                  {row.lastContactAttemptAt ? formatDate(row.lastContactAttemptAt) : <span className="text-zinc-400">—</span>}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
+
+function mergeSignupTrends(cohorts: AdminSogpReportCohort[]): AdminSogpReportSignupPoint[] {
+  const weekly = new Map<string, number>();
+  for (const cohort of cohorts) {
+    for (const point of cohort.signupTrend) {
+      weekly.set(point.weekStart, (weekly.get(point.weekStart) ?? 0) + point.signups);
+    }
+  }
+  let cumulative = 0;
+  return Array.from(weekly.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([weekStart, signups]) => {
+      cumulative += signups;
+      return { weekStart, signups, cumulative };
+    });
+}
+
+function SignupGrowthSection({ points, label }: { points: AdminSogpReportSignupPoint[]; label: string }) {
+  return (
+    <section className="rounded-sm border border-zinc-200 bg-white p-4">
+      <h3 className="ppc-heading text-sm font-semibold text-zinc-900">Sign-up growth — {label}</h3>
+      <p className="mt-0.5 text-xs text-zinc-500">New enrolments per week (Mon start) and running total.</p>
+      {points.length ? (
+        <div className="mt-3 h-64 w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <ComposedChart data={points} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e4e4e7" />
+              <XAxis dataKey="weekStart" tick={{ fontSize: 10 }} stroke="#a1a1aa" />
+              <YAxis tick={{ fontSize: 11 }} stroke="#a1a1aa" allowDecimals={false} />
+              <Tooltip contentStyle={{ fontSize: 12 }} />
+              <Legend wrapperStyle={{ fontSize: 11 }} />
+              <Bar dataKey="signups" name="New sign-ups" fill="#2563eb" radius={[3, 3, 0, 0]} />
+              <Line dataKey="cumulative" name="Total enrolled" stroke="#22c55e" strokeWidth={2} dot={false} />
+            </ComposedChart>
+          </ResponsiveContainer>
+        </div>
+      ) : (
+        <p className="mt-3 text-xs text-zinc-500">No sign-ups yet.</p>
+      )}
     </section>
   );
 }
@@ -526,19 +671,46 @@ export function AdminSogpReport({
   tracks: AdminSogpData["tracks"];
   liveClasses: AdminSogpData["liveClasses"];
 }) {
-  const { data } = useSuspenseQuery({ queryKey: ADMIN_QUERY_KEYS.sogpReport, queryFn: getAdminSogpReportData });
+  const [pastorFilter, setPastorFilter] = useState<string>("all");
+  const pastorId = pastorFilter === "all" ? undefined : pastorFilter;
+  const { data, isLoading, error } = useQuery({
+    queryKey: [...ADMIN_QUERY_KEYS.sogpReport, pastorFilter],
+    queryFn: () => getAdminSogpReportData({ pastorId }),
+    placeholderData: keepPreviousData,
+  });
+
+  const [selection, setSelection] = useState<number | "all" | null>(null);
 
   const defaultCohortId = useMemo(() => {
-    const active = data.cohorts.find((cohort) => cohort.status === "active");
-    return active?.id ?? data.cohorts[0]?.id ?? null;
-  }, [data.cohorts]);
+    const active = data?.cohorts.find((cohort) => cohort.status === "active");
+    return active?.id ?? data?.cohorts[0]?.id ?? null;
+  }, [data]);
 
-  const [selection, setSelection] = useState<number | "all">(defaultCohortId ?? "all");
+  if (!data) {
+    return error ? (
+      <p className="px-4 py-10 text-center text-xs text-rose-700">Could not load the report.</p>
+    ) : (
+      <p className="px-4 py-10 text-center text-xs text-zinc-500">{isLoading ? "Loading report…" : ""}</p>
+    );
+  }
 
+  const activeSelection: number | "all" = selection ?? defaultCohortId ?? "all";
   const selectedCohort =
-    selection === "all" ? null : (data.cohorts.find((cohort) => cohort.id === selection) ?? null);
+    activeSelection === "all" ? null : (data.cohorts.find((cohort) => cohort.id === activeSelection) ?? null);
   const leftBehindEntries =
-    selection === "all" ? data.leftBehind : data.leftBehind.filter((entry) => entry.cohortId === selection);
+    activeSelection === "all"
+      ? data.leftBehind
+      : data.leftBehind.filter((entry) => entry.cohortId === activeSelection);
+  const pastorBreakdownRows = selectedCohort
+    ? data.pastorBreakdown.filter((row) => row.cohortId === selectedCohort.id)
+    : [];
+  const signupPoints = selectedCohort ? selectedCohort.signupTrend : mergeSignupTrends(data.cohorts);
+  const pastorLabel =
+    pastorFilter === "all"
+      ? null
+      : pastorFilter === UNASSIGNED_PASTOR_FILTER
+        ? "Unassigned"
+        : (data.pastors.find((pastor) => pastor.id === pastorFilter)?.name ?? "Selected pastor");
 
   if (!data.cohorts.length) {
     return <p className="px-4 py-10 text-center text-xs text-zinc-500">No cohorts to report on yet.</p>;
@@ -550,7 +722,7 @@ export function AdminSogpReport({
         <label className="grid gap-1 text-xs font-medium text-zinc-700">
           Cohort
           <select
-            value={selection}
+            value={activeSelection}
             onChange={(event) => setSelection(event.target.value === "all" ? "all" : Number(event.target.value))}
             className="h-8 rounded-sm border border-zinc-200 bg-white px-2 text-xs"
           >
@@ -562,8 +734,34 @@ export function AdminSogpReport({
             ))}
           </select>
         </label>
-        <ExportButton cohortId={selection} />
+        <label className="grid gap-1 text-xs font-medium text-zinc-700">
+          Pastor
+          <select
+            value={pastorFilter}
+            onChange={(event) => setPastorFilter(event.target.value)}
+            className="h-8 rounded-sm border border-zinc-200 bg-white px-2 text-xs"
+          >
+            <option value="all">All pastors</option>
+            {data.pastors.map((pastor) => (
+              <option key={pastor.id} value={pastor.id}>
+                {pastor.name} ({pastor.assignedCount})
+              </option>
+            ))}
+            <option value={UNASSIGNED_PASTOR_FILTER}>Unassigned ({data.unassignedCount})</option>
+          </select>
+        </label>
+        <div className="ml-auto">
+          <ExportButton cohortId={activeSelection} pastorFilter={pastorFilter} />
+        </div>
       </div>
+      {pastorLabel ? (
+        <p className="rounded-sm bg-blue-50 px-3 py-2 text-xs text-blue-900">
+          Showing only <span className="font-medium">{pastorLabel}</span>&rsquo;s enrollees.{" "}
+          <button type="button" onClick={() => setPastorFilter("all")} className="underline underline-offset-2">
+            Clear filter
+          </button>
+        </p>
+      ) : null}
 
       {selectedCohort ? (
         <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -639,12 +837,24 @@ export function AdminSogpReport({
 
       {selectedCohort ? (
         <div className="grid gap-4 xl:grid-cols-2">
-          <TeachingSection cohortId={selectedCohort.id} tracks={tracks} />
-          <ReviewsSection cohortId={selectedCohort.id} liveClasses={liveClasses} />
+          <TeachingSection cohortId={selectedCohort.id} pastorId={pastorId} tracks={tracks} />
+          <ReviewsSection cohortId={selectedCohort.id} pastorId={pastorId} liveClasses={liveClasses} />
         </div>
       ) : null}
 
-      {selectedCohort ? <PrayerWatchSection cohort={selectedCohort} /> : null}
+      {selectedCohort ? <PrayerWatchSection cohort={selectedCohort} pastorId={pastorId} /> : null}
+
+      <SignupGrowthSection
+        points={signupPoints}
+        label={selectedCohort ? selectedCohort.title : "all cohorts"}
+      />
+
+      {selectedCohort ? (
+        <PastorBreakdownSection
+          rows={pastorBreakdownRows}
+          onSelectPastor={(id) => setPastorFilter(id ?? UNASSIGNED_PASTOR_FILTER)}
+        />
+      ) : null}
 
       <section className="overflow-x-auto rounded-sm border border-zinc-200 bg-white">
         <div className="border-b border-zinc-100 px-4 py-3">

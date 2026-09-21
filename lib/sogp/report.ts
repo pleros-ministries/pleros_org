@@ -1,4 +1,5 @@
 import { SOGP_TOTAL_WEEKS, getSogpCohortWeek } from "./calendar";
+import { toLagosDateKey } from "./formation-progress";
 
 import type { SogpReportRawData } from "@/lib/db/queries/sogp-report";
 import type {
@@ -7,8 +8,11 @@ import type {
   AdminSogpReportLeftBehindEntry,
   AdminSogpReportLeftBehindFlag,
   AdminSogpReportParticipant,
+  AdminSogpReportPastorBreakdown,
+  AdminSogpReportSignupPoint,
   AdminSogpReportWeek,
 } from "@/lib/admin-query";
+import { UNASSIGNED_PASTOR_FILTER } from "../admin-query";
 
 export const SOGP_INACTIVITY_WINDOW_DAYS = 7;
 export const SOGP_LEFT_BEHIND_PACE_THRESHOLD = 0.5;
@@ -127,7 +131,45 @@ function groupBy<T, K>(rows: T[], key: (row: T) => K): Map<K, T[]> {
   return map;
 }
 
-export function buildSogpReport(raw: SogpReportRawData, now = new Date()): AdminSogpReportData {
+type CoreReport = Pick<AdminSogpReportData, "generatedAt" | "cohorts" | "participants" | "leftBehind">;
+
+function lagosWeekStart(date: Date) {
+  const day = new Date(`${toLagosDateKey(date)}T00:00:00.000Z`);
+  day.setUTCDate(day.getUTCDate() - ((day.getUTCDay() + 6) % 7));
+  return day.toISOString().slice(0, 10);
+}
+
+export function buildSignupTrend(createdAts: Date[]): AdminSogpReportSignupPoint[] {
+  const counts = new Map<string, number>();
+  for (const createdAt of createdAts) {
+    const key = lagosWeekStart(createdAt);
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+  const keys = Array.from(counts.keys()).sort();
+  if (!keys.length) return [];
+
+  const points: AdminSogpReportSignupPoint[] = [];
+  const cursor = new Date(`${keys[0]}T00:00:00.000Z`);
+  const last = new Date(`${keys[keys.length - 1]}T00:00:00.000Z`);
+  let cumulative = 0;
+  while (cursor <= last) {
+    const weekStart = cursor.toISOString().slice(0, 10);
+    const signups = counts.get(weekStart) ?? 0;
+    cumulative += signups;
+    points.push({ weekStart, signups, cumulative });
+    cursor.setUTCDate(cursor.getUTCDate() + 7);
+  }
+  return points;
+}
+
+function buildCore(raw: SogpReportRawData, now: Date): CoreReport {
+  const assignmentByEnrollment = new Map(raw.pastorAssignments.map((row) => [row.enrollmentId, row]));
+  const pastorNameById = new Map(raw.pastors.map((pastor) => [pastor.id, pastor.name]));
+  const pastorOf = (enrollmentId: number) => {
+    const pastorId = assignmentByEnrollment.get(enrollmentId)?.pastorUserId ?? null;
+    return { pastorId, pastorName: pastorId ? (pastorNameById.get(pastorId) ?? "Unknown pastor") : null };
+  };
+
   const tracksByCohort = groupBy(raw.tracks, (row) => row.track.cohortId);
   const enrollmentsByCohort = groupBy(raw.enrollments, (row) => row.cohortId);
   const liveClassesByCohort = groupBy(raw.liveClasses, (row) => row.cohortId);
@@ -233,7 +275,9 @@ export function buildSogpReport(raw: SogpReportRawData, now = new Date()): Admin
         liveClassesAttended: attendedRequiredLiveClasses,
         liveClassesRequired: requiredLiveClasses.length,
         prayerWatchDays: prayerDaysAttended,
+        prayerWatchRate: (prayerDaysAttended / cohortDayCount) * 100,
         completionPercent,
+        ...pastorOf(enrollment.id),
       });
     }
 
@@ -309,6 +353,7 @@ export function buildSogpReport(raw: SogpReportRawData, now = new Date()): Admin
       certificatesIssued: cohortEnrollments.filter((enrollment) => activeCertificateEnrollmentIds.has(enrollment.id))
         .length,
       weeklyParticipation,
+      signupTrend: buildSignupTrend(cohortEnrollments.map((enrollment) => enrollment.createdAt)),
     };
   });
 
@@ -359,6 +404,7 @@ export function buildSogpReport(raw: SogpReportRawData, now = new Date()): Admin
         lastActivityAt: lastActivityAt ? lastActivityAt.toISOString() : null,
         daysSinceLastActivity,
         flags,
+        ...pastorOf(enrollment.id),
       });
     }
   }
@@ -368,5 +414,91 @@ export function buildSogpReport(raw: SogpReportRawData, now = new Date()): Admin
     cohorts,
     participants,
     leftBehind,
+  };
+}
+
+function buildPastorBreakdown(
+  core: CoreReport,
+  raw: SogpReportRawData,
+): AdminSogpReportPastorBreakdown[] {
+  const assignmentByEnrollment = new Map(raw.pastorAssignments.map((row) => [row.enrollmentId, row]));
+  const groups = groupBy(core.participants, (participant) => `${participant.cohortId}:${participant.pastorId ?? ""}`);
+
+  return Array.from(groups.values())
+    .map((members) => {
+      const first = members[0]!;
+      const mean = (values: number[]) => (values.length ? values.reduce((a, b) => a + b, 0) / values.length : 0);
+      const assignments = members.flatMap((member) => {
+        const assignment = assignmentByEnrollment.get(member.enrollmentId);
+        return assignment ? [assignment] : [];
+      });
+      const contactedCount = assignments.filter((assignment) => assignment.contactCount > 0).length;
+      const lastContact = assignments.reduce<Date | null>(
+        (latest, assignment) =>
+          assignment.lastContactedAt && (!latest || assignment.lastContactedAt > latest)
+            ? assignment.lastContactedAt
+            : latest,
+        null,
+      );
+      return {
+        cohortId: first.cohortId,
+        pastorId: first.pastorId,
+        pastorName: first.pastorName ?? "Unassigned",
+        enrollees: members.length,
+        averageCompletionPercent: mean(members.map((member) => member.completionPercent)),
+        liveClassAttendanceRate: mean(
+          members.map((member) =>
+            member.liveClassesRequired ? (member.liveClassesAttended / member.liveClassesRequired) * 100 : 0,
+          ),
+        ),
+        prayerWatchParticipationRate: mean(members.map((member) => member.prayerWatchRate)),
+        leftBehindCount: core.leftBehind.filter(
+          (entry) => entry.cohortId === first.cohortId && entry.pastorId === first.pastorId,
+        ).length,
+        contactedCount,
+        neverContactedCount: first.pastorId ? members.length - contactedCount : 0,
+        lastContactAttemptAt: lastContact ? lastContact.toISOString() : null,
+      };
+    })
+    .sort((a, b) => a.cohortId - b.cohortId || b.enrollees - a.enrollees);
+}
+
+export function buildSogpReport(
+  raw: SogpReportRawData,
+  now = new Date(),
+  options: { pastorId?: string } = {},
+): AdminSogpReportData {
+  const full = buildCore(raw, now);
+  const assignedPastorByEnrollment = new Map(
+    raw.pastorAssignments.map((row) => [row.enrollmentId, row.pastorUserId]),
+  );
+
+  const assignedCounts = new Map<string, number>();
+  let unassignedCount = 0;
+  for (const enrollment of raw.enrollments) {
+    const pastorId = assignedPastorByEnrollment.get(enrollment.id);
+    if (pastorId) assignedCounts.set(pastorId, (assignedCounts.get(pastorId) ?? 0) + 1);
+    else unassignedCount += 1;
+  }
+
+  const filterId = options.pastorId;
+  const scoped = filterId
+    ? buildCore(
+        {
+          ...raw,
+          enrollments: raw.enrollments.filter((enrollment) => {
+            const pastorId = assignedPastorByEnrollment.get(enrollment.id);
+            return filterId === UNASSIGNED_PASTOR_FILTER ? !pastorId : pastorId === filterId;
+          }),
+        },
+        now,
+      )
+    : full;
+
+  return {
+    ...scoped,
+    pastors: raw.pastors.map((pastor) => ({ ...pastor, assignedCount: assignedCounts.get(pastor.id) ?? 0 })),
+    unassignedCount,
+    pastorBreakdown: buildPastorBreakdown(full, raw),
   };
 }

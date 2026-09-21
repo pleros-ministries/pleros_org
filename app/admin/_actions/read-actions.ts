@@ -395,10 +395,12 @@ export async function getAdminSogpData(): Promise<AdminSogpData> {
   };
 }
 
-export async function getAdminSogpReportData(): Promise<AdminSogpReportData> {
+export async function getAdminSogpReportData(
+  options: { pastorId?: string } = {},
+): Promise<AdminSogpReportData> {
   await requireAdmin();
   const raw = await getSogpReportData();
-  return buildSogpReport(raw);
+  return buildSogpReport(raw, new Date(), { pastorId: options.pastorId || undefined });
 }
 
 export async function getAdminRegistrants(): Promise<AdminRegistrantSummary[]> {

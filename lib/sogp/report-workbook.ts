@@ -70,6 +70,7 @@ export function buildSogpReportWorkbook(report: AdminSogpReportData, cohortId: n
         Name: participant.name,
         Email: participant.email,
         Cohort: participant.cohortTitle,
+        Pastor: participant.pastorName ?? "Unassigned",
         Status: participant.status,
         ...weekColumns,
         "Live classes attended": `${participant.liveClassesAttended}/${participant.liveClassesRequired}`,
@@ -84,6 +85,7 @@ export function buildSogpReportWorkbook(report: AdminSogpReportData, cohortId: n
       Name: entry.name,
       Email: entry.email,
       Cohort: entry.cohortTitle,
+      Pastor: entry.pastorName ?? "Unassigned",
       "Current week": entry.currentWeek ?? `Cohort ended (week ${SOGP_TOTAL_WEEKS} expected)`,
       "Expected tracks": entry.expectedTrackCount,
       "Completed tracks": entry.completedTrackCount,
@@ -95,11 +97,42 @@ export function buildSogpReportWorkbook(report: AdminSogpReportData, cohortId: n
     })),
   );
 
+  const cohortTitleById = new Map(report.cohorts.map((cohort) => [cohort.id, cohort.title]));
+  const pastorSheet = XLSX.utils.json_to_sheet(
+    report.pastorBreakdown
+      .filter((row) => cohortIds.has(row.cohortId))
+      .map((row) => ({
+        Cohort: cohortTitleById.get(row.cohortId) ?? "",
+        Pastor: row.pastorName,
+        Enrollees: row.enrollees,
+        "Average completion %": Math.round(row.averageCompletionPercent * 10) / 10,
+        "Live class attendance %": Math.round(row.liveClassAttendanceRate * 10) / 10,
+        "Prayer watch %": Math.round(row.prayerWatchParticipationRate * 10) / 10,
+        "Left behind": row.leftBehindCount,
+        "Contact attempted (enrollees)": row.pastorId ? row.contactedCount : "n/a",
+        "Never contact-attempted": row.pastorId ? row.neverContactedCount : "n/a",
+        "Last contact attempt": formatDate(row.lastContactAttemptAt),
+      })),
+  );
+
+  const signupSheet = XLSX.utils.json_to_sheet(
+    cohorts.flatMap((cohort) =>
+      cohort.signupTrend.map((point) => ({
+        Cohort: cohort.title,
+        "Week starting (Mon)": point.weekStart,
+        "New sign-ups": point.signups,
+        "Cumulative sign-ups": point.cumulative,
+      })),
+    ),
+  );
+
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, summarySheet, "Cohort summary");
   XLSX.utils.book_append_sheet(workbook, weeklySheet, "Weekly participation");
   XLSX.utils.book_append_sheet(workbook, participantSheet, "Participant weekly matrix");
   XLSX.utils.book_append_sheet(workbook, leftBehindSheet, "Left behind");
+  XLSX.utils.book_append_sheet(workbook, pastorSheet, "By pastor");
+  XLSX.utils.book_append_sheet(workbook, signupSheet, "Sign-up growth");
 
   return XLSX.write(workbook, { type: "buffer", bookType: "xlsx" }) as Buffer;
 }
