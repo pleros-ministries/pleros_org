@@ -12,7 +12,8 @@
     "sync:ppc-teachings": "tsx scripts/sync-ppc-teachings.ts",
     "import:ppc-content": "tsx scripts/import-ppc-content.ts",
     "seed:sogp": "node --env-file=.env --import tsx scripts/seed-sogp-cohort.ts",
-    "build:country-names": "node scripts/generate-country-names.mjs"
+    "build:country-names": "node scripts/generate-country-names.mjs",
+    "schedule:reviews": "node --env-file=.env --import tsx scripts/schedule-daily-reviews.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.2.0",

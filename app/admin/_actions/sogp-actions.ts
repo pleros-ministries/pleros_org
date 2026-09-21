@@ -1,5 +1,6 @@
 "use server";
 
+import { ensureDailyReviewSessions } from "@/lib/db/queries/sogp-daily-reviews";
 import { and, eq, inArray, notInArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
@@ -297,6 +298,7 @@ export async function updateSogpCohort(input: {
     .where(eq(schema.sogpCohorts.id, input.cohortId))
     .returning();
   if (!updated) return { error: "SOGP cohort not found." };
+  await ensureDailyReviewSessions(updated.id);
   revalidatePath("/admin/sogp");
   return { error: null as string | null, ...updated };
 }

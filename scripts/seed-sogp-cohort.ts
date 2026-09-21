@@ -2,6 +2,7 @@ import { asc, eq, inArray } from "drizzle-orm";
 
 import { db } from "../lib/db";
 import { transactionDb } from "../lib/db/transaction";
+import { ensureDailyReviewSessions } from "../lib/db/queries/sogp-daily-reviews";
 import * as schema from "../lib/db/schema";
 import { buildFirstCohortTrackSelection } from "../lib/sogp/first-cohort";
 import {
@@ -104,6 +105,7 @@ await transactionDb.transaction(async (tx) => {
   );
 });
 
+const reviews = await ensureDailyReviewSessions(cohort.id);
 console.log(
-  `Seeded ${cohort.title} with ${selection.length} required tracks.`,
+  `Seeded ${cohort.title} with ${selection.length} required tracks and ${reviews.created} daily review sessions.`,
 );
