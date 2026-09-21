@@ -1417,20 +1417,20 @@
   background: transparent;
   padding-inline: 0.75rem;
   color: var(--color-text-muted);
-  cursor: pointer;
+  pointer-events: none;
   outline: none;
 }
 
-.sogp-field-trigger:hover {
+.sogp-field-control:focus-within .sogp-field-trigger {
   color: var(--color-brand-blue);
 }
 
-.sogp-field-trigger svg {
-  transition: transform 180ms ease;
-}
-
-.sogp-field-trigger[data-popup-open] svg {
-  transform: rotate(180deg);
+/* Strips the browser's own arrow so our chevron is the only one showing. */
+.sogp-field-select {
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  padding-inline-end: 0;
 }
 
 .sogp-phone-country {
@@ -1444,16 +1444,33 @@
   color: var(--color-text-strong);
   cursor: pointer;
   outline: none;
+  position: relative;
   transition: background-color 150ms ease;
 }
 
 .sogp-phone-country:hover,
-.sogp-phone-country[data-popup-open] {
+.sogp-phone-country:focus-within {
   background: var(--color-brand-sky-soft, var(--color-surface-muted));
 }
 
-.sogp-phone-country:focus-visible {
+.sogp-phone-country:focus-within {
   box-shadow: inset 0 0 0 2px var(--color-brand-blue);
+}
+
+/* Invisible but still the real control: it takes the taps, the focus and the
+   keyboard, while the flag and dial code underneath show the selection. */
+.sogp-phone-country-select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  background: transparent;
+  color: transparent;
+  opacity: 0;
+  cursor: pointer;
 }
 
 .sogp-phone-dial {

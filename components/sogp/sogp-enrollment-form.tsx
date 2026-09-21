@@ -2,8 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { Select } from "@base-ui/react/select";
-import { ArrowRight, Check, ChevronDown, LoaderCircle } from "lucide-react";
+import { ArrowRight, ChevronDown, LoaderCircle } from "lucide-react";
 import Link from "next/link";
 import type { CountryCode } from "libphonenumber-js/min";
 
@@ -15,7 +14,6 @@ import {
   SOGP_REFERRAL_OPTIONS,
   validateSogpEnrollment,
   type SogpEnrollmentErrors,
-  type SogpReferralOption,
 } from "@/lib/sogp/enrollment";
 import { getSogpCountryOrDefault } from "@/lib/sogp/countries";
 import { CountryCombobox } from "./country-combobox";
@@ -115,66 +113,29 @@ function ReferralSourceFields({
   onSourceChange: (value: string) => void;
   onOtherSourceChange: (value: string) => void;
 }) {
-  const selectedOption: SogpReferralOption | null =
-    SOGP_REFERRAL_OPTIONS.find((option) => option.value === source) ?? null;
-
   return (
     <div className="grid gap-2">
       <label htmlFor="referralSource" className="font-[var(--font-be-vietnam-pro)] [font-size:0.8125rem] font-medium text-[var(--color-text-strong)]">How did you hear about us?<RequiredMark /></label>
-      <Select.Root
-        items={SOGP_REFERRAL_OPTIONS}
-        value={selectedOption}
-        onValueChange={(value: SogpReferralOption | null) => {
-          if (value) onSourceChange(value.value);
-        }}
-        itemToStringLabel={(option: SogpReferralOption) => option.label}
-        itemToStringValue={(option: SogpReferralOption) => option.value}
-        isItemEqualToValue={(left: SogpReferralOption, right: SogpReferralOption) =>
-          left.value === right.value
-        }
-        name="referralSource"
-        required
-      >
-        <Select.Trigger
+      {/* A native <select> so the field still works on older mobile browsers,
+          where a JS-rendered popup can leave the visitor with no way to pick. */}
+      <div className="relative">
+        <select
           id="referralSource"
+          name="referralSource"
+          value={source}
+          onChange={(event) => onSourceChange(event.target.value)}
+          required
           aria-invalid={Boolean(sourceError)}
           aria-describedby={sourceError ? "referral-source-error" : undefined}
-          className={`relative flex h-11 w-full items-center rounded-[var(--radius-sm)] border border-[var(--color-line-strong)] bg-white px-4 pr-11 text-left [font-size:0.875rem] outline-none transition aria-invalid:border-[var(--destructive)] aria-invalid:ring-4 aria-invalid:ring-red-100 focus-visible:border-[var(--color-brand-blue)] focus-visible:ring-4 focus-visible:ring-[var(--color-focus)] ${source ? "text-[var(--color-text-strong)]" : "text-[var(--color-text-muted)]"}`}
+          className={`h-11 w-full appearance-none rounded-[var(--radius-sm)] border border-[var(--color-line-strong)] bg-white px-4 pr-11 [font-size:0.875rem] outline-none transition aria-invalid:border-[var(--destructive)] aria-invalid:ring-4 aria-invalid:ring-red-100 focus-visible:border-[var(--color-brand-blue)] focus-visible:ring-4 focus-visible:ring-[var(--color-focus)] ${source ? "text-[var(--color-text-strong)]" : "text-[var(--color-text-muted)]"}`}
         >
-          <Select.Value placeholder="Select an option" />
-          <Select.Icon
-            render={
-              <ChevronDown
-                className={`pointer-events-none absolute right-4 top-1/2 size-4 -translate-y-1/2 ${source ? "text-[var(--color-brand-blue)]" : "text-[var(--color-text-muted)]"}`}
-                aria-hidden="true"
-              />
-            }
-          />
-        </Select.Trigger>
-        <Select.Portal>
-          <Select.Positioner sideOffset={6} className="sogp-popup-positioner">
-            <Select.Popup className="sogp-popup sogp-referral-popup">
-              <Select.List className="sogp-popup-list">
+          <option value="">Select an option</option>
           {SOGP_REFERRAL_OPTIONS.map((option) => (
-                  <Select.Item
-                    key={option.value}
-                    value={option}
-                    label={option.label}
-                    className="sogp-popup-item sogp-referral-popup-item"
-                  >
-                    <Select.ItemText className="sogp-popup-item-label">
-                      {option.label}
-                    </Select.ItemText>
-                    <Select.ItemIndicator className="sogp-popup-item-check">
-                      <Check className="size-3.5" aria-hidden="true" />
-                    </Select.ItemIndicator>
-                  </Select.Item>
+            <option key={option.value} value={option.value}>{option.label}</option>
           ))}
-              </Select.List>
-            </Select.Popup>
-          </Select.Positioner>
-        </Select.Portal>
-      </Select.Root>
+        </select>
+        <ChevronDown className={`pointer-events-none absolute right-4 top-1/2 size-4 -translate-y-1/2 ${source ? "text-[var(--color-brand-blue)]" : "text-[var(--color-text-muted)]"}`} aria-hidden="true" />
+      </div>
       <FieldError id="referral-source-error" error={sourceError} />
       {source === "other" ? (
         <div className="grid gap-2 pt-1">

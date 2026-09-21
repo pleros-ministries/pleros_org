@@ -5,7 +5,7 @@ import {
   type CountryCode,
 } from "libphonenumber-js/min";
 
-const countryNames = new Intl.DisplayNames(["en-GB"], { type: "region" });
+import { SOGP_COUNTRY_NAMES } from "./country-names";
 
 export type SogpCountryOption = {
   code: CountryCode;
@@ -41,7 +41,9 @@ function normalizeForSearch(value: string) {
 
 export const SOGP_COUNTRIES: SogpCountryOption[] = getCountries()
   .map((code) => {
-    const label = countryNames.of(code) ?? code;
+    // Frozen names, not Intl.DisplayNames: server and browser ICU data disagree
+    // on a few regions, and the pickers server-render every option.
+    const label = SOGP_COUNTRY_NAMES[code] ?? code;
     const callingCode = getCountryCallingCode(code);
     return {
       code,

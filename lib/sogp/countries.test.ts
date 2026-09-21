@@ -1,5 +1,7 @@
+import { getCountries } from "libphonenumber-js/min";
 import { describe, expect, test } from "vitest";
 
+import { SOGP_COUNTRY_NAMES } from "./country-names";
 import {
   countryCodeToFlag,
   getSogpCountry,
@@ -23,6 +25,14 @@ describe("SOGP country options", () => {
         left.localeCompare(right, "en-GB"),
       ),
     );
+  });
+
+  // The pickers server-render every option, so a code without a frozen name
+  // would fall back to raw ICU on one side only and break hydration. Bump
+  // libphonenumber-js, run `npm run build:country-names`, and this passes again.
+  test("has a frozen name for every country the picker lists", () => {
+    const missing = getCountries().filter((code) => !SOGP_COUNTRY_NAMES[code]);
+    expect(missing).toEqual([]);
   });
 
   test("carries a dial code and flag for the picker", () => {

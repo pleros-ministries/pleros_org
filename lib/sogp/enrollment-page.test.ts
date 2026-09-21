@@ -62,8 +62,11 @@ test("keeps the enrolment page focused with a compact summary list", () => {
   expect(formSource.match(/appearance-none/g)?.length ?? 0).toBeGreaterThanOrEqual(1);
   expect(formSource.match(/right-4/g)?.length ?? 0).toBeGreaterThanOrEqual(2);
   expect(formSource).not.toContain('type="checkbox"');
-  expect(formSource).toContain("<Select.Root");
-  expect(formSource).toContain("sogp-referral-popup");
+  // Both pickers are native <select>s so they still open on older mobile
+  // browsers, where a JS-rendered popup can fail to appear at all.
+  expect(formSource).toMatch(/<select\s+id="referralSource"/);
+  expect(formSource).not.toContain("@base-ui/react/select");
+  expect(formSource).not.toContain("sogp-referral-popup");
   expect(formSource.match(/type="radio"/g)?.length).toBe(1);
   expect(formSource).toContain('name="whatsappConsent"');
   expect(formSource).toContain('id={`whatsappConsent${option === "yes" ? "Yes" : "No"}`}');

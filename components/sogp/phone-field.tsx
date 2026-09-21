@@ -1,8 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Combobox } from "@base-ui/react/combobox";
-import { ChevronDown, Search } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import {
   AsYouType,
   getExampleNumber,
@@ -13,12 +12,10 @@ import examples from "libphonenumber-js/examples.mobile.json";
 
 import {
   getSogpCountryOrDefault,
-  matchesSogpCountryQuery,
   SOGP_COUNTRIES,
   type SogpCountryOption,
 } from "@/lib/sogp/countries";
 import { CountryFlag } from "./country-flag";
-import { CountryOptions } from "./country-options";
 
 /** Keeps typing forgiving while dropping anything a dialler would never accept. */
 function sanitize(value: string) {
@@ -102,56 +99,31 @@ export function PhoneField({
 
   return (
     <div className="sogp-field-control" data-invalid={invalid || undefined}>
-      <Combobox.Root
-        items={SOGP_COUNTRIES}
-        value={country}
-        onValueChange={(next: SogpCountryOption | null) => {
-          if (next) handleCountryChange(next);
-        }}
-        itemToStringLabel={(option: SogpCountryOption) => option.label}
-        itemToStringValue={(option: SogpCountryOption) => option.code}
-        isItemEqualToValue={(
-          left: SogpCountryOption,
-          right: SogpCountryOption,
-        ) => left.code === right.code}
-        filter={(option: SogpCountryOption, search: string) =>
-          matchesSogpCountryQuery(option, search)
-        }
-        autoHighlight
-      >
-        <Combobox.Trigger
-          className="sogp-phone-country"
-          aria-label={`Dialling code: ${country.label} +${country.callingCode}`}
+      {/* The flag, dial code and chevron are painted by us; the transparent
+          native <select> on top opens the browser's own picker, which works
+          even where a JS-rendered popup does not. */}
+      <span className="sogp-phone-country">
+        <CountryFlag code={country.code} />
+        <span className="sogp-phone-dial">+{country.callingCode}</span>
+        <ChevronDown className="size-3.5 opacity-60" aria-hidden="true" />
+        <select
+          className="sogp-phone-country-select"
+          aria-label="Country dialling code"
+          value={country.code}
+          onChange={(event) => {
+            const next = SOGP_COUNTRIES.find(
+              (option) => option.code === event.target.value,
+            );
+            if (next) handleCountryChange(next);
+          }}
         >
-          <CountryFlag code={country.code} />
-          <span className="sogp-phone-dial">+{country.callingCode}</span>
-          <ChevronDown className="size-3.5 opacity-60" aria-hidden="true" />
-        </Combobox.Trigger>
-
-        <Combobox.Portal>
-          <Combobox.Positioner
-            sideOffset={6}
-            align="start"
-            className="sogp-popup-positioner"
-          >
-            <Combobox.Popup className="sogp-popup">
-              <div className="sogp-popup-search">
-                <Search
-                  className="size-4 shrink-0 opacity-50"
-                  aria-hidden="true"
-                />
-                <Combobox.Input
-                  placeholder="Search countries"
-                  autoComplete="off"
-                  spellCheck={false}
-                  aria-label="Search countries"
-                />
-              </div>
-              <CountryOptions />
-            </Combobox.Popup>
-          </Combobox.Positioner>
-        </Combobox.Portal>
-      </Combobox.Root>
+          {SOGP_COUNTRIES.map((option) => (
+            <option key={option.code} value={option.code}>
+              {option.label} +{option.callingCode}
+            </option>
+          ))}
+        </select>
+      </span>
 
       <input
         id="phone"
