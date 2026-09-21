@@ -34,6 +34,7 @@ export function QuizFlow({ lessonId, questions, bestScore }: QuizFlowProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [result, setResult] = useState<QuizResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   const sorted = [...questions].sort((a, b) => a.sortOrder - b.sortOrder);
@@ -51,6 +52,11 @@ export function QuizFlow({ lessonId, questions, bestScore }: QuizFlowProps) {
   const handleSubmit = () => {
     startTransition(async () => {
       const res = await submitQuiz(lessonId, answers);
+      if (res.error !== null) {
+        setError(res.error);
+        return;
+      }
+      setError(null);
       setResult(res);
       router.refresh();
     });
@@ -144,6 +150,8 @@ export function QuizFlow({ lessonId, questions, bestScore }: QuizFlowProps) {
           />
         )}
       </div>
+
+      {error ? <p className="text-xs text-rose-700">{error}</p> : null}
 
       <div className="flex items-center justify-between">
         <button

@@ -79,13 +79,19 @@ export function StudentDetailClient({
   const [overrideLevel, setOverrideLevel] = useState("1");
   const [isPending, startTransition] = useTransition();
   const [confirmReset, setConfirmReset] = useState(false);
+  const [reviewError, setReviewError] = useState<string | null>(null);
 
   const currentLP = levelProgress.find((lp) => lp.levelId === activeLevel);
   const levelSubs = submissions.filter((s) => s.levelId === activeLevel);
 
   const handleApprove = (submissionId: number) => {
     startTransition(async () => {
-      await approveWrittenSubmission(submissionId);
+      const result = await approveWrittenSubmission(submissionId);
+      if (result.error) {
+        setReviewError(result.error);
+        return;
+      }
+      setReviewError(null);
       router.refresh();
     });
   };
@@ -94,7 +100,12 @@ export function StudentDetailClient({
     const note = revisionNotes[submissionId]?.trim();
     if (!note) return;
     startTransition(async () => {
-      await requestSubmissionRevision(submissionId, note);
+      const result = await requestSubmissionRevision(submissionId, note);
+      if (result.error) {
+        setReviewError(result.error);
+        return;
+      }
+      setReviewError(null);
       setRevisionNotes((prev) => ({ ...prev, [submissionId]: "" }));
       router.refresh();
     });
@@ -201,6 +212,9 @@ export function StudentDetailClient({
           <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-zinc-400">
             Written submissions
           </p>
+          {reviewError && (
+            <p className="mb-2 text-xs text-rose-700">{reviewError}</p>
+          )}
           <div className="grid gap-1">
             {levelSubs.map((sub) => {
               const isExpanded = expandedSub === sub.id;

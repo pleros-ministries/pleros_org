@@ -19,7 +19,10 @@ function seriesVideos(slug: string): SeedVideo[] {
 
 export function buildPreSogpSeed(preparationStartsAt: Date) {
   const candidates: SeedVideo[] = [
-    ...purposePathwayVideos,
+    // "What is God's Purpose?" Part 7 is intentionally excluded from Pre-SOGP so
+    // the Gospel Answers series begins on Day 7. Part 7 still appears on the
+    // public "Discover Purpose" pathway page (that list is untouched).
+    ...purposePathwayVideos.slice(0, 6),
     ...seriesVideos("gospel-answers-simple-series"),
     ...discipleshipFoundationsVideos,
     ...seriesVideos("most-important-questions-series"),
@@ -47,6 +50,7 @@ export function buildPreSogpSeed(preparationStartsAt: Date) {
 export function validateSogpLaunchReadiness(input: {
   preparationCount: number;
   uniquePreparationUrlCount: number;
+  requiredTrackCount: number;
   readyTrackCount: number;
   requiredReviewCount: number;
 }) {
@@ -59,8 +63,8 @@ export function validateSogpLaunchReadiness(input: {
       `Add exactly ${PRE_SOGP_PREPARATION_DAYS} unique Pre-SOGP lessons.`,
     );
   }
-  if (input.readyTrackCount !== 24) {
-    issues.push("Publish all 24 content-ready SOGP teachings.");
+  if (input.requiredTrackCount === 0 || input.readyTrackCount !== input.requiredTrackCount) {
+    issues.push("Publish content-ready SOGP teachings for every track assigned to this cohort.");
   }
   if (input.requiredReviewCount !== 4) {
     issues.push("Schedule four required review sessions.");

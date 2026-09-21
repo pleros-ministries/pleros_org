@@ -1,8 +1,10 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Check, Headphones } from "lucide-react";
+
+import { ShareLearningProgressDialog } from "./share-learning-progress-dialog";
 
 export function SogpAudioPlayer({
   dayNumber,
@@ -14,6 +16,8 @@ export function SogpAudioPlayer({
   listened: boolean;
 }) {
   const notified = useRef(listened);
+  const wasAlreadyListened = useRef(listened);
+  const [shareOpen, setShareOpen] = useState(false);
   const queryClient = useQueryClient();
   const mutation = useMutation({
     mutationFn: async () => {
@@ -25,6 +29,7 @@ export function SogpAudioPlayer({
       if (!response.ok) throw new Error("Audio progress could not be saved");
     },
     async onSuccess() {
+      if (!wasAlreadyListened.current) setShareOpen(true);
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["sogp", "day", dayNumber] }),
         queryClient.invalidateQueries({ queryKey: ["sogp", "dashboard"] }),
@@ -51,7 +56,30 @@ export function SogpAudioPlayer({
           }
         }}
       />
-      <p className="mt-3 text-xs leading-[1.45] text-[var(--color-text-muted)]">Your listening step completes automatically after 90% playback.</p>
+      {listened ? (
+        <p className="mt-3 text-xs leading-[1.45] text-[var(--color-text-muted)]">Your listening step completes automatically after 90% playback.</p>
+      ) : (
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+          <p className="text-xs leading-[1.45] text-[var(--color-text-muted)]">Completes automatically after 90% playback, or downloaded the audio to listen elsewhere?</p>
+          <button
+            type="button"
+            disabled={mutation.isPending}
+            onClick={() => {
+              notified.current = true;
+              mutation.mutate();
+            }}
+            className="inline-flex h-8 shrink-0 items-center rounded-full border border-[var(--color-brand-blue)] px-3 text-xs font-semibold text-[var(--color-brand-blue)] disabled:opacity-50"
+          >
+            {mutation.isPending ? "Marking…" : "I've listened to this"}
+          </button>
+        </div>
+      )}
+      <ShareLearningProgressDialog
+        open={shareOpen}
+        onOpenChange={setShareOpen}
+        track="sogp"
+        dayNumber={dayNumber}
+      />
     </div>
   );
 }

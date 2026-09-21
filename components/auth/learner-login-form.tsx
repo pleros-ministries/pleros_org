@@ -9,7 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth/auth-client";
 
-export function LearnerLoginForm({ returnTo }: { returnTo: string }) {
+export function LearnerLoginForm({
+  returnTo,
+  alreadyEnrolledNotice = false,
+}: {
+  returnTo: string;
+  alreadyEnrolledNotice?: boolean;
+}) {
   const router = useRouter();
   const [mode, setMode] = useState<"password" | "code">("password");
   const [codeSent, setCodeSent] = useState(false);
@@ -93,6 +99,15 @@ export function LearnerLoginForm({ returnTo }: { returnTo: string }) {
         <h1 className="font-[var(--font-sen)] text-2xl font-semibold tracking-[-0.04em] text-[var(--color-text-strong)]">Welcome back</h1>
         <p className="font-[var(--font-be-vietnam-pro)] [font-size:0.875rem] leading-[1.55] text-[var(--color-text-muted)]">Log in to continue your SOGP journey.</p>
       </div>
+
+      {alreadyEnrolledNotice ? (
+        <p
+          role="status"
+          className="rounded-[var(--radius-sm)] border border-[var(--color-line)] bg-[var(--color-brand-sky-soft)] px-4 py-2.5 font-[var(--font-be-vietnam-pro)] [font-size:0.8125rem] leading-[1.5] text-[var(--color-brand-blue)]"
+        >
+          Looks like you already have a SOGP account for this email — sign in below.
+        </p>
+      ) : null}
 
       {mode === "password" ? (
         <form className="grid gap-4" noValidate onSubmit={passwordLogin}>

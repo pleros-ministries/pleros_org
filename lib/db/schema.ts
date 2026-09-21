@@ -10,6 +10,7 @@ import {
   index,
   pgEnum,
   date,
+  type AnyPgColumn,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import type { SogpEnrollmentValues } from "../sogp/enrollment";
@@ -20,6 +21,7 @@ export const userRoleEnum = pgEnum("user_role", [
   "admin",
   "instructor",
   "student",
+  "pastor",
 ]);
 
 export const lessonStatusEnum = pgEnum("lesson_status", [
@@ -76,6 +78,16 @@ export const sogpEnrollmentStatusEnum = pgEnum("sogp_enrollment_status", [
   "withdrawn",
 ]);
 
+export const sogpOrientationReasonEnum = pgEnum("sogp_orientation_reason", [
+  "faith_answers",
+  "gods_purpose",
+  "spiritual_growth_freedom",
+  "divine_healing",
+  "ministry_supernatural_empowerment",
+  "wisdom_career_business_finance",
+  "stronger_walk_fulfilling_purpose",
+]);
+
 export const sogpSetupOtpPurposeEnum = pgEnum("sogp_setup_otp_purpose", [
   "email_verification",
   "sign_in",
@@ -109,6 +121,63 @@ export const prayerWatchSessionEnum = pgEnum("prayer_watch_session", [
   "afternoon",
   "evening",
 ]);
+
+export const unitStatusEnum = pgEnum("unit_status", ["active", "archived"]);
+
+export const unitMemberRoleEnum = pgEnum("unit_member_role", [
+  "member",
+  "leader",
+]);
+
+export const communityPostScopeEnum = pgEnum("community_post_scope", [
+  "global",
+  "unit",
+]);
+
+export const communityPostAuthorKindEnum = pgEnum(
+  "community_post_author_kind",
+  ["ministry", "leader", "member"],
+);
+
+export const communityPostStatusEnum = pgEnum("community_post_status", [
+  "published",
+  "hidden",
+  "removed",
+]);
+
+/** Also used by community_post_comments.status. */
+export const communityMessageStatusEnum = pgEnum("community_message_status", [
+  "visible",
+  "hidden",
+  "removed",
+]);
+
+export const contentFlagTargetEnum = pgEnum("content_flag_target", [
+  "post",
+  "thread",
+  "message",
+  "comment",
+]);
+
+export const contentFlagStatusEnum = pgEnum("content_flag_status", [
+  "open",
+  "actioned",
+  "dismissed",
+]);
+
+export const communityNotificationKindEnum = pgEnum(
+  "community_notification_kind",
+  [
+    "official_post",
+    "thread_reply",
+    "message_reply",
+    "post_comment",
+    "comment_reply",
+    "made_leader",
+    "flag_resolved",
+    "leader_nudge",
+  ],
+);
 
 // ─── Welcome pack leads ─────────────────────────────────────────────────────
 
@@ -145,6 +214,8 @@ export const users = pgTable(
     name: text("name").notNull(),
     email: text("email").notNull(),
     role: userRoleEnum("role").notNull().default("student"),
+    /** Lets an admin/super_admin also hold pastor assignments without a role change. */
+    isPastor: boolean("is_pastor").notNull().default(false),
     emailVerified: boolean("email_verified").notNull().default(false),
     startingLevel: integer("starting_level").notNull().default(1),
     location: text("location"),
@@ -757,6 +828,14 @@ export const sogpEnrollments = pgTable(
     }),
     reason: text("reason"),
     status: sogpEnrollmentStatusEnum("status").notNull().default("enrolled"),
+    leaderboardOptOut: boolean("leaderboard_opt_out").notNull().default(false),
+    // Per-student referral link code (minted lazily) and the enrolment that
+    // referred this one.
+    referralCode: text("referral_code"),
+    referredByEnrollmentId: integer("referred_by_enrollment_id").references(
+      (): AnyPgColumn => sogpEnrollments.id,
+      { onDelete: "set null" },
+    ),
     utmSource: text("utm_source"),
     utmMedium: text("utm_medium"),
     utmCampaign: text("utm_campaign"),
@@ -778,7 +857,76 @@ export const sogpEnrollments = pgTable(
     uniqueIndex("sogp_enrollments_cohort_email_idx").on(t.cohortId, t.email),
     index("sogp_enrollments_status_idx").on(t.status),
     index("sogp_enrollments_telegram_user_idx").on(t.telegramUserId),
+    uniqueIndex("sogp_enrollments_referral_code_idx")
+      .on(t.referralCode)
+      .where(sql`${t.referralCode} IS NOT NULL`),
+    index("sogp_enrollments_referred_by_idx").on(t.referredByEnrollmentId),
   ],
+);
+
+export const sogpOrientationSurveys = pgTable(
+  "sogp_orientation_surveys",
+  {
+    id: serial("id").primaryKey(),
+    enrollmentId: integer("enrollment_id")
+      .notNull()
+      .references(() => sogpEnrollments.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    reasons: jsonb("reasons").$type<string[]>().notNull(),
+    question: text("question"),
+    adminResponse: text("admin_response"),
+    respondedBy: text("responded_by").references(() => users.id),
+    respondedAt: timestamp("responded_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("sogp_orientation_surveys_enrollment_idx").on(t.enrollmentId),
+    index("sogp_orientation_surveys_user_idx").on(t.userId),
+  ],
+);
+
+export const sogpLearningProgressTrackEnum = pgEnum(
+  "sogp_learning_progress_track",
+  ["sogp", "pre_sogp"],
+);
+
+export const sogpLearningProgressShareTemplateEnum = pgEnum(
+  "sogp_learning_progress_share_template",
+  ["light-card", "dark-open", "dark-card"],
+);
+
+export const sogpLearningProgressShares = pgTable(
+  "sogp_learning_progress_shares",
+  {
+    id: serial("id").primaryKey(),
+    enrollmentId: integer("enrollment_id")
+      .notNull()
+      .references(() => sogpEnrollments.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    track: sogpLearningProgressTrackEnum("track").notNull(),
+    dayNumber: integer("day_number"),
+    quote: text("quote").notNull(),
+    authorName: text("author_name").notNull(),
+    template: sogpLearningProgressShareTemplateEnum("template")
+      .notNull()
+      .default("light-card"),
+    // Snapshot of the day's lesson title at share time, for tracks/designs
+    // that print it (e.g. the "dark-card" template's headline).
+    lessonTitle: text("lesson_title"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [index("sogp_learning_progress_shares_user_idx").on(t.userId)],
 );
 
 export const sogpPendingEnrollments = pgTable(
@@ -1022,6 +1170,324 @@ export const sogpRewardGrants = pgTable(
     uniqueIndex("sogp_reward_grants_enrollment_reward_idx").on(
       t.enrollmentId,
       t.rewardKey,
+    ),
+  ],
+);
+
+// ─── Community: location units ──────────────────────────────────────────────
+
+export const units = pgTable(
+  "units",
+  {
+    id: serial("id").primaryKey(),
+    countryCode: text("country_code").notNull(),
+    /** Canonical state/province/region slug; null = country-level unit. */
+    regionKey: text("region_key"),
+    name: text("name").notNull(),
+    telegramUrl: text("telegram_url"),
+    status: unitStatusEnum("status").notNull().default("active"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    // One unit per (country, region). COALESCE keeps country-level units unique.
+    uniqueIndex("units_country_region_idx").on(
+      t.countryCode,
+      sql`coalesce(${t.regionKey}, '')`,
+    ),
+    index("units_status_idx").on(t.status),
+  ],
+);
+
+export const unitMembers = pgTable(
+  "unit_members",
+  {
+    id: serial("id").primaryKey(),
+    unitId: integer("unit_id")
+      .notNull()
+      .references(() => units.id, { onDelete: "cascade" }),
+    enrollmentId: integer("enrollment_id")
+      .notNull()
+      .references(() => sogpEnrollments.id, { onDelete: "cascade" }),
+    role: unitMemberRoleEnum("role").notNull().default("member"),
+    /** null = automatically assigned from enrolment location. */
+    assignedBy: text("assigned_by").references(() => users.id),
+    joinedAt: timestamp("joined_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("unit_members_unit_enrollment_idx").on(
+      t.unitId,
+      t.enrollmentId,
+    ),
+    // Exactly one membership per enrolment.
+    uniqueIndex("unit_members_enrollment_idx").on(t.enrollmentId),
+    index("unit_members_unit_role_idx").on(t.unitId, t.role),
+  ],
+);
+
+export const unitLeaderInvites = pgTable(
+  "unit_leader_invites",
+  {
+    id: serial("id").primaryKey(),
+    unitId: integer("unit_id")
+      .notNull()
+      .references(() => units.id, { onDelete: "cascade" }),
+    email: text("email").notNull(),
+    tokenHash: text("token_hash").notNull(),
+    invitedBy: text("invited_by")
+      .notNull()
+      .references(() => users.id),
+    acceptedBy: text("accepted_by").references(() => users.id),
+    acceptedAt: timestamp("accepted_at", { withTimezone: true }),
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index("unit_leader_invites_unit_idx").on(t.unitId),
+    index("unit_leader_invites_email_idx").on(t.email),
+    uniqueIndex("unit_leader_invites_token_hash_idx").on(t.tokenHash),
+  ],
+);
+
+// ─── Pastor follow-up ────────────────────────────────────────────────────────
+
+export const pastorAssignments = pgTable(
+  "pastor_assignments",
+  {
+    id: serial("id").primaryKey(),
+    enrollmentId: integer("enrollment_id")
+      .notNull()
+      .references(() => sogpEnrollments.id, { onDelete: "cascade" }),
+    pastorUserId: text("pastor_user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    assignedBy: text("assigned_by").references(() => users.id),
+    assignedAt: timestamp("assigned_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    lastContactedAt: timestamp("last_contacted_at", { withTimezone: true }),
+    contactCount: integer("contact_count").notNull().default(0),
+  },
+  (t) => [
+    // Exactly one pastor per enrolment.
+    uniqueIndex("pastor_assignments_enrollment_idx").on(t.enrollmentId),
+    index("pastor_assignments_pastor_idx").on(t.pastorUserId),
+  ],
+);
+
+/** Which pastor covers which region (unit) — one pastor per region. */
+export const pastorRegions = pgTable(
+  "pastor_regions",
+  {
+    id: serial("id").primaryKey(),
+    unitId: integer("unit_id")
+      .notNull()
+      .references(() => units.id, { onDelete: "cascade" }),
+    pastorUserId: text("pastor_user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    assignedBy: text("assigned_by").references(() => users.id),
+    assignedAt: timestamp("assigned_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("pastor_regions_unit_idx").on(t.unitId),
+    index("pastor_regions_pastor_idx").on(t.pastorUserId),
+  ],
+);
+
+// ─── Community: official posts ──────────────────────────────────────────────
+
+export const communityPosts = pgTable(
+  "community_posts",
+  {
+    id: serial("id").primaryKey(),
+    scope: communityPostScopeEnum("scope").notNull(),
+    /** null for global posts. */
+    unitId: integer("unit_id").references(() => units.id, {
+      onDelete: "cascade",
+    }),
+    authorId: text("author_id")
+      .notNull()
+      .references(() => users.id),
+    authorKind: communityPostAuthorKindEnum("author_kind").notNull(),
+    title: text("title"),
+    body: text("body").notNull(),
+    /** Up to 4 uploaded images: `[{ url, key }]`. */
+    images: jsonb("images")
+      .$type<{ url: string; key: string }[]>()
+      .notNull()
+      .default(sql`'[]'::jsonb`),
+    pinned: boolean("pinned").notNull().default(false),
+    status: communityPostStatusEnum("status").notNull().default("published"),
+    commentCount: integer("comment_count").notNull().default(0),
+    shareCount: integer("share_count").notNull().default(0),
+    /** Set when this post is a repost; points at the original. */
+    sharedFromPostId: integer("shared_from_post_id").references(
+      (): AnyPgColumn => communityPosts.id,
+      { onDelete: "set null" },
+    ),
+    publishedAt: timestamp("published_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    lastActivityAt: timestamp("last_activity_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index("community_posts_scope_published_idx").on(t.scope, t.publishedAt),
+    index("community_posts_unit_published_idx").on(t.unitId, t.publishedAt),
+    index("community_posts_scope_activity_idx").on(t.scope, t.lastActivityAt),
+    index("community_posts_status_idx").on(t.status),
+  ],
+);
+
+export const postReactions = pgTable(
+  "post_reactions",
+  {
+    id: serial("id").primaryKey(),
+    postId: integer("post_id")
+      .notNull()
+      .references(() => communityPosts.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    kind: text("kind").notNull().default("pray"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("post_reactions_post_user_kind_idx").on(
+      t.postId,
+      t.userId,
+      t.kind,
+    ),
+  ],
+);
+
+// ─── Community: post comments ──────────────────────────────────────────────
+
+export const communityPostComments = pgTable(
+  "community_post_comments",
+  {
+    id: serial("id").primaryKey(),
+    postId: integer("post_id")
+      .notNull()
+      .references(() => communityPosts.id, { onDelete: "cascade" }),
+    authorId: text("author_id")
+      .notNull()
+      .references(() => users.id),
+    body: text("body").notNull(),
+    status: communityMessageStatusEnum("status").notNull().default("visible"),
+    /** One level of reply nesting. */
+    replyToId: integer("reply_to_id").references(
+      (): AnyPgColumn => communityPostComments.id,
+      { onDelete: "set null" },
+    ),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index("community_post_comments_post_created_idx").on(t.postId, t.createdAt),
+  ],
+);
+
+export const commentReactions = pgTable(
+  "comment_reactions",
+  {
+    id: serial("id").primaryKey(),
+    commentId: integer("comment_id")
+      .notNull()
+      .references(() => communityPostComments.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    kind: text("kind").notNull().default("like"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("comment_reactions_comment_user_kind_idx").on(
+      t.commentId,
+      t.userId,
+      t.kind,
+    ),
+  ],
+);
+
+export const contentFlags = pgTable(
+  "content_flags",
+  {
+    id: serial("id").primaryKey(),
+    targetType: contentFlagTargetEnum("target_type").notNull(),
+    targetId: integer("target_id").notNull(),
+    reporterId: text("reporter_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    reason: text("reason").notNull(),
+    status: contentFlagStatusEnum("status").notNull().default("open"),
+    handledBy: text("handled_by").references(() => users.id),
+    handledAt: timestamp("handled_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index("content_flags_status_idx").on(t.status),
+    index("content_flags_target_idx").on(t.targetType, t.targetId),
+    uniqueIndex("content_flags_reporter_target_idx").on(
+      t.reporterId,
+      t.targetType,
+      t.targetId,
+    ),
+  ],
+);
+
+// ─── Community: notifications ──────────────────────────────────────────────
+
+export const communityNotifications = pgTable(
+  "community_notifications",
+  {
+    id: serial("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    kind: communityNotificationKindEnum("kind").notNull(),
+    payload: jsonb("payload").$type<Record<string, unknown>>().notNull(),
+    readAt: timestamp("read_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index("community_notifications_user_created_idx").on(
+      t.userId,
+      t.createdAt,
     ),
   ],
 );

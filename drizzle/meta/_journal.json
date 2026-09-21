@@ -127,6 +127,97 @@
       "when": 1788172505000,
       "tag": "0017_sogp_pending_enrolments",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1788511940015,
+      "tag": "0018_sogp_referrals",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1788991516040,
+      "tag": "0019_community_units",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1789021630172,
+      "tag": "0020_community_posts",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1789024237899,
+      "tag": "0021_community_discussion",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1789025971834,
+      "tag": "0022_community_notifications",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1789030021199,
+      "tag": "0023_community_feed_redesign",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1789216035311,
+      "tag": "0024_old_victor_mancha",
+      "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1789222902371,
+      "tag": "0025_kind_tinkerer",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1789225841544,
+      "tag": "0026_robust_talon",
+      "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1789531312861,
+      "tag": "0027_fuzzy_vargas",
+      "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1789617801566,
+      "tag": "0028_loving_sentinel",
+      "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1789681727369,
+      "tag": "0029_sogp_learning_progress_share_templates",
+      "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1789970315802,
+      "tag": "0030_sogp_leaderboard_opt_out",
+      "breakpoints": true
     }
   ]
 }

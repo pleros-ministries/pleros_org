@@ -17,12 +17,13 @@ export function SogpCourseSidebar({
 }) {
   return (
     <div className="grid gap-4">
-      <section className="rounded-sm border border-zinc-200 bg-white p-3">
+      <section className="relative left-1/2 right-1/2 w-screen -mx-[50vw] rounded-none bg-[var(--color-brand-sky)] p-3 lg:static lg:left-auto lg:right-auto lg:mx-0 lg:w-auto lg:rounded-sm">
         <SogpCalendar
           days={data.days}
           selectedDateKey={selectedDateKey}
           todayKey={data.todayKey}
           onSelect={onSelect}
+          tinted
         />
       </section>
 

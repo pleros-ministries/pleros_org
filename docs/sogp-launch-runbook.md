@@ -44,6 +44,8 @@ Formation-tracking migration: `drizzle/0010_sogp_formation_tracking.sql`. Legacy
 
 Birth-year migration: `drizzle/0012_sogp_birth_year.sql` adds the nullable `sogp_enrollments.birth_year` column collected on the enrolment form (applied to the current Neon database on 2026-08-26). Existing rows stay `NULL`; run it before deploying the updated form to any environment that has not had it applied.
 
+Referral migration: `drizzle/0018_sogp_referrals.sql` adds `sogp_enrollments.referral_code` (nullable, partial-unique) and `sogp_enrollments.referred_by_enrollment_id` (nullable self-FK). Apply with `DATABASE_URL_UNPOOLED=... npx drizzle-kit migrate` before deploying the referral dashboard. Existing enrolments have `NULL` codes and get one minted on their first visit to `/dashboard/sogp/referrals`; `?ref=CODE` on the enrol link is captured through the same path as `utm_*`.
+
 Current production data has an enrolment-open `september-2026` cohort. Level 1 and Level 2 provide 16 content-ready tracks. Four named, content-ready Level 3 selections remain required before course activation.
 
 Configure first 20-track curriculum after Level 3 content is ready:
@@ -68,7 +70,7 @@ curl --request POST "https://api.telegram.org/bot$TELEGRAM_SOGP_BOT_TOKEN/setWeb
 
 Verify with `getWebhookInfo`. Admin `/admin/sogp` can preview and send one-off channel broadcasts. Hobby-compatible daily cron runs at 05:00 UTC (06:00 WAT) and sends deduplicated preparation, newly released track, and next-24-hours live-class messages.
 
-Completed enrolments post a learner alert (running enrolment number, name, phone, country, state, age, referral, cohort) to the private ops chat `TELEGRAM_SOGP_SIGNUP_CHAT_ID` via `lib/telegram/sogp-signup-alert.ts`. This is a separate chat from the public `TELEGRAM_SOGP_CHANNEL_ID` broadcast channel; the bot must be an administrator of it. Unset the var to disable the alert (enrolment is unaffected).
+Completed enrolments post a learner alert (running enrolment number, name, phone, country, state, year of birth, referral, cohort) to the private ops chat `TELEGRAM_SOGP_SIGNUP_CHAT_ID` via `lib/telegram/sogp-signup-alert.ts`. This is a separate chat from the public `TELEGRAM_SOGP_CHANNEL_ID` broadcast channel; the bot must be an administrator of it. Unset the var to disable the alert (enrolment is unaffected).
 
 ## Launch checklist
 

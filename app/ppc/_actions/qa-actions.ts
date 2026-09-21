@@ -49,7 +49,7 @@ export async function replyToThread(data: {
   const session = await requireAuth();
   const thread = await getThreadById(data.threadId);
   if (!thread) {
-    throw new Error("Thread not found");
+    return { error: "Thread not found" };
   }
   assertCanAccessQaThread(session, thread);
   const { authorId, authorRole } = getSignedInActor(session);
@@ -60,7 +60,7 @@ export async function replyToThread(data: {
     content: data.content,
   });
   revalidateQaSurfaces();
-  return message;
+  return { error: null as string | null, ...message };
 }
 
 export async function closeQaThread(threadId: number) {
@@ -79,14 +79,17 @@ export async function fetchThreadMessages(threadId: number) {
   const session = await requireAuth();
   const thread = await getThreadById(threadId);
   if (!thread) {
-    throw new Error("Thread not found");
+    return { error: "Thread not found", messages: [] };
   }
   assertCanAccessQaThread(session, thread);
   const messages = await getThreadMessages(threadId);
-  return messages.map((m) => ({
-    ...m,
-    createdAt: m.createdAt.toISOString(),
-  }));
+  return {
+    error: null as string | null,
+    messages: messages.map((m) => ({
+      ...m,
+      createdAt: m.createdAt.toISOString(),
+    })),
+  };
 }
 
 export async function updateQaThreadAssignment(
@@ -96,7 +99,7 @@ export async function updateQaThreadAssignment(
   const session = await requireStaff();
   const thread = await getThreadById(threadId);
   if (!thread) {
-    throw new Error("Thread not found");
+    return { error: "Thread not found" };
   }
 
   const actingUserId = session.user.id;
@@ -119,17 +122,17 @@ export async function updateQaThreadAssignment(
       })) ?? null;
 
     if (!assignee || !isStaffRole(assignee.role)) {
-      throw new Error("Assignee must be a staff member");
+      return { error: "Assignee must be a staff member" };
     }
   }
 
   if (!hasAdminAccess(actingRole)) {
     if (assignedToId && assignedToId !== actingUserId) {
-      throw new Error("Forbidden: instructors can only assign threads to themselves");
+      return { error: "Forbidden: instructors can only assign threads to themselves" };
     }
 
     if (assignedToId == null && thread.assignedTo !== actingUserId) {
-      throw new Error("Forbidden: instructors can only clear their own assignments");
+      return { error: "Forbidden: instructors can only clear their own assignments" };
     }
   }
 
@@ -161,4 +164,5 @@ export async function updateQaThreadAssignment(
   }
 
   revalidateQaSurfaces();
+  return { error: null as string | null };
 }

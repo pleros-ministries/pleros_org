@@ -23,7 +23,9 @@ describe("Pre-SOGP seed", () => {
       publishDate: "2026-11-01",
       title: "What is God's Purpose? (Part 1)",
     });
-    expect(days[7]?.title).toBe("Gospel Answers Series 1");
+    expect(days[5]?.title).toBe("What is God's Purpose? (Part 6)");
+    expect(days.every((day) => !day.title.includes("Part 7"))).toBe(true);
+    expect(days[6]?.title).toBe("Gospel Answers Series 1");
     expect(days.at(-1)?.publishDate).toBe("2026-11-14");
   });
 });
@@ -85,17 +87,18 @@ test("admin exposes cohort date and status controls", () => {
 });
 
 describe("SOGP launch readiness", () => {
-  test("requires a full preparation window, 24 ready tracks, and four reviews", () => {
+  test("requires a full preparation window, every assigned track ready, and four reviews", () => {
     expect(
       validateSogpLaunchReadiness({
         preparationCount: PRE_SOGP_PREPARATION_DAYS - 1,
         uniquePreparationUrlCount: PRE_SOGP_PREPARATION_DAYS - 1,
+        requiredTrackCount: 24,
         readyTrackCount: 23,
         requiredReviewCount: 3,
       }),
     ).toEqual([
       `Add exactly ${PRE_SOGP_PREPARATION_DAYS} unique Pre-SOGP lessons.`,
-      "Publish all 24 content-ready SOGP teachings.",
+      "Publish content-ready SOGP teachings for every track assigned to this cohort.",
       "Schedule four required review sessions.",
     ]);
   });
@@ -105,10 +108,37 @@ describe("SOGP launch readiness", () => {
       validateSogpLaunchReadiness({
         preparationCount: PRE_SOGP_PREPARATION_DAYS,
         uniquePreparationUrlCount: PRE_SOGP_PREPARATION_DAYS,
+        requiredTrackCount: 24,
         readyTrackCount: 24,
         requiredReviewCount: 4,
       }),
     ).toEqual([]);
+  });
+
+  test("accepts a cohort whose curriculum is still being rolled out incrementally", () => {
+    expect(
+      validateSogpLaunchReadiness({
+        preparationCount: PRE_SOGP_PREPARATION_DAYS,
+        uniquePreparationUrlCount: PRE_SOGP_PREPARATION_DAYS,
+        requiredTrackCount: 10,
+        readyTrackCount: 10,
+        requiredReviewCount: 4,
+      }),
+    ).toEqual([]);
+  });
+
+  test("rejects a cohort with no tracks assigned yet", () => {
+    expect(
+      validateSogpLaunchReadiness({
+        preparationCount: PRE_SOGP_PREPARATION_DAYS,
+        uniquePreparationUrlCount: PRE_SOGP_PREPARATION_DAYS,
+        requiredTrackCount: 0,
+        readyTrackCount: 0,
+        requiredReviewCount: 4,
+      }),
+    ).toEqual([
+      "Publish content-ready SOGP teachings for every track assigned to this cohort.",
+    ]);
   });
 });
 

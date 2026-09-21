@@ -116,6 +116,7 @@ describe("focused Welcome Pack pages", () => {
       <WelcomePackJoinPage
         telegramUrl="https://t.me/pleros_sogp"
         videoSrc="/site/sogp/sogp-welcome-page-20260831.mp4"
+        surveyCompleted
       />,
     );
 
@@ -130,6 +131,7 @@ describe("focused Welcome Pack pages", () => {
       <WelcomePackJoinPage
         telegramUrl="https://t.me/pleros_sogp"
         videoSrc={null}
+        surveyCompleted
       />,
     );
     expect(html.match(/<a /g)).toHaveLength(1);

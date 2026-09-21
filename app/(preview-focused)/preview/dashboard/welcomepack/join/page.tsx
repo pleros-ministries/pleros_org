@@ -17,6 +17,7 @@ export default function WelcomePackJoinPreviewPage() {
       telegramUrl="https://t.me/pleros_sogp"
       videoSrc={WELCOME_PACK_JOIN_VIDEO_SRC}
       videoPosterSrc={WELCOME_PACK_JOIN_POSTER_SRC}
+      surveyCompleted
     />
   );
 }

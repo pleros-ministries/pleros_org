@@ -11,6 +11,7 @@ import { buildFirstCohortTrackSelection } from "@/lib/sogp/first-cohort";
 import {
   assertMondayCohortStart,
   buildSogpTrackReleaseDates,
+  resolveFirstReleaseAt,
 } from "@/lib/sogp/schedule";
 import { resolvePreparationStartsAt } from "@/lib/sogp/calendar";
 import {
@@ -33,6 +34,14 @@ import {
   type SogpBroadcastKind,
 } from "@/lib/telegram/sogp-broadcast";
 
+// Next.js treats a `throw` from a Server Action as an uncaught exception: in
+// production the message is redacted to a generic one (the "digest" error /
+// React error #441), even for a deliberate, safe validation message. Every
+// action below returns `{ error: string }` for expected failures instead, so
+// the real message actually reaches the admin. `requireAdmin()` throws are
+// left alone on purpose: those mean "you shouldn't be able to call this at
+// all," not a normal validation case.
+
 export async function sendAdminSogpBroadcast(input: {
   kind: SogpBroadcastKind;
   message: string;
@@ -48,9 +57,10 @@ export async function configureSogpTelegramWebhook() {
   const secret = process.env.TELEGRAM_SOGP_WEBHOOK_SECRET;
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
   if (!token || !secret || !baseUrl?.startsWith("https://")) {
-    throw new Error(
-      "Telegram token, webhook secret, and HTTPS NEXT_PUBLIC_APP_URL are required.",
-    );
+    return {
+      error:
+        "Telegram token, webhook secret, and HTTPS NEXT_PUBLIC_APP_URL are required.",
+    };
   }
   const response = await fetch(`https://api.telegram.org/bot${token}/setWebhook`, {
     method: "POST",
@@ -66,36 +76,54 @@ export async function configureSogpTelegramWebhook() {
     description?: string;
   };
   if (!response.ok || !payload.ok) {
-    throw new Error(payload.description ?? "Telegram webhook setup failed.");
+    return { error: payload.description ?? "Telegram webhook setup failed." };
   }
-  return { configured: true };
+  return { error: null as string | null, configured: true };
 }
 
 export async function configureSogpCurriculum(input: {
   cohortId: number;
+  levels?: (1 | 2 | 3 | 4)[];
+  curriculumOrders?: number[];
 }) {
   await requireAdmin();
-  const selection = buildFirstCohortTrackSelection();
+  const allTracks = buildFirstCohortTrackSelection();
+  const selection = input.curriculumOrders?.length
+    ? allTracks.filter((track) =>
+        input.curriculumOrders!.includes(track.curriculumOrder),
+      )
+    : allTracks.filter((track) =>
+        (input.levels ?? [1, 2, 3, 4]).includes(track.curriculumLevel),
+      );
+  if (!selection.length) return { error: "Choose at least one teaching to push." };
   const cohort = await db.query.sogpCohorts.findFirst({
     where: (row, { eq: equal }) => equal(row.id, input.cohortId),
   });
-  if (!cohort) throw new Error("SOGP cohort not found.");
+  if (!cohort) return { error: "SOGP cohort not found." };
 
   const candidates = await db
     .select()
     .from(schema.lessons)
     .where(inArray(schema.lessons.levelId, [1, 2, 3]));
+  const missingLesson = selection.find(
+    (selected) =>
+      !candidates.some(
+        (candidate) =>
+          candidate.levelId === selected.levelId &&
+          candidate.lessonNumber === selected.lessonNumber,
+      ),
+  );
+  if (missingLesson) {
+    return {
+      error: `Missing Level ${missingLesson.levelId}.${missingLesson.lessonNumber}.`,
+    };
+  }
   const selectedLessons = selection.map((selected) => {
     const lesson = candidates.find(
       (candidate) =>
         candidate.levelId === selected.levelId &&
         candidate.lessonNumber === selected.lessonNumber,
-    );
-    if (!lesson) {
-      throw new Error(
-        `Missing Level ${selected.levelId}.${selected.lessonNumber}.`,
-      );
-    }
+    )!;
     return { selected, lesson };
   });
   const quizRows = await db
@@ -116,20 +144,33 @@ export async function configureSogpCurriculum(input: {
       }),
   );
   if (unready.length) {
-    throw new Error(
-      `Content not ready: ${unready.map(({ lesson }) => `L${lesson.levelId}.${lesson.lessonNumber} ${lesson.title}`).join(", ")}`,
-    );
+    return {
+      error: `Content not ready: ${unready.map(({ lesson }) => `L${lesson.levelId}.${lesson.lessonNumber} ${lesson.title}`).join(", ")}`,
+    };
   }
 
-  const firstRelease = new Date(cohort.startsAt);
-  firstRelease.setUTCHours(5, 0, 0, 0);
-  assertMondayCohortStart(firstRelease);
-  const releaseDates = buildSogpTrackReleaseDates(firstRelease);
+  const firstRelease = resolveFirstReleaseAt(new Date(cohort.startsAt));
+  let releaseDates: Date[];
+  try {
+    assertMondayCohortStart(firstRelease);
+    releaseDates = buildSogpTrackReleaseDates(firstRelease);
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : "Invalid cohort start date.",
+    };
+  }
 
-  await db.transaction(async (tx) => {
+  const selectedOrders = selection.map((selected) => selected.curriculumOrder);
+
+  await transactionDb.transaction(async (tx) => {
     await tx
       .delete(schema.sogpCohortTracks)
-      .where(eq(schema.sogpCohortTracks.cohortId, input.cohortId));
+      .where(
+        and(
+          eq(schema.sogpCohortTracks.cohortId, input.cohortId),
+          inArray(schema.sogpCohortTracks.curriculumOrder, selectedOrders),
+        ),
+      );
     await tx.insert(schema.sogpCohortTracks).values(
       selectedLessons.map(({ selected, lesson }) => ({
         cohortId: input.cohortId,
@@ -148,6 +189,7 @@ export async function configureSogpCurriculum(input: {
   revalidatePath("/admin/sogp");
 
   return {
+    error: null as string | null,
     requiredTrackCount: selection.length,
   };
 }
@@ -159,12 +201,13 @@ export async function updateSogpCohort(input: {
   endsAt?: string;
   telegramChannelUrl?: string | null;
   telegramDiscussionUrl?: string | null;
+  enrollmentClosesAt?: string | null;
 }) {
   await requireAdmin();
   const currentCohort = await db.query.sogpCohorts.findFirst({
     where: (row, { eq: equal }) => equal(row.id, input.cohortId),
   });
-  if (!currentCohort) throw new Error("SOGP cohort not found.");
+  if (!currentCohort) return { error: "SOGP cohort not found." };
   const startsAt = input.startsAt ? new Date(input.startsAt) : currentCohort.startsAt;
   const endsAt = input.endsAt ? new Date(input.endsAt) : currentCohort.endsAt;
   if (
@@ -172,9 +215,15 @@ export async function updateSogpCohort(input: {
     Number.isNaN(endsAt.getTime()) ||
     endsAt <= startsAt
   ) {
-    throw new Error("Enter a valid cohort start and end date.");
+    return { error: "Enter a valid cohort start and end date." };
   }
-  assertMondayCohortStart(startsAt);
+  try {
+    assertMondayCohortStart(startsAt);
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : "Invalid cohort start date.",
+    };
+  }
   if (input.status === "active") {
     const [preparationRows, trackRows, reviewRows, quizRows] = await Promise.all([
       db
@@ -213,20 +262,20 @@ export async function updateSogpCohort(input: {
         .from(schema.quizQuestions),
     ]);
     const lessonsWithQuiz = new Set(quizRows.map((row) => row.lessonId));
+    const requiredTrackRows = trackRows.filter(({ track }) => track.isRequired);
     const readinessIssues = validateSogpLaunchReadiness({
       preparationCount: new Set(preparationRows.map((row) => row.dayId)).size,
       uniquePreparationUrlCount: new Set(preparationRows.map((row) => row.url)).size,
-      readyTrackCount: trackRows.filter(
-        ({ track, lesson }) =>
-          track.isRequired &&
-          isSogpLessonContentReady({
-            ...lesson,
-            hasQuiz: lessonsWithQuiz.has(lesson.id),
-          }),
+      requiredTrackCount: requiredTrackRows.length,
+      readyTrackCount: requiredTrackRows.filter(({ lesson }) =>
+        isSogpLessonContentReady({
+          ...lesson,
+          hasQuiz: lessonsWithQuiz.has(lesson.id),
+        }),
       ).length,
       requiredReviewCount: reviewRows.length,
     });
-    if (readinessIssues.length) throw new Error(readinessIssues.join(" "));
+    if (readinessIssues.length) return { error: readinessIssues.join(" ") };
   }
   const [updated] = await db
     .update(schema.sogpCohorts)
@@ -240,13 +289,16 @@ export async function updateSogpCohort(input: {
       ...(input.telegramDiscussionUrl !== undefined
         ? { telegramDiscussionUrl: input.telegramDiscussionUrl }
         : {}),
+      ...(input.enrollmentClosesAt !== undefined
+        ? { enrollmentClosesAt: input.enrollmentClosesAt ? new Date(input.enrollmentClosesAt) : null }
+        : {}),
       updatedAt: new Date(),
     })
     .where(eq(schema.sogpCohorts.id, input.cohortId))
     .returning();
-  if (!updated) throw new Error("SOGP cohort not found.");
+  if (!updated) return { error: "SOGP cohort not found." };
   revalidatePath("/admin/sogp");
-  return updated;
+  return { error: null as string | null, ...updated };
 }
 
 export async function seedSogpPreparation(input: { cohortId: number }) {
@@ -254,7 +306,7 @@ export async function seedSogpPreparation(input: { cohortId: number }) {
   const cohort = await db.query.sogpCohorts.findFirst({
     where: (row, { eq: equal }) => equal(row.id, input.cohortId),
   });
-  if (!cohort) throw new Error("SOGP cohort not found.");
+  if (!cohort) return { error: "SOGP cohort not found." };
   const seed = buildPreSogpSeed(
     resolvePreparationStartsAt(
       cohort.startsAt,
@@ -314,7 +366,7 @@ export async function seedSogpPreparation(input: { cohortId: number }) {
     }
   });
   revalidatePath("/admin/sogp");
-  return { count: seed.length };
+  return { error: null as string | null, count: seed.length };
 }
 
 export async function saveSogpPreparationDay(input: SogpPreparationInput) {
@@ -323,7 +375,7 @@ export async function saveSogpPreparationDay(input: SogpPreparationInput) {
   const cohort = await db.query.sogpCohorts.findFirst({
     where: (row, { eq: equal }) => equal(row.id, normalized.cohortId),
   });
-  if (!cohort) throw new Error("SOGP cohort not found.");
+  if (!cohort) return { error: "SOGP cohort not found." };
 
   return db.transaction(async (tx) => {
     const [day] = normalized.id
@@ -362,7 +414,7 @@ export async function saveSogpPreparationDay(input: SogpPreparationInput) {
         ...resource,
       })),
     );
-    return { id: day.id };
+    return { error: null as string | null, id: day.id };
   });
 }
 
@@ -376,8 +428,8 @@ export async function setSogpPreparationStatus(input: {
     .set({ status: input.status, updatedAt: new Date() })
     .where(eq(schema.sogpPreparationDays.id, input.id))
     .returning({ id: schema.sogpPreparationDays.id });
-  if (!updated) throw new Error("Preparation day not found.");
-  return updated;
+  if (!updated) return { error: "Preparation day not found." };
+  return { error: null as string | null, ...updated };
 }
 
 export async function deleteSogpPreparationDay(input: { id: number }) {
@@ -386,8 +438,8 @@ export async function deleteSogpPreparationDay(input: { id: number }) {
     .delete(schema.sogpPreparationDays)
     .where(eq(schema.sogpPreparationDays.id, input.id))
     .returning({ id: schema.sogpPreparationDays.id });
-  if (!deleted) throw new Error("Preparation day not found.");
-  return deleted;
+  if (!deleted) return { error: "Preparation day not found." };
+  return { error: null as string | null, ...deleted };
 }
 
 export async function createSogpLiveClass(input: {
@@ -404,7 +456,7 @@ export async function createSogpLiveClass(input: {
   const startsAt = new Date(input.startsAt);
   const endsAt = new Date(input.endsAt);
   if (!title || Number.isNaN(startsAt.getTime()) || endsAt <= startsAt) {
-    throw new Error("Enter a title and valid class time range.");
+    return { error: "Enter a title and valid class time range." };
   }
   const [created] = await db
     .insert(schema.sogpLiveClasses)
@@ -419,7 +471,7 @@ export async function createSogpLiveClass(input: {
     })
     .returning();
   revalidatePath("/admin/sogp");
-  return created;
+  return { error: null as string | null, ...created };
 }
 
 export async function updateSogpLiveClass(input: {
@@ -443,17 +495,39 @@ export async function updateSogpLiveClass(input: {
     })
     .where(eq(schema.sogpLiveClasses.id, input.id))
     .returning();
-  if (!updated) throw new Error("SOGP review session not found.");
+  if (!updated) return { error: "SOGP review session not found." };
   revalidatePath("/admin/sogp");
-  return updated;
+  return { error: null as string | null, ...updated };
 }
 
-async function requireSogpEnrollmentForCorrection(enrollmentId: number) {
+export async function respondToOrientationSurvey(input: {
+  surveyId: number;
+  response: string;
+}) {
+  const session = await requireAdmin();
+  const response = input.response.trim();
+  if (!response) return { error: "Write a response before saving." };
+  const [updated] = await db
+    .update(schema.sogpOrientationSurveys)
+    .set({
+      adminResponse: response,
+      respondedBy: session.user.id,
+      respondedAt: new Date(),
+      updatedAt: new Date(),
+    })
+    .where(eq(schema.sogpOrientationSurveys.id, input.surveyId))
+    .returning();
+  if (!updated) return { error: "Orientation survey response not found." };
+  revalidatePath("/admin/sogp");
+  return { error: null as string | null, ...updated };
+}
+
+async function findSogpEnrollmentForCorrection(enrollmentId: number) {
   const enrollment = await db.query.sogpEnrollments.findFirst({
     where: (row, { eq: equal }) => equal(row.id, enrollmentId),
   });
-  if (!enrollment) throw new Error("SOGP enrolment not found.");
-  return enrollment;
+  if (!enrollment) return { error: "SOGP enrolment not found.", enrollment: null };
+  return { error: null, enrollment };
 }
 
 export async function correctSogpPreparationCompletion(input: {
@@ -462,14 +536,16 @@ export async function correctSogpPreparationCompletion(input: {
   complete: boolean;
 }) {
   await requireAdmin();
-  const enrollment = await requireSogpEnrollmentForCorrection(input.enrollmentId);
+  const found = await findSogpEnrollmentForCorrection(input.enrollmentId);
+  if (found.error) return { error: found.error };
+  const enrollment = found.enrollment!;
   const result = await setPreparationLessonComplete({
     userId: enrollment.userId,
     preparationDayId: input.preparationDayId,
     complete: input.complete,
   });
   revalidatePath("/admin/sogp");
-  return result;
+  return { error: null as string | null, ...result };
 }
 
 export async function correctSogpPrayerCompletion(input: {
@@ -478,14 +554,16 @@ export async function correctSogpPrayerCompletion(input: {
   complete: boolean;
 }) {
   await requireAdmin();
-  const enrollment = await requireSogpEnrollmentForCorrection(input.enrollmentId);
+  const found = await findSogpEnrollmentForCorrection(input.enrollmentId);
+  if (found.error) return { error: found.error };
+  const enrollment = found.enrollment!;
   const result = await setSogpMorningPrayerComplete({
     userId: enrollment.userId,
     dateKey: input.dateKey,
     complete: input.complete,
   });
   revalidatePath("/admin/sogp");
-  return result;
+  return { error: null as string | null, ...result };
 }
 
 export async function correctSogpReviewCompletion(input: {
@@ -495,7 +573,9 @@ export async function correctSogpReviewCompletion(input: {
   source: "live" | "recording";
 }) {
   await requireAdmin();
-  const enrollment = await requireSogpEnrollmentForCorrection(input.enrollmentId);
+  const found = await findSogpEnrollmentForCorrection(input.enrollmentId);
+  if (found.error) return { error: found.error };
+  const enrollment = found.enrollment!;
   const result = await setSogpReviewComplete({
     userId: enrollment.userId,
     liveClassId: input.liveClassId,
@@ -503,7 +583,7 @@ export async function correctSogpReviewCompletion(input: {
     source: input.source,
   });
   revalidatePath("/admin/sogp");
-  return result;
+  return { error: null as string | null, ...result };
 }
 
 export async function markSogpLiveClassAttendance(input: {

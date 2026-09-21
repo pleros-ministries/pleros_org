@@ -14,6 +14,10 @@ export function getStudentSelfActor(session: AppSession) {
 }
 
 export function getSignedInActor(session: AppSession) {
+  if (session.user.role === "pastor") {
+    throw new Error("Forbidden: pastors cannot perform this action");
+  }
+
   return {
     authorId: session.user.id,
     authorRole: session.user.role,

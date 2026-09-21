@@ -15,12 +15,12 @@ export async function issueSogpCertificate(input: {
 }) {
   const session = await requireAdmin();
   const completion = await getSogpCompletionForEnrollment(input.enrollmentId);
-  if (!completion) throw new Error("SOGP enrolment not found.");
+  if (!completion) return { error: "SOGP enrolment not found." };
   const overrideReason = input.overrideReason?.trim() || null;
   if (!completion.eligibility.eligible && !overrideReason) {
-    throw new Error(
-      `Learner is not eligible: ${completion.eligibility.unmet.join(", ")}.`,
-    );
+    return {
+      error: `Learner is not eligible: ${completion.eligibility.unmet.join(", ")}.`,
+    };
   }
   const verificationCode = `SOGP-${randomBytes(6).toString("hex").toUpperCase()}`;
   const [certificate] = await db
@@ -48,7 +48,10 @@ export async function issueSogpCertificate(input: {
       grantedBy: session.user.id,
     })
     .onConflictDoNothing();
-  return certificate ?? completion.dashboard.certificate;
+  return {
+    error: null as string | null,
+    certificate: certificate ?? completion.dashboard.certificate,
+  };
 }
 
 export async function grantSogpReward(input: {
@@ -57,7 +60,7 @@ export async function grantSogpReward(input: {
 }) {
   const session = await requireAdmin();
   const label = SOGP_REWARDS[input.rewardKey];
-  if (!label) throw new Error("Unknown SOGP reward.");
+  if (!label) return { error: "Unknown SOGP reward." };
   const [grant] = await db
     .insert(schema.sogpRewardGrants)
     .values({
@@ -68,5 +71,5 @@ export async function grantSogpReward(input: {
     })
     .onConflictDoNothing()
     .returning();
-  return grant ?? null;
+  return { error: null as string | null, grant: grant ?? null };
 }

@@ -108,7 +108,7 @@ export async function sendStaffAssignmentNotification(opts: {
 
 export async function sendStaffInvite(opts: {
   to: string;
-  role: "admin" | "instructor";
+  role: "admin" | "instructor" | "pastor";
   inviteUrl: string;
 }) {
   if (!isEmailEnabled() || !resend) return null;

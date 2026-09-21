@@ -24,6 +24,8 @@ import {
 import { partitionSogpPreparationDays } from "@/lib/sogp/preparation";
 import type { SogpPreparationDay } from "@/lib/sogp/types";
 
+import { SharePreparationDay } from "./share-preparation-day";
+
 type DashboardPayload = {
   generatedAt: string;
   enrollment: {
@@ -59,6 +61,7 @@ type DashboardPayload = {
     releaseAt: string;
     lesson: { id: number; title: string; status: "draft" | "published" };
     completed: boolean;
+    accessible: boolean;
   }>;
   liveClasses: Array<{
     id: number;
@@ -97,7 +100,6 @@ function formatDate(value: string) {
 }
 
 function CurriculumRail({ data }: { data: DashboardPayload }) {
-  const now = new Date(data.generatedAt).getTime();
   return (
     <aside className="hidden rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white lg:block">
       <div className="flex items-center gap-2 border-b border-[var(--color-line)] px-4 py-4">
@@ -114,7 +116,7 @@ function CurriculumRail({ data }: { data: DashboardPayload }) {
               <p className="px-2 pb-2 font-[var(--font-be-vietnam-pro)] text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-[var(--color-text-muted)]">Week {week}</p>
               <div className="grid gap-1">
                 {tracks.length ? tracks.map((track) => {
-                  const unlocked = new Date(track.releaseAt).getTime() <= now;
+                  const unlocked = track.accessible;
                   const Icon = track.completed ? Check : unlocked ? Play : LockKeyhole;
                   return (
                     <Link key={track.id} href={unlocked ? `/dashboard/sogp/course/day/${track.dayNumber}` : "#"} aria-disabled={!unlocked} className={`grid grid-cols-[1.5rem_1fr] items-start gap-2 rounded-[0.45rem] px-2 py-2.5 transition-colors ${unlocked ? "hover:bg-[var(--color-brand-sky)]" : "pointer-events-none opacity-48"}`}>
@@ -180,6 +182,16 @@ function PreparingDashboard({ data }: { data: DashboardPayload }) {
             <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-brand-blue)]">Today’s preparation</p>
             <h2 className="font-[var(--font-sen)] text-2xl font-semibold tracking-[-0.045em] text-[var(--color-text-strong)]">{preparation.today.countdownLabel}</h2>
             <p className="max-w-[44rem] text-sm leading-[1.6] text-[var(--color-text-muted)]">{preparation.today.introduction}</p>
+            <SharePreparationDay
+              dateKey={preparation.today.publishDate}
+              dayLabel={preparation.today.countdownLabel}
+              title={
+                preparation.today.resources.find(
+                  (resource) =>
+                    resource.type === "video" || resource.type === "teaching",
+                )?.title ?? preparation.today.countdownLabel
+              }
+            />
           </div>
           <div className="grid gap-3 md:grid-cols-2">{preparation.today.resources.map(resourceLink)}</div>
         </section>
@@ -221,10 +233,7 @@ function ActiveDashboard({ data }: { data: DashboardPayload }) {
   const percent = total ? Math.round((completed / total) * 100) : 0;
   const now = new Date(data.generatedAt).getTime();
   const nextTrack = data.tracks.find(
-    (track) =>
-      track.isRequired &&
-      !track.completed &&
-      new Date(track.releaseAt).getTime() <= now,
+    (track) => track.isRequired && !track.completed && track.accessible,
   );
   const nextClass = data.liveClasses.find(
     (item) => item.status !== "cancelled" && new Date(item.endsAt).getTime() > now,

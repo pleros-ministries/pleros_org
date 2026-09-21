@@ -68,9 +68,9 @@ const tabDefs: { key: TabKey; label: string }[] = [
 ];
 
 function parseMessages(
-  msgs: Awaited<ReturnType<typeof fetchThreadMessages>>,
+  result: Awaited<ReturnType<typeof fetchThreadMessages>>,
 ): Message[] {
-  return msgs.map((m) => ({
+  return result.messages.map((m) => ({
     ...m,
     authorName:
       ((m as Record<string, unknown>).authorName as string) ?? "Unknown",
@@ -179,11 +179,16 @@ export function QaInboxClient({
     setMessages([]);
     setLoadingMessages(true);
 
-    fetchThreadMessages(selectedId).then((msgs) => {
+    fetchThreadMessages(selectedId).then((result) => {
       if (isCancelled) {
         return;
       }
-      setMessages(parseMessages(msgs));
+      if (result.error) {
+        setFeedback(result.error);
+        setLoadingMessages(false);
+        return;
+      }
+      setMessages(parseMessages(result));
       setLoadingMessages(false);
     });
 
@@ -195,10 +200,14 @@ export function QaInboxClient({
   const handleReply = () => {
     if (!replyText.trim() || selectedId == null) return;
     startTransition(async () => {
-      await replyToThread({
+      const replyResult = await replyToThread({
         threadId: selectedId,
         content: replyText.trim(),
       });
+      if (replyResult.error) {
+        setFeedback(replyResult.error);
+        return;
+      }
       setThreadRecords((prev) =>
         prev.map((thread) =>
           thread.id === selectedId
@@ -212,8 +221,12 @@ export function QaInboxClient({
       );
       setReplyText("");
       setFeedback("Reply sent.");
-      const msgs = await fetchThreadMessages(selectedId);
-      setMessages(parseMessages(msgs));
+      const result = await fetchThreadMessages(selectedId);
+      if (result.error) {
+        setFeedback(result.error);
+        return;
+      }
+      setMessages(parseMessages(result));
       await queryClient.invalidateQueries({ queryKey: ADMIN_QUERY_KEYS.qa });
     });
   };
@@ -259,7 +272,11 @@ export function QaInboxClient({
 
   const handleAssignmentUpdate = (threadId: number, nextAssignedToId: string | null) => {
     startTransition(async () => {
-      await updateQaThreadAssignment(threadId, nextAssignedToId);
+      const result = await updateQaThreadAssignment(threadId, nextAssignedToId);
+      if (result.error) {
+        setFeedback(result.error);
+        return;
+      }
       setThreadRecords((prev) =>
         prev.map((thread) =>
           thread.id === threadId

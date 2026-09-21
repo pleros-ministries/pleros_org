@@ -12,10 +12,7 @@ export type SogpSignupAlertInput = {
   cohortTitle: string;
 };
 
-export function formatSogpSignupAlert(
-  input: SogpSignupAlertInput,
-  now: Date = new Date(),
-): string {
+export function formatSogpSignupAlert(input: SogpSignupAlertInput): string {
   const name = `${input.firstName} ${input.lastName}`.trim();
   const lines = [
     `🎓 New SOGP enrolment #${input.enrollmentId}`,
@@ -27,7 +24,7 @@ export function formatSogpSignupAlert(
   ];
 
   if (input.birthYear) {
-    lines.push(`Age: ${now.getFullYear() - input.birthYear}`);
+    lines.push(`Year of birth: ${input.birthYear}`);
   }
 
   lines.push(`Heard about us: ${input.referralSource || "—"}`);

@@ -11,7 +11,8 @@ export type PpcShellIcon =
   | "contact"
   | "notifications"
   | "learning"
-  | "waitlist";
+  | "waitlist"
+  | "pastors";
 
 export type PpcShellNavItem = {
   label: string;
@@ -65,10 +66,30 @@ export const PPC_SHELL_NAV_ITEMS: PpcShellNavItem[] = [
     roles: ["super_admin", "admin"],
   },
   {
+    label: "Community",
+    path: "/community",
+    icon: "students",
+    roles: ["super_admin", "admin"],
+  },
+  {
+    label: "Pastors",
+    path: "/pastors",
+    icon: "pastors",
+    roles: ["super_admin", "admin"],
+  },
+  {
+    label: "My Enrollees",
+    path: "/my-enrollees",
+    icon: "students",
+    // Also visible to admins — an admin flagged `isPastor` needs a way to
+    // reach their own assigned enrollees; other admins just see it empty.
+    roles: ["super_admin", "admin", "pastor"],
+  },
+  {
     label: "Staff",
     path: "/staff",
     icon: "staff",
-    roles: ["super_admin"],
+    roles: ["super_admin", "admin"],
   },
   {
     label: "Registrants",
@@ -316,10 +337,31 @@ export function getPpcShellContext(pathname: string): PpcShellContext {
     };
   }
 
+  if (logicalPath === "/community") {
+    return {
+      label: "Community",
+      description: "Location units, leaders, official posts, and moderation",
+    };
+  }
+
   if (logicalPath === "/staff") {
     return {
       label: "Staff access",
       description: "Invites, roles, and account onboarding",
+    };
+  }
+
+  if (logicalPath === "/pastors") {
+    return {
+      label: "Pastors",
+      description: "Pastor assignments and follow-up activity across SOGP",
+    };
+  }
+
+  if (logicalPath === "/my-enrollees") {
+    return {
+      label: "My Enrollees",
+      description: "Enrollees assigned to you for follow-up",
     };
   }
 

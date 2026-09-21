@@ -40,6 +40,25 @@ export async function submitForReview(userId: string, lessonId: number) {
     .where(eq(schema.writtenSubmissions.id, submission.id))
     .returning();
 
+  if (updated) {
+    // The enrollee's own lesson/day completion shouldn't wait on a pastor's
+    // review turnaround - submitting is enough to count the written step as
+    // done. Pastor review still happens (status/reviewerNote track it) but
+    // only requestRevision() below reopens this step, by clearing the flag
+    // until the enrollee resubmits.
+    await db
+      .insert(schema.studentProgress)
+      .values({
+        userId: updated.userId,
+        lessonId: updated.lessonId,
+        writtenApproved: true,
+      })
+      .onConflictDoUpdate({
+        target: [schema.studentProgress.userId, schema.studentProgress.lessonId],
+        set: { writtenApproved: true },
+      });
+  }
+
   return updated;
 }
 

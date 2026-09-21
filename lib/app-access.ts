@@ -1,7 +1,7 @@
 import type { AppRole } from "./app-role";
 import { hasAdminAccess, isStaffRole } from "./app-role";
 
-export type AccessArea = "staff" | "admin" | "student";
+export type AccessArea = "staff" | "admin" | "student" | "pastor";
 
 export function canAccessArea(role: AppRole, area: AccessArea): boolean {
   if (area === "staff") {
@@ -10,6 +10,10 @@ export function canAccessArea(role: AppRole, area: AccessArea): boolean {
 
   if (area === "admin") {
     return hasAdminAccess(role);
+  }
+
+  if (area === "pastor") {
+    return role === "pastor" || hasAdminAccess(role);
   }
 
   return role === "student";

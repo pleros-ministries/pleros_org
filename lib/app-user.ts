@@ -1,7 +1,7 @@
 import type { AppRole } from "./app-role";
 import { normalizeEmailList } from "./app-role";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, ilike, or } from "drizzle-orm";
 
 const BUILT_IN_SUPER_ADMIN_EMAILS = [
   "akintyr@gmail.com",
@@ -47,6 +47,45 @@ export async function getAppUserByEmail(email: string) {
     );
   } catch {
     return null;
+  }
+}
+
+export async function getAppUserById(id: string) {
+  try {
+    return (
+      (await db.query.users.findFirst({
+        where: (u, { eq: equal }) => equal(u.id, id),
+      })) ?? null
+    );
+  } catch {
+    return null;
+  }
+}
+
+/** Search any registered account by name or email — for picking an existing
+ * user to grant staff/pastor access to, without needing their exact email. */
+export async function searchAppUsers(query: string, limit = 8) {
+  const trimmed = query.trim();
+  if (!trimmed) return [];
+
+  try {
+    const { users } = await import("./db/schema");
+    const like = `%${trimmed}%`;
+
+    return await db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        role: users.role,
+        emailVerified: users.emailVerified,
+      })
+      .from(users)
+      .where(or(ilike(users.name, like), ilike(users.email, like)))
+      .orderBy(users.name)
+      .limit(limit);
+  } catch {
+    return [];
   }
 }
 

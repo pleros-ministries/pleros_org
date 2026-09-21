@@ -13,17 +13,18 @@ export const metadata: Metadata = {
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ returnTo?: string }>;
+  searchParams: Promise<{ returnTo?: string; notice?: string }>;
 }) {
   const params = await searchParams;
   const returnTo = normalizeLearnerReturnTo(params.returnTo);
+  const alreadyEnrolledNotice = params.notice === "already-enrolled";
 
   return (
     <PublicSitePageShell>
       <main className="site-font-theme min-h-[75vh] bg-[var(--color-surface-muted)] py-10 md:py-16">
         <section className="site-shell-page sogp-shell-page grid place-items-center">
           <div className="w-full max-w-[32rem] rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white p-6 shadow-[var(--shadow-sm)] sm:p-8">
-            <LearnerLoginForm returnTo={returnTo} />
+            <LearnerLoginForm returnTo={returnTo} alreadyEnrolledNotice={alreadyEnrolledNotice} />
           </div>
         </section>
       </main>

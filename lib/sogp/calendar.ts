@@ -121,6 +121,31 @@ export function getSogpCountdown(startsAt: Date, now = new Date()) {
   };
 }
 
+/** SOGP core runs for a fixed number of weeks. */
+export const SOGP_TOTAL_WEEKS = 4;
+
+/**
+ * Where a cohort sits in its 4-week core, for at-a-glance UI ("Week 2 of 4").
+ * Before `startsAt` the cohort is still in the preparation window; on/after
+ * `endsAt` the programme is complete.
+ */
+export function getSogpCohortWeek(
+  startsAt: Date,
+  endsAt: Date,
+  now = new Date(),
+): { phase: "preparation" | "active" | "complete"; week: number | null } {
+  if (now < startsAt) return { phase: "preparation", week: null };
+  if (now >= endsAt) return { phase: "complete", week: null };
+  const week =
+    Math.floor(
+      (now.getTime() - startsAt.getTime()) / (7 * 24 * 60 * 60 * 1000),
+    ) + 1;
+  return {
+    phase: "active",
+    week: Math.min(Math.max(week, 1), SOGP_TOTAL_WEEKS),
+  };
+}
+
 export function getPreSogpCountdown(startsAt: Date, now = new Date()) {
   const startDateKey = toLagosDateKey(startsAt);
   const todayKey = toLagosDateKey(now);

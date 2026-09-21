@@ -65,10 +65,10 @@ describe("welcome dashboard content", () => {
       status: "coming_soon",
       statusLabel: "Coming soon",
     });
+    // Community (index 6) is gated by enrolment, not "coming soon".
     expect(locked[3]?.cards[0]).toMatchObject({
       href: undefined,
-      status: "coming_soon",
-      statusLabel: "Coming soon",
+      status: "enrolment_required",
     });
   });
 
@@ -86,6 +86,10 @@ describe("welcome dashboard content", () => {
       href: "/dashboard/sogp",
       status: "upcoming",
       statusLabel: "3 days until SOGP begins",
+    });
+    expect(enrolled[3]?.cards[0]).toMatchObject({
+      href: "/dashboard/community",
+      status: "available",
     });
   });
 

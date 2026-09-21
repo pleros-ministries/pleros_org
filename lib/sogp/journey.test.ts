@@ -16,10 +16,9 @@ describe("SOGP journey requirements", () => {
     ).toEqual([true, false]);
   });
 
-  test("requires Prayer Watch and assessment on weekdays", () => {
+  test("requires Prayer Watch and assessment on a teaching day", () => {
     expect(
       getSogpDayRequirements({
-        kind: "weekday",
         prayerWatchComplete: true,
         assessmentComplete: false,
       }),
@@ -29,7 +28,6 @@ describe("SOGP journey requirements", () => {
   test("requires only Prayer Watch on an ordinary weekend date", () => {
     expect(
       getSogpDayRequirements({
-        kind: "weekend",
         prayerWatchComplete: true,
       }),
     ).toEqual([true]);
@@ -38,11 +36,20 @@ describe("SOGP journey requirements", () => {
   test("requires Prayer Watch and the review on a scheduled review date", () => {
     expect(
       getSogpDayRequirements({
-        kind: "review",
         prayerWatchComplete: true,
         reviewComplete: false,
       }),
     ).toEqual([true, false]);
+  });
+
+  test("requires Prayer Watch, assessment, and the review when both are scheduled on the same day", () => {
+    expect(
+      getSogpDayRequirements({
+        prayerWatchComplete: true,
+        assessmentComplete: true,
+        reviewComplete: false,
+      }),
+    ).toEqual([true, true, false]);
   });
 });
 

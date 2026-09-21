@@ -16,12 +16,14 @@ import {
   type SogpEnrollmentErrors,
 } from "@/lib/sogp/enrollment";
 import { getSogpCountryOrDefault } from "@/lib/sogp/countries";
+import { NIGERIA_STATE_LABELS } from "@/lib/community/units";
 import { CountryCombobox } from "./country-combobox";
 import { PhoneField } from "./phone-field";
 import { trackSogpEvent } from "./sogp-analytics";
 
 type EnrollmentResponse = {
   redirectTo?: string;
+  alreadyEnrolled?: boolean;
   errors?: SogpEnrollmentErrors;
   error?: string;
 };
@@ -75,6 +77,7 @@ async function submitEnrollment(body: Record<string, unknown>) {
       utmCampaign: params.get("utm_campaign"),
       utmContent: params.get("utm_content"),
       utmTerm: params.get("utm_term"),
+      ref: params.get("ref"),
     }),
   });
   const payload = (await response.json()) as EnrollmentResponse;
@@ -197,7 +200,9 @@ export function SogpEnrollmentForm({
   const mutation = useMutation({
     mutationFn: submitEnrollment,
     onSuccess(payload) {
-      trackSogpEvent("sogp_email_verification_sent");
+      trackSogpEvent(
+        payload.alreadyEnrolled ? "sogp_already_enrolled" : "sogp_email_verification_sent",
+      );
       window.location.assign(payload.redirectTo ?? "/setup");
     },
     onError(error: EnrollmentResponse) {
@@ -354,17 +359,39 @@ export function SogpEnrollmentForm({
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="grid gap-2">
           <label htmlFor="region" className="font-[var(--font-be-vietnam-pro)] [font-size:0.8125rem] font-medium text-[var(--color-text-strong)]">State/Province/Region of residence<RequiredMark /></label>
-          <Input
-            id="region"
-            name="region"
-            autoComplete="address-level1"
-            value={values.region}
-            onChange={(event) => update("region", event.target.value)}
-            required
-            aria-invalid={Boolean(regionError)}
-            aria-describedby={regionError ? "region-error" : undefined}
-            className="aria-invalid:border-[var(--destructive)] aria-invalid:ring-4 aria-invalid:ring-red-100"
-          />
+          {values.countryCode === "NG" ? (
+            <div className="relative">
+              <select
+                id="region"
+                name="region"
+                autoComplete="address-level1"
+                value={values.region}
+                onChange={(event) => update("region", event.target.value)}
+                required
+                aria-invalid={Boolean(regionError)}
+                aria-describedby={regionError ? "region-error" : undefined}
+                className={`h-11 w-full appearance-none rounded-[var(--radius-sm)] border border-[var(--color-line-strong)] bg-white px-4 pr-11 [font-size:0.875rem] outline-none transition aria-invalid:border-[var(--destructive)] aria-invalid:ring-4 aria-invalid:ring-red-100 focus-visible:border-[var(--color-brand-blue)] focus-visible:ring-4 focus-visible:ring-[var(--color-focus)] ${values.region ? "text-[var(--color-text-strong)]" : "text-[var(--color-text-muted)]"}`}
+              >
+                <option value="">Select state</option>
+                {NIGERIA_STATE_LABELS.map((state) => (
+                  <option key={state} value={state}>{state}</option>
+                ))}
+              </select>
+              <ChevronDown className={`pointer-events-none absolute right-4 top-1/2 size-4 -translate-y-1/2 ${values.region ? "text-[var(--color-brand-blue)]" : "text-[var(--color-text-muted)]"}`} aria-hidden="true" />
+            </div>
+          ) : (
+            <Input
+              id="region"
+              name="region"
+              autoComplete="address-level1"
+              value={values.region}
+              onChange={(event) => update("region", event.target.value)}
+              required
+              aria-invalid={Boolean(regionError)}
+              aria-describedby={regionError ? "region-error" : undefined}
+              className="aria-invalid:border-[var(--destructive)] aria-invalid:ring-4 aria-invalid:ring-red-100"
+            />
+          )}
           <FieldError id="region-error" error={regionError} />
         </div>
         <div className="grid gap-2">

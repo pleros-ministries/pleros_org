@@ -121,7 +121,7 @@ function DialogTitle({ className, ...props }: DialogPrimitive.Title.Props) {
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn("h3 text-[var(--color-text-strong)]", className)}
+      className={cn(" h3 text-[var(--color-text-strong)]", className)}
       {...props}
     />
   );
@@ -134,7 +134,7 @@ function DialogDescription({
   return (
     <DialogPrimitive.Description
       data-slot="dialog-description"
-      className={cn("body text-[var(--color-text-muted)]", className)}
+      className={cn("body mb-0 text-[var(--color-text-muted)]", className)}
       {...props}
     />
   );

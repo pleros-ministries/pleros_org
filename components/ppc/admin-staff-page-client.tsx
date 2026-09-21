@@ -19,7 +19,7 @@ export function AdminStaffPageClient() {
       <Breadcrumb items={[{ label: "Dashboard", href: "/admin" }, { label: "Staff" }]} />
       <PageHeader
         title="Staff access"
-        description="Invite admins and instructors into PPC"
+        description="Invite admins, instructors, and pastors into PPC"
       />
 
       {isError ? (

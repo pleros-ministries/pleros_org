@@ -83,6 +83,28 @@ export async function getSogpDashboardAccess(userId: string) {
       };
 }
 
+export async function getSogpEnrollmentTelegramUrl(userId: string) {
+  const row = await getEnrollmentCohort(userId);
+  return (
+    row?.cohort.telegramDiscussionUrl ??
+    row?.cohort.telegramChannelUrl ??
+    "https://t.me/pleros_sogp"
+  );
+}
+
+export async function getOrientationSurveyStatus(userId: string) {
+  const row = await getEnrollmentCohort(userId);
+  if (!row) return { enrollmentId: null, completed: false };
+
+  const [survey] = await db
+    .select({ id: schema.sogpOrientationSurveys.id })
+    .from(schema.sogpOrientationSurveys)
+    .where(eq(schema.sogpOrientationSurveys.enrollmentId, row.enrollment.id))
+    .limit(1);
+
+  return { enrollmentId: row.enrollment.id, completed: Boolean(survey) };
+}
+
 export async function getPreSogpJourney(
   userId: string,
   now = new Date(),
@@ -205,6 +227,75 @@ export async function getPreSogpJourney(
           : null,
       };
     }),
+  };
+}
+
+export type PublicPreparationPost = {
+  dayNumber: number;
+  dateKey: string;
+  countdownLabel: string;
+  introduction: string;
+  title: string | null;
+  cohortTitle: string;
+};
+
+/**
+ * Public (unauthenticated) view of a single Pre-SOGP preparation day, used by
+ * the shareable preview page. Returns only teaser copy — never resource URLs or
+ * the teaching media, which stay enrolment-gated. `null` when the date is
+ * outside the cohort's preparation window or has no published day.
+ */
+export async function getPublicPreparationPost(
+  cohort: typeof schema.sogpCohorts.$inferSelect,
+  dateKey: string,
+): Promise<PublicPreparationPost | null> {
+  const preparationStartsAt = resolvePreparationStartsAt(
+    cohort.startsAt,
+    cohort.preparationStartsAt,
+  );
+  const index = buildPreparationDateKeys(preparationStartsAt).indexOf(dateKey);
+  if (index === -1) return null;
+
+  const rows = await db
+    .select({
+      day: schema.sogpPreparationDays,
+      resource: schema.sogpPreparationResources,
+    })
+    .from(schema.sogpPreparationDays)
+    .leftJoin(
+      schema.sogpPreparationResources,
+      eq(
+        schema.sogpPreparationResources.preparationDayId,
+        schema.sogpPreparationDays.id,
+      ),
+    )
+    .where(
+      and(
+        eq(schema.sogpPreparationDays.cohortId, cohort.id),
+        eq(schema.sogpPreparationDays.status, "published"),
+        eq(schema.sogpPreparationDays.publishDate, dateKey),
+      ),
+    )
+    .orderBy(asc(schema.sogpPreparationResources.sortOrder));
+
+  const day = rows[0]?.day;
+  if (!day) return null;
+
+  const lessonResource = rows
+    .map((row) => row.resource)
+    .find((resource) =>
+      resource
+        ? resource.type === "video" || resource.type === "teaching"
+        : false,
+    );
+
+  return {
+    dayNumber: index + 1,
+    dateKey,
+    countdownLabel: day.countdownLabel,
+    introduction: day.introduction,
+    title: lessonResource?.title ?? null,
+    cohortTitle: cohort.title,
   };
 }
 
@@ -388,8 +479,8 @@ export type SogpJourneyData = {
       title: string;
       audioUrl: string | null;
       assessmentComplete: boolean;
-      assessmentHref: string;
-      reviewState: string | null;
+      quizPassed: boolean;
+      writtenResponseStatus: string | null;
       accessible: boolean;
       lockedReason: string | null;
     };
@@ -531,16 +622,15 @@ export async function getActiveSogpJourney(
       : track
         ? ("weekday" as const)
         : ("weekend" as const);
-    const requirements =
-      kind === "weekday"
-        ? getSogpDayRequirements({ kind, prayerWatchComplete, assessmentComplete })
-        : kind === "review"
-          ? getSogpDayRequirements({
-              kind,
-              prayerWatchComplete,
-              reviewComplete: Boolean(completedReviewSource),
-            })
-          : getSogpDayRequirements({ kind, prayerWatchComplete });
+    // A day can carry a track, a review, both, or neither — every one
+    // present must be complete, not just whichever `kind` picks as the
+    // day's label (a review scheduled on a teaching day still requires
+    // that day's assessment).
+    const requirements = getSogpDayRequirements({
+      prayerWatchComplete,
+      assessmentComplete: track ? assessmentComplete : undefined,
+      reviewComplete: review ? Boolean(completedReviewSource) : undefined,
+    });
     const curriculumLevel = track
       ? (track.curriculumLevel as SogpCurriculumLevel)
       : null;
@@ -576,10 +666,8 @@ export async function getActiveSogpJourney(
             title: track.lesson.title,
             audioUrl: track.lesson.audioUrl,
             assessmentComplete,
-            assessmentHref: track.progress.quizPassed
-              ? `/dashboard/sogp/course/day/${track.dayNumber}/response`
-              : `/dashboard/sogp/course/day/${track.dayNumber}/quiz`,
-            reviewState: writtenStatus ?? null,
+            quizPassed: track.progress.quizPassed,
+            writtenResponseStatus: writtenStatus ?? null,
             accessible,
             lockedReason,
           }

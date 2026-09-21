@@ -8,6 +8,7 @@ import {
   mainGifts,
   type WelcomePackGift,
 } from "../../lib/welcome-pack-gifts";
+import { OrientationSurveyGate } from "./orientation-survey-gate";
 
 const hubPath = "/dashboard/welcomepack";
 
@@ -143,10 +144,12 @@ export function WelcomePackJoinPage({
   telegramUrl,
   videoSrc,
   videoPosterSrc,
+  surveyCompleted,
 }: {
   telegramUrl: string;
   videoSrc: string | null;
   videoPosterSrc?: string | null;
+  surveyCompleted: boolean;
 }) {
   return (
     <main className="site-font-theme grid min-h-screen grid-cols-[minmax(0,1fr)] place-items-center bg-[var(--color-brand-blue)] px-5 py-10 text-white">
@@ -182,20 +185,10 @@ export function WelcomePackJoinPage({
           </div>
         )}
 
-        <div className="grid min-w-0 justify-items-center gap-3 text-center">
-          <p className="min-w-0 max-w-full font-[var(--font-be-vietnam-pro)] text-sm leading-[1.6] text-white/82 sm:max-w-[32rem]">
-            Join your cohort community on Telegram for your orientation pack
-            and the next steps to take.
-          </p>
-          <a
-            href={telegramUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="site-button-text inline-flex min-h-12 max-w-full items-center justify-center gap-2 rounded-full bg-white px-5 text-center text-xs font-semibold text-[var(--color-brand-blue)] transition-transform duration-150 hover:-translate-y-px sm:px-7 sm:text-sm"
-          >
-            Join the orientation group
-          </a>
-        </div>
+        <OrientationSurveyGate
+          telegramUrl={telegramUrl}
+          initialCompleted={surveyCompleted}
+        />
       </section>
     </main>
   );

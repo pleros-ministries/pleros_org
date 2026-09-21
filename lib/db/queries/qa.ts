@@ -95,7 +95,7 @@ export async function createThread(data: {
   lessonId: number;
   subject: string;
   message: string;
-  authorRole: AppRole;
+  authorRole: Exclude<AppRole, "pastor">;
 }) {
   const [thread] = await db
     .insert(schema.qaThreads)
@@ -121,7 +121,7 @@ export async function createThread(data: {
 export async function addMessage(data: {
   threadId: number;
   authorId: string;
-  authorRole: AppRole;
+  authorRole: Exclude<AppRole, "pastor">;
   content: string;
 }) {
   const [message] = await db

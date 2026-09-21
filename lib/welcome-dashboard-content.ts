@@ -1,3 +1,14 @@
+import type { LucideIcon } from "lucide-react";
+import {
+  BookOpenIcon,
+  BrainIcon,
+  HeartHandshakeIcon,
+  MailIcon,
+  PodcastIcon,
+  SchoolIcon,
+  UsersIcon,
+} from "lucide-react";
+
 import { getSogpCountdown } from "./sogp/calendar";
 
 export type WelcomeDashboardCardStatus =
@@ -13,15 +24,15 @@ export type WelcomeDashboardCard = {
   href?: string;
   status: WelcomeDashboardCardStatus;
   statusLabel?: string;
-  accent: "orange" | "blue";
-  backgroundImageSrc?: string;
-  backgroundImagePosition?: string;
-  backgroundOverlay?: "text-gradient" | "text-panel" | "none";
+  icon: LucideIcon;
 };
+
+export type WelcomeDashboardSectionAccent = "gold" | "blue" | "purple" | "green";
 
 export type WelcomeDashboardSection = {
   id: string;
   title: string;
+  accent: WelcomeDashboardSectionAccent;
   cards: WelcomeDashboardCard[];
 };
 
@@ -29,6 +40,7 @@ export const welcomeDashboardSections: WelcomeDashboardSection[] = [
   {
     id: "start-here",
     title: "Start Here",
+    accent: "gold",
     cards: [
       {
         id: "welcome-pack",
@@ -36,8 +48,7 @@ export const welcomeDashboardSections: WelcomeDashboardSection[] = [
         description: "Begin with your welcome, orientation, and gifts.",
         href: "/dashboard/welcomepack",
         status: "available",
-        accent: "orange",
-        backgroundImageSrc: "/site/home/assets/dashboard-cards/1-welcome-pack-bg.webp",
+        icon: MailIcon,
       },
       {
         id: "pre-sogp",
@@ -46,15 +57,14 @@ export const welcomeDashboardSections: WelcomeDashboardSection[] = [
         href: "/sogp/enrol",
         status: "enrolment_required",
         statusLabel: "Enrolment required",
-        accent: "blue",
-        backgroundImageSrc: "/site/home/assets/pleros-community-background.webp",
-        backgroundOverlay: "text-panel",
+        icon: BrainIcon,
       },
     ],
   },
   {
     id: "rhythm",
     title: "Your Devotion",
+    accent: "blue",
     cards: [
       {
         id: "podcast",
@@ -62,9 +72,7 @@ export const welcomeDashboardSections: WelcomeDashboardSection[] = [
         description: "Listen to the Pleros Podcast and keep growing in truth.",
         href: "/dashboard/podcast",
         status: "available",
-        accent: "orange",
-        backgroundImageSrc: "/site/home/assets/dashboard-cards/3-pleros-podcast-v2.webp",
-        backgroundImagePosition: "object-[72%_center]",
+        icon: PodcastIcon,
       },
       {
         id: "devotion",
@@ -72,15 +80,14 @@ export const welcomeDashboardSections: WelcomeDashboardSection[] = [
         description: "Join Prayer Watch and maintain your daily devotion.",
         href: "/dashboard/prayer-watch",
         status: "available",
-        accent: "blue",
-        backgroundImageSrc: "/site/home/assets/dashboard-cards/4-prayer-watch-bg.webp",
-        backgroundOverlay: "none",
+        icon: BookOpenIcon,
       },
     ],
   },
   {
     id: "learning",
     title: "Your Training",
+    accent: "purple",
     cards: [
       {
         id: "sogp",
@@ -89,8 +96,7 @@ export const welcomeDashboardSections: WelcomeDashboardSection[] = [
         href: "/sogp/enrol",
         status: "enrolment_required",
         statusLabel: "Enrolment required",
-        accent: "blue",
-        backgroundImageSrc: "/site/home/assets/dashboard-cards/6-school-of-purpose-v2.webp",
+        icon: SchoolIcon,
       },
       {
         id: "advanced-sogp",
@@ -99,24 +105,23 @@ export const welcomeDashboardSections: WelcomeDashboardSection[] = [
         href: undefined,
         status: "coming_soon",
         statusLabel: "Coming soon",
-        accent: "orange",
-        backgroundImageSrc: "/site/home/assets/dashboard-cards/5-PPC-bg.webp",
+        icon: SchoolIcon,
       },
     ],
   },
   {
     id: "next-steps",
     title: "Your Commitment",
+    accent: "green",
     cards: [
       {
         id: "community",
         title: "Community",
-        description: "Stay connected with the wider Pleros community.",
+        description: "Your location unit, official updates, and discussion.",
         href: undefined,
-        status: "coming_soon",
-        statusLabel: "Coming soon",
-        accent: "orange",
-        backgroundImageSrc: "/site/home/assets/dashboard-cards/7-assignment-bg-v2.webp",
+        status: "enrolment_required",
+        statusLabel: "Enrolment required",
+        icon: UsersIcon,
       },
       {
         id: "partnership",
@@ -124,8 +129,7 @@ export const welcomeDashboardSections: WelcomeDashboardSection[] = [
         description: "Help us reach more people in more nations of the Earth.",
         href: "/partner",
         status: "available",
-        accent: "blue",
-        backgroundImageSrc: "/site/home/assets/dashboard-cards/8-partnership-bg.webp",
+        icon: HeartHandshakeIcon,
       },
     ],
   },
@@ -143,13 +147,25 @@ export function resolveWelcomeDashboardSections({
   return welcomeDashboardSections.map((section) => ({
     ...section,
     cards: section.cards.map((card) => {
-      const isJourneyCard = card.id === "pre-sogp" || card.id === "sogp";
+      const isJourneyCard =
+        card.id === "pre-sogp" ||
+        card.id === "sogp" ||
+        card.id === "community";
       if (!isSogpEnrolled || !isJourneyCard) return { ...card };
 
       if (card.id === "pre-sogp") {
         return {
           ...card,
           href: "/dashboard/pre-sogp",
+          status: "available" as const,
+          statusLabel: undefined,
+        };
+      }
+
+      if (card.id === "community") {
+        return {
+          ...card,
+          href: "/dashboard/community",
           status: "available" as const,
           statusLabel: undefined,
         };

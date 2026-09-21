@@ -23,6 +23,8 @@ export type SogpEnrollmentValues = {
   utmCampaign: string;
   utmContent: string;
   utmTerm: string;
+  /** `?ref=` code of the student who referred this enrolment, if any. */
+  referredByCode: string;
 };
 
 export type SogpEnrollmentInput = Omit<
@@ -31,6 +33,7 @@ export type SogpEnrollmentInput = Omit<
 > & {
   phoneCountryCode?: string;
   whatsappConsent?: boolean | "" | "yes" | "no" | null;
+  ref?: string | null;
 };
 export type SogpEnrollmentErrors = Partial<
   Record<
@@ -149,6 +152,8 @@ export function normalizeSogpEnrollment(
     utmCampaign: clean(input.utmCampaign, 200),
     utmContent: clean(input.utmContent, 200),
     utmTerm: clean(input.utmTerm, 200),
+    // Case-sensitive; never validated so a stale/bad code can't block enrolment.
+    referredByCode: clean(input.ref, 32),
   };
 }
 

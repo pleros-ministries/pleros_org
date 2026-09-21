@@ -65,7 +65,7 @@ const staffPageSource = readFileSync(
     "app",
     "admin",
     "(app)",
-    "(super-admin-only)",
+    "(admin-only)",
     "staff",
     "page.tsx",
   ),

@@ -2,6 +2,7 @@ export const ADMIN_QUERY_KEYS = {
   dashboard: ["admin", "dashboard"] as const,
   schoolOfPurposeWaitlist: ["admin", "school-of-purpose", "waitlist"] as const,
   sogp: ["admin", "sogp"] as const,
+  sogpReport: ["admin", "sogp", "report"] as const,
   registrants: ["admin", "registrants"] as const,
   platform: ["admin", "platform"] as const,
   staff: ["admin", "staff"] as const,
@@ -17,6 +18,7 @@ export type AdminSogpData = {
     status: string;
     startsAt: string;
     endsAt: string;
+    enrollmentClosesAt: string | null;
     telegramChannelUrl: string | null;
     telegramDiscussionUrl: string | null;
     telegramBotUsername: string | null;
@@ -105,7 +107,125 @@ export type AdminSogpData = {
     botConfigured: boolean;
     webhookSecretConfigured: boolean;
   };
+  orientationSurveys: Array<{
+    id: number;
+    enrollmentId: number;
+    userId: string;
+    reasons: string[];
+    question: string | null;
+    adminResponse: string | null;
+    respondedBy: string | null;
+    respondedAt: string | null;
+    createdAt: string;
+  }>;
 };
+
+export type AdminSogpReportLeftBehindFlag = "behind_pace" | "inactive_7_days";
+
+export type AdminSogpReportWeek = {
+  week: number;
+  startsAt: string;
+  endsAt: string;
+  activeEnrollments: number;
+  completedAtLeastOneRequiredTrack: number;
+  completedAllRequiredTracksForWeek: number;
+  trackCompletionPercent: number;
+  liveClassAttendance: number;
+  liveClassAttendancePercent: number;
+  prayerWatchDistinctDays: number;
+  prayerWatchParticipationPercent: number;
+};
+
+export type AdminSogpReportCohort = {
+  id: number;
+  slug: string;
+  title: string;
+  status: string;
+  startsAt: string;
+  endsAt: string;
+  totalEnrollments: number;
+  statusBreakdown: Record<string, number>;
+  averageCompletionPercent: number;
+  prepPhaseCompletionRate: number;
+  liveClassAttendanceRate: number;
+  prayerWatchParticipationRate: number;
+  certificatesIssued: number;
+  weeklyParticipation: AdminSogpReportWeek[];
+  signupTrend: AdminSogpReportSignupPoint[];
+};
+
+export type AdminSogpReportSignupPoint = {
+  weekStart: string;
+  signups: number;
+  cumulative: number;
+};
+
+export type AdminSogpReportLeftBehindEntry = {
+  enrollmentId: number;
+  cohortId: number;
+  cohortTitle: string;
+  name: string;
+  email: string;
+  currentWeek: number | null;
+  expectedTrackCount: number;
+  completedTrackCount: number;
+  completionPercent: number;
+  lastActivityAt: string | null;
+  daysSinceLastActivity: number | null;
+  flags: AdminSogpReportLeftBehindFlag[];
+  pastorId: string | null;
+  pastorName: string | null;
+};
+
+export type AdminSogpReportParticipant = {
+  enrollmentId: number;
+  cohortId: number;
+  cohortTitle: string;
+  name: string;
+  email: string;
+  status: string;
+  weeklyTrackCompletion: Array<{ week: number; completed: number; total: number }>;
+  liveClassesAttended: number;
+  liveClassesRequired: number;
+  prayerWatchDays: number;
+  prayerWatchRate: number;
+  completionPercent: number;
+  pastorId: string | null;
+  pastorName: string | null;
+};
+
+export type AdminSogpReportPastorBreakdown = {
+  cohortId: number;
+  pastorId: string | null;
+  pastorName: string;
+  enrollees: number;
+  averageCompletionPercent: number;
+  liveClassAttendanceRate: number;
+  prayerWatchParticipationRate: number;
+  leftBehindCount: number;
+  contactedCount: number;
+  neverContactedCount: number;
+  lastContactAttemptAt: string | null;
+};
+
+export type AdminSogpReportPastor = {
+  id: string;
+  name: string;
+  email: string;
+  assignedCount: number;
+};
+
+export type AdminSogpReportData = {
+  generatedAt: string;
+  cohorts: AdminSogpReportCohort[];
+  participants: AdminSogpReportParticipant[];
+  leftBehind: AdminSogpReportLeftBehindEntry[];
+  pastors: AdminSogpReportPastor[];
+  unassignedCount: number;
+  pastorBreakdown: AdminSogpReportPastorBreakdown[];
+};
+
+export const UNASSIGNED_PASTOR_FILTER = "unassigned";
 
 export const ADMIN_QUERY_DEFAULTS = {
   staleTime: 30_000,

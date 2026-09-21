@@ -51,6 +51,8 @@ describe("SOGP dashboard previews", () => {
     );
     const prePage = source("components", "sogp", "pre-sogp-page.tsx");
     const sogpPage = source("components", "sogp", "sogp-journey-page.tsx");
+    const sogpTasks = source("components", "sogp", "sogp-daily-tasks.tsx");
+    const sogpOtherDetails = source("components", "sogp", "sogp-other-details.tsx");
 
     expect(preRoute).toContain("preSogpPreviewData");
     expect(preRoute).toContain("preview");
@@ -61,28 +63,33 @@ describe("SOGP dashboard previews", () => {
     expect(prePage).toContain('data-pre-sogp-section="coming-soon"');
     expect(sogpPage).toContain("initialData?: SogpJourneyData");
     expect(prePage).toContain("Preview mode");
-    expect(sogpPage).toContain("Preview mode");
-    expect(sogpPage).toContain(
-      'className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1"',
-    );
-    expect(sogpPage).toContain("ppc-heading text-lg font-semibold");
-    expect(sogpPage).not.toContain(
-      'className="grid gap-1">\n            <p',
-    );
-    expect(sogpPage).toContain(
-      '<nav aria-label="SOGP dashboard navigation"',
-    );
-    expect(sogpPage.indexOf("SOGP dashboard navigation")).toBeLessThan(
-      sogpPage.indexOf("Welcome, {firstName"),
-    );
+    expect(sogpOtherDetails).toContain("Preview mode");
     expect(sogpPage).toContain(
       'href={preview ? "/preview/dashboard" : "/dashboard"}',
     );
-    expect(sogpPage).toContain(">SOGP</span>");
-    expect(sogpPage).toContain(
-      "border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)]",
+    expect(sogpPage).toContain("SOGP");
+
+    // Header: navy background with white text throughout, less vertical
+    // chrome — per the September 2026 dashboard redesign.
+    expect(sogpPage).toContain("bg-[var(--color-brand-blue)] text-white");
+    expect(sogpPage).toContain("Welcome, {firstName");
+    expect(sogpPage.indexOf("bg-[var(--color-brand-blue)] text-white")).toBeLessThan(
+      sogpPage.indexOf("Welcome, {firstName"),
     );
-    expect(sogpPage).toContain("text-white/85");
-    expect(sogpPage).toContain("text-[var(--color-brand-lime)]");
+
+    // Tasks section: a single white, decluttered block driven by SogpDailyTasks.
+    expect(sogpPage).toContain("<SogpDailyTasks");
+    expect(sogpTasks).toContain("bg-white");
+    expect(sogpTasks).toContain("done");
+    expect(sogpTasks).toContain("task");
+
+    // Other details: a visually separate, light-blue grouped section.
+    expect(sogpPage).toContain("<SogpOtherDetails");
+    expect(sogpOtherDetails).toContain("bg-[var(--color-brand-sky-soft)]");
+    expect(sogpOtherDetails).toContain("Other details");
+    expect(sogpOtherDetails).toContain("Course progress");
+    expect(sogpOtherDetails).toContain("Invite friends");
+    expect(sogpOtherDetails).toContain("Share what you learnt today");
+    expect(sogpOtherDetails).toContain("Prayer Watch reminder");
   });
 });

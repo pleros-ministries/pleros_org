@@ -6,6 +6,7 @@ import {
   deleteExpiredPendingSogpEnrollments,
   getLatestPendingSogpEnrollmentByEmail,
   getOpenSogpCohort,
+  getSogpEnrollmentByEmail,
   recordPendingSogpCodeSent,
 } from "@/lib/db/queries/sogp";
 import {
@@ -47,6 +48,15 @@ export async function POST(request: NextRequest) {
   try {
     const email = values.email.trim().toLowerCase();
     await deleteExpiredPendingSogpEnrollments();
+
+    const existingEnrollment = await getSogpEnrollmentByEmail(email);
+    if (existingEnrollment) {
+      return NextResponse.json({
+        alreadyEnrolled: true,
+        redirectTo: "/login?returnTo=/dashboard/sogp&notice=already-enrolled",
+      });
+    }
+
     const latestPending = await getLatestPendingSogpEnrollmentByEmail(email);
     if (
       latestPending &&

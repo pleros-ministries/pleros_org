@@ -4,10 +4,13 @@ import {
   count,
   desc,
   eq,
+  gt,
   gte,
   inArray,
+  isNull,
   lt,
   lte,
+  or,
   sql,
 } from "drizzle-orm";
 
@@ -15,6 +18,8 @@ import { db } from "@/lib/db";
 import { deriveSogpLearnerState } from "@/lib/sogp/status";
 import { normalizeSogpAssessmentPolicy } from "@/lib/sogp/assessment";
 import { toLagosDateKey } from "@/lib/sogp/formation-progress";
+import { canAccessSogpTrack, summarizeSogpLevels } from "@/lib/sogp/progression";
+import type { SogpCurriculumLevel } from "@/lib/sogp/curriculum";
 import type {
   SogpDashboardData,
   SogpEnrollmentCreateInput,
@@ -33,10 +38,16 @@ export async function getOpenSogpCohort() {
     .select()
     .from(schema.sogpCohorts)
     .where(
-      inArray(schema.sogpCohorts.status, [
-        "enrollment_open",
-        "preparing",
-      ]),
+      and(
+        inArray(schema.sogpCohorts.status, [
+          "enrollment_open",
+          "preparing",
+        ]),
+        or(
+          isNull(schema.sogpCohorts.enrollmentClosesAt),
+          gt(schema.sogpCohorts.enrollmentClosesAt, new Date()),
+        ),
+      ),
     )
     .orderBy(asc(schema.sogpCohorts.startsAt))
     .limit(1);
@@ -69,6 +80,33 @@ export async function getSogpEnrollmentByUserId(userId: string) {
     .limit(1);
 
   return enrollment ?? null;
+}
+
+export async function getSogpEnrollmentByEmail(email: string) {
+  const [enrollment] = await db
+    .select()
+    .from(schema.sogpEnrollments)
+    .where(eq(schema.sogpEnrollments.email, email.trim().toLowerCase()))
+    .limit(1);
+
+  return enrollment ?? null;
+}
+
+/**
+ * All of a user's enrollments (any cohort), newest first, each joined to its
+ * cohort. Used to gate the "join another cohort" opt-in: that decision needs
+ * every enrollment's cohort status, not just the most recent one.
+ */
+export async function getSogpEnrollmentsWithCohortByUserId(userId: string) {
+  return db
+    .select({ enrollment: schema.sogpEnrollments, cohort: schema.sogpCohorts })
+    .from(schema.sogpEnrollments)
+    .innerJoin(
+      schema.sogpCohorts,
+      eq(schema.sogpEnrollments.cohortId, schema.sogpCohorts.id),
+    )
+    .where(eq(schema.sogpEnrollments.userId, userId))
+    .orderBy(desc(schema.sogpEnrollments.createdAt));
 }
 
 export async function upsertSogpEnrollment(input: SogpEnrollmentCreateInput) {
@@ -353,6 +391,18 @@ export async function getSogpDashboardData(
         ),
     ]);
 
+  const now = new Date();
+  const levelSummaries = summarizeSogpLevels({
+    tracks: trackRows.map(({ track, lesson, progress }) => ({
+      curriculumLevel: track.curriculumLevel,
+      assessmentComplete:
+        (progress?.quizPassed ?? false) &&
+        (!lesson.responsePrompt || (progress?.writtenApproved ?? false)),
+    })),
+    startsAt: row.cohort.startsAt,
+    now,
+  });
+
   const tracks = trackRows.map(({ track, lesson, progress }) => {
     const normalizedProgress = {
       audioListened: progress?.audioListened ?? false,
@@ -360,6 +410,17 @@ export async function getSogpDashboardData(
       quizPassed: progress?.quizPassed ?? false,
       writtenApproved: progress?.writtenApproved ?? false,
     };
+    const curriculumLevel = track.curriculumLevel as SogpCurriculumLevel;
+    const previousLevelComplete =
+      curriculumLevel === 1 ||
+      levelSummaries.find((level) => level.level === curriculumLevel - 1)
+        ?.status === "complete";
+    const accessible = canAccessSogpTrack({
+      releaseAt: track.releaseAt,
+      curriculumLevel,
+      previousLevelComplete,
+      now,
+    });
     return {
       id: track.id,
       dayNumber: track.dayNumber,
@@ -381,6 +442,7 @@ export async function getSogpDashboardData(
       },
       progress: normalizedProgress,
       completed: Object.values(normalizedProgress).every(Boolean),
+      accessible,
     };
   });
 
@@ -487,6 +549,7 @@ export async function getAdminSogpData() {
     liveClasses,
     certificates,
     preparationRows,
+    orientationSurveys,
   ] =
     await Promise.all([
       db.select().from(schema.sogpCohorts).orderBy(desc(schema.sogpCohorts.startsAt)),
@@ -518,6 +581,10 @@ export async function getAdminSogpData() {
           desc(schema.sogpPreparationDays.publishDate),
           asc(schema.sogpPreparationResources.sortOrder),
         ),
+      db
+        .select()
+        .from(schema.sogpOrientationSurveys)
+        .orderBy(desc(schema.sogpOrientationSurveys.createdAt)),
     ]);
 
   const preparationDays = Array.from(
@@ -539,5 +606,6 @@ export async function getAdminSogpData() {
     liveClasses,
     certificates,
     preparationDays,
+    orientationSurveys,
   };
 }

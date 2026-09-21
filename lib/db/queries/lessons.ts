@@ -9,9 +9,9 @@ export async function getLevels() {
 }
 
 export async function getLevelById(id: number) {
-  return db.query.levels.findFirst({
+  return (await db.query.levels.findFirst({
     where: (l, { eq: eq2 }) => eq2(l.id, id),
-  }) ?? null;
+  })) ?? null;
 }
 
 export async function updateLevel(id: number, data: Partial<{

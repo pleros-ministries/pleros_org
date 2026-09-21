@@ -1,17 +1,20 @@
 "use server";
 
-import { requireAdmin, requireStaff, requireSuperAdmin } from "@/lib/auth/require-role";
+import { requireAdmin, requireStaff } from "@/lib/auth/require-role";
 import type { AdminRegistrantSummary } from "@/lib/admin-registrants";
 import type {
   AdminDashboardData,
   AdminPlatformData,
   AdminSchoolOfPurposeWaitlistEntry,
   AdminSogpData,
+  AdminSogpReportData,
   AdminStaffData,
 } from "@/lib/admin-query";
 import { getAdminRegistrantList } from "@/lib/db/queries/admin-registrants";
 import { getSchoolOfPurposeWaitlistEntries } from "@/lib/db/queries/school-of-purpose-waitlist";
 import { getAdminSogpData as getSogpOperationsData } from "@/lib/db/queries/sogp";
+import { getSogpReportData } from "@/lib/db/queries/sogp-report";
+import { buildSogpReport } from "@/lib/sogp/report";
 import { getSuperAdminOverviewMetrics } from "@/lib/db/queries/admin-analytics";
 import { getStudentPlatformList } from "@/lib/db/queries/students";
 import { getAllThreads } from "@/lib/db/queries/qa";
@@ -275,6 +278,7 @@ export async function getAdminSogpData(): Promise<AdminSogpData> {
       status: cohort.status,
       startsAt: cohort.startsAt.toISOString(),
       endsAt: cohort.endsAt.toISOString(),
+      enrollmentClosesAt: cohort.enrollmentClosesAt?.toISOString() ?? null,
       telegramChannelUrl: cohort.telegramChannelUrl,
       telegramDiscussionUrl: cohort.telegramDiscussionUrl,
       telegramBotUsername: cohort.telegramBotUsername,
@@ -377,7 +381,26 @@ export async function getAdminSogpData(): Promise<AdminSogpData> {
       botConfigured: Boolean(process.env.TELEGRAM_SOGP_BOT_TOKEN),
       webhookSecretConfigured: Boolean(process.env.TELEGRAM_SOGP_WEBHOOK_SECRET),
     },
+    orientationSurveys: data.orientationSurveys.map((survey) => ({
+      id: survey.id,
+      enrollmentId: survey.enrollmentId,
+      userId: survey.userId,
+      reasons: survey.reasons,
+      question: survey.question,
+      adminResponse: survey.adminResponse,
+      respondedBy: survey.respondedBy,
+      respondedAt: serializeDate(survey.respondedAt),
+      createdAt: survey.createdAt.toISOString(),
+    })),
   };
+}
+
+export async function getAdminSogpReportData(
+  options: { pastorId?: string } = {},
+): Promise<AdminSogpReportData> {
+  await requireAdmin();
+  const raw = await getSogpReportData();
+  return buildSogpReport(raw, new Date(), { pastorId: options.pastorId || undefined });
 }
 
 export async function getAdminRegistrants(): Promise<AdminRegistrantSummary[]> {
@@ -436,7 +459,7 @@ export async function getAdminPlatformData(): Promise<AdminPlatformData> {
 }
 
 export async function getAdminStaffData(): Promise<AdminStaffData> {
-  await requireSuperAdmin();
+  await requireAdmin();
   const [staffUsers, invites] = await Promise.all([
     listStaffUsers(),
     listStaffInvites(),

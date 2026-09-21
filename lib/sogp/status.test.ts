@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { deriveSogpLearnerState } from "./status";
+import { canOfferJoinAnotherCohort, deriveSogpLearnerState } from "./status";
 
 describe("deriveSogpLearnerState", () => {
   test.each([
@@ -29,5 +29,46 @@ describe("deriveSogpLearnerState", () => {
         enrollmentStatus: "withdrawn",
       }),
     ).toBe("withdrawn");
+  });
+});
+
+describe("canOfferJoinAnotherCohort", () => {
+  test("false when there is no open cohort", () => {
+    expect(
+      canOfferJoinAnotherCohort(
+        [{ enrollment: { cohortId: 1 }, cohort: { status: "completed" } }],
+        null,
+      ),
+    ).toBe(false);
+  });
+
+  test("false when any enrollment's cohort has not completed", () => {
+    expect(
+      canOfferJoinAnotherCohort(
+        [
+          { enrollment: { cohortId: 1 }, cohort: { status: "completed" } },
+          { enrollment: { cohortId: 2 }, cohort: { status: "active" } },
+        ],
+        3,
+      ),
+    ).toBe(false);
+  });
+
+  test("false when already enrolled in the open cohort", () => {
+    expect(
+      canOfferJoinAnotherCohort(
+        [{ enrollment: { cohortId: 3 }, cohort: { status: "completed" } }],
+        3,
+      ),
+    ).toBe(false);
+  });
+
+  test("true when every enrollment is completed and the open cohort is new", () => {
+    expect(
+      canOfferJoinAnotherCohort(
+        [{ enrollment: { cohortId: 1 }, cohort: { status: "completed" } }],
+        3,
+      ),
+    ).toBe(true);
   });
 });

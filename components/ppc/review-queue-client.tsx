@@ -78,6 +78,7 @@ export function ReviewQueueClient({
   const [revisionNotes, setRevisionNotes] = useState<Record<number, string>>({});
   const [assignmentValue, setAssignmentValue] = useState("");
   const [isPending, startTransition] = useTransition();
+  const [actionError, setActionError] = useState<string | null>(null);
 
   useEffect(() => {
     setSubmissionRecords(submissions);
@@ -149,7 +150,12 @@ export function ReviewQueueClient({
 
   const handleApprove = (id: number) => {
     startTransition(async () => {
-      await approveWrittenSubmission(id);
+      const result = await approveWrittenSubmission(id);
+      if (result.error) {
+        setActionError(result.error);
+        return;
+      }
+      setActionError(null);
       setSubmissionRecords((prev) =>
         prev.map((submission) =>
           submission.id === id
@@ -170,7 +176,12 @@ export function ReviewQueueClient({
     const note = revisionNotes[id]?.trim();
     if (!note) return;
     startTransition(async () => {
-      await requestSubmissionRevision(id, note);
+      const result = await requestSubmissionRevision(id, note);
+      if (result.error) {
+        setActionError(result.error);
+        return;
+      }
+      setActionError(null);
       setRevisionNotes((prev) => ({ ...prev, [id]: "" }));
       setSubmissionRecords((prev) =>
         prev.map((submission) =>
@@ -191,7 +202,12 @@ export function ReviewQueueClient({
 
   const handleAssignmentUpdate = (id: number, nextAssignedToId: string | null) => {
     startTransition(async () => {
-      await updateSubmissionAssignment(id, nextAssignedToId);
+      const result = await updateSubmissionAssignment(id, nextAssignedToId);
+      if (result.error) {
+        setActionError(result.error);
+        return;
+      }
+      setActionError(null);
       setSubmissionRecords((prev) =>
         prev.map((submission) =>
           submission.id === id
@@ -208,6 +224,7 @@ export function ReviewQueueClient({
 
   return (
     <div className="grid gap-3">
+      {actionError && <p className="text-xs text-rose-700">{actionError}</p>}
       <div className="flex gap-1 border-b border-zinc-200">
         {tabs.map((tab) => (
           <button

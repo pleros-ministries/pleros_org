@@ -120,7 +120,7 @@ type StaffAssignmentProps = {
 };
 
 export type StaffInviteProps = {
-  role: "admin" | "instructor";
+  role: "admin" | "instructor" | "pastor";
   inviteUrl: string;
 };
 
@@ -264,31 +264,28 @@ export function staffAssignmentHtml({
   url,
   ctaLabel,
 }: StaffAssignmentProps): string {
-  return `
-<!DOCTYPE html>
-<html>
-<head><meta charset="utf-8" /></head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #142033; max-width: 520px; margin: 0 auto; padding: 32px 16px;">
-  <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #58657a;">Pleros admin</p>
-  <h1 style="font-size: 20px; margin: 12px 0 0;">New assignment for ${staffName}</h1>
-  <p style="font-size: 14px; color: #58657a; line-height: 1.6;">
-    ${itemLabel}
-  </p>
-  <div style="margin: 16px 0; padding: 12px; background: #fafafa; border: 1px solid #e4e4e7; border-radius: 4px; font-size: 13px; color: #3f3f46;">
-    ${detail}
-  </div>
-  <a href="${url}" style="display: inline-block; margin-top: 12px; padding: 10px 20px; background: #18181b; color: #fff; border-radius: 4px; font-size: 13px; font-weight: 600; text-decoration: none;">
-    ${ctaLabel}
-  </a>
-</body>
-</html>`.trim();
+  const safeStaffName = escapeHtml(staffName);
+  const safeItemLabel = escapeHtml(itemLabel);
+  const safeDetail = escapeHtml(detail);
+  const safeUrl = escapeHtml(url);
+  const safeCtaLabel = escapeHtml(ctaLabel);
+
+  return brandedAuthEmailHtml({
+    eyebrow: "Pleros admin",
+    title: `New assignment for ${safeStaffName}`,
+    contentHtml: `<p style="font-family:'Be Vietnam Pro',Arial,Helvetica,sans-serif; font-size:16px; line-height:1.65; font-weight:400; margin:0 0 16px;">${safeItemLabel}</p><p style="font-family:'Be Vietnam Pro',Arial,Helvetica,sans-serif; font-size:14px; line-height:1.65; font-weight:400; color:#6876a0; margin:0 0 24px;">${safeDetail}</p>`,
+    action: {
+      label: safeCtaLabel,
+      url: safeUrl,
+    },
+  });
 }
 
 export function staffInviteHtml({
   role,
   inviteUrl,
 }: StaffInviteProps): string {
-  const safeRole = escapeHtml(role === "admin" ? "admin" : "instructor");
+  const safeRole = escapeHtml(role);
   const safeInviteUrl = escapeHtml(inviteUrl);
 
   return brandedAuthEmailHtml({

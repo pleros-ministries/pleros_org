@@ -97,6 +97,12 @@ export type SogpDashboardTrack = {
     writtenApproved: boolean;
   };
   completed: boolean;
+  /**
+   * Whether the learner can currently open this day: it has been released
+   * AND, when it belongs to week 2+, every required track in the prior
+   * week has passed its quiz (and written response, where required).
+   */
+  accessible: boolean;
 };
 
 export type SogpDashboardData = {

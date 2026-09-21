@@ -2,6 +2,7 @@ import type {
   PreSogpJourneyData,
   SogpJourneyData,
 } from "@/lib/db/queries/sogp-journey";
+import type { ReferralsDashboardData } from "@/lib/db/queries/sogp-referrals";
 
 import {
   buildPreparationDateKeys,
@@ -83,7 +84,6 @@ const sogpDays: SogpJourneyData["days"] = sogpDates.map((dateKey) => {
         dateKey,
         todayKey: sogpTodayKey,
         requirements: getSogpDayRequirements({
-          kind: "review",
           prayerWatchComplete,
           reviewComplete: complete,
         }),
@@ -117,7 +117,6 @@ const sogpDays: SogpJourneyData["days"] = sogpDates.map((dateKey) => {
       dateKey,
       todayKey: sogpTodayKey,
       requirements: getSogpDayRequirements({
-        kind: "weekday",
         prayerWatchComplete,
         assessmentComplete,
       }),
@@ -133,8 +132,8 @@ const sogpDays: SogpJourneyData["days"] = sogpDates.map((dateKey) => {
         ? "https://res.cloudinary.com/dxajhzf4d/video/upload/v1786094111/samples/Music/Audio%20Book/wtp-1_fnvl3n.mp3"
         : null,
       assessmentComplete,
-      assessmentHref: "#",
-      reviewState: assessmentComplete ? "approved" : null,
+      quizPassed: assessmentComplete,
+      writtenResponseStatus: assessmentComplete ? "approved" : null,
       accessible,
       lockedReason: accessible
         ? null
@@ -183,4 +182,32 @@ export const sogpPreviewData: SogpJourneyData = {
     reviewsTotal: 4,
     eligible: false,
   },
+};
+
+
+export const referralsPreviewData: ReferralsDashboardData = {
+  referralCode: "a1b2c3d4",
+  referralUrl: "https://pleros.org/sogp/enrol?ref=a1b2c3d4",
+  referredCount: 3,
+  preparationDaysTotal: 14,
+  referred: [
+    {
+      firstName: "Grace",
+      joinedAt: "2026-08-28T09:00:00.000Z",
+      stage: "preparing",
+      preparationDaysComplete: 6,
+    },
+    {
+      firstName: "Samuel",
+      joinedAt: "2026-08-30T14:30:00.000Z",
+      stage: "enrolled",
+      preparationDaysComplete: 0,
+    },
+    {
+      firstName: "Blessing",
+      joinedAt: "2026-08-22T18:15:00.000Z",
+      stage: "in_course",
+      preparationDaysComplete: 14,
+    },
+  ],
 };
