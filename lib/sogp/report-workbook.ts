@@ -2,6 +2,8 @@ import * as XLSX from "xlsx";
 
 import { SOGP_TOTAL_WEEKS } from "./calendar";
 
+import { summarizeDailyByPastor, type DailyParticipationRow } from "./daily-participation";
+
 import type { AdminSogpReportData } from "@/lib/admin-query";
 
 function formatDate(value: string | null) {
@@ -134,5 +136,46 @@ export function buildSogpReportWorkbook(report: AdminSogpReportData, cohortId: n
   XLSX.utils.book_append_sheet(workbook, pastorSheet, "By pastor");
   XLSX.utils.book_append_sheet(workbook, signupSheet, "Sign-up growth");
 
+  return XLSX.write(workbook, { type: "buffer", bookType: "xlsx" }) as Buffer;
+}
+
+export function buildDailyParticipationWorkbook(rows: DailyParticipationRow[], cohortTitle: string, dateKey: string): Buffer {
+  const yn = (value: boolean) => (value ? "Yes" : "No");
+  const { pastors, total } = summarizeDailyByPastor(rows);
+  const listenedCell = (summary: (typeof pastors)[number]) =>
+    summary.listenedApplicable ? summary.listened : "No lesson this day";
+
+  const summarySheet = XLSX.utils.json_to_sheet(
+    [...pastors, total].map((summary) => ({
+      Cohort: cohortTitle,
+      Date: dateKey,
+      Pastor: summary.pastorName,
+      Enrollees: summary.enrollees,
+      "Prayer watch": summary.prayerWatch,
+      "Listened (that day's lesson, to date)": listenedCell(summary),
+      "Quiz taken": summary.quizAttempted,
+      "Written submitted": summary.writtenSubmitted,
+      "Written approved": summary.writtenApproved,
+      "Review attended": summary.reviewAttended,
+    })),
+  );
+
+  const enrolleeSheet = XLSX.utils.json_to_sheet(
+    rows.map((row) => ({
+      Name: row.name,
+      Email: row.email,
+      Pastor: row.pastorName ?? "Unassigned",
+      "Prayer watch": yn(row.prayerWatch),
+      "Listened (that day's lesson, to date)": row.listened === null ? "No lesson this day" : yn(row.listened),
+      "Quiz taken": yn(row.quizAttempted),
+      "Written submitted": yn(row.writtenSubmitted),
+      "Written approved": yn(row.writtenApproved),
+      "Review attended": yn(row.reviewAttended),
+    })),
+  );
+
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, summarySheet, "By pastor");
+  XLSX.utils.book_append_sheet(workbook, enrolleeSheet, "Enrollees");
   return XLSX.write(workbook, { type: "buffer", bookType: "xlsx" }) as Buffer;
 }

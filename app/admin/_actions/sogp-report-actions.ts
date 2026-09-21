@@ -1,6 +1,8 @@
 "use server";
 
 import { requireAdmin } from "@/lib/auth/require-role";
+import { getSogpDailyParticipation } from "@/lib/db/queries/sogp-daily";
+import { DAILY_DATE_PATTERN, type DailyParticipationRow } from "@/lib/sogp/daily-participation";
 import {
   getSogpLessonRoster,
   getSogpLiveClassRoster,
@@ -82,4 +84,13 @@ export async function getAdminSogpLiveClassRoster(
     attendedAt: entry.attendedAt ? entry.attendedAt.toISOString() : null,
     completionSource: entry.completionSource,
   }));
+}
+
+export async function getAdminSogpDailyParticipation(
+  cohortId: number,
+  dateKey: string,
+): Promise<DailyParticipationRow[]> {
+  await requireAdmin();
+  if (!DAILY_DATE_PATTERN.test(dateKey)) throw new Error("Invalid date");
+  return getSogpDailyParticipation(cohortId, dateKey);
 }

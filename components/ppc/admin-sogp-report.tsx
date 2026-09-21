@@ -38,6 +38,7 @@ import type {
   AdminSogpReportSignupPoint,
 } from "@/lib/admin-query";
 import { Metric } from "@/components/ppc/admin-sogp-page";
+import { DailyByPastorSection } from "@/components/ppc/admin-sogp-daily-by-pastor";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const STATUS_COLORS: Record<string, string> = {
@@ -791,6 +792,8 @@ export function AdminSogpReport({
           />
         </section>
       ) : null}
+
+      {selectedCohort ? <DailyByPastorSection cohort={selectedCohort} /> : null}
 
       <div className="grid gap-4 xl:grid-cols-2">
         {selectedCohort ? (
