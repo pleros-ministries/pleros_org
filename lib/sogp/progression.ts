@@ -23,10 +23,9 @@ export function canAccessSogpTrack(input: {
   previousLevelComplete: boolean;
   now: Date;
 }) {
-  const isReleased = input.releaseAt.getTime() <= input.now.getTime();
-  const prerequisiteMet =
-    input.curriculumLevel === 1 || input.previousLevelComplete;
-  return isReleased && prerequisiteMet;
+  // Access follows the release schedule only: a learner can open any
+  // released teaching even if earlier ones aren't finished yet.
+  return input.releaseAt.getTime() <= input.now.getTime();
 }
 
 export function summarizeSogpLevels(input: {

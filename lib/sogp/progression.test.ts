@@ -72,7 +72,7 @@ describe("summarizeSogpLevels", () => {
 });
 
 describe("canAccessSogpTrack", () => {
-  test("combines release date and prior-level completion", () => {
+  test("depends only on the release schedule, regardless of prior-level completion", () => {
     const released = new Date("2026-09-21T06:00:00+01:00");
     const now = new Date("2026-09-21T12:00:00+01:00");
 
@@ -89,6 +89,20 @@ describe("canAccessSogpTrack", () => {
         releaseAt: released,
         curriculumLevel: 2,
         previousLevelComplete: false,
+        now,
+      }),
+    ).toBe(true);
+  });
+
+  test("still blocks access before the release time", () => {
+    const releaseAt = new Date("2026-09-21T06:00:00+01:00");
+    const now = new Date("2026-09-21T05:00:00+01:00");
+
+    expect(
+      canAccessSogpTrack({
+        releaseAt,
+        curriculumLevel: 1,
+        previousLevelComplete: true,
         now,
       }),
     ).toBe(false);

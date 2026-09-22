@@ -36,7 +36,7 @@ describe("canAccessSogpDay", () => {
     ).toBe(true);
   });
 
-  test("blocks a released track until the previous level is complete", () => {
+  test("allows a released track even if the previous level isn't complete", () => {
     expect(
       canAccessSogpDay({
         learnerState: "active",
@@ -44,6 +44,18 @@ describe("canAccessSogpDay", () => {
         releaseAt: new Date("2026-09-21T00:00:00Z"),
         curriculumLevel: 2,
         previousLevelComplete: false,
+      }),
+    ).toBe(true);
+  });
+
+  test("still blocks withdrawn learners from a released track", () => {
+    expect(
+      canAccessSogpDay({
+        learnerState: "withdrawn",
+        now: new Date("2026-09-27T00:00:00Z"),
+        releaseAt: new Date("2026-09-21T00:00:00Z"),
+        curriculumLevel: 2,
+        previousLevelComplete: true,
       }),
     ).toBe(false);
   });
