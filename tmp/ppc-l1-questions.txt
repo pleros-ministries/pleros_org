@@ -4,75 +4,126 @@ Level 1
 
 
 Track 1
-The Gospel – The Word of Truth
+The Gospel: The Word of Truth
 
 
 Section A: MCQs
 
 
-1. What best explains why humans are confronted with persistent questions about truth and existence?
-A. Exposure to religious teachings before independent reasoning
-B. A built-in burden or existential design that compels inquiry into truth
-C. Psychological instability arising from deep questioning
-D. Social influence shaping concern about meaning
+1. Why does the gospel's claim to be "the word of truth" require more than simply telling people to believe it?
+A. Because truth can only be established by religious tradition
+B. Because truth exists independently of whether people accept it and must therefore be examined and established
+C. Because every person must have the same personal experience before believing
+D. Because the gospel is mainly a philosophical argument
 
 
-2. What characterizes the nature of belief in Christ in relation to the word of truth?
-A. It results from persuasion and social influence
-B. It is imposed through doctrinal authority
-C. It follows hearing and recognizing truth as truth
-D. It develops through gradual moral discipline
+2. According to the teaching, which method can be used to establish truth about what, how, when, where, and who, while questions about why ultimately require revelation?
+A. Observation and reason
+B. Personal experience and tradition
+C. Faith and religious authority
+D. Emotion and conscience
 
 
-3. Which statement accurately describes the nature of truth?
-A. Truth depends on human awareness to exist
-B. Truth is established through consensus
-C. Truth exists independently of human knowledge
-D. Truth is determined by usefulness
+3. What are the two primary conclusions derived from observing and reasoning about the world?
+A. That humanity is naturally good and that the world will eventually improve
+B. That there must be a God, and that there is a contradiction in the world that requires God's resolution
+C. That science can explain everything and that revelation is unnecessary
+D. That suffering proves God does not exist and that humanity must save itself
 
 
-4. Which approach establishes truth in matters within the observable world?
-A. Revelation alone
-B. Observation and reason
-C. Institutional teaching
-D. Subjective conviction
+4. Why does the contradiction in the world point toward God as the necessary resolution?
+A. Because every problem in the world can be solved through human knowledge
+B. Because the source of reality cannot itself be deficient, so the contradiction must ultimately be resolved by the origin of all things
+C. Because suffering is evidence that the world has no purpose
+D. Because human beings are incapable of making moral decisions
 
 
-5. What conclusion follows from a finite and contingent world?
-A. The world sustains itself necessarily
-B. The world is self-explanatory
-C. The world implies a cause with greater power, intelligence, and character
-D. The world exists without origin
+5. What is the significance of Christ's death and resurrection in relation to the gospel's argument?
+A. They provide a historical demonstration that God has resolved the contradiction of sin, death, and darkness through Christ
+B. They prove that observation and reason are unnecessary for understanding the gospel
+C. They show that the natural world is fundamentally evil
+D. They establish that salvation comes through human moral improvement
 
 
 Section B: SAQs
 
 
-1. Distinguish between what can be known by observation and reason and what requires revelation.
-Marking Scheme (4 marks):
+1. How do observation and reason lead to the conclusion that there must be a God?
+Marking Scheme (1 mark):
+The finite and contingent nature of the world requires an adequate cause, which the teaching identifies as God. (1)
 
 
-Observation and reason: what, how, when, where, who (2)
-Revelation: why (1)
-Intention located in a mind/heart (1)
+2. How does the gospel present God's resolution of the world's contradiction?
+Marking Scheme (1 mark):
+The gospel presents Christ's death and resurrection as God's resolution of sin, death, and darkness, restoring humanity to God's purpose. (1)
 
 
-2. State the two primary conclusions derived from observing and reasoning about the world.
-Marking Scheme (4 marks):
+Section C: Answer Key and Marking Guide
 
 
-Existence of God / necessary cause (2)
-Presence of contradiction/deficiency (2)
+MCQs:
+1. B
+2. A
+3. B
+4. B
+5. A
 
 
-3. Explain why the contradiction in the world necessitates divine resolution.
-Marking Scheme (4 marks):
 
 
-Contradiction (death, darkness, evil) (1)
-Cannot originate from a perfect origin (1)
-Only God can resolve it (1)
-Resolution expressed as salvation/redemption (1)
+Track 2
+God's Purpose: Why We Exist
+
+
+Section A: MCQs
+
+
+1. Why can the question "Why do we exist?" ultimately only be answered by revelation?
+A. Because human beings cannot observe anything about the world
+B. Because the purpose of an intelligent Creator cannot be known merely through observation and reasoning
+C. Because human reasoning is always false
+D. Because the Bible is the only source of knowledge about the physical world
+
+
+2. Why must general revelation from Scripture be established before personal revelation concerning God's purpose?
+A. Because God never gives personal guidance to believers
+B. Because personal revelation is more important than Scripture
+C. Because personal ideas about purpose can become subjective and contradict God's objectively revealed purpose
+D. Because believers are not permitted to make personal decisions
+
+
+3. According to Ephesians 1:5 and 1:9, what is God's purpose, described as His will and good pleasure?
+A. The forgiveness of sins
+B. The establishment of the church
+C. Sonship
+D. The prosperity of believers
+
+
+4. According to Romans 8:15–17, what two realities are in sonship?
+A. That believers are prophets and teachers
+B. That believers are children of God and heirs of God
+C. That believers are saved from suffering and death
+D. That believers are called to preach and evangelize
+
+
+5. What does being an heir of God imply about a believer's purpose?
+A. The believer is free from responsibility because everything has already been given to him
+B. The believer has an assigned portion or responsibility, including natural and spiritual assignments to fulfill
+C. The believer's only assignment is to attend church and pray
+D. The believer's purpose is limited to finding a successful career
+
+
+Section B: SAQs
+
+
+1. Why must God's purpose for human existence be established from God's revealed Word rather than personal revelation?
+Marking Scheme (1 mark):
+God's purpose must be established from His revealed Word because it is God's objective revelation and provides the standard that personal revelation must not contradict. (1)
+
+
+2. What is God's purpose according to Ephesians 1?
+Marking Scheme (1 mark):
+God's purpose is to bring humanity into sonship as His children through Christ, according to His good pleasure and will. (1)
 
 
 Section C: Answer Key and Marking Guide
@@ -83,172 +134,64 @@ MCQs:
 2. C
 3. C
 4. B
-5. C
-
-
-SAQs:
-Award marks strictly based on inclusion of specified doctrinal terms and distinctions. Partial credit applies only where required elements are explicitly stated.
-
-
-
-
-Track 2
-God’s Purpose – Why We Exist
-
-
-Section A: MCQs
-
-
-1. What is the correct basis for answering the question of “why” concerning human existence?
-A. Observation and reason applied to human experience
-B. Personal intuition formed through reflection
-C. Revelation of intention from the one who created
-D. Collective agreement across belief systems
-        
-2. How are God’s will, good pleasure, and purpose related?
-A. They describe sequential stages of divine action
-B. They are distinct aspects of divine planning
-C. They are interchangeable expressions of the same reality
-D. They represent human interpretations of divine intent
-        
-3. What is identified as the direct expression of God’s purpose?
-A. Redemption from sin and judgment
-B. Moral transformation of humanity
-C. Adoption as sons (sonship)
-D. Establishment of divine authority over creation
-        
-4. What is the doctrinal meaning of the term “huiothesia”?
-A. Legal acceptance into a divine covenant
-B. Moral qualification for divine approval
-C. Placement into the state of sonship
-D. Gradual transformation into divine likeness
-
-
-5. How is sonship expressed in its twofold reality?
-A. As relational fellowship and moral obedience
-B. As being a child of God and an heir of God
-C. As possessing divine nature and exercising authority
-D. As receiving salvation and fulfilling destiny
-
-
-Section B: SAQs
-
-
-1. Distinguish between general revelation and personal revelation in establishing God’s purpose.
-Marking Scheme (4 marks):
-
-
-        •        General revelation precedes personal revelation (1)
-        •        General revelation established from Scripture/Word of God (1)
-        •        Personal revelation is individual-specific (1)
-        •        Personal revelation must align with general revelation (1)
-
-
-2. Define sonship using its two core components and explain their implications.
-Marking Scheme (4 marks):
-
-
-        •        Child (teknon): fellowship / relationship / reproduction after God’s kind (2)
-        •        Heir (kleronomos): assigned lot / inheritance / responsibility (2)
-
-
-3. Explain the distinction between natural assignment and spiritual assignment within heirship.
-Marking Scheme (4 marks):
-
-
-        •        Natural assignment: earthly responsibilities / work / service context (1)
-        •        Spiritual assignment: ministry / role in body of Christ (1)
-        •        Both are inheritance (assigned lot from God) (1)
-        •        Both are to be fulfilled as service to the Lord (1)
-
-
-Section C: Answer Key and Marking Guide
-
-
-MCQs:
-1. C
-2. C
-3. C
-4. C
 5. B
-
-
-SAQs:
-Award marks strictly based on inclusion of specified doctrinal terms and distinctions. Partial credit applies only where required elements are explicitly stated.
 
 
 
 
 Track 3
-The New Creation – Who You Are in Christ
+The New Creation (Who You Are in Christ)
 
 
 Section A: MCQs
 
 
-1. What is identified as the first priority after believing the gospel and understanding God’s purpose?
-A. Engaging in spiritual disciplines
-B. Discovering one’s assignment
-C. Knowing one’s identity in Christ
-D. Pursuing moral transformation
-        
-2. What event is directly associated with believing the gospel?
-A. Gradual transformation of character
-B. Sealing with the Holy Spirit
-C. Entrance into ministry service
-D. Renewal of the physical body
+1. What is the first thing God wants a believer to understand after believing the gospel and knowing God's purpose?
+A. The specific ministry assignment they must immediately begin
+B. The spiritual gifts they have received
+C. Who they are in Christ and what happened to them at salvation
+D. The rules they must follow to remain saved
 
 
-3. How is the new creation best described in relation to the former state?
-A. A refinement of the previous condition
-B. A coexistence of old and new realities
-C. A complete replacement of the former reality
-D. A progressive transition from the old to the new
+2. What does the teaching mean by saying that the believer is a "new creation" in 2 Corinthians 5:17?
+A. The believer's physical body and mind are immediately changed
+B. The believer's inward man has been changed, with the old reality passing away and all things becoming new
+C. The believer no longer has any need to grow spiritually
+D. The believer becomes physically immortal immediately after salvation
 
 
-4. Which distinction is necessary to properly understand the new creation?
-A. The distinction between faith and works
-B. The distinction between natural and spiritual gifts
-C. The distinction between outward man and inward man
-D. The distinction between law and grace
-        
-5. What defines the condition of the inward man in the new creation?
-A. A mixture of righteousness and sin
-B. A gradual release from sin
-C. Complete freedom from sin and union with Christ
-D. Dependence on the outward man for transformation
+3. Why is understanding the distinction between the inward man and the outward man important for understanding the new creation?
+A. Because salvation changes the believer's outward appearance before changing anything else
+B. Because the outward man determines whether a person is saved
+C. Because salvation changes the inward man, while the outward man remains subject to natural and physical realities until its eventual glorification
+D. Because the inward man refers only to the believer's physical brain
+
+
+4. According to Romans 6, what happened to the believer's old man when the believer was united with Christ?
+A. It remained alive but became weaker
+B. It was hidden and would eventually disappear through human effort
+C. It was crucified with Christ, and the believer was freed from sin and made alive with Christ
+D. It was transferred from the inward man to the outward man
+
+
+5. What are the three major implications of being a new creation identified in the teaching?
+A. New salvation, new church membership, and new ministry
+B. New status, new character, and new abilities
+C. New body, new mind, and new circumstances
+D. New knowledge, new possessions, and new relationships
 
 
 Section B: SAQs
 
 
-1. Explain the relationship between the new creation and the reception of the Spirit at salvation.
-Marking Scheme (4 marks):
+1. What is the difference between the inward man and the outward man in the new creation?
+Marking Scheme (1 mark):
+The inward man is spiritually made new at salvation, while the outward man, including the physical body, remains subject to natural realities. (1)
 
 
-        •        Sealed with the Holy Spirit at belief (1)
-        •        Received the Spirit of sonship/adoption (1)
-        •        New creation defined by receiving the Spirit (1)
-        •        Direct contrast with former state (not continuation) (1)
-
-
-2. Distinguish between the outward man and the inward man in the context of the new creation.
-Marking Scheme (4 marks):
-
-
-        •        Outward man: physical body / perishing / tent (1)
-        •        Inward man: spirit / renewed / eternal (1)
-        •        New creation applies to inward man (1)
-        •        Outward man not yet changed (awaits glorification) (1)
-
-
-3. State and explain the three implications of the new creation.
-Marking Scheme (6 marks):
-
-
-        •        New status: no condemnation / access to God / authority (2)
-        •        New character: righteousness / love / fruit of the Spirit (2)
-        •        New abilities: works of Christ / gifts of the Spirit (2)
+2. What are the three major implications of the new creation?
+Marking Scheme (1 mark):
+The new creation gives the believer a new status, character, and abilities in Christ. (1)
 
 
 Section C: Answer Key and Marking Guide
@@ -259,14 +202,7 @@ MCQs:
 2. B
 3. C
 4. C
-5. C
-
-
-SAQs:
-• Award marks strictly based on the presence of required doctrinal terms.
-• No credit for vague or implied answers; terms must be explicitly stated.
-
-
+5. B
 
 
 Track 4
