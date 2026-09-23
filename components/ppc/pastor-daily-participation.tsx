@@ -9,10 +9,16 @@ import { Count, Mark } from "@/components/ppc/admin-sogp-daily-by-pastor";
 import { clampDate, lagosToday, shiftDate } from "@/lib/sogp/daily-date";
 import { summarizeDailyByPastor } from "@/lib/sogp/daily-participation";
 
-type CohortWindow = { id: number; title: string; startsAt: string; endsAt: string };
+type CohortWindow = { id: number; title: string; startsAt: string; endsAt: string; status: string };
 
+// "active" is the one cohort an admin has explicitly marked current — prefer
+// that over guessing from date windows, since a newer cohort's prep period
+// can start before the active one ends and would otherwise win a date-range
+// check (cohorts are ordered newest-first).
 function pickDefaultCohort(cohorts: CohortWindow[]): CohortWindow | null {
   if (!cohorts.length) return null;
+  const active = cohorts.find((cohort) => cohort.status === "active");
+  if (active) return active;
   const today = lagosToday();
   const current = cohorts.find(
     (cohort) => cohort.startsAt.slice(0, 10) <= today && today <= cohort.endsAt.slice(0, 10),

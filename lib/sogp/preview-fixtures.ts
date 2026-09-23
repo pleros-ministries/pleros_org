@@ -187,7 +187,7 @@ export const sogpPreviewData: SogpJourneyData = {
 
 export const referralsPreviewData: ReferralsDashboardData = {
   referralCode: "a1b2c3d4",
-  referralUrl: "https://pleros.org/sogp/enrol?ref=a1b2c3d4",
+  referralUrl: "https://pleros.org/sogp?ref=a1b2c3d4",
   referredCount: 3,
   preparationDaysTotal: 14,
   referred: [

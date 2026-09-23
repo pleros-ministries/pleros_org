@@ -28,14 +28,16 @@ import { SogpCurriculumAccordion } from "./sogp-curriculum-accordion";
 
 function SectionCta({
   label,
+  href,
   inverse = false,
 }: {
   label: string;
+  href: string;
   inverse?: boolean;
 }) {
   return (
     <Link
-      href={content.hero.ctaHref}
+      href={href}
       prefetch={true}
       className={
         inverse
@@ -51,7 +53,7 @@ function SectionCta({
 
 const structureIcons = [CalendarDays, Radio, Clock3, RotateCcw] as const;
 
-function CurriculumSection() {
+function CurriculumSection({ enrolHref }: { enrolHref: string }) {
   const curriculumLevels = getSogpCurriculumLevels();
 
   return (
@@ -66,13 +68,13 @@ function CurriculumSection() {
           </p>
         </div>
         <SogpCurriculumAccordion levels={curriculumLevels} />
-        <SectionCta label={content.ctas.curriculum} />
+        <SectionCta label={content.ctas.curriculum} href={enrolHref} />
       </div>
     </section>
   );
 }
 
-function StructureSection() {
+function StructureSection({ enrolHref }: { enrolHref: string }) {
   return (
     <section className="bg-[var(--color-brand-blue)] py-14 text-white md:py-20">
       <div className="site-shell-page sogp-shell-page grid gap-9">
@@ -111,13 +113,13 @@ function StructureSection() {
             );
           })}
         </div>
-        <SectionCta label={content.ctas.middle} inverse />
+        <SectionCta label={content.ctas.middle} href={enrolHref} inverse />
       </div>
     </section>
   );
 }
 
-function ToolsSection() {
+function ToolsSection({ enrolHref }: { enrolHref: string }) {
   return (
     <section className="py-14 md:py-20">
       <div className="site-shell-page sogp-shell-page grid gap-9">
@@ -201,13 +203,13 @@ function ToolsSection() {
             </div>
           </article>
         </div>
-        <SectionCta label={content.ctas.middle} />
+        <SectionCta label={content.ctas.middle} href={enrolHref} />
       </div>
     </section>
   );
 }
 
-export function SogpLandingPage() {
+export function SogpLandingPage({ enrolHref }: { enrolHref: string }) {
   const schoolName = content.hero.titleLines[3].replace(/^with the /, "");
 
   return (
@@ -234,7 +236,7 @@ export function SogpLandingPage() {
               <p className="max-w-[42rem] font-[var(--font-be-vietnam-pro)] text-[1rem] leading-[1.6] tracking-[-0.02em] text-[var(--color-text-muted)] md:text-[1.15rem]">
                 {content.hero.description}
               </p>
-              <SectionCta label={content.ctas.hero} />
+              <SectionCta label={content.ctas.hero} href={enrolHref} />
             </div>
             <SogpHeroPhone />
           </div>
@@ -260,7 +262,7 @@ export function SogpLandingPage() {
                 </li>
               ))}
             </ol>
-            <SectionCta label={content.ctas.early} />
+            <SectionCta label={content.ctas.early} href={enrolHref} />
           </div>
         </section>
 
@@ -280,7 +282,7 @@ export function SogpLandingPage() {
                 title={content.introVideo.title}
                 posterSrc={content.introVideo.posterSrc}
               />
-              <SectionCta label={content.ctas.middle} inverse />
+              <SectionCta label={content.ctas.middle} href={enrolHref} inverse />
             </div>
           </div>
         </section>
@@ -320,7 +322,7 @@ export function SogpLandingPage() {
                   </li>
                 ))}
               </ul>
-              <SectionCta label={content.ctas.middle} />
+              <SectionCta label={content.ctas.middle} href={enrolHref} />
             </div>
           </div>
         </section>
@@ -345,12 +347,12 @@ export function SogpLandingPage() {
                 </li>
               ))}
             </ol>
-            <SectionCta label={content.ctas.middle} />
+            <SectionCta label={content.ctas.middle} href={enrolHref} />
           </div>
         </section>
 
-        <CurriculumSection />
-        <StructureSection />
+        <CurriculumSection enrolHref={enrolHref} />
+        <StructureSection enrolHref={enrolHref} />
 
         <section className="bg-[var(--color-brand-sky)] py-14 md:py-20">
           <div className="site-shell-page sogp-shell-page grid gap-8 md:grid-cols-[0.7fr_1.3fr] md:gap-14">
@@ -370,12 +372,12 @@ export function SogpLandingPage() {
                   {paragraph}
                 </p>
               ))}
-              <SectionCta label={content.ctas.free} />
+              <SectionCta label={content.ctas.free} href={enrolHref} />
             </div>
           </div>
         </section>
 
-        <ToolsSection />
+        <ToolsSection enrolHref={enrolHref} />
 
         <section className="bg-[var(--color-brand-sky)] py-14 md:py-20">
           <div className="site-shell-page sogp-shell-page grid gap-9 md:grid-cols-[0.85fr_1.15fr] md:items-center md:gap-14">
@@ -398,7 +400,7 @@ export function SogpLandingPage() {
               <p className="site-section-intro text-[var(--color-text-strong)]">
                 {content.facilitator.description}
               </p>
-              <SectionCta label={content.ctas.free} />
+              <SectionCta label={content.ctas.free} href={enrolHref} />
             </div>
           </div>
         </section>
@@ -419,7 +421,7 @@ export function SogpLandingPage() {
             <p className="site-section-intro max-w-[45rem] text-white/84">
               {content.socialProof.description}
             </p>
-            <SectionCta label={content.ctas.free} inverse />
+            <SectionCta label={content.ctas.free} href={enrolHref} inverse />
           </div>
         </section>
 
@@ -444,7 +446,7 @@ export function SogpLandingPage() {
                   );
                 })}
               </ul>
-              <SectionCta label={content.ctas.free} />
+              <SectionCta label={content.ctas.free} href={enrolHref} />
             </div>
           </div>
         </section>
@@ -476,7 +478,7 @@ export function SogpLandingPage() {
                   </AccordionItem>
                 ))}
               </Accordion>
-              <SectionCta label={content.ctas.free} />
+              <SectionCta label={content.ctas.free} href={enrolHref} />
             </div>
           </div>
         </section>
@@ -486,7 +488,7 @@ export function SogpLandingPage() {
             <h2 className="site-section-heading max-w-[17ch] text-[2.2rem] text-white md:text-[3rem]">
               Find truth. Discover God’s purpose. Grow to fulfil it.
             </h2>
-            <SectionCta label={content.ctas.free} inverse />
+            <SectionCta label={content.ctas.free} href={enrolHref} inverse />
           </div>
         </section>
       </main>

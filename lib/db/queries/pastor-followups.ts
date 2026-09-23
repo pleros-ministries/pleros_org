@@ -603,11 +603,20 @@ async function enrichWithProgress(
   }));
 }
 
-export type PastorCohortWindow = { id: number; title: string; startsAt: string; endsAt: string };
+export type PastorCohortWindow = {
+  id: number;
+  title: string;
+  startsAt: string;
+  endsAt: string;
+  status: (typeof schema.sogpCohortStatusEnum.enumValues)[number];
+};
 
 /**
  * Distinct cohorts a pastor currently has enrollees in, newest first —
  * powers the cohort picker for the pastor's daily participation table.
+ * `status` lets the picker default to the one cohort an admin has marked
+ * "active" (the authoritative "current cohort"), rather than guessing from
+ * overlapping date windows.
  */
 export async function getPastorCohorts(pastorUserId: string): Promise<PastorCohortWindow[]> {
   const rows = await db
@@ -616,6 +625,7 @@ export async function getPastorCohorts(pastorUserId: string): Promise<PastorCoho
       title: schema.sogpCohorts.title,
       startsAt: schema.sogpCohorts.startsAt,
       endsAt: schema.sogpCohorts.endsAt,
+      status: schema.sogpCohorts.status,
     })
     .from(schema.pastorAssignments)
     .innerJoin(
@@ -631,6 +641,7 @@ export async function getPastorCohorts(pastorUserId: string): Promise<PastorCoho
     title: row.title,
     startsAt: row.startsAt.toISOString(),
     endsAt: row.endsAt.toISOString(),
+    status: row.status,
   }));
 }
 

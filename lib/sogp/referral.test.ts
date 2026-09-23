@@ -18,12 +18,12 @@ describe("generateReferralCode", () => {
 });
 
 describe("buildReferralUrl", () => {
-  test("points straight at the enrol form with the ref param", () => {
+  test("points at the SOGP landing page with the ref param", () => {
     expect(buildReferralUrl("https://pleros.org", "a1b2c3d4")).toBe(
-      "https://pleros.org/sogp/enrol?ref=a1b2c3d4",
+      "https://pleros.org/sogp?ref=a1b2c3d4",
     );
     expect(buildReferralUrl("https://pleros.org/", "a1b2c3d4")).toBe(
-      "https://pleros.org/sogp/enrol?ref=a1b2c3d4",
+      "https://pleros.org/sogp?ref=a1b2c3d4",
     );
   });
 });

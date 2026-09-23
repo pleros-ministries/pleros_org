@@ -9,7 +9,7 @@ export function generateReferralCode(): string {
 }
 
 export function buildReferralUrl(siteUrl: string, code: string): string {
-  return `${siteUrl.replace(/\/$/, "")}/sogp/enrol?ref=${encodeURIComponent(code)}`;
+  return `${siteUrl.replace(/\/$/, "")}/sogp?ref=${encodeURIComponent(code)}`;
 }
 
 export function buildReferralShareMessage(): string {
