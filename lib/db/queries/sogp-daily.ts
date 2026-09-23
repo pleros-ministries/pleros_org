@@ -8,6 +8,7 @@ import * as schema from "../schema";
 export async function getSogpDailyParticipation(
   cohortId: number,
   dateKey: string,
+  pastorId?: string,
 ): Promise<DailyParticipationRow[]> {
   const { start, end } = lagosDayRange(dateKey);
 
@@ -27,7 +28,12 @@ export async function getSogpDailyParticipation(
         eq(schema.pastorAssignments.enrollmentId, schema.sogpEnrollments.id),
       )
       .leftJoin(schema.users, eq(schema.users.id, schema.pastorAssignments.pastorUserId))
-      .where(eq(schema.sogpEnrollments.cohortId, cohortId))
+      .where(
+        and(
+          eq(schema.sogpEnrollments.cohortId, cohortId),
+          pastorId ? eq(schema.pastorAssignments.pastorUserId, pastorId) : undefined,
+        ),
+      )
       .orderBy(asc(schema.sogpEnrollments.name)),
     db
       .select({

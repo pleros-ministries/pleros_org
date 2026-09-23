@@ -13,6 +13,12 @@ import {
 import { getBestQuizScore } from "@/lib/db/queries/quizzes";
 import { getSubmission } from "@/lib/db/queries/submissions";
 import { getThreadsByLesson } from "@/lib/db/queries/qa";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Breadcrumb } from "@/components/ppc/breadcrumb";
 import { PageHeader } from "@/components/ppc/page-header";
 import { AudioPlayer } from "@/components/ppc/audio-player";
@@ -145,14 +151,22 @@ export default async function LessonDetailPage({
           )}
 
           {lesson.notesContent && (
-            <section className="space-y-2">
-              <h3 className="ppc-heading text-xs font-semibold uppercase tracking-wider text-zinc-400">
-                Notes
-              </h3>
-              <div className="prose prose-sm max-w-none rounded-sm border border-zinc-200 bg-white p-4 text-zinc-700">
-                <div dangerouslySetInnerHTML={{ __html: lesson.notesContent }} />
-              </div>
-            </section>
+            <Accordion>
+              <AccordionItem
+                value="notes"
+                tone="muted"
+                className="rounded-sm border-zinc-200 bg-white px-4"
+              >
+                <AccordionTrigger className="text-xs font-semibold uppercase tracking-wider text-zinc-400 hover:text-zinc-600">
+                  Notes
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="prose prose-sm max-w-none text-zinc-700">
+                    <div dangerouslySetInnerHTML={{ __html: lesson.notesContent }} />
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
           )}
 
           <LessonHubClient

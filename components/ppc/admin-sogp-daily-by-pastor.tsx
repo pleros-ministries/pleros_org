@@ -5,30 +5,17 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight, Download } from "lucide-react";
 
 import { getAdminSogpDailyParticipation } from "@/app/admin/_actions/sogp-report-actions";
+import { clampDate, lagosToday, shiftDate } from "@/lib/sogp/daily-date";
 import { summarizeDailyByPastor, type DailyPastorSummary } from "@/lib/sogp/daily-participation";
 
 type CohortWindow = { id: number; title: string; startsAt: string; endsAt: string };
 
-function lagosToday() {
-  return new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Lagos" }).format(new Date());
-}
-
-function shiftDate(dateKey: string, days: number) {
-  const date = new Date(`${dateKey}T00:00:00.000Z`);
-  date.setUTCDate(date.getUTCDate() + days);
-  return date.toISOString().slice(0, 10);
-}
-
-function clamp(value: string, min: string, max: string) {
-  return value < min ? min : value > max ? max : value;
-}
-
-function Mark({ value }: { value: boolean | null }) {
+export function Mark({ value }: { value: boolean | null }) {
   if (value === null) return <span className="text-zinc-300">—</span>;
   return <span className={value ? "font-medium text-emerald-700" : "text-zinc-400"}>{value ? "Yes" : "No"}</span>;
 }
 
-function Count({ n, of, applicable = true }: { n: number; of: number; applicable?: boolean }) {
+export function Count({ n, of, applicable = true }: { n: number; of: number; applicable?: boolean }) {
   if (!applicable) return <span className="text-zinc-300">—</span>;
   const percent = of ? Math.round((n / of) * 100) : 0;
   return (
@@ -58,7 +45,7 @@ function SummaryCells({ summary }: { summary: DailyPastorSummary }) {
 export function DailyByPastorSection({ cohort }: { cohort: CohortWindow }) {
   const minDate = cohort.startsAt.slice(0, 10);
   const maxDate = cohort.endsAt.slice(0, 10);
-  const [date, setDate] = useState(() => clamp(lagosToday(), minDate, maxDate));
+  const [date, setDate] = useState(() => clampDate(lagosToday(), minDate, maxDate));
   const [expanded, setExpanded] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);

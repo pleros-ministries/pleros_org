@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   useMutation,
   useQueryClient,
@@ -80,16 +81,24 @@ export function LeaderboardPage({
     initialData,
   });
 
-  const visibility = useMutation({
-    mutationFn: async (hidden: boolean) => {
-      const response = await fetch("/api/sogp/leaderboard/visibility", {
+  const [aliasDraft, setAliasDraft] = useState<string | null>(null);
+
+  const alias = useMutation({
+    mutationFn: async (value: string | null) => {
+      const response = await fetch("/api/sogp/leaderboard/alias", {
         method: "PATCH",
         credentials: "same-origin",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ hidden }),
+        body: JSON.stringify({ alias: value }),
       });
-      if (!response.ok) throw new Error("Your visibility could not be saved.");
+      const payload = (await response.json().catch(() => null)) as {
+        error?: string;
+      } | null;
+      if (!response.ok) {
+        throw new Error(payload?.error ?? "Your display name could not be saved.");
+      }
     },
+    onSuccess: () => setAliasDraft(null),
     onSettled: () =>
       queryClient.invalidateQueries({ queryKey: LEADERBOARD_QUERY_KEY }),
   });
@@ -137,11 +146,6 @@ export function LeaderboardPage({
         {me ? (
           <SogpActivitySection
             title="Your standing"
-            description={
-              me.hidden
-                ? "You are hidden from the leaderboard. Only you can see this."
-                : undefined
-            }
             icon={
               <TrophyIcon
                 className="size-4 text-[var(--color-brand-blue)]"
@@ -158,6 +162,15 @@ export function LeaderboardPage({
               </p>
               <StreakBadge days={me.currentStreak} />
             </div>
+            {me.alias ? (
+              <p className="text-xs text-zinc-500">
+                Showing on the leaderboard as{" "}
+                <strong className="font-semibold text-zinc-900">
+                  {me.alias}
+                </strong>
+                .
+              </p>
+            ) : null}
             <dl className="grid grid-cols-2 gap-2">
               {breakdown.map((item) => (
                 <div
@@ -257,8 +270,8 @@ export function LeaderboardPage({
 
         {me ? (
           <SogpActivitySection
-            title="Visibility"
-            description="Your full name is shown to your cohort. You can hide yourself and still see your own rank."
+            title="Display name"
+            description="Your full name is shown by default. Set a display name if you'd rather appear under something else — it must be unique in your cohort."
             icon={
               <InfoIcon
                 className="size-4 text-[var(--color-brand-blue)]"
@@ -266,19 +279,47 @@ export function LeaderboardPage({
               />
             }
           >
-            <label className="flex items-start gap-2.5 text-sm text-zinc-700">
+            <form
+              className="flex flex-wrap items-start gap-2"
+              onSubmit={(event) => {
+                event.preventDefault();
+                alias.mutate(aliasDraft ?? me.alias ?? "");
+              }}
+            >
               <input
-                type="checkbox"
-                className="mt-0.5 size-4 accent-[var(--color-brand-blue)]"
-                checked={me.hidden}
-                disabled={visibility.isPending}
-                onChange={(event) => visibility.mutate(event.target.checked)}
+                type="text"
+                inputMode="text"
+                maxLength={24}
+                placeholder="e.g. Faithful7"
+                value={aliasDraft ?? me.alias ?? ""}
+                onChange={(event) => setAliasDraft(event.target.value)}
+                disabled={alias.isPending}
+                className="h-9 min-w-0 flex-1 rounded-sm border border-zinc-200 bg-white px-3 text-sm text-zinc-900 outline-none focus:border-[var(--color-brand-blue)]"
               />
-              <span>Hide me from the leaderboard</span>
-            </label>
-            {visibility.isError ? (
+              <button
+                type="submit"
+                disabled={alias.isPending}
+                className="inline-flex h-9 shrink-0 items-center rounded-full bg-[var(--color-brand-blue)] px-4 text-xs font-semibold text-white disabled:opacity-55"
+              >
+                Save
+              </button>
+              {me.alias ? (
+                <button
+                  type="button"
+                  disabled={alias.isPending}
+                  onClick={() => {
+                    setAliasDraft("");
+                    alias.mutate(null);
+                  }}
+                  className="inline-flex h-9 shrink-0 items-center rounded-full border border-zinc-200 bg-white px-4 text-xs font-medium text-zinc-700 disabled:opacity-55"
+                >
+                  Use my real name
+                </button>
+              ) : null}
+            </form>
+            {alias.isError ? (
               <p role="alert" className="text-xs text-red-600">
-                {visibility.error.message}
+                {alias.error.message}
               </p>
             ) : null}
           </SogpActivitySection>

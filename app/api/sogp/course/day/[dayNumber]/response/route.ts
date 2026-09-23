@@ -69,16 +69,17 @@ export async function POST(
       );
       return NextResponse.json({ submission });
     }
-    const current = await getSubmission(
-      context.session.user.id,
-      context.data.track.lesson.id,
-    );
-    if (!current?.content.trim()) {
+    if (!content || content.length > 20_000) {
       return NextResponse.json(
-        { error: "Save your response before submitting." },
+        { error: "Write a response within 20,000 characters." },
         { status: 400 },
       );
     }
+    await upsertDraft(
+      context.session.user.id,
+      context.data.track.lesson.id,
+      content,
+    );
     const submission = await submitForReview(
       context.session.user.id,
       context.data.track.lesson.id,

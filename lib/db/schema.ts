@@ -828,7 +828,9 @@ export const sogpEnrollments = pgTable(
     }),
     reason: text("reason"),
     status: sogpEnrollmentStatusEnum("status").notNull().default("enrolled"),
-    leaderboardOptOut: boolean("leaderboard_opt_out").notNull().default(false),
+    // Optional per-cohort display name shown on the leaderboard instead of
+    // the learner's real name. Null means "show my real name".
+    leaderboardAlias: text("leaderboard_alias"),
     // Per-student referral link code (minted lazily) and the enrolment that
     // referred this one.
     referralCode: text("referral_code"),
@@ -861,6 +863,9 @@ export const sogpEnrollments = pgTable(
       .on(t.referralCode)
       .where(sql`${t.referralCode} IS NOT NULL`),
     index("sogp_enrollments_referred_by_idx").on(t.referredByEnrollmentId),
+    uniqueIndex("sogp_enrollments_cohort_leaderboard_alias_idx")
+      .on(t.cohortId, t.leaderboardAlias)
+      .where(sql`${t.leaderboardAlias} IS NOT NULL`),
   ],
 );
 

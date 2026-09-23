@@ -15,7 +15,6 @@ import * as schema from "@/lib/db/schema";
 import { toLagosDateKey } from "@/lib/sogp/formation-progress";
 import {
   computeStreaks,
-  denseRankFor,
   EMPTY_ACTIVITY_COUNTS,
   LEADERBOARD_MAX_LISTED,
   rankByPoints,
@@ -39,7 +38,7 @@ export type LeaderboardMe = {
   points: number;
   currentStreak: number;
   longestStreak: number;
-  hidden: boolean;
+  alias: string | null;
   breakdown: LeaderboardBreakdown;
 };
 
@@ -88,7 +87,7 @@ export async function getSogpLeaderboard(
       id: schema.sogpEnrollments.id,
       userId: schema.sogpEnrollments.userId,
       name: schema.sogpEnrollments.name,
-      optOut: schema.sogpEnrollments.leaderboardOptOut,
+      alias: schema.sogpEnrollments.leaderboardAlias,
     })
     .from(schema.sogpEnrollments)
     .where(
@@ -323,8 +322,8 @@ export async function getSogpLeaderboard(
     );
     return {
       userId: member.userId,
-      name: member.name,
-      hidden: member.optOut,
+      name: member.alias ?? member.name,
+      alias: member.alias,
       points: breakdown.total,
       currentStreak: streaks.current,
       longestStreak: streaks.longest,
@@ -332,17 +331,10 @@ export async function getSogpLeaderboard(
     };
   });
 
-  const visible = scored.filter((row) => !row.hidden);
-  const ranked = rankByPoints(visible);
-
-  const mine = scored.find((row) => row.userId === userId);
-  const myRank = mine
-    ? (ranked.find((row) => row.userId === userId)?.rank ??
-      denseRankFor(
-        mine.points,
-        visible.map((row) => row.points),
-      ))
-    : null;
+  const ranked = rankByPoints(scored);
+  const mine = meIsMember
+    ? ranked.find((row) => row.userId === userId)
+    : undefined;
 
   return {
     cohortTitle: cohort.title,
@@ -353,32 +345,47 @@ export async function getSogpLeaderboard(
       currentStreak: row.currentStreak,
       isMe: row.userId === userId,
     })),
-    total: visible.length,
-    me:
-      mine && meIsMember && myRank !== null
-        ? {
-            rank: myRank,
-            points: mine.points,
-            currentStreak: mine.currentStreak,
-            longestStreak: mine.longestStreak,
-            hidden: mine.hidden,
-            breakdown: mine.breakdown,
-          }
-        : null,
+    total: ranked.length,
+    me: mine
+      ? {
+          rank: mine.rank,
+          points: mine.points,
+          currentStreak: mine.currentStreak,
+          longestStreak: mine.longestStreak,
+          alias: mine.alias,
+          breakdown: mine.breakdown,
+        }
+      : null,
   };
 }
 
-export async function setSogpLeaderboardVisibility(
+const ALIAS_PATTERN = /^[\p{L}\p{N} _-]+$/u;
+
+export async function setSogpLeaderboardAlias(
   userId: string,
-  hidden: boolean,
-) {
+  rawAlias: string | null,
+): Promise<{ alias: string | null } | { error: "invalid" | "taken" }> {
   const enrollment = await getSogpEnrollmentByUserId(userId);
-  if (!enrollment) return null;
+  if (!enrollment) return { error: "invalid" };
 
-  await db
-    .update(schema.sogpEnrollments)
-    .set({ leaderboardOptOut: hidden, updatedAt: new Date() })
-    .where(eq(schema.sogpEnrollments.id, enrollment.id));
+  const alias = rawAlias?.trim() || null;
+  if (alias !== null) {
+    if (alias.length < 2 || alias.length > 24 || !ALIAS_PATTERN.test(alias)) {
+      return { error: "invalid" };
+    }
+  }
 
-  return { hidden };
+  try {
+    await db
+      .update(schema.sogpEnrollments)
+      .set({ leaderboardAlias: alias, updatedAt: new Date() })
+      .where(eq(schema.sogpEnrollments.id, enrollment.id));
+  } catch (error) {
+    if ((error as { code?: string }).code === "23505") {
+      return { error: "taken" };
+    }
+    throw error;
+  }
+
+  return { alias };
 }

@@ -1,7 +1,7 @@
 import { PastorFollowupView } from "@/components/ppc/pastor-followup-view";
 import { requirePastorOrAdmin } from "@/lib/auth/require-role";
 import { hasAdminAccess } from "@/lib/app-role";
-import { getPastorEnrollees, listPastors } from "@/lib/db/queries/pastor-followups";
+import { getPastorCohorts, getPastorEnrollees, listPastors } from "@/lib/db/queries/pastor-followups";
 
 export default async function PastorMyEnrolleesPage({
   searchParams,
@@ -20,11 +20,15 @@ export default async function PastorMyEnrolleesPage({
   // doubles as a pastor. `?pastorId=` lets an admin preview anyone else's.
   const targetPastorId = isAdmin && requested ? requested : session.user.id;
 
-  const enrollees = await getPastorEnrollees(targetPastorId);
+  const [enrollees, cohorts] = await Promise.all([
+    getPastorEnrollees(targetPastorId),
+    getPastorCohorts(targetPastorId),
+  ]);
 
   return (
     <PastorFollowupView
       enrollees={enrollees}
+      cohorts={cohorts}
       isAdmin={isAdmin}
       pastorOptions={allPastors.map((p) => ({ id: p.id, name: p.name }))}
       selectedPastorId={targetPastorId}

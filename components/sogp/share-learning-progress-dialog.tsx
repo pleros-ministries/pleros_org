@@ -16,7 +16,9 @@ import {
   DEFAULT_LEARNING_PROGRESS_SHARE_TEMPLATE,
   LEARNING_PROGRESS_SHARE_TEMPLATES,
   MAX_LEARNING_PROGRESS_CHARS,
+  MAX_LEARNING_PROGRESS_WORDS,
   buildLearningProgressShareMessage,
+  countWords,
   validateLearningProgressQuote,
   type LearningProgressShareTemplate,
 } from "@/lib/sogp/learning-progress-share";
@@ -243,14 +245,21 @@ export function ShareLearningProgressDialog({
                 className="w-full resize-y rounded-[var(--radius-sm)] border border-[var(--color-line-strong)] p-3 text-sm leading-[1.6] outline-none focus-visible:border-[var(--color-brand-blue)]"
               />
               <span
-                className={`justify-self-end text-xs ${quote.length > MAX_LEARNING_PROGRESS_CHARS
+                className={`justify-self-end text-xs ${quote.length > MAX_LEARNING_PROGRESS_CHARS ||
+                    countWords(quote) > MAX_LEARNING_PROGRESS_WORDS
                     ? "text-red-600"
                     : "text-[var(--color-text-muted)]"
                   }`}
               >
-                {quote.length} / {MAX_LEARNING_PROGRESS_CHARS} characters
+                {quote.length} / {MAX_LEARNING_PROGRESS_CHARS} characters ·{" "}
+                {countWords(quote)} / {MAX_LEARNING_PROGRESS_WORDS} words
               </span>
             </label>
+            {validationError && quote.trim().length > 0 ? (
+              <p role="alert" className="text-sm text-red-700">
+                {validationError}
+              </p>
+            ) : null}
             {error ? (
               <p role="alert" className="text-sm text-red-700">
                 {error}

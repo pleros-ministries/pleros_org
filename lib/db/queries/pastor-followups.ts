@@ -603,6 +603,37 @@ async function enrichWithProgress(
   }));
 }
 
+export type PastorCohortWindow = { id: number; title: string; startsAt: string; endsAt: string };
+
+/**
+ * Distinct cohorts a pastor currently has enrollees in, newest first —
+ * powers the cohort picker for the pastor's daily participation table.
+ */
+export async function getPastorCohorts(pastorUserId: string): Promise<PastorCohortWindow[]> {
+  const rows = await db
+    .selectDistinct({
+      id: schema.sogpCohorts.id,
+      title: schema.sogpCohorts.title,
+      startsAt: schema.sogpCohorts.startsAt,
+      endsAt: schema.sogpCohorts.endsAt,
+    })
+    .from(schema.pastorAssignments)
+    .innerJoin(
+      schema.sogpEnrollments,
+      eq(schema.sogpEnrollments.id, schema.pastorAssignments.enrollmentId),
+    )
+    .innerJoin(schema.sogpCohorts, eq(schema.sogpCohorts.id, schema.sogpEnrollments.cohortId))
+    .where(eq(schema.pastorAssignments.pastorUserId, pastorUserId))
+    .orderBy(desc(schema.sogpCohorts.startsAt));
+
+  return rows.map((row) => ({
+    id: row.id,
+    title: row.title,
+    startsAt: row.startsAt.toISOString(),
+    endsAt: row.endsAt.toISOString(),
+  }));
+}
+
 /**
  * A pastor's own "my enrollees" list — full record for each assignment, plus
  * SOGP progress.

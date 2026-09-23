@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation";
 
 import { recordFollowUpContact } from "@/app/admin/(app)/(pastor-only)/_actions/pastor-followup-actions";
 import { PageHeader } from "@/components/ppc/page-header";
-import type { PastorEnrollee } from "@/lib/db/queries/pastor-followups";
+import { PastorDailyParticipationSection } from "@/components/ppc/pastor-daily-participation";
+import type { PastorCohortWindow, PastorEnrollee } from "@/lib/db/queries/pastor-followups";
 
 type SortKey = "recent" | "name" | "least-contacted" | "lowest-progress";
 
@@ -280,11 +281,13 @@ function EnrolleeRow({
 
 export function PastorFollowupView({
   enrollees,
+  cohorts,
   isAdmin,
   pastorOptions,
   selectedPastorId,
 }: {
   enrollees: PastorEnrollee[];
+  cohorts: PastorCohortWindow[];
   isAdmin: boolean;
   pastorOptions: Array<{ id: string; name: string }>;
   selectedPastorId: string | null;
@@ -330,6 +333,10 @@ export function PastorFollowupView({
       </PageHeader>
 
       <ProgressSummary enrollees={enrollees} />
+
+      {selectedPastorId && cohorts.length > 0 ? (
+        <PastorDailyParticipationSection cohorts={cohorts} pastorId={selectedPastorId} />
+      ) : null}
 
       <section className="overflow-hidden rounded-sm border border-zinc-200 bg-white">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-100 px-4 py-3 text-xs">

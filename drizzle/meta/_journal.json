@@ -218,6 +218,13 @@
       "when": 1789970315802,
       "tag": "0030_sogp_leaderboard_opt_out",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1790111740980,
+      "tag": "0031_sogp_leaderboard_alias",
+      "breakpoints": true
     }
   ]
 }
