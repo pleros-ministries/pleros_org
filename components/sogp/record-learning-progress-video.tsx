@@ -237,9 +237,9 @@ export function RecordLearningProgressVideo({
 
   return (
     <div className="grid gap-3">
-      <div className="relative overflow-hidden rounded-[var(--radius-md)] border border-[var(--color-line)] bg-black">
+      <div className="relative mx-auto aspect-[9/16] max-h-[46vh] w-auto overflow-hidden rounded-[var(--radius-md)] border border-[var(--color-line)] bg-black">
         <video ref={videoRef} muted playsInline className="hidden" />
-        <canvas ref={canvasRef} className="aspect-[9/16] w-full" />
+        <canvas ref={canvasRef} className="h-full w-full" />
         {status === "requesting" ? (
           <div className="absolute inset-0 grid place-items-center bg-black/40">
             <Loader2 className="size-6 animate-spin text-white" />
@@ -257,33 +257,38 @@ export function RecordLearningProgressVideo({
           </div>
         ) : null}
       </div>
-      <div className="flex justify-center">
-        {status === "recording" ? (
-          <button
-            type="button"
-            onClick={stopRecording}
-            className="inline-flex min-h-11 items-center gap-2 rounded-full bg-red-600 px-5 text-sm font-semibold text-white"
-          >
-            <Square className="size-3.5 fill-current" /> Stop recording
-          </button>
-        ) : status === "recorded" ? (
-          <span className="text-xs font-semibold text-[var(--color-text-muted)]">
-            Preparing your video…
-          </span>
-        ) : (
-          <button
-            type="button"
-            disabled={status !== "ready"}
-            onClick={startRecording}
-            className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--color-brand-blue)] px-5 text-sm font-semibold text-white disabled:opacity-50"
-          >
-            <Camera className="size-4" /> Start recording
-          </button>
-        )}
+      {/* Sticky so the action stays reachable without scrolling, even when
+          the preview above pushes this below the fold on short viewports.
+          Negative margins bleed to DialogContent's own p-5/sm:p-6 edges. */}
+      <div className="sticky bottom-0 -mx-5 -mb-5 grid gap-2 border-t border-[var(--color-line)] bg-[var(--page-surface-raised)] px-5 pt-3 pb-5 sm:-mx-6 sm:-mb-6 sm:px-6 sm:pb-6">
+        <div className="flex justify-center">
+          {status === "recording" ? (
+            <button
+              type="button"
+              onClick={stopRecording}
+              className="inline-flex min-h-11 items-center gap-2 rounded-full bg-red-600 px-5 text-sm font-semibold text-white"
+            >
+              <Square className="size-3.5 fill-current" /> Stop recording
+            </button>
+          ) : status === "recorded" ? (
+            <span className="text-xs font-semibold text-[var(--color-text-muted)]">
+              Preparing your video…
+            </span>
+          ) : (
+            <button
+              type="button"
+              disabled={status !== "ready"}
+              onClick={startRecording}
+              className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--color-brand-blue)] px-5 text-sm font-semibold text-white disabled:opacity-50"
+            >
+              <Camera className="size-4" /> Start recording
+            </button>
+          )}
+        </div>
+        <p className="text-center text-xs text-[var(--color-text-muted)]">
+          Up to {MAX_LEARNING_PROGRESS_VIDEO_SECONDS} seconds. Our branding is added to the video automatically.
+        </p>
       </div>
-      <p className="text-center text-xs text-[var(--color-text-muted)]">
-        Up to {MAX_LEARNING_PROGRESS_VIDEO_SECONDS} seconds. Our branding is added to the video automatically.
-      </p>
     </div>
   );
 }

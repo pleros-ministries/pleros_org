@@ -268,7 +268,7 @@ export function ShareLearningProgressDialog({
         if (!next) reset();
       }}
     >
-      <DialogContent className="gap-2.5">
+      <DialogContent className="max-h-[85vh] gap-2.5 overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Share your learning progress</DialogTitle>
           <DialogDescription>
