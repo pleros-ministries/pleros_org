@@ -3,6 +3,9 @@ import { and, asc, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
 import { PRE_SOGP_PREPARATION_DAYS } from "@/lib/sogp/calendar";
+import type { StudentStatus } from "@/lib/sogp/student-status";
+
+import { getStudentStatusesForPastor } from "./sogp-daily";
 
 /**
  * Full cleanup when someone stops being a pastor — whether their `isPastor`
@@ -366,6 +369,7 @@ export async function autoAssignPastorForEnrollment(
 export type PastorEnrollee = {
   enrollmentId: number;
   name: string;
+  firstName: string;
   email: string;
   phone: string;
   country: string;
@@ -394,13 +398,22 @@ export type PastorEnrollee = {
   certificateIssued: boolean;
   /** How many other enrollees they've personally referred in. */
   referredCount: number;
+  /** Automatic participation status — see `lib/sogp/student-status.ts`.
+   * Distinct from `status`, which is the enrollment lifecycle status. */
+  followUpStatus: StudentStatus;
 };
+
+/** What `enrichWithProgress` alone can produce — `followUpStatus` is attached
+ * afterward by each caller, since only `getPastorEnrollees` (the dashboard)
+ * needs the extra participation-range query it requires. */
+type PastorEnrolleeWithoutFollowUp = Omit<PastorEnrollee, "followUpStatus">;
 
 type PastorEnrolleeBaseRow = {
   enrollmentId: number;
   userId: string;
   cohortId: number;
   name: string;
+  firstName: string;
   email: string;
   phone: string;
   country: string;
@@ -413,6 +426,7 @@ type PastorEnrolleeBaseRow = {
   assignedAt: Date;
   lastContactedAt: Date | null;
   contactCount: number;
+  createdAt: Date;
 };
 
 const pastorEnrolleeColumns = {
@@ -420,6 +434,7 @@ const pastorEnrolleeColumns = {
   userId: schema.sogpEnrollments.userId,
   cohortId: schema.sogpEnrollments.cohortId,
   name: schema.sogpEnrollments.name,
+  firstName: schema.sogpEnrollments.firstName,
   email: schema.sogpEnrollments.email,
   phone: schema.sogpEnrollments.phone,
   country: schema.sogpEnrollments.country,
@@ -432,6 +447,7 @@ const pastorEnrolleeColumns = {
   assignedAt: schema.pastorAssignments.assignedAt,
   lastContactedAt: schema.pastorAssignments.lastContactedAt,
   contactCount: schema.pastorAssignments.contactCount,
+  createdAt: schema.sogpEnrollments.createdAt,
 } as const;
 
 /**
@@ -445,7 +461,7 @@ const pastorEnrolleeColumns = {
  */
 async function enrichWithProgress(
   rows: PastorEnrolleeBaseRow[],
-): Promise<PastorEnrollee[]> {
+): Promise<PastorEnrolleeWithoutFollowUp[]> {
   const enrollmentIds = rows.map((row) => row.enrollmentId);
   const userIds = rows.map((row) => row.userId);
   const cohortIds = [...new Set(rows.map((row) => row.cohortId))];
@@ -585,7 +601,7 @@ async function enrichWithProgress(
       .filter((r) => r.referredByEnrollmentId != null)
       .map((r) => [r.referredByEnrollmentId as number, r.referred]),
   );
-  return rows.map(({ userId, cohortId, ...row }) => ({
+  return rows.map(({ userId, cohortId, createdAt, ...row }) => ({
     ...row,
     assignedAt: new Date(row.assignedAt).toISOString(),
     lastContactedAt: row.lastContactedAt
@@ -669,7 +685,22 @@ export async function getPastorEnrollees(
     .limit(limit)
     .offset(offset);
 
-  return enrichWithProgress(rows);
+  const [enriched, followUpStatusByEnrollment] = await Promise.all([
+    enrichWithProgress(rows),
+    getStudentStatusesForPastor(
+      pastorUserId,
+      rows.map((row) => ({
+        enrollmentId: row.enrollmentId,
+        cohortId: row.cohortId,
+        enrollmentCreatedAt: row.createdAt,
+      })),
+    ),
+  ]);
+
+  return enriched.map((enrollee) => ({
+    ...enrollee,
+    followUpStatus: followUpStatusByEnrollment.get(enrollee.enrollmentId) ?? "on_track",
+  }));
 }
 
 /** One enrollee's full record, regardless of which pastor holds it — powers
@@ -694,7 +725,11 @@ export async function getPastorEnrolleeById(
 
   if (rows.length === 0) return null;
   const [enrollee] = await enrichWithProgress(rows);
-  return enrollee ?? null;
+  if (!enrollee) return null;
+  // The detail page doesn't render `followUpStatus`, so it isn't worth the
+  // extra participation-range query here — only `getPastorEnrollees` (the
+  // dashboard list) computes it for real.
+  return { ...enrollee, followUpStatus: "on_track" };
 }
 
 /** Ownership check — does this enrollment currently belong to this pastor? */

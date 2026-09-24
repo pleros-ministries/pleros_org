@@ -787,7 +787,7 @@ export const sogpCohorts = pgTable(
       .notNull()
       .$type<SogpAssessmentPolicy>()
       .default(
-        sql`'{"requiredTrackCompletionPercent":100,"requiredPrayerWatchPercent":80,"requiredLiveClassCount":4}'::jsonb`,
+        sql`'{"requiredTrackCompletionPercent":100,"requiredPrayerWatchPercent":80,"requiredLiveClassPercent":80}'::jsonb`,
       ),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
@@ -907,6 +907,11 @@ export const sogpLearningProgressShareTemplateEnum = pgEnum(
   ["light-card", "dark-open", "dark-card"],
 );
 
+export const sogpLearningProgressShareKindEnum = pgEnum(
+  "sogp_learning_progress_share_kind",
+  ["image", "video"],
+);
+
 export const sogpLearningProgressShares = pgTable(
   "sogp_learning_progress_shares",
   {
@@ -919,7 +924,10 @@ export const sogpLearningProgressShares = pgTable(
       .references(() => users.id, { onDelete: "cascade" }),
     track: sogpLearningProgressTrackEnum("track").notNull(),
     dayNumber: integer("day_number"),
-    quote: text("quote").notNull(),
+    kind: sogpLearningProgressShareKindEnum("kind").notNull().default("image"),
+    // Only present for image shares — the learner's typed reflection. Video
+    // shares carry no typed quote (the learner speaks instead).
+    quote: text("quote"),
     authorName: text("author_name").notNull(),
     template: sogpLearningProgressShareTemplateEnum("template")
       .notNull()

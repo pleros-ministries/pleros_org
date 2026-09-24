@@ -7,22 +7,25 @@ import { NextResponse } from "next/server";
 
 import { getAppSession } from "@/lib/app-session";
 import { getLearningProgressShareForOwner } from "@/lib/db/queries/sogp-learning-progress-share";
-import { getLearningProgressShareInitials } from "@/lib/sogp/learning-progress-share";
+import {
+  LEARNING_PROGRESS_SHARE_ACCENT_DARK as ACCENT_DARK,
+  LEARNING_PROGRESS_SHARE_ACCENT_LIGHT as ACCENT_LIGHT,
+  LEARNING_PROGRESS_SHARE_NAVY as NAVY,
+  LEARNING_PROGRESS_SHARE_PADDING as PADDING,
+  LEARNING_PROGRESS_SHARE_PATTERN_BLUE as PATTERN_BLUE,
+  LEARNING_PROGRESS_SHARE_SANS as SANS,
+  LEARNING_PROGRESS_SHARE_SERIF as SERIF,
+  LEARNING_PROGRESS_SHARE_SKY as SKY,
+  LEARNING_PROGRESS_SHARE_WHAT_I_LEARNT_GREEN as WHAT_I_LEARNT_GREEN,
+  getLearningProgressDayText,
+  getLearningProgressHeadline,
+  getLearningProgressShareInitials,
+  getLearningProgressTeachingLabel,
+} from "@/lib/sogp/learning-progress-share";
 
 export const runtime = "nodejs";
 
 const SIZE = { width: 1080, height: 1080 };
-const PADDING = 64;
-
-const NAVY = "#0A1A6E";
-const SKY = "#DBF0FC";
-const PATTERN_BLUE = "#133FD4";
-const ACCENT_LIGHT = "#7BA253";
-const ACCENT_DARK = "#A8C98A";
-const WHAT_I_LEARNT_GREEN = "#4E6E33";
-
-const SANS = "Poppins";
-const SERIF = "Newsreader";
 
 function loadDataUri(relativePath: string): Promise<string> {
   return readFile(join(process.cwd(), relativePath)).then(
@@ -90,29 +93,6 @@ type ShareRenderData = {
   dayNumber: number | null;
   lessonTitle: string | null;
 };
-
-function getDayText(share: ShareRenderData): string {
-  return share.dayNumber
-    ? `Day ${share.dayNumber}`
-    : share.track === "pre_sogp"
-      ? "Pre-SOGP"
-      : "SOGP";
-}
-
-function getTeachingLabel(share: ShareRenderData): string {
-  return share.lessonTitle
-    ? "Teaching"
-    : share.track === "pre_sogp"
-      ? "Pre-SOGP preparation"
-      : "Learning progress";
-}
-
-function getHeadline(share: ShareRenderData): string {
-  if (share.lessonTitle) return share.lessonTitle;
-  return share.track === "pre_sogp"
-    ? "My Pre-SOGP Journey"
-    : "My SOGP Learning Progress";
-}
 
 // Reflection quotes are capped at MAX_LEARNING_PROGRESS_CHARS (120) at
 // submission time, so the top tiers below cover the real range; the last
@@ -358,12 +338,12 @@ function LightCardTemplate({
       <div style={{ marginTop: 40, display: "flex", flexDirection: "column" }}>
         <DayBadge
           tone="light"
-          dayText={getDayText(share)}
-          teachingLabel={getTeachingLabel(share)}
+          dayText={getLearningProgressDayText(share)}
+          teachingLabel={getLearningProgressTeachingLabel(share)}
           accent={ACCENT_LIGHT}
         />
       </div>
-      <Headline tone="light" text={getHeadline(share)} />
+      <Headline tone="light" text={getLearningProgressHeadline(share)} />
       <div
         style={{
           marginTop: 36,
@@ -435,12 +415,12 @@ function DarkOpenTemplate({
       <div style={{ marginTop: 40, display: "flex", flexDirection: "column" }}>
         <DayBadge
           tone="dark"
-          dayText={getDayText(share)}
-          teachingLabel={getTeachingLabel(share)}
+          dayText={getLearningProgressDayText(share)}
+          teachingLabel={getLearningProgressTeachingLabel(share)}
           accent={ACCENT_DARK}
         />
       </div>
-      <Headline tone="dark" text={getHeadline(share)} />
+      <Headline tone="dark" text={getLearningProgressHeadline(share)} />
       <div style={{ marginTop: 40, flexGrow: 1, display: "flex", flexDirection: "column" }}>
         <WhatILearntRow labelColor={ACCENT_DARK} lineColor={ACCENT_DARK} />
         <div style={{ flexGrow: 1, display: "flex", alignItems: "center", padding: "28px 0" }}>
@@ -506,12 +486,12 @@ function DarkCardTemplate({
       <div style={{ marginTop: 40, display: "flex", flexDirection: "column" }}>
         <DayBadge
           tone="dark"
-          dayText={getDayText(share)}
-          teachingLabel={getTeachingLabel(share)}
+          dayText={getLearningProgressDayText(share)}
+          teachingLabel={getLearningProgressTeachingLabel(share)}
           accent={ACCENT_DARK}
         />
       </div>
-      <Headline tone="dark" text={getHeadline(share)} />
+      <Headline tone="dark" text={getLearningProgressHeadline(share)} />
       <div
         style={{
           marginTop: 36,
@@ -577,7 +557,7 @@ export async function GET(
     shareId,
     session.user.id,
   );
-  if (!share) {
+  if (!share || share.kind !== "image" || !share.quote) {
     return NextResponse.json({ error: "Share not found" }, { status: 404 });
   }
 

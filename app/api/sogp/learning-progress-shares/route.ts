@@ -14,11 +14,14 @@ export async function POST(request: Request) {
     dayNumber?: number;
     quote?: string;
     template?: string;
+    kind?: string;
   } | null;
 
   if (!body || (body.track !== "sogp" && body.track !== "pre_sogp")) {
     return NextResponse.json({ error: "Invalid submission" }, { status: 400 });
   }
+
+  const kind = body.kind === "video" ? "video" : "image";
 
   const result = await createLearningProgressShare(session.user.id, {
     track: body.track,
@@ -26,6 +29,7 @@ export async function POST(request: Request) {
       typeof body.dayNumber === "number" ? body.dayNumber : null,
     quote: body.quote ?? "",
     template: body.template,
+    kind,
   });
 
   if ("error" in result) {
@@ -34,7 +38,10 @@ export async function POST(request: Request) {
 
   return NextResponse.json({
     id: result.id,
-    imageUrl: `/api/sogp/learning-progress-shares/${result.id}/image`,
+    kind: result.kind,
+    ...(result.kind === "image"
+      ? { imageUrl: `/api/sogp/learning-progress-shares/${result.id}/image` }
+      : {}),
     referralUrl: result.referralUrl,
   });
 }

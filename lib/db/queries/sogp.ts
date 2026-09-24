@@ -403,6 +403,17 @@ export async function getSogpDashboardData(
     now,
   });
 
+  // Teaching unlocks a week at a time, not day by day: use the earliest
+  // release date within each track's week rather than its own release date,
+  // so the rest of that week opens as soon as the week starts.
+  const weekReleaseAt = new Map<number, Date>();
+  for (const { track } of trackRows) {
+    const current = weekReleaseAt.get(track.weekNumber);
+    if (!current || track.releaseAt < current) {
+      weekReleaseAt.set(track.weekNumber, track.releaseAt);
+    }
+  }
+
   const tracks = trackRows.map(({ track, lesson, progress }) => {
     const normalizedProgress = {
       audioListened: progress?.audioListened ?? false,
@@ -416,7 +427,7 @@ export async function getSogpDashboardData(
       levelSummaries.find((level) => level.level === curriculumLevel - 1)
         ?.status === "complete";
     const accessible = canAccessSogpTrack({
-      releaseAt: track.releaseAt,
+      releaseAt: weekReleaseAt.get(track.weekNumber)!,
       curriculumLevel,
       previousLevelComplete,
       now,

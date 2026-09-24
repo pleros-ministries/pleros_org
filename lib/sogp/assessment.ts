@@ -31,6 +31,10 @@ export function calculateSogpEligibility(
     input.prayerDaysAttended,
     input.prayerDaysAvailable,
   );
+  const liveClassPercent = percent(
+    input.liveClassesAttended,
+    input.liveClassesTotal,
+  );
   const unmet: SogpEligibilityResult["unmet"] = [];
 
   if (trackPercent < input.policy.requiredTrackCompletionPercent) {
@@ -41,7 +45,7 @@ export function calculateSogpEligibility(
     unmet.push("prayer_watch");
   }
 
-  if (input.liveClassesAttended < input.policy.requiredLiveClassCount) {
+  if (liveClassPercent < input.policy.requiredLiveClassPercent) {
     unmet.push("live_classes");
   }
 
@@ -49,6 +53,7 @@ export function calculateSogpEligibility(
     eligible: unmet.length === 0,
     trackPercent,
     prayerPercent,
+    liveClassPercent,
     unmet,
   };
 }

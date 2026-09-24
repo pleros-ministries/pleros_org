@@ -20,7 +20,6 @@ import {
   isDateWithinSogpWindow,
 } from "@/lib/sogp/journey";
 import {
-  canAccessSogpTrack,
   summarizeSogpLevels,
   type SogpLevelStatus,
 } from "@/lib/sogp/progression";
@@ -599,6 +598,7 @@ export async function getActiveSogpJourney(
     prayerDaysAttended: prayerDates.size,
     prayerDaysAvailable: dateKeys.length,
     liveClassesAttended: reviewCompletion.size,
+    liveClassesTotal: requiredReviews.length,
     policy: dashboard.cohort.assessmentPolicy,
   });
 
@@ -634,18 +634,7 @@ export async function getActiveSogpJourney(
     const curriculumLevel = track
       ? (track.curriculumLevel as SogpCurriculumLevel)
       : null;
-    const previousLevelComplete = curriculumLevel
-      ? curriculumLevel === 1 ||
-        levelSummaries[curriculumLevel - 2]?.status === "complete"
-      : false;
-    const accessible = track && curriculumLevel
-      ? canAccessSogpTrack({
-          releaseAt: track.releaseAt,
-          curriculumLevel,
-          previousLevelComplete,
-          now,
-        })
-      : false;
+    const accessible = track ? track.accessible : false;
     const lockedReason = !track || accessible
       ? null
       : track.releaseAt.getTime() > now.getTime()

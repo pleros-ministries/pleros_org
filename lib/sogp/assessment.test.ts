@@ -13,17 +13,19 @@ describe("calculateSogpEligibility", () => {
         totalTracks: 20,
         prayerDaysAttended: 23,
         prayerDaysAvailable: 28,
-        liveClassesAttended: 4,
+        liveClassesAttended: 23,
+        liveClassesTotal: 28,
         policy: {
           requiredTrackCompletionPercent: 100,
           requiredPrayerWatchPercent: 80,
-          requiredLiveClassCount: 4,
+          requiredLiveClassPercent: 80,
         },
       }),
     ).toEqual({
       eligible: true,
       trackPercent: 100,
       prayerPercent: 82,
+      liveClassPercent: 82,
       unmet: [],
     });
   });
@@ -36,10 +38,11 @@ describe("calculateSogpEligibility", () => {
         prayerDaysAttended: 10,
         prayerDaysAvailable: 28,
         liveClassesAttended: 1,
+        liveClassesTotal: 28,
         policy: {
           requiredTrackCompletionPercent: 100,
           requiredPrayerWatchPercent: 80,
-          requiredLiveClassCount: 4,
+          requiredLiveClassPercent: 80,
         },
       }).unmet,
     ).toEqual(["tracks", "prayer_watch", "live_classes"]);
@@ -52,10 +55,11 @@ describe("calculateSogpEligibility", () => {
       prayerDaysAttended: 0,
       prayerDaysAvailable: 0,
       liveClassesAttended: 0,
+      liveClassesTotal: 0,
       policy: {
         requiredTrackCompletionPercent: 100,
         requiredPrayerWatchPercent: 80,
-        requiredLiveClassCount: 0,
+        requiredLiveClassPercent: 0,
       },
     });
 

@@ -31,7 +31,7 @@ function makeCohort(overrides: Partial<SogpReportRawData["cohorts"][number]> = {
     assessmentPolicy: {
       requiredTrackCompletionPercent: 100,
       requiredPrayerWatchPercent: 80,
-      requiredLiveClassCount: 4,
+      requiredLiveClassPercent: 80,
     },
     createdAt: startsAt,
     updatedAt: startsAt,

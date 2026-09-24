@@ -96,8 +96,9 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${suisseIntl.variable} ${sen.variable} ${beVietnamPro.variable} ${figtree.variable} ${dmSans.variable}`}
+      suppressHydrationWarning
     >
-      <body className="page-shell antialiased">
+      <body className="page-shell antialiased" suppressHydrationWarning>
         <ServiceWorkerRegister />
         <PushNotificationPrompt />
         <GoogleAnalytics />

@@ -69,23 +69,19 @@ async function getLessonTitleForDay(
   return row?.title ?? null;
 }
 
-export async function createLearningProgressShare(
+// Shared by createLearningProgressShare and getLearningProgressShareRenderContext:
+// resolves the enrollment, the effective day number (falling back to today's
+// scheduled day for the learner's cohort — the same way the dashboard
+// resolves "today", see getActiveSogpJourney), and that day's lesson title.
+async function resolveLearningProgressShareContext(
   userId: string,
-  input: {
-    track: "sogp" | "pre_sogp";
-    dayNumber?: number | null;
-    quote: string;
-    template?: string | null;
-  },
+  input: { track: "sogp" | "pre_sogp"; dayNumber?: number | null },
 ): Promise<
   | { error: string }
   | {
-      id: number;
-      quote: string;
-      authorName: string;
-      track: "sogp" | "pre_sogp";
-      referralUrl: string;
-      template: LearningProgressShareTemplate;
+      enrollment: { id: number; cohortId: number; name: string };
+      dayNumber: number | null;
+      lessonTitle: string | null;
     }
 > {
   const enrollment = await getLatestEnrollment(userId);
@@ -93,28 +89,85 @@ export async function createLearningProgressShare(
     return { error: "No SOGP enrolment found for this account." };
   }
 
-  const { error, quote } = validateLearningProgressQuote(input.quote);
-  if (error || !quote) {
-    return { error: error ?? "Invalid submission." };
-  }
-
-  const template = isLearningProgressShareTemplate(input.template)
-    ? input.template
-    : DEFAULT_LEARNING_PROGRESS_SHARE_TEMPLATE;
-
-  // The caller doesn't always know which day it is (e.g. the generic "Share
-  // your progress" entry points have no specific lesson in context) — fall
-  // back to today's scheduled day for the learner's cohort, the same way the
-  // dashboard resolves "today" (see getActiveSogpJourney).
-  const effectiveDayNumber =
+  const dayNumber =
     input.track === "sogp"
       ? (input.dayNumber ?? (await getCurrentDayNumberForCohort(enrollment.cohortId)))
       : (input.dayNumber ?? null);
 
   const lessonTitle =
-    input.track === "sogp" && effectiveDayNumber
-      ? await getLessonTitleForDay(enrollment.cohortId, effectiveDayNumber)
+    input.track === "sogp" && dayNumber
+      ? await getLessonTitleForDay(enrollment.cohortId, dayNumber)
       : null;
+
+  return { enrollment, dayNumber, lessonTitle };
+}
+
+export async function getLearningProgressShareRenderContext(
+  userId: string,
+  input: { track: "sogp" | "pre_sogp"; dayNumber?: number | null },
+): Promise<
+  | { error: string }
+  | {
+      authorName: string;
+      track: "sogp" | "pre_sogp";
+      dayNumber: number | null;
+      lessonTitle: string | null;
+    }
+> {
+  const context = await resolveLearningProgressShareContext(userId, input);
+  if ("error" in context) return context;
+  return {
+    authorName: context.enrollment.name,
+    track: input.track,
+    dayNumber: context.dayNumber,
+    lessonTitle: context.lessonTitle,
+  };
+}
+
+export async function createLearningProgressShare(
+  userId: string,
+  input: {
+    track: "sogp" | "pre_sogp";
+    dayNumber?: number | null;
+    quote: string;
+    template?: string | null;
+    kind?: "image" | "video";
+  },
+): Promise<
+  | { error: string }
+  | {
+      id: number;
+      quote: string | null;
+      authorName: string;
+      track: "sogp" | "pre_sogp";
+      referralUrl: string;
+      template: LearningProgressShareTemplate;
+      kind: "image" | "video";
+    }
+> {
+  const context = await resolveLearningProgressShareContext(userId, {
+    track: input.track,
+    dayNumber: input.dayNumber,
+  });
+  if ("error" in context) return context;
+  const { enrollment, dayNumber: effectiveDayNumber, lessonTitle } = context;
+
+  const kind = input.kind === "video" ? "video" : "image";
+
+  // Video shares carry no typed quote — the learner speaks instead, so only
+  // image shares require and validate one.
+  let quote: string | null = null;
+  if (kind === "image") {
+    const validated = validateLearningProgressQuote(input.quote);
+    if (validated.error || !validated.quote) {
+      return { error: validated.error ?? "Invalid submission." };
+    }
+    quote = validated.quote;
+  }
+
+  const template = isLearningProgressShareTemplate(input.template)
+    ? input.template
+    : DEFAULT_LEARNING_PROGRESS_SHARE_TEMPLATE;
 
   const [row] = await db
     .insert(schema.sogpLearningProgressShares)
@@ -123,6 +176,7 @@ export async function createLearningProgressShare(
       userId,
       track: input.track,
       dayNumber: effectiveDayNumber,
+      kind,
       quote,
       authorName: enrollment.name,
       template,
@@ -147,6 +201,7 @@ export async function createLearningProgressShare(
     track: input.track,
     referralUrl,
     template,
+    kind,
   };
 }
 
@@ -160,6 +215,7 @@ export async function getLearningProgressShareForOwner(
       userId: schema.sogpLearningProgressShares.userId,
       track: schema.sogpLearningProgressShares.track,
       dayNumber: schema.sogpLearningProgressShares.dayNumber,
+      kind: schema.sogpLearningProgressShares.kind,
       quote: schema.sogpLearningProgressShares.quote,
       authorName: schema.sogpLearningProgressShares.authorName,
       template: schema.sogpLearningProgressShares.template,

@@ -1,0 +1,1 @@
+ALTER TABLE "sogp_cohorts" ALTER COLUMN "assessment_policy" SET DEFAULT '{"requiredTrackCompletionPercent":100,"requiredPrayerWatchPercent":80,"requiredLiveClassPercent":80}'::jsonb;

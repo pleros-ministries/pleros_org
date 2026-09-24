@@ -134,7 +134,7 @@ function DialogDescription({
   return (
     <DialogPrimitive.Description
       data-slot="dialog-description"
-      className={cn("body mb-0 text-[var(--color-text-muted)]", className)}
+      className={cn("body !mb-0 text-[var(--color-text-muted)]", className)}
       {...props}
     />
   );

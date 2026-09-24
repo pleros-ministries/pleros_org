@@ -10,7 +10,7 @@ import * as schema from "../schema";
 const SCHEDULED_STATUSES = ["enrollment_open", "preparing", "active"];
 
 /**
- * Idempotently creates the optional daily review sessions for a cohort and
+ * Idempotently creates the required daily review sessions for a cohort and
  * points them at the cohort's Telegram channel. Sessions that already ended,
  * or already exist at the same start time, are skipped.
  */
@@ -50,7 +50,7 @@ export async function ensureDailyReviewSessions(
         startsAt: session.startsAt,
         endsAt: session.endsAt,
         youtubeLiveUrl: cohort.telegramChannelUrl,
-        isRequired: false,
+        isRequired: true,
       })),
     );
   }

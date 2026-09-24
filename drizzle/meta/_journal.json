@@ -225,6 +225,20 @@
       "when": 1790111740980,
       "tag": "0031_sogp_leaderboard_alias",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1790231029915,
+      "tag": "0032_sogp_learning_progress_share_kind",
+      "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1790238268257,
+      "tag": "0033_sogp_daily_review_required_percent",
+      "breakpoints": true
     }
   ]
 }

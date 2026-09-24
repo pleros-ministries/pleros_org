@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   BookOpen,
   CalendarDays,
@@ -27,7 +27,7 @@ import { AdminSogpPreparation } from "@/components/ppc/admin-sogp-preparation";
 import { AdminSogpProgressCorrections } from "@/components/ppc/admin-sogp-progress-corrections";
 import { AdminSogpCohortControls } from "@/components/ppc/admin-sogp-cohort-controls";
 import { ADMIN_QUERY_KEYS } from "@/lib/admin-query";
-import { PRE_SOGP_PREPARATION_DAYS } from "@/lib/sogp/calendar";
+import { PRE_SOGP_PREPARATION_DAYS, buildSogpDateKeys } from "@/lib/sogp/calendar";
 import { SOGP_LEVELS, SOGP_TRACKS } from "@/lib/sogp/curriculum";
 import { orientationReasonLabel } from "@/lib/sogp/orientation-survey";
 import type { SogpBroadcastKind } from "@/lib/telegram/sogp-broadcast";
@@ -98,26 +98,52 @@ function OrientationSurveyResponseEditor({ survey, onSaved }: { survey: { id: nu
   </div>;
 }
 
+function AdminSogpSkeleton() {
+  return (
+    <div className="grid animate-pulse gap-4" aria-busy="true" aria-label="Loading SOGP operations">
+      <div className="h-16 rounded-sm bg-zinc-100" />
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        {Array.from({ length: 4 }, (_, index) => <div key={index} className="h-24 rounded-sm bg-zinc-100" />)}
+      </div>
+      <div className="h-96 rounded-sm bg-zinc-100" />
+    </div>
+  );
+}
+
 export function AdminSogpPage() {
   const queryClient = useQueryClient();
-  const { data } = useSuspenseQuery({ queryKey: ADMIN_QUERY_KEYS.sogp, queryFn: getAdminSogpData });
+  const { data, isLoading, isError } = useQuery({ queryKey: ADMIN_QUERY_KEYS.sogp, queryFn: getAdminSogpData });
   const [tab, setTab] = useState<Tab>("Overview");
   const [curriculumOrders, setCurriculumOrders] = useState<number[]>(
     SOGP_TRACKS.map((track) => track.curriculumOrder),
   );
-  const current = data.cohorts[0] ?? null;
-  const currentTracks = current ? data.tracks.filter((track)=>track.cohortId===current.id) : [];
+
+  const current = data?.cohorts[0] ?? null;
+  const currentTracks = current ? data!.tracks.filter((track)=>track.cohortId===current.id) : [];
   const requiredTracks = currentTracks.filter((track)=>track.isRequired);
   const readyTracks = requiredTracks.filter((track)=>track.ready).length;
-  const preparationDays = current ? data.preparationDays.filter((day)=>day.cohortId===current.id) : [];
-  const requiredReviews = current ? data.liveClasses.filter((item)=>item.cohortId===current.id&&item.isRequired) : [];
+  const preparationDays = current ? data!.preparationDays.filter((day)=>day.cohortId===current.id) : [];
+  const requiredReviews = current ? data!.liveClasses.filter((item)=>item.cohortId===current.id&&item.isRequired) : [];
+  const expectedReviewCount = current ? buildSogpDateKeys(new Date(current.startsAt), new Date(current.endsAt)).length : 0;
   const curriculumMutation = useMutation({ mutationFn: async ()=>{ if(!current) throw new Error("Create a cohort first."); const result = await configureSogpCurriculum({cohortId:current.id,curriculumOrders:curriculumOrders}); if(result.error) throw new Error(result.error); return result;}, async onSuccess(){await queryClient.invalidateQueries({queryKey:ADMIN_QUERY_KEYS.sogp});} });
   const liveClassMutation = useMutation({ mutationFn: async (formData:FormData)=>{if(!current) throw new Error("Create a cohort first."); const result = await createSogpLiveClass({cohortId:current.id,title:String(formData.get("title")??""),startsAt:String(formData.get("startsAt")??""),endsAt:String(formData.get("endsAt")??""),youtubeLiveUrl:String(formData.get("youtubeUrl")??""),recordingUrl:String(formData.get("recordingUrl")??""),isRequired:formData.get("isRequired")==="on"}); if(result.error) throw new Error(result.error); return result;}, async onSuccess(){await queryClient.invalidateQueries({queryKey:ADMIN_QUERY_KEYS.sogp});} });
   const certificateMutation = useMutation({ mutationFn: async (enrollmentId:number)=>{const result = await issueSogpCertificate({enrollmentId}); if(result.error) throw new Error(result.error); return result;}, async onSuccess(){await queryClient.invalidateQueries({queryKey:ADMIN_QUERY_KEYS.sogp});} });
   const webhookMutation = useMutation({ mutationFn: async ()=>{const result = await configureSogpTelegramWebhook(); if(result.error) throw new Error(result.error); return result;} });
 
-  return <div className="grid gap-5"><PageHeader title="SOGP" description="Cohorts, curriculum, preparation, reviews and completion"/><nav className="flex gap-1 overflow-x-auto border-b border-zinc-200" aria-label="SOGP sections">{tabs.map((item)=><button key={item} type="button" onClick={()=>setTab(item)} className={`h-9 shrink-0 border-b-2 px-3 text-xs font-medium ${tab===item?"border-[var(--color-brand-blue)] text-zinc-950":"border-transparent text-zinc-500 hover:text-zinc-800"}`}>{item}</button>)}</nav>{requiredTracks.length!==24||readyTracks!==24||preparationDays.length!==PRE_SOGP_PREPARATION_DAYS||requiredReviews.length!==4?<div className="flex items-center gap-2 rounded-sm border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900"><CircleAlert className="size-4"/> Cohort activation requires {PRE_SOGP_PREPARATION_DAYS} preparation lessons, 24 ready teachings, and four required reviews.</div>:null}
-  {tab==="Overview"?<div className="grid gap-4"><section className="grid grid-cols-2 gap-3 lg:grid-cols-4"><Metric label="Current cohort" value={current?.title??"None"} hint={current?.status.replaceAll("_"," ")??"Create cohort"} Icon={CalendarDays}/><Metric label="Enrolments" value={data.enrollments.length} hint="All SOGP enrolments" Icon={Users}/><Metric label="Preparation" value={`${preparationDays.length} / ${PRE_SOGP_PREPARATION_DAYS}`} hint="Dated Pre-SOGP lessons" Icon={CalendarDays}/><Metric label="Curriculum" value={`${readyTracks} / 24`} hint="Required teachings ready" Icon={BookOpen}/></section><div className="grid gap-4 xl:grid-cols-[minmax(0,1.45fr)_minmax(20rem,0.75fr)]"><section className="rounded-sm border border-zinc-200 bg-white"><div className="border-b border-zinc-100 px-4 py-3"><h2 className="ppc-heading text-sm font-semibold">{current?.title??"No cohort"}</h2></div><div className="grid gap-4 p-4 text-xs"><div className="grid gap-3 sm:grid-cols-3"><div><p className="text-zinc-500">Starts</p><p className="mt-1 font-medium text-zinc-900">{current?formatDate(current.startsAt):"—"}</p></div><div><p className="text-zinc-500">Ends</p><p className="mt-1 font-medium text-zinc-900">{current?formatDate(current.endsAt):"—"}</p></div><div><p className="text-zinc-500">Telegram-linked</p><p className="mt-1 font-medium text-zinc-900">{data.enrollments.filter((item)=>item.telegramLinkedAt).length}</p></div></div><div className="grid gap-2 border-t border-zinc-100 pt-4">{[[`${PRE_SOGP_PREPARATION_DAYS} preparation lessons`,preparationDays.length===PRE_SOGP_PREPARATION_DAYS],["24 required teachings",requiredTracks.length===24&&readyTracks===24],["Four required reviews",requiredReviews.length===4],["Telegram channel",data.telegram.channelConfigured],["Bot credentials",data.telegram.botConfigured]].map(([label,ok])=><div key={String(label)} className="flex items-center justify-between"><span>{label}</span><span className={ok?"text-emerald-700":"text-amber-700"}>{ok?"Ready":"Needs attention"}</span></div>)}</div>{webhookMutation.error?<p className="text-rose-700">{webhookMutation.error.message}</p>:null}{webhookMutation.data?<p className="text-emerald-700">Telegram webhook configured.</p>:null}<button type="button" onClick={()=>webhookMutation.mutate()} disabled={webhookMutation.isPending} className="h-8 w-fit rounded-sm border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 disabled:opacity-50">{webhookMutation.isPending?"Configuring":"Configure bot webhook"}</button></div></section><BroadcastComposer/></div></div>:null}
+  if (isLoading) return <AdminSogpSkeleton />;
+  if (isError || !data) {
+    return (
+      <div className="grid gap-4">
+        <PageHeader title="SOGP" description="Cohorts, curriculum, preparation, reviews and completion" />
+        <div className="rounded-sm border border-rose-200 bg-rose-50 px-4 py-10 text-xs text-rose-700">
+          SOGP operations data could not be loaded. Try again shortly.
+        </div>
+      </div>
+    );
+  }
+
+  return <div className="grid gap-5"><PageHeader title="SOGP" description="Cohorts, curriculum, preparation, reviews and completion"/><nav className="flex gap-1 overflow-x-auto border-b border-zinc-200" aria-label="SOGP sections">{tabs.map((item)=><button key={item} type="button" onClick={()=>setTab(item)} className={`h-9 shrink-0 border-b-2 px-3 text-xs font-medium ${tab===item?"border-[var(--color-brand-blue)] text-zinc-950":"border-transparent text-zinc-500 hover:text-zinc-800"}`}>{item}</button>)}</nav>{requiredTracks.length!==24||readyTracks!==24||preparationDays.length!==PRE_SOGP_PREPARATION_DAYS||requiredReviews.length!==expectedReviewCount?<div className="flex items-center gap-2 rounded-sm border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900"><CircleAlert className="size-4"/> Cohort activation requires {PRE_SOGP_PREPARATION_DAYS} preparation lessons, 24 ready teachings, and {expectedReviewCount} required reviews.</div>:null}
+  {tab==="Overview"?<div className="grid gap-4"><section className="grid grid-cols-2 gap-3 lg:grid-cols-4"><Metric label="Current cohort" value={current?.title??"None"} hint={current?.status.replaceAll("_"," ")??"Create cohort"} Icon={CalendarDays}/><Metric label="Enrolments" value={data.enrollments.length} hint="All SOGP enrolments" Icon={Users}/><Metric label="Preparation" value={`${preparationDays.length} / ${PRE_SOGP_PREPARATION_DAYS}`} hint="Dated Pre-SOGP lessons" Icon={CalendarDays}/><Metric label="Curriculum" value={`${readyTracks} / 24`} hint="Required teachings ready" Icon={BookOpen}/></section><div className="grid gap-4 xl:grid-cols-[minmax(0,1.45fr)_minmax(20rem,0.75fr)]"><section className="rounded-sm border border-zinc-200 bg-white"><div className="border-b border-zinc-100 px-4 py-3"><h2 className="ppc-heading text-sm font-semibold">{current?.title??"No cohort"}</h2></div><div className="grid gap-4 p-4 text-xs"><div className="grid gap-3 sm:grid-cols-3"><div><p className="text-zinc-500">Starts</p><p className="mt-1 font-medium text-zinc-900">{current?formatDate(current.startsAt):"—"}</p></div><div><p className="text-zinc-500">Ends</p><p className="mt-1 font-medium text-zinc-900">{current?formatDate(current.endsAt):"—"}</p></div><div><p className="text-zinc-500">Telegram-linked</p><p className="mt-1 font-medium text-zinc-900">{data.enrollments.filter((item)=>item.telegramLinkedAt).length}</p></div></div><div className="grid gap-2 border-t border-zinc-100 pt-4">{[[`${PRE_SOGP_PREPARATION_DAYS} preparation lessons`,preparationDays.length===PRE_SOGP_PREPARATION_DAYS],["24 required teachings",requiredTracks.length===24&&readyTracks===24],[`${expectedReviewCount} required reviews`,requiredReviews.length===expectedReviewCount],["Telegram channel",data.telegram.channelConfigured],["Bot credentials",data.telegram.botConfigured]].map(([label,ok])=><div key={String(label)} className="flex items-center justify-between"><span>{label}</span><span className={ok?"text-emerald-700":"text-amber-700"}>{ok?"Ready":"Needs attention"}</span></div>)}</div>{webhookMutation.error?<p className="text-rose-700">{webhookMutation.error.message}</p>:null}{webhookMutation.data?<p className="text-emerald-700">Telegram webhook configured.</p>:null}<button type="button" onClick={()=>webhookMutation.mutate()} disabled={webhookMutation.isPending} className="h-8 w-fit rounded-sm border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 disabled:opacity-50">{webhookMutation.isPending?"Configuring":"Configure bot webhook"}</button></div></section><BroadcastComposer/></div></div>:null}
   {tab==="Cohorts"?<div className="grid gap-4"><section className="overflow-hidden rounded-sm border border-zinc-200 bg-white"><table className="min-w-full text-left text-xs"><thead className="bg-zinc-50 text-zinc-500"><tr><th className="px-4 py-3">Cohort</th><th className="px-4 py-3">Status</th><th className="px-4 py-3">Starts</th><th className="px-4 py-3">Ends</th></tr></thead><tbody className="divide-y divide-zinc-100">{data.cohorts.map((cohort)=><tr key={cohort.id}><td className="px-4 py-3 font-medium text-zinc-900">{cohort.title}</td><td className="px-4 py-3">{cohort.status.replaceAll("_"," ")}</td><td className="px-4 py-3">{formatDate(cohort.startsAt)}</td><td className="px-4 py-3">{formatDate(cohort.endsAt)}</td></tr>)}</tbody></table></section>{current?<AdminSogpCohortControls cohort={current}/>:null}</div>:null}
   {tab==="Curriculum"?<section className="grid gap-4 lg:grid-cols-[1fr_24rem]">
     <div className="overflow-hidden rounded-sm border border-zinc-200 bg-white">

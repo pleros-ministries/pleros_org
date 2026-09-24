@@ -24,13 +24,13 @@ export type SogpLearnerState =
 export type SogpAssessmentPolicy = {
   requiredTrackCompletionPercent: number;
   requiredPrayerWatchPercent: number;
-  requiredLiveClassCount: number;
+  requiredLiveClassPercent: number;
 };
 
 export const DEFAULT_SOGP_ASSESSMENT_POLICY: SogpAssessmentPolicy = {
   requiredTrackCompletionPercent: 100,
   requiredPrayerWatchPercent: 80,
-  requiredLiveClassCount: 4,
+  requiredLiveClassPercent: 80,
 };
 
 export type SogpEligibilityInput = {
@@ -39,6 +39,7 @@ export type SogpEligibilityInput = {
   prayerDaysAttended: number;
   prayerDaysAvailable: number;
   liveClassesAttended: number;
+  liveClassesTotal: number;
   policy: SogpAssessmentPolicy;
 };
 
@@ -46,6 +47,7 @@ export type SogpEligibilityResult = {
   eligible: boolean;
   trackPercent: number;
   prayerPercent: number;
+  liveClassPercent: number;
   unmet: Array<"tracks" | "prayer_watch" | "live_classes">;
 };
 

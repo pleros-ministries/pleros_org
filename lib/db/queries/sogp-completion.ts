@@ -22,6 +22,7 @@ export async function getSogpCompletionForEnrollment(enrollmentId: number) {
     prayerDaysAttended: journey.progress.prayerCompleted,
     prayerDaysAvailable: journey.progress.prayerTotal,
     liveClassesAttended: journey.progress.reviewsCompleted,
+    liveClassesTotal: journey.progress.reviewsTotal,
     policy: dashboard.cohort.assessmentPolicy,
   });
   return { enrollment, dashboard, eligibility };

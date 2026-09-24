@@ -230,7 +230,11 @@ export function SogpDailyTasks({
     (day) => day.review && !day.review.complete && day.dateKey >= data.todayKey,
   );
   const nextReview = nextReviewDay?.review;
-  const reviewComplete = selectedDay.review ? selectedDay.review.complete : !nextReview;
+  // A day only carries a review requirement when `selectedDay.review` is set
+  // (see lib/db/queries/sogp-journey.ts). A day without one — including the
+  // pre-policy-change days grandfathered in as optional — has nothing to do
+  // for Review, regardless of whether a later day still has one outstanding.
+  const reviewComplete = selectedDay.review ? selectedDay.review.complete : true;
 
   const reviewTask = {
     key: "review",
@@ -285,7 +289,7 @@ export function SogpDailyTasks({
           <button
             type="button"
             onClick={() => onSelectDate(nextReviewDay.dateKey)}
-            className={primaryButton}
+            className={cn(primaryButton, "w-fit")}
           >
             View review
           </button>

@@ -5,9 +5,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { recordFollowUpContact } from "@/app/admin/(app)/(pastor-only)/_actions/pastor-followup-actions";
+import { FollowUpMessageDialog } from "@/components/ppc/follow-up-message-dialog";
 import { PageHeader } from "@/components/ppc/page-header";
 import { PastorDailyParticipationSection } from "@/components/ppc/pastor-daily-participation";
 import type { PastorCohortWindow, PastorEnrollee } from "@/lib/db/queries/pastor-followups";
+import { STUDENT_STATUS_META } from "@/lib/sogp/student-status";
 
 type SortKey = "recent" | "name" | "least-contacted" | "lowest-progress";
 
@@ -29,10 +31,6 @@ function relativeTime(iso: string): string {
   return `${day}d ago`;
 }
 
-function digitsOnly(phone: string) {
-  return phone.replace(/\D/g, "");
-}
-
 const CSV_COLUMNS: Array<{ header: string; value: (enrollee: PastorEnrollee) => string | number }> = [
   { header: "Name", value: (e) => e.name },
   { header: "Email", value: (e) => e.email },
@@ -41,7 +39,8 @@ const CSV_COLUMNS: Array<{ header: string; value: (enrollee: PastorEnrollee) => 
   { header: "Region", value: (e) => e.region },
   { header: "Birth year", value: (e) => e.birthYear ?? "" },
   { header: "Cohort", value: (e) => e.cohortTitle },
-  { header: "Status", value: (e) => e.status.replaceAll("_", " ") },
+  { header: "Enrollment status", value: (e) => e.status.replaceAll("_", " ") },
+  { header: "Follow-up status", value: (e) => STUDENT_STATUS_META[e.followUpStatus].label },
   { header: "Referral source", value: (e) => e.referralSource },
   { header: "Assigned at", value: (e) => e.assignedAt },
   { header: "Contact count", value: (e) => e.contactCount },
@@ -184,8 +183,10 @@ function EnrolleeRow({
   pastorUserId: string | null;
 }) {
   const [pending, startTransition] = useTransition();
+  const [followUpOpen, setFollowUpOpen] = useState(false);
+  const statusMeta = STUDENT_STATUS_META[enrollee.followUpStatus];
 
-  function logContact(channel: "whatsapp" | "call" | "email") {
+  function logContact(channel: "call") {
     startTransition(async () => {
       const result = await recordFollowUpContact({
         enrollmentId: enrollee.enrollmentId,
@@ -203,12 +204,17 @@ function EnrolleeRow({
   return (
     <div className="grid gap-3 border-b border-zinc-100 p-4 last:border-b-0 sm:grid-cols-[1fr_auto] sm:items-start">
       <div className="grid gap-1 text-xs">
-        <Link
-          href={`/admin/my-enrollees/${enrollee.enrollmentId}`}
-          className="ppc-heading w-fit text-sm font-semibold text-zinc-900 hover:underline"
-        >
-          {enrollee.name}
-        </Link>
+        <div className="flex flex-wrap items-center gap-2">
+          <Link
+            href={`/admin/my-enrollees/${enrollee.enrollmentId}`}
+            className="ppc-heading w-fit text-sm font-semibold text-zinc-900 hover:underline"
+          >
+            {enrollee.name}
+          </Link>
+          <span className="inline-flex items-center gap-1 rounded-full border border-zinc-200 bg-zinc-50 px-2 py-0.5 text-[0.65rem] font-semibold text-zinc-700">
+            {statusMeta.emoji} {statusMeta.label}
+          </span>
+        </div>
         <p className="text-zinc-500">
           {enrollee.email} · {enrollee.phone}
         </p>
@@ -249,17 +255,13 @@ function EnrolleeRow({
         >
           Review assignments
         </Link>
-        {enrollee.whatsappConsent ? (
-          <a
-            href={`https://wa.me/${digitsOnly(enrollee.phone)}`}
-            target="_blank"
-            rel="noreferrer"
-            onClick={() => logContact("whatsapp")}
-            className={contactButton}
-          >
-            WhatsApp
-          </a>
-        ) : null}
+        <button
+          type="button"
+          onClick={() => setFollowUpOpen(true)}
+          className={contactButton}
+        >
+          Follow up
+        </button>
         <a
           href={`tel:${enrollee.phone}`}
           onClick={() => logContact("call")}
@@ -267,14 +269,14 @@ function EnrolleeRow({
         >
           Call
         </a>
-        <a
-          href={`mailto:${enrollee.email}`}
-          onClick={() => logContact("email")}
-          className={contactButton}
-        >
-          Email
-        </a>
       </div>
+
+      <FollowUpMessageDialog
+        open={followUpOpen}
+        onOpenChange={setFollowUpOpen}
+        enrollee={enrollee}
+        pastorUserId={pastorUserId}
+      />
     </div>
   );
 }
