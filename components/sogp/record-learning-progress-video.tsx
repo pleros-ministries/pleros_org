@@ -121,7 +121,7 @@ export function RecordLearningProgressVideo({
         const [stream, assets, renderData] = await Promise.all([
           navigator.mediaDevices.getUserMedia({
             video: {
-              facingMode: "user",
+              facingMode: "environment",
               width: { ideal: 1080 },
               height: { ideal: 1920 },
             },
