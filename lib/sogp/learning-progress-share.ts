@@ -1,6 +1,6 @@
 export const MAX_LEARNING_PROGRESS_WORDS = 20;
 export const MAX_LEARNING_PROGRESS_CHARS = 120;
-export const MAX_LEARNING_PROGRESS_VIDEO_SECONDS = 30;
+export const MAX_LEARNING_PROGRESS_VIDEO_SECONDS = 60;
 
 // Brand constants shared by the server-rendered share card
 // (app/api/sogp/learning-progress-shares/[id]/image/route.tsx) and the

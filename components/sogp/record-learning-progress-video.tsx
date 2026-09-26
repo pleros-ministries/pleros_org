@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Camera, Loader2, Square } from "lucide-react";
+import { Camera, Loader2, Square, SwitchCamera } from "lucide-react";
 
 import { MAX_LEARNING_PROGRESS_VIDEO_SECONDS } from "@/lib/sogp/learning-progress-share";
 import {
@@ -71,6 +71,7 @@ export function RecordLearningProgressVideo({
   const [status, setStatus] = useState<Status>("requesting");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [secondsLeft, setSecondsLeft] = useState(MAX_LEARNING_PROGRESS_VIDEO_SECONDS);
+  const [facingMode, setFacingMode] = useState<"user" | "environment">("user");
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -121,7 +122,7 @@ export function RecordLearningProgressVideo({
         const [stream, assets, renderData] = await Promise.all([
           navigator.mediaDevices.getUserMedia({
             video: {
-              facingMode: "environment",
+              facingMode,
               width: { ideal: 1080 },
               height: { ideal: 1920 },
             },
@@ -174,6 +175,32 @@ export function RecordLearningProgressVideo({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- start/drawFrame only need to run once per mount
   }, []);
+
+  async function switchCamera() {
+    if (status !== "ready") return;
+    const nextFacingMode = facingMode === "user" ? "environment" : "user";
+    try {
+      const nextStream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: nextFacingMode,
+          width: { ideal: 1080 },
+          height: { ideal: 1920 },
+        },
+        audio: true,
+      });
+      cameraStreamRef.current?.getTracks().forEach((t) => t.stop());
+      cameraStreamRef.current = nextStream;
+      setFacingMode(nextFacingMode);
+      const video = videoRef.current;
+      if (video) {
+        video.srcObject = nextStream;
+        await video.play();
+      }
+    } catch {
+      // Keep the current camera if the other one can't be opened (e.g. a
+      // device without a back camera).
+    }
+  }
 
   function startRecording() {
     const canvas = canvasRef.current;
@@ -244,6 +271,16 @@ export function RecordLearningProgressVideo({
           <div className="absolute inset-0 grid place-items-center bg-black/40">
             <Loader2 className="size-6 animate-spin text-white" />
           </div>
+        ) : null}
+        {status === "ready" ? (
+          <button
+            type="button"
+            onClick={switchCamera}
+            aria-label="Switch camera"
+            className="absolute left-3 top-3 inline-flex size-9 items-center justify-center rounded-full bg-black/60 text-white"
+          >
+            <SwitchCamera className="size-4" />
+          </button>
         ) : null}
         {status === "recording" ? (
           <div className="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-black/60 px-2.5 py-1 text-xs font-semibold text-white">
