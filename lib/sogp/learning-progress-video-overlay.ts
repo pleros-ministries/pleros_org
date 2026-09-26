@@ -129,6 +129,82 @@ function drawCover(
   ctx.drawImage(source, sx, sy, sw, sh, dx, dy, dw, dh);
 }
 
+// object-fit: contain — scales the source to fit entirely inside the
+// destination without cropping, preserving the full original framing.
+function drawContain(
+  ctx: CanvasRenderingContext2D,
+  source: CanvasImageSource,
+  sourceWidth: number,
+  sourceHeight: number,
+  dx: number,
+  dy: number,
+  dw: number,
+  dh: number,
+): void {
+  if (!sourceWidth || !sourceHeight || dw <= 0 || dh <= 0) return;
+  const sourceAspect = sourceWidth / sourceHeight;
+  const destAspect = dw / dh;
+  let drawWidth = dw;
+  let drawHeight = dh;
+  if (sourceAspect > destAspect) {
+    drawHeight = dw / sourceAspect;
+  } else {
+    drawWidth = dh * sourceAspect;
+  }
+  ctx.drawImage(
+    source,
+    0,
+    0,
+    sourceWidth,
+    sourceHeight,
+    dx + (dw - drawWidth) / 2,
+    dy + (dh - drawHeight) / 2,
+    drawWidth,
+    drawHeight,
+  );
+}
+
+let blurBackgroundCanvas: HTMLCanvasElement | null = null;
+function getBlurBackgroundCanvas(): HTMLCanvasElement {
+  if (!blurBackgroundCanvas) blurBackgroundCanvas = document.createElement("canvas");
+  return blurBackgroundCanvas;
+}
+
+// A landscape camera feed cropped tight enough to fill a tall portrait frame
+// with no bars ends up looking uncomfortably zoomed in (most of the width is
+// cut away). Instead: fill the frame edge-to-edge with a heavily downscaled
+// (and therefore naturally soft/blurred, cheaply so — no per-frame canvas
+// blur filter) cover-fit copy, then draw the full, un-cropped frame sharply
+// on top at its natural size — the same "blurred fill + contained subject"
+// treatment apps like Instagram/TikTok use to fit landscape video into a
+// vertical frame without cropping or leaving dead bars.
+function drawVideoFrame(
+  ctx: CanvasRenderingContext2D,
+  video: HTMLVideoElement,
+  dx: number,
+  dy: number,
+  dw: number,
+  dh: number,
+): void {
+  const sourceWidth = video.videoWidth;
+  const sourceHeight = video.videoHeight;
+
+  const small = getBlurBackgroundCanvas();
+  const smallWidth = 64;
+  const smallHeight = Math.max(1, Math.round(smallWidth * (dh / dw)));
+  small.width = smallWidth;
+  small.height = smallHeight;
+  const smallCtx = small.getContext("2d");
+  if (smallCtx) {
+    drawCover(smallCtx, video, sourceWidth, sourceHeight, 0, 0, smallWidth, smallHeight);
+    ctx.drawImage(small, dx, dy, dw, dh);
+  }
+  ctx.fillStyle = "rgba(10, 26, 110, 0.35)";
+  ctx.fillRect(dx, dy, dw, dh);
+
+  drawContain(ctx, video, sourceWidth, sourceHeight, dx, dy, dw, dh);
+}
+
 function wrapText(
   ctx: CanvasRenderingContext2D,
   text: string,
@@ -296,16 +372,7 @@ export function drawLearningProgressOverlay(
   roundRectPath(ctx, frameLeft, frameTop, frameWidth, frameHeight, frameRadius);
   ctx.clip();
   if (video.readyState >= 2 && video.videoWidth && video.videoHeight) {
-    drawCover(
-      ctx,
-      video,
-      video.videoWidth,
-      video.videoHeight,
-      frameLeft,
-      frameTop,
-      frameWidth,
-      frameHeight,
-    );
+    drawVideoFrame(ctx, video, frameLeft, frameTop, frameWidth, frameHeight);
   } else {
     ctx.fillStyle = NAVY;
     ctx.fillRect(frameLeft, frameTop, frameWidth, frameHeight);
