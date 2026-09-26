@@ -264,7 +264,7 @@ export function RecordLearningProgressVideo({
 
   return (
     <div className="grid gap-3">
-      <div className="relative mx-auto aspect-[9/16] max-h-[46vh] w-auto overflow-hidden rounded-[var(--radius-md)] border border-[var(--color-line)] bg-black">
+      <div className="relative mx-auto aspect-[9/16] max-h-[46vh] w-auto max-w-full justify-self-center overflow-hidden rounded-[var(--radius-md)] border border-[var(--color-line)] bg-black">
         <video ref={videoRef} muted playsInline className="hidden" />
         <canvas ref={canvasRef} className="h-full w-full" />
         {status === "requesting" ? (

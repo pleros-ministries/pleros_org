@@ -129,45 +129,6 @@ function drawCover(
   ctx.drawImage(source, sx, sy, sw, sh, dx, dy, dw, dh);
 }
 
-// object-fit: contain — scales the source to fit entirely inside the
-// destination, preserving aspect ratio, letterboxing any leftover space
-// with `background` instead of cropping the source.
-function drawContain(
-  ctx: CanvasRenderingContext2D,
-  source: CanvasImageSource,
-  sourceWidth: number,
-  sourceHeight: number,
-  dx: number,
-  dy: number,
-  dw: number,
-  dh: number,
-  background: string,
-): void {
-  if (!sourceWidth || !sourceHeight || dw <= 0 || dh <= 0) return;
-  ctx.fillStyle = background;
-  ctx.fillRect(dx, dy, dw, dh);
-  const sourceAspect = sourceWidth / sourceHeight;
-  const destAspect = dw / dh;
-  let drawWidth = dw;
-  let drawHeight = dh;
-  if (sourceAspect > destAspect) {
-    drawHeight = dw / sourceAspect;
-  } else {
-    drawWidth = dh * sourceAspect;
-  }
-  ctx.drawImage(
-    source,
-    0,
-    0,
-    sourceWidth,
-    sourceHeight,
-    dx + (dw - drawWidth) / 2,
-    dy + (dh - drawHeight) / 2,
-    drawWidth,
-    drawHeight,
-  );
-}
-
 function wrapText(
   ctx: CanvasRenderingContext2D,
   text: string,
@@ -335,7 +296,7 @@ export function drawLearningProgressOverlay(
   roundRectPath(ctx, frameLeft, frameTop, frameWidth, frameHeight, frameRadius);
   ctx.clip();
   if (video.readyState >= 2 && video.videoWidth && video.videoHeight) {
-    drawContain(
+    drawCover(
       ctx,
       video,
       video.videoWidth,
@@ -344,7 +305,6 @@ export function drawLearningProgressOverlay(
       frameTop,
       frameWidth,
       frameHeight,
-      NAVY,
     );
   } else {
     ctx.fillStyle = NAVY;
