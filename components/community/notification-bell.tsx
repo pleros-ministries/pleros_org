@@ -42,6 +42,26 @@ function summarise(n: Notification): string {
       return `Your report was ${(n.payload.outcome as string) ?? "reviewed"}`;
     case "leader_nudge":
       return (n.payload.message as string) ?? "A note from your unit leader";
+    case "discipleship_joined":
+      return `${(n.payload.name as string) ?? "Someone"} joined your discipleship group`;
+    case "discipleship_prompt":
+      return `New check-in from ${(n.payload.name as string) ?? "your discipler"}`;
+    case "discipleship_response":
+      return `${(n.payload.name as string) ?? "A disciple"} answered your check-in`;
+    case "discipleship_reply":
+      return `${(n.payload.name as string) ?? "Your discipler"} replied to your check-in`;
+    case "discipleship_nudge":
+      return `${(n.payload.name as string) ?? "Your discipler"}: ${(n.payload.message as string) ?? "thinking of you"}`;
+    case "discipleship_alert":
+      return (n.payload.message as string) ?? "Discipleship update";
+    case "discipleship_digest":
+      return (n.payload.message as string) ?? "Your discipleship week";
+    case "discipleship_prayer_request":
+      return `${(n.payload.name as string) ?? "A disciple"} shared a prayer request`;
+    case "discipleship_prayed":
+      return `${(n.payload.name as string) ?? "Your discipler"} prayed for your request`;
+    case "discipleship_prayer_answered":
+      return `${(n.payload.name as string) ?? "A disciple"} shared an answered prayer`;
     default:
       return "Community update";
   }

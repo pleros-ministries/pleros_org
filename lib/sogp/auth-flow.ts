@@ -50,8 +50,15 @@ export function normalizeLearnerReturnTo(
     const isDashboardPath =
       parsed.pathname === "/dashboard" ||
       parsed.pathname.startsWith("/dashboard/");
+    // Discipleship invite links send signed-out learners back to confirm joining.
+    const isDiscipleshipInvite = /^\/sogp\/discipleship\/[0-9a-f]{8}$/.test(
+      parsed.pathname,
+    );
 
-    if (parsed.origin !== "https://pleros.local" || !isDashboardPath) {
+    if (
+      parsed.origin !== "https://pleros.local" ||
+      !(isDashboardPath || isDiscipleshipInvite)
+    ) {
       return fallback;
     }
 

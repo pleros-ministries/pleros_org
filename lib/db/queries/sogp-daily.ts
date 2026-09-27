@@ -181,8 +181,10 @@ export async function getSogpParticipationRange(
   cohortId: number,
   startDateKey: string,
   endDateKey: string,
-  pastorId?: string,
+  filter: { pastorId?: string; enrollmentIds?: number[] } = {},
 ): Promise<RangeParticipationRow[]> {
+  const { pastorId, enrollmentIds } = filter;
+  if (enrollmentIds && enrollmentIds.length === 0) return [];
   const { start, end } = lagosRange(startDateKey, endDateKey);
   const dateKeys = enumerateDateKeys(startDateKey, endDateKey);
 
@@ -198,6 +200,7 @@ export async function getSogpParticipationRange(
         and(
           eq(schema.sogpEnrollments.cohortId, cohortId),
           pastorId ? eq(schema.pastorAssignments.pastorUserId, pastorId) : undefined,
+          enrollmentIds ? inArray(schema.sogpEnrollments.id, enrollmentIds) : undefined,
         ),
       ),
     db
@@ -329,7 +332,21 @@ export async function getSogpParticipationRange(
  */
 export async function getStudentStatusesForPastor(
   pastorUserId: string,
-  enrollees: Array<{ enrollmentId: number; cohortId: number; enrollmentCreatedAt: Date }>,
+  enrollees: StatusEnrollee[],
+): Promise<Map<number, StudentStatus>> {
+  return getStudentStatusesForEnrollments(enrollees, { pastorId: pastorUserId });
+}
+
+type StatusEnrollee = { enrollmentId: number; cohortId: number; enrollmentCreatedAt: Date };
+
+/**
+ * Same classification for an explicit set of enrolments (e.g. a discipler's
+ * disciples). Without a pastor filter the range query is narrowed to exactly
+ * these enrolments.
+ */
+export async function getStudentStatusesForEnrollments(
+  enrollees: StatusEnrollee[],
+  filter: { pastorId?: string } = {},
 ): Promise<Map<number, StudentStatus>> {
   if (!enrollees.length) return new Map();
 
@@ -352,7 +369,9 @@ export async function getStudentStatusesForPastor(
         cohortId,
         lookbackStartKey,
         todayKey,
-        pastorUserId,
+        filter.pastorId
+          ? { pastorId: filter.pastorId }
+          : { enrollmentIds: enrollees.map((enrollee) => enrollee.enrollmentId) },
       );
       rowsByCohort.set(cohortId, rows);
     }),

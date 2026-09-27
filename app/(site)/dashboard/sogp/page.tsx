@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 
+import { DiscipleshipInviteBanner } from "@/components/sogp/discipleship-invite-banner";
 import { SogpDashboardBoundary } from "@/components/sogp/sogp-dashboard-boundary";
 import { SogpJoinCohortBanner } from "@/components/sogp/sogp-join-cohort-banner";
 import { getAppSession } from "@/lib/app-session";
@@ -30,6 +31,7 @@ export default async function SogpDashboardPage() {
           }}
         />
       ) : null}
+      <DiscipleshipInviteBanner enrollmentId={rows[0]!.enrollment.id} />
       <SogpDashboardBoundary />
     </>
   );

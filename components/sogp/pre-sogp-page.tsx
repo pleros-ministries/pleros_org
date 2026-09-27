@@ -313,6 +313,14 @@ export function PreSogpPage({
                     Invite friends and track their progress
                   </Link>
                 )}
+                {preview ? null : (
+                  <Link
+                    href="/dashboard/sogp/discipleship"
+                    className="text-xs font-medium text-[var(--color-brand-blue)] underline underline-offset-4"
+                  >
+                    Start a discipleship group
+                  </Link>
+                )}
               </div>
             </section>
           </>

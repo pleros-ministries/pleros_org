@@ -32,6 +32,7 @@ import {
   setCommentStatus,
 } from "@/lib/db/queries/community-comments";
 import type { PostImage } from "@/lib/db/queries/community-posts";
+import { setDiscipleshipGroupStatus } from "@/lib/db/queries/sogp-discipleship";
 import { sendSogpChannelMessage } from "@/lib/telegram/sogp-broadcast";
 
 /**
@@ -261,4 +262,15 @@ export async function resolveContentFlag(input: {
       revalidatePath(`/dashboard/community/post/${postId}`);
     }
   }
+}
+
+/** Pause or restore a learner's discipleship group (misuse handling). */
+export async function updateDiscipleshipGroupStatus(input: {
+  groupId: number;
+  status: "active" | "archived";
+}) {
+  await requireAdmin();
+  await setDiscipleshipGroupStatus(input.groupId, input.status);
+  revalidatePath("/admin/community");
+  revalidatePath("/dashboard/sogp/discipleship");
 }

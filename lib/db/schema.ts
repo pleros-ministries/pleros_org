@@ -176,8 +176,42 @@ export const communityNotificationKindEnum = pgEnum(
     "made_leader",
     "flag_resolved",
     "leader_nudge",
+    "discipleship_joined",
+    "discipleship_prompt",
+    "discipleship_response",
+    "discipleship_reply",
+    "discipleship_nudge",
+    "discipleship_alert",
+    "discipleship_digest",
+    "discipleship_prayer_request",
+    "discipleship_prayed",
+    "discipleship_prayer_answered",
   ],
 );
+
+export const discipleshipGroupStatusEnum = pgEnum("discipleship_group_status", [
+  "active",
+  "archived",
+]);
+
+export const discipleshipMembershipStatusEnum = pgEnum(
+  "discipleship_membership_status",
+  ["active", "left", "removed"],
+);
+
+export const discipleshipContactKindEnum = pgEnum("discipleship_contact_kind", [
+  "nudge",
+  "whatsapp",
+  "call",
+  "visit",
+  "message",
+  "note",
+]);
+
+export const discipleshipPrayerStatusEnum = pgEnum("discipleship_prayer_status", [
+  "open",
+  "answered",
+]);
 
 // ─── Welcome pack leads ─────────────────────────────────────────────────────
 
@@ -1502,5 +1536,161 @@ export const communityNotifications = pgTable(
       t.userId,
       t.createdAt,
     ),
+  ],
+);
+
+// ─── SOGP discipleship groups ───────────────────────────────────────────────
+
+/** One discipleship group per enrolment; the enrolee is its discipler. */
+export const discipleshipGroups = pgTable(
+  "discipleship_groups",
+  {
+    id: serial("id").primaryKey(),
+    leaderEnrollmentId: integer("leader_enrollment_id")
+      .notNull()
+      .references(() => sogpEnrollments.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    inviteCode: text("invite_code").notNull(),
+    /** Consent for disciples to see a WhatsApp shortcut to the discipler. */
+    leaderSharesPhone: boolean("leader_shares_phone").notNull().default(false),
+    status: discipleshipGroupStatusEnum("status").notNull().default("active"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("discipleship_groups_leader_idx").on(t.leaderEnrollmentId),
+    uniqueIndex("discipleship_groups_invite_code_idx").on(t.inviteCode),
+    index("discipleship_groups_status_idx").on(t.status),
+  ],
+);
+
+export const discipleshipMemberships = pgTable(
+  "discipleship_memberships",
+  {
+    id: serial("id").primaryKey(),
+    groupId: integer("group_id")
+      .notNull()
+      .references(() => discipleshipGroups.id, { onDelete: "cascade" }),
+    discipleEnrollmentId: integer("disciple_enrollment_id")
+      .notNull()
+      .references(() => sogpEnrollments.id, { onDelete: "cascade" }),
+    status: discipleshipMembershipStatusEnum("status")
+      .notNull()
+      .default("active"),
+    /** Consent for the discipler to see a WhatsApp shortcut to this disciple. */
+    sharesPhone: boolean("shares_phone").notNull().default(false),
+    joinedAt: timestamp("joined_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    endedAt: timestamp("ended_at", { withTimezone: true }),
+    lastContactedAt: timestamp("last_contacted_at", { withTimezone: true }),
+    contactCount: integer("contact_count").notNull().default(0),
+    /** Status the discipler was last alerted about; alerts fire only on change. */
+    lastKnownStatus: text("last_known_status"),
+  },
+  (t) => [
+    // One active discipler per enrolment; ended memberships stay as history.
+    uniqueIndex("discipleship_memberships_active_disciple_idx")
+      .on(t.discipleEnrollmentId)
+      .where(sql`${t.status} = 'active'`),
+    index("discipleship_memberships_group_status_idx").on(t.groupId, t.status),
+  ],
+);
+
+export const discipleshipPrompts = pgTable(
+  "discipleship_prompts",
+  {
+    id: serial("id").primaryKey(),
+    groupId: integer("group_id")
+      .notNull()
+      .references(() => discipleshipGroups.id, { onDelete: "cascade" }),
+    body: text("body").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index("discipleship_prompts_group_created_idx").on(t.groupId, t.createdAt),
+  ],
+);
+
+export const discipleshipPromptResponses = pgTable(
+  "discipleship_prompt_responses",
+  {
+    id: serial("id").primaryKey(),
+    promptId: integer("prompt_id")
+      .notNull()
+      .references(() => discipleshipPrompts.id, { onDelete: "cascade" }),
+    discipleEnrollmentId: integer("disciple_enrollment_id")
+      .notNull()
+      .references(() => sogpEnrollments.id, { onDelete: "cascade" }),
+    body: text("body").notNull(),
+    leaderReply: text("leader_reply"),
+    leaderRepliedAt: timestamp("leader_replied_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("discipleship_prompt_responses_prompt_disciple_idx").on(
+      t.promptId,
+      t.discipleEnrollmentId,
+    ),
+  ],
+);
+
+/** The discipler's private follow-up log for one disciple. */
+export const discipleshipContactLogs = pgTable(
+  "discipleship_contact_logs",
+  {
+    id: serial("id").primaryKey(),
+    membershipId: integer("membership_id")
+      .notNull()
+      .references(() => discipleshipMemberships.id, { onDelete: "cascade" }),
+    kind: discipleshipContactKindEnum("kind").notNull(),
+    note: text("note"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index("discipleship_contact_logs_membership_created_idx").on(
+      t.membershipId,
+      t.createdAt,
+    ),
+  ],
+);
+
+export const discipleshipPrayerRequests = pgTable(
+  "discipleship_prayer_requests",
+  {
+    id: serial("id").primaryKey(),
+    groupId: integer("group_id")
+      .notNull()
+      .references(() => discipleshipGroups.id, { onDelete: "cascade" }),
+    discipleEnrollmentId: integer("disciple_enrollment_id")
+      .notNull()
+      .references(() => sogpEnrollments.id, { onDelete: "cascade" }),
+    body: text("body").notNull(),
+    status: discipleshipPrayerStatusEnum("status").notNull().default("open"),
+    answerNote: text("answer_note"),
+    prayedAt: timestamp("prayed_at", { withTimezone: true }),
+    answeredAt: timestamp("answered_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index("discipleship_prayer_requests_group_created_idx").on(t.groupId, t.createdAt),
   ],
 );

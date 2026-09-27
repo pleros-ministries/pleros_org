@@ -3,6 +3,7 @@ import { eq, inArray } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
+import { runDiscipleshipCron } from "@/lib/db/queries/sogp-discipleship";
 import { sendPushToUser } from "@/lib/push/send";
 import { buildSogpPrayerWatchPushCandidate } from "@/lib/sogp/notifications";
 
@@ -51,5 +52,15 @@ export async function GET(request: Request) {
     }
   }
 
-  return NextResponse.json({ sent });
+  // Discipleship alerts share this Hobby-plan cron; a failure here must never
+  // block the prayer-watch reminders above.
+  let discipleship: { alerts: number; digests: number } | { error: string };
+  try {
+    discipleship = await runDiscipleshipCron(now);
+  } catch (error) {
+    console.error("Discipleship cron failed:", error);
+    discipleship = { error: "failed" };
+  }
+
+  return NextResponse.json({ sent, discipleship });
 }
