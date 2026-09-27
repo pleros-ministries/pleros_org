@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 
 import { recordFollowUpContact } from "@/app/admin/(app)/(pastor-only)/_actions/pastor-followup-actions";
 import {
@@ -36,11 +36,15 @@ export function FollowUpMessageDialog({
   const [pending, startTransition] = useTransition();
   const statusMeta = STUDENT_STATUS_META[enrollee.followUpStatus];
 
-  useEffect(() => {
-    if (open) {
+  // Reset the draft whenever the dialog opens or the enrollee changes.
+  const draftKey = open ? `${enrollee.followUpStatus}:${enrollee.firstName}` : null;
+  const [prevDraftKey, setPrevDraftKey] = useState<string | null>(null);
+  if (draftKey !== prevDraftKey) {
+    setPrevDraftKey(draftKey);
+    if (draftKey !== null) {
       setMessage(buildFollowUpMessage(enrollee.followUpStatus, enrollee.firstName));
     }
-  }, [open, enrollee.followUpStatus, enrollee.firstName]);
+  }
 
   function logAndClose(channel: "whatsapp" | "email") {
     startTransition(async () => {
