@@ -51,9 +51,16 @@ test("the journey query applies assessment and date gates to all 24 tracks", () 
     "utf8",
   );
 
+  // Track access gating lives in the dashboard query that the journey reuses.
+  const dashboardSource = readFileSync(
+    join(process.cwd(), "lib", "db", "queries", "sogp.ts"),
+    "utf8",
+  );
+
   expect(source).toContain("summarizeSogpLevels");
-  expect(source).toContain("canAccessSogpTrack");
-  expect(source).toContain("previousLevelComplete");
+  expect(source).toContain("getSogpDashboardData");
+  expect(dashboardSource).toContain("canAccessSogpTrack");
+  expect(dashboardSource).toContain("previousLevelComplete");
   expect(source).not.toContain("extras:");
 });
 

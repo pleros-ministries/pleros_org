@@ -83,7 +83,7 @@ describe("SOGP landing content", () => {
     expect(source).toContain("<SogpHeroPhone");
     const introVideoIndex = source.indexOf("<SogpIntroVideo");
     const introCtaIndex = source.indexOf(
-      '<SectionCta label={content.ctas.middle} inverse />',
+      '<SectionCta label={content.ctas.middle} href={enrolHref} inverse />',
       introVideoIndex,
     );
     expect(introVideoIndex).toBeGreaterThan(-1);

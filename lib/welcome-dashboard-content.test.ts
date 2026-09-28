@@ -120,7 +120,7 @@ describe("welcome dashboard content", () => {
 
     expect(source).toContain("DashboardChurchMinistryStrip");
     expect(source).toContain("bg-[linear-gradient(180deg,#f4fcff_0%,#dff5ff_100%)]");
-    expect(source).toContain("py-14");
+    expect(source).toContain("py-10");
     expect(source).toContain("gap-6 sm:gap-7");
     expect(source).toContain("/site/home/assets/pathway-card-headers/church-card-header.svg");
     expect(source).toContain("right-[-5rem] bottom-[-3.5rem]");
