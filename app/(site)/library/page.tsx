@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { unstable_cache } from "next/cache";
+import { connection } from "next/server";
 
 import { HomepageFooter } from "@/components/home/homepage-footer";
 import { HomepageNav } from "@/components/home/homepage-nav";
@@ -13,16 +15,24 @@ export const metadata: Metadata = {
     "Browse, search, and listen to the full Pleros teaching archive — Faith & Growth, Gospel & Truth, The New Creation, and more.",
 };
 
-export const revalidate = 60;
+// Cached for 60s across requests. Serialise Date → string inside the cache
+// scope, since unstable_cache stores JSON and the client boundary needs strings.
+const getLibraryTeachings = unstable_cache(
+  async () => {
+    const teachings = await getAllTeachings();
+    return teachings.map((t) => ({
+      ...t,
+      createdAt: t.createdAt.toISOString() as unknown as Date,
+    }));
+  },
+  ["site-library-teachings"],
+  { revalidate: 60 },
+);
 
 export default async function LibraryPage() {
-  const teachings = await getAllTeachings();
-
-  // Serialise Date → string for client boundary
-  const serialised = teachings.map((t) => ({
-    ...t,
-    createdAt: t.createdAt.toISOString() as unknown as Date,
-  }));
+  // Render at request time so `next build` never needs a reachable database.
+  await connection();
+  const serialised = await getLibraryTeachings();
 
   return (
     <PublicSitePageShell>

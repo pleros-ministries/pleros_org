@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       # Placeholders so modules that build a DB/auth client at import time can load.
-      # CI never connects to a real database.
+      # `next build` must not query the database: DB-backed pages render at request time.
       DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
       DATABASE_URL_UNPOOLED: postgresql://ci:ci@localhost:5432/ci
       BETTER_AUTH_SECRET: ci-placeholder-secret-not-used-in-production-000000
