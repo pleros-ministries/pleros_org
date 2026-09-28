@@ -10,7 +10,17 @@ type Kind =
   | "comment_reply"
   | "made_leader"
   | "flag_resolved"
-  | "leader_nudge";
+  | "leader_nudge"
+  | "discipleship_joined"
+  | "discipleship_prompt"
+  | "discipleship_response"
+  | "discipleship_reply"
+  | "discipleship_nudge"
+  | "discipleship_alert"
+  | "discipleship_digest"
+  | "discipleship_prayer_request"
+  | "discipleship_prayed"
+  | "discipleship_prayer_answered";
 
 const PUSH_COPY: Record<Kind, { title: string }> = {
   official_post: { title: "New Pleros update" },
@@ -19,6 +29,16 @@ const PUSH_COPY: Record<Kind, { title: string }> = {
   made_leader: { title: "You're now a unit leader" },
   flag_resolved: { title: "Your report was reviewed" },
   leader_nudge: { title: "A note from your unit leader" },
+  discipleship_joined: { title: "Someone joined your discipleship group" },
+  discipleship_prompt: { title: "New check-in from your discipler" },
+  discipleship_response: { title: "A disciple answered your check-in" },
+  discipleship_reply: { title: "Your discipler replied" },
+  discipleship_nudge: { title: "A note from your discipler" },
+  discipleship_alert: { title: "Discipleship update" },
+  discipleship_digest: { title: "Your discipleship week" },
+  discipleship_prayer_request: { title: "New prayer request" },
+  discipleship_prayed: { title: "Someone prayed for you" },
+  discipleship_prayer_answered: { title: "A prayer was answered" },
 };
 
 /**
@@ -165,5 +185,32 @@ export async function notifyLeaderNudge(input: {
     kind: "leader_nudge",
     payload: { unitName: input.unitName, message: input.message },
     pushBody: input.message.slice(0, 120),
+  });
+}
+
+const DISCIPLESHIP_URL = "/dashboard/sogp/discipleship";
+
+/**
+ * Discipleship notifications. Payloads carry first names and preset copy only —
+ * never answer or prayer text — because notification rows outlive a disciple
+ * leaving the group.
+ */
+export async function notifyDiscipleship(input: {
+  kind: Extract<Kind, `discipleship_${string}`>;
+  recipientUserIds: string[];
+  /** Null for system notifications (cron alerts and digests). */
+  actorUserId: string | null;
+  actorFirstName: string;
+  pushBody: string;
+  /** Extra non-sensitive payload, e.g. a preset nudge's text. */
+  payload?: Record<string, unknown>;
+}) {
+  await notify({
+    userIds: input.recipientUserIds,
+    kind: input.kind,
+    payload: { name: input.actorFirstName, ...input.payload },
+    pushBody: input.pushBody,
+    pushUrl: DISCIPLESHIP_URL,
+    exclude: input.actorUserId ?? undefined,
   });
 }

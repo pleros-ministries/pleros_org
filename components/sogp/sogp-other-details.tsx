@@ -144,6 +144,12 @@ export function SogpOtherDetails({
           href="/dashboard/sogp/referrals"
         />
 
+        <DetailRow
+          title="Discipleship"
+          description="Invite people to your group, follow their progress and check in."
+          href={preview ? "/preview/dashboard/sogp/discipleship" : "/dashboard/sogp/discipleship"}
+        />
+
         {preview ? null : <LeaderboardWidget />}
 
         <DetailRow

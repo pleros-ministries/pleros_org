@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Camera, Loader2, Square } from "lucide-react";
+import { Camera, Loader2, Square, SwitchCamera } from "lucide-react";
 
 import { MAX_LEARNING_PROGRESS_VIDEO_SECONDS } from "@/lib/sogp/learning-progress-share";
 import {
@@ -71,6 +71,7 @@ export function RecordLearningProgressVideo({
   const [status, setStatus] = useState<Status>("requesting");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [secondsLeft, setSecondsLeft] = useState(MAX_LEARNING_PROGRESS_VIDEO_SECONDS);
+  const [facingMode, setFacingMode] = useState<"user" | "environment">("user");
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -121,7 +122,7 @@ export function RecordLearningProgressVideo({
         const [stream, assets, renderData] = await Promise.all([
           navigator.mediaDevices.getUserMedia({
             video: {
-              facingMode: "user",
+              facingMode,
               width: { ideal: 1080 },
               height: { ideal: 1920 },
             },
@@ -174,6 +175,32 @@ export function RecordLearningProgressVideo({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- start/drawFrame only need to run once per mount
   }, []);
+
+  async function switchCamera() {
+    if (status !== "ready") return;
+    const nextFacingMode = facingMode === "user" ? "environment" : "user";
+    try {
+      const nextStream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: nextFacingMode,
+          width: { ideal: 1080 },
+          height: { ideal: 1920 },
+        },
+        audio: true,
+      });
+      cameraStreamRef.current?.getTracks().forEach((t) => t.stop());
+      cameraStreamRef.current = nextStream;
+      setFacingMode(nextFacingMode);
+      const video = videoRef.current;
+      if (video) {
+        video.srcObject = nextStream;
+        await video.play();
+      }
+    } catch {
+      // Keep the current camera if the other one can't be opened (e.g. a
+      // device without a back camera).
+    }
+  }
 
   function startRecording() {
     const canvas = canvasRef.current;
@@ -237,13 +264,23 @@ export function RecordLearningProgressVideo({
 
   return (
     <div className="grid gap-3">
-      <div className="relative overflow-hidden rounded-[var(--radius-md)] border border-[var(--color-line)] bg-black">
+      <div className="relative mx-auto aspect-[9/16] max-h-[46vh] w-auto max-w-full justify-self-center overflow-hidden rounded-[var(--radius-md)] border border-[var(--color-line)] bg-black">
         <video ref={videoRef} muted playsInline className="hidden" />
-        <canvas ref={canvasRef} className="aspect-[9/16] w-full" />
+        <canvas ref={canvasRef} className="h-full w-full" />
         {status === "requesting" ? (
           <div className="absolute inset-0 grid place-items-center bg-black/40">
             <Loader2 className="size-6 animate-spin text-white" />
           </div>
+        ) : null}
+        {status === "ready" ? (
+          <button
+            type="button"
+            onClick={switchCamera}
+            aria-label="Switch camera"
+            className="absolute left-3 top-3 inline-flex size-9 items-center justify-center rounded-full bg-black/60 text-white"
+          >
+            <SwitchCamera className="size-4" />
+          </button>
         ) : null}
         {status === "recording" ? (
           <div className="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-black/60 px-2.5 py-1 text-xs font-semibold text-white">
@@ -257,33 +294,38 @@ export function RecordLearningProgressVideo({
           </div>
         ) : null}
       </div>
-      <div className="flex justify-center">
-        {status === "recording" ? (
-          <button
-            type="button"
-            onClick={stopRecording}
-            className="inline-flex min-h-11 items-center gap-2 rounded-full bg-red-600 px-5 text-sm font-semibold text-white"
-          >
-            <Square className="size-3.5 fill-current" /> Stop recording
-          </button>
-        ) : status === "recorded" ? (
-          <span className="text-xs font-semibold text-[var(--color-text-muted)]">
-            Preparing your video…
-          </span>
-        ) : (
-          <button
-            type="button"
-            disabled={status !== "ready"}
-            onClick={startRecording}
-            className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--color-brand-blue)] px-5 text-sm font-semibold text-white disabled:opacity-50"
-          >
-            <Camera className="size-4" /> Start recording
-          </button>
-        )}
+      {/* Sticky so the action stays reachable without scrolling, even when
+          the preview above pushes this below the fold on short viewports.
+          Negative margins bleed to DialogContent's own p-5/sm:p-6 edges. */}
+      <div className="sticky bottom-0 -mx-5 -mb-5 grid gap-2 border-t border-[var(--color-line)] bg-[var(--page-surface-raised)] px-5 pt-3 pb-5 sm:-mx-6 sm:-mb-6 sm:px-6 sm:pb-6">
+        <div className="flex justify-center">
+          {status === "recording" ? (
+            <button
+              type="button"
+              onClick={stopRecording}
+              className="inline-flex min-h-11 items-center gap-2 rounded-full bg-red-600 px-5 text-sm font-semibold text-white"
+            >
+              <Square className="size-3.5 fill-current" /> Stop recording
+            </button>
+          ) : status === "recorded" ? (
+            <span className="text-xs font-semibold text-[var(--color-text-muted)]">
+              Preparing your video…
+            </span>
+          ) : (
+            <button
+              type="button"
+              disabled={status !== "ready"}
+              onClick={startRecording}
+              className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--color-brand-blue)] px-5 text-sm font-semibold text-white disabled:opacity-50"
+            >
+              <Camera className="size-4" /> Start recording
+            </button>
+          )}
+        </div>
+        <p className="text-center text-xs text-[var(--color-text-muted)]">
+          Up to {MAX_LEARNING_PROGRESS_VIDEO_SECONDS} seconds. Our branding is added to the video automatically.
+        </p>
       </div>
-      <p className="text-center text-xs text-[var(--color-text-muted)]">
-        Up to {MAX_LEARNING_PROGRESS_VIDEO_SECONDS} seconds. Our branding is added to the video automatically.
-      </p>
     </div>
   );
 }

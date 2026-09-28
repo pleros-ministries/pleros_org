@@ -3,6 +3,7 @@ import type {
   SogpJourneyData,
 } from "@/lib/db/queries/sogp-journey";
 import type { ReferralsDashboardData } from "@/lib/db/queries/sogp-referrals";
+import type { DiscipleshipDashboardData } from "@/lib/db/queries/sogp-discipleship";
 
 import {
   buildPreparationDateKeys,
@@ -210,4 +211,170 @@ export const referralsPreviewData: ReferralsDashboardData = {
       preparationDaysComplete: 14,
     },
   ],
+};
+
+const discipleBase = {
+  preparationDaysTotal: 14,
+  coreTotal: 24,
+  prayerTotal: 28,
+  reviewsTotal: 28,
+};
+
+export const discipleshipPreviewData: DiscipleshipDashboardData = {
+  viewer: { enrollmentId: 1, firstName: "Tola" },
+  myGroup: {
+    id: 1,
+    name: "Tola's discipleship group",
+    inviteUrl: "https://pleros.org/sogp/discipleship/ab12cd34",
+    leaderSharesPhone: true,
+    status: "active",
+    disciples: [
+      {
+        ...discipleBase,
+        membershipId: 1,
+        enrollmentId: 2,
+        name: "Grace Adeyemi",
+        firstName: "Grace",
+        joinedAt: "2026-08-28T09:00:00.000Z",
+        status: "on_track",
+        preparationDaysComplete: 14,
+        coreCompleted: 9,
+        prayerCompleted: 10,
+        prayerPercent: 90,
+        reviewsCompleted: 10,
+        averageQuizScore: 86,
+        eligible: true,
+        lastActiveAt: "2026-09-24T05:40:00.000Z",
+        whatsappUrl: "https://wa.me/2348031234567",
+        lastContactedAt: "2026-09-23T18:00:00.000Z",
+        contactCount: 6,
+        nudgedToday: false,
+        openPrayerCount: 1,
+        recentContacts: [
+          { id: 3, kind: "call", note: "Talked about her new job.", createdAt: "2026-09-23T18:00:00.000Z" },
+          { id: 2, kind: "nudge", note: "I'm praying for you today.", createdAt: "2026-09-20T07:00:00.000Z" },
+        ],
+      },
+      {
+        ...discipleBase,
+        membershipId: 2,
+        enrollmentId: 3,
+        name: "Samuel Okafor",
+        firstName: "Samuel",
+        joinedAt: "2026-08-30T14:30:00.000Z",
+        status: "declining",
+        preparationDaysComplete: 8,
+        coreCompleted: 4,
+        prayerCompleted: 5,
+        prayerPercent: 45,
+        reviewsCompleted: 3,
+        averageQuizScore: 72,
+        eligible: false,
+        lastActiveAt: "2026-09-19T20:10:00.000Z",
+        whatsappUrl: null,
+        lastContactedAt: "2026-09-12T10:00:00.000Z",
+        contactCount: 2,
+        nudgedToday: false,
+        openPrayerCount: 0,
+        recentContacts: [
+          { id: 1, kind: "message", note: null, createdAt: "2026-09-12T10:00:00.000Z" },
+        ],
+      },
+      {
+        ...discipleBase,
+        membershipId: 3,
+        enrollmentId: 4,
+        name: "Blessing Eze",
+        firstName: "Blessing",
+        joinedAt: "2026-09-02T18:15:00.000Z",
+        status: "at_risk",
+        preparationDaysComplete: 2,
+        coreCompleted: 0,
+        prayerCompleted: 1,
+        prayerPercent: 9,
+        reviewsCompleted: 0,
+        averageQuizScore: null,
+        eligible: false,
+        lastActiveAt: null,
+        whatsappUrl: "https://wa.me/2348091234567",
+        lastContactedAt: null,
+        contactCount: 0,
+        nudgedToday: false,
+        openPrayerCount: 0,
+        recentContacts: [],
+      },
+    ],
+    prompts: [
+      {
+        id: 2,
+        body: "What did God teach you through this week's teachings?",
+        createdAt: "2026-09-21T07:00:00.000Z",
+        responses: [
+          {
+            id: 1,
+            discipleEnrollmentId: 2,
+            discipleFirstName: "Grace",
+            body: "The Walk of Faith teaching reminded me to trust God with my next step at work.",
+            updatedAt: "2026-09-21T19:30:00.000Z",
+            leaderReply: "Amen, Grace. I'm praying with you about this.",
+            leaderRepliedAt: "2026-09-22T06:00:00.000Z",
+          },
+        ],
+      },
+      {
+        id: 1,
+        body: "How can I pray for you this week?",
+        createdAt: "2026-09-14T07:00:00.000Z",
+        responses: [],
+      },
+    ],
+    prayerRequests: [
+      {
+        id: 1,
+        discipleFirstName: "Grace",
+        body: "Please pray for wisdom as I settle into my new role at work.",
+        status: "open",
+        answerNote: null,
+        prayedAt: null,
+        answeredAt: null,
+        createdAt: "2026-09-22T19:00:00.000Z",
+      },
+    ],
+    promptSuggestions: {
+      levelTitle: "Gospel foundations and the Spirit",
+      suggestions: [
+        'What stood out to you in "Discipline – The Drive of the Spirit"?',
+        'How will you live out "Gospel foundations and the Spirit" this week?',
+        'How can I pray for you as you study "Faith Stand: How to Grow in Christ"?',
+      ],
+    },
+  },
+  myDiscipler: {
+    groupName: "Kemi's discipleship group",
+    leaderFirstName: "Kemi",
+    leaderName: "Kemi Balogun",
+    whatsappUrl: "https://wa.me/2348021234567",
+    sharesPhone: true,
+    joinedAt: "2026-08-25T10:00:00.000Z",
+    prompts: [
+      {
+        id: 10,
+        body: "What is one thing you will put into practice from today's lesson?",
+        createdAt: "2026-09-23T07:00:00.000Z",
+        response: null,
+      },
+    ],
+    prayerRequests: [
+      {
+        id: 20,
+        discipleFirstName: "Tola",
+        body: "Pray for my family's health this month.",
+        status: "open",
+        answerNote: null,
+        prayedAt: "2026-09-21T06:30:00.000Z",
+        answeredAt: null,
+        createdAt: "2026-09-20T21:00:00.000Z",
+      },
+    ],
+  },
 };

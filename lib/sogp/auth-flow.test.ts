@@ -17,6 +17,12 @@ describe("SOGP authentication flow", () => {
       "/dashboard/sogp?day=2",
     );
     expect(normalizeLearnerReturnTo("/dashboard")).toBe("/dashboard");
+    expect(normalizeLearnerReturnTo("/sogp/discipleship/ab12cd34")).toBe(
+      "/sogp/discipleship/ab12cd34",
+    );
+    expect(normalizeLearnerReturnTo("/sogp/discipleship/not-a-code")).toBe(
+      "/dashboard",
+    );
 
     for (const unsafe of [
       "//evil.example/dashboard",

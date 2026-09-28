@@ -7,6 +7,8 @@ import * as schema from "@/lib/db/schema";
 export const COMMUNITY_LIMITS = {
   post: { max: 10, windowMinutes: 60 },
   comment: { max: 40, windowMinutes: 60 },
+  /** Discipleship check-in questions, per group. */
+  discipleshipPrompt: { max: 5, windowMinutes: 60 * 24 },
   /** New enrolments wait this long before they can post at all. */
   newAccountCooldownMinutes: 10,
 } as const;
@@ -54,6 +56,24 @@ export async function assertCanComment(userId: string) {
   if (n >= COMMUNITY_LIMITS.comment.max) {
     throw new RateLimitError(
       "You're posting very quickly. Take a short break and try again.",
+    );
+  }
+}
+
+export async function assertCanCreateDiscipleshipPrompt(groupId: number) {
+  const since = windowStart(COMMUNITY_LIMITS.discipleshipPrompt.windowMinutes);
+  const [{ n }] = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(schema.discipleshipPrompts)
+    .where(
+      and(
+        eq(schema.discipleshipPrompts.groupId, groupId),
+        gte(schema.discipleshipPrompts.createdAt, since),
+      ),
+    );
+  if (n >= COMMUNITY_LIMITS.discipleshipPrompt.max) {
+    throw new RateLimitError(
+      "You've sent several check-ins today. Give your group time to answer, then try again tomorrow.",
     );
   }
 }

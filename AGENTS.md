@@ -54,6 +54,15 @@ All authentication emails—SOGP OTP, password reset, email verification, staff 
 - SOGP dashboard/API access additionally requires an SOGP enrolment; a signed-in but unenrolled learner returns to `/sogp/enrol`.
 - Preserve `admin` and `super_admin` identities, accounts, roles, and sessions during auth migrations or cleanup. Super-admin access remains email-verified and fail-closed.
 
+### SOGP discipleship groups
+
+- Any enrolled learner leads one group at `/dashboard/sogp/discipleship`, created lazily with a regenerable 8-hex invite link `/sogp/discipleship/[code]`. One level only: each learner has at most one active discipler (partial unique index), cannot join their own group or their own disciple's group, and groups cap at 12 (`lib/sogp/discipleship.ts`).
+- Joining always needs explicit confirmation on the invite page. Signed-out visitors log in with that invite path as `returnTo`; non-enrolled visitors go through `/sogp/discipleship/[code]/enrol`, which sets the code-only `pleros_discipleship_invite` cookie and forwards to `/sogp/enrol?ref=<leader referral code>`; `/dashboard/sogp` then shows a "Finish joining" banner.
+- Disciplers see status, progress and average quiz scores only—never quiz answers, written submissions or email. WhatsApp shortcuts appear only with per-side consent (`shares_phone`, `leader_shares_phone`). Check-in answers are visible only to the current leader and hide when the disciple leaves or is removed.
+- Accountability tools: preset-only encouragement nudges (plus a ≤200-char personal line, one per disciple per Lagos day via a `notification_checkpoints` key), a private discipler follow-up log (`discipleship_contact_logs`; WhatsApp taps log automatically), disciple prayer requests (Prayed/Answered with optional testimony, hidden when the disciple leaves), and check-in suggestions built from the teachings released in the last 7 days for the group's majority cohort.
+- The single daily `/api/cron/sogp-reminders` cron also runs `runDiscipleshipCron`: it alerts disciplers only on status transitions into at-risk/not-active or back on track (tracked in `last_known_status`) and sends a Monday group digest; failures never block prayer-watch reminders. Push text never contains check-in or prayer text.
+- Admins pause/restore groups from `/admin/community`. Never post discipleship data to Telegram.
+
 ### Retired Welcome Pack soft access
 
 Dashboard and Welcome Pack resources require a full Better Auth app session. The old `pleros_welcome_access_v2` cookie is expired by `proxy.ts` and is never accepted by dashboard layouts, focused Welcome Pack routes, dashboard resources/actions, or downloads. `/welcome` permanently redirects to `/sogp`. Keep existing users, enrolments, progress, lead records, and staff/admin identities intact; the retired cookie is not an identity source.

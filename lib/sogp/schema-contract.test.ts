@@ -20,6 +20,12 @@ import {
   commentReactions,
   contentFlags,
   communityNotifications,
+  discipleshipGroups,
+  discipleshipMemberships,
+  discipleshipPrompts,
+  discipleshipPromptResponses,
+  discipleshipContactLogs,
+  discipleshipPrayerRequests,
 } from "../db/schema";
 
 describe("SOGP schema", () => {
@@ -63,6 +69,20 @@ describe("SOGP schema", () => {
     expect(commentReactions.commentId).toBeDefined();
     expect(contentFlags.targetType).toBeDefined();
     expect(contentFlags.status).toBeDefined();
+  });
+
+  test("exports the discipleship group tables", () => {
+    expect(discipleshipGroups.leaderEnrollmentId).toBeDefined();
+    expect(discipleshipGroups.inviteCode).toBeDefined();
+    expect(discipleshipGroups.leaderSharesPhone).toBeDefined();
+    expect(discipleshipMemberships.discipleEnrollmentId).toBeDefined();
+    expect(discipleshipMemberships.sharesPhone).toBeDefined();
+    expect(discipleshipPrompts.groupId).toBeDefined();
+    expect(discipleshipPromptResponses.leaderReply).toBeDefined();
+    expect(discipleshipMemberships.lastContactedAt).toBeDefined();
+    expect(discipleshipMemberships.lastKnownStatus).toBeDefined();
+    expect(discipleshipContactLogs.kind).toBeDefined();
+    expect(discipleshipPrayerRequests.prayedAt).toBeDefined();
   });
 
   test("exports the community notifications table", () => {
