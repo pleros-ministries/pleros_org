@@ -6,7 +6,7 @@
 - Preserve unrelated dirty work. Inspect overlap first, edit narrowly, and stage explicit paths only when the user asks for a commit.
 - Use **npm**; `package-lock.json` is canonical even though `pnpm-lock.yaml` exists.
 - Read the version-matched Next.js documentation in `node_modules/next/dist/docs/` before changing framework behaviour.
-- Do not run tests, lint, builds, React Doctor, or post-edit browser verification unless the user explicitly requests verification. Report edits as unverified otherwise.
+- Do not run tests, lint, builds, React Doctor, or post-edit browser verification unless the user explicitly requests verification. Report edits as unverified otherwise
 
 ## UI foundations
 
