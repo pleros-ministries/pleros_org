@@ -8,6 +8,7 @@ import {
   getPastorEnrolleeSubmissions,
   isPastorAssignedToEnrollment,
 } from "@/lib/db/queries/pastor-followups";
+import { getSogpEnrolleePerformance } from "@/lib/db/queries/sogp-daily";
 
 export default async function PastorEnrolleeDetailPage({
   params,
@@ -26,9 +27,10 @@ export default async function PastorEnrolleeDetailPage({
     if (!owns) notFound();
   }
 
-  const [enrollee, submissions] = await Promise.all([
+  const [enrollee, submissions, performance] = await Promise.all([
     getPastorEnrolleeById(enrollmentId),
     getPastorEnrolleeSubmissions(enrollmentId),
+    getSogpEnrolleePerformance(enrollmentId),
   ]);
   if (!enrollee) notFound();
 
@@ -36,6 +38,7 @@ export default async function PastorEnrolleeDetailPage({
     <PastorEnrolleeReviewView
       enrollee={enrollee}
       submissions={submissions}
+      performance={performance}
       isAdmin={isAdmin}
     />
   );

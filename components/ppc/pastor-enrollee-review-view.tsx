@@ -9,12 +9,15 @@ import {
   requestPastorRevision,
 } from "@/app/admin/(app)/(pastor-only)/_actions/pastor-review-actions";
 import { recordFollowUpContact } from "@/app/admin/(app)/(pastor-only)/_actions/pastor-followup-actions";
+import { EnrolleeDailyPerformance } from "@/components/ppc/enrollee-daily-performance";
 import { PageHeader } from "@/components/ppc/page-header";
 import { getReviewGradingReadiness } from "@/lib/ppc-staff-workflows";
 import type {
   PastorEnrollee,
   PastorEnrolleeSubmission,
 } from "@/lib/db/queries/pastor-followups";
+import type { EnrolleePerformance } from "@/lib/db/queries/sogp-daily";
+import { STUDENT_STATUS_META } from "@/lib/sogp/student-status";
 
 function digitsOnly(phone: string) {
   return phone.replace(/\D/g, "");
@@ -189,12 +192,15 @@ function SubmissionCard({
 export function PastorEnrolleeReviewView({
   enrollee,
   submissions,
+  performance,
   isAdmin,
 }: {
   enrollee: PastorEnrollee;
   submissions: PastorEnrolleeSubmission[];
+  performance: EnrolleePerformance | null;
   isAdmin: boolean;
 }) {
+  const statusMeta = STUDENT_STATUS_META[enrollee.followUpStatus];
   const [, startTransition] = useTransition();
 
   function logContact(channel: "whatsapp" | "call" | "email") {
@@ -211,7 +217,11 @@ export function PastorEnrolleeReviewView({
       <PageHeader
         title={enrollee.name}
         description={isAdmin ? `${enrollee.email} · Admin preview` : enrollee.email}
-      />
+      >
+        <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full border border-zinc-200 bg-zinc-50 px-2.5 py-1 text-[0.7rem] font-semibold text-zinc-700">
+          {statusMeta.emoji} {statusMeta.label}
+        </span>
+      </PageHeader>
 
       <section className="grid gap-2 rounded-sm border border-zinc-200 bg-white p-4 text-xs text-zinc-600">
         <p>
@@ -254,6 +264,10 @@ export function PastorEnrolleeReviewView({
           </a>
         </div>
       </section>
+
+      {performance ? (
+        <EnrolleeDailyPerformance days={performance.days} todayKey={performance.todayKey} />
+      ) : null}
 
       <section className="grid gap-3">
         <h2 className="ppc-heading text-sm font-semibold text-zinc-900">
