@@ -1,3 +1,5 @@
+import type { StudentStatus } from "@/lib/sogp/student-status";
+
 export const ADMIN_QUERY_KEYS = {
   dashboard: ["admin", "dashboard"] as const,
   schoolOfPurposeWaitlist: ["admin", "school-of-purpose", "waitlist"] as const,
@@ -39,6 +41,7 @@ export type AdminSogpData = {
     whatsappConsent: boolean;
     whatsappOptedInAt: string | null;
     status: string;
+    automatedStatus: StudentStatus;
     telegramLinkedAt: string | null;
     createdAt: string;
     morningPrayerDays: number;

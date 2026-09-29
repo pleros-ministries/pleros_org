@@ -2,12 +2,18 @@
 
 import { useMemo, useState } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-import { getPastorSogpDailyParticipation } from "@/app/admin/(app)/(pastor-only)/_actions/pastor-daily-actions";
+import {
+  getPastorEnrolleeStatuses,
+  getPastorSogpDailyParticipation,
+} from "@/app/admin/(app)/(pastor-only)/_actions/pastor-daily-actions";
 import { Count, Mark } from "@/components/ppc/admin-sogp-daily-by-pastor";
 import { clampDate, lagosToday, shiftDate } from "@/lib/sogp/daily-date";
 import { summarizeDailyByPastor } from "@/lib/sogp/daily-participation";
+import { STUDENT_STATUS_META } from "@/lib/sogp/student-status";
 
 type CohortWindow = { id: number; title: string; startsAt: string; endsAt: string; status: string };
 
@@ -46,6 +52,15 @@ export function PastorDailyParticipationSection({
     enabled: Boolean(cohort),
     placeholderData: keepPreviousData,
   });
+
+  // Status reflects the recent pattern, not the picked date, so it's keyed
+  // without `date` and doesn't refetch while stepping through days.
+  const { data: statuses } = useQuery({
+    queryKey: ["pastor", "sogp", "statuses", pastorId, cohort?.id],
+    queryFn: () => getPastorEnrolleeStatuses(cohort!.id, pastorId),
+    enabled: Boolean(cohort),
+  });
+  const router = useRouter();
 
   const summary = useMemo(() => (data ? summarizeDailyByPastor(data).total : null), [data]);
 
@@ -131,6 +146,7 @@ export function PastorDailyParticipationSection({
             <thead className="bg-zinc-50 text-zinc-500">
               <tr>
                 <th className="px-4 py-3">Enrollee</th>
+                <th className="px-4 py-3">Status</th>
                 <th className="px-4 py-3">Prayer watch</th>
                 <th
                   className="px-4 py-3"
@@ -153,11 +169,32 @@ export function PastorDailyParticipationSection({
                   row.writtenSubmitted ||
                   row.writtenApproved ||
                   row.reviewAttended;
+                const status = statuses?.[row.enrollmentId];
+                const detailHref = `/admin/my-enrollees/${row.enrollmentId}`;
                 return (
-                  <tr key={row.enrollmentId} className={active ? "" : "bg-rose-50"}>
+                  <tr
+                    key={row.enrollmentId}
+                    onClick={() => router.push(detailHref)}
+                    className={`cursor-pointer ${active ? "hover:bg-zinc-50" : "bg-rose-50 hover:bg-rose-100/70"}`}
+                  >
                     <td className="px-4 py-3">
-                      <p className="font-medium text-zinc-900">{row.name}</p>
+                      <Link
+                        href={detailHref}
+                        onClick={(event) => event.stopPropagation()}
+                        className="font-medium text-zinc-900 hover:underline"
+                      >
+                        {row.name}
+                      </Link>
                       <p className="text-[10px] text-zinc-500">{row.email}</p>
+                    </td>
+                    <td className="px-4 py-3">
+                      {status ? (
+                        <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full border border-zinc-200 bg-white px-2 py-0.5 text-[0.65rem] font-semibold text-zinc-700">
+                          {STUDENT_STATUS_META[status].emoji} {STUDENT_STATUS_META[status].label}
+                        </span>
+                      ) : (
+                        <span className="text-zinc-300">—</span>
+                      )}
                     </td>
                     <td className="px-4 py-3">
                       <Mark value={row.prayerWatch} />
@@ -182,6 +219,7 @@ export function PastorDailyParticipationSection({
               })}
               <tr className="bg-zinc-50 font-medium">
                 <td className="px-4 py-3 text-zinc-900">All enrollees</td>
+                <td className="px-4 py-3" />
                 <td className="px-4 py-3">
                   <Count n={summary.prayerWatch} of={summary.enrollees} />
                 </td>
@@ -210,7 +248,8 @@ export function PastorDailyParticipationSection({
         *Listening isn&rsquo;t date-stamped, so this shows who has listened to the lesson released on this day, as of
         now (&ldquo;—&rdquo; when no lesson was released). Quiz counts anyone who took a quiz that day; review counts
         the day it was attended or marked. Prayer watch is morning sessions. Enrollees with no activity that day are
-        highlighted.
+        highlighted. Status is set automatically from the last few days of participation; select an enrollee to see
+        their day-by-day performance.
       </p>
     </section>
   );

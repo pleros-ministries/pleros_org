@@ -14,6 +14,7 @@ import { getAdminRegistrantList } from "@/lib/db/queries/admin-registrants";
 import { getSchoolOfPurposeWaitlistEntries } from "@/lib/db/queries/school-of-purpose-waitlist";
 import { getAdminSogpData as getSogpOperationsData } from "@/lib/db/queries/sogp";
 import { getSogpReportData } from "@/lib/db/queries/sogp-report";
+import { getStudentStatusesForEnrollments } from "@/lib/db/queries/sogp-daily";
 import { buildSogpReport } from "@/lib/sogp/report";
 import { getSuperAdminOverviewMetrics } from "@/lib/db/queries/admin-analytics";
 import { getStudentPlatformList } from "@/lib/db/queries/students";
@@ -252,6 +253,13 @@ export async function getAdminSogpData(): Promise<AdminSogpData> {
       })
       .from(schema.sogpLiveClassAttendance),
   ]);
+  const statusByEnrollment = await getStudentStatusesForEnrollments(
+    data.enrollments.map((enrollment) => ({
+      enrollmentId: enrollment.id,
+      cohortId: enrollment.cohortId,
+      enrollmentCreatedAt: enrollment.createdAt,
+    })),
+  );
   const lessonsWithQuiz = new Set(quizRows.map((row) => row.lessonId));
   const ready = (lesson: {
     id: number;
@@ -303,6 +311,7 @@ export async function getAdminSogpData(): Promise<AdminSogpData> {
         whatsappConsent: enrollment.whatsappConsent,
         whatsappOptedInAt: serializeDate(enrollment.whatsappOptedInAt),
         status: enrollment.status,
+        automatedStatus: statusByEnrollment.get(enrollment.id) ?? "on_track",
         telegramLinkedAt: serializeDate(enrollment.telegramLinkedAt),
         createdAt: enrollment.createdAt.toISOString(),
         morningPrayerDays: morningPrayerRows.filter(

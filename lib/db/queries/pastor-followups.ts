@@ -5,7 +5,7 @@ import * as schema from "@/lib/db/schema";
 import { PRE_SOGP_PREPARATION_DAYS } from "@/lib/sogp/calendar";
 import type { StudentStatus } from "@/lib/sogp/student-status";
 
-import { getStudentStatusesForPastor } from "./sogp-daily";
+import { getStudentStatusesForEnrollments, getStudentStatusesForPastor } from "./sogp-daily";
 
 /**
  * Full cleanup when someone stops being a pastor — whether their `isPastor`
@@ -726,10 +726,14 @@ export async function getPastorEnrolleeById(
   if (rows.length === 0) return null;
   const [enrollee] = await enrichWithProgress(rows);
   if (!enrollee) return null;
-  // The detail page doesn't render `followUpStatus`, so it isn't worth the
-  // extra participation-range query here — only `getPastorEnrollees` (the
-  // dashboard list) computes it for real.
-  return { ...enrollee, followUpStatus: "on_track" };
+  const statuses = await getStudentStatusesForEnrollments([
+    {
+      enrollmentId: enrollee.enrollmentId,
+      cohortId: rows[0]!.cohortId,
+      enrollmentCreatedAt: rows[0]!.createdAt,
+    },
+  ]);
+  return { ...enrollee, followUpStatus: statuses.get(enrollee.enrollmentId) ?? "on_track" };
 }
 
 /** Ownership check — does this enrollment currently belong to this pastor? */

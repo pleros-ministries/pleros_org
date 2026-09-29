@@ -330,6 +330,13 @@ export function getPpcShellContext(pathname: string): PpcShellContext {
     };
   }
 
+  if (/^\/sogp\/enrolments\/[^/]+$/.test(logicalPath)) {
+    return {
+      label: "Enrollee detail",
+      description: "Profile, status, and daily performance",
+    };
+  }
+
   if (logicalPath === "/sogp") {
     return {
       label: "SOGP operations",
