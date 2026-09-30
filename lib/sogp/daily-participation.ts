@@ -7,6 +7,7 @@ export type DailyParticipationRow = {
   enrollmentId: number;
   name: string;
   email: string;
+  leaderboardAlias: string | null;
   pastorId: string | null;
   pastorName: string | null;
   prayerWatch: boolean;

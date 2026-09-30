@@ -6,6 +6,7 @@ import { transactionDb } from "@/lib/db/transaction";
 import { notifyDiscipleship } from "@/lib/community/notify";
 import { firstNameOf } from "@/lib/community/visibility";
 import { PRE_SOGP_PREPARATION_DAYS } from "@/lib/sogp/calendar";
+import { getPreparationTotalsByCohort } from "./sogp-preparation-length";
 import { getSogpLevel, type SogpCurriculumLevel } from "@/lib/sogp/curriculum";
 import {
   buildCurriculumPromptSuggestions,
@@ -768,6 +769,7 @@ async function getDiscipleSummaries(groupId: number): Promise<DiscipleSummary[]>
   ]);
 
   const prepByEnrollment = new Map(prepRows.map((r) => [r.enrollmentId, r]));
+  const prepTotalByCohort = await getPreparationTotalsByCohort(members.map((m) => m.cohortId));
   const scoresByEnrollment = new Map<number, number[]>();
   for (const row of quizRows) {
     const list = scoresByEnrollment.get(row.enrollmentId) ?? [];
@@ -791,7 +793,7 @@ async function getDiscipleSummaries(groupId: number): Promise<DiscipleSummary[]>
       joinedAt: member.joinedAt.toISOString(),
       status: statuses.get(member.enrollmentId) ?? null,
       preparationDaysComplete: prep?.completed ?? 0,
-      preparationDaysTotal: PRE_SOGP_PREPARATION_DAYS,
+      preparationDaysTotal: prepTotalByCohort.get(member.cohortId) ?? PRE_SOGP_PREPARATION_DAYS,
       coreCompleted: progress?.coreCompleted ?? null,
       coreTotal: progress?.coreTotal ?? null,
       prayerCompleted: progress?.prayerCompleted ?? null,

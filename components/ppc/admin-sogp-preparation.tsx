@@ -153,10 +153,15 @@ export function AdminSogpPreparation({
           <h2 className="ppc-heading text-sm font-semibold">Preparation schedule</h2>
           <p className="mt-0.5 text-xs text-zinc-500">Published days become visible on the learner dashboard on their Lagos calendar date.</p>
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            <button type="button" disabled={!cohortId || seedMutation.isPending} onClick={() => seedMutation.mutate()} className="h-8 rounded-sm bg-[var(--color-brand-blue)] px-3 text-xs font-medium text-white disabled:opacity-50">
+            <button type="button" disabled={!cohortId || seedMutation.isPending} onClick={() => {
+              // A longer custom schedule (e.g. October 2026's 20 days) would be
+              // replaced by the default window, so confirm before rebuilding it.
+              if (days.length > PRE_SOGP_PREPARATION_DAYS && !window.confirm(`This cohort has ${days.length} preparation days. Rebuilding replaces them with the default ${PRE_SOGP_PREPARATION_DAYS}-day schedule. Continue?`)) return;
+              seedMutation.mutate();
+            }} className="h-8 rounded-sm bg-[var(--color-brand-blue)] px-3 text-xs font-medium text-white disabled:opacity-50">
               {seedMutation.isPending ? `Building ${PRE_SOGP_PREPARATION_DAYS}-day schedule…` : `Build approved ${PRE_SOGP_PREPARATION_DAYS}-day schedule`}
             </button>
-            <span className="text-[10px] text-zinc-500">{days.length}/{PRE_SOGP_PREPARATION_DAYS} preparation days</span>
+            <span className="text-[10px] text-zinc-500">{days.length}/{Math.max(PRE_SOGP_PREPARATION_DAYS, days.length)} preparation days</span>
           </div>
           {seedMutation.error ? <p className="mt-2 text-xs text-rose-700">{seedMutation.error.message}</p> : null}
         </div>

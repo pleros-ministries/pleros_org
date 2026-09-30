@@ -3,6 +3,7 @@ import { and, asc, count, desc, eq, inArray, isNull } from "drizzle-orm";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
 import { PRE_SOGP_PREPARATION_DAYS } from "@/lib/sogp/calendar";
+import { getPreparationTotalsByCohort } from "./sogp-preparation-length";
 import {
   buildReferralUrl,
   deriveReferralStage,
@@ -128,6 +129,7 @@ export async function getSogpReferralsDashboard(
       createdAt: schema.sogpEnrollments.createdAt,
       enrollmentStatus: schema.sogpEnrollments.status,
       cohortStatus: schema.sogpCohorts.status,
+      cohortId: schema.sogpEnrollments.cohortId,
     })
     .from(schema.sogpEnrollments)
     .innerJoin(
@@ -157,7 +159,10 @@ export async function getSogpReferralsDashboard(
     referralCode,
     referralUrl: buildReferralUrl(resolvePublicSiteUrl(process.env), referralCode),
     referredCount: referredRows.length,
-    preparationDaysTotal: PRE_SOGP_PREPARATION_DAYS,
+    preparationDaysTotal: Math.max(
+      PRE_SOGP_PREPARATION_DAYS,
+      ...(await getPreparationTotalsByCohort(referredRows.map((row) => row.cohortId))).values(),
+    ),
     referred: referredRows.map((row) => {
       const preparationDaysComplete = prepCounts.get(row.id) ?? 0;
       return {

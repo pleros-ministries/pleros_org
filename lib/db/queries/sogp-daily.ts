@@ -33,6 +33,7 @@ export async function getSogpDailyParticipation(
         userId: schema.sogpEnrollments.userId,
         name: schema.sogpEnrollments.name,
         email: schema.sogpEnrollments.email,
+        leaderboardAlias: schema.sogpEnrollments.leaderboardAlias,
         pastorId: schema.pastorAssignments.pastorUserId,
         pastorName: schema.users.name,
       })
@@ -158,6 +159,7 @@ export async function getSogpDailyParticipation(
     enrollmentId: enrollment.id,
     name: enrollment.name,
     email: enrollment.email,
+    leaderboardAlias: enrollment.leaderboardAlias,
     pastorId: enrollment.pastorId,
     pastorName: enrollment.pastorId ? (enrollment.pastorName ?? "Unknown pastor") : null,
     prayerWatch: prayerIds.has(enrollment.userId),
@@ -419,6 +421,7 @@ export type EnrolleePerformance = {
     country: string;
     region: string;
     birthYear: number | null;
+    leaderboardAlias: string | null;
     referralSource: string;
     whatsappConsent: boolean;
     enrollmentStatus: string;
@@ -504,6 +507,7 @@ export async function getSogpEnrolleePerformance(
       country: enrollment.country,
       region: enrollment.region,
       birthYear: enrollment.birthYear,
+      leaderboardAlias: enrollment.leaderboardAlias,
       referralSource: enrollment.referralSource,
       whatsappConsent: enrollment.whatsappConsent,
       enrollmentStatus: enrollment.status,

@@ -2,10 +2,10 @@ import { and, asc, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
-import { PRE_SOGP_PREPARATION_DAYS } from "@/lib/sogp/calendar";
 import type { StudentStatus } from "@/lib/sogp/student-status";
 
 import { getStudentStatusesForEnrollments, getStudentStatusesForPastor } from "./sogp-daily";
+import { getPreparationTotalsByCohort } from "./sogp-preparation-length";
 
 /**
  * Full cleanup when someone stops being a pastor — whether their `isPastor`
@@ -382,7 +382,7 @@ export type PastorEnrollee = {
   assignedAt: string;
   lastContactedAt: string | null;
   contactCount: number;
-  /** Preparation lessons completed, out of `PRE_SOGP_PREPARATION_DAYS`. */
+  /** Preparation lessons completed, out of the cohort's published Pre-SOGP days. */
   preparationDaysComplete: number;
   preparationDaysTotal: number;
   /** Morning Prayer Watch days attended, all-time. */
@@ -465,6 +465,7 @@ async function enrichWithProgress(
   const enrollmentIds = rows.map((row) => row.enrollmentId);
   const userIds = rows.map((row) => row.userId);
   const cohortIds = [...new Set(rows.map((row) => row.cohortId))];
+  const prepTotalsPromise = getPreparationTotalsByCohort(cohortIds);
 
   const [
     prepRows,
@@ -589,6 +590,7 @@ async function enrichWithProgress(
       : Promise.resolve([]),
   ]);
 
+  const prepTotalByCohort = await prepTotalsPromise;
   const prepByEnrollment = new Map(prepRows.map((r) => [r.enrollmentId, r.completed]));
   const prayerByUser = new Map(prayerRows.map((r) => [r.userId, r.days]));
   const reviewByUser = new Map(reviewRows.map((r) => [r.userId, r.attended]));
@@ -608,7 +610,7 @@ async function enrichWithProgress(
       ? new Date(row.lastContactedAt).toISOString()
       : null,
     preparationDaysComplete: prepByEnrollment.get(row.enrollmentId) ?? 0,
-    preparationDaysTotal: PRE_SOGP_PREPARATION_DAYS,
+    preparationDaysTotal: prepTotalByCohort.get(cohortId) ?? 0,
     morningPrayerDays: prayerByUser.get(userId) ?? 0,
     reviewSessionsComplete: reviewByUser.get(userId) ?? 0,
     quizzesPassed: quizPassedByUser.get(userId) ?? 0,

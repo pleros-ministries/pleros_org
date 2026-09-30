@@ -7,10 +7,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
 import type { PreSogpJourneyData } from "@/lib/db/queries/sogp-journey";
-import {
-  deriveSogpCalendarState,
-  PRE_SOGP_PREPARATION_DAYS,
-} from "@/lib/sogp/calendar";
+import { deriveSogpCalendarState } from "@/lib/sogp/calendar";
 import { getPreparationRequirements } from "@/lib/sogp/journey";
 import { PRAYER_WATCH_YOUTUBE_URL } from "@/lib/prayer-watch";
 
@@ -153,10 +150,12 @@ export function PreSogpPage({
   });
 
   const completeDays = data.days.filter((day) => day.state === "complete").length;
+  // Cohorts can run longer than the default window, so totals follow the calendar.
+  const totalDays = data.days.length;
   const isFuture = selectedDay.dateKey > data.todayKey;
 
   const preparationPercent = Math.round(
-    (completeDays / PRE_SOGP_PREPARATION_DAYS) * 100,
+    (completeDays / totalDays) * 100,
   );
 
   return (
@@ -194,7 +193,7 @@ export function PreSogpPage({
             </div>
             <p className="max-w-2xl p-4 text-xs leading-[1.6] text-zinc-500">
               Video 1 opens at 12:00 am WAT. A new lesson will open each day
-              until Video {PRE_SOGP_PREPARATION_DAYS}.
+              until Video {totalDays}.
             </p>
           </section>
         ) : (
@@ -215,7 +214,7 @@ export function PreSogpPage({
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <SogpLessonHeading
                   eyebrow="Current day"
-                  title={`Day ${selectedDay.dayNumber}/${PRE_SOGP_PREPARATION_DAYS}`}
+                  title={`Day ${selectedDay.dayNumber}/${totalDays}`}
                 />
                 <button
                   type="button"
@@ -299,7 +298,7 @@ export function PreSogpPage({
             >
               <div className="flex items-center justify-between gap-3 border-b border-zinc-100 px-4 py-3">
                 <h2 className="ppc-heading text-sm font-semibold text-zinc-900">Preparation progress</h2>
-                <span className="ppc-heading text-sm font-semibold text-[var(--color-brand-blue)]">{completeDays} of {PRE_SOGP_PREPARATION_DAYS} days</span>
+                <span className="ppc-heading text-sm font-semibold text-[var(--color-brand-blue)]">{completeDays} of {totalDays} days</span>
               </div>
               <div className="grid gap-3 p-4">
                 <div className="h-1.5 overflow-hidden rounded-full bg-zinc-100">

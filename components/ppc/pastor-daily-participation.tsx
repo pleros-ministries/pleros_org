@@ -185,7 +185,10 @@ export function PastorDailyParticipationSection({
                       >
                         {row.name}
                       </Link>
-                      <p className="text-[10px] text-zinc-500">{row.email}</p>
+                      <p className="text-[10px] text-zinc-500">
+                        {row.email}
+                        {row.leaderboardAlias ? ` · Leaderboard: ${row.leaderboardAlias}` : ""}
+                      </p>
                     </td>
                     <td className="px-4 py-3">
                       {status ? (

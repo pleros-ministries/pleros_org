@@ -37,6 +37,7 @@ export type AdminSogpData = {
     country: string;
     region: string;
     birthYear: number | null;
+    leaderboardAlias: string | null;
     referralSource: string;
     whatsappConsent: boolean;
     whatsappOptedInAt: string | null;
