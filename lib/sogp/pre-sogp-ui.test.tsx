@@ -63,7 +63,7 @@ describe("Pre-SOGP learner UI", () => {
     expect(page).toContain("onError");
     expect(page).toContain("Preparation progress");
     expect(page).toContain(
-      "{completeDays} of {PRE_SOGP_PREPARATION_DAYS} days",
+      "{completeDays} of {totalDays} days",
     );
   });
 

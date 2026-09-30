@@ -15,6 +15,8 @@ import {
   resolveSogpCountryCode,
 } from "@/lib/sogp/countries";
 
+import { getPreparationTotalsByCohort } from "./sogp-preparation-length";
+
 export type Unit = typeof schema.units.$inferSelect;
 
 /** Find-or-create the unit for a (country, region) pair and return its id. */
@@ -166,6 +168,7 @@ export async function getUnitDetail(unitId: number): Promise<UnitDetail | null> 
       enrollmentId: schema.sogpEnrollments.id,
       enrollmentStatus: schema.sogpEnrollments.status,
       cohortStatus: schema.sogpCohorts.status,
+      cohortId: schema.sogpEnrollments.cohortId,
     })
     .from(schema.unitMembers)
     .innerJoin(
@@ -215,7 +218,10 @@ export async function getUnitDetail(unitId: number): Promise<UnitDetail | null> 
       ? { firstName: members.find((m) => m.isLeader)!.firstName }
       : null,
     members,
-    preparationDaysTotal: PRE_SOGP_PREPARATION_DAYS,
+    preparationDaysTotal: Math.max(
+      PRE_SOGP_PREPARATION_DAYS,
+      ...(await getPreparationTotalsByCohort(memberRows.map((row) => row.cohortId))).values(),
+    ),
   };
 }
 

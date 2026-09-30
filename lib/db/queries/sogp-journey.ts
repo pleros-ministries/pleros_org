@@ -24,6 +24,7 @@ import {
   type SogpLevelStatus,
 } from "@/lib/sogp/progression";
 import { getSogpDashboardData } from "./sogp";
+import { getCohortPreparationLength } from "./sogp-preparation-length";
 
 import * as schema from "../schema";
 
@@ -115,7 +116,10 @@ export async function getPreSogpJourney(
     row.cohort.startsAt,
     row.cohort.preparationStartsAt,
   );
-  const dateKeys = buildPreparationDateKeys(preparationStartsAt);
+  const dateKeys = buildPreparationDateKeys(
+    preparationStartsAt,
+    await getCohortPreparationLength(row.cohort.id, preparationStartsAt),
+  );
   const todayKey = toLagosDateKey(now);
   const [dayRows, completionRows, prayerRows] = await Promise.all([
     db
@@ -252,7 +256,10 @@ export async function getPublicPreparationPost(
     cohort.startsAt,
     cohort.preparationStartsAt,
   );
-  const index = buildPreparationDateKeys(preparationStartsAt).indexOf(dateKey);
+  const index = buildPreparationDateKeys(
+    preparationStartsAt,
+    await getCohortPreparationLength(cohort.id, preparationStartsAt),
+  ).indexOf(dateKey);
   if (index === -1) return null;
 
   const rows = await db

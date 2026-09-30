@@ -3,6 +3,7 @@ import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
 import { PRE_SOGP_PREPARATION_DAYS } from "@/lib/sogp/calendar";
+import { getPreparationTotalsByCohort } from "./sogp-preparation-length";
 import { firstNameOf } from "@/lib/community/visibility";
 
 export type LeaderReport = {
@@ -39,6 +40,7 @@ export async function getLeaderReport(
       userId: schema.sogpEnrollments.userId,
       name: schema.sogpEnrollments.name,
       firstName: schema.sogpEnrollments.firstName,
+      cohortId: schema.sogpEnrollments.cohortId,
       joinedAt: schema.unitMembers.joinedAt,
     })
     .from(schema.unitMembers)
@@ -47,6 +49,9 @@ export async function getLeaderReport(
       eq(schema.sogpEnrollments.id, schema.unitMembers.enrollmentId),
     )
     .where(eq(schema.unitMembers.unitId, unitId));
+  const prepTotalByCohort = await getPreparationTotalsByCohort(
+    members.map((m) => m.cohortId),
+  );
 
   const enrollmentIds = members.map((m) => m.enrollmentId);
   const userIds = members.map((m) => m.userId);
@@ -94,7 +99,8 @@ export async function getLeaderReport(
   for (const member of members) {
     const prep = prepByEnrollment.get(member.enrollmentId) ?? 0;
     if (prep === 0) buckets.none += 1;
-    else if (prep >= PRE_SOGP_PREPARATION_DAYS) buckets.done += 1;
+    else if (prep >= (prepTotalByCohort.get(member.cohortId) ?? PRE_SOGP_PREPARATION_DAYS))
+      buckets.done += 1;
     else buckets.some += 1;
 
     const prayer = prayerByUser.get(member.userId) ?? 0;
@@ -118,7 +124,7 @@ export async function getLeaderReport(
     unitId: unit.id,
     unitName: unit.name,
     memberCount: members.length,
-    preparationDaysTotal: PRE_SOGP_PREPARATION_DAYS,
+    preparationDaysTotal: Math.max(PRE_SOGP_PREPARATION_DAYS, ...prepTotalByCohort.values()),
     preparationBuckets: buckets,
     morningPrayerActive: prayerRows.filter((r) => r.days > 0).length,
     atRisk,

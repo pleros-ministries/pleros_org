@@ -239,6 +239,9 @@ export function PastorEnrolleeReviewView({
           approved {enrollee.responsesApproved} · Certificate:{" "}
           {enrollee.certificateIssued ? "Issued" : "Not yet"} · Referred{" "}
           {enrollee.referredCount}
+          {performance?.enrollee.leaderboardAlias
+            ? ` · Leaderboard: ${performance.enrollee.leaderboardAlias}`
+            : ""}
         </p>
         <div className="flex flex-wrap gap-2 pt-1">
           {enrollee.whatsappConsent ? (

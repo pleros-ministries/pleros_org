@@ -19,6 +19,17 @@ describe("buildPreparationDateKeys", () => {
     expect(dates[0]).toBe("2026-11-01");
     expect(dates.at(-1)).toBe("2026-11-14");
   });
+
+  test("extends to a longer cohort-specific window", () => {
+    const dates = buildPreparationDateKeys(
+      new Date("2026-09-21T00:00:00+01:00"),
+      20,
+    );
+
+    expect(dates).toHaveLength(20);
+    expect(dates[0]).toBe("2026-09-21");
+    expect(dates.at(-1)).toBe("2026-10-10");
+  });
 });
 
 describe("getPreSogpCountdown", () => {

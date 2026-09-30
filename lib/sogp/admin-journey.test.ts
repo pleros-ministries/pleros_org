@@ -97,7 +97,7 @@ describe("SOGP launch readiness", () => {
         requiredReviewCount: 3,
       }),
     ).toEqual([
-      `Add exactly ${PRE_SOGP_PREPARATION_DAYS} unique Pre-SOGP lessons.`,
+      `Add at least ${PRE_SOGP_PREPARATION_DAYS} unique Pre-SOGP lessons.`,
       "Publish content-ready SOGP teachings for every track assigned to this cohort.",
       "Schedule four required review sessions.",
     ]);
@@ -108,6 +108,18 @@ describe("SOGP launch readiness", () => {
       validateSogpLaunchReadiness({
         preparationCount: PRE_SOGP_PREPARATION_DAYS,
         uniquePreparationUrlCount: PRE_SOGP_PREPARATION_DAYS,
+        requiredTrackCount: 24,
+        readyTrackCount: 24,
+        requiredReviewCount: 4,
+      }),
+    ).toEqual([]);
+  });
+
+  test("accepts a cohort with a longer Pre-SOGP window", () => {
+    expect(
+      validateSogpLaunchReadiness({
+        preparationCount: 20,
+        uniquePreparationUrlCount: 20,
         requiredTrackCount: 24,
         readyTrackCount: 24,
         requiredReviewCount: 4,

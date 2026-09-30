@@ -52,6 +52,7 @@ export default async function AdminSogpEnrolleePage({
           {enrollee.pastorName ?? "Unassigned"}
         </p>
         <p>
+          {enrollee.leaderboardAlias ? `Leaderboard: ${enrollee.leaderboardAlias} · ` : ""}
           WhatsApp: {enrollee.whatsappConsent ? "Opted in" : "Not opted in"}
           {enrollee.referralSource
             ? ` · Heard via ${enrollee.referralSource.replaceAll("_", " ")}`

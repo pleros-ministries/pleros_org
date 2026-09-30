@@ -56,11 +56,11 @@ export function validateSogpLaunchReadiness(input: {
 }) {
   const issues: string[] = [];
   if (
-    input.preparationCount !== PRE_SOGP_PREPARATION_DAYS ||
-    input.uniquePreparationUrlCount !== PRE_SOGP_PREPARATION_DAYS
+    input.preparationCount < PRE_SOGP_PREPARATION_DAYS ||
+    input.uniquePreparationUrlCount !== input.preparationCount
   ) {
     issues.push(
-      `Add exactly ${PRE_SOGP_PREPARATION_DAYS} unique Pre-SOGP lessons.`,
+      `Add at least ${PRE_SOGP_PREPARATION_DAYS} unique Pre-SOGP lessons.`,
     );
   }
   if (input.requiredTrackCount === 0 || input.readyTrackCount !== input.requiredTrackCount) {

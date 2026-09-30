@@ -7,6 +7,7 @@ function row(overrides: Partial<DailyParticipationRow>): DailyParticipationRow {
     enrollmentId: 1,
     name: "Test",
     email: "t@example.com",
+    leaderboardAlias: null,
     pastorId: "p1",
     pastorName: "Pastor One",
     prayerWatch: false,
