@@ -742,6 +742,14 @@ async function getDiscipleSummaries(groupId: number): Promise<DiscipleSummary[]>
         lastAt: max(schema.sogpPreparationCompletions.completedAt),
       })
       .from(schema.sogpPreparationCompletions)
+      // Only published days count, so unpublished (rescheduled) days don't inflate progress.
+      .innerJoin(
+        schema.sogpPreparationDays,
+        and(
+          eq(schema.sogpPreparationDays.id, schema.sogpPreparationCompletions.preparationDayId),
+          eq(schema.sogpPreparationDays.status, "published"),
+        ),
+      )
       .where(inArray(schema.sogpPreparationCompletions.enrollmentId, enrollmentIds))
       .groupBy(schema.sogpPreparationCompletions.enrollmentId),
     // Best score per lesson, limited to lessons in each disciple's own cohort.

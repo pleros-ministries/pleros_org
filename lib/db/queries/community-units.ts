@@ -191,6 +191,14 @@ export async function getUnitDetail(unitId: number): Promise<UnitDetail | null> 
         completed: sql<number>`count(*)::int`,
       })
       .from(schema.sogpPreparationCompletions)
+      // Only published days count, so unpublished (rescheduled) days don't inflate progress.
+      .innerJoin(
+        schema.sogpPreparationDays,
+        and(
+          eq(schema.sogpPreparationDays.id, schema.sogpPreparationCompletions.preparationDayId),
+          eq(schema.sogpPreparationDays.status, "published"),
+        ),
+      )
       .where(inArray(schema.sogpPreparationCompletions.enrollmentId, ids))
       .groupBy(schema.sogpPreparationCompletions.enrollmentId);
     for (const row of rows) prepCounts.set(row.enrollmentId, row.completed);

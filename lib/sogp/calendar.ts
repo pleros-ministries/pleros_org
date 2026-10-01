@@ -1,11 +1,10 @@
 import { toLagosDateKey } from "./formation-progress";
 
 /**
- * Default (and minimum) length of the Pre-SOGP preparation window, in days.
- * Drives the seed size and launch-readiness check. A cohort may publish more
- * days than this (October 2026 runs 20), so learner calendars and progress
- * totals follow the cohort's published days instead — see
- * `getCohortPreparationLength`.
+ * Default length of the Pre-SOGP preparation window, in days, used by the
+ * seed. A cohort may publish a different number of days (October 2026 runs
+ * 10), so learner calendars and progress totals follow the cohort's published
+ * days instead — see `getCohortPreparationLength`.
  */
 export const PRE_SOGP_PREPARATION_DAYS = 14;
 
