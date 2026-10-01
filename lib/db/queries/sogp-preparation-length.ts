@@ -10,8 +10,9 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 
 /**
  * How many days a cohort's Pre-SOGP calendar spans: from its preparation start
- * through its last published day, never shorter than the default window. Lets
- * one cohort run longer (October 2026 runs 20 days) without changing others.
+ * through its last published day. Falls back to the default window when nothing
+ * is published yet. Lets one cohort run shorter or longer than another
+ * (October 2026 runs 10 days) without changing the rest.
  */
 export async function getCohortPreparationLength(
   cohortId: number,
@@ -33,11 +34,11 @@ export async function getCohortPreparationLength(
     Math.round(
       (Date.parse(`${row.lastDate}T00:00:00Z`) - Date.parse(`${startKey}T00:00:00Z`)) / DAY_MS,
     ) + 1;
-  return Math.max(PRE_SOGP_PREPARATION_DAYS, span);
+  return span > 0 ? span : PRE_SOGP_PREPARATION_DAYS;
 }
 
 /** Published Pre-SOGP lesson count per cohort, for "x of N" progress totals.
- * Cohorts with fewer (or no) published days fall back to the default window. */
+ * Cohorts with no published days fall back to the default window. */
 export async function getPreparationTotalsByCohort(
   cohortIds: number[],
 ): Promise<Map<number, number>> {
@@ -55,7 +56,7 @@ export async function getPreparationTotalsByCohort(
     .groupBy(schema.sogpPreparationDays.cohortId);
   const totals = new Map(unique.map((id) => [id, PRE_SOGP_PREPARATION_DAYS]));
   for (const row of rows) {
-    totals.set(row.cohortId, Math.max(PRE_SOGP_PREPARATION_DAYS, row.total));
+    if (row.total > 0) totals.set(row.cohortId, row.total);
   }
   return totals;
 }

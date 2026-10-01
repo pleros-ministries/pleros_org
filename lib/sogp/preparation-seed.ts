@@ -56,12 +56,10 @@ export function validateSogpLaunchReadiness(input: {
 }) {
   const issues: string[] = [];
   if (
-    input.preparationCount < PRE_SOGP_PREPARATION_DAYS ||
+    input.preparationCount === 0 ||
     input.uniquePreparationUrlCount !== input.preparationCount
   ) {
-    issues.push(
-      `Add at least ${PRE_SOGP_PREPARATION_DAYS} unique Pre-SOGP lessons.`,
-    );
+    issues.push("Publish the Pre-SOGP lessons, each with a unique teaching.");
   }
   if (input.requiredTrackCount === 0 || input.readyTrackCount !== input.requiredTrackCount) {
     issues.push("Publish content-ready SOGP teachings for every track assigned to this cohort.");

@@ -26,7 +26,7 @@ import {
 } from "@/lib/db/queries/staff-invites";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
-import { count, eq } from "drizzle-orm";
+import { and, count, eq } from "drizzle-orm";
 import { hasAdminAccess } from "@/lib/app-role";
 import { getDashboardStats } from "@/lib/db/queries/students";
 import { getContentOverview } from "@/lib/db/queries/content";
@@ -246,7 +246,15 @@ export async function getAdminSogpData(): Promise<AdminSogpData> {
       .select({
         enrollmentId: schema.sogpPreparationCompletions.enrollmentId,
       })
-      .from(schema.sogpPreparationCompletions),
+      .from(schema.sogpPreparationCompletions)
+      // Only published days count, so unpublished (rescheduled) days don't inflate progress.
+      .innerJoin(
+        schema.sogpPreparationDays,
+        and(
+          eq(schema.sogpPreparationDays.id, schema.sogpPreparationCompletions.preparationDayId),
+          eq(schema.sogpPreparationDays.status, "published"),
+        ),
+      ),
     db
       .select({
         userId: schema.sogpLiveClassAttendance.userId,

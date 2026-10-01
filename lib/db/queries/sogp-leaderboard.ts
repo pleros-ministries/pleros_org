@@ -5,6 +5,7 @@ import {
   gte,
   inArray,
   lte,
+  min,
   ne,
   sql,
   type AnyColumn,
@@ -108,7 +109,15 @@ export async function getSogpLeaderboard(
   const activityDays = new Map<string, Set<string>>();
 
   if (memberUserIds.length > 0) {
-    const windowStart = toLagosDateKey(cohort.preparationStartsAt ?? cohort.startsAt);
+    // Start at the earliest preparation day ever scheduled (drafts included),
+    // so moving a cohort's Pre-SOGP start doesn't wipe earlier prayer points.
+    const [earliestPrep] = await db
+      .select({ date: min(schema.sogpPreparationDays.publishDate) })
+      .from(schema.sogpPreparationDays)
+      .where(eq(schema.sogpPreparationDays.cohortId, cohort.id));
+    const configuredStart = toLagosDateKey(cohort.preparationStartsAt ?? cohort.startsAt);
+    const windowStart =
+      earliestPrep?.date && earliestPrep.date < configuredStart ? earliestPrep.date : configuredStart;
     const windowEnd = toLagosDateKey(cohort.endsAt);
 
     const cohortLessons = db
