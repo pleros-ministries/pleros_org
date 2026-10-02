@@ -1,7 +1,10 @@
 "use client";
 
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import {
   ArrowLeftIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
   HandHelpingIcon,
   HeartHandshakeIcon,
   LinkIcon,
@@ -10,9 +13,10 @@ import {
   UsersIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { Fragment, useState } from "react";
 
 import {
+  getDiscipleParticipationAction,
   leaveDiscipleshipGroupAction,
   logWhatsAppContactAction,
   regenerateInviteLinkAction,
@@ -20,11 +24,15 @@ import {
   setDiscipleSharesPhoneAction,
   setLeaderSharesPhoneAction,
 } from "@/app/(site)/dashboard/sogp/discipleship/_actions";
+import { Mark } from "@/components/ppc/admin-sogp-daily-by-pastor";
+import { DetailGrid, ExpandButton } from "@/components/ppc/expandable-table-row";
 import { ProgressBar } from "@/components/ppc/progress-bar";
 import type {
+  DiscipleDayParticipation,
   DiscipleSummary,
   DiscipleshipDashboardData,
 } from "@/lib/db/queries/sogp-discipleship";
+import { clampDate, lagosToday, shiftDate } from "@/lib/sogp/daily-date";
 import {
   DISCIPLESHIP_GROUP_MAX,
   buildDiscipleshipShareMessage,
@@ -119,7 +127,7 @@ export function DiscipleshipPage({
 
           <SogpActivitySection
             title={`Your disciples (${myGroup.disciples.length})`}
-            description="Progress updates as your disciples complete their SOGP activities."
+            description="See who took part each day. Tap a disciple for their progress and follow-up."
             icon={<UsersIcon className={iconClass} strokeWidth={2} />}
           >
             {myGroup.disciples.length === 0 ? (
@@ -128,11 +136,11 @@ export function DiscipleshipPage({
                 through SOGP.
               </p>
             ) : (
-              <ul className="grid gap-3">
-                {myGroup.disciples.map((disciple) => (
-                  <DiscipleRow key={disciple.membershipId} disciple={disciple} preview={preview} />
-                ))}
-              </ul>
+              <DiscipleParticipationTable
+                disciples={myGroup.disciples}
+                range={data.participationRange}
+                preview={preview}
+              />
             )}
           </SogpActivitySection>
         </div>
@@ -238,35 +246,242 @@ function InviteSection({
   );
 }
 
-function DiscipleRow({ disciple, preview }: { disciple: DiscipleSummary; preview: boolean }) {
-  const remove = useDiscipleshipAction(preview);
-  const status = disciple.status ? STATUS_DISPLAY[disciple.status] : null;
+/** Stable sample activity for the preview route, which has no server data. */
+function previewParticipation(
+  disciples: DiscipleSummary[],
+  dateKey: string,
+): DiscipleDayParticipation[] {
+  const day = Number(dateKey.slice(-2));
+  return disciples.map((disciple, index) => {
+    const seed = (day + index * 3) % 7;
+    return {
+      membershipId: disciple.membershipId,
+      prayerWatch: seed !== 0 && seed !== 4,
+      listened: day % 7 === 0 ? null : seed < 5,
+      quizAttempted: seed % 2 === 0 && seed !== 0,
+      writtenSubmitted: seed === 2 || seed === 5,
+      reviewAttended: seed > 1 && seed !== 6,
+    };
+  });
+}
+
+function dayActivities(day: DiscipleDayParticipation) {
+  return [
+    day.prayerWatch,
+    day.listened,
+    day.quizAttempted,
+    day.writtenSubmitted,
+    day.reviewAttended,
+  ].filter((value): value is boolean => value !== null);
+}
+
+const stepButtonClass =
+  "inline-flex h-8 items-center rounded-sm border border-zinc-200 bg-white px-2 text-zinc-600 hover:bg-zinc-50 disabled:opacity-40";
+
+function DiscipleParticipationTable({
+  disciples,
+  range,
+  preview,
+}: {
+  disciples: DiscipleSummary[];
+  range: DiscipleshipDashboardData["participationRange"];
+  preview: boolean;
+}) {
+  const maxDate = range?.end ?? lagosToday();
+  const minDate = range?.start ?? maxDate;
+  const [date, setDate] = useState(maxDate);
+  const [expandedId, setExpandedId] = useState<number | null>(null);
+  const toggle = (id: number) => setExpandedId((current) => (current === id ? null : id));
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["discipleship", "participation", date, disciples.map((d) => d.membershipId).join()],
+    queryFn: () =>
+      preview
+        ? Promise.resolve(previewParticipation(disciples, date))
+        : getDiscipleParticipationAction(date),
+    placeholderData: keepPreviousData,
+  });
+  const dayByMembership = new Map((data ?? []).map((day) => [day.membershipId, day]));
 
   return (
-    <li className="grid gap-2.5 rounded-sm border border-zinc-200 bg-white p-3">
-      <div className="flex items-start justify-between gap-3">
-        <span className="grid gap-0.5">
-          <span className="text-sm font-semibold text-zinc-900">{disciple.name}</span>
-          <span className="text-[0.7rem] text-zinc-400">
-            Joined {formatDiscipleshipDate(disciple.joinedAt)}
-            {disciple.lastActiveAt
-              ? ` · Last active ${formatDiscipleshipDate(disciple.lastActiveAt)}`
-              : " · No activity yet"}
-          </span>
-        </span>
-        <span className="flex shrink-0 flex-col items-end gap-1">
-          {status ? (
-            <span className={`rounded-full px-2 py-0.5 text-[0.65rem] font-semibold ${status.className}`}>
-              {status.label}
-            </span>
-          ) : null}
-          {disciple.openPrayerCount > 0 ? (
-            <span className="rounded-full bg-sky-50 px-2 py-0.5 text-[0.65rem] font-semibold text-[var(--color-brand-blue)]">
-              {disciple.openPrayerCount} prayer request{disciple.openPrayerCount === 1 ? "" : "s"}
-            </span>
-          ) : null}
-        </span>
+    <div className="overflow-hidden rounded-sm border border-zinc-200 bg-white">
+      <div className="flex items-end gap-2 border-b border-zinc-100 px-3 py-2.5">
+        <button
+          type="button"
+          aria-label="Previous day"
+          disabled={date <= minDate}
+          onClick={() => setDate(clampDate(shiftDate(date, -1), minDate, maxDate))}
+          className={stepButtonClass}
+        >
+          <ChevronLeftIcon className="size-3.5" />
+        </button>
+        <label className="grid min-w-0 flex-1 gap-1 text-xs font-medium text-zinc-700 sm:flex-none">
+          Day
+          <input
+            type="date"
+            value={date}
+            min={minDate}
+            max={maxDate}
+            onChange={(event) => event.target.value && setDate(event.target.value)}
+            className="h-8 w-full min-w-0 rounded-sm border border-zinc-200 bg-white px-2 text-xs"
+          />
+        </label>
+        <button
+          type="button"
+          aria-label="Next day"
+          disabled={date >= maxDate}
+          onClick={() => setDate(clampDate(shiftDate(date, 1), minDate, maxDate))}
+          className={stepButtonClass}
+        >
+          <ChevronRightIcon className="size-3.5" />
+        </button>
       </div>
+
+      {error ? (
+        <p role="alert" className="px-3 py-2 text-xs text-red-700">
+          Couldn&apos;t load this day. Try again shortly.
+        </p>
+      ) : null}
+
+      <div className="overflow-x-auto">
+        <table className="min-w-full text-left text-xs">
+          <thead className="bg-zinc-50 text-zinc-500">
+            <tr>
+              <th className="px-3 py-2.5 font-medium">Disciple</th>
+              <th className="hidden px-3 py-2.5 font-medium md:table-cell">Status</th>
+              <th className="hidden px-3 py-2.5 font-medium md:table-cell">Prayer watch</th>
+              <th className="hidden px-3 py-2.5 font-medium md:table-cell">Teaching</th>
+              <th className="hidden px-3 py-2.5 font-medium md:table-cell">Quiz</th>
+              <th className="hidden px-3 py-2.5 font-medium md:table-cell">Response</th>
+              <th className="hidden px-3 py-2.5 font-medium md:table-cell">Review</th>
+              <th className="px-3 py-2.5 text-right font-medium md:hidden">Done</th>
+              <th className="w-8 px-2 py-2.5">
+                <span className="sr-only">Details</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-zinc-100">
+            {disciples.map((disciple) => {
+              const day = dayByMembership.get(disciple.membershipId) ?? null;
+              const activities = day ? dayActivities(day) : [];
+              const done = activities.filter(Boolean).length;
+              const inactive = day !== null && done === 0;
+              const expanded = expandedId === disciple.membershipId;
+              const detailsId = `disciple-${disciple.membershipId}`;
+              const rowTone = inactive ? "bg-rose-50/60" : "";
+              const status = disciple.status ? STATUS_DISPLAY[disciple.status] : null;
+              const statusPill = status ? (
+                <span
+                  className={`inline-block whitespace-nowrap rounded-full px-2 py-0.5 text-[0.65rem] font-semibold ${status.className}`}
+                >
+                  {status.label}
+                </span>
+              ) : null;
+              const loadingMark = <span className="text-zinc-300">{isLoading ? "…" : "—"}</span>;
+
+              return (
+                <Fragment key={disciple.membershipId}>
+                  <tr
+                    onClick={() => toggle(disciple.membershipId)}
+                    className={`cursor-pointer hover:bg-zinc-50 ${rowTone} ${expanded ? "border-b-0" : ""}`}
+                  >
+                    <td className="px-3 py-3">
+                      <span className="block max-w-[11rem] truncate text-sm font-semibold text-zinc-900 sm:max-w-none">
+                        {disciple.name}
+                      </span>
+                      {disciple.openPrayerCount > 0 ? (
+                        <span className="mt-1 inline-block rounded-full bg-sky-50 px-2 py-0.5 text-[0.65rem] font-semibold text-[var(--color-brand-blue)]">
+                          {disciple.openPrayerCount} prayer request{disciple.openPrayerCount === 1 ? "" : "s"}
+                        </span>
+                      ) : null}
+                      {statusPill ? <div className="mt-1 md:hidden">{statusPill}</div> : null}
+                    </td>
+                    <td className="hidden px-3 py-3 md:table-cell">
+                      {statusPill ?? <span className="text-zinc-300">—</span>}
+                    </td>
+                    <td className="hidden px-3 py-3 md:table-cell">
+                      {day ? <Mark value={day.prayerWatch} /> : loadingMark}
+                    </td>
+                    <td className="hidden px-3 py-3 md:table-cell">
+                      {day ? <Mark value={day.listened} /> : loadingMark}
+                    </td>
+                    <td className="hidden px-3 py-3 md:table-cell">
+                      {day ? <Mark value={day.quizAttempted} /> : loadingMark}
+                    </td>
+                    <td className="hidden px-3 py-3 md:table-cell">
+                      {day ? <Mark value={day.writtenSubmitted} /> : loadingMark}
+                    </td>
+                    <td className="hidden px-3 py-3 md:table-cell">
+                      {day ? <Mark value={day.reviewAttended} /> : loadingMark}
+                    </td>
+                    <td className="whitespace-nowrap px-3 py-3 text-right md:hidden">
+                      {day ? (
+                        <span className={inactive ? "text-red-700" : "font-medium text-zinc-900"}>
+                          {done}/{activities.length}
+                        </span>
+                      ) : (
+                        loadingMark
+                      )}
+                    </td>
+                    <td className="px-2 py-3">
+                      <ExpandButton
+                        expanded={expanded}
+                        controls={detailsId}
+                        label={`details for ${disciple.firstName}`}
+                        onToggle={() => toggle(disciple.membershipId)}
+                      />
+                    </td>
+                  </tr>
+                  {expanded ? (
+                    <tr id={detailsId} className={rowTone}>
+                      <td colSpan={9} className="px-3 pb-3 pt-0">
+                        <div className="grid gap-2.5">
+                          {day ? (
+                            <div className="md:hidden">
+                              <DetailGrid
+                                items={[
+                                  ["Prayer watch", <Mark key="prayer" value={day.prayerWatch} />],
+                                  ["Teaching", <Mark key="teaching" value={day.listened} />],
+                                  ["Quiz", <Mark key="quiz" value={day.quizAttempted} />],
+                                  ["Response", <Mark key="response" value={day.writtenSubmitted} />],
+                                  ["Review", <Mark key="review" value={day.reviewAttended} />],
+                                ]}
+                              />
+                            </div>
+                          ) : null}
+                          <DiscipleDetails disciple={disciple} preview={preview} />
+                        </div>
+                      </td>
+                    </tr>
+                  ) : null}
+                </Fragment>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      <p className="border-t border-zinc-100 px-3 py-2 text-[0.65rem] text-zinc-500">
+        <span className="md:hidden">Done counts the activities they did that day. </span>
+        Highlighted disciples took no part that day; — means no teaching was released.
+      </p>
+    </div>
+  );
+}
+
+/** A disciple's overall progress, follow-up and actions — the dropdown under
+ * their row in the participation table. */
+function DiscipleDetails({ disciple, preview }: { disciple: DiscipleSummary; preview: boolean }) {
+  const remove = useDiscipleshipAction(preview);
+
+  return (
+    <div className="grid gap-2.5 rounded-sm border border-zinc-200 bg-white p-3">
+      <p className="text-[0.7rem] text-zinc-400">
+        Joined {formatDiscipleshipDate(disciple.joinedAt)}
+        {disciple.lastActiveAt
+          ? ` · Last active ${formatDiscipleshipDate(disciple.lastActiveAt)}`
+          : " · No activity yet"}
+      </p>
 
       <dl className="grid grid-cols-2 gap-x-4 gap-y-2.5">
         <Metric
@@ -340,7 +555,7 @@ function DiscipleRow({ disciple, preview }: { disciple: DiscipleSummary; preview
           {remove.error}
         </p>
       ) : null}
-    </li>
+    </div>
   );
 }
 

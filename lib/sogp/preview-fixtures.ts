@@ -377,4 +377,5 @@ export const discipleshipPreviewData: DiscipleshipDashboardData = {
       },
     ],
   },
+  participationRange: { start: "2026-09-01", end: sogpTodayKey },
 };

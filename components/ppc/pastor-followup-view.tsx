@@ -323,7 +323,7 @@ export function PastorFollowupView({
             onChange={(event) =>
               router.push(`/admin/my-enrollees?pastorId=${event.target.value}`)
             }
-            className="h-8 rounded-sm border border-zinc-200 px-2 text-xs"
+            className="h-8 max-w-[45vw] truncate rounded-sm border border-zinc-200 px-2 text-xs sm:max-w-xs"
           >
             {pastorOptions.map((pastor) => (
               <option key={pastor.id} value={pastor.id}>

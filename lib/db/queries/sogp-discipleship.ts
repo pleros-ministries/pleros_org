@@ -5,7 +5,7 @@ import * as schema from "@/lib/db/schema";
 import { transactionDb } from "@/lib/db/transaction";
 import { notifyDiscipleship } from "@/lib/community/notify";
 import { firstNameOf } from "@/lib/community/visibility";
-import { PRE_SOGP_PREPARATION_DAYS } from "@/lib/sogp/calendar";
+import { PRE_SOGP_PREPARATION_DAYS, resolvePreparationStartsAt } from "@/lib/sogp/calendar";
 import { getPreparationTotalsByCohort } from "./sogp-preparation-length";
 import { getSogpLevel, type SogpCurriculumLevel } from "@/lib/sogp/curriculum";
 import {
@@ -27,7 +27,7 @@ import { toLagosDateKey } from "@/lib/sogp/formation-progress";
 import type { StudentStatus } from "@/lib/sogp/student-status";
 import { resolvePublicSiteUrl } from "@/lib/welcome-campaign";
 
-import { getStudentStatusesForEnrollments } from "./sogp-daily";
+import { getSogpDailyParticipation, getStudentStatusesForEnrollments } from "./sogp-daily";
 import { getActiveSogpJourney } from "./sogp-journey";
 import { ensureSogpReferralCode } from "./sogp-referrals";
 
@@ -601,7 +601,98 @@ export type DiscipleshipDashboardData = {
     promptSuggestions: { levelTitle: string | null; suggestions: string[] };
   };
   myDiscipler: DisciplerView | null;
+  /** Date-picker bounds for the disciples' participation table: the earliest
+   * Pre-SOGP start among the disciples' cohorts through today (Lagos). */
+  participationRange: { start: string; end: string } | null;
 };
+
+/** One disciple's activity on one day — deliberately limited to activity
+ * flags, since this reaches a fellow learner (no email, pastor or alias). */
+export type DiscipleDayParticipation = {
+  membershipId: number;
+  prayerWatch: boolean;
+  /** null when no teaching was released that day. */
+  listened: boolean | null;
+  quizAttempted: boolean;
+  writtenSubmitted: boolean;
+  reviewAttended: boolean;
+};
+
+async function getActiveDiscipleEnrollments(groupId: number) {
+  return db
+    .select({
+      membershipId: schema.discipleshipMemberships.id,
+      enrollmentId: schema.sogpEnrollments.id,
+      cohortId: schema.sogpEnrollments.cohortId,
+      cohortStartsAt: schema.sogpCohorts.startsAt,
+      cohortPreparationStartsAt: schema.sogpCohorts.preparationStartsAt,
+    })
+    .from(schema.discipleshipMemberships)
+    .innerJoin(
+      schema.sogpEnrollments,
+      eq(schema.sogpEnrollments.id, schema.discipleshipMemberships.discipleEnrollmentId),
+    )
+    .innerJoin(schema.sogpCohorts, eq(schema.sogpCohorts.id, schema.sogpEnrollments.cohortId))
+    .where(
+      and(
+        eq(schema.discipleshipMemberships.groupId, groupId),
+        eq(schema.discipleshipMemberships.status, "active"),
+      ),
+    );
+}
+
+async function getDiscipleParticipationRange(
+  groupId: number,
+): Promise<{ start: string; end: string } | null> {
+  const members = await getActiveDiscipleEnrollments(groupId);
+  if (!members.length) return null;
+  const starts = members.map((member) =>
+    toLagosDateKey(resolvePreparationStartsAt(member.cohortStartsAt, member.cohortPreparationStartsAt)),
+  );
+  const end = toLagosDateKey(new Date());
+  const start = starts.reduce((earliest, key) => (key < earliest ? key : earliest));
+  return { start: start < end ? start : end, end };
+}
+
+/**
+ * The leader's active disciples' activity on `dateKey`. Scoped by the
+ * leader's own enrolment, so a learner can only ever read their own group.
+ */
+export async function getDiscipleDailyParticipation(
+  leaderEnrollmentId: number,
+  dateKey: string,
+): Promise<DiscipleDayParticipation[]> {
+  const group = await getGroupByLeader(leaderEnrollmentId);
+  if (!group) return [];
+  const members = await getActiveDiscipleEnrollments(group.id);
+  if (!members.length) return [];
+
+  const cohortIds = [...new Set(members.map((member) => member.cohortId))];
+  const enrollmentIds = members.map((member) => member.enrollmentId);
+  const rows = (
+    await Promise.all(
+      cohortIds.map((cohortId) =>
+        getSogpDailyParticipation(cohortId, dateKey, undefined, enrollmentIds),
+      ),
+    )
+  ).flat();
+  const byEnrollment = new Map(rows.map((row) => [row.enrollmentId, row]));
+
+  return members.flatMap((member) => {
+    const row = byEnrollment.get(member.enrollmentId);
+    if (!row) return [];
+    return [
+      {
+        membershipId: member.membershipId,
+        prayerWatch: row.prayerWatch,
+        listened: row.listened,
+        quizAttempted: row.quizAttempted,
+        writtenSubmitted: row.writtenSubmitted,
+        reviewAttended: row.reviewAttended,
+      },
+    ];
+  });
+}
 
 export async function getDiscipleshipDashboard(
   userId: string,
@@ -615,12 +706,14 @@ export async function getDiscipleshipDashboard(
   if (!enrollment) return null;
 
   const group = await ensureDiscipleshipGroup(enrollment);
-  const [disciples, prompts, myDiscipler, prayerRequests, promptSuggestions] = await Promise.all([
+  const [disciples, prompts, myDiscipler, prayerRequests, promptSuggestions, participationRange] =
+    await Promise.all([
     getDiscipleSummaries(group.id),
     getLeaderPrompts(group.id),
     getDisciplerView(enrollment.id),
     getGroupPrayerRequests(group.id),
     getPromptSuggestions(group.id, enrollment.cohortId),
+    getDiscipleParticipationRange(group.id),
   ]);
 
   return {
@@ -640,6 +733,7 @@ export async function getDiscipleshipDashboard(
       promptSuggestions,
     },
     myDiscipler,
+    participationRange,
   };
 }
 

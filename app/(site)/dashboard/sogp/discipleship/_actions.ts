@@ -30,7 +30,10 @@ import {
   setDiscipleSharesPhone,
   setLeaderSharesPhone,
   upsertDiscipleshipResponse,
+  getDiscipleDailyParticipation,
+  type DiscipleDayParticipation,
 } from "@/lib/db/queries/sogp-discipleship";
+import { DAILY_DATE_PATTERN } from "@/lib/sogp/daily-participation";
 import {
   DISCIPLESHIP_CONTACT_NOTE_MAX_LENGTH,
   DISCIPLESHIP_INVITE_COOKIE,
@@ -48,6 +51,15 @@ import {
 const PAGE_PATH = "/dashboard/sogp/discipleship";
 
 export type DiscipleshipActionResult = { ok: true } | { ok: false; error: string };
+
+/** Read-only: the signed-in leader's disciples' activity on one day. */
+export async function getDiscipleParticipationAction(
+  dateKey: string,
+): Promise<DiscipleDayParticipation[]> {
+  if (!DAILY_DATE_PATTERN.test(dateKey)) throw new Error("Invalid date.");
+  const learner = await requireEnrolledLearner();
+  return getDiscipleDailyParticipation(learner.enrollment.id, dateKey);
+}
 
 async function requireEnrolledLearner() {
   const session = await getAppSession();
