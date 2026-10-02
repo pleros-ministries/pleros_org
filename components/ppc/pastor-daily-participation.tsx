@@ -14,6 +14,7 @@ import { Count, Mark } from "@/components/ppc/admin-sogp-daily-by-pastor";
 import { DetailGrid, ExpandButton, isDesktop } from "@/components/ppc/expandable-table-row";
 import { clampDate, lagosToday, shiftDate } from "@/lib/sogp/daily-date";
 import { summarizeDailyByPastor } from "@/lib/sogp/daily-participation";
+import { fullnessLabel, matchesFullnessFilter, type FullnessFilter } from "@/lib/sogp/fullness";
 import { STUDENT_STATUS_META } from "@/lib/sogp/student-status";
 
 type CohortWindow = { id: number; title: string; startsAt: string; endsAt: string; status: string };
@@ -36,9 +37,12 @@ function pickDefaultCohort(cohorts: CohortWindow[]): CohortWindow | null {
 export function PastorDailyParticipationSection({
   cohorts,
   pastorId,
+  fullnessFilter = "all",
 }: {
   cohorts: CohortWindow[];
   pastorId: string;
+  /** Applies the My Enrollees Fullness filter to this table and its totals. */
+  fullnessFilter?: FullnessFilter;
 }) {
   const [cohortId, setCohortId] = useState(() => pickDefaultCohort(cohorts)?.id ?? null);
   const cohort = cohorts.find((c) => c.id === cohortId) ?? null;
@@ -65,7 +69,11 @@ export function PastorDailyParticipationSection({
   const [expandedId, setExpandedId] = useState<number | "total" | null>(null);
   const toggle = (id: number | "total") => setExpandedId((current) => (current === id ? null : id));
 
-  const summary = useMemo(() => (data ? summarizeDailyByPastor(data).total : null), [data]);
+  const rows = useMemo(
+    () => (data ? data.filter((row) => matchesFullnessFilter(row.fullness, fullnessFilter)) : null),
+    [data, fullnessFilter],
+  );
+  const summary = useMemo(() => (rows ? summarizeDailyByPastor(rows).total : null), [rows]);
 
   if (!cohort) return null;
 
@@ -140,10 +148,12 @@ export function PastorDailyParticipationSection({
       {isLoading && !summary ? <p className="px-4 py-8 text-center text-xs text-zinc-500">Loading…</p> : null}
       {error ? <p className="px-4 py-8 text-center text-xs text-rose-700">Could not load this day.</p> : null}
       {summary && !summary.enrollees ? (
-        <p className="px-4 py-8 text-center text-xs text-zinc-500">No enrollees in this cohort.</p>
+        <p className="px-4 py-8 text-center text-xs text-zinc-500">
+          {data?.length ? "No enrollees match this Fullness filter." : "No enrollees in this cohort."}
+        </p>
       ) : null}
 
-      {data && summary && summary.enrollees ? (
+      {rows && summary && summary.enrollees ? (
         <div className="overflow-x-auto">
           <table className="min-w-full text-left text-xs">
             <thead className="bg-zinc-50 text-zinc-500">
@@ -168,7 +178,7 @@ export function PastorDailyParticipationSection({
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100">
-              {data.map((row) => {
+              {rows.map((row) => {
                 const activities = [
                   row.prayerWatch,
                   row.listened,
@@ -208,6 +218,7 @@ export function PastorDailyParticipationSection({
                         <p className="max-w-[11rem] truncate text-[10px] text-zinc-500 sm:max-w-none">
                           {row.email}
                           <span className="hidden md:inline">
+                            {row.fullness ? ` · ${fullnessLabel(row.fullness)}` : ""}
                             {row.leaderboardAlias ? ` · Leaderboard: ${row.leaderboardAlias}` : ""}
                           </span>
                         </p>
@@ -261,11 +272,14 @@ export function PastorDailyParticipationSection({
                               ["Review", <Mark key="r" value={row.reviewAttended} />],
                             ]}
                           />
-                          {row.leaderboardAlias ? (
-                            <p className="mt-2 text-[11px] text-zinc-500">
-                              Leaderboard: <span className="font-medium text-zinc-700">{row.leaderboardAlias}</span>
-                            </p>
-                          ) : null}
+                          <p className="mt-2 text-[11px] text-zinc-500">
+                            Fullness: <span className="font-medium text-zinc-700">{fullnessLabel(row.fullness)}</span>
+                            {row.leaderboardAlias ? (
+                              <>
+                                {" · "}Leaderboard: <span className="font-medium text-zinc-700">{row.leaderboardAlias}</span>
+                              </>
+                            ) : null}
+                          </p>
                           <Link
                             href={detailHref}
                             className="mt-2 inline-block text-[11px] font-medium text-[var(--color-brand-blue)] hover:underline"

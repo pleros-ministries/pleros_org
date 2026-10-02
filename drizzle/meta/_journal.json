@@ -253,6 +253,13 @@
       "when": 1790533123345,
       "tag": "0035_sogp_discipleship_phase_two",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1790923700884,
+      "tag": "0036_sogp_enrollment_fullness",
+      "breakpoints": true
     }
   ]
 }
