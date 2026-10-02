@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -11,6 +11,7 @@ import {
   getPastorSogpDailyParticipation,
 } from "@/app/admin/(app)/(pastor-only)/_actions/pastor-daily-actions";
 import { Count, Mark } from "@/components/ppc/admin-sogp-daily-by-pastor";
+import { DetailGrid, ExpandButton, isDesktop } from "@/components/ppc/expandable-table-row";
 import { clampDate, lagosToday, shiftDate } from "@/lib/sogp/daily-date";
 import { summarizeDailyByPastor } from "@/lib/sogp/daily-participation";
 import { STUDENT_STATUS_META } from "@/lib/sogp/student-status";
@@ -61,6 +62,8 @@ export function PastorDailyParticipationSection({
     enabled: Boolean(cohort),
   });
   const router = useRouter();
+  const [expandedId, setExpandedId] = useState<number | "total" | null>(null);
+  const toggle = (id: number | "total") => setExpandedId((current) => (current === id ? null : id));
 
   const summary = useMemo(() => (data ? summarizeDailyByPastor(data).total : null), [data]);
 
@@ -78,9 +81,9 @@ export function PastorDailyParticipationSection({
             Pick a day to see which of your enrollees took part.
           </p>
         </div>
-        <div className="flex flex-wrap items-end gap-2">
+        <div className="flex w-full flex-wrap items-end gap-2 sm:w-auto">
           {cohorts.length > 1 ? (
-            <label className="grid gap-1 text-xs font-medium text-zinc-700">
+            <label className="grid w-full gap-1 text-xs font-medium text-zinc-700 sm:w-auto">
               Cohort
               <select
                 value={cohort.id}
@@ -92,7 +95,7 @@ export function PastorDailyParticipationSection({
                     clampDate(current, next.startsAt.slice(0, 10), next.endsAt.slice(0, 10)),
                   );
                 }}
-                className="h-8 rounded-sm border border-zinc-200 bg-white px-2 text-xs"
+                className="h-8 w-full rounded-sm border border-zinc-200 bg-white px-2 text-xs sm:w-auto"
               >
                 {cohorts.map((c) => (
                   <option key={c.id} value={c.id}>
@@ -111,7 +114,7 @@ export function PastorDailyParticipationSection({
           >
             <ChevronLeft className="size-3.5" />
           </button>
-          <label className="grid gap-1 text-xs font-medium text-zinc-700">
+          <label className="grid min-w-0 flex-1 gap-1 text-xs font-medium text-zinc-700 sm:flex-none">
             Date
             <input
               type="date"
@@ -119,7 +122,7 @@ export function PastorDailyParticipationSection({
               min={minDate}
               max={maxDate}
               onChange={(event) => event.target.value && setDate(event.target.value)}
-              className="h-8 rounded-sm border border-zinc-200 bg-white px-2 text-xs"
+              className="h-8 w-full min-w-0 rounded-sm border border-zinc-200 bg-white px-2 text-xs"
             />
           </label>
           <button
@@ -145,109 +148,198 @@ export function PastorDailyParticipationSection({
           <table className="min-w-full text-left text-xs">
             <thead className="bg-zinc-50 text-zinc-500">
               <tr>
-                <th className="px-4 py-3">Enrollee</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Prayer watch</th>
+                <th className="px-3 py-3 md:px-4">Enrollee</th>
+                <th className="hidden px-4 py-3 md:table-cell">Status</th>
+                <th className="hidden px-4 py-3 md:table-cell">Prayer watch</th>
                 <th
-                  className="px-4 py-3"
+                  className="hidden px-4 py-3 md:table-cell"
                   title="Listening isn't date-stamped. Shows who has listened to the lesson released on this day, as of now."
                 >
                   Listened*
                 </th>
-                <th className="px-4 py-3">Quiz taken</th>
-                <th className="px-4 py-3">Written submitted</th>
-                <th className="px-4 py-3">Written approved</th>
-                <th className="px-4 py-3">Review</th>
+                <th className="hidden px-4 py-3 md:table-cell">Quiz taken</th>
+                <th className="hidden px-4 py-3 md:table-cell">Written submitted</th>
+                <th className="hidden px-4 py-3 md:table-cell">Written approved</th>
+                <th className="hidden px-4 py-3 md:table-cell">Review</th>
+                <th className="px-3 py-3 text-right md:hidden">Done</th>
+                <th className="w-8 px-2 py-3 md:hidden">
+                  <span className="sr-only">Details</span>
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100">
               {data.map((row) => {
-                const active =
-                  row.prayerWatch ||
-                  row.listened === true ||
-                  row.quizAttempted ||
-                  row.writtenSubmitted ||
-                  row.writtenApproved ||
-                  row.reviewAttended;
+                const activities = [
+                  row.prayerWatch,
+                  row.listened,
+                  row.quizAttempted,
+                  row.writtenSubmitted,
+                  row.writtenApproved,
+                  row.reviewAttended,
+                ].filter((value): value is boolean => value !== null);
+                const done = activities.filter(Boolean).length;
+                const active = done > 0;
                 const status = statuses?.[row.enrollmentId];
+                const statusPill = status ? (
+                  <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full border border-zinc-200 bg-white px-2 py-0.5 text-[0.65rem] font-semibold text-zinc-700">
+                    {STUDENT_STATUS_META[status].emoji} {STUDENT_STATUS_META[status].label}
+                  </span>
+                ) : null;
                 const detailHref = `/admin/my-enrollees/${row.enrollmentId}`;
+                const expanded = expandedId === row.enrollmentId;
+                const detailsId = `daily-participation-${row.enrollmentId}`;
+                const rowTone = active ? "" : "bg-rose-50";
                 return (
-                  <tr
-                    key={row.enrollmentId}
-                    onClick={() => router.push(detailHref)}
-                    className={`cursor-pointer ${active ? "hover:bg-zinc-50" : "bg-rose-50 hover:bg-rose-100/70"}`}
-                  >
-                    <td className="px-4 py-3">
-                      <Link
-                        href={detailHref}
-                        onClick={(event) => event.stopPropagation()}
-                        className="font-medium text-zinc-900 hover:underline"
-                      >
-                        {row.name}
-                      </Link>
-                      <p className="text-[10px] text-zinc-500">
-                        {row.email}
-                        {row.leaderboardAlias ? ` · Leaderboard: ${row.leaderboardAlias}` : ""}
-                      </p>
-                    </td>
-                    <td className="px-4 py-3">
-                      {status ? (
-                        <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full border border-zinc-200 bg-white px-2 py-0.5 text-[0.65rem] font-semibold text-zinc-700">
-                          {STUDENT_STATUS_META[status].emoji} {STUDENT_STATUS_META[status].label}
+                  <Fragment key={row.enrollmentId}>
+                    <tr
+                      onClick={() =>
+                        isDesktop() ? router.push(detailHref) : toggle(row.enrollmentId)
+                      }
+                      className={`cursor-pointer ${rowTone} ${active ? "hover:bg-zinc-50" : "hover:bg-rose-100/70"} ${expanded ? "border-b-0" : ""}`}
+                    >
+                      <td className="px-3 py-3 md:px-4">
+                        <Link
+                          href={detailHref}
+                          onClick={(event) => event.stopPropagation()}
+                          className="block max-w-[11rem] truncate font-medium text-zinc-900 hover:underline sm:max-w-none"
+                        >
+                          {row.name}
+                        </Link>
+                        <p className="max-w-[11rem] truncate text-[10px] text-zinc-500 sm:max-w-none">
+                          {row.email}
+                          <span className="hidden md:inline">
+                            {row.leaderboardAlias ? ` · Leaderboard: ${row.leaderboardAlias}` : ""}
+                          </span>
+                        </p>
+                        {statusPill ? <div className="mt-1 md:hidden">{statusPill}</div> : null}
+                      </td>
+                      <td className="hidden px-4 py-3 md:table-cell">
+                        {statusPill ?? <span className="text-zinc-300">—</span>}
+                      </td>
+                      <td className="hidden px-4 py-3 md:table-cell">
+                        <Mark value={row.prayerWatch} />
+                      </td>
+                      <td className="hidden px-4 py-3 md:table-cell">
+                        <Mark value={row.listened} />
+                      </td>
+                      <td className="hidden px-4 py-3 md:table-cell">
+                        <Mark value={row.quizAttempted} />
+                      </td>
+                      <td className="hidden px-4 py-3 md:table-cell">
+                        <Mark value={row.writtenSubmitted} />
+                      </td>
+                      <td className="hidden px-4 py-3 md:table-cell">
+                        <Mark value={row.writtenApproved} />
+                      </td>
+                      <td className="hidden px-4 py-3 md:table-cell">
+                        <Mark value={row.reviewAttended} />
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-3 text-right md:hidden">
+                        <span className={active ? "font-medium text-zinc-900" : "text-rose-700"}>
+                          {done}/{activities.length}
                         </span>
-                      ) : (
-                        <span className="text-zinc-300">—</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      <Mark value={row.prayerWatch} />
-                    </td>
-                    <td className="px-4 py-3">
-                      <Mark value={row.listened} />
-                    </td>
-                    <td className="px-4 py-3">
-                      <Mark value={row.quizAttempted} />
-                    </td>
-                    <td className="px-4 py-3">
-                      <Mark value={row.writtenSubmitted} />
-                    </td>
-                    <td className="px-4 py-3">
-                      <Mark value={row.writtenApproved} />
-                    </td>
-                    <td className="px-4 py-3">
-                      <Mark value={row.reviewAttended} />
-                    </td>
-                  </tr>
+                      </td>
+                      <td className="px-2 py-3 md:hidden">
+                        <ExpandButton
+                          expanded={expanded}
+                          controls={detailsId}
+                          label={`activities for ${row.name}`}
+                          onToggle={() => toggle(row.enrollmentId)}
+                        />
+                      </td>
+                    </tr>
+                    {expanded ? (
+                      <tr id={detailsId} className={`md:hidden ${rowTone}`}>
+                        <td colSpan={10} className="px-3 pb-3 pt-0">
+                          <DetailGrid
+                            items={[
+                              ["Prayer watch", <Mark key="p" value={row.prayerWatch} />],
+                              ["Listened*", <Mark key="l" value={row.listened} />],
+                              ["Quiz taken", <Mark key="q" value={row.quizAttempted} />],
+                              ["Written submitted", <Mark key="ws" value={row.writtenSubmitted} />],
+                              ["Written approved", <Mark key="wa" value={row.writtenApproved} />],
+                              ["Review", <Mark key="r" value={row.reviewAttended} />],
+                            ]}
+                          />
+                          {row.leaderboardAlias ? (
+                            <p className="mt-2 text-[11px] text-zinc-500">
+                              Leaderboard: <span className="font-medium text-zinc-700">{row.leaderboardAlias}</span>
+                            </p>
+                          ) : null}
+                          <Link
+                            href={detailHref}
+                            className="mt-2 inline-block text-[11px] font-medium text-[var(--color-brand-blue)] hover:underline"
+                          >
+                            View daily performance →
+                          </Link>
+                        </td>
+                      </tr>
+                    ) : null}
+                  </Fragment>
                 );
               })}
-              <tr className="bg-zinc-50 font-medium">
-                <td className="px-4 py-3 text-zinc-900">All enrollees</td>
-                <td className="px-4 py-3" />
-                <td className="px-4 py-3">
+              <tr
+                onClick={() => {
+                  if (!isDesktop()) toggle("total");
+                }}
+                className={`bg-zinc-50 font-medium ${expandedId === "total" ? "border-b-0" : ""}`}
+              >
+                <td className="px-3 py-3 text-zinc-900 md:px-4">All enrollees</td>
+                <td className="hidden px-4 py-3 md:table-cell" />
+                <td className="hidden px-4 py-3 md:table-cell">
                   <Count n={summary.prayerWatch} of={summary.enrollees} />
                 </td>
-                <td className="px-4 py-3">
+                <td className="hidden px-4 py-3 md:table-cell">
                   <Count n={summary.listened} of={summary.enrollees} applicable={summary.listenedApplicable} />
                 </td>
-                <td className="px-4 py-3">
+                <td className="hidden px-4 py-3 md:table-cell">
                   <Count n={summary.quizAttempted} of={summary.enrollees} />
                 </td>
-                <td className="px-4 py-3">
+                <td className="hidden px-4 py-3 md:table-cell">
                   <Count n={summary.writtenSubmitted} of={summary.enrollees} />
                 </td>
-                <td className="px-4 py-3">
+                <td className="hidden px-4 py-3 md:table-cell">
                   <Count n={summary.writtenApproved} of={summary.enrollees} />
                 </td>
-                <td className="px-4 py-3">
+                <td className="hidden px-4 py-3 md:table-cell">
                   <Count n={summary.reviewAttended} of={summary.enrollees} />
                 </td>
+                <td className="px-3 py-3 text-right text-zinc-500 md:hidden">{summary.enrollees}</td>
+                <td className="px-2 py-3 md:hidden">
+                  <ExpandButton
+                    expanded={expandedId === "total"}
+                    controls="daily-participation-total"
+                    label="totals for all enrollees"
+                    onToggle={() => toggle("total")}
+                  />
+                </td>
               </tr>
+              {expandedId === "total" ? (
+                <tr id="daily-participation-total" className="bg-zinc-50 md:hidden">
+                  <td colSpan={10} className="px-3 pb-3 pt-0">
+                    <DetailGrid
+                      items={[
+                        ["Prayer watch", <Count key="p" n={summary.prayerWatch} of={summary.enrollees} />],
+                        [
+                          "Listened*",
+                          <Count key="l" n={summary.listened} of={summary.enrollees} applicable={summary.listenedApplicable} />,
+                        ],
+                        ["Quiz taken", <Count key="q" n={summary.quizAttempted} of={summary.enrollees} />],
+                        ["Written submitted", <Count key="ws" n={summary.writtenSubmitted} of={summary.enrollees} />],
+                        ["Written approved", <Count key="wa" n={summary.writtenApproved} of={summary.enrollees} />],
+                        ["Review", <Count key="r" n={summary.reviewAttended} of={summary.enrollees} />],
+                      ]}
+                    />
+                  </td>
+                </tr>
+              ) : null}
             </tbody>
           </table>
         </div>
       ) : null}
 
       <p className="border-t border-zinc-100 px-4 py-2 text-[10px] text-zinc-500">
+        <span className="md:hidden">Tap an enrollee to see their activities; Done counts the activities they did that day. </span>
         *Listening isn&rsquo;t date-stamped, so this shows who has listened to the lesson released on this day, as of
         now (&ldquo;—&rdquo; when no lesson was released). Quiz counts anyone who took a quiz that day; review counts
         the day it was attended or marked. Prayer watch is morning sessions. Enrollees with no activity that day are
