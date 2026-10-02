@@ -23,7 +23,9 @@ export async function getSogpDailyParticipation(
   cohortId: number,
   dateKey: string,
   pastorId?: string,
+  enrollmentIds?: number[],
 ): Promise<DailyParticipationRow[]> {
+  if (enrollmentIds && enrollmentIds.length === 0) return [];
   const { start, end } = lagosDayRange(dateKey);
 
   const [enrollments, trackRows] = await Promise.all([
@@ -47,6 +49,7 @@ export async function getSogpDailyParticipation(
         and(
           eq(schema.sogpEnrollments.cohortId, cohortId),
           pastorId ? eq(schema.pastorAssignments.pastorUserId, pastorId) : undefined,
+          enrollmentIds ? inArray(schema.sogpEnrollments.id, enrollmentIds) : undefined,
         ),
       )
       .orderBy(asc(schema.sogpEnrollments.name)),
