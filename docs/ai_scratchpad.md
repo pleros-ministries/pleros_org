@@ -36,6 +36,7 @@ Consolidated 2026-08-31. Keep this file short, current, pattern-focused, and fre
 - Keep the authenticated admin shell mounted across destinations. Show route skeletons and optimistic nav selection immediately; profile visible-content and URL-commit latency before claiming improvement.
 - Expensive admin read models should use batched queries, short-lived shared caches or TanStack Query, and mutation-driven invalidation.
 - PPC operational UI stays compact: tight controls/radii, zinc surfaces, concise copy, 2-column mobile stat grids, text-only metric cards, and icons reserved for actions.
+- `/admin/my-enrollees` defaults admins to every enrollee (`?pastorId=all`, `ALL_PASTORS`), including unassigned ones; pastors only ever see their own queue. Admins tag enrollees as Fullness of Christ Church members via `sogp_enrollments.fullness_membership` (`fullness` / `non_fullness`, null = not set) one at a time or in bulk; the tag drives list/daily-table filters, "Fullness first" sort and CSV, and never reaches learner-facing data.
 - Full account resets clear Better Auth and app identity state (`user`, `session`, `account`, `verification`, `two_factor`, `users`, `welcome_pack_leads`) and verify zero counts.
 
 ## Legacy PPC content rules

@@ -2,6 +2,7 @@ import { and, asc, desc, eq, ilike, inArray, or, sql } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
+import type { FullnessMembership } from "@/lib/sogp/fullness";
 import type { StudentStatus } from "@/lib/sogp/student-status";
 
 import { getStudentStatusesForEnrollments, getStudentStatusesForPastor } from "./sogp-daily";
@@ -379,9 +380,15 @@ export type PastorEnrollee = {
   status: (typeof schema.sogpEnrollmentStatusEnum.enumValues)[number];
   whatsappConsent: boolean;
   cohortTitle: string;
+  /** When their current pastor was assigned; enrolment date when unassigned. */
   assignedAt: string;
   lastContactedAt: string | null;
   contactCount: number;
+  /** Assigned pastor, or null when nobody has been assigned yet. */
+  pastorUserId: string | null;
+  pastorName: string | null;
+  /** Admin-set Fullness of Christ Church tag; null = not set. */
+  fullness: FullnessMembership | null;
   /** Preparation lessons completed, out of the cohort's published Pre-SOGP days. */
   preparationDaysComplete: number;
   preparationDaysTotal: number;
@@ -423,9 +430,13 @@ type PastorEnrolleeBaseRow = {
   status: (typeof schema.sogpEnrollmentStatusEnum.enumValues)[number];
   whatsappConsent: boolean;
   cohortTitle: string;
-  assignedAt: Date;
+  // Nullable because the admin "all enrollees" view includes unassigned rows.
+  assignedAt: Date | null;
   lastContactedAt: Date | null;
-  contactCount: number;
+  contactCount: number | null;
+  pastorUserId: string | null;
+  pastorName: string | null;
+  fullness: FullnessMembership | null;
   createdAt: Date;
 };
 
@@ -447,6 +458,9 @@ const pastorEnrolleeColumns = {
   assignedAt: schema.pastorAssignments.assignedAt,
   lastContactedAt: schema.pastorAssignments.lastContactedAt,
   contactCount: schema.pastorAssignments.contactCount,
+  pastorUserId: schema.pastorAssignments.pastorUserId,
+  pastorName: schema.users.name,
+  fullness: schema.sogpEnrollments.fullnessMembership,
   createdAt: schema.sogpEnrollments.createdAt,
 } as const;
 
@@ -613,7 +627,8 @@ async function enrichWithProgress(
   );
   return rows.map(({ userId, cohortId, createdAt, ...row }) => ({
     ...row,
-    assignedAt: new Date(row.assignedAt).toISOString(),
+    assignedAt: new Date(row.assignedAt ?? createdAt).toISOString(),
+    contactCount: row.contactCount ?? 0,
     lastContactedAt: row.lastContactedAt
       ? new Date(row.lastContactedAt).toISOString()
       : null,
@@ -690,6 +705,7 @@ export async function getPastorEnrollees(
       schema.sogpCohorts,
       eq(schema.sogpCohorts.id, schema.sogpEnrollments.cohortId),
     )
+    .leftJoin(schema.users, eq(schema.users.id, schema.pastorAssignments.pastorUserId))
     .where(eq(schema.pastorAssignments.pastorUserId, pastorUserId))
     .orderBy(desc(schema.pastorAssignments.assignedAt))
     .limit(limit)
@@ -721,16 +737,18 @@ export async function getPastorEnrolleeById(
 ): Promise<PastorEnrollee | null> {
   const rows = await db
     .select(pastorEnrolleeColumns)
-    .from(schema.pastorAssignments)
-    .innerJoin(
-      schema.sogpEnrollments,
-      eq(schema.sogpEnrollments.id, schema.pastorAssignments.enrollmentId),
-    )
+    .from(schema.sogpEnrollments)
     .innerJoin(
       schema.sogpCohorts,
       eq(schema.sogpCohorts.id, schema.sogpEnrollments.cohortId),
     )
-    .where(eq(schema.pastorAssignments.enrollmentId, enrollmentId))
+    // Left joins so admins can open enrollees who have no pastor yet.
+    .leftJoin(
+      schema.pastorAssignments,
+      eq(schema.pastorAssignments.enrollmentId, schema.sogpEnrollments.id),
+    )
+    .leftJoin(schema.users, eq(schema.users.id, schema.pastorAssignments.pastorUserId))
+    .where(eq(schema.sogpEnrollments.id, enrollmentId))
     .limit(1);
 
   if (rows.length === 0) return null;
@@ -744,6 +762,76 @@ export async function getPastorEnrolleeById(
     },
   ]);
   return { ...enrollee, followUpStatus: statuses.get(enrollee.enrollmentId) ?? "on_track" };
+}
+
+/**
+ * Admin: every SOGP enrollee with progress, status, pastor (if any) and
+ * Fullness tag — the "All enrollees" view of My Enrollees. Not paged, so the
+ * page can filter and sort the whole list client-side.
+ */
+export async function getAllSogpEnrollees(): Promise<PastorEnrollee[]> {
+  const rows = await db
+    .select(pastorEnrolleeColumns)
+    .from(schema.sogpEnrollments)
+    .innerJoin(
+      schema.sogpCohorts,
+      eq(schema.sogpCohorts.id, schema.sogpEnrollments.cohortId),
+    )
+    .leftJoin(
+      schema.pastorAssignments,
+      eq(schema.pastorAssignments.enrollmentId, schema.sogpEnrollments.id),
+    )
+    .leftJoin(schema.users, eq(schema.users.id, schema.pastorAssignments.pastorUserId))
+    .orderBy(desc(schema.sogpEnrollments.createdAt));
+  if (!rows.length) return [];
+
+  const [enriched, statuses] = await Promise.all([
+    enrichWithProgress(rows),
+    getStudentStatusesForEnrollments(
+      rows.map((row) => ({
+        enrollmentId: row.enrollmentId,
+        cohortId: row.cohortId,
+        enrollmentCreatedAt: row.createdAt,
+      })),
+    ),
+  ]);
+  return enriched.map((enrollee) => ({
+    ...enrollee,
+    followUpStatus: statuses.get(enrollee.enrollmentId) ?? "on_track",
+  }));
+}
+
+/** Admin: every cohort, newest first, for the "All enrollees" daily table. */
+export async function getAllCohorts(): Promise<PastorCohortWindow[]> {
+  const rows = await db
+    .select({
+      id: schema.sogpCohorts.id,
+      title: schema.sogpCohorts.title,
+      startsAt: schema.sogpCohorts.startsAt,
+      endsAt: schema.sogpCohorts.endsAt,
+      status: schema.sogpCohorts.status,
+    })
+    .from(schema.sogpCohorts)
+    .orderBy(desc(schema.sogpCohorts.startsAt));
+  return rows.map((row) => ({
+    ...row,
+    startsAt: row.startsAt.toISOString(),
+    endsAt: row.endsAt.toISOString(),
+  }));
+}
+
+/** Admin: set (or clear, with null) the Fullness tag on one or many enrolments. */
+export async function setSogpEnrollmentFullness(
+  enrollmentIds: number[],
+  value: FullnessMembership | null,
+): Promise<number> {
+  if (!enrollmentIds.length) return 0;
+  const updated = await db
+    .update(schema.sogpEnrollments)
+    .set({ fullnessMembership: value, updatedAt: new Date() })
+    .where(inArray(schema.sogpEnrollments.id, enrollmentIds))
+    .returning({ id: schema.sogpEnrollments.id });
+  return updated.length;
 }
 
 /** Ownership check — does this enrollment currently belong to this pastor? */

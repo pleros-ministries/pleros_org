@@ -1,13 +1,20 @@
+import type { FullnessMembership } from "./fullness";
+
 const LAGOS_OFFSET = "+01:00";
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 export const DAILY_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+/** Pastor-queue id meaning "every enrollee, regardless of pastor" (admins only). */
+export const ALL_PASTORS = "all";
 
 export type DailyParticipationRow = {
   enrollmentId: number;
   name: string;
   email: string;
   leaderboardAlias: string | null;
+  /** Admin-set Fullness of Christ Church tag; staff-only. */
+  fullness: FullnessMembership | null;
   pastorId: string | null;
   pastorName: string | null;
   prayerWatch: boolean;

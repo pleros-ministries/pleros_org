@@ -69,6 +69,13 @@ export const sogpCohortStatusEnum = pgEnum("sogp_cohort_status", [
   "archived",
 ]);
 
+// Whether an enrollee belongs to Fullness of Christ Church; set by admins.
+// Null on the column means "not set yet".
+export const sogpFullnessMembershipEnum = pgEnum("sogp_fullness_membership", [
+  "fullness",
+  "non_fullness",
+]);
+
 export const sogpEnrollmentStatusEnum = pgEnum("sogp_enrollment_status", [
   "enrolled",
   "preparing",
@@ -865,6 +872,8 @@ export const sogpEnrollments = pgTable(
     // Optional per-cohort display name shown on the leaderboard instead of
     // the learner's real name. Null means "show my real name".
     leaderboardAlias: text("leaderboard_alias"),
+    // Admin-set Fullness of Christ Church membership tag; null = not set.
+    fullnessMembership: sogpFullnessMembershipEnum("fullness_membership"),
     // Per-student referral link code (minted lazily) and the enrolment that
     // referred this one.
     referralCode: text("referral_code"),

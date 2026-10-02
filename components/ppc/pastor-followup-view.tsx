@@ -1,23 +1,37 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useOptimistic, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 
-import { recordFollowUpContact } from "@/app/admin/(app)/(pastor-only)/_actions/pastor-followup-actions";
+import {
+  recordFollowUpContact,
+  setEnrolleeFullness,
+} from "@/app/admin/(app)/(pastor-only)/_actions/pastor-followup-actions";
 import { FollowUpMessageDialog } from "@/components/ppc/follow-up-message-dialog";
 import { PageHeader } from "@/components/ppc/page-header";
 import { PastorDailyParticipationSection } from "@/components/ppc/pastor-daily-participation";
 import type { PastorCohortWindow, PastorEnrollee } from "@/lib/db/queries/pastor-followups";
+import { ALL_PASTORS } from "@/lib/sogp/daily-participation";
+import {
+  FULLNESS_FILTER_OPTIONS,
+  fullnessLabel,
+  fullnessRank,
+  matchesFullnessFilter,
+  type FullnessFilter,
+  type FullnessMembership,
+} from "@/lib/sogp/fullness";
 import { STUDENT_STATUS_META } from "@/lib/sogp/student-status";
 
-type SortKey = "recent" | "name" | "least-contacted" | "lowest-progress";
+type SortKey = "recent" | "name" | "least-contacted" | "lowest-progress" | "fullness";
 
 const SORT_LABELS: Record<SortKey, string> = {
   recent: "Recently assigned",
   name: "Name (A–Z)",
   "least-contacted": "Least contacted",
   "lowest-progress": "Needs most attention (lowest progress)",
+  fullness: "Fullness first",
 };
 
 function relativeTime(iso: string): string {
@@ -41,6 +55,8 @@ const CSV_COLUMNS: Array<{ header: string; value: (enrollee: PastorEnrollee) => 
   { header: "Cohort", value: (e) => e.cohortTitle },
   { header: "Enrollment status", value: (e) => e.status.replaceAll("_", " ") },
   { header: "Follow-up status", value: (e) => STUDENT_STATUS_META[e.followUpStatus].label },
+  { header: "Fullness", value: (e) => fullnessLabel(e.fullness) },
+  { header: "Pastor", value: (e) => e.pastorName ?? "Unassigned" },
   { header: "Referral source", value: (e) => e.referralSource },
   { header: "Assigned at", value: (e) => e.assignedAt },
   { header: "Contact count", value: (e) => e.contactCount },
@@ -107,6 +123,10 @@ function sortEnrollees(enrollees: PastorEnrollee[], sortKey: SortKey): PastorEnr
       });
     case "lowest-progress":
       return sorted.sort((a, b) => progressScore(a) - progressScore(b));
+    case "fullness":
+      return sorted.sort(
+        (a, b) => fullnessRank(a.fullness) - fullnessRank(b.fullness) || a.name.localeCompare(b.name),
+      );
     default:
       return sorted.sort((a, b) => b.assignedAt.localeCompare(a.assignedAt));
   }
@@ -123,7 +143,7 @@ function Stat({ label, value }: { label: string; value: string | number }) {
   );
 }
 
-function ProgressSummary({ enrollees }: { enrollees: PastorEnrollee[] }) {
+function ProgressSummary({ enrollees, totalLabel }: { enrollees: PastorEnrollee[]; totalLabel: string }) {
   const summary = useMemo(() => {
     const buckets = { none: 0, some: 0, done: 0 };
     let morningPrayerActive = 0;
@@ -161,7 +181,7 @@ function ProgressSummary({ enrollees }: { enrollees: PastorEnrollee[] }) {
 
   return (
     <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-      <Stat label="Assigned" value={enrollees.length} />
+      <Stat label={totalLabel} value={enrollees.length} />
       <Stat label="Prep complete" value={summary.buckets.done} />
       <Stat label="Prep started" value={summary.buckets.some} />
       <Stat label="Morning prayer active" value={summary.morningPrayerActive} />
@@ -175,23 +195,79 @@ function ProgressSummary({ enrollees }: { enrollees: PastorEnrollee[] }) {
   );
 }
 
+function FullnessTag({ value }: { value: FullnessMembership | null }) {
+  if (!value) return null;
+  return (
+    <span
+      className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[0.65rem] font-semibold ${
+        value === "fullness"
+          ? "border-sky-200 bg-sky-50 text-[var(--color-brand-blue)]"
+          : "border-zinc-200 bg-white text-zinc-600"
+      }`}
+    >
+      {fullnessLabel(value)}
+    </span>
+  );
+}
+
+export function FullnessSelect({
+  value,
+  disabled,
+  onChange,
+  label,
+}: {
+  value: FullnessMembership | null;
+  disabled?: boolean;
+  onChange: (value: FullnessMembership | null) => void;
+  label: string;
+}) {
+  return (
+    <select
+      aria-label={label}
+      value={value ?? ""}
+      disabled={disabled}
+      onChange={(event) => onChange((event.target.value || null) as FullnessMembership | null)}
+      className={`h-8 rounded-sm border border-zinc-200 bg-white px-2 text-xs disabled:opacity-60 ${
+        value ? "text-zinc-800" : "text-zinc-400"
+      }`}
+    >
+      <option value="">Not set</option>
+      <option value="fullness">Fullness</option>
+      <option value="non_fullness">Non-Fullness</option>
+    </select>
+  );
+}
+
 function EnrolleeRow({
   enrollee,
-  pastorUserId,
+  isAdmin,
+  showPastor,
+  selected,
+  onSelectedChange,
+  onSetFullness,
+  fullnessPending,
 }: {
   enrollee: PastorEnrollee;
-  pastorUserId: string | null;
+  isAdmin: boolean;
+  showPastor: boolean;
+  selected: boolean;
+  onSelectedChange: (selected: boolean) => void;
+  onSetFullness: (value: FullnessMembership | null) => void;
+  fullnessPending: boolean;
 }) {
   const [pending, startTransition] = useTransition();
   const [followUpOpen, setFollowUpOpen] = useState(false);
   const statusMeta = STUDENT_STATUS_META[enrollee.followUpStatus];
 
   function logContact(channel: "call") {
+    // Contacts are logged against the enrollee's pastor; unassigned enrollees
+    // can still be called, there's just no queue to record it in.
+    if (isAdmin && !enrollee.pastorUserId) return;
     startTransition(async () => {
       const result = await recordFollowUpContact({
         enrollmentId: enrollee.enrollmentId,
         channel,
-        pastorUserId: pastorUserId ?? undefined,
+        pastorUserId: enrollee.pastorUserId ?? undefined,
       });
       if (result.error) {
         console.error("Could not log contact:", result.error);
@@ -202,9 +278,22 @@ function EnrolleeRow({
   const contactButton = `inline-flex h-8 items-center gap-1.5 rounded-sm border border-zinc-200 bg-white px-3 text-xs font-medium text-zinc-700 hover:bg-zinc-50 ${pending ? "opacity-60" : ""}`;
 
   return (
-    <div className="grid gap-3 border-b border-zinc-100 p-4 last:border-b-0 sm:grid-cols-[1fr_auto] sm:items-start">
+    <div
+      className={`grid gap-3 border-b border-zinc-100 p-4 last:border-b-0 sm:grid-cols-[1fr_auto] sm:items-start ${
+        selected ? "bg-sky-50/50" : ""
+      }`}
+    >
       <div className="grid gap-1 text-xs">
         <div className="flex flex-wrap items-center gap-2">
+          {isAdmin ? (
+            <input
+              type="checkbox"
+              checked={selected}
+              onChange={(event) => onSelectedChange(event.target.checked)}
+              aria-label={`Select ${enrollee.name}`}
+              className="size-4 accent-[var(--color-brand-blue)]"
+            />
+          ) : null}
           <Link
             href={`/admin/my-enrollees/${enrollee.enrollmentId}`}
             className="ppc-heading w-fit text-sm font-semibold text-zinc-900 hover:underline"
@@ -214,6 +303,7 @@ function EnrolleeRow({
           <span className="inline-flex items-center gap-1 rounded-full border border-zinc-200 bg-zinc-50 px-2 py-0.5 text-[0.65rem] font-semibold text-zinc-700">
             {statusMeta.emoji} {statusMeta.label}
           </span>
+          <FullnessTag value={enrollee.fullness} />
         </div>
         <p className="text-zinc-500">
           {enrollee.email} · {enrollee.phone}
@@ -228,6 +318,7 @@ function EnrolleeRow({
           {enrollee.referralSource
             ? ` · Heard via ${enrollee.referralSource.replaceAll("_", " ")}`
             : ""}
+          {showPastor ? ` · Pastor: ${enrollee.pastorName ?? "Unassigned"}` : ""}
         </p>
         <p className="text-zinc-500">
           Prep: {enrollee.preparationDaysComplete}/{enrollee.preparationDaysTotal} ·
@@ -242,13 +333,21 @@ function EnrolleeRow({
         </p>
         <p className="text-zinc-500">
           WhatsApp: {enrollee.whatsappConsent ? "Opted in" : "Not opted in"} ·{" "}
-          {enrollee.contactCount > 0
-            ? `Contacted ${enrollee.contactCount}x, last ${relativeTime(enrollee.lastContactedAt!)}`
+          {enrollee.contactCount > 0 && enrollee.lastContactedAt
+            ? `Contacted ${enrollee.contactCount}x, last ${relativeTime(enrollee.lastContactedAt)}`
             : "Not yet contacted"}
         </p>
       </div>
 
       <div className="flex flex-wrap items-start gap-2">
+        {isAdmin ? (
+          <FullnessSelect
+            value={enrollee.fullness}
+            disabled={fullnessPending}
+            onChange={onSetFullness}
+            label={`Fullness tag for ${enrollee.name}`}
+          />
+        ) : null}
         <Link
           href={`/admin/my-enrollees/${enrollee.enrollmentId}`}
           className={contactButton}
@@ -275,7 +374,7 @@ function EnrolleeRow({
         open={followUpOpen}
         onOpenChange={setFollowUpOpen}
         enrollee={enrollee}
-        pastorUserId={pastorUserId}
+        pastorUserId={enrollee.pastorUserId}
       />
     </div>
   );
@@ -295,36 +394,92 @@ export function PastorFollowupView({
   selectedPastorId: string | null;
 }) {
   const router = useRouter();
+  const queryClient = useQueryClient();
+  const showAll = isAdmin && selectedPastorId === ALL_PASTORS;
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("recent");
+  const [fullnessFilter, setFullnessFilter] = useState<FullnessFilter>("all");
+  const [selected, setSelected] = useState<Set<number>>(() => new Set());
+  const [fullnessPending, startFullnessTransition] = useTransition();
+  const [fullnessError, setFullnessError] = useState<string | null>(null);
+
+  // Tags show immediately; the server action's revalidation then replaces
+  // `enrollees` with the saved values.
+  const [shownEnrollees, applyFullness] = useOptimistic(
+    enrollees,
+    (state, update: { ids: Set<number>; value: FullnessMembership | null }) =>
+      state.map((enrollee) =>
+        update.ids.has(enrollee.enrollmentId) ? { ...enrollee, fullness: update.value } : enrollee,
+      ),
+  );
+
+  function setFullness(ids: number[], value: FullnessMembership | null) {
+    if (!ids.length) return;
+    setFullnessError(null);
+    startFullnessTransition(async () => {
+      applyFullness({ ids: new Set(ids), value });
+      const result = await setEnrolleeFullness({ enrollmentIds: ids, value });
+      if (result.error) {
+        setFullnessError(result.error);
+        return;
+      }
+      setSelected(new Set());
+      await queryClient.invalidateQueries({ queryKey: ["pastor", "sogp", "daily"] });
+    });
+  }
+
+  const fullnessFiltered = useMemo(
+    () => shownEnrollees.filter((item) => matchesFullnessFilter(item.fullness, fullnessFilter)),
+    [shownEnrollees, fullnessFilter],
+  );
 
   const visible = useMemo(() => {
     const query = search.trim().toLowerCase();
     const matched = query
-      ? enrollees.filter(
+      ? fullnessFiltered.filter(
           (item) =>
             item.name.toLowerCase().includes(query) ||
             item.email.toLowerCase().includes(query) ||
             item.phone.includes(query),
         )
-      : enrollees;
+      : fullnessFiltered;
     return sortEnrollees(matched, sortKey);
-  }, [enrollees, search, sortKey]);
+  }, [fullnessFiltered, search, sortKey]);
+
+  const allVisibleSelected = visible.length > 0 && visible.every((item) => selected.has(item.enrollmentId));
+
+  function toggleSelected(enrollmentId: number, checked: boolean) {
+    setSelected((current) => {
+      const next = new Set(current);
+      if (checked) next.add(enrollmentId);
+      else next.delete(enrollmentId);
+      return next;
+    });
+  }
+
+  const controlClass = "h-8 rounded-sm border border-zinc-200 bg-white px-2";
 
   return (
     <div className="grid gap-4">
       <PageHeader
-        title="My Enrollees"
-        description="Everyone assigned to you for follow-up."
+        title={showAll ? "All enrollees" : "My Enrollees"}
+        description={
+          showAll
+            ? "Every SOGP enrollee. Tag Fullness members to filter and sort."
+            : "Everyone assigned to you for follow-up."
+        }
       >
         {isAdmin && pastorOptions.length > 0 ? (
           <select
-            value={selectedPastorId ?? ""}
-            onChange={(event) =>
-              router.push(`/admin/my-enrollees?pastorId=${event.target.value}`)
-            }
+            value={selectedPastorId ?? ALL_PASTORS}
+            onChange={(event) => {
+              setSelected(new Set());
+              router.push(`/admin/my-enrollees?pastorId=${event.target.value}`);
+            }}
+            aria-label="Show enrollees for"
             className="h-8 max-w-[45vw] truncate rounded-sm border border-zinc-200 px-2 text-xs sm:max-w-xs"
           >
+            <option value={ALL_PASTORS}>All enrollees</option>
             {pastorOptions.map((pastor) => (
               <option key={pastor.id} value={pastor.id}>
                 {pastor.name}
@@ -334,28 +489,57 @@ export function PastorFollowupView({
         ) : null}
       </PageHeader>
 
-      <ProgressSummary enrollees={enrollees} />
+      <ProgressSummary enrollees={fullnessFiltered} totalLabel={showAll ? "Enrollees" : "Assigned"} />
 
       {selectedPastorId && cohorts.length > 0 ? (
-        <PastorDailyParticipationSection cohorts={cohorts} pastorId={selectedPastorId} />
+        <PastorDailyParticipationSection
+          cohorts={cohorts}
+          pastorId={selectedPastorId}
+          fullnessFilter={fullnessFilter}
+        />
       ) : null}
 
       <section className="overflow-hidden rounded-sm border border-zinc-200 bg-white">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-100 px-4 py-3 text-xs">
-          <input
-            type="search"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search name, email, phone…"
-            className="h-8 rounded-sm border border-zinc-200 px-2.5"
-          />
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <input
+              type="search"
+              value={search}
+              onChange={(event) => {
+                setSearch(event.target.value);
+                setSelected(new Set());
+              }}
+              placeholder="Search name, email, phone…"
+              className="h-8 rounded-sm border border-zinc-200 px-2.5"
+            />
+            <label className="flex items-center gap-1.5">
+              Fullness
+              <select
+                value={fullnessFilter}
+                onChange={(event) => {
+                  setFullnessFilter(event.target.value as FullnessFilter);
+                  setSelected(new Set());
+                }}
+                className={controlClass}
+              >
+                {FULLNESS_FILTER_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-zinc-500">
+              {visible.length} enrollee{visible.length === 1 ? "" : "s"}
+            </span>
             <label className="flex items-center gap-1.5">
               Sort by
               <select
                 value={sortKey}
                 onChange={(event) => setSortKey(event.target.value as SortKey)}
-                className="h-8 rounded-sm border border-zinc-200 px-2"
+                className={controlClass}
               >
                 {Object.entries(SORT_LABELS).map(([key, label]) => (
                   <option key={key} value={key}>
@@ -375,22 +559,92 @@ export function PastorFollowupView({
           </div>
         </div>
 
+        {isAdmin && visible.length > 0 ? (
+          <label className="flex items-center gap-2 border-b border-zinc-100 bg-zinc-50/60 px-4 py-2 text-xs text-zinc-600">
+            <input
+              type="checkbox"
+              checked={allVisibleSelected}
+              onChange={(event) =>
+                setSelected(
+                  event.target.checked ? new Set(visible.map((item) => item.enrollmentId)) : new Set(),
+                )
+              }
+              className="size-4 accent-[var(--color-brand-blue)]"
+            />
+            Select all shown ({visible.length})
+          </label>
+        ) : null}
+
+        {fullnessError ? (
+          <p role="alert" className="border-b border-rose-100 bg-rose-50 px-4 py-2 text-xs text-rose-700">
+            {fullnessError}
+          </p>
+        ) : null}
+
         {visible.length === 0 ? (
           <p className="px-4 py-10 text-center text-xs text-zinc-500">
             {enrollees.length === 0
-              ? "No enrollees assigned yet."
-              : "No enrollees match your search."}
+              ? showAll
+                ? "No enrollees yet."
+                : "No enrollees assigned yet."
+              : "No enrollees match your search or filter."}
           </p>
         ) : (
           visible.map((enrollee) => (
             <EnrolleeRow
               key={enrollee.enrollmentId}
               enrollee={enrollee}
-              pastorUserId={isAdmin ? selectedPastorId : null}
+              isAdmin={isAdmin}
+              showPastor={showAll}
+              selected={selected.has(enrollee.enrollmentId)}
+              onSelectedChange={(checked) => toggleSelected(enrollee.enrollmentId, checked)}
+              onSetFullness={(value) => setFullness([enrollee.enrollmentId], value)}
+              fullnessPending={fullnessPending}
             />
           ))
         )}
       </section>
+
+      {isAdmin && selected.size > 0 ? (
+        <div
+          role="region"
+          aria-label="Bulk Fullness tagging"
+          className="sticky bottom-3 z-20 flex flex-wrap items-center gap-2 rounded-sm border border-zinc-200 bg-white px-3 py-2 text-xs shadow-md"
+        >
+          <span className="font-medium text-zinc-900">{selected.size} selected</span>
+          <button
+            type="button"
+            disabled={fullnessPending}
+            onClick={() => setFullness([...selected], "fullness")}
+            className="h-8 rounded-sm bg-[var(--color-brand-blue)] px-3 font-medium text-white disabled:opacity-60"
+          >
+            Mark as Fullness
+          </button>
+          <button
+            type="button"
+            disabled={fullnessPending}
+            onClick={() => setFullness([...selected], "non_fullness")}
+            className="h-8 rounded-sm border border-zinc-200 bg-white px-3 font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-60"
+          >
+            Mark as Non-Fullness
+          </button>
+          <button
+            type="button"
+            disabled={fullnessPending}
+            onClick={() => setFullness([...selected], null)}
+            className="h-8 rounded-sm border border-zinc-200 bg-white px-3 font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-60"
+          >
+            Clear tag
+          </button>
+          <button
+            type="button"
+            onClick={() => setSelected(new Set())}
+            className="ml-auto h-8 px-2 font-medium text-zinc-500 hover:text-zinc-800"
+          >
+            Cancel
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }

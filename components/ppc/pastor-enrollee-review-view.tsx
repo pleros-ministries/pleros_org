@@ -8,15 +8,20 @@ import {
   approvePastorSubmission,
   requestPastorRevision,
 } from "@/app/admin/(app)/(pastor-only)/_actions/pastor-review-actions";
-import { recordFollowUpContact } from "@/app/admin/(app)/(pastor-only)/_actions/pastor-followup-actions";
+import {
+  recordFollowUpContact,
+  setEnrolleeFullness,
+} from "@/app/admin/(app)/(pastor-only)/_actions/pastor-followup-actions";
 import { EnrolleeDailyPerformance } from "@/components/ppc/enrollee-daily-performance";
 import { PageHeader } from "@/components/ppc/page-header";
+import { FullnessSelect } from "@/components/ppc/pastor-followup-view";
 import { getReviewGradingReadiness } from "@/lib/ppc-staff-workflows";
 import type {
   PastorEnrollee,
   PastorEnrolleeSubmission,
 } from "@/lib/db/queries/pastor-followups";
 import type { EnrolleePerformance } from "@/lib/db/queries/sogp-daily";
+import { fullnessLabel, type FullnessMembership } from "@/lib/sogp/fullness";
 import { STUDENT_STATUS_META } from "@/lib/sogp/student-status";
 
 function digitsOnly(phone: string) {
@@ -202,6 +207,25 @@ export function PastorEnrolleeReviewView({
 }) {
   const statusMeta = STUDENT_STATUS_META[enrollee.followUpStatus];
   const [, startTransition] = useTransition();
+  const router = useRouter();
+  const [fullness, setFullness] = useState<FullnessMembership | null>(enrollee.fullness);
+  const [fullnessPending, startFullnessTransition] = useTransition();
+  const [fullnessError, setFullnessError] = useState<string | null>(null);
+
+  function changeFullness(value: FullnessMembership | null) {
+    const previous = fullness;
+    setFullness(value);
+    setFullnessError(null);
+    startFullnessTransition(async () => {
+      const result = await setEnrolleeFullness({ enrollmentIds: [enrollee.enrollmentId], value });
+      if (result.error) {
+        setFullness(previous);
+        setFullnessError(result.error);
+        return;
+      }
+      router.refresh();
+    });
+  }
 
   function logContact(channel: "whatsapp" | "call" | "email") {
     startTransition(async () => {
@@ -222,6 +246,28 @@ export function PastorEnrolleeReviewView({
           {statusMeta.emoji} {statusMeta.label}
         </span>
       </PageHeader>
+
+      <section className="flex flex-wrap items-center gap-2 rounded-sm border border-zinc-200 bg-white px-4 py-3 text-xs text-zinc-600">
+        <span className="font-medium text-zinc-700">Fullness</span>
+        {isAdmin ? (
+          <FullnessSelect
+            value={fullness}
+            disabled={fullnessPending}
+            onChange={changeFullness}
+            label={`Fullness tag for ${enrollee.name}`}
+          />
+        ) : (
+          <span className="text-zinc-900">{fullnessLabel(fullness)}</span>
+        )}
+        <span className="text-zinc-400">
+          Pastor: {enrollee.pastorName ?? "Unassigned"}
+        </span>
+        {fullnessError ? (
+          <span role="alert" className="text-rose-700">
+            {fullnessError}
+          </span>
+        ) : null}
+      </section>
 
       <section className="grid gap-2 rounded-sm border border-zinc-200 bg-white p-4 text-xs text-zinc-600">
         <p>

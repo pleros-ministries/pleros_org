@@ -36,6 +36,7 @@ export async function getSogpDailyParticipation(
         name: schema.sogpEnrollments.name,
         email: schema.sogpEnrollments.email,
         leaderboardAlias: schema.sogpEnrollments.leaderboardAlias,
+        fullness: schema.sogpEnrollments.fullnessMembership,
         pastorId: schema.pastorAssignments.pastorUserId,
         pastorName: schema.users.name,
       })
@@ -163,6 +164,7 @@ export async function getSogpDailyParticipation(
     name: enrollment.name,
     email: enrollment.email,
     leaderboardAlias: enrollment.leaderboardAlias,
+    fullness: enrollment.fullness,
     pastorId: enrollment.pastorId,
     pastorName: enrollment.pastorId ? (enrollment.pastorName ?? "Unknown pastor") : null,
     prayerWatch: prayerIds.has(enrollment.userId),
@@ -638,5 +640,20 @@ export async function getPastorCohortStatuses(
       ),
     );
   const statuses = await getStudentStatusesForPastor(pastorId, enrollments);
+  return Object.fromEntries(statuses);
+}
+
+/** Admin: automatic status for every enrollee in one cohort — the Status
+ * column of the "All enrollees" daily participation table. */
+export async function getCohortStatuses(cohortId: number): Promise<Record<number, StudentStatus>> {
+  const enrollments = await db
+    .select({
+      enrollmentId: schema.sogpEnrollments.id,
+      cohortId: schema.sogpEnrollments.cohortId,
+      enrollmentCreatedAt: schema.sogpEnrollments.createdAt,
+    })
+    .from(schema.sogpEnrollments)
+    .where(eq(schema.sogpEnrollments.cohortId, cohortId));
+  const statuses = await getStudentStatusesForEnrollments(enrollments);
   return Object.fromEntries(statuses);
 }
