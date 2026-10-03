@@ -6,13 +6,29 @@ import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 
 import {
+  moveEnrolleesToCohort,
   recordFollowUpContact,
+  setCohortMoveResponse,
   setEnrolleeFullness,
 } from "@/app/admin/(app)/(pastor-only)/_actions/pastor-followup-actions";
+import {
+  CohortMoveConfirmDialog,
+  CohortMoveControls,
+  CohortMoveTag,
+} from "@/components/ppc/cohort-move-controls";
 import { FollowUpMessageDialog } from "@/components/ppc/follow-up-message-dialog";
 import { PageHeader } from "@/components/ppc/page-header";
 import { PastorDailyParticipationSection } from "@/components/ppc/pastor-daily-participation";
 import type { PastorCohortWindow, PastorEnrollee } from "@/lib/db/queries/pastor-followups";
+import {
+  COHORT_MOVE_FILTER_OPTIONS,
+  cohortMoveLabel,
+  getCohortMoveBlocker,
+  matchesCohortMoveFilter,
+  type CohortMoveFilter,
+  type CohortMoveState,
+  type CohortMoveTarget,
+} from "@/lib/sogp/cohort-move";
 import { ALL_PASTORS } from "@/lib/sogp/daily-participation";
 import {
   FULLNESS_FILTER_OPTIONS,
@@ -22,9 +38,36 @@ import {
   type FullnessFilter,
   type FullnessMembership,
 } from "@/lib/sogp/fullness";
-import { STUDENT_STATUS_META } from "@/lib/sogp/student-status";
+import {
+  INACTIVE_STUDENT_STATUSES,
+  STUDENT_STATUS_META,
+  type StudentStatus,
+} from "@/lib/sogp/student-status";
 
 type SortKey = "recent" | "name" | "least-contacted" | "lowest-progress" | "fullness";
+
+type StatusFilter = "all" | "not_active" | StudentStatus;
+
+const STATUS_FILTER_OPTIONS: Array<{ value: StatusFilter; label: string }> = [
+  { value: "all", label: "All" },
+  { value: "not_active", label: "Not active" },
+  ...(Object.keys(STUDENT_STATUS_META) as StudentStatus[]).map((status) => ({
+    value: status,
+    label: STUDENT_STATUS_META[status].label,
+  })),
+];
+
+function matchesStatusFilter(status: StudentStatus, filter: StatusFilter): boolean {
+  if (filter === "all") return true;
+  if (filter === "not_active") return INACTIVE_STUDENT_STATUSES.includes(status);
+  return status === filter;
+}
+
+type CohortMoveStates = Record<number, CohortMoveState>;
+
+function canMoveTo(enrollee: PastorEnrollee, target: CohortMoveTarget | null): boolean {
+  return target !== null && getCohortMoveBlocker(enrollee, target) === null;
+}
 
 const SORT_LABELS: Record<SortKey, string> = {
   recent: "Recently assigned",
@@ -45,7 +88,10 @@ function relativeTime(iso: string): string {
   return `${day}d ago`;
 }
 
-const CSV_COLUMNS: Array<{ header: string; value: (enrollee: PastorEnrollee) => string | number }> = [
+const CSV_COLUMNS: Array<{
+  header: string;
+  value: (enrollee: PastorEnrollee, moveStates: CohortMoveStates) => string | number;
+}> = [
   { header: "Name", value: (e) => e.name },
   { header: "Email", value: (e) => e.email },
   { header: "Phone", value: (e) => e.phone },
@@ -56,6 +102,11 @@ const CSV_COLUMNS: Array<{ header: string; value: (enrollee: PastorEnrollee) => 
   { header: "Enrollment status", value: (e) => e.status.replaceAll("_", " ") },
   { header: "Follow-up status", value: (e) => STUDENT_STATUS_META[e.followUpStatus].label },
   { header: "Fullness", value: (e) => fullnessLabel(e.fullness) },
+  {
+    header: "Cohort move",
+    value: (e, moveStates) =>
+      moveStates[e.enrollmentId] ? cohortMoveLabel(moveStates[e.enrollmentId]) : "",
+  },
   { header: "Pastor", value: (e) => e.pastorName ?? "Unassigned" },
   { header: "Referral source", value: (e) => e.referralSource },
   { header: "Assigned at", value: (e) => e.assignedAt },
@@ -78,18 +129,18 @@ function csvCell(value: string | number): string {
   return /[",\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
 }
 
-function enrolleesToCsv(enrollees: PastorEnrollee[]): string {
+function enrolleesToCsv(enrollees: PastorEnrollee[], moveStates: CohortMoveStates): string {
   const rows = [
     CSV_COLUMNS.map((column) => csvCell(column.header)).join(","),
     ...enrollees.map((enrollee) =>
-      CSV_COLUMNS.map((column) => csvCell(column.value(enrollee))).join(","),
+      CSV_COLUMNS.map((column) => csvCell(column.value(enrollee, moveStates))).join(","),
     ),
   ];
   return rows.join("\n");
 }
 
-function downloadEnrolleesCsv(enrollees: PastorEnrollee[]) {
-  const csv = enrolleesToCsv(enrollees);
+function downloadEnrolleesCsv(enrollees: PastorEnrollee[], moveStates: CohortMoveStates) {
+  const csv = enrolleesToCsv(enrollees, moveStates);
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
@@ -246,6 +297,8 @@ function EnrolleeRow({
   onSelectedChange,
   onSetFullness,
   fullnessPending,
+  moveTarget,
+  moveState,
 }: {
   enrollee: PastorEnrollee;
   isAdmin: boolean;
@@ -254,6 +307,9 @@ function EnrolleeRow({
   onSelectedChange: (selected: boolean) => void;
   onSetFullness: (value: FullnessMembership | null) => void;
   fullnessPending: boolean;
+  /** The cohort this enrollee can move to, or null when the move isn't open to them. */
+  moveTarget: CohortMoveTarget | null;
+  moveState: CohortMoveState | undefined;
 }) {
   const [pending, startTransition] = useTransition();
   const [followUpOpen, setFollowUpOpen] = useState(false);
@@ -304,6 +360,7 @@ function EnrolleeRow({
             {statusMeta.emoji} {statusMeta.label}
           </span>
           <FullnessTag value={enrollee.fullness} />
+          <CohortMoveTag state={moveState} />
         </div>
         <p className="text-zinc-500">
           {enrollee.email} · {enrollee.phone}
@@ -368,6 +425,9 @@ function EnrolleeRow({
         >
           Call
         </a>
+        {moveTarget ? (
+          <CohortMoveControls enrollee={enrollee} target={moveTarget} state={moveState} />
+        ) : null}
       </div>
 
       <FollowUpMessageDialog
@@ -386,12 +446,17 @@ export function PastorFollowupView({
   isAdmin,
   pastorOptions,
   selectedPastorId,
+  moveTarget,
+  moveStates,
 }: {
   enrollees: PastorEnrollee[];
   cohorts: PastorCohortWindow[];
   isAdmin: boolean;
   pastorOptions: Array<{ id: string; name: string }>;
   selectedPastorId: string | null;
+  /** The cohort enrollees can be moved into right now, if one is getting ready. */
+  moveTarget: CohortMoveTarget | null;
+  moveStates: CohortMoveStates;
 }) {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -399,9 +464,17 @@ export function PastorFollowupView({
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("recent");
   const [fullnessFilter, setFullnessFilter] = useState<FullnessFilter>("all");
+  const [cohortFilter, setCohortFilter] = useState<number | "all">("all");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [moveFilter, setMoveFilter] = useState<CohortMoveFilter>("all");
   const [selected, setSelected] = useState<Set<number>>(() => new Set());
   const [fullnessPending, startFullnessTransition] = useTransition();
   const [fullnessError, setFullnessError] = useState<string | null>(null);
+  const [movePending, startMoveTransition] = useTransition();
+  const [moveNotice, setMoveNotice] = useState<{ isError: boolean; text: string } | null>(null);
+  const [bulkMoveOpen, setBulkMoveOpen] = useState(false);
+
+  const canMove = (enrollee: PastorEnrollee) => canMoveTo(enrollee, moveTarget);
 
   // Tags show immediately; the server action's revalidation then replaces
   // `enrollees` with the saved values.
@@ -428,25 +501,85 @@ export function PastorFollowupView({
     });
   }
 
-  const fullnessFiltered = useMemo(
-    () => shownEnrollees.filter((item) => matchesFullnessFilter(item.fullness, fullnessFilter)),
-    [shownEnrollees, fullnessFilter],
+  const filtered = useMemo(
+    () =>
+      shownEnrollees.filter(
+        (item) =>
+          matchesFullnessFilter(item.fullness, fullnessFilter) &&
+          (cohortFilter === "all" || item.cohortId === cohortFilter) &&
+          matchesStatusFilter(item.followUpStatus, statusFilter) &&
+          matchesCohortMoveFilter(
+            moveStates[item.enrollmentId],
+            canMoveTo(item, moveTarget),
+            moveFilter,
+          ),
+      ),
+    [shownEnrollees, fullnessFilter, cohortFilter, statusFilter, moveFilter, moveStates, moveTarget],
   );
 
   const visible = useMemo(() => {
     const query = search.trim().toLowerCase();
     const matched = query
-      ? fullnessFiltered.filter(
+      ? filtered.filter(
           (item) =>
             item.name.toLowerCase().includes(query) ||
             item.email.toLowerCase().includes(query) ||
             item.phone.includes(query),
         )
-      : fullnessFiltered;
+      : filtered;
     return sortEnrollees(matched, sortKey);
-  }, [fullnessFiltered, search, sortKey]);
+  }, [filtered, search, sortKey]);
 
   const allVisibleSelected = visible.length > 0 && visible.every((item) => selected.has(item.enrollmentId));
+
+  // Only people who can actually move count towards the bulk move actions.
+  const selectedMovable = shownEnrollees
+    .filter((item) => selected.has(item.enrollmentId) && canMove(item))
+    .map((item) => item.enrollmentId);
+
+  function markSelectedAsked() {
+    const target = moveTarget;
+    if (!target || !selectedMovable.length) return;
+    setMoveNotice(null);
+    startMoveTransition(async () => {
+      const result = await setCohortMoveResponse({
+        enrollmentIds: selectedMovable,
+        targetCohortId: target.id,
+        response: "asked",
+      });
+      if (result.error) {
+        setMoveNotice({ isError: true, text: result.error });
+        return;
+      }
+      setSelected(new Set());
+    });
+  }
+
+  function moveSelected() {
+    const target = moveTarget;
+    if (!target || !selectedMovable.length) return;
+    setMoveNotice(null);
+    startMoveTransition(async () => {
+      const result = await moveEnrolleesToCohort({
+        enrollmentIds: selectedMovable,
+        targetCohortId: target.id,
+      });
+      setBulkMoveOpen(false);
+      if (result.error) {
+        setMoveNotice({ isError: true, text: result.error });
+        return;
+      }
+      const skipped = result.skipped
+        .map((row) => `${row.name || `#${row.enrollmentId}`} (${row.reason})`)
+        .join("; ");
+      setMoveNotice({
+        isError: result.skipped.length > 0,
+        text: `Moved ${result.moved} to ${target.title}.${skipped ? ` Not moved: ${skipped}.` : ""}`,
+      });
+      setSelected(new Set());
+      await queryClient.invalidateQueries({ queryKey: ["pastor", "sogp", "daily"] });
+    });
+  }
 
   function toggleSelected(enrollmentId: number, checked: boolean) {
     setSelected((current) => {
@@ -489,7 +622,7 @@ export function PastorFollowupView({
         ) : null}
       </PageHeader>
 
-      <ProgressSummary enrollees={fullnessFiltered} totalLabel={showAll ? "Enrollees" : "Assigned"} />
+      <ProgressSummary enrollees={filtered} totalLabel={showAll ? "Enrollees" : "Assigned"} />
 
       {selectedPastorId && cohorts.length > 0 ? (
         <PastorDailyParticipationSection
@@ -529,6 +662,62 @@ export function PastorFollowupView({
                 ))}
               </select>
             </label>
+            {cohorts.length > 1 ? (
+              <label className="flex items-center gap-1.5">
+                Cohort
+                <select
+                  value={cohortFilter}
+                  onChange={(event) => {
+                    setCohortFilter(event.target.value === "all" ? "all" : Number(event.target.value));
+                    setSelected(new Set());
+                  }}
+                  className={controlClass}
+                >
+                  <option value="all">All</option>
+                  {cohorts.map((cohort) => (
+                    <option key={cohort.id} value={cohort.id}>
+                      {cohort.title}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ) : null}
+            <label className="flex items-center gap-1.5">
+              Status
+              <select
+                value={statusFilter}
+                onChange={(event) => {
+                  setStatusFilter(event.target.value as StatusFilter);
+                  setSelected(new Set());
+                }}
+                className={controlClass}
+              >
+                {STATUS_FILTER_OPTIONS.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {moveTarget ? (
+              <label className="flex items-center gap-1.5">
+                Cohort move
+                <select
+                  value={moveFilter}
+                  onChange={(event) => {
+                    setMoveFilter(event.target.value as CohortMoveFilter);
+                    setSelected(new Set());
+                  }}
+                  className={controlClass}
+                >
+                  {COHORT_MOVE_FILTER_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ) : null}
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <span className="text-zinc-500">
@@ -550,7 +739,7 @@ export function PastorFollowupView({
             </label>
             <button
               type="button"
-              onClick={() => downloadEnrolleesCsv(visible)}
+              onClick={() => downloadEnrolleesCsv(visible, moveStates)}
               disabled={visible.length === 0}
               className="h-8 rounded-sm border border-zinc-200 bg-white px-3 font-medium text-zinc-700 hover:bg-zinc-50 disabled:cursor-not-allowed disabled:opacity-50"
             >
@@ -581,6 +770,19 @@ export function PastorFollowupView({
           </p>
         ) : null}
 
+        {moveNotice ? (
+          <p
+            role={moveNotice.isError ? "alert" : "status"}
+            className={`border-b px-4 py-2 text-xs ${
+              moveNotice.isError
+                ? "border-rose-100 bg-rose-50 text-rose-700"
+                : "border-emerald-100 bg-emerald-50 text-emerald-700"
+            }`}
+          >
+            {moveNotice.text}
+          </p>
+        ) : null}
+
         {visible.length === 0 ? (
           <p className="px-4 py-10 text-center text-xs text-zinc-500">
             {enrollees.length === 0
@@ -600,6 +802,8 @@ export function PastorFollowupView({
               onSelectedChange={(checked) => toggleSelected(enrollee.enrollmentId, checked)}
               onSetFullness={(value) => setFullness([enrollee.enrollmentId], value)}
               fullnessPending={fullnessPending}
+              moveTarget={canMove(enrollee) ? moveTarget : null}
+              moveState={moveStates[enrollee.enrollmentId]}
             />
           ))
         )}
@@ -608,7 +812,7 @@ export function PastorFollowupView({
       {isAdmin && selected.size > 0 ? (
         <div
           role="region"
-          aria-label="Bulk Fullness tagging"
+          aria-label="Bulk actions"
           className="sticky bottom-3 z-20 flex flex-wrap items-center gap-2 rounded-sm border border-zinc-200 bg-white px-3 py-2 text-xs shadow-md"
         >
           <span className="font-medium text-zinc-900">{selected.size} selected</span>
@@ -636,6 +840,26 @@ export function PastorFollowupView({
           >
             Clear tag
           </button>
+          {moveTarget && selectedMovable.length > 0 ? (
+            <>
+              <button
+                type="button"
+                disabled={movePending}
+                onClick={markSelectedAsked}
+                className="h-8 rounded-sm border border-zinc-200 bg-white px-3 font-medium text-zinc-700 hover:bg-zinc-50 disabled:opacity-60"
+              >
+                Mark {selectedMovable.length} as asked
+              </button>
+              <button
+                type="button"
+                disabled={movePending}
+                onClick={() => setBulkMoveOpen(true)}
+                className="h-8 rounded-sm border border-[var(--color-brand-blue)] bg-white px-3 font-medium text-[var(--color-brand-blue)] hover:bg-sky-50 disabled:opacity-60"
+              >
+                Move {selectedMovable.length} to {moveTarget.title}
+              </button>
+            </>
+          ) : null}
           <button
             type="button"
             onClick={() => setSelected(new Set())}
@@ -644,6 +868,17 @@ export function PastorFollowupView({
             Cancel
           </button>
         </div>
+      ) : null}
+
+      {moveTarget ? (
+        <CohortMoveConfirmDialog
+          open={bulkMoveOpen}
+          onOpenChange={setBulkMoveOpen}
+          who={`${selectedMovable.length} enrollee${selectedMovable.length === 1 ? "" : "s"}`}
+          target={moveTarget}
+          pending={movePending}
+          onConfirm={moveSelected}
+        />
       ) : null}
     </div>
   );

@@ -12,6 +12,7 @@ import {
   recordFollowUpContact,
   setEnrolleeFullness,
 } from "@/app/admin/(app)/(pastor-only)/_actions/pastor-followup-actions";
+import { CohortMoveControls, CohortMoveTag } from "@/components/ppc/cohort-move-controls";
 import { EnrolleeDailyPerformance } from "@/components/ppc/enrollee-daily-performance";
 import { PageHeader } from "@/components/ppc/page-header";
 import { FullnessSelect } from "@/components/ppc/pastor-followup-view";
@@ -21,6 +22,11 @@ import type {
   PastorEnrolleeSubmission,
 } from "@/lib/db/queries/pastor-followups";
 import type { EnrolleePerformance } from "@/lib/db/queries/sogp-daily";
+import {
+  getCohortMoveBlocker,
+  type CohortMoveState,
+  type CohortMoveTarget,
+} from "@/lib/sogp/cohort-move";
 import { fullnessLabel, type FullnessMembership } from "@/lib/sogp/fullness";
 import { STUDENT_STATUS_META } from "@/lib/sogp/student-status";
 
@@ -199,13 +205,19 @@ export function PastorEnrolleeReviewView({
   submissions,
   performance,
   isAdmin,
+  moveTarget,
+  moveState,
 }: {
   enrollee: PastorEnrollee;
   submissions: PastorEnrolleeSubmission[];
   performance: EnrolleePerformance | null;
   isAdmin: boolean;
+  /** The cohort enrollees can be moved into right now, if one is getting ready. */
+  moveTarget: CohortMoveTarget | null;
+  moveState: CohortMoveState | null;
 }) {
   const statusMeta = STUDENT_STATUS_META[enrollee.followUpStatus];
+  const canMove = moveTarget !== null && getCohortMoveBlocker(enrollee, moveTarget) === null;
   const [, startTransition] = useTransition();
   const router = useRouter();
   const [fullness, setFullness] = useState<FullnessMembership | null>(enrollee.fullness);
@@ -262,6 +274,7 @@ export function PastorEnrolleeReviewView({
         <span className="text-zinc-400">
           Pastor: {enrollee.pastorName ?? "Unassigned"}
         </span>
+        <CohortMoveTag state={moveState} />
         {fullnessError ? (
           <span role="alert" className="text-rose-700">
             {fullnessError}
@@ -311,6 +324,9 @@ export function PastorEnrolleeReviewView({
           >
             Email
           </a>
+          {moveTarget && canMove ? (
+            <CohortMoveControls enrollee={enrollee} target={moveTarget} state={moveState} />
+          ) : null}
         </div>
       </section>
 
