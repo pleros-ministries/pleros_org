@@ -76,6 +76,14 @@ export const sogpFullnessMembershipEnum = pgEnum("sogp_fullness_membership", [
   "non_fullness",
 ]);
 
+// A staff offer to move an enrolment into another cohort: asked, then either
+// declined or moved. Moving directly skips straight to "moved".
+export const sogpCohortTransferStatusEnum = pgEnum("sogp_cohort_transfer_status", [
+  "asked",
+  "declined",
+  "moved",
+]);
+
 export const sogpEnrollmentStatusEnum = pgEnum("sogp_enrollment_status", [
   "enrolled",
   "preparing",
@@ -1362,6 +1370,43 @@ export const pastorRegions = pgTable(
   (t) => [
     uniqueIndex("pastor_regions_unit_idx").on(t.unitId),
     index("pastor_regions_pastor_idx").on(t.pastorUserId),
+  ],
+);
+
+/**
+ * Trail of staff moving an enrolment into another cohort — one row per
+ * enrolment and target cohort. The move itself rewrites
+ * `sogp_enrollments.cohort_id`; this keeps who was asked, who declined and
+ * where a moved enrolment came from.
+ */
+export const sogpCohortTransfers = pgTable(
+  "sogp_cohort_transfers",
+  {
+    id: serial("id").primaryKey(),
+    enrollmentId: integer("enrollment_id")
+      .notNull()
+      .references(() => sogpEnrollments.id, { onDelete: "cascade" }),
+    fromCohortId: integer("from_cohort_id")
+      .notNull()
+      .references(() => sogpCohorts.id, { onDelete: "cascade" }),
+    toCohortId: integer("to_cohort_id")
+      .notNull()
+      .references(() => sogpCohorts.id, { onDelete: "cascade" }),
+    status: sogpCohortTransferStatusEnum("status").notNull().default("asked"),
+    // Set null so full account resets are never blocked by this trail.
+    askedBy: text("asked_by").references(() => users.id, { onDelete: "set null" }),
+    askedAt: timestamp("asked_at", { withTimezone: true }).notNull().defaultNow(),
+    resolvedBy: text("resolved_by").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    resolvedAt: timestamp("resolved_at", { withTimezone: true }),
+  },
+  (t) => [
+    uniqueIndex("sogp_cohort_transfers_enrollment_target_idx").on(
+      t.enrollmentId,
+      t.toCohortId,
+    ),
+    index("sogp_cohort_transfers_target_idx").on(t.toCohortId),
   ],
 );
 

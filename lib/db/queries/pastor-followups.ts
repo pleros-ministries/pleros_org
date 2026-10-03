@@ -379,7 +379,9 @@ export type PastorEnrollee = {
   referralSource: string;
   status: (typeof schema.sogpEnrollmentStatusEnum.enumValues)[number];
   whatsappConsent: boolean;
+  cohortId: number;
   cohortTitle: string;
+  cohortStartsAt: string;
   /** When their current pastor was assigned; enrolment date when unassigned. */
   assignedAt: string;
   lastContactedAt: string | null;
@@ -430,6 +432,7 @@ type PastorEnrolleeBaseRow = {
   status: (typeof schema.sogpEnrollmentStatusEnum.enumValues)[number];
   whatsappConsent: boolean;
   cohortTitle: string;
+  cohortStartsAt: Date;
   // Nullable because the admin "all enrollees" view includes unassigned rows.
   assignedAt: Date | null;
   lastContactedAt: Date | null;
@@ -455,6 +458,7 @@ const pastorEnrolleeColumns = {
   status: schema.sogpEnrollments.status,
   whatsappConsent: schema.sogpEnrollments.whatsappConsent,
   cohortTitle: schema.sogpCohorts.title,
+  cohortStartsAt: schema.sogpCohorts.startsAt,
   assignedAt: schema.pastorAssignments.assignedAt,
   lastContactedAt: schema.pastorAssignments.lastContactedAt,
   contactCount: schema.pastorAssignments.contactCount,
@@ -625,19 +629,20 @@ async function enrichWithProgress(
       .filter((r) => r.referredByEnrollmentId != null)
       .map((r) => [r.referredByEnrollmentId as number, r.referred]),
   );
-  return rows.map(({ userId, cohortId, createdAt, ...row }) => ({
+  return rows.map(({ userId, createdAt, ...row }) => ({
     ...row,
+    cohortStartsAt: new Date(row.cohortStartsAt).toISOString(),
     assignedAt: new Date(row.assignedAt ?? createdAt).toISOString(),
     contactCount: row.contactCount ?? 0,
     lastContactedAt: row.lastContactedAt
       ? new Date(row.lastContactedAt).toISOString()
       : null,
     preparationDaysComplete: prepByEnrollment.get(row.enrollmentId) ?? 0,
-    preparationDaysTotal: prepTotalByCohort.get(cohortId) ?? 0,
+    preparationDaysTotal: prepTotalByCohort.get(row.cohortId) ?? 0,
     morningPrayerDays: prayerByUser.get(userId) ?? 0,
     reviewSessionsComplete: reviewByUser.get(userId) ?? 0,
     quizzesPassed: quizPassedByUser.get(userId) ?? 0,
-    quizzesTotal: quizTotalByCohort.get(cohortId) ?? 0,
+    quizzesTotal: quizTotalByCohort.get(row.cohortId) ?? 0,
     responsesApproved: approvedByUser.get(userId) ?? 0,
     certificateIssued: certifiedEnrollments.has(row.enrollmentId),
     referredCount: referredByEnrollment.get(row.enrollmentId) ?? 0,
@@ -850,6 +855,25 @@ export async function isPastorAssignedToEnrollment(
     )
     .limit(1);
   return Boolean(row);
+}
+
+/** Ownership check for a batch — true only when every enrolment is this pastor's. */
+export async function pastorOwnsEnrollments(
+  pastorUserId: string,
+  enrollmentIds: number[],
+): Promise<boolean> {
+  const ids = [...new Set(enrollmentIds)];
+  if (!ids.length) return false;
+  const rows = await db
+    .select({ enrollmentId: schema.pastorAssignments.enrollmentId })
+    .from(schema.pastorAssignments)
+    .where(
+      and(
+        eq(schema.pastorAssignments.pastorUserId, pastorUserId),
+        inArray(schema.pastorAssignments.enrollmentId, ids),
+      ),
+    );
+  return rows.length === ids.length;
 }
 
 export type PastorEnrolleeSubmission = {

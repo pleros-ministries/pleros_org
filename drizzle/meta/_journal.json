@@ -260,6 +260,13 @@
       "when": 1790923700884,
       "tag": "0036_sogp_enrollment_fullness",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1791011166823,
+      "tag": "0037_sogp_cohort_transfers",
+      "breakpoints": true
     }
   ]
 }

@@ -280,6 +280,32 @@ export async function sendSogpEnrollmentEmail(opts: {
   });
 }
 
+/**
+ * The same confirmation for several learners in one request (Resend batches
+ * take up to 100) — used when staff move enrollees into another cohort.
+ */
+export async function sendSogpEnrollmentEmails(
+  items: Array<{
+    to: string;
+    name: string;
+    cohortTitle: string;
+    cohortDates: string;
+    dashboardUrl: string;
+  }>,
+) {
+  if (!isEmailEnabled() || !resend || !items.length) return null;
+
+  const from = getSogpSender(process.env.EMAIL_FROM_PLEROS);
+  return resend.batch.send(
+    items.map((item) => ({
+      from,
+      to: item.to,
+      subject: SOGP_ENROLLMENT_SUBJECT,
+      html: sogpEnrollmentHtml(item),
+    })),
+  );
+}
+
 export async function sendSogpAuthCodeEmail(opts: {
   to: string;
   otp: string;

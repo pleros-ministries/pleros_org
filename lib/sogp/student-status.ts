@@ -19,6 +19,9 @@ export const STUDENT_STATUS_META: Record<StudentStatus, { emoji: string; label: 
   on_track: { emoji: "🟢", label: "On Track" },
 };
 
+/** The statuses staff mean by "not active": several straight days of nothing. */
+export const INACTIVE_STUDENT_STATUSES: StudentStatus[] = ["unresponsive", "at_risk"];
+
 export type StudentDayRecord = {
   dateKey: string;
   activities: {

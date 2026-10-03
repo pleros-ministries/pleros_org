@@ -20,3 +20,17 @@ export const FOLLOW_UP_MESSAGE_TEMPLATES: Record<StudentStatus, string> = {
 export function buildFollowUpMessage(status: StudentStatus, firstName: string): string {
   return FOLLOW_UP_MESSAGE_TEMPLATES[status].replaceAll("[Name]", firstName.trim() || "there");
 }
+
+export const COHORT_INVITE_MESSAGE_TEMPLATE =
+  "Hi [Name], we noticed you haven't been able to keep up with SOGP this time, and we'd still love for you to complete the journey. A new cohort, [Cohort], is just starting ([Dates]). Would you like us to move you to it so you can start afresh? Just reply YES and we'll set it up for you.";
+
+/** Invitation to restart in another cohort; the sender edits it before sending. */
+export function buildCohortInviteMessage(
+  firstName: string,
+  cohortTitle: string,
+  cohortDates: string,
+): string {
+  return COHORT_INVITE_MESSAGE_TEMPLATE.replaceAll("[Name]", firstName.trim() || "there")
+    .replaceAll("[Cohort]", cohortTitle)
+    .replaceAll("[Dates]", cohortDates);
+}

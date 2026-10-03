@@ -21,28 +21,42 @@ function digitsOnly(phone: string) {
   return phone.replace(/\D/g, "");
 }
 
+/** Sends something other than the status check-in, e.g. a cohort invitation. */
+export type FollowUpMessageVariant = {
+  title: string;
+  description: string;
+  message: string;
+  emailSubject: string;
+  /** Runs once the message has been handed to WhatsApp or email. */
+  onSent?: () => void;
+};
+
 export function FollowUpMessageDialog({
   open,
   onOpenChange,
   enrollee,
   pastorUserId,
+  variant,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   enrollee: PastorEnrollee;
   pastorUserId: string | null;
+  variant?: FollowUpMessageVariant;
 }) {
   const [message, setMessage] = useState("");
   const [pending, startTransition] = useTransition();
   const statusMeta = STUDENT_STATUS_META[enrollee.followUpStatus];
+  const template =
+    variant?.message ?? buildFollowUpMessage(enrollee.followUpStatus, enrollee.firstName);
 
   // Reset the draft whenever the dialog opens or the enrollee changes.
-  const draftKey = open ? `${enrollee.followUpStatus}:${enrollee.firstName}` : null;
+  const draftKey = open ? template : null;
   const [prevDraftKey, setPrevDraftKey] = useState<string | null>(null);
   if (draftKey !== prevDraftKey) {
     setPrevDraftKey(draftKey);
     if (draftKey !== null) {
-      setMessage(buildFollowUpMessage(enrollee.followUpStatus, enrollee.firstName));
+      setMessage(template);
     }
   }
 
@@ -57,6 +71,7 @@ export function FollowUpMessageDialog({
         console.error("Could not log contact:", result.error);
       }
     });
+    variant?.onSent?.();
     onOpenChange(false);
   }
 
@@ -67,9 +82,12 @@ export function FollowUpMessageDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="gap-3">
         <DialogHeader>
-          <DialogTitle>Follow up with {enrollee.firstName || enrollee.name}</DialogTitle>
+          <DialogTitle>
+            {variant?.title ?? `Follow up with ${enrollee.firstName || enrollee.name}`}
+          </DialogTitle>
           <DialogDescription>
-            {statusMeta.emoji} {statusMeta.label} — edit this message before sending.
+            {variant?.description ??
+              `${statusMeta.emoji} ${statusMeta.label} — edit this message before sending.`}
           </DialogDescription>
         </DialogHeader>
 
@@ -93,7 +111,7 @@ export function FollowUpMessageDialog({
             </a>
           ) : null}
           <a
-            href={`mailto:${enrollee.email}?subject=${encodeURIComponent(EMAIL_SUBJECT)}&body=${encodeURIComponent(message)}`}
+            href={`mailto:${enrollee.email}?subject=${encodeURIComponent(variant?.emailSubject ?? EMAIL_SUBJECT)}&body=${encodeURIComponent(message)}`}
             onClick={() => logAndClose("email")}
             className="inline-flex h-9 items-center gap-1.5 rounded-sm border border-zinc-200 bg-white px-3.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
           >

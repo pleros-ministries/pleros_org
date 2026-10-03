@@ -8,6 +8,7 @@ import {
   getPastorEnrolleeSubmissions,
   isPastorAssignedToEnrollment,
 } from "@/lib/db/queries/pastor-followups";
+import { getCohortMoveStates, getCohortMoveTarget } from "@/lib/db/queries/sogp-cohort-moves";
 import { getSogpEnrolleePerformance } from "@/lib/db/queries/sogp-daily";
 
 export default async function PastorEnrolleeDetailPage({
@@ -27,10 +28,14 @@ export default async function PastorEnrolleeDetailPage({
     if (!owns) notFound();
   }
 
-  const [enrollee, submissions, performance] = await Promise.all([
+  const [enrollee, submissions, performance, move] = await Promise.all([
     getPastorEnrolleeById(enrollmentId),
     getPastorEnrolleeSubmissions(enrollmentId),
     getSogpEnrolleePerformance(enrollmentId),
+    getCohortMoveTarget().then(async (target) => ({
+      target,
+      states: await getCohortMoveStates({ targetCohortId: target?.id ?? null, enrollmentId }),
+    })),
   ]);
   if (!enrollee) notFound();
 
@@ -40,6 +45,8 @@ export default async function PastorEnrolleeDetailPage({
       submissions={submissions}
       performance={performance}
       isAdmin={isAdmin}
+      moveTarget={move.target}
+      moveState={move.states[enrollmentId] ?? null}
     />
   );
 }

@@ -9,19 +9,9 @@ import {
 import { sendSogpEnrollmentEmail } from "@/lib/email/send";
 import { sendSogpSignupAlert } from "@/lib/telegram/sogp-signup-alert";
 import { resolvePublicSiteUrl } from "@/lib/welcome-campaign";
+import { formatCohortDates } from "./cohort-dates";
 import { formatSogpReferralSource } from "./enrollment";
 import type * as schema from "@/lib/db/schema";
-
-const cohortDateFormatter = new Intl.DateTimeFormat("en-GB", {
-  day: "numeric",
-  month: "long",
-  year: "numeric",
-  timeZone: "Africa/Lagos",
-});
-
-export function formatCohortDates(startsAt: Date, endsAt: Date) {
-  return `${cohortDateFormatter.format(startsAt)} – ${cohortDateFormatter.format(endsAt)}`;
-}
 
 /**
  * Everything that should happen after a real `sogp_enrollments` row is
