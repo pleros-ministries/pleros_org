@@ -3,6 +3,7 @@ import { and, asc, eq, inArray, isNull, ne, or, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
 import { transactionDb } from "@/lib/db/transaction";
+import { formatCohortDates } from "@/lib/sogp/cohort-dates";
 import {
   getCohortMoveBlocker,
   type CohortMoveBlocker,
@@ -10,7 +11,6 @@ import {
   type CohortMoveState,
   type CohortMoveTarget,
 } from "@/lib/sogp/cohort-move";
-import { formatCohortDates } from "@/lib/sogp/enrollment-side-effects";
 
 import { getOpenSogpCohort } from "./sogp";
 
