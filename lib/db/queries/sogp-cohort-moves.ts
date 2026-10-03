@@ -12,23 +12,16 @@ import {
 } from "@/lib/sogp/cohort-move";
 import { formatCohortDates } from "@/lib/sogp/enrollment-side-effects";
 
+import { getOpenSogpCohort } from "./sogp";
+
 /**
- * The cohort staff can move enrollees into: the earliest-starting one that is
- * still getting ready. Unlike `getOpenSogpCohort` this ignores the public
- * enrolment window — a staff move is not a public enrolment.
+ * The cohort staff can move enrollees into: the one a new learner would be
+ * enrolled in today. Cohort `status` alone can't tell cohorts apart — a
+ * running cohort may still say `enrollment_open` — so this follows the
+ * enrolment window, exactly as public enrolment does.
  */
 export async function getCohortMoveTarget(): Promise<CohortMoveTarget | null> {
-  const [cohort] = await db
-    .select({
-      id: schema.sogpCohorts.id,
-      title: schema.sogpCohorts.title,
-      startsAt: schema.sogpCohorts.startsAt,
-      endsAt: schema.sogpCohorts.endsAt,
-    })
-    .from(schema.sogpCohorts)
-    .where(inArray(schema.sogpCohorts.status, ["enrollment_open", "preparing"]))
-    .orderBy(asc(schema.sogpCohorts.startsAt))
-    .limit(1);
+  const cohort = await getOpenSogpCohort();
   if (!cohort) return null;
 
   return {
