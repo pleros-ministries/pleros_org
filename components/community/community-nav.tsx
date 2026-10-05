@@ -2,16 +2,41 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ListIcon, StarIcon, UsersIcon, type LucideIcon } from "lucide-react";
+import {
+  ClipboardListIcon,
+  HeartHandshakeIcon,
+  ListIcon,
+  MessageCircleIcon,
+  MessageCircleQuestionIcon,
+  StarIcon,
+  UsersIcon,
+  UsersRoundIcon,
+  type LucideIcon,
+} from "lucide-react";
+
+import { useUnreadQuestions } from "./ask/use-unread-questions";
+import { useUnreadMessages } from "./messages/use-unread-messages";
 
 type NavItem = {
-  key: "feed" | "unit" | "leader";
+  key:
+    | "feed"
+    | "messages"
+    | "unit"
+    | "groups"
+    | "discipleship"
+    | "report"
+    | "ask"
+    | "leader";
   label: string;
   href: string;
   icon: LucideIcon;
 };
 
-function buildItems(unitId: number | null, showLeaderTab: boolean): NavItem[] {
+function buildItems(
+  unitId: number | null,
+  showLeaderTab: boolean,
+  showDiscipleship: boolean,
+): NavItem[] {
   const items: NavItem[] = [
     {
       key: "feed",
@@ -19,15 +44,47 @@ function buildItems(unitId: number | null, showLeaderTab: boolean): NavItem[] {
       href: "/dashboard/community",
       icon: ListIcon,
     },
+    {
+      key: "messages",
+      label: "Messages",
+      href: "/dashboard/community/messages",
+      icon: MessageCircleIcon,
+    },
   ];
   if (unitId != null) {
     items.push({
       key: "unit",
-      label: "Your unit",
+      label: "Your group",
       href: `/dashboard/community/unit/${unitId}`,
       icon: UsersIcon,
     });
   }
+  items.push({
+    key: "groups",
+    label: "Groups",
+    href: "/dashboard/community/groups",
+    icon: UsersRoundIcon,
+  });
+  if (showDiscipleship) {
+    items.push({
+      key: "discipleship",
+      label: "Discipleship",
+      href: "/dashboard/community/discipleship",
+      icon: HeartHandshakeIcon,
+    });
+  }
+  items.push({
+    key: "report",
+    label: "Daily report",
+    href: "/dashboard/community/report",
+    icon: ClipboardListIcon,
+  });
+  items.push({
+    key: "ask",
+    label: "Ask Pleros",
+    href: "/dashboard/community/ask",
+    icon: MessageCircleQuestionIcon,
+  });
   if (showLeaderTab) {
     items.push({
       key: "leader",
@@ -47,16 +104,20 @@ function isActive(pathname: string, href: string) {
 export function CommunityNav({
   unitId,
   showLeaderTab = false,
+  showDiscipleship = false,
   onNavigate,
   className = "",
 }: {
   unitId: number | null;
   showLeaderTab?: boolean;
+  showDiscipleship?: boolean;
   onNavigate?: () => void;
   className?: string;
 }) {
   const pathname = usePathname() ?? "";
-  const items = buildItems(unitId, showLeaderTab);
+  const items = buildItems(unitId, showLeaderTab, showDiscipleship);
+  const unreadMessages = useUnreadMessages();
+  const unreadQuestions = useUnreadQuestions();
 
   return (
     <nav
@@ -85,6 +146,20 @@ export function CommunityNav({
               strokeWidth={2}
             />
             {item.label}
+            {item.key === "messages" && unreadMessages > 0 ? (
+              <span
+                aria-label={`${unreadMessages} unread`}
+                className="ml-auto inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-(--color-brand-blue) px-1.5 text-[0.7rem] font-semibold text-white"
+              >
+                {unreadMessages > 99 ? "99+" : unreadMessages}
+              </span>
+            ) : null}
+            {item.key === "ask" && unreadQuestions > 0 ? (
+              <span
+                aria-label="Pleros has replied"
+                className="ml-auto size-2 rounded-full bg-(--color-brand-blue)"
+              />
+            ) : null}
           </Link>
         );
       })}

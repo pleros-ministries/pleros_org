@@ -1,5 +1,10 @@
 # SOGP Community section — design specification
 
+> Superseded in part (October 2026): member discussions, private messages and
+> member restrictions are now in scope, and the threads module described here
+> was replaced by the feed. The current rules are in `AGENTS.md` under
+> "SOGP community".
+
 ## Status and scope
 
 This specification defines the in-app Community section of the authenticated Pleros

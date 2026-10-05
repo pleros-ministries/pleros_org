@@ -20,7 +20,11 @@ type Kind =
   | "discipleship_digest"
   | "discipleship_prayer_request"
   | "discipleship_prayed"
-  | "discipleship_prayer_answered";
+  | "discipleship_prayer_answered"
+  | "discipleship_post"
+  | "group_join_request"
+  | "group_join_approved"
+  | "pleros_reply";
 
 const PUSH_COPY: Record<Kind, { title: string }> = {
   official_post: { title: "New Pleros update" },
@@ -39,6 +43,10 @@ const PUSH_COPY: Record<Kind, { title: string }> = {
   discipleship_prayer_request: { title: "New prayer request" },
   discipleship_prayed: { title: "Someone prayed for you" },
   discipleship_prayer_answered: { title: "A prayer was answered" },
+  discipleship_post: { title: "New in your discipleship group" },
+  group_join_request: { title: "Someone asked to join your group" },
+  group_join_approved: { title: "You're in" },
+  pleros_reply: { title: "Pleros replied" },
 };
 
 /**
@@ -212,5 +220,79 @@ export async function notifyDiscipleship(input: {
     pushBody: input.pushBody,
     pushUrl: DISCIPLESHIP_URL,
     exclude: input.actorUserId ?? undefined,
+  });
+}
+
+/**
+ * Tells a discipleship group that a member posted in its discussion space.
+ * Names the author only: the post's title and text never leave the group.
+ */
+export async function notifyDiscipleshipPost(input: {
+  postId: number;
+  recipientUserIds: string[];
+  actorUserId: string;
+  actorFirstName: string;
+}) {
+  await notify({
+    userIds: input.recipientUserIds,
+    kind: "discipleship_post",
+    payload: { name: input.actorFirstName, postId: input.postId },
+    pushBody: `${input.actorFirstName} posted in your discipleship group.`,
+    pushUrl: `/dashboard/community/post/${input.postId}`,
+    exclude: input.actorUserId,
+  });
+}
+
+/** Tells a private group's owner and moderators that someone asked to join. */
+export async function notifyGroupJoinRequest(input: {
+  groupId: number;
+  groupName: string;
+  managerUserIds: string[];
+  requesterUserId: string;
+  requesterFirstName: string;
+}) {
+  await notify({
+    userIds: input.managerUserIds,
+    kind: "group_join_request",
+    payload: {
+      name: input.requesterFirstName,
+      groupId: input.groupId,
+      groupName: input.groupName,
+    },
+    pushBody: `${input.requesterFirstName} asked to join ${input.groupName}.`,
+    pushUrl: `/dashboard/community/groups/${input.groupId}`,
+    exclude: input.requesterUserId,
+  });
+}
+
+/** Tells a learner their request to join a private group was approved. */
+export async function notifyGroupJoinApproved(input: {
+  groupId: number;
+  groupName: string;
+  userId: string;
+}) {
+  await notify({
+    userIds: [input.userId],
+    kind: "group_join_approved",
+    payload: { groupId: input.groupId, groupName: input.groupName },
+    pushBody: `You are now a member of ${input.groupName}.`,
+    pushUrl: `/dashboard/community/groups/${input.groupId}`,
+  });
+}
+
+/**
+ * Tells the asker that Pleros has replied to their private question. The
+ * notification carries only the question id — never its text or the answer.
+ */
+export async function notifyPlerosReply(input: {
+  userId: string;
+  questionId: number;
+}) {
+  await notify({
+    userIds: [input.userId],
+    kind: "pleros_reply",
+    payload: { questionId: input.questionId },
+    pushBody: "Pleros has replied to your question.",
+    pushUrl: `/dashboard/community/ask/${input.questionId}`,
   });
 }

@@ -72,6 +72,18 @@ export const PPC_SHELL_NAV_ITEMS: PpcShellNavItem[] = [
     roles: ["super_admin", "admin"],
   },
   {
+    label: "Ask Pleros",
+    path: "/questions",
+    icon: "qa",
+    roles: ["super_admin", "admin"],
+  },
+  {
+    label: "Ministry reports",
+    path: "/ministry",
+    icon: "review",
+    roles: ["super_admin", "admin"],
+  },
+  {
     label: "Pastors",
     path: "/pastors",
     icon: "pastors",
@@ -348,6 +360,20 @@ export function getPpcShellContext(pathname: string): PpcShellContext {
     return {
       label: "Community",
       description: "Location units, leaders, official posts, and moderation",
+    };
+  }
+
+  if (logicalPath === "/questions") {
+    return {
+      label: "Ask Pleros",
+      description: "Private questions from learners, named or anonymous",
+    };
+  }
+
+  if (logicalPath === "/ministry") {
+    return {
+      label: "Ministry reports",
+      description: "Daily reach, outcomes and Pleros activity for each member",
     };
   }
 

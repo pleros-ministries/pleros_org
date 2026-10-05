@@ -32,6 +32,11 @@ import {
   setCommentStatus,
 } from "@/lib/db/queries/community-comments";
 import type { PostImage } from "@/lib/db/queries/community-posts";
+import { setMessageStatus } from "@/lib/db/queries/community-messages";
+import {
+  clearRestriction,
+  restrictMember,
+} from "@/lib/db/queries/community-restrictions";
 import { setDiscipleshipGroupStatus } from "@/lib/db/queries/sogp-discipleship";
 import { sendSogpChannelMessage } from "@/lib/telegram/sogp-broadcast";
 
@@ -215,27 +220,36 @@ export async function moderatePost(input: {
 
 // ─── Moderation queue ─────────────────────────────────────────────────────
 
+/**
+ * Closes a flag. "hide" hides a post or comment, or removes a reported
+ * private message. The target is read from the flag itself, never the client.
+ */
 export async function resolveContentFlag(input: {
   flagId: number;
-  targetType: "post" | "comment";
-  targetId: number;
   action: "hide" | "dismiss";
 }) {
   const session = await requireAdmin();
 
-  if (input.action === "hide") {
-    if (input.targetType === "post") {
-      await setPostStatus(input.targetId, "hidden");
-    } else {
-      await setCommentStatus(input.targetId, "hidden");
-    }
-  }
-
   const [flag] = await db
-    .select({ reporterId: schema.contentFlags.reporterId })
+    .select({
+      reporterId: schema.contentFlags.reporterId,
+      targetType: schema.contentFlags.targetType,
+      targetId: schema.contentFlags.targetId,
+    })
     .from(schema.contentFlags)
     .where(eq(schema.contentFlags.id, input.flagId))
     .limit(1);
+  if (!flag) return;
+
+  if (input.action === "hide") {
+    if (flag.targetType === "post") {
+      await setPostStatus(flag.targetId, "hidden");
+    } else if (flag.targetType === "comment") {
+      await setCommentStatus(flag.targetId, "hidden");
+    } else if (flag.targetType === "message") {
+      await setMessageStatus(flag.targetId, "removed");
+    }
+  }
 
   await resolveFlag({
     flagId: input.flagId,
@@ -243,25 +257,47 @@ export async function resolveContentFlag(input: {
     status: input.action === "hide" ? "actioned" : "dismissed",
   });
 
-  if (flag) {
-    after(() =>
-      notifyFlagResolved({
-        reporterId: flag.reporterId,
-        outcome: input.action === "hide" ? "actioned" : "dismissed",
-      }).catch((error) =>
-        console.error("Flag-resolved notification failed:", error),
-      ),
-    );
-  }
+  after(() =>
+    notifyFlagResolved({
+      reporterId: flag.reporterId,
+      outcome: input.action === "hide" ? "actioned" : "dismissed",
+    }).catch((error) =>
+      console.error("Flag-resolved notification failed:", error),
+    ),
+  );
 
   revalidatePath("/admin/community");
   revalidatePath("/dashboard/community");
-  if (input.targetType === "comment") {
-    const postId = await commentPostId(input.targetId);
+  if (flag.targetType === "comment") {
+    const postId = await commentPostId(flag.targetId);
     if (postId != null) {
       revalidatePath(`/dashboard/community/post/${postId}`);
     }
   }
+}
+
+// ─── Member restrictions ──────────────────────────────────────────────────
+
+/** Pause a member's posting or private messaging after misuse. */
+export async function restrictCommunityMember(input: {
+  userId: string;
+  posting?: boolean;
+  messaging?: boolean;
+  reason?: string;
+}) {
+  const session = await requireAdmin();
+  if (!input.userId) return;
+  await restrictMember({ ...input, setBy: session.user.id });
+  revalidatePath("/admin/community");
+  revalidatePath("/dashboard/community");
+}
+
+/** Lift every pause on a member. */
+export async function restoreCommunityMember(userId: string) {
+  await requireAdmin();
+  await clearRestriction(userId);
+  revalidatePath("/admin/community");
+  revalidatePath("/dashboard/community");
 }
 
 /** Pause or restore a learner's discipleship group (misuse handling). */

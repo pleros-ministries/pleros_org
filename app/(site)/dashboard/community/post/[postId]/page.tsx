@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { PostDetail } from "@/components/community/post-detail";
 import { getAppSession } from "@/lib/app-session";
 import { canAccessCommunity, getCommunityContext } from "@/lib/community/context";
-import { canPostAnywhere } from "@/lib/community/permissions";
+import { canPostOfficialAnywhere } from "@/lib/community/permissions";
 import { getPost } from "@/lib/db/queries/community-posts";
 
 export default async function CommunityPostRoute({
@@ -26,13 +26,16 @@ export default async function CommunityPostRoute({
   const post = await getPost(ctx, id);
   if (!post) notFound();
 
+  // In a discipleship space only the discipler moderates, admin or not.
+  const moderatesAsAdmin = ctx.isAdmin && post.scope !== "discipleship";
+
   return (
     <PostDetail
       post={post}
       viewerName={session.user.name ?? "You"}
       viewerUnitName={ctx.unit?.name ?? null}
-      canPost={canPostAnywhere(ctx)}
-      isAdmin={ctx.isAdmin}
+      canRepost={canPostOfficialAnywhere(ctx)}
+      isAdmin={moderatesAsAdmin}
     />
   );
 }

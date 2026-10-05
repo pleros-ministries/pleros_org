@@ -4,9 +4,9 @@ import { useActionState, useRef, useState, type MouseEvent } from "react";
 import { useFormStatus } from "react-dom";
 import Link from "next/link";
 import {
+  ArrowLeftIcon,
   CheckIcon,
   ChevronDownIcon,
-  ChevronLeftIcon,
   ArrowUpRightIcon,
   SearchIcon,
 } from "lucide-react";
@@ -15,14 +15,22 @@ import {
   markSelectedPodcastEpisodesListenedAction,
   togglePodcastEpisodeProgressAction,
 } from "@/app/_actions/podcast-progress-actions";
+import { SogpCalendar } from "@/components/sogp/sogp-calendar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { RssEpisode } from "@/lib/anchor-rss";
+import { buildPodcastDays, summarisePodcastProgress } from "@/lib/podcast-journey";
+import type { PodcastLeaderboardData } from "@/lib/podcast-leaderboard";
 import {
+  getPodcastSeriesTitle,
   groupPodcastEpisodesBySeries,
   type PodcastEpisodeGroup,
 } from "@/lib/podcast-progress";
+import { getSogpLearningWeek } from "@/lib/sogp/calendar";
 import { cn } from "@/lib/utils";
+
+import { PodcastDailyTasks } from "./podcast-daily-tasks";
+import { PodcastOtherDetails } from "./podcast-other-details";
 
 const INITIAL_STATE = { error: null as string | null };
 
@@ -324,24 +332,71 @@ function PodcastSeriesGroup({
   );
 }
 
+function firstName(name: string) {
+  return name.trim().split(/\s+/)[0] || "there";
+}
+
+const weekdayFormatter = new Intl.DateTimeFormat("en-NG", {
+  weekday: "short",
+  timeZone: "UTC",
+});
+
 export function PodcastProgressPage({
   episodes,
   listenedEpisodeGuids,
   previewMode = false,
+  todayKey,
+  calendarStartKey,
+  calendarEndKey,
+  prayerDateKeys,
+  listenerName,
+  leaderboard,
 }: {
   episodes: RssEpisode[];
   listenedEpisodeGuids: string[];
   previewMode?: boolean;
+  todayKey: string;
+  calendarStartKey: string;
+  calendarEndKey: string;
+  prayerDateKeys: string[];
+  listenerName: string;
+  leaderboard: PodcastLeaderboardData | null;
 }) {
   const [query, setQuery] = useState("");
   const [localListenedGuids, setLocalListenedGuids] = useState(listenedEpisodeGuids);
+  const [localPrayerDateKeys, setLocalPrayerDateKeys] = useState(prayerDateKeys);
+  const [selectedDateKey, setSelectedDateKey] = useState(todayKey);
   const listened = new Set(localListenedGuids);
+  const prayed = new Set(localPrayerDateKeys);
   const filteredEpisodes = query.trim()
     ? episodes.filter((episode) =>
         episode.title.toLowerCase().includes(query.trim().toLowerCase()),
       )
     : episodes;
   const episodeGroups = groupPodcastEpisodesBySeries(filteredEpisodes);
+  // One local state feeds the calendar, the day's tasks and the full list, so
+  // a tick in any of them shows in the others at once.
+  const days = buildPodcastDays({
+    episodes,
+    listenedGuids: listened,
+    prayerDateKeys: prayed,
+    todayKey,
+    startKey: calendarStartKey,
+    endKey: calendarEndKey,
+  });
+  const selectedDay =
+    days.find((day) => day.dateKey === selectedDateKey) ??
+    days.find((day) => day.dateKey === todayKey) ??
+    days[0]!;
+  const summary = summarisePodcastProgress({
+    episodes,
+    listenedGuids: listened,
+    prayerDateKeys: prayed,
+    todayKey,
+  });
+  const weekEpisodeDays = getSogpLearningWeek(days, selectedDay.dateKey).filter(
+    (day) => day !== null && day.episode !== null,
+  );
 
   function toggleLocalListened(episodeGuid: string, nextListened: boolean) {
     setLocalListenedGuids((current) => {
@@ -363,43 +418,155 @@ export function PodcastProgressPage({
     });
   }
 
-  return (
-    <section className="site-font-theme bg-[var(--color-surface)] pb-16 pt-5 sm:pb-20 sm:pt-6">
-      <div className="container-pleros grid max-w-[36rem] gap-8">
-        <Link
-          href="/dashboard"
-          className="inline-flex w-fit items-center gap-1 font-[var(--font-be-vietnam-pro)] text-[0.8125rem] font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-brand-blue)]"
-        >
-          <ChevronLeftIcon className="size-4" />
-          Back to dashboard
-        </Link>
+  function setLocalPrayerComplete(dateKey: string, complete: boolean) {
+    setLocalPrayerDateKeys((current) => {
+      if (complete) {
+        return current.includes(dateKey) ? current : [...current, dateKey];
+      }
 
-        <div className="grid gap-2">
-          <h1 className="site-hero-heading max-w-[12ch] text-[clamp(2.4rem,6.2vw,3.45rem)] text-[var(--color-brand-blue)]">
-            Podcast progress
-          </h1>
-          <p className="max-w-[34ch] font-[var(--font-be-vietnam-pro)] text-[0.95rem] leading-[1.42] tracking-[-0.02em] text-[var(--color-text-muted)]">
-            Mark the Pleros Podcast episodes you have listened to and keep moving
-            through the teachings.
+      return current.filter((key) => key !== dateKey);
+    });
+  }
+
+  return (
+    <section className="site-font-theme min-h-screen bg-[var(--color-surface-muted)] pb-16 text-zinc-900">
+      <header className="bg-[var(--color-brand-blue)] text-white">
+        <div className="site-shell-page sogp-shell-page flex items-center justify-between gap-4 py-2.5">
+          <Link
+            href={previewMode ? "/preview/dashboard" : "/dashboard"}
+            className="inline-flex min-h-8 items-center gap-1.5 rounded-sm px-1 text-xs font-medium text-white/85 transition-colors duration-150 hover:text-white focus-visible:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white active:scale-[0.98]"
+          >
+            <ArrowLeftIcon className="size-3.5" strokeWidth={2} /> Dashboard
+          </Link>
+          <span className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-[var(--color-brand-lime)]">
+            Podcast
+          </span>
+        </div>
+        <div className="site-shell-page sogp-shell-page grid gap-1 pb-4 pt-1">
+          <p className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-white/75">
+            Pleros Podcast
           </p>
+          <h1 className="ppc-heading text-2xl font-semibold tracking-[-0.02em] text-white md:text-3xl">
+            Welcome, {firstName(listenerName)}
+          </h1>
+          {selectedDay.episode ? (
+            <p className="text-xs font-medium text-white/75">
+              {selectedDay.episode.episodeNumber
+                ? `Ep. ${selectedDay.episode.episodeNumber} · `
+                : null}
+              {getPodcastSeriesTitle(selectedDay.episode.title)}
+            </p>
+          ) : null}
+        </div>
+      </header>
+
+      <div className="site-shell-page sogp-shell-page grid gap-4 pb-6 lg:grid-cols-[15.5rem_minmax(0,1fr)] lg:items-start lg:pt-4 xl:grid-cols-[15.5rem_minmax(0,1fr)_15.5rem]">
+        <aside
+          data-podcast-section="calendar"
+          className="grid gap-4 lg:sticky lg:top-4 lg:row-span-3 xl:row-span-2"
+        >
+          <section className="relative left-1/2 right-1/2 -mx-[50vw] w-screen rounded-none bg-[var(--color-brand-sky)] p-3 lg:static lg:left-auto lg:right-auto lg:mx-0 lg:w-auto lg:rounded-sm">
+            <SogpCalendar
+              days={days}
+              selectedDateKey={selectedDay.dateKey}
+              todayKey={todayKey}
+              onSelect={setSelectedDateKey}
+              tinted
+            />
+          </section>
+
+          {weekEpisodeDays.length ? (
+            <section className="hidden rounded-sm border border-zinc-200 bg-white lg:block">
+              <div className="border-b border-zinc-100 px-4 py-3">
+                <h2 className="ppc-heading text-sm font-semibold text-zinc-900">
+                  This week’s episodes
+                </h2>
+              </div>
+              <ul className="grid gap-0.5 p-2">
+                {weekEpisodeDays.map((day) =>
+                  day?.episode ? (
+                    <li key={day.dateKey}>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedDateKey(day.dateKey)}
+                        aria-pressed={day.dateKey === selectedDay.dateKey}
+                        className={cn(
+                          "grid w-full cursor-pointer grid-cols-[1rem_minmax(0,1fr)] items-start gap-2 rounded-[0.45rem] px-2 py-2 text-left transition-colors hover:bg-[var(--color-brand-sky-soft)]",
+                          day.dateKey === selectedDay.dateKey &&
+                            "bg-[var(--color-brand-sky-soft)]",
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            "mt-0.5 grid size-4 place-items-center rounded-full",
+                            day.episodeListened
+                              ? "bg-[var(--color-brand-lime)] text-[var(--color-brand-blue)]"
+                              : "border border-zinc-300",
+                          )}
+                        >
+                          {day.episodeListened ? (
+                            <CheckIcon className="size-3" strokeWidth={2.5} />
+                          ) : null}
+                        </span>
+                        <span className="grid min-w-0 gap-0.5">
+                          <span className="text-[0.62rem] font-semibold uppercase tracking-[0.08em] text-zinc-400">
+                            {weekdayFormatter.format(
+                              new Date(`${day.dateKey}T00:00:00.000Z`),
+                            )}
+                          </span>
+                          <span className="truncate text-xs text-zinc-700">
+                            {day.episode.title}
+                          </span>
+                        </span>
+                      </button>
+                    </li>
+                  ) : null,
+                )}
+              </ul>
+            </section>
+          ) : null}
+        </aside>
+
+        <div data-podcast-section="daily-content" className="grid min-w-0 gap-4">
+          <PodcastDailyTasks
+            // A save error belongs to the day it happened on.
+            key={selectedDay.dateKey}
+            day={selectedDay}
+            todayKey={todayKey}
+            previewMode={previewMode}
+            onSetEpisodeListened={toggleLocalListened}
+            onSetPrayerComplete={setLocalPrayerComplete}
+          />
+        </div>
+
+        <div className="grid content-start gap-4 lg:col-start-2 xl:sticky xl:top-4 xl:col-start-auto xl:row-span-2">
+          <PodcastOtherDetails
+            summary={summary}
+            leaderboard={leaderboard}
+            previewMode={previewMode}
+          />
+        </div>
+
+        <section
+          data-podcast-section="all-episodes"
+          className="grid min-w-0 gap-4 rounded-[var(--radius-md)] border border-zinc-200 bg-white p-4 md:p-5 lg:col-start-2"
+        >
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 className="ppc-heading text-lg font-semibold text-zinc-900">
+              All episodes
+            </h2>
+            <span className="rounded-[var(--radius-xs)] bg-[var(--color-brand-sky-soft)] px-3 py-1 text-[0.75rem] font-medium text-[var(--color-brand-blue)]">
+              {summary.episodesListened} of {summary.episodesTotal} listened
+            </span>
+          </div>
+
           <Link
             href="/podcast"
-            className="site-button-text group mt-2 inline-flex w-fit items-center gap-1 text-[0.75rem] font-semibold tracking-[0.12em] text-[var(--color-brand-blue)] uppercase"
+            className="site-button-text group inline-flex w-fit items-center gap-1 text-[0.75rem] font-semibold tracking-[0.12em] text-[var(--color-brand-blue)] uppercase"
           >
             Open podcast
             <ArrowUpRightIcon className="size-3.5 transition-transform duration-150 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </Link>
-        </div>
-
-        <div className="grid gap-4 rounded-[1.25rem] border border-[var(--color-line)] bg-white p-4 shadow-[var(--shadow-sm)] sm:p-5">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="site-pathway-title text-[1.15rem] text-[var(--color-brand-blue)] sm:text-[1.3rem]">
-              Episodes
-            </p>
-            <span className="rounded-[var(--radius-xs)] bg-[var(--page-accent-soft)] px-3 py-1 text-[0.75rem] font-medium text-[var(--color-brand-blue)]">
-              {listened.size} of {episodes.length} listened
-            </span>
-          </div>
 
           <div className="relative">
             <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--color-text-muted)]" />
@@ -431,7 +598,7 @@ export function PodcastProgressPage({
               </p>
             )}
           </div>
-        </div>
+        </section>
       </div>
     </section>
   );

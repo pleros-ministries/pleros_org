@@ -4,8 +4,15 @@ import { useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ImagePlusIcon, XIcon } from "lucide-react";
 
-import type { PostImage } from "@/lib/db/queries/community-posts";
+import type { PostImage, PostScope } from "@/lib/db/queries/community-posts";
+import { POSTING_PAUSED_COPY } from "@/lib/community/errors";
+import {
+  POST_BODY_MAX,
+  POST_TITLE_MAX,
+  type PostKind,
+} from "@/lib/community/post-input";
 import { communityKeys } from "@/lib/community/query-keys";
+import { COMMUNITY_TOPICS } from "@/lib/community/topics";
 import { createPost } from "@/app/(site)/dashboard/community/_actions/feed-actions";
 import { useUploadThing } from "@/lib/upload/uploadthing-client";
 
@@ -13,24 +20,57 @@ import { Avatar } from "./avatar";
 
 const MAX_IMAGES = 4;
 
+const fieldClass =
+  "w-full rounded-xl border border-zinc-200 px-3 text-base outline-none focus:border-zinc-300 sm:text-[15px]";
+
+/**
+ * Where the viewer may publish an announcement: nowhere (members), inside
+ * their own group (leaders), or anywhere (admins). Everyone can raise a
+ * discussion.
+ */
+export type OfficialReach = "none" | "unit" | "all";
+
+/** A specific space the composer is locked to: a unit, discipleship group or member group. */
+export type PostTarget = {
+  scope: "unit" | "discipleship" | "group";
+  id: number;
+};
+
 export function FeedComposer({
   viewerName = "You",
   unitName,
-  defaultScope = "global",
-  lockScope = false,
+  target = null,
+  officialReach = "none",
+  postingBlocked = false,
 }: {
   viewerName?: string;
+  /** The viewer's own location group, offered as a destination when no target is set. */
   unitName: string | null;
-  defaultScope?: "global" | "unit";
-  lockScope?: boolean;
+  /** Lock every post to one space. Without it the viewer picks community or their own unit. */
+  target?: PostTarget | null;
+  officialReach?: OfficialReach;
+  postingBlocked?: boolean;
 }) {
+  const defaultScope: PostScope = target?.scope ?? "global";
+  const lockScope = target != null;
   const queryClient = useQueryClient();
+  const defaultKind: PostKind = officialReach === "all" ? "official" : "discussion";
   const [open, setOpen] = useState(false);
+  const [kind, setKind] = useState<PostKind>(defaultKind);
+  const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
-  const [scope, setScope] = useState<"global" | "unit">(defaultScope);
+  const [topic, setTopic] = useState("");
+  const [scope, setScope] = useState<PostScope>(defaultScope);
   const [images, setImages] = useState<PostImage[]>([]);
   const [error, setError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  // "unit" reach announces inside the viewer's own location group only.
+  const officialAllowed =
+    officialReach === "all" || (officialReach === "unit" && scope === "unit");
+  const postKind: PostKind =
+    kind === "official" && officialAllowed ? "official" : "discussion";
+  const isDiscussion = postKind === "discussion";
 
   const { startUpload, isUploading } = useUploadThing("communityImage", {
     onClientUploadComplete: (results) => {
@@ -44,7 +84,10 @@ export function FeedComposer({
   });
 
   function reset() {
+    setKind(defaultKind);
+    setTitle("");
     setBody("");
+    setTopic("");
     setImages([]);
     setScope(defaultScope);
     setError(null);
@@ -52,10 +95,21 @@ export function FeedComposer({
   }
 
   const postMutation = useMutation({
-    mutationFn: () => createPost({ scope, body, images }),
+    mutationFn: async () => {
+      const result = await createPost({
+        scope,
+        targetId: target?.id ?? null,
+        kind: postKind,
+        title,
+        topic: isDiscussion ? topic || null : null,
+        body,
+        images,
+      });
+      if (!result.ok) throw new Error(result.error);
+    },
     onSuccess: () => {
       reset();
-      queryClient.invalidateQueries({ queryKey: communityKeys.feed() });
+      queryClient.invalidateQueries({ queryKey: communityKeys.feedRoot() });
     },
     onError: (e) =>
       setError(e instanceof Error ? e.message : "Could not post."),
@@ -69,6 +123,14 @@ export function FeedComposer({
     void startUpload(Array.from(list).slice(0, room));
   }
 
+  if (postingBlocked) {
+    return (
+      <p className="rounded-2xl border border-(--color-line-strong) bg-white p-4 text-sm text-zinc-600 shadow-(--shadow-sm)">
+        {POSTING_PAUSED_COPY} You can still read and like posts.
+      </p>
+    );
+  }
+
   if (!open) {
     return (
       <div className="flex items-center gap-3 rounded-2xl border border-(--color-line-strong) bg-white p-3 shadow-(--shadow-sm)">
@@ -78,7 +140,9 @@ export function FeedComposer({
           onClick={() => setOpen(true)}
           className="h-10 flex-1 rounded-full bg-zinc-100 px-4 text-left text-xs text-zinc-500 transition-colors hover:bg-zinc-200/70"
         >
-          Share something with the community…
+          {officialReach === "all"
+            ? "Share an update or start a discussion…"
+            : "Start a discussion…"}
         </button>
       </div>
     );
@@ -94,14 +158,74 @@ export function FeedComposer({
     >
       <div className="flex items-start gap-3">
         <Avatar name={viewerName} size={40} />
-        <textarea
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
-          placeholder="What would you like to share?"
-          rows={4}
-          autoFocus
-          className="flex-1 resize-none rounded-xl border border-zinc-200 p-3 text-[15px] leading-relaxed outline-none focus:border-zinc-300"
-        />
+        <div className="grid min-w-0 flex-1 gap-2">
+          {officialReach !== "none" ? (
+            <div
+              role="group"
+              aria-label="Post type"
+              className="flex w-fit items-center gap-0.5 rounded-full border border-zinc-200 p-0.5"
+            >
+              {(
+                [
+                  ["discussion", "Discussion"],
+                  ["official", "Announcement"],
+                ] as const
+              ).map(([value, label]) => {
+                const active = postKind === value;
+                const unavailable = value === "official" && !officialAllowed;
+                return (
+                  <button
+                    key={value}
+                    type="button"
+                    aria-pressed={active}
+                    disabled={unavailable}
+                    title={
+                      unavailable
+                        ? "Announcements go to your own group"
+                        : undefined
+                    }
+                    onClick={() => setKind(value)}
+                    className={`h-7 rounded-full px-3 text-[13px] font-medium transition-colors disabled:opacity-40 ${
+                      active
+                        ? "bg-(--muted) text-(--color-brand-blue)"
+                        : "text-zinc-500 hover:text-zinc-800"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          ) : null}
+
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder={
+              isDiscussion
+                ? "Title: what would you like to discuss?"
+                : "Title (optional)"
+            }
+            aria-label="Title"
+            maxLength={POST_TITLE_MAX}
+            required={isDiscussion}
+            autoFocus
+            className={`${fieldClass} h-11 font-medium`}
+          />
+          <textarea
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            placeholder={
+              isDiscussion
+                ? "Add more detail (optional)"
+                : "What would you like to share?"
+            }
+            aria-label="Post"
+            rows={4}
+            maxLength={POST_BODY_MAX}
+            className={`${fieldClass} resize-none py-3 leading-relaxed`}
+          />
+        </div>
       </div>
 
       {images.length > 0 ? (
@@ -129,7 +253,11 @@ export function FeedComposer({
         </div>
       ) : null}
 
-      {error ? <p className="pl-13 text-xs text-red-700">{error}</p> : null}
+      {error ? (
+        <p role="alert" className="pl-13 text-[13px] text-red-700">
+          {error}
+        </p>
+      ) : null}
 
       <div className="flex flex-wrap items-center gap-2 pl-13">
         <input
@@ -153,14 +281,33 @@ export function FeedComposer({
           {isUploading ? "Uploading…" : "Photo"}
         </button>
 
+        {isDiscussion ? (
+          <select
+            value={topic}
+            onChange={(e) => setTopic(e.target.value)}
+            aria-label="Topic"
+            className={`h-9 rounded-lg border border-zinc-200 px-2 text-sm ${
+              topic ? "text-zinc-900" : "text-zinc-500"
+            }`}
+          >
+            <option value="">Topic (optional)</option>
+            {COMMUNITY_TOPICS.map((option) => (
+              <option key={option.key} value={option.key}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        ) : null}
+
         {unitName && !lockScope ? (
           <select
             value={scope}
-            onChange={(e) => setScope(e.target.value as "global" | "unit")}
-            className="h-9 rounded-lg border border-zinc-200 px-2 text-sm"
+            onChange={(e) => setScope(e.target.value as PostScope)}
+            aria-label="Where to post"
+            className="h-9 max-w-44 rounded-lg border border-zinc-200 px-2 text-sm"
           >
-            <option value="global">To the community</option>
-            <option value="unit">To {unitName}</option>
+            <option value="global">Whole community</option>
+            <option value="unit">{unitName}</option>
           </select>
         ) : null}
 

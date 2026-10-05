@@ -117,7 +117,7 @@ export const welcomeDashboardSections: WelcomeDashboardSection[] = [
       {
         id: "community",
         title: "Community",
-        description: "Your location unit, official updates, and discussion.",
+        description: "Your location group, discussions, and private messages.",
         href: undefined,
         status: "enrolment_required",
         statusLabel: "Enrolment required",

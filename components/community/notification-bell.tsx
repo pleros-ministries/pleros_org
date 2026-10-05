@@ -62,6 +62,14 @@ function summarise(n: Notification): string {
       return `${(n.payload.name as string) ?? "Your discipler"} prayed for your request`;
     case "discipleship_prayer_answered":
       return `${(n.payload.name as string) ?? "A disciple"} shared an answered prayer`;
+    case "discipleship_post":
+      return `${(n.payload.name as string) ?? "Someone"} posted in your discipleship group`;
+    case "group_join_request":
+      return `${(n.payload.name as string) ?? "Someone"} asked to join ${(n.payload.groupName as string) ?? "your group"}`;
+    case "group_join_approved":
+      return `You are now a member of ${(n.payload.groupName as string) ?? "the group"}`;
+    case "pleros_reply":
+      return "Pleros replied to your question";
     default:
       return "Community update";
   }

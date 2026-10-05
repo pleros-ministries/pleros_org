@@ -48,6 +48,7 @@ export async function togglePrayerWatchAttendanceAction(
 
   revalidatePath("/dashboard/prayer-watch");
   revalidatePath("/dashboard/sogp");
+  revalidatePath("/dashboard/podcast");
   return { error: null };
 }
 

@@ -2,6 +2,7 @@ import { and, eq, gte, sql } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
+import { isWithinNewAccountCooldown } from "@/lib/community/post-input";
 
 /** Per-user creation limits within a rolling window. */
 export const COMMUNITY_LIMITS = {
@@ -11,6 +12,10 @@ export const COMMUNITY_LIMITS = {
   discipleshipPrompt: { max: 5, windowMinutes: 60 * 24 },
   /** New enrolments wait this long before they can post at all. */
   newAccountCooldownMinutes: 10,
+  /** Private messages, per sender. */
+  directMessage: { max: 60, windowMinutes: 60 },
+  /** Conversations a sender may open with new people — deters spam. */
+  newConversation: { max: 10, windowMinutes: 60 * 24 },
 } as const;
 
 export class RateLimitError extends Error {
@@ -38,6 +43,25 @@ export async function assertCanCreatePost(userId: string) {
   if (n >= COMMUNITY_LIMITS.post.max) {
     throw new RateLimitError(
       "You've posted several times recently. Try again a little later.",
+    );
+  }
+}
+
+/** New learners wait briefly before their first post; leaders and admins do not. */
+export function assertPastNewAccountCooldown(ctx: {
+  isAdmin: boolean;
+  isUnitLeader: boolean;
+  enrolledAt: Date | null;
+}) {
+  if (ctx.isAdmin || ctx.isUnitLeader) return;
+  if (
+    isWithinNewAccountCooldown(
+      ctx.enrolledAt,
+      COMMUNITY_LIMITS.newAccountCooldownMinutes,
+    )
+  ) {
+    throw new RateLimitError(
+      "Welcome! You can start posting a few minutes after enrolling. Try again shortly.",
     );
   }
 }
@@ -74,6 +98,42 @@ export async function assertCanCreateDiscipleshipPrompt(groupId: number) {
   if (n >= COMMUNITY_LIMITS.discipleshipPrompt.max) {
     throw new RateLimitError(
       "You've sent several check-ins today. Give your group time to answer, then try again tomorrow.",
+    );
+  }
+}
+
+export async function assertCanSendMessage(userId: string) {
+  const since = windowStart(COMMUNITY_LIMITS.directMessage.windowMinutes);
+  const [{ n }] = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(schema.dmMessages)
+    .where(
+      and(
+        eq(schema.dmMessages.senderId, userId),
+        gte(schema.dmMessages.createdAt, since),
+      ),
+    );
+  if (n >= COMMUNITY_LIMITS.directMessage.max) {
+    throw new RateLimitError(
+      "You're sending messages very quickly. Take a short break and try again.",
+    );
+  }
+}
+
+export async function assertCanStartConversation(userId: string) {
+  const since = windowStart(COMMUNITY_LIMITS.newConversation.windowMinutes);
+  const [{ n }] = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(schema.dmConversations)
+    .where(
+      and(
+        eq(schema.dmConversations.startedBy, userId),
+        gte(schema.dmConversations.startedAt, since),
+      ),
+    );
+  if (n >= COMMUNITY_LIMITS.newConversation.max) {
+    throw new RateLimitError(
+      "You've started several new conversations today. Try again tomorrow.",
     );
   }
 }

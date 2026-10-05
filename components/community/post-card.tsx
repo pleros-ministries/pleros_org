@@ -2,56 +2,56 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   useMutation,
   useQuery,
   useQueryClient,
   type InfiniteData,
+  type QueryClient,
 } from "@tanstack/react-query";
 import {
   CopyIcon,
+  EyeOffIcon,
+  FlagIcon,
+  MegaphoneIcon,
   MessageCircleIcon,
+  PencilIcon,
   PinIcon,
   Repeat2Icon,
   SendIcon,
   Share2Icon,
   ThumbsUpIcon,
+  Trash2Icon,
 } from "lucide-react";
 import { Popover } from "@base-ui/react/popover";
 
 import type { FeedPost, PostImage } from "@/lib/db/queries/community-posts";
 import type { PostComment } from "@/lib/db/queries/community-comments";
 import type { FeedPage } from "@/lib/community/feed";
+import { POST_BODY_MAX, POST_TITLE_MAX } from "@/lib/community/post-input";
 import { communityKeys } from "@/lib/community/query-keys";
+import { relativeTime } from "@/lib/community/time";
+import { COMMUNITY_TOPICS, topicLabel } from "@/lib/community/topics";
 import {
   commentOnPost,
+  deleteOwnPost,
+  editOwnPost,
   moderateComment,
   moderatePost,
+  reportContent,
   sharePostToFeed,
   toggleCommentLike,
   toggleCommunityReaction,
+  togglePostPin,
 } from "@/app/(site)/dashboard/community/_actions/feed-actions";
-import { togglePostPinned } from "@/app/admin/_actions/community-actions";
 
+import { ActionMenu, type MenuAction } from "./action-menu";
 import { Avatar } from "./avatar";
 import { ImageLightbox } from "./image-lightbox";
+import { useOpenConversation } from "./messages/use-open-conversation";
 import { PostBody } from "./post-body";
-
-function relativeTime(iso: string): string {
-  const diff = Date.now() - new Date(iso).getTime();
-  const min = Math.round(diff / 60_000);
-  if (min < 1) return "just now";
-  if (min < 60) return `${min}m`;
-  const hr = Math.round(min / 60);
-  if (hr < 24) return `${hr}h`;
-  const day = Math.round(hr / 24);
-  if (day < 7) return `${day}d`;
-  return new Intl.DateTimeFormat("en-GB", {
-    day: "numeric",
-    month: "short",
-    timeZone: "Africa/Lagos",
-  }).format(new Date(iso));
-}
+import { ReportDialog } from "./report-dialog";
 
 function ImageGrid({
   images,
@@ -118,66 +118,181 @@ function QuotedPost({ post }: { post: NonNullable<FeedPost["sharedFrom"]> }) {
   );
 }
 
+/** Applies `update` to one post in every open feed view (community or group, any sort). */
+function patchPostInFeeds(
+  queryClient: QueryClient,
+  postId: number,
+  update: (post: FeedPost) => FeedPost,
+) {
+  queryClient.setQueriesData<InfiniteData<FeedPage>>(
+    { queryKey: communityKeys.feedRoot() },
+    (old) =>
+      old
+        ? {
+            ...old,
+            pages: old.pages.map((pg) => ({
+              ...pg,
+              posts: pg.posts.map((p) => (p.id === postId ? update(p) : p)),
+            })),
+          }
+        : old,
+  );
+}
+
+/** Inline editor for the author's own post. Photos stay as posted. */
+function PostEditForm({
+  post,
+  onDone,
+}: {
+  post: FeedPost;
+  onDone: () => void;
+}) {
+  const queryClient = useQueryClient();
+  const [title, setTitle] = useState(post.title ?? "");
+  const [body, setBody] = useState(post.body);
+  const [topic, setTopic] = useState(post.topic ?? "");
+  const [error, setError] = useState<string | null>(null);
+  const isDiscussion = post.kind === "discussion";
+
+  const saveMutation = useMutation({
+    mutationFn: async () => {
+      const result = await editOwnPost({
+        postId: post.id,
+        title,
+        body,
+        topic: isDiscussion ? topic || null : null,
+      });
+      if (!result.ok) throw new Error(result.error);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: communityKeys.feedRoot() });
+      onDone();
+    },
+    onError: (e) =>
+      setError(e instanceof Error ? e.message : "Could not save your changes."),
+  });
+
+  const fieldClass =
+    "w-full rounded-xl border border-zinc-200 px-3 text-base outline-none focus:border-zinc-300 sm:text-[15px]";
+
+  return (
+    <form
+      className="grid gap-2"
+      action={() => {
+        setError(null);
+        saveMutation.mutate();
+      }}
+    >
+      <input
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        placeholder={isDiscussion ? "Title" : "Title (optional)"}
+        aria-label="Title"
+        maxLength={POST_TITLE_MAX}
+        required={isDiscussion}
+        className={`${fieldClass} h-11 font-medium`}
+      />
+      <textarea
+        value={body}
+        onChange={(e) => setBody(e.target.value)}
+        aria-label="Post"
+        rows={4}
+        maxLength={POST_BODY_MAX}
+        className={`${fieldClass} resize-none py-3 leading-relaxed`}
+      />
+      {error ? (
+        <p role="alert" className="text-[13px] text-red-700">
+          {error}
+        </p>
+      ) : null}
+      <div className="flex flex-wrap items-center gap-2">
+        {isDiscussion ? (
+          <select
+            value={topic}
+            onChange={(e) => setTopic(e.target.value)}
+            aria-label="Topic"
+            className="h-9 rounded-lg border border-zinc-200 px-2 text-sm"
+          >
+            <option value="">No topic</option>
+            {COMMUNITY_TOPICS.map((option) => (
+              <option key={option.key} value={option.key}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        ) : null}
+        <div className="ml-auto flex items-center gap-3">
+          <button
+            type="button"
+            onClick={onDone}
+            className="text-sm text-zinc-500 hover:underline"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={saveMutation.isPending}
+            className="inline-flex h-9 items-center rounded-lg bg-[var(--color-brand-blue)] px-4 text-sm font-semibold text-white disabled:opacity-50"
+          >
+            {saveMutation.isPending ? "Saving…" : "Save"}
+          </button>
+        </div>
+      </div>
+    </form>
+  );
+}
+
 export function PostCard({
   post,
   viewerName = "You",
   viewerUnitName,
-  canPost = false,
+  canRepost = false,
   isAdmin,
   startExpanded = false,
 }: {
   post: FeedPost;
   viewerName?: string;
   viewerUnitName: string | null;
-  canPost?: boolean;
+  /** Leaders and admins can repost into the feed. */
+  canRepost?: boolean;
   isAdmin: boolean;
   startExpanded?: boolean;
 }) {
+  const router = useRouter();
   const queryClient = useQueryClient();
+  const chat = useOpenConversation();
   const [lightbox, setLightbox] = useState<string | null>(null);
   const [showComments, setShowComments] = useState(startExpanded);
+  const [editing, setEditing] = useState(false);
+  const [reporting, setReporting] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
 
   const reacted = post.reactedByMe;
   const reactionCount = post.reactionCount;
+  const feedRoot = communityKeys.feedRoot();
 
   function invalidateFeed() {
-    queryClient.invalidateQueries({ queryKey: communityKeys.feed() });
+    queryClient.invalidateQueries({ queryKey: feedRoot });
   }
 
   const reactionMutation = useMutation({
     mutationFn: () => toggleCommunityReaction(post.id),
     onMutate: async () => {
-      await queryClient.cancelQueries({ queryKey: communityKeys.feed() });
-      const prev = queryClient.getQueryData<InfiniteData<FeedPage>>(
-        communityKeys.feed(),
-      );
-      queryClient.setQueryData<InfiniteData<FeedPage>>(
-        communityKeys.feed(),
-        (old) =>
-          old
-            ? {
-                ...old,
-                pages: old.pages.map((pg) => ({
-                  ...pg,
-                  posts: pg.posts.map((p) =>
-                    p.id === post.id
-                      ? {
-                          ...p,
-                          reactedByMe: !p.reactedByMe,
-                          reactionCount:
-                            p.reactionCount + (p.reactedByMe ? -1 : 1),
-                        }
-                      : p,
-                  ),
-                })),
-              }
-            : old,
-      );
+      await queryClient.cancelQueries({ queryKey: feedRoot });
+      const prev = queryClient.getQueriesData<InfiniteData<FeedPage>>({
+        queryKey: feedRoot,
+      });
+      patchPostInFeeds(queryClient, post.id, (p) => ({
+        ...p,
+        reactedByMe: !p.reactedByMe,
+        reactionCount: p.reactionCount + (p.reactedByMe ? -1 : 1),
+      }));
       return { prev };
     },
     onError: (_e, _v, context) => {
-      if (context?.prev)
-        queryClient.setQueryData(communityKeys.feed(), context.prev);
+      for (const [key, data] of context?.prev ?? []) {
+        queryClient.setQueryData(key, data);
+      }
     },
     onSettled: invalidateFeed,
   });
@@ -187,41 +302,141 @@ export function PostCard({
     onSettled: invalidateFeed,
   });
   const pinMutation = useMutation({
-    mutationFn: (pinned: boolean) =>
-      togglePostPinned({ postId: post.id, pinned }),
+    mutationFn: (pinned: boolean) => togglePostPin({ postId: post.id, pinned }),
+    onSettled: invalidateFeed,
+  });
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      const result = await deleteOwnPost(post.id);
+      if (!result.ok) throw new Error(result.error);
+    },
+    onSuccess: () => {
+      if (startExpanded) {
+        router.push(
+          post.scope === "discipleship"
+            ? "/dashboard/community/discipleship"
+            : post.scope === "group" && post.groupId != null
+              ? `/dashboard/community/groups/${post.groupId}`
+              : "/dashboard/community",
+        );
+      }
+    },
+    onError: (e) =>
+      setNotice(e instanceof Error ? e.message : "Could not delete the post."),
     onSettled: invalidateFeed,
   });
 
   const pending =
     reactionMutation.isPending ||
     moderateMutation.isPending ||
-    pinMutation.isPending;
+    pinMutation.isPending ||
+    deleteMutation.isPending;
 
   function like() {
     reactionMutation.mutate();
   }
 
   const isUnit = post.scope === "unit";
-  const scopeLabel = isUnit ? (post.unitName ?? "Unit") : "Community";
-  const railClass = isUnit
-    ? "before:bg-(--fulfil-accent)"
-    : "before:bg-(--color-brand-blue)";
-  const pillClass = isUnit
-    ? "bg-(--fulfil-accent-soft) text-(--fulfil-accent)"
-    : "bg-(--muted) text-(--color-brand-blue)";
-  const roleLabel =
-    post.authorKind === "leader"
+  const isDiscipleship = post.scope === "discipleship";
+  const isMemberGroup = post.scope === "group";
+  // Posts in a discipleship or member group stay inside that group.
+  const staysInGroup = isDiscipleship || isMemberGroup;
+  const scopeLabel = isDiscipleship
+    ? (post.discipleshipGroupName ?? "Discipleship group")
+    : isMemberGroup
+      ? (post.groupName ?? "Group")
+      : isUnit
+        ? (post.unitName ?? "Group")
+        : "Community";
+  const railClass = staysInGroup
+    ? "before:bg-(--purpose-accent)"
+    : isUnit
+      ? "before:bg-(--fulfil-accent)"
+      : "before:bg-(--color-brand-blue)";
+  const pillClass = staysInGroup
+    ? "bg-(--purpose-accent-soft) text-(--purpose-accent)"
+    : isUnit
+      ? "bg-(--fulfil-accent-soft) text-(--fulfil-accent)"
+      : "bg-(--muted) text-(--color-brand-blue)";
+  const roleLabel = isDiscipleship
+    ? post.authorKind === "leader"
+      ? "Discipler"
+      : "Disciple"
+    : isMemberGroup
+      ? post.authorKind === "leader"
+        ? "Group admin"
+        : "Member"
+      : post.authorKind === "leader"
       ? isUnit
-        ? "Unit leader"
+        ? "Group leader"
         : "Leader"
       : post.authorKind === "member"
         ? isUnit
-          ? "Unit member"
+          ? "Group member"
           : "Member"
         : null;
+  const topic = post.kind === "discussion" ? topicLabel(post.topic) : null;
+
+  const menuActions: MenuAction[] = [];
+  if (post.messageUserId) {
+    const authorId = post.messageUserId;
+    menuActions.push({
+      key: "message",
+      label: `Message ${post.authorName}`,
+      icon: MessageCircleIcon,
+      onSelect: () => chat.open(authorId),
+    });
+  }
+  if (post.isMine) {
+    menuActions.push(
+      {
+        key: "edit",
+        label: "Edit post",
+        icon: PencilIcon,
+        onSelect: () => setEditing(true),
+      },
+      {
+        key: "delete",
+        label: "Delete post",
+        icon: Trash2Icon,
+        danger: true,
+        onSelect: () => {
+          if (window.confirm("Delete this post? This can't be undone.")) {
+            setNotice(null);
+            deleteMutation.mutate();
+          }
+        },
+      },
+    );
+  }
+  if (post.canManage) {
+    menuActions.push(
+      {
+        key: "pin",
+        label: post.pinned ? "Unpin" : "Pin to top",
+        icon: PinIcon,
+        onSelect: () => pinMutation.mutate(!post.pinned),
+      },
+      {
+        key: "hide",
+        label: "Hide post",
+        icon: EyeOffIcon,
+        onSelect: () => moderateMutation.mutate("hide"),
+      },
+    );
+  }
+  if (!post.isMine) {
+    menuActions.push({
+      key: "report",
+      label: "Report post",
+      icon: FlagIcon,
+      onSelect: () => setReporting(true),
+    });
+  }
 
   const actionButton =
     "flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-sm font-medium transition-colors";
+  const alertText = notice ?? chat.error;
 
   return (
     <article
@@ -246,21 +461,57 @@ export function PostCard({
                   Pinned
                 </span>
               ) : null}
+              {post.kind === "official" ? (
+                <span className="inline-flex items-center gap-1 rounded-full bg-(--muted) px-2 py-0.5 text-[0.7rem] font-medium text-(--color-brand-blue)">
+                  <MegaphoneIcon className="size-3" strokeWidth={2} />
+                  {staysInGroup ? "Announcement" : "Official"}
+                </span>
+              ) : topic ? (
+                <span className="inline-flex items-center rounded-full bg-zinc-100 px-2 py-0.5 text-[0.7rem] font-medium text-zinc-600">
+                  {topic}
+                </span>
+              ) : null}
               {roleLabel ? <span>{roleLabel} ·</span> : null}
               {relativeTime(post.lastActivityAt)}
             </p>
           </div>
+          <ActionMenu
+            label="Post options"
+            actions={menuActions}
+            className="-mr-1.5 -mt-1"
+          />
         </div>
 
-        {post.title ? (
-          <h2 className="ppc-heading text-base font-semibold text-zinc-900">
-            {post.title}
-          </h2>
+        {alertText ? (
+          <p role="alert" className="text-[13px] text-red-700">
+            {alertText}
+          </p>
         ) : null}
 
-        {post.body ? (
-          <PostBody body={post.body} expanded={startExpanded} />
-        ) : null}
+        {editing ? (
+          <PostEditForm post={post} onDone={() => setEditing(false)} />
+        ) : (
+          <>
+            {post.title ? (
+              <h2 className="ppc-heading text-base font-semibold text-zinc-900">
+                {startExpanded ? (
+                  post.title
+                ) : (
+                  <Link
+                    href={`/dashboard/community/post/${post.id}`}
+                    className="hover:underline"
+                  >
+                    {post.title}
+                  </Link>
+                )}
+              </h2>
+            ) : null}
+
+            {post.body ? (
+              <PostBody body={post.body} expanded={startExpanded} />
+            ) : null}
+          </>
+        )}
 
         <ImageGrid images={post.images} onOpen={setLightbox} />
 
@@ -326,39 +577,17 @@ export function PostCard({
           <MessageCircleIcon className="size-[18px]" strokeWidth={2} />
           Comment
         </button>
-        <ShareMenu
-          post={post}
-          viewerUnitName={viewerUnitName}
-          canRepost={canPost}
-          onShared={invalidateFeed}
-          className={`${actionButton} text-zinc-600 hover:bg-zinc-50`}
-        />
+        {/* A post in a discipleship or member group has no Share. */}
+        {staysInGroup ? null : (
+          <ShareMenu
+            post={post}
+            viewerUnitName={viewerUnitName}
+            canRepost={canRepost}
+            onShared={invalidateFeed}
+            className={`${actionButton} text-zinc-600 hover:bg-zinc-50`}
+          />
+        )}
       </div>
-
-      {post.canManage || isAdmin ? (
-        <div className="flex items-center gap-4 px-4 pb-2 text-[0.7rem] text-zinc-400 sm:px-5">
-          {post.canManage ? (
-            <button
-              type="button"
-              disabled={pending}
-              onClick={() => moderateMutation.mutate("hide")}
-              className="hover:text-zinc-600 hover:underline"
-            >
-              Hide
-            </button>
-          ) : null}
-          {isAdmin ? (
-            <button
-              type="button"
-              disabled={pending}
-              onClick={() => pinMutation.mutate(!post.pinned)}
-              className="hover:text-zinc-600 hover:underline"
-            >
-              {post.pinned ? "Unpin" : "Pin"}
-            </button>
-          ) : null}
-        </div>
-      ) : null}
 
       {showComments ? (
         <div className="border-t border-zinc-100 bg-zinc-50/50 px-4 py-4 sm:px-5">
@@ -366,6 +595,7 @@ export function PostCard({
             postId={post.id}
             viewerName={viewerName}
             isAdmin={isAdmin}
+            canComment={post.canComment}
           />
         </div>
       ) : null}
@@ -377,6 +607,15 @@ export function PostCard({
           onClose={() => setLightbox(null)}
         />
       ) : null}
+
+      <ReportDialog
+        open={reporting}
+        onOpenChange={setReporting}
+        noun="post"
+        onSubmit={(reason) =>
+          reportContent({ targetType: "post", targetId: post.id, reason })
+        }
+      />
     </article>
   );
 }
@@ -539,14 +778,19 @@ export function CommentThread({
   postId,
   viewerName = "You",
   isAdmin,
+  canComment = true,
 }: {
   postId: number;
   viewerName?: string;
   isAdmin: boolean;
+  /** False when the viewer can read the post but must join its group to reply. */
+  canComment?: boolean;
 }) {
   const queryClient = useQueryClient();
+  const chat = useOpenConversation();
   const [body, setBody] = useState("");
   const [replyTo, setReplyTo] = useState<number | null>(null);
+  const [reportId, setReportId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const commentsKey = communityKeys.comments(postId);
@@ -571,7 +815,7 @@ export function CommentThread({
     queryClient.invalidateQueries({ queryKey: commentsKey });
   }
   function invalidateFeed() {
-    queryClient.invalidateQueries({ queryKey: communityKeys.feed() });
+    queryClient.invalidateQueries({ queryKey: communityKeys.feedRoot() });
   }
 
   const commentMutation = useMutation({
@@ -592,6 +836,7 @@ export function CommentThread({
         reactionCount: 0,
         reactedByMe: false,
         canModerate: false,
+        messageUserId: null,
       };
       patch((list) => [...list, optimistic]);
       return { prev };
@@ -683,7 +928,13 @@ export function CommentThread({
 
   return (
     <div className="grid gap-3">
-      <form className="flex items-start gap-2" action={() => submit()}>
+      {canComment ? null : (
+        <p className="text-xs text-zinc-500">Join this group to comment.</p>
+      )}
+      <form
+        className={canComment ? "flex items-start gap-2" : "hidden"}
+        action={() => submit()}
+      >
         <Avatar name={viewerName} size={32} className="mt-0.5" />
         <div className="min-w-0 flex-1">
           {replyTo != null ? (
@@ -714,7 +965,11 @@ export function CommentThread({
               Post
             </button>
           </div>
-          {error ? <p className="mt-1 text-xs text-red-700">{error}</p> : null}
+          {error ?? chat.error ? (
+            <p role="alert" className="mt-1 text-xs text-red-700">
+              {error ?? chat.error}
+            </p>
+          ) : null}
         </div>
       </form>
 
@@ -741,11 +996,13 @@ export function CommentThread({
                 comment={comment}
                 isAdmin={isAdmin}
                 pending={pending}
-                onReply={() => setReplyTo(comment.id)}
+                onReply={canComment ? () => setReplyTo(comment.id) : undefined}
                 onLike={() => likeMutation.mutate(comment.id)}
                 onModerate={(action) =>
                   moderateMutation.mutate({ commentId: comment.id, action })
                 }
+                onReport={() => setReportId(comment.id)}
+                onMessage={chat.open}
               />
               {(repliesByParent.get(comment.id) ?? []).map((reply) => (
                 <div key={reply.id} className="ml-10">
@@ -757,6 +1014,8 @@ export function CommentThread({
                     onModerate={(action) =>
                       moderateMutation.mutate({ commentId: reply.id, action })
                     }
+                    onReport={() => setReportId(reply.id)}
+                    onMessage={chat.open}
                   />
                 </div>
               ))}
@@ -764,6 +1023,21 @@ export function CommentThread({
           ))}
         </ul>
       )}
+
+      <ReportDialog
+        open={reportId != null}
+        onOpenChange={(open) => {
+          if (!open) setReportId(null);
+        }}
+        noun="comment"
+        onSubmit={(reason) =>
+          reportContent({
+            targetType: "comment",
+            targetId: reportId ?? 0,
+            reason,
+          })
+        }
+      />
     </div>
   );
 }
@@ -775,6 +1049,8 @@ function CommentRow({
   onReply,
   onLike,
   onModerate,
+  onReport,
+  onMessage,
 }: {
   comment: PostComment;
   isAdmin: boolean;
@@ -782,6 +1058,8 @@ function CommentRow({
   onReply?: () => void;
   onLike: () => void;
   onModerate: (action: "hide" | "restore") => void;
+  onReport: () => void;
+  onMessage: (userId: string) => void;
 }) {
   const canModerate = comment.canModerate || isAdmin;
   return (
@@ -824,6 +1102,20 @@ function CommentRow({
           <span className="text-zinc-400">
             {relativeTime(comment.createdAt)}
           </span>
+          {comment.messageUserId ? (
+            <button
+              type="button"
+              onClick={() => onMessage(comment.messageUserId!)}
+              className="hover:underline"
+            >
+              Message
+            </button>
+          ) : null}
+          {!comment.isMine && comment.body != null && comment.id > 0 ? (
+            <button type="button" onClick={onReport} className="hover:underline">
+              Report
+            </button>
+          ) : null}
           {canModerate && comment.body != null ? (
             <button
               type="button"

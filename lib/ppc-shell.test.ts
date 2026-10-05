@@ -57,6 +57,18 @@ describe("ppc shell helpers", () => {
         roles: ["super_admin", "admin"],
       },
       {
+        label: "Ask Pleros",
+        path: "/questions",
+        icon: "qa",
+        roles: ["super_admin", "admin"],
+      },
+      {
+        label: "Ministry reports",
+        path: "/ministry",
+        icon: "review",
+        roles: ["super_admin", "admin"],
+      },
+      {
         label: "Pastors",
         path: "/pastors",
         icon: "pastors",
@@ -122,6 +134,8 @@ describe("ppc shell helpers", () => {
       "/content",
       "/sogp",
       "/community",
+      "/questions",
+      "/ministry",
       "/pastors",
       "/my-enrollees",
       "/staff",
@@ -137,6 +151,8 @@ describe("ppc shell helpers", () => {
       "/content",
       "/sogp",
       "/community",
+      "/questions",
+      "/ministry",
       "/pastors",
       "/my-enrollees",
       "/staff",
@@ -186,6 +202,14 @@ describe("ppc shell helpers", () => {
     expect(getPpcShellContext("/review")).toEqual({
       label: "Review queue",
       description: "Written submissions awaiting attention",
+    });
+    expect(getPpcShellContext("/questions")).toEqual({
+      label: "Ask Pleros",
+      description: "Private questions from learners, named or anonymous",
+    });
+    expect(getPpcShellContext("/ministry")).toEqual({
+      label: "Ministry reports",
+      description: "Daily reach, outcomes and Pleros activity for each member",
     });
     expect(getPpcShellContext("/qa")).toEqual({
       label: "Q&A inbox",

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { PodcastProgressPage } from "@/components/dashboard/podcast-progress-page";
 import type { RssEpisode } from "@/lib/anchor-rss";
+import type { PodcastLeaderboardData } from "@/lib/podcast-leaderboard";
 
 export const metadata: Metadata = {
   title: "Podcast progress dashboard preview",
@@ -50,11 +51,36 @@ const previewPodcastEpisodes: RssEpisode[] = [
   },
 ];
 
+// The preview is pinned to the fixture's dates so its calendar always has
+// episodes to show.
+const previewPodcastLeaderboard: PodcastLeaderboardData = {
+  monthLabel: "July 2026",
+  top: [
+    { rank: 1, name: "Ada", points: 71, currentStreak: 9, isMe: false },
+    { rank: 2, name: "Tunde", points: 54, currentStreak: 4, isMe: false },
+    { rank: 3, name: "Preview", points: 9, currentStreak: 2, isMe: true },
+  ],
+  total: 3,
+  me: {
+    rank: 3,
+    points: 9,
+    currentStreak: 2,
+    longestStreak: 2,
+    breakdown: { episodes: 5, prayer: 4, streak: 0, total: 9 },
+  },
+};
+
 export default function PodcastDashboardPreviewPage() {
   return (
     <PodcastProgressPage
       episodes={previewPodcastEpisodes}
       listenedEpisodeGuids={["righteous-nature-23"]}
+      todayKey="2026-07-13"
+      calendarStartKey="2026-07-01"
+      calendarEndKey="2026-07-31"
+      prayerDateKeys={["2026-07-11", "2026-07-12"]}
+      listenerName="Preview"
+      leaderboard={previewPodcastLeaderboard}
       previewMode
     />
   );

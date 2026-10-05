@@ -605,6 +605,82 @@ export function welcomePackExtrasUnlockedHtml({
 </html>`.trim();
 }
 
+export type AskPlerosStaffNotificationProps = {
+  /** "Anonymous", or the asker's name when they chose to show it. */
+  askerLabel: string;
+  /** The asker's location group; null for an anonymous question. */
+  groupName: string | null;
+  message: string;
+  isFollowUp: boolean;
+  adminUrl: string;
+};
+
+/**
+ * Staff notice of a new Ask Pleros question or follow-up. It is given only
+ * the staff view of the asker, so an anonymous question carries no identity.
+ */
+export function askPlerosStaffNotificationHtml({
+  askerLabel,
+  groupName,
+  message,
+  isFollowUp,
+  adminUrl,
+}: AskPlerosStaffNotificationProps): string {
+  const safeAsker = escapeHtml(askerLabel);
+  const safeGroup = groupName ? escapeHtml(groupName) : null;
+  const safeMessage = escapeHtml(message);
+  const safeAdminUrl = escapeHtml(adminUrl);
+  const heading = isFollowUp ? "Follow-up on a question" : "New question for Pleros";
+
+  return `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8" /></head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #142033; max-width: 560px; margin: 0 auto; padding: 32px 16px;">
+  <p style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: #58657a;">Ask Pleros</p>
+  <h1 style="font-size: 20px; margin: 12px 0 0;">${heading}</h1>
+  <p style="font-size: 14px; color: #58657a; line-height: 1.6;">
+    Reply from the admin area so the answer reaches the person in their community.
+  </p>
+
+  <div style="margin: 20px 0; border: 1px solid #e4e4e7; border-radius: 8px; overflow: hidden;">
+    <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+      <tbody>
+        <tr><td style="padding: 10px 12px; background: #fafafa; width: 140px; color: #58657a;">Asked by</td><td style="padding: 10px 12px;">${safeAsker}</td></tr>
+        ${safeGroup ? `<tr><td style="padding: 10px 12px; background: #fafafa; width: 140px; color: #58657a;">Group</td><td style="padding: 10px 12px;">${safeGroup}</td></tr>` : ""}
+      </tbody>
+    </table>
+  </div>
+
+  <div style="margin: 18px 0; padding: 14px; background: #fafafa; border: 1px solid #e4e4e7; border-radius: 8px;">
+    <p style="margin: 0 0 8px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: #58657a;">${isFollowUp ? "Follow-up" : "Question"}</p>
+    <p style="margin: 0; font-size: 14px; line-height: 1.7; white-space: pre-wrap;">${safeMessage}</p>
+  </div>
+
+  <a href="${safeAdminUrl}" style="display: inline-block; margin-top: 12px; padding: 10px 20px; background: #18181b; color: #fff; border-radius: 6px; font-size: 13px; font-weight: 600; text-decoration: none;">
+    Reply in admin
+  </a>
+</body>
+</html>`.trim();
+}
+
+/**
+ * Tells a learner that Pleros has answered. Deliberately carries neither the
+ * question nor the answer: both stay inside the community.
+ */
+export function plerosReplyHtml({ url }: { url: string }): string {
+  return brandedAuthEmailHtml({
+    eyebrow: "Ask Pleros",
+    title: "Pleros has replied to your question",
+    contentHtml: `<p style="font-family:'Be Vietnam Pro',Arial,Helvetica,sans-serif; font-size:16px; line-height:1.65; font-weight:400; margin:0 0 24px;">There is a reply waiting for you in the community. Open it to read the answer or to ask a follow-up.</p>`,
+    action: {
+      label: "Read the reply",
+      url: escapeHtml(url),
+    },
+    note: "For your privacy, this email does not include your question or the reply.",
+  });
+}
+
 export function contactSubmissionNotificationHtml({
   fullName,
   email,

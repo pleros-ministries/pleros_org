@@ -4,6 +4,7 @@ import {
   canAccessCommunity,
   getCommunityContext,
 } from "@/lib/community/context";
+import { isDefaultFeedView, parseFeedView } from "@/lib/community/feed-view";
 import {
   COMMUNITY_FEED_PAGE_SIZE,
   getCommunityFeed,
@@ -22,19 +23,21 @@ export async function GET(request: Request) {
     );
   }
 
-  const offset = Math.max(
-    0,
-    Number(new URL(request.url).searchParams.get("offset") ?? 0) || 0,
-  );
+  const params = new URL(request.url).searchParams;
+  const offset = Math.max(0, Number(params.get("offset") ?? 0) || 0);
+  const view = parseFeedView({
+    sort: params.get("sort"),
+    filter: params.get("filter"),
+  });
 
-  const posts = await getCommunityFeed(ctx, { offset });
+  const posts = await getCommunityFeed(ctx, { offset, view });
   const nextOffset =
     posts.length === COMMUNITY_FEED_PAGE_SIZE ? offset + posts.length : null;
 
   return NextResponse.json({
     posts,
     nextOffset,
-    ...(offset === 0
+    ...(offset === 0 && isDefaultFeedView(view)
       ? {
           sidebar: await getCommunitySidebar(ctx),
           unit: ctx.unit,
