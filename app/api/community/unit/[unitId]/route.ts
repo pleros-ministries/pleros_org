@@ -1,11 +1,16 @@
 import { NextResponse } from "next/server";
 
 import { canAccessCommunity, getCommunityContext } from "@/lib/community/context";
-import { getUnitDetail } from "@/lib/db/queries/community-units";
-import { getUnitPosts } from "@/lib/db/queries/community-posts";
+import { parseFeedView } from "@/lib/community/feed-view";
+import { canSeeUnit } from "@/lib/community/permissions";
+import {
+  COMMUNITY_FEED_PAGE_SIZE,
+  getUnitPosts,
+} from "@/lib/db/queries/community-posts";
 
+/** One page of a unit's posts, in the requested sort and filter. */
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ unitId: string }> },
 ) {
   const { unitId } = await params;
@@ -24,17 +29,20 @@ export async function GET(
       { status: 403 },
     );
   }
-  if (ctx.unit?.id !== id && !ctx.isAdmin) {
+  if (!canSeeUnit(ctx, id)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  const [detail, posts] = await Promise.all([
-    getUnitDetail(id),
-    getUnitPosts(id, ctx),
-  ]);
-  if (!detail) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
-  }
+  const search = new URL(request.url).searchParams;
+  const offset = Math.max(0, Number(search.get("offset") ?? 0) || 0);
+  const view = parseFeedView({
+    sort: search.get("sort"),
+    filter: search.get("filter"),
+  });
 
-  return NextResponse.json({ detail, posts });
+  const posts = await getUnitPosts(id, ctx, { offset, view });
+  const nextOffset =
+    posts.length === COMMUNITY_FEED_PAGE_SIZE ? offset + posts.length : null;
+
+  return NextResponse.json({ posts, nextOffset });
 }

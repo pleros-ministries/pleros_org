@@ -267,6 +267,62 @@
       "when": 1791011166823,
       "tag": "0037_sogp_cohort_transfers",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1791184188340,
+      "tag": "0038_community_discussions",
+      "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1791184226152,
+      "tag": "0039_community_direct_messages",
+      "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1791184237622,
+      "tag": "0040_community_restrictions",
+      "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1791208139356,
+      "tag": "0041_community_discipleship_posts",
+      "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1791209766036,
+      "tag": "0042_community_member_groups",
+      "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1791211291419,
+      "tag": "0043_ask_pleros",
+      "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1791233501870,
+      "tag": "0044_ministry_reports",
+      "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1791234962155,
+      "tag": "0045_outreach_contacts",
+      "breakpoints": true
     }
   ]
 }

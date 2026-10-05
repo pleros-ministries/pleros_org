@@ -6,6 +6,7 @@ import {
   canAccessCommunity,
   getCommunityContext,
 } from "@/lib/community/context";
+import { managesUnit } from "@/lib/community/permissions";
 import {
   COMMUNITY_FEED_PAGE_SIZE,
   getCommunityFeed,
@@ -28,8 +29,9 @@ export default async function CommunityRoute() {
       initialNextOffset={initialNextOffset}
       viewerName={session.user.name ?? "You"}
       unit={ctx.unit}
-      isUnitLeader={ctx.isUnitLeader}
+      isUnitLeader={managesUnit(ctx, ctx.unit?.id)}
       isAdmin={ctx.isAdmin}
+      postingBlocked={ctx.postingBlocked}
     />
   );
 }

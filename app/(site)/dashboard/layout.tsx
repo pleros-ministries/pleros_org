@@ -25,9 +25,10 @@ export default async function DashboardLayout({
     visitorType: "user",
   });
 
-  // The SOGP journey page has its own header and navigation, so it skips
-  // the generic site nav/footer that wraps every other dashboard route.
-  if (pathname === "/dashboard/sogp") {
+  // The SOGP journey page and its podcast lookalike have their own header and
+  // navigation, so they skip the generic site nav/footer that wraps every
+  // other dashboard route.
+  if (pathname === "/dashboard/sogp" || pathname === "/dashboard/podcast") {
     return children;
   }
 

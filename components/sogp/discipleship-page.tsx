@@ -24,6 +24,7 @@ import {
   setDiscipleSharesPhoneAction,
   setLeaderSharesPhoneAction,
 } from "@/app/(site)/dashboard/sogp/discipleship/_actions";
+import { getDiscipleMinistryAction } from "@/app/(site)/dashboard/community/_actions/report-actions";
 import { Mark } from "@/components/ppc/admin-sogp-daily-by-pastor";
 import { DetailGrid, ExpandButton } from "@/components/ppc/expandable-table-row";
 import { ProgressBar } from "@/components/ppc/progress-bar";
@@ -303,6 +304,17 @@ function DiscipleParticipationTable({
   });
   const dayByMembership = new Map((data ?? []).map((day) => [day.membershipId, day]));
 
+  // What each disciple reported for their ministry that day: numbers only.
+  const { data: ministry } = useQuery({
+    queryKey: ["discipleship", "ministry", date],
+    queryFn: () => getDiscipleMinistryAction(date),
+    enabled: !preview,
+    placeholderData: keepPreviousData,
+  });
+  const ministryByMembership = new Map(
+    (ministry ?? []).map((report) => [report.membershipId, report]),
+  );
+
   return (
     <div className="overflow-hidden rounded-sm border border-zinc-200 bg-white">
       <div className="flex items-end gap-2 border-b border-zinc-100 px-3 py-2.5">
@@ -354,6 +366,8 @@ function DiscipleParticipationTable({
               <th className="hidden px-3 py-2.5 font-medium md:table-cell">Quiz</th>
               <th className="hidden px-3 py-2.5 font-medium md:table-cell">Response</th>
               <th className="hidden px-3 py-2.5 font-medium md:table-cell">Review</th>
+              <th className="hidden px-3 py-2.5 text-right font-medium md:table-cell">Reached</th>
+              <th className="hidden px-3 py-2.5 text-right font-medium md:table-cell">Saved</th>
               <th className="px-3 py-2.5 text-right font-medium md:hidden">Done</th>
               <th className="w-8 px-2 py-2.5">
                 <span className="sr-only">Details</span>
@@ -363,6 +377,10 @@ function DiscipleParticipationTable({
           <tbody className="divide-y divide-zinc-100">
             {disciples.map((disciple) => {
               const day = dayByMembership.get(disciple.membershipId) ?? null;
+              const report = ministryByMembership.get(disciple.membershipId) ?? null;
+              const reached = report
+                ? report.reachedOnline + report.reachedOffline
+                : null;
               const activities = day ? dayActivities(day) : [];
               const done = activities.filter(Boolean).length;
               const inactive = day !== null && done === 0;
@@ -414,6 +432,12 @@ function DiscipleParticipationTable({
                     <td className="hidden px-3 py-3 md:table-cell">
                       {day ? <Mark value={day.reviewAttended} /> : loadingMark}
                     </td>
+                    <td className="hidden px-3 py-3 text-right tabular-nums md:table-cell">
+                      {reached ?? <span className="text-zinc-300">—</span>}
+                    </td>
+                    <td className="hidden px-3 py-3 text-right tabular-nums md:table-cell">
+                      {report ? report.saved : <span className="text-zinc-300">—</span>}
+                    </td>
                     <td className="whitespace-nowrap px-3 py-3 text-right md:hidden">
                       {day ? (
                         <span className={inactive ? "text-red-700" : "font-medium text-zinc-900"}>
@@ -434,7 +458,7 @@ function DiscipleParticipationTable({
                   </tr>
                   {expanded ? (
                     <tr id={detailsId} className={rowTone}>
-                      <td colSpan={9} className="px-3 pb-3 pt-0">
+                      <td colSpan={11} className="px-3 pb-3 pt-0">
                         <div className="grid gap-2.5">
                           {day ? (
                             <div className="md:hidden">
@@ -445,6 +469,8 @@ function DiscipleParticipationTable({
                                   ["Quiz", <Mark key="quiz" value={day.quizAttempted} />],
                                   ["Response", <Mark key="response" value={day.writtenSubmitted} />],
                                   ["Review", <Mark key="review" value={day.reviewAttended} />],
+                                  ["Reached", reached ?? "No report"],
+                                  ["Saved", report ? report.saved : "No report"],
                                 ]}
                               />
                             </div>

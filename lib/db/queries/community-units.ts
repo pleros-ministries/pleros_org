@@ -2,8 +2,15 @@ import { and, asc, eq, inArray, isNull, sql } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
+import type { CommunityContext } from "@/lib/community/context";
+import { isMinor } from "@/lib/community/messaging";
+import { managesUnit } from "@/lib/community/permissions";
 import { buildUnitName, canonicalRegionKey } from "@/lib/community/units";
-import { toPeerMember, type PeerMember } from "@/lib/community/visibility";
+import {
+  firstNameOf,
+  toPeerMember,
+  type PeerMember,
+} from "@/lib/community/visibility";
 import {
   PRE_SOGP_PREPARATION_DAYS,
   SOGP_TOTAL_WEEKS,
@@ -90,6 +97,8 @@ export async function assignEnrollmentToUnit(
 export type UnitWithCounts = Unit & {
   memberCount: number;
   leaderName: string | null;
+  /** The pastor assigned to this region, who manages the group. */
+  pastorName: string | null;
 };
 
 export async function listUnits(): Promise<UnitWithCounts[]> {
@@ -100,6 +109,13 @@ export async function listUnits(): Promise<UnitWithCounts[]> {
       leaderName: sql<
         string | null
       >`max(case when ${schema.unitMembers.role} = 'leader' then ${schema.sogpEnrollments.firstName} end)`,
+      pastorName: sql<string | null>`(
+        select ${schema.users.name} from ${schema.pastorRegions}
+        inner join ${schema.users}
+          on ${schema.users.id} = ${schema.pastorRegions.pastorUserId}
+        where ${schema.pastorRegions.unitId} = ${schema.units.id}
+        limit 1
+      )`,
     })
     .from(schema.units)
     .leftJoin(
@@ -117,6 +133,7 @@ export async function listUnits(): Promise<UnitWithCounts[]> {
     ...row.unit,
     memberCount: row.memberCount,
     leaderName: row.leaderName,
+    pastorName: row.pastorName,
   }));
 }
 
@@ -149,13 +166,39 @@ export type UnitDetail = {
   telegramUrl: string | null;
   status: "active" | "archived";
   memberCount: number;
-  leader: { firstName: string } | null;
+  /** The pastor assigned to this region, who manages the group. */
+  pastor: { firstName: string; messageUserId: string | null } | null;
+  leader: { firstName: string; messageUserId: string | null } | null;
   members: PeerMember[];
   preparationDaysTotal: number;
 };
 
-/** Peer-safe member directory for a unit (first name + join month + stage). */
-export async function getUnitDetail(unitId: number): Promise<UnitDetail | null> {
+/**
+ * Whether the viewer may start a private conversation with a unit member.
+ * Adults message each other freely; a conversation involving an under-18
+ * needs the other person to manage this unit (its pastor or leader) or be an
+ * admin. The server
+ * action re-checks this (plus blocks and discipler links) before anything is sent.
+ */
+function canMessageUnitMember(
+  viewer: CommunityContext,
+  unitId: number,
+  member: { userId: string; isLeader: boolean; isMinor: boolean },
+): boolean {
+  if (member.userId === viewer.userId || viewer.messagingBlocked) return false;
+  if (member.isMinor && !managesUnit(viewer, unitId)) return false;
+  if (viewer.isMinor && !member.isLeader) return false;
+  return true;
+}
+
+/**
+ * Peer-safe member directory for a unit (first name + join month + stage).
+ * Pass the viewer to mark which members they may message.
+ */
+export async function getUnitDetail(
+  unitId: number,
+  viewer?: CommunityContext,
+): Promise<UnitDetail | null> {
   const unit = await getUnit(unitId);
   if (!unit) return null;
 
@@ -165,6 +208,8 @@ export async function getUnitDetail(unitId: number): Promise<UnitDetail | null> 
       joinedAt: schema.unitMembers.joinedAt,
       name: schema.sogpEnrollments.name,
       firstName: schema.sogpEnrollments.firstName,
+      userId: schema.sogpEnrollments.userId,
+      birthYear: schema.sogpEnrollments.birthYear,
       enrollmentId: schema.sogpEnrollments.id,
       enrollmentStatus: schema.sogpEnrollments.status,
       cohortStatus: schema.sogpCohorts.status,
@@ -213,8 +258,28 @@ export async function getUnitDetail(unitId: number): Promise<UnitDetail | null> 
       cohortStatus: row.cohortStatus,
       enrollmentStatus: row.enrollmentStatus,
       preparationDaysComplete: prepCounts.get(row.enrollmentId) ?? 0,
+      messageUserId:
+        viewer &&
+        canMessageUnitMember(viewer, unitId, {
+          userId: row.userId,
+          isLeader: row.role === "leader",
+          isMinor: isMinor(row.birthYear),
+        })
+          ? row.userId
+          : null,
     }),
   );
+  const leader = members.find((m) => m.isLeader) ?? null;
+
+  const [pastorRow] = await db
+    .select({ userId: schema.users.id, name: schema.users.name })
+    .from(schema.pastorRegions)
+    .innerJoin(
+      schema.users,
+      eq(schema.users.id, schema.pastorRegions.pastorUserId),
+    )
+    .where(eq(schema.pastorRegions.unitId, unitId))
+    .limit(1);
 
   return {
     id: unit.id,
@@ -222,8 +287,20 @@ export async function getUnitDetail(unitId: number): Promise<UnitDetail | null> 
     telegramUrl: unit.telegramUrl,
     status: unit.status,
     memberCount: members.length,
-    leader: members.find((m) => m.isLeader)
-      ? { firstName: members.find((m) => m.isLeader)!.firstName }
+    pastor: pastorRow
+      ? {
+          firstName: firstNameOf(pastorRow.name),
+          // A pastor manages the unit, so every member may message them.
+          messageUserId:
+            viewer &&
+            pastorRow.userId !== viewer.userId &&
+            !viewer.messagingBlocked
+              ? pastorRow.userId
+              : null,
+        }
+      : null,
+    leader: leader
+      ? { firstName: leader.firstName, messageUserId: leader.messageUserId }
       : null,
     members,
     preparationDaysTotal: Math.max(
@@ -427,4 +504,16 @@ export async function mergeUnits(input: {
   }
 
   await setUnitStatus(input.fromUnitId, "archived");
+}
+
+/** Names of specific units — for listing the location groups someone manages. */
+export async function listUnitNames(
+  unitIds: number[],
+): Promise<Array<{ id: number; name: string }>> {
+  if (unitIds.length === 0) return [];
+  return db
+    .select({ id: schema.units.id, name: schema.units.name })
+    .from(schema.units)
+    .where(inArray(schema.units.id, unitIds))
+    .orderBy(asc(schema.units.name));
 }

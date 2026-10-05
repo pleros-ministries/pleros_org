@@ -20,6 +20,18 @@ import {
   commentReactions,
   contentFlags,
   communityNotifications,
+  communityGroupMembers,
+  communityGroups,
+  communityRestrictions,
+  dmConversations,
+  dmMessages,
+  dmParticipants,
+  ministryReports,
+  outreachContacts,
+  plerosQuestionMessages,
+  plerosQuestionMutes,
+  plerosQuestions,
+  userBlocks,
   discipleshipGroups,
   discipleshipMemberships,
   discipleshipPrompts,
@@ -59,7 +71,70 @@ describe("SOGP schema", () => {
     expect(communityPosts.shareCount).toBeDefined();
     expect(communityPosts.sharedFromPostId).toBeDefined();
     expect(communityPosts.lastActivityAt).toBeDefined();
+    expect(communityPosts.kind).toBeDefined();
+    expect(communityPosts.topic).toBeDefined();
+    expect(communityPosts.discipleshipGroupId).toBeDefined();
+    expect(communityPosts.groupId).toBeDefined();
     expect(postReactions.postId).toBeDefined();
+  });
+
+  test("exports the member-created group tables", () => {
+    expect(communityGroups.name).toBeDefined();
+    expect(communityGroups.privacy).toBeDefined();
+    expect(communityGroups.status).toBeDefined();
+    expect(communityGroups.createdBy).toBeDefined();
+    expect(communityGroupMembers.groupId).toBeDefined();
+    expect(communityGroupMembers.userId).toBeDefined();
+    expect(communityGroupMembers.role).toBeDefined();
+    expect(communityGroupMembers.status).toBeDefined();
+  });
+
+  test("exports the daily ministry report table", () => {
+    expect(ministryReports.userId).toBeDefined();
+    expect(ministryReports.reportDate).toBeDefined();
+    expect(ministryReports.reachedOnline).toBeDefined();
+    expect(ministryReports.reachedOffline).toBeDefined();
+    expect(ministryReports.saved).toBeDefined();
+    expect(ministryReports.notSaved).toBeDefined();
+    expect(ministryReports.filled).toBeDefined();
+    expect(ministryReports.healed).toBeDefined();
+    expect(ministryReports.followUps).toBeDefined();
+    expect(ministryReports.note).toBeDefined();
+  });
+
+  test("exports the outreach contacts table", () => {
+    expect(outreachContacts.userId).toBeDefined();
+    expect(outreachContacts.metDate).toBeDefined();
+    expect(outreachContacts.name).toBeDefined();
+    expect(outreachContacts.phone).toBeDefined();
+    expect(outreachContacts.followedUpAt).toBeDefined();
+    expect(outreachContacts.followedUpBy).toBeDefined();
+    expect(outreachContacts.followUpNote).toBeDefined();
+  });
+
+  test("exports the Ask Pleros tables", () => {
+    expect(plerosQuestions.askerId).toBeDefined();
+    expect(plerosQuestions.isAnonymous).toBeDefined();
+    expect(plerosQuestions.status).toBeDefined();
+    expect(plerosQuestions.askerUnread).toBeDefined();
+    expect(plerosQuestionMessages.questionId).toBeDefined();
+    expect(plerosQuestionMessages.fromStaff).toBeDefined();
+    expect(plerosQuestionMessages.staffAuthorId).toBeDefined();
+    expect(plerosQuestionMutes.userId).toBeDefined();
+  });
+
+  test("exports the private message, block and restriction tables", () => {
+    expect(dmConversations.pairKey).toBeDefined();
+    expect(dmConversations.startedBy).toBeDefined();
+    expect(dmConversations.lastMessageAt).toBeDefined();
+    expect(dmParticipants.conversationId).toBeDefined();
+    expect(dmParticipants.lastReadMessageId).toBeDefined();
+    expect(dmMessages.senderId).toBeDefined();
+    expect(dmMessages.status).toBeDefined();
+    expect(userBlocks.blockerId).toBeDefined();
+    expect(userBlocks.blockedId).toBeDefined();
+    expect(communityRestrictions.postingBlocked).toBeDefined();
+    expect(communityRestrictions.messagingBlocked).toBeDefined();
   });
 
   test("exports the community comment + moderation tables", () => {

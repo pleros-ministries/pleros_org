@@ -9,28 +9,38 @@ export function PostDetail({
   post,
   viewerName,
   viewerUnitName,
-  canPost,
+  canRepost,
   isAdmin,
 }: {
   post: FeedPost;
   viewerName: string;
   viewerUnitName: string | null;
-  canPost: boolean;
+  canRepost: boolean;
   isAdmin: boolean;
 }) {
+  const back =
+    post.scope === "discipleship"
+      ? { href: "/dashboard/community/discipleship", label: "Back to discipleship" }
+      : post.scope === "group" && post.groupId != null
+        ? {
+            href: `/dashboard/community/groups/${post.groupId}`,
+            label: `Back to ${post.groupName ?? "group"}`,
+          }
+        : { href: "/dashboard/community", label: "Back to feed" };
+
   return (
     <div className="grid gap-3">
       <Link
-        href="/dashboard/community"
+        href={back.href}
         className="inline-flex w-fit items-center gap-1.5 text-xs font-medium text-zinc-500 transition-colors hover:text-[var(--color-brand-blue)]"
       >
-        <ArrowLeftIcon className="size-3.5" strokeWidth={2} /> Back to feed
+        <ArrowLeftIcon className="size-3.5" strokeWidth={2} /> {back.label}
       </Link>
       <PostCard
         post={post}
         viewerName={viewerName}
         viewerUnitName={viewerUnitName}
-        canPost={canPost}
+        canRepost={canRepost}
         isAdmin={isAdmin}
         startExpanded
       />

@@ -1,7 +1,8 @@
 /**
  * Reduces a unit member to the only shape peers (and leaders) may see:
  * first name, the month they joined, and a coarse progress stage. Never
- * surname, email, phone, or exact dates.
+ * surname, email, phone, or exact dates. `messageUserId` is an opaque id that
+ * is present only when the viewer may privately message that member.
  */
 
 import {
@@ -17,6 +18,7 @@ export type PeerMember = {
   stage: ReferralStage;
   stageLabel: string;
   isLeader: boolean;
+  messageUserId: string | null;
 };
 
 const monthFmt = new Intl.DateTimeFormat("en-GB", {
@@ -24,6 +26,11 @@ const monthFmt = new Intl.DateTimeFormat("en-GB", {
   year: "numeric",
   timeZone: "Africa/Lagos",
 });
+
+/** "Oct 2026" — the only join date peers ever see. */
+export function joinMonthLabel(date: Date): string {
+  return monthFmt.format(date);
+}
 
 export function firstNameOf(name: string): string {
   return name.trim().split(/\s+/)[0] || "Someone";
@@ -37,6 +44,8 @@ export function toPeerMember(input: {
   cohortStatus: SogpCohortStatus;
   enrollmentStatus: SogpEnrollmentStatus;
   preparationDaysComplete: number;
+  /** Set by the caller once the messaging rules allow it; defaults to hidden. */
+  messageUserId?: string | null;
 }): PeerMember {
   const stage = deriveReferralStage({
     cohortStatus: input.cohortStatus,
@@ -45,9 +54,10 @@ export function toPeerMember(input: {
   });
   return {
     firstName: firstNameOf(input.firstName || input.name),
-    joinedMonth: monthFmt.format(input.joinedAt),
+    joinedMonth: joinMonthLabel(input.joinedAt),
     stage,
     stageLabel: referralStageLabel(stage),
     isLeader: input.role === "leader",
+    messageUserId: input.messageUserId ?? null,
   };
 }

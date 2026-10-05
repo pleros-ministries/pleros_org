@@ -52,7 +52,7 @@ export const uploadRouter = {
   })
     .middleware(async () => {
       const ctx = await getCommunityContext();
-      if (!ctx || !canAccessCommunity(ctx)) {
+      if (!ctx || !canAccessCommunity(ctx) || ctx.postingBlocked) {
         throw new Error("Unauthorised");
       }
       return { userId: ctx.userId };

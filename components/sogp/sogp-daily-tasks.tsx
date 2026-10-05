@@ -53,7 +53,12 @@ function TaskPill({
   );
 }
 
-function TaskCard({
+export const SOGP_TASK_PRIMARY_BUTTON =
+  "inline-flex h-9 cursor-pointer items-center justify-center gap-1.5 rounded-full bg-[var(--color-brand-blue)] px-4 text-xs font-semibold text-white transition-colors active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50";
+export const SOGP_TASK_SECONDARY_BUTTON =
+  "inline-flex h-9 cursor-pointer items-center gap-2 rounded-full border border-zinc-200 bg-white px-3 text-xs font-semibold text-zinc-700 transition-colors hover:bg-zinc-50 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50";
+
+export function TaskCard({
   number,
   title,
   description,
@@ -116,10 +121,8 @@ export function SogpDailyTasks({
   reviewPending: boolean;
 }) {
   const track = selectedDay.track;
-  const primaryButton =
-    "inline-flex h-9 cursor-pointer items-center justify-center gap-1.5 rounded-full bg-[var(--color-brand-blue)] px-4 text-xs font-semibold text-white transition-colors active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50";
-  const secondaryButton =
-    "inline-flex h-9 cursor-pointer items-center gap-2 rounded-full border border-zinc-200 bg-white px-3 text-xs font-semibold text-zinc-700 transition-colors hover:bg-zinc-50 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50";
+  const primaryButton = SOGP_TASK_PRIMARY_BUTTON;
+  const secondaryButton = SOGP_TASK_SECONDARY_BUTTON;
 
   const teachingTasks: Array<{ key: string; complete: boolean; node: ReactNode }> = [];
 

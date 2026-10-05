@@ -3,8 +3,16 @@ import { and, asc, eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
 import type { CommunityContext } from "@/lib/community/context";
+import { CommunityError, POSTING_PAUSED_COPY } from "@/lib/community/errors";
+import { minorBirthYearFloor } from "@/lib/community/messaging";
 import { assertCanComment } from "@/lib/community/rate-limit";
-import { canModeratePostRow, getPostMeta } from "@/lib/db/queries/community-posts";
+import {
+  canCommentOnPostRow,
+  canModeratePostRow,
+  canViewPostRow,
+  getPostAccess,
+  getPostMeta,
+} from "@/lib/db/queries/community-posts";
 
 function firstName(name: string) {
   return name.trim().split(/\s+/)[0] || "Someone";
@@ -22,6 +30,8 @@ export type PostComment = {
   reactionCount: number;
   reactedByMe: boolean;
   canModerate: boolean;
+  /** The author's user id, present only when the viewer may message them. */
+  messageUserId: string | null;
 };
 
 /** Visible + hidden (tombstoned) comments for a post, oldest first. */
@@ -30,7 +40,11 @@ export async function listComments(
   postId: number,
 ): Promise<PostComment[]> {
   const postMeta = await getPostMeta(postId);
-  const canModerate = postMeta ? canModeratePostRow(ctx, postMeta) : false;
+  if (!postMeta) return [];
+  // Comments follow their post: no reading a thread the viewer cannot open.
+  const access = await getPostAccess(ctx, postMeta);
+  if (!canViewPostRow(ctx, postMeta, access)) return [];
+  const canModerate = canModeratePostRow(ctx, postMeta, access);
 
   const rows = await db
     .select({
@@ -44,6 +58,12 @@ export async function listComments(
         select 1 from ${schema.commentReactions}
         where ${schema.commentReactions.commentId} = ${schema.communityPostComments.id}
           and ${schema.commentReactions.userId} = ${ctx.userId}
+      )`,
+      // Server-side only: decides whether the author can be messaged.
+      authorIsMinor: sql<boolean>`exists (
+        select 1 from ${schema.sogpEnrollments}
+        where ${schema.sogpEnrollments.userId} = ${schema.communityPostComments.authorId}
+          and ${schema.sogpEnrollments.birthYear} >= ${minorBirthYearFloor()}
       )`,
     })
     .from(schema.communityPostComments)
@@ -71,6 +91,14 @@ export async function listComments(
     reactionCount: row.reactionCount,
     reactedByMe: row.reactedByMe,
     canModerate,
+    messageUserId:
+      row.comment.status === "visible" &&
+      row.comment.authorId !== ctx.userId &&
+      !ctx.isMinor &&
+      !ctx.messagingBlocked &&
+      !row.authorIsMinor
+        ? row.comment.authorId
+        : null,
   }));
 }
 
@@ -78,6 +106,7 @@ export async function addComment(
   ctx: CommunityContext,
   input: { postId: number; body: string; replyToId?: number | null },
 ): Promise<{ id: number; postAuthorId: string; replyToAuthorId: string | null }> {
+  if (ctx.postingBlocked) throw new CommunityError(POSTING_PAUSED_COPY);
   await assertCanComment(ctx.userId);
   const body = input.body.trim();
   if (!body) throw new Error("Comment cannot be empty.");
@@ -86,12 +115,10 @@ export async function addComment(
   if (!post || post.status !== "published") {
     throw new Error("This post is no longer available.");
   }
-  if (
-    post.scope === "unit" &&
-    !ctx.isAdmin &&
-    post.unitId !== ctx.unit?.id
-  ) {
-    throw new Error("Forbidden");
+  const access = await getPostAccess(ctx, post);
+  if (!canViewPostRow(ctx, post, access)) throw new Error("Forbidden");
+  if (!canCommentOnPostRow(ctx, post, access)) {
+    throw new CommunityError("Join this group to comment.");
   }
 
   // One level of nesting: only allow replying to a top-level comment on this post.
@@ -176,6 +203,20 @@ export async function commentPostId(commentId: number): Promise<number | null> {
   return row?.postId ?? null;
 }
 
+/** Post, author and status of a comment — used to gate reports. */
+export async function getCommentMeta(commentId: number) {
+  const [row] = await db
+    .select({
+      postId: schema.communityPostComments.postId,
+      authorId: schema.communityPostComments.authorId,
+      status: schema.communityPostComments.status,
+    })
+    .from(schema.communityPostComments)
+    .where(eq(schema.communityPostComments.id, commentId))
+    .limit(1);
+  return row ?? null;
+}
+
 export async function setCommentStatus(
   commentId: number,
   status: "visible" | "hidden" | "removed",
@@ -194,5 +235,10 @@ export async function assertCanModerateComment(
   const postId = await commentPostId(commentId);
   if (postId == null) throw new Error("Comment not found");
   const post = await getPostMeta(postId);
-  if (!post || !canModeratePostRow(ctx, post)) throw new Error("Forbidden");
+  if (
+    !post ||
+    !canModeratePostRow(ctx, post, await getPostAccess(ctx, post))
+  ) {
+    throw new Error("Forbidden");
+  }
 }

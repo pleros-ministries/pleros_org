@@ -1,6 +1,9 @@
+import { resolveAskPlerosInbox } from "../community/ask-pleros";
 import { resend, isEmailEnabled } from "./resend";
 import {
+  askPlerosStaffNotificationHtml,
   contactSubmissionNotificationHtml,
+  plerosReplyHtml,
   emailVerificationHtml,
   inactivityReminderHtml,
   passwordResetHtml,
@@ -318,5 +321,58 @@ export async function sendSogpAuthCodeEmail(opts: {
     to: opts.to,
     subject: "Your SOGP verification code",
     html: sogpAuthCodeHtml({ otp: opts.otp, type: opts.type }),
+  });
+}
+
+/**
+ * Emails the shared Ask Pleros inbox about a new question or follow-up. No
+ * reply-to is set: answers go through the admin area so they are recorded and
+ * so an anonymous asker's address is never needed.
+ */
+export async function sendAskPlerosStaffNotification(opts: {
+  askerLabel: string;
+  groupName: string | null;
+  message: string;
+  isFollowUp: boolean;
+  isAnonymous: boolean;
+  adminUrl: string;
+}) {
+  const to = resolveAskPlerosInbox(process.env);
+
+  if (!to) {
+    return { ok: false as const, reason: "missing_inbox" as const };
+  }
+  if (!isEmailEnabled() || !resend) {
+    return { ok: false as const, reason: "email_unavailable" as const };
+  }
+
+  const subject = opts.isFollowUp
+    ? "Follow-up on a question for Pleros"
+    : opts.isAnonymous
+      ? "New anonymous question for Pleros"
+      : `New question for Pleros from ${opts.askerLabel}`;
+
+  try {
+    await resend.emails.send({
+      from: process.env.EMAIL_FROM_PLEROS ?? FROM,
+      to,
+      subject,
+      html: askPlerosStaffNotificationHtml(opts),
+    });
+    return { ok: true as const };
+  } catch {
+    return { ok: false as const, reason: "send_failed" as const };
+  }
+}
+
+/** Tells the asker that Pleros has replied; the email carries no question or answer text. */
+export async function sendPlerosReplyEmail(opts: { to: string; url: string }) {
+  if (!isEmailEnabled() || !resend) return null;
+
+  return resend.emails.send({
+    from: getSogpSender(process.env.EMAIL_FROM_PLEROS),
+    to: opts.to,
+    subject: "Pleros has replied to your question",
+    html: plerosReplyHtml({ url: opts.url }),
   });
 }

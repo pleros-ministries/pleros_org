@@ -59,7 +59,7 @@ const POINT_RULES: Array<{ label: string; value: string }> = [
   },
 ];
 
-function StreakBadge({ days }: { days: number }) {
+export function StreakBadge({ days }: { days: number }) {
   if (days < 1) return null;
   return (
     <span className="inline-flex items-center gap-1 text-[0.7rem] font-medium text-orange-600">

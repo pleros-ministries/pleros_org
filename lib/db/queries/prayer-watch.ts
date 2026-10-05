@@ -38,6 +38,27 @@ export async function getPrayerWatchAttendanceForMonth(
   return rows.map((row) => ({ dateKey: row.attendedDate, session: row.session }));
 }
 
+/** Dates with a logged 5:30 am watch, the session the daily dashboards tick. */
+export async function getMorningPrayerWatchDateKeys(
+  userId: string,
+  startKey: string,
+  endKey: string,
+): Promise<string[]> {
+  const rows = await db
+    .select({ attendedDate: schema.prayerWatchAttendance.attendedDate })
+    .from(schema.prayerWatchAttendance)
+    .where(
+      and(
+        eq(schema.prayerWatchAttendance.userId, userId),
+        eq(schema.prayerWatchAttendance.session, "morning"),
+        gte(schema.prayerWatchAttendance.attendedDate, startKey),
+        lte(schema.prayerWatchAttendance.attendedDate, endKey),
+      ),
+    );
+
+  return rows.map((row) => row.attendedDate);
+}
+
 export async function logPrayerWatchAttendance(
   userId: string,
   dateKey: string,

@@ -1,16 +1,20 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import type { UnitWithCounts } from "@/lib/db/queries/community-units";
 import type { AdminPost, OpenFlag, PostImage } from "@/lib/db/queries/community-posts";
+import type { RestrictedMember } from "@/lib/db/queries/community-restrictions";
 import { useUploadThing } from "@/lib/upload/uploadthing-client";
 import {
   backfillCommunityUnits,
   moderatePost,
   publishGlobalPost,
   resolveContentFlag,
+  restoreCommunityMember,
+  restrictCommunityMember,
   togglePostPinned,
   updateUnitStatus,
   updateUnitTelegramUrl,
@@ -20,12 +24,14 @@ export function AdminCommunityPage({
   units,
   posts,
   flags,
+  restricted,
   enrolmentCount,
   memberCount,
 }: {
   units: UnitWithCounts[];
   posts: AdminPost[];
   flags: OpenFlag[];
+  restricted: RestrictedMember[];
   enrolmentCount: number;
   memberCount: number;
 }) {
@@ -61,7 +67,7 @@ export function AdminCommunityPage({
     <div className="grid gap-4">
       <header className="grid gap-1">
         <h1 className="ppc-heading text-lg font-semibold text-zinc-900">
-          Community units
+          Community
         </h1>
         <p className="text-xs text-zinc-500">
           {enrolmentCount} enrolments · {memberCount} placed in a unit
@@ -172,13 +178,23 @@ export function AdminCommunityPage({
                 className="grid gap-1 border-t border-zinc-100 pt-2 text-xs first:border-0 first:pt-0"
               >
                 <div className="text-zinc-900">
-                  <span className="font-semibold">{flag.targetType}</span>{" "}
+                  <span className="font-semibold">
+                    {flag.targetType === "message"
+                      ? "Private message"
+                      : flag.targetType === "post"
+                        ? "Post"
+                        : "Comment"}
+                  </span>
+                  {flag.authorName ? ` by ${flag.authorName}` : ""}{" "}
                   {flag.preview ? `— ${flag.preview}` : ""}
                 </div>
                 <div className="text-zinc-500">
                   “{flag.reason}” · reported by {flag.reporterName}
+                  {flag.targetType === "message"
+                    ? " · only this message is shown, not the conversation"
+                    : ""}
                 </div>
-                <div className="flex gap-3">
+                <div className="flex flex-wrap gap-3">
                   <button
                     type="button"
                     disabled={pending}
@@ -187,17 +203,48 @@ export function AdminCommunityPage({
                         () =>
                           resolveContentFlag({
                             flagId: flag.id,
-                            targetType: flag.targetType,
-                            targetId: flag.targetId,
                             action: "hide",
                           }),
-                        "Content hidden, flag closed.",
+                        flag.targetType === "message"
+                          ? "Message removed, flag closed."
+                          : "Content hidden, flag closed.",
                       )
                     }
                     className="text-red-700 underline underline-offset-2"
                   >
-                    Hide content
+                    {flag.targetType === "message"
+                      ? "Remove message"
+                      : "Hide content"}
                   </button>
+                  {flag.authorId ? (
+                    <button
+                      type="button"
+                      disabled={pending}
+                      onClick={() => {
+                        const authorId = flag.authorId;
+                        if (!authorId) return;
+                        const messaging = flag.targetType === "message";
+                        run(
+                          () =>
+                            restrictCommunityMember({
+                              userId: authorId,
+                              ...(messaging
+                                ? { messaging: true }
+                                : { posting: true }),
+                              reason: flag.reason,
+                            }),
+                          messaging
+                            ? "Private messaging paused for this member."
+                            : "Posting paused for this member.",
+                        );
+                      }}
+                      className="text-[var(--color-brand-blue)] underline underline-offset-2"
+                    >
+                      {flag.targetType === "message"
+                        ? "Pause author's messaging"
+                        : "Pause author's posting"}
+                    </button>
+                  ) : null}
                   <button
                     type="button"
                     disabled={pending}
@@ -206,8 +253,6 @@ export function AdminCommunityPage({
                         () =>
                           resolveContentFlag({
                             flagId: flag.id,
-                            targetType: flag.targetType,
-                            targetId: flag.targetId,
                             action: "dismiss",
                           }),
                         "Flag dismissed.",
@@ -224,12 +269,65 @@ export function AdminCommunityPage({
         )}
       </section>
 
+      <section className="grid gap-2 rounded-sm border border-zinc-200 bg-white p-4">
+        <h2 className="ppc-heading text-sm font-semibold text-zinc-900">
+          Paused members{restricted.length > 0 ? ` (${restricted.length})` : ""}
+        </h2>
+        {restricted.length === 0 ? (
+          <p className="text-xs text-zinc-500">
+            No one is paused. Pause a member&apos;s posting or private messaging
+            from a report in the moderation queue.
+          </p>
+        ) : (
+          <ul className="grid gap-2">
+            {restricted.map((member) => (
+              <li
+                key={member.userId}
+                className="flex flex-wrap items-center justify-between gap-2 border-t border-zinc-100 pt-2 text-xs first:border-0 first:pt-0"
+              >
+                <div className="grid gap-0.5">
+                  <span className="font-semibold text-zinc-900">
+                    {member.name}
+                  </span>
+                  <span className="text-zinc-500">
+                    {[
+                      member.postingBlocked ? "Posting paused" : null,
+                      member.messagingBlocked ? "Messaging paused" : null,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
+                    {member.reason ? ` · “${member.reason}”` : ""}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  disabled={pending}
+                  onClick={() =>
+                    run(
+                      () => restoreCommunityMember(member.userId),
+                      "Member restored.",
+                    )
+                  }
+                  className="text-[var(--color-brand-blue)] underline underline-offset-2"
+                >
+                  Restore
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <h2 className="ppc-heading text-sm font-semibold text-zinc-900">
+        Location groups ({units.length})
+      </h2>
       <div className="overflow-x-auto rounded-sm border border-zinc-200">
         <table className="w-full text-left text-xs">
           <thead className="bg-zinc-50 text-zinc-500">
             <tr>
-              <th className="px-3 py-2 font-medium">Unit</th>
+              <th className="px-3 py-2 font-medium">Group</th>
               <th className="px-3 py-2 font-medium">Members</th>
+              <th className="px-3 py-2 font-medium">Pastor</th>
               <th className="px-3 py-2 font-medium">Leader</th>
               <th className="px-3 py-2 font-medium">Telegram</th>
               <th className="px-3 py-2 font-medium">Status</th>
@@ -238,15 +336,23 @@ export function AdminCommunityPage({
           <tbody className="divide-y divide-zinc-100">
             {units.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-3 py-6 text-center text-zinc-500">
+                <td colSpan={6} className="px-3 py-6 text-center text-zinc-500">
                   No units yet. Run the backfill to create them from enrolments.
                 </td>
               </tr>
             ) : (
               units.map((unit) => (
                 <tr key={unit.id} className={unit.status === "archived" ? "opacity-50" : ""}>
-                  <td className="px-3 py-2 font-medium text-zinc-900">{unit.name}</td>
+                  <td className="px-3 py-2 font-medium text-zinc-900">
+                    <Link
+                      href={`/dashboard/community/unit/${unit.id}`}
+                      className="text-[var(--color-brand-blue)] underline underline-offset-2"
+                    >
+                      {unit.name}
+                    </Link>
+                  </td>
                   <td className="px-3 py-2">{unit.memberCount}</td>
+                  <td className="px-3 py-2">{unit.pastorName ?? "Not assigned"}</td>
                   <td className="px-3 py-2">{unit.leaderName ?? "—"}</td>
                   <td className="px-3 py-2">
                     <TelegramCell

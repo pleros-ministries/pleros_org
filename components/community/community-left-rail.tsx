@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import type { DiscipleshipRailSummary } from "@/lib/db/queries/community-discipleship";
 import type { UnitRailCard } from "@/lib/db/queries/community-units";
 
 import { CommunityNav } from "./community-nav";
@@ -17,15 +18,32 @@ function cohortLine(cohort: UnitRailCard["cohort"]) {
   return "Programme complete";
 }
 
+function discipleshipLine(summary: DiscipleshipRailSummary) {
+  const parts = [
+    summary.disciplerFirstName
+      ? `Discipled by ${summary.disciplerFirstName}`
+      : null,
+    summary.discipleCount > 0
+      ? `you disciple ${summary.discipleCount}`
+      : null,
+  ].filter(Boolean);
+  if (parts.length === 0) return "Not in a group yet";
+  const line = parts.join(" · ");
+  return line.charAt(0).toUpperCase() + line.slice(1);
+}
+
 /** The rail's inner stack — reused by the desktop rail and the mobile sheet. */
 export function CommunityRailContent({
   unitCard,
   unitId,
+  discipleship = null,
   showLeaderTab = false,
   onNavigate,
 }: {
   unitCard: UnitRailCard | null;
   unitId: number | null;
+  /** null for viewers without an enrolment (admins). */
+  discipleship?: DiscipleshipRailSummary | null;
   showLeaderTab?: boolean;
   onNavigate?: () => void;
 }) {
@@ -39,7 +57,7 @@ export function CommunityRailContent({
           onClick={onNavigate}
           className={`${card} block transition-colors hover:border-zinc-300`}
         >
-          <p className="text-xs font-medium text-zinc-500">Your unit</p>
+          <p className="text-xs font-medium text-zinc-500">Your group</p>
           <p className="mt-1 flex items-center gap-1.5 text-sm font-semibold text-zinc-900">
             {unitCard.flag ? (
               <span aria-hidden className="text-base leading-none">
@@ -63,9 +81,25 @@ export function CommunityRailContent({
         </Link>
       ) : null}
 
+      {discipleship ? (
+        <Link
+          href="/dashboard/community/discipleship"
+          onClick={onNavigate}
+          className={`${card} block transition-colors hover:border-zinc-300`}
+        >
+          <p className="text-xs font-medium text-zinc-500">
+            Your discipleship group
+          </p>
+          <p className="mt-1 text-sm font-semibold text-zinc-900">
+            {discipleshipLine(discipleship)}
+          </p>
+        </Link>
+      ) : null}
+
       <CommunityNav
         unitId={unitId}
         showLeaderTab={showLeaderTab}
+        showDiscipleship={discipleship != null}
         onNavigate={onNavigate}
       />
 
@@ -77,11 +111,13 @@ export function CommunityRailContent({
 export function CommunityLeftRail({
   unitCard,
   unitId,
+  discipleship = null,
   showLeaderTab = false,
   className = "",
 }: {
   unitCard: UnitRailCard | null;
   unitId: number | null;
+  discipleship?: DiscipleshipRailSummary | null;
   showLeaderTab?: boolean;
   className?: string;
 }) {
@@ -91,6 +127,7 @@ export function CommunityLeftRail({
         <CommunityRailContent
           unitCard={unitCard}
           unitId={unitId}
+          discipleship={discipleship}
           showLeaderTab={showLeaderTab}
         />
       </div>

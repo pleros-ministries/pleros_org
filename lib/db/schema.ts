@@ -147,7 +147,26 @@ export const unitMemberRoleEnum = pgEnum("unit_member_role", [
 export const communityPostScopeEnum = pgEnum("community_post_scope", [
   "global",
   "unit",
+  "discipleship",
+  "group",
 ]);
+
+export const communityGroupPrivacyEnum = pgEnum("community_group_privacy", [
+  "public",
+  "private",
+]);
+
+export const communityGroupRoleEnum = pgEnum("community_group_role", [
+  "owner",
+  "moderator",
+  "member",
+]);
+
+/** `pending` is a request to join a private group; `banned` blocks rejoining. */
+export const communityGroupMemberStatusEnum = pgEnum(
+  "community_group_member_status",
+  ["active", "pending", "banned"],
+);
 
 export const communityPostAuthorKindEnum = pgEnum(
   "community_post_author_kind",
@@ -160,7 +179,13 @@ export const communityPostStatusEnum = pgEnum("community_post_status", [
   "removed",
 ]);
 
-/** Also used by community_post_comments.status. */
+/** `official` = ministry/leader announcement; `discussion` = raised by any member. */
+export const communityPostKindEnum = pgEnum("community_post_kind", [
+  "official",
+  "discussion",
+]);
+
+/** Also used by community_post_comments.status and dm_messages.status. */
 export const communityMessageStatusEnum = pgEnum("community_message_status", [
   "visible",
   "hidden",
@@ -201,6 +226,10 @@ export const communityNotificationKindEnum = pgEnum(
     "discipleship_prayer_request",
     "discipleship_prayed",
     "discipleship_prayer_answered",
+    "discipleship_post",
+    "group_join_request",
+    "group_join_approved",
+    "pleros_reply",
   ],
 );
 
@@ -1421,10 +1450,23 @@ export const communityPosts = pgTable(
     unitId: integer("unit_id").references(() => units.id, {
       onDelete: "cascade",
     }),
+    /** Set only for `discipleship` posts: the group whose members can see it. */
+    discipleshipGroupId: integer("discipleship_group_id").references(
+      (): AnyPgColumn => discipleshipGroups.id,
+      { onDelete: "cascade" },
+    ),
+    /** Set only for `group` posts: the member-created group it belongs to. */
+    groupId: integer("group_id").references(
+      (): AnyPgColumn => communityGroups.id,
+      { onDelete: "cascade" },
+    ),
     authorId: text("author_id")
       .notNull()
       .references(() => users.id),
     authorKind: communityPostAuthorKindEnum("author_kind").notNull(),
+    kind: communityPostKindEnum("kind").notNull().default("official"),
+    /** Optional discussion topic key, validated against `COMMUNITY_TOPICS`. */
+    topic: text("topic"),
     title: text("title"),
     body: text("body").notNull(),
     /** Up to 4 uploaded images: `[{ url, key }]`. */
@@ -1459,6 +1501,12 @@ export const communityPosts = pgTable(
     index("community_posts_unit_published_idx").on(t.unitId, t.publishedAt),
     index("community_posts_scope_activity_idx").on(t.scope, t.lastActivityAt),
     index("community_posts_status_idx").on(t.status),
+    index("community_posts_kind_activity_idx").on(t.kind, t.lastActivityAt),
+    index("community_posts_discipleship_activity_idx").on(
+      t.discipleshipGroupId,
+      t.lastActivityAt,
+    ),
+    index("community_posts_group_activity_idx").on(t.groupId, t.lastActivityAt),
   ],
 );
 
@@ -1592,6 +1640,308 @@ export const communityNotifications = pgTable(
     ),
   ],
 );
+
+// ─── Community: member-created groups ──────────────────────────────────────
+
+/** A group any learner can create, Facebook-style. Location groups stay in `units`. */
+export const communityGroups = pgTable(
+  "community_groups",
+  {
+    id: serial("id").primaryKey(),
+    name: text("name").notNull(),
+    description: text("description").notNull().default(""),
+    /** Public: anyone reads and joins. Private: members only, joining needs approval. */
+    privacy: communityGroupPrivacyEnum("privacy").notNull().default("public"),
+    status: unitStatusEnum("status").notNull().default("active"),
+    createdBy: text("created_by").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    // Names are unique whatever their capitalisation.
+    uniqueIndex("community_groups_name_idx").on(sql`lower(${t.name})`),
+    index("community_groups_status_idx").on(t.status),
+  ],
+);
+
+export const communityGroupMembers = pgTable(
+  "community_group_members",
+  {
+    id: serial("id").primaryKey(),
+    groupId: integer("group_id")
+      .notNull()
+      .references(() => communityGroups.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    role: communityGroupRoleEnum("role").notNull().default("member"),
+    status: communityGroupMemberStatusEnum("status").notNull().default("active"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("community_group_members_group_user_idx").on(
+      t.groupId,
+      t.userId,
+    ),
+    index("community_group_members_user_status_idx").on(t.userId, t.status),
+    index("community_group_members_group_status_idx").on(t.groupId, t.status),
+  ],
+);
+
+// ─── Community: Ask Pleros ─────────────────────────────────────────────────
+
+/**
+ * A private question from a learner to the ministry. `asker_id` is how the
+ * reply reaches them; when `is_anonymous` is true it must never be selected
+ * for, or shown to, staff.
+ */
+export const plerosQuestions = pgTable(
+  "pleros_questions",
+  {
+    id: serial("id").primaryKey(),
+    askerId: text("asker_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    isAnonymous: boolean("is_anonymous").notNull(),
+    status: qaStatusEnum("status").notNull().default("open"),
+    /** True while Pleros has replied and the asker has not opened it. */
+    askerUnread: boolean("asker_unread").notNull().default(false),
+    lastMessageAt: timestamp("last_message_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index("pleros_questions_asker_idx").on(t.askerId, t.lastMessageAt),
+    index("pleros_questions_status_idx").on(t.status, t.lastMessageAt),
+  ],
+);
+
+export const plerosQuestionMessages = pgTable(
+  "pleros_question_messages",
+  {
+    id: serial("id").primaryKey(),
+    questionId: integer("question_id")
+      .notNull()
+      .references(() => plerosQuestions.id, { onDelete: "cascade" }),
+    fromStaff: boolean("from_staff").notNull(),
+    /** Which admin replied — internal record only; askers see "Pleros". Null for asker messages. */
+    staffAuthorId: text("staff_author_id").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    body: text("body").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [index("pleros_question_messages_question_idx").on(t.questionId, t.id)],
+);
+
+/**
+ * People who may no longer send questions. Never list this table anywhere:
+ * showing who is muted would unmask an anonymous asker.
+ */
+export const plerosQuestionMutes = pgTable("pleros_question_mutes", {
+  userId: text("user_id")
+    .primaryKey()
+    .references(() => users.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
+
+// ─── Community: daily ministry reports ─────────────────────────────────────
+
+/**
+ * What a member did in ministry on one Lagos day, as they reported it. Their
+ * Pleros activity for the day (Bible reading, Prayer Watch, SOGP, podcast) is
+ * compiled live from its own tables and is never copied here.
+ */
+export const ministryReports = pgTable(
+  "ministry_reports",
+  {
+    id: serial("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    reportDate: date("report_date", { mode: "string" }).notNull(),
+    reachedOnline: integer("reached_online").notNull().default(0),
+    reachedOffline: integer("reached_offline").notNull().default(0),
+    saved: integer("saved").notNull().default(0),
+    notSaved: integer("not_saved").notNull().default(0),
+    filled: integer("filled").notNull().default(0),
+    healed: integer("healed").notNull().default(0),
+    followUps: integer("follow_ups").notNull().default(0),
+    note: text("note"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("ministry_reports_user_date_idx").on(t.userId, t.reportDate),
+    index("ministry_reports_date_idx").on(t.reportDate),
+  ],
+);
+
+/**
+ * Someone a member met in outreach, kept so they can be followed up. These are
+ * people outside Pleros, so their details go only to the member who met them,
+ * the pastor assigned to that member's location group, and admins.
+ */
+export const outreachContacts = pgTable(
+  "outreach_contacts",
+  {
+    id: serial("id").primaryKey(),
+    /** The member who met this person. */
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    /** The Lagos day they met, matching that day's ministry report. */
+    metDate: date("met_date", { mode: "string" }).notNull(),
+    name: text("name").notNull(),
+    phone: text("phone"),
+    note: text("note"),
+    /** null while the person is still to be followed up. */
+    followedUpAt: timestamp("followed_up_at", { withTimezone: true }),
+    followedUpBy: text("followed_up_by").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    followUpNote: text("follow_up_note"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index("outreach_contacts_user_date_idx").on(t.userId, t.metDate),
+    index("outreach_contacts_date_idx").on(t.metDate),
+  ],
+);
+
+// ─── Community: private messages ───────────────────────────────────────────
+
+/** One conversation per pair of members; `pair_key` is `<lowerUserId>:<higherUserId>`. */
+export const dmConversations = pgTable(
+  "dm_conversations",
+  {
+    id: serial("id").primaryKey(),
+    pairKey: text("pair_key").notNull(),
+    /** Set with the first message; feeds the new-conversation rate limit. */
+    startedBy: text("started_by").references(() => users.id, {
+      onDelete: "set null",
+    }),
+    startedAt: timestamp("started_at", { withTimezone: true }),
+    /** null until the first message, so empty conversations stay out of inboxes. */
+    lastMessageAt: timestamp("last_message_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("dm_conversations_pair_key_idx").on(t.pairKey),
+    index("dm_conversations_started_idx").on(t.startedBy, t.startedAt),
+  ],
+);
+
+export const dmParticipants = pgTable(
+  "dm_participants",
+  {
+    id: serial("id").primaryKey(),
+    conversationId: integer("conversation_id")
+      .notNull()
+      .references(() => dmConversations.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    /** Highest message id this participant has seen. */
+    lastReadMessageId: integer("last_read_message_id").notNull().default(0),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("dm_participants_conversation_user_idx").on(
+      t.conversationId,
+      t.userId,
+    ),
+    index("dm_participants_user_idx").on(t.userId),
+  ],
+);
+
+export const dmMessages = pgTable(
+  "dm_messages",
+  {
+    id: serial("id").primaryKey(),
+    conversationId: integer("conversation_id")
+      .notNull()
+      .references(() => dmConversations.id, { onDelete: "cascade" }),
+    senderId: text("sender_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    body: text("body").notNull(),
+    status: communityMessageStatusEnum("status").notNull().default("visible"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index("dm_messages_conversation_id_idx").on(t.conversationId, t.id),
+    index("dm_messages_sender_created_idx").on(t.senderId, t.createdAt),
+  ],
+);
+
+/** A member who blocks another stops private messages in both directions. */
+export const userBlocks = pgTable(
+  "user_blocks",
+  {
+    id: serial("id").primaryKey(),
+    blockerId: text("blocker_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    blockedId: text("blocked_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("user_blocks_blocker_blocked_idx").on(t.blockerId, t.blockedId),
+    index("user_blocks_blocked_idx").on(t.blockedId),
+  ],
+);
+
+/** Admin-set limits on a member after misuse. No row means no restriction. */
+export const communityRestrictions = pgTable("community_restrictions", {
+  userId: text("user_id")
+    .primaryKey()
+    .references(() => users.id, { onDelete: "cascade" }),
+  postingBlocked: boolean("posting_blocked").notNull().default(false),
+  messagingBlocked: boolean("messaging_blocked").notNull().default(false),
+  reason: text("reason"),
+  setBy: text("set_by").references(() => users.id, { onDelete: "set null" }),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
 
 // ─── SOGP discipleship groups ───────────────────────────────────────────────
 
