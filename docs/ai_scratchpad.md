@@ -22,6 +22,7 @@ Consolidated 2026-08-31. Keep this file short, current, pattern-focused, and fre
 - Next.js 16.3.1 and Tailwind v4 are installed. Use `/_next/mcp` and browser checks for runtime verification.
 - Suisse Int'l files are committed under `app/fonts/suisse-intl/`; load exact filenames with `next/font/local`, expose a CSS variable, and integrate through existing tokens.
 - Core checks: `npm run lint`, `npm test`, `npm run build`, and `npm run dev`.
+- The Vercel deploy runs `next build`, which type-checks every `.ts`/`.tsx` in the repo, including `scripts/` and tests. One type error anywhere fails the deploy even when `next dev` serves the page without complaint, so unverified work should get a clean `npx tsc --noEmit` before it is committed. The two "Dynamic filesystem access causes tracing of the whole project" notices from the learning-progress share image route are long-standing warnings, printed last in the log; they are not what fails a build.
 - PPC DB routes need `DATABASE_URL`. The default Neon HTTP Drizzle client cannot run transactions; use the dedicated Neon `Pool` transaction client for atomic admin writes and `DATABASE_URL_UNPOOLED` with `Pool`/`Client` for bulk scripts.
 
 ## Product and architecture

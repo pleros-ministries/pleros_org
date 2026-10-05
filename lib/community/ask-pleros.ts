@@ -74,10 +74,9 @@ export function staffAskerLabel(view: StaffAskerView): string {
 }
 
 /** The shared inbox for new questions: its own address, else the contact-form inbox. */
-export function resolveAskPlerosInbox(env: {
-  ASK_PLEROS_INBOX_EMAIL?: string;
-  CONTACT_INBOX_EMAIL?: string;
-}): string | null {
+export function resolveAskPlerosInbox(
+  env: Record<string, string | undefined>,
+): string | null {
   return (
     env.ASK_PLEROS_INBOX_EMAIL?.trim() ||
     env.CONTACT_INBOX_EMAIL?.trim() ||

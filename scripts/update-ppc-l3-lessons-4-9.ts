@@ -73,7 +73,13 @@ async function main() {
     .from(schema.lessons)
     .where(eq(schema.lessons.levelId, LEVEL_ID));
 
-  const plans = [];
+  const plans: Array<{
+    lesson: (typeof LESSONS)[number];
+    existing: (typeof levelLessons)[number];
+    quizTrack: (typeof quizTracks)[number];
+    responseTrack: (typeof responseTracks)[number];
+    notesContent: string | null;
+  }> = [];
   for (const lesson of LESSONS) {
     const quizTrack = quizTracks.find((track) => track.trackNumber === lesson.lessonNumber);
     const responseTrack = responseTracks.find(

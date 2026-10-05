@@ -40,7 +40,7 @@ const contactColumns = {
   followedUpByName: followUpUser.name,
 };
 
-type ContactRow = {
+type ContactRecord = {
   id: number;
   metDate: string;
   name: string;
@@ -51,7 +51,7 @@ type ContactRow = {
   followedUpByName: string | null;
 };
 
-function toContact(row: ContactRow): OutreachContact {
+function toContact(row: ContactRecord): OutreachContact {
   return { ...row, followedUpAt: row.followedUpAt?.toISOString() ?? null };
 }
 
