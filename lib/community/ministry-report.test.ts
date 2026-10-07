@@ -16,7 +16,6 @@ import {
   reportableDateKeys,
   resolveMinistryRange,
   sumMinistryNumbers,
-  summariseMinistryWeek,
   totalReached,
   type DayActivity,
 } from "./ministry-report";
@@ -189,42 +188,6 @@ describe("totals", () => {
     const keys = MINISTRY_FIELDS.map((field) => field.key);
     expect(new Set(keys).size).toBe(keys.length);
     expect([...keys].sort()).toEqual(Object.keys(emptyMinistryNumbers()).sort());
-  });
-});
-
-describe("summariseMinistryWeek", () => {
-  const report = (reportDate: string, reachedOnline: number, saved = 0) => ({
-    ...emptyMinistryNumbers(),
-    reportDate,
-    reachedOnline,
-    saved,
-  });
-
-  test("counts only the seven days ending today", () => {
-    const summary = summariseMinistryWeek(
-      [
-        report("2026-10-05", 4, 1),
-        report("2026-09-29", 6),
-        report("2026-09-28", 100, 50),
-      ],
-      "2026-10-05",
-    );
-    expect(summary).toEqual({
-      reportedToday: true,
-      weekReports: 2,
-      weekReached: 10,
-      weekSaved: 1,
-    });
-  });
-
-  test("knows when today's report is still missing", () => {
-    expect(summariseMinistryWeek([report("2026-10-04", 3)], "2026-10-05")).toEqual({
-      reportedToday: false,
-      weekReports: 1,
-      weekReached: 3,
-      weekSaved: 0,
-    });
-    expect(summariseMinistryWeek([], "2026-10-05").weekReports).toBe(0);
   });
 });
 

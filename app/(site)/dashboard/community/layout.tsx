@@ -3,7 +3,6 @@ import type { ReactNode } from "react";
 import { CommunityGrid } from "@/components/community/community-grid";
 import { CommunityLeftRail } from "@/components/community/community-left-rail";
 import { CommunityQueryProvider } from "@/components/community/community-query-provider";
-import { CommunitySidebar } from "@/components/community/community-sidebar";
 import { CommunityShell } from "@/components/community/community-shell";
 import {
   canAccessCommunity,
@@ -11,7 +10,6 @@ import {
 } from "@/lib/community/context";
 import { managesAnyUnit } from "@/lib/community/permissions";
 import { getDiscipleshipRailSummary } from "@/lib/db/queries/community-discipleship";
-import { getCommunitySidebar } from "@/lib/db/queries/community-posts";
 import { getUnitRailCard } from "@/lib/db/queries/community-units";
 
 export default async function CommunityLayout({
@@ -31,8 +29,7 @@ export default async function CommunityLayout({
   const showLeaderTab = managesAnyUnit(ctx);
   const unitId = ctx.unit?.id ?? null;
 
-  const [sidebar, unitCard, discipleship] = await Promise.all([
-    getCommunitySidebar(ctx),
+  const [unitCard, discipleship] = await Promise.all([
     ctx.unit
       ? getUnitRailCard(ctx.unit.id, ctx.enrollmentId)
       : Promise.resolve(null),
@@ -63,7 +60,6 @@ export default async function CommunityLayout({
                   className="hidden xl:block"
                 />
               }
-              sidebar={<CommunitySidebar data={sidebar} />}
             >
               {children}
             </CommunityGrid>
