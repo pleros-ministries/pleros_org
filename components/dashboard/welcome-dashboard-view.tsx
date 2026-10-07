@@ -7,7 +7,6 @@ import {
   type WelcomeDashboardSection,
   type WelcomeDashboardSectionAccent,
 } from "@/lib/welcome-dashboard-content";
-import type { MinistryDashboardSummary } from "@/lib/community/ministry-report";
 import { InstallAppCta } from "@/components/pwa/install-app-cta";
 import { cn } from "@/lib/utils";
 
@@ -183,62 +182,11 @@ function DashboardChurchMinistryStrip() {
 type WelcomeDashboardViewProps = {
   name?: string;
   sections?: WelcomeDashboardSection[];
-  /** The learner's ministry reports this week; omitted for anyone outside the community. */
-  ministry?: MinistryDashboardSummary | null;
 };
-
-/** The learner's daily ministry report at a glance, with the way in to send or correct it. */
-function MinistryReportPanel({ ministry }: { ministry: MinistryDashboardSummary }) {
-  const figures = [
-    { label: "Reports", value: ministry.weekReports },
-    { label: "Reached", value: ministry.weekReached },
-    { label: "Saved", value: ministry.weekSaved },
-  ];
-  return (
-    <section className="grid gap-3">
-      <p className="font-[var(--font-be-vietnam-pro)] text-[0.6875rem] font-semibold uppercase tracking-[0.22em] text-(--color-brand-blue)">
-        Your Ministry
-      </p>
-      <div className="grid gap-4 rounded-(--radius-md) border border-(--color-line) bg-white p-4 shadow-(--shadow-sm)">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="grid gap-0.5">
-            <h2 className="site-dashboard-card-title text-[0.9rem] text-(--color-text-strong) sm:text-[1.05rem]">
-              Daily ministry report
-            </h2>
-            <p className="site-dashboard-card-body text-[0.7125rem] text-(--color-text-muted) sm:text-[0.8125rem]">
-              {ministry.reportedToday
-                ? "Today's report is in. You can still correct it."
-                : "You have not sent today's report yet."}
-            </p>
-          </div>
-          <Link
-            href="/dashboard/community/report"
-            className="inline-flex min-h-10 items-center rounded-full bg-(--color-brand-blue) px-4 font-[var(--font-be-vietnam-pro)] text-[0.875rem] font-medium text-white"
-          >
-            {ministry.reportedToday ? "View report" : "Send today's report"}
-          </Link>
-        </div>
-        <dl className="grid grid-cols-3 gap-3 border-t border-(--color-line) pt-3">
-          {figures.map((figure) => (
-            <div key={figure.label} className="grid gap-0.5">
-              <dd className="site-dashboard-card-title text-lg text-(--color-text-strong)">
-                {figure.value}
-              </dd>
-              <dt className="site-dashboard-card-body text-[0.7125rem] text-(--color-text-muted)">
-                {figure.label} · last 7 days
-              </dt>
-            </div>
-          ))}
-        </dl>
-      </div>
-    </section>
-  );
-}
 
 export function WelcomeDashboardView({
   name,
   sections = welcomeDashboardSections,
-  ministry = null,
 }: WelcomeDashboardViewProps = {}) {
   return (
     <section className="site-font-theme bg-[var(--color-surface)]">
@@ -282,7 +230,6 @@ export function WelcomeDashboardView({
               </div>
             </section>
           ))}
-          {ministry ? <MinistryReportPanel ministry={ministry} /> : null}
         </div>
 
         <InstallAppCta />

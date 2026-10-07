@@ -166,33 +166,6 @@ export function ministryRangePresets(
   ];
 }
 
-/** What the main dashboard shows about a member's reports. */
-export type MinistryDashboardSummary = {
-  reportedToday: boolean;
-  /** Reports sent in the seven days ending today. */
-  weekReports: number;
-  weekReached: number;
-  weekSaved: number;
-};
-
-/** Sums the reports that fall in the seven days ending on `todayKey`. */
-export function summariseMinistryWeek(
-  reports: Array<MinistryNumbers & { reportDate: string }>,
-  todayKey: string,
-): MinistryDashboardSummary {
-  const weekStart = shiftDate(todayKey, -6);
-  const week = reports.filter(
-    (report) => report.reportDate >= weekStart && report.reportDate <= todayKey,
-  );
-  const total = sumMinistryNumbers(week);
-  return {
-    reportedToday: week.some((report) => report.reportDate === todayKey),
-    weekReports: week.length,
-    weekReached: totalReached(total),
-    weekSaved: total.saved,
-  };
-}
-
 // ─── Pleros activity compiled for the same day ─────────────────────────────
 
 export type PrayerWatchSession = "unspecified" | "morning" | "afternoon" | "evening";

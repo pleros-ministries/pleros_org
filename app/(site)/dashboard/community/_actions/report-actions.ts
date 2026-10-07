@@ -70,7 +70,6 @@ export async function saveMinistryReport(input: {
     revalidatePath("/dashboard/community/report");
     revalidatePath("/dashboard/community/report/people");
     revalidatePath("/dashboard/community/leader");
-    revalidatePath("/dashboard");
     revalidatePath("/admin/ministry");
     return {
       ok: true,
