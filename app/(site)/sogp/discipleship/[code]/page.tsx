@@ -90,6 +90,9 @@ async function InviteBody({
         <h1 className="font-[var(--font-sen)] text-2xl font-semibold tracking-[-0.04em] text-[var(--color-text-strong)]">
           {name} has invited you to their discipleship group
         </h1>
+        <p className="[font-size:0.8125rem] font-medium text-[var(--color-text-strong)]">
+          {invite.groupName}
+        </p>
         <p className="font-[var(--font-be-vietnam-pro)] [font-size:0.875rem] leading-[1.55] text-[var(--color-text-muted)]">
           Walk through the School of God&apos;s Purpose together. {name} will encourage you,
           check in with you, and help you keep going.

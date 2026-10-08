@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+import { ExpandButton } from "@/components/ppc/expandable-table-row";
+import { ACTIVITY_KINDS, type ActivityKind } from "@/lib/community/ministry-activities";
 import {
   MINISTRY_FIELDS,
   activityLines,
@@ -18,14 +20,16 @@ import {
 import { dateKeyLabel } from "@/lib/community/time";
 import type {
   DayActivitySummary,
-  MemberReport,
+  MemberActivity,
   MinistryDayTotals,
   MinistryMemberTotals,
   StaffMinistryRow,
-} from "@/lib/db/queries/ministry-reports";
+} from "@/lib/db/queries/ministry-activities";
 import type { StaffOutreachContact } from "@/lib/db/queries/outreach-contacts";
 import { shiftDate } from "@/lib/sogp/daily-date";
 
+import type { ContactViewer } from "./report/contact-detail";
+import { MemberActivityList } from "./report/member-activity-list";
 import { OutreachContactBrowser } from "./report/outreach-contact-browser";
 
 export type AdminMinistryMember = {
@@ -35,7 +39,7 @@ export type AdminMinistryMember = {
   /** One entry per day of the range, newest first. */
   days: Array<{
     dateKey: string;
-    report: MemberReport | null;
+    activities: MemberActivity[];
     activity: DayActivitySummary | null;
   }>;
 };
@@ -56,6 +60,7 @@ const linkClass = "text-[var(--color-brand-blue)] underline underline-offset-2";
 const tileClass = "grid gap-0.5 rounded-sm border border-zinc-200 bg-white p-3";
 const tileLabelClass =
   "text-[0.6rem] font-semibold uppercase tracking-[0.08em] text-zinc-400";
+const tileValueClass = "ppc-heading text-base font-semibold text-zinc-900";
 
 function hrefFor(params: PageParams): string {
   const search = new URLSearchParams({
@@ -91,16 +96,38 @@ function rangeActivity(activity: DayActivitySummary | null): string {
   return done.length > 0 ? done.join(" · ") : "—";
 }
 
+/** "Outreach 12 · Teaching meeting 4", leaving out kinds with nothing. */
+function kindSummary(byKind: Record<ActivityKind, number>): string {
+  const parts = ACTIVITY_KINDS.filter((kind) => byKind[kind.key] > 0).map(
+    (kind) => `${kind.label} ${byKind[kind.key]}`,
+  );
+  return parts.length > 0 ? parts.join(" · ") : "No activities";
+}
+
+function sumKinds(rows: Array<{ byKind: Record<ActivityKind, number> }>) {
+  const total = {} as Record<ActivityKind, number>;
+  for (const kind of ACTIVITY_KINDS) {
+    total[kind.key] = rows.reduce((sum, row) => sum + row.byKind[kind.key], 0);
+  }
+  return total;
+}
+
 // ─── Sorting ───────────────────────────────────────────────────────────────
 
-type SortKey = "label" | "reports" | "reached" | MinistryFieldKey;
+type SortKey = "label" | "days" | "members" | "activities" | "reached" | MinistryFieldKey;
 type SortState = { key: SortKey; descending: boolean };
 
-type SortableRow = MinistryNumbers & { reports: number };
+type SortableRow = MinistryNumbers & {
+  activities: number;
+  days?: number;
+  members?: number;
+};
 
 function sortValue(row: SortableRow, label: string, key: SortKey): number | string {
   if (key === "label") return label;
-  if (key === "reports") return row.reports;
+  if (key === "days") return row.days ?? 0;
+  if (key === "members") return row.members ?? 0;
+  if (key === "activities") return row.activities;
   if (key === "reached") return totalReached(row);
   return row[key];
 }
@@ -165,22 +192,64 @@ function SortHeader({
   );
 }
 
-function NumberCells({ row }: { row: MinistryNumbers }) {
+function NumberCells({ row }: { row: MinistryNumbers | null }) {
   return (
     <>
       {MINISTRY_FIELDS.map((field) => (
         <td key={field.key} className="px-2 py-2 text-right tabular-nums">
-          {row[field.key]}
+          {row ? row[field.key] : "–"}
         </td>
       ))}
     </>
   );
 }
 
+function NumberHeaders() {
+  return (
+    <>
+      {MINISTRY_FIELDS.map((field) => (
+        <th key={field.key} className="px-2 py-2 text-right font-medium">
+          {field.short}
+        </th>
+      ))}
+    </>
+  );
+}
+
+function Tiles({
+  leading,
+  totals,
+}: {
+  leading: Array<{ label: string; value: number; sub?: string }>;
+  totals: MinistryNumbers;
+}) {
+  return (
+    <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+      {leading.map((tile) => (
+        <div key={tile.label} className={tileClass}>
+          <span className={tileLabelClass}>{tile.label}</span>
+          <span className={tileValueClass}>
+            {tile.value}
+            {tile.sub ? (
+              <span className="text-xs font-normal text-zinc-400"> {tile.sub}</span>
+            ) : null}
+          </span>
+        </div>
+      ))}
+      {MINISTRY_FIELDS.map((field) => (
+        <div key={field.key} className={tileClass}>
+          <span className={tileLabelClass}>{field.short}</span>
+          <span className={tileValueClass}>{totals[field.key]}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 /**
- * Ministry reports for admins: a date range with sortable totals per member
- * and per day and the people met in it, one day across every member, and one
- * member's own days. Numbers are shown as reported.
+ * Ministry activities for admins: a date range with sortable totals per
+ * member and per day and the people met in it, one day across every member,
+ * and one member's own days. Numbers are shown as entered.
  */
 export function AdminMinistryPage({
   today,
@@ -194,6 +263,7 @@ export function AdminMinistryPage({
   contacts,
   contactLimitReached,
   member,
+  viewer,
 }: {
   today: string;
   /** The single day shown in the day table. */
@@ -208,6 +278,7 @@ export function AdminMinistryPage({
   /** True when the range holds more people than were loaded. */
   contactLimitReached: boolean;
   member: AdminMinistryMember | null;
+  viewer: ContactViewer;
 }) {
   const router = useRouter();
   const [everyone, setEveryone] = useState(false);
@@ -219,17 +290,23 @@ export function AdminMinistryPage({
     key: "label",
     descending: true,
   });
+  const [expandedDay, setExpandedDay] = useState<string | null>(null);
+  const [expandedMember, setExpandedMember] = useState<string | null>(null);
 
   const params: PageParams = { date: dateKey, ...range, unitId };
   const go = (next: Partial<PageParams>) => router.push(hrefFor({ ...params, ...next }));
 
-  const reported = rows.filter((row) => row.report !== null);
+  const reported = rows.filter((row) => row.totals !== null);
   const visible = everyone ? rows : reported;
-  const dayTotals = sumMinistryNumbers(
-    reported.flatMap((row) => (row.report ? [row.report] : [])),
-  );
+  const dayActivities = reported.flatMap((row) => row.activities);
+  const dayTotals = sumMinistryNumbers(dayActivities);
+  const dayKinds = {} as Record<ActivityKind, number>;
+  for (const kind of ACTIVITY_KINDS) {
+    dayKinds[kind.key] = dayActivities.filter((activity) => activity.kind === kind.key).length;
+  }
   const rangeTotals = sumMinistryNumbers(totalsByDay);
-  const rangeReports = totalsByDay.reduce((sum, day) => sum + day.reports, 0);
+  const rangeActivities = totalsByDay.reduce((sum, day) => sum + day.activities, 0);
+  const rangeKinds = sumKinds(totalsByDay);
   const sortedMembers = sortRows(totalsByMember, memberSort, (row) => row.name);
   const sortedDays = sortRows(totalsByDay, daySort, (row) => row.dateKey);
   const columns = MINISTRY_FIELDS.length;
@@ -242,8 +319,9 @@ export function AdminMinistryPage({
           Ministry reports
         </h1>
         <p className="text-xs text-zinc-500">
-          What members report each day, beside what they did on Pleros. The
-          numbers are as each person entered them.
+          What members log each day, beside what they did on Pleros. The
+          numbers are as each person entered them. Reached counts people
+          reached online, reached offline and present at meetings.
         </p>
       </header>
 
@@ -315,22 +393,14 @@ export function AdminMinistryPage({
           </span>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-8">
-          <div className={tileClass}>
-            <span className={tileLabelClass}>Reports</span>
-            <span className="ppc-heading text-base font-semibold text-zinc-900">
-              {rangeReports}
-            </span>
-          </div>
-          {MINISTRY_FIELDS.map((field) => (
-            <div key={field.key} className={tileClass}>
-              <span className={tileLabelClass}>{field.short}</span>
-              <span className="ppc-heading text-base font-semibold text-zinc-900">
-                {rangeTotals[field.key]}
-              </span>
-            </div>
-          ))}
-        </div>
+        <Tiles
+          leading={[
+            { label: "Activities", value: rangeActivities },
+            { label: "Reached", value: totalReached(rangeTotals) },
+          ]}
+          totals={rangeTotals}
+        />
+        <p className="text-xs text-zinc-500">By kind: {kindSummary(rangeKinds)}</p>
       </section>
 
       {member ? (
@@ -351,34 +421,56 @@ export function AdminMinistryPage({
               <thead className="sticky top-0 bg-zinc-50 text-zinc-500">
                 <tr>
                   <th className="px-3 py-2 font-medium">Day</th>
-                  {MINISTRY_FIELDS.map((field) => (
-                    <th key={field.key} className="px-2 py-2 text-right font-medium">
-                      {field.short}
-                    </th>
-                  ))}
-                  <th className="px-3 py-2 font-medium">Note</th>
+                  <th className="px-2 py-2 text-right font-medium">Activities</th>
+                  <th className="px-2 py-2 text-right font-medium">Reached</th>
+                  <NumberHeaders />
                   <th className="px-3 py-2 font-medium">On Pleros</th>
+                  <th className="px-2 py-2" />
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100">
-                {member.days.map((day) => (
-                  <tr key={day.dateKey} className={day.report ? "" : "text-zinc-400"}>
-                    <td className="whitespace-nowrap px-3 py-2 font-medium">
-                      {dateKeyLabel(day.dateKey)}
-                    </td>
-                    {MINISTRY_FIELDS.map((field) => (
-                      <td key={field.key} className="px-2 py-2 text-right tabular-nums">
-                        {day.report ? day.report[field.key] : "–"}
-                      </td>
-                    ))}
-                    <td className="max-w-[16rem] px-3 py-2 text-zinc-600">
-                      {day.report?.note ?? ""}
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-2 text-zinc-600">
-                      {rangeActivity(day.activity)}
-                    </td>
-                  </tr>
-                ))}
+                {member.days.map((day) => {
+                  const totals =
+                    day.activities.length > 0 ? sumMinistryNumbers(day.activities) : null;
+                  const open = expandedDay === day.dateKey;
+                  const detailId = `member-day-${day.dateKey}`;
+                  return (
+                    <Fragment key={day.dateKey}>
+                      <tr className={totals ? "" : "text-zinc-400"}>
+                        <td className="whitespace-nowrap px-3 py-2 font-medium">
+                          {dateKeyLabel(day.dateKey)}
+                        </td>
+                        <td className="px-2 py-2 text-right tabular-nums">
+                          {totals ? day.activities.length : "–"}
+                        </td>
+                        <td className="px-2 py-2 text-right font-medium tabular-nums">
+                          {totals ? totalReached(totals) : "–"}
+                        </td>
+                        <NumberCells row={totals} />
+                        <td className="whitespace-nowrap px-3 py-2 text-zinc-600">
+                          {rangeActivity(day.activity)}
+                        </td>
+                        <td className="px-2 py-1 text-right">
+                          {totals ? (
+                            <ExpandButton
+                              expanded={open}
+                              controls={detailId}
+                              label={`activities on ${dateKeyLabel(day.dateKey)}`}
+                              onToggle={() => setExpandedDay(open ? null : day.dateKey)}
+                            />
+                          ) : null}
+                        </td>
+                      </tr>
+                      {open ? (
+                        <tr id={detailId} className="bg-zinc-50/60">
+                          <td colSpan={columns + 5} className="px-3 py-2.5">
+                            <MemberActivityList activities={day.activities} />
+                          </td>
+                        </tr>
+                      ) : null}
+                    </Fragment>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -397,7 +489,8 @@ export function AdminMinistryPage({
               <tr>
                 <SortHeader label="Member" sortKey="label" sort={memberSort} onSort={setMemberSort} align="left" />
                 <th className="px-2 py-2 font-medium">Group</th>
-                <SortHeader label="Reports" sortKey="reports" sort={memberSort} onSort={setMemberSort} />
+                <SortHeader label="Days" sortKey="days" sort={memberSort} onSort={setMemberSort} />
+                <SortHeader label="Activities" sortKey="activities" sort={memberSort} onSort={setMemberSort} />
                 <SortHeader label="Reached" sortKey="reached" sort={memberSort} onSort={setMemberSort} />
                 {MINISTRY_FIELDS.map((field) => (
                   <SortHeader key={field.key} label={field.short} sortKey={field.key} sort={memberSort} onSort={setMemberSort} />
@@ -407,8 +500,8 @@ export function AdminMinistryPage({
             <tbody className="divide-y divide-zinc-100">
               {sortedMembers.length === 0 ? (
                 <tr>
-                  <td colSpan={columns + 4} className="px-3 py-6 text-center text-zinc-500">
-                    No reports in this range.
+                  <td colSpan={columns + 5} className="px-3 py-6 text-center text-zinc-500">
+                    No activities in this range.
                   </td>
                 </tr>
               ) : (
@@ -424,7 +517,10 @@ export function AdminMinistryPage({
                       </Link>
                     </td>
                     <td className="whitespace-nowrap px-2 py-2">{row.unitName ?? "—"}</td>
-                    <td className="px-2 py-2 text-right tabular-nums">{row.reports}</td>
+                    <td className="px-2 py-2 text-right tabular-nums">{row.days}</td>
+                    <td className="px-2 py-2 text-right tabular-nums" title={kindSummary(row.byKind)}>
+                      {row.activities}
+                    </td>
                     <td className="px-2 py-2 text-right font-medium tabular-nums">
                       {totalReached(row)}
                     </td>
@@ -441,14 +537,15 @@ export function AdminMinistryPage({
       <section className="grid gap-2">
         <h2 className="ppc-heading text-sm font-semibold text-zinc-900">
           Day by day
-          <span className="font-normal text-zinc-500"> · days with at least one report</span>
+          <span className="font-normal text-zinc-500"> · days with at least one activity</span>
         </h2>
         <div className="max-h-[32rem] overflow-auto rounded-sm border border-zinc-200 bg-white">
           <table className="w-full text-left text-xs">
             <thead className="sticky top-0 bg-zinc-50 text-zinc-500">
               <tr>
                 <SortHeader label="Day" sortKey="label" sort={daySort} onSort={setDaySort} align="left" />
-                <SortHeader label="Reports" sortKey="reports" sort={daySort} onSort={setDaySort} />
+                <SortHeader label="Members" sortKey="members" sort={daySort} onSort={setDaySort} />
+                <SortHeader label="Activities" sortKey="activities" sort={daySort} onSort={setDaySort} />
                 <SortHeader label="Reached" sortKey="reached" sort={daySort} onSort={setDaySort} />
                 {MINISTRY_FIELDS.map((field) => (
                   <SortHeader key={field.key} label={field.short} sortKey={field.key} sort={daySort} onSort={setDaySort} />
@@ -458,8 +555,8 @@ export function AdminMinistryPage({
             <tbody className="divide-y divide-zinc-100">
               {sortedDays.length === 0 ? (
                 <tr>
-                  <td colSpan={columns + 3} className="px-3 py-6 text-center text-zinc-500">
-                    No reports in this range.
+                  <td colSpan={columns + 4} className="px-3 py-6 text-center text-zinc-500">
+                    No activities in this range.
                   </td>
                 </tr>
               ) : (
@@ -474,7 +571,10 @@ export function AdminMinistryPage({
                         {dateKeyLabel(day.dateKey)}
                       </Link>
                     </td>
-                    <td className="px-2 py-2 text-right tabular-nums">{day.reports}</td>
+                    <td className="px-2 py-2 text-right tabular-nums">{day.members}</td>
+                    <td className="px-2 py-2 text-right tabular-nums" title={kindSummary(day.byKind)}>
+                      {day.activities}
+                    </td>
                     <td className="px-2 py-2 text-right font-medium tabular-nums">
                       {totalReached(day)}
                     </td>
@@ -490,7 +590,7 @@ export function AdminMinistryPage({
       {/* ── People met in the range ────────────────────────────────────── */}
       <section className="grid gap-2">
         <h2 className="ppc-heading text-sm font-semibold text-zinc-900">
-          People met in outreach
+          People met in ministry
           {member ? (
             <span className="font-normal text-zinc-500"> · by {member.name}</span>
           ) : null}
@@ -505,6 +605,8 @@ export function AdminMinistryPage({
         <div className="max-h-[36rem] overflow-auto rounded-sm border border-zinc-200 bg-white">
           <OutreachContactBrowser
             contacts={contacts}
+            today={today}
+            viewer={viewer}
             staff
             defaultStatus="pending"
             emptyText="No one has been recorded in this range."
@@ -553,23 +655,14 @@ export function AdminMinistryPage({
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-8">
-          <div className={tileClass}>
-            <span className={tileLabelClass}>Reports</span>
-            <span className="ppc-heading text-base font-semibold text-zinc-900">
-              {reported.length}
-              <span className="text-xs font-normal text-zinc-400"> of {rows.length}</span>
-            </span>
-          </div>
-          {MINISTRY_FIELDS.map((field) => (
-            <div key={field.key} className={tileClass}>
-              <span className={tileLabelClass}>{field.short}</span>
-              <span className="ppc-heading text-base font-semibold text-zinc-900">
-                {dayTotals[field.key]}
-              </span>
-            </div>
-          ))}
-        </div>
+        <Tiles
+          leading={[
+            { label: "Reported", value: reported.length, sub: `of ${rows.length}` },
+            { label: "Activities", value: dayActivities.length },
+          ]}
+          totals={dayTotals}
+        />
+        <p className="text-xs text-zinc-500">By kind: {kindSummary(dayKinds)}</p>
 
         <label className="flex items-center gap-1.5 text-xs text-zinc-600">
           <input
@@ -578,7 +671,7 @@ export function AdminMinistryPage({
             onChange={(event) => setEveryone(event.target.checked)}
             className="size-3.5 accent-[var(--color-brand-blue)]"
           />
-          Show members who sent no report
+          Show members who logged nothing
         </label>
         <div className="overflow-x-auto rounded-sm border border-zinc-200 bg-white">
           <table className="w-full text-left text-xs">
@@ -586,53 +679,73 @@ export function AdminMinistryPage({
               <tr>
                 <th className="px-3 py-2 font-medium">Member</th>
                 <th className="px-3 py-2 font-medium">Group</th>
-                {MINISTRY_FIELDS.map((field) => (
-                  <th key={field.key} className="px-2 py-2 text-right font-medium">
-                    {field.short}
-                  </th>
-                ))}
-                <th className="px-3 py-2 font-medium">Note</th>
+                <th className="px-2 py-2 text-right font-medium">Activities</th>
+                <th className="px-2 py-2 text-right font-medium">Reached</th>
+                <NumberHeaders />
                 <th className="px-3 py-2 font-medium">On Pleros</th>
+                <th className="px-2 py-2" />
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100">
               {visible.length === 0 ? (
                 <tr>
-                  <td colSpan={columns + 4} className="px-3 py-6 text-center text-zinc-500">
+                  <td colSpan={columns + 6} className="px-3 py-6 text-center text-zinc-500">
                     {rows.length === 0
                       ? "No members in this group."
-                      : "No reports for this day yet."}
+                      : "No activities for this day yet."}
                   </td>
                 </tr>
               ) : (
-                visible.map((row) => (
-                  <tr key={row.userId} className={row.report ? "" : "text-zinc-400"}>
-                    <td className="whitespace-nowrap px-3 py-2 font-medium">
-                      <Link
-                        href={hrefFor({ ...params, member: row.userId })}
-                        scroll={false}
-                        className={linkClass}
-                      >
-                        {row.name}
-                      </Link>
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-2">{row.unitName ?? "—"}</td>
-                    {MINISTRY_FIELDS.map((field) => (
-                      <td key={field.key} className="px-2 py-2 text-right tabular-nums">
-                        {row.report ? row.report[field.key] : "–"}
-                      </td>
-                    ))}
-                    <td className="max-w-[16rem] px-3 py-2 text-zinc-600">
-                      {row.report?.note ?? ""}
-                    </td>
-                    <td
-                      className="whitespace-nowrap px-3 py-2 text-zinc-600"
-                      title={activityTitle(row.activity)}
-                    >
-                      {activitySummary(row.activity)}
-                    </td>
-                  </tr>
-                ))
+                visible.map((row) => {
+                  const open = expandedMember === row.userId;
+                  const detailId = `day-member-${row.userId}`;
+                  return (
+                    <Fragment key={row.userId}>
+                      <tr className={row.totals ? "" : "text-zinc-400"}>
+                        <td className="whitespace-nowrap px-3 py-2 font-medium">
+                          <Link
+                            href={hrefFor({ ...params, member: row.userId })}
+                            scroll={false}
+                            className={linkClass}
+                          >
+                            {row.name}
+                          </Link>
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-2">{row.unitName ?? "—"}</td>
+                        <td className="px-2 py-2 text-right tabular-nums">
+                          {row.totals ? row.activities.length : "–"}
+                        </td>
+                        <td className="px-2 py-2 text-right font-medium tabular-nums">
+                          {row.totals ? totalReached(row.totals) : "–"}
+                        </td>
+                        <NumberCells row={row.totals} />
+                        <td
+                          className="whitespace-nowrap px-3 py-2 text-zinc-600"
+                          title={activityTitle(row.activity)}
+                        >
+                          {activitySummary(row.activity)}
+                        </td>
+                        <td className="px-2 py-1 text-right">
+                          {row.totals ? (
+                            <ExpandButton
+                              expanded={open}
+                              controls={detailId}
+                              label={`activities for ${row.name}`}
+                              onToggle={() => setExpandedMember(open ? null : row.userId)}
+                            />
+                          ) : null}
+                        </td>
+                      </tr>
+                      {open ? (
+                        <tr id={detailId} className="bg-zinc-50/60">
+                          <td colSpan={columns + 6} className="px-3 py-2.5">
+                            <MemberActivityList activities={row.activities} />
+                          </td>
+                        </tr>
+                      ) : null}
+                    </Fragment>
+                  );
+                })
               )}
             </tbody>
           </table>

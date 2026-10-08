@@ -1,11 +1,16 @@
 import { describe, expect, test } from "vitest";
 
-import { firstNameOf, toPeerMember } from "./visibility";
+import { firstNameOf, fullNameOf, toPeerMember } from "./visibility";
 
 describe("visibility", () => {
   test("firstNameOf takes the first token", () => {
     expect(firstNameOf("Ada Grace Nwosu")).toBe("Ada");
     expect(firstNameOf("  ")).toBe("Someone");
+  });
+
+  test("fullNameOf keeps the whole name and tidies its spacing", () => {
+    expect(fullNameOf("  Ada   Grace Nwosu ")).toBe("Ada Grace Nwosu");
+    expect(fullNameOf("  ")).toBe("Someone");
   });
 
   test("toPeerMember exposes only first name, join month, stage, leader flag", () => {

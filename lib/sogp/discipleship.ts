@@ -12,6 +12,15 @@ import type { StudentStatus } from "./student-status";
 /** Small enough to disciple personally, and bounds the per-disciple progress reads. */
 export const DISCIPLESHIP_GROUP_MAX = 12;
 
+/** Open groups one learner may lead at a time. */
+export const DISCIPLESHIP_GROUPS_LED_MAX = 5;
+
+export const DISCIPLESHIP_GROUP_NAME_MIN = 3;
+export const DISCIPLESHIP_GROUP_NAME_MAX = 60;
+
+/** `archived` is an admin pause; `closed` is the leader ending their own group. */
+export type DiscipleshipGroupStatus = "active" | "archived" | "closed";
+
 export const DISCIPLESHIP_PROMPT_MAX_LENGTH = 500;
 export const DISCIPLESHIP_RESPONSE_MAX_LENGTH = 2000;
 export const DISCIPLESHIP_REPLY_MAX_LENGTH = 1000;
@@ -53,6 +62,85 @@ export function defaultDiscipleshipGroupName(firstName: string): string {
   return name ? `${name}'s discipleship group` : "Discipleship group";
 }
 
+// ─── Leading several groups ─────────────────────────────────────────────────
+
+export type DiscipleshipGroupNameResult =
+  | { ok: true; name: string }
+  | { ok: false; error: string };
+
+/**
+ * Cleans a group name and checks it against the leader's other open groups, so
+ * two of their groups never share a name in the switcher.
+ */
+export function validateDiscipleshipGroupName(
+  value: unknown,
+  otherNames: string[] = [],
+): DiscipleshipGroupNameResult {
+  const name = typeof value === "string" ? value.trim().replace(/\s+/g, " ") : "";
+  if (name.length < DISCIPLESHIP_GROUP_NAME_MIN) {
+    return {
+      ok: false,
+      error: `Give the group a name of at least ${DISCIPLESHIP_GROUP_NAME_MIN} characters.`,
+    };
+  }
+  if (name.length > DISCIPLESHIP_GROUP_NAME_MAX) {
+    return {
+      ok: false,
+      error: `Keep the group name under ${DISCIPLESHIP_GROUP_NAME_MAX} characters.`,
+    };
+  }
+  const taken = otherNames.some((other) => other.trim().toLowerCase() === name.toLowerCase());
+  if (taken) {
+    return { ok: false, error: "You already have a group with this name." };
+  }
+  return { ok: true, name };
+}
+
+export type DiscipleshipGroupBlock = "limit" | "paused" | "last_group";
+
+export type DiscipleshipGroupDecision =
+  | { ok: true }
+  | { ok: false; reason: DiscipleshipGroupBlock };
+
+/**
+ * Whether a leader may start another group. A paused group blocks new ones, so
+ * an admin pause cannot be sidestepped by opening a fresh group.
+ */
+export function evaluateCreateDiscipleshipGroup(input: {
+  /** Groups the leader has that are not closed (active or paused). */
+  openGroupCount: number;
+  hasPausedGroup: boolean;
+}): DiscipleshipGroupDecision {
+  if (input.hasPausedGroup) return { ok: false, reason: "paused" };
+  if (input.openGroupCount >= DISCIPLESHIP_GROUPS_LED_MAX) {
+    return { ok: false, reason: "limit" };
+  }
+  return { ok: true };
+}
+
+/** Whether a leader may close a group: never a paused one, and never their last. */
+export function evaluateCloseDiscipleshipGroup(input: {
+  status: DiscipleshipGroupStatus;
+  openGroupCount: number;
+}): DiscipleshipGroupDecision {
+  if (input.status !== "active") return { ok: false, reason: "paused" };
+  if (input.openGroupCount <= 1) return { ok: false, reason: "last_group" };
+  return { ok: true };
+}
+
+const GROUP_BLOCK_COPY: Record<DiscipleshipGroupBlock, string> = {
+  limit: `You can lead up to ${DISCIPLESHIP_GROUPS_LED_MAX} groups. Close one you no longer need to start another.`,
+  paused:
+    "One of your groups has been paused by the Pleros team. Contact support before changing your groups.",
+  last_group: "You need at least one group, so this one can't be closed.",
+};
+
+export function discipleshipGroupBlockMessage(reason: DiscipleshipGroupBlock): string {
+  return GROUP_BLOCK_COPY[reason];
+}
+
+// ─── Joining ────────────────────────────────────────────────────────────────
+
 export type DiscipleshipJoinBlock =
   | "own_group"
   | "already_in_group"
@@ -70,7 +158,7 @@ export type DiscipleshipJoinDecision =
  */
 export function evaluateDiscipleshipJoin(input: {
   viewerEnrollmentId: number;
-  group: { leaderEnrollmentId: number; status: "active" | "archived" };
+  group: { leaderEnrollmentId: number; status: DiscipleshipGroupStatus };
   /** Group id of the viewer's current active membership, if any. */
   viewerActiveGroupId: number | null;
   /** True when the group's leader is currently the viewer's disciple. */
@@ -196,6 +284,8 @@ export function buildWeeklyDigest(input: {
   statuses: Array<StudentStatus | null>;
   unansweredCheckIns: number;
   openPrayerRequests: number;
+  /** Set when the leader runs more than one group, so each digest says which. */
+  groupName?: string | null;
 }): { title: string; body: string } | null {
   if (input.statuses.length === 0) return null;
   const parts = DIGEST_STATUS_ORDER.flatMap(({ statuses, label }) => {
@@ -212,9 +302,13 @@ export function buildWeeklyDigest(input: {
       `${input.openPrayerRequests} prayer request${input.openPrayerRequests === 1 ? "" : "s"}`,
     );
   }
+  const summary = parts.length
+    ? parts.join(" · ")
+    : `${input.statuses.length} disciples in your group`;
+  const groupName = input.groupName?.trim();
   return {
     title: "Your discipleship week",
-    body: parts.length ? parts.join(" · ") : `${input.statuses.length} disciples in your group`,
+    body: groupName ? `${groupName}: ${summary}` : summary,
   };
 }
 

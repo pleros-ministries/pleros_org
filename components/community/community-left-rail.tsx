@@ -87,9 +87,7 @@ export function CommunityRailContent({
           onClick={onNavigate}
           className={`${card} block transition-colors hover:border-zinc-300`}
         >
-          <p className="text-xs font-medium text-zinc-500">
-            Your discipleship group
-          </p>
+          <p className="text-xs font-medium text-zinc-500">Discipleship</p>
           <p className="mt-1 text-sm font-semibold text-zinc-900">
             {discipleshipLine(discipleship)}
           </p>

@@ -1,6 +1,7 @@
 import { eq, inArray } from "drizzle-orm";
 
 import { db } from "@/lib/db";
+import { listUsersWithCommunityPushOff } from "@/lib/db/queries/notification-preferences";
 import * as schema from "@/lib/db/schema";
 import { sendPushToUser } from "@/lib/push/send";
 
@@ -75,14 +76,24 @@ export async function notify(input: {
   );
 
   if (input.pushBody) {
+    // The in-app notification above is written for everyone; only the push
+    // respects the learner's "community updates" preference. One lookup covers
+    // the whole fan-out, so each send goes out ungated.
+    const muted = await listUsersWithCommunityPushOff(recipients);
     await Promise.allSettled(
-      recipients.map((userId) =>
-        sendPushToUser(userId, {
-          title: PUSH_COPY[input.kind].title,
-          body: input.pushBody!,
-          url: input.pushUrl ?? "/dashboard/community",
-        }),
-      ),
+      recipients
+        .filter((userId) => !muted.has(userId))
+        .map((userId) =>
+          sendPushToUser(
+            userId,
+            {
+              title: PUSH_COPY[input.kind].title,
+              body: input.pushBody!,
+              url: input.pushUrl ?? "/dashboard/community",
+            },
+            { gate: "none" },
+          ),
+        ),
     );
   }
 }

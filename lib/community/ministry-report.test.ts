@@ -12,7 +12,8 @@ import {
   emptyMinistryNumbers,
   isDateKey,
   ministryRangePresets,
-  normaliseMinistryReport,
+  normaliseMinistryNote,
+  normaliseMinistryNumbers,
   reportableDateKeys,
   resolveMinistryRange,
   sumMinistryNumbers,
@@ -20,62 +21,73 @@ import {
   type DayActivity,
 } from "./ministry-report";
 
-describe("normaliseMinistryReport", () => {
+describe("normaliseMinistryNumbers", () => {
+  const rules = {
+    shown: ["reachedOnline", "reachedOffline", "saved", "filled"],
+    required: ["reachedOnline", "reachedOffline"],
+  } as const;
+
   test("reads form strings and defaults the optional numbers to zero", () => {
     expect(
-      normaliseMinistryReport({
-        reachedOnline: " 12 ",
-        reachedOffline: "0",
-        saved: "3",
-        filled: "",
-        note: "  Street outreach in Ikeja.  ",
-      }),
+      normaliseMinistryNumbers(
+        { reachedOnline: " 12 ", reachedOffline: "0", saved: "3", filled: "" },
+        rules,
+      ),
     ).toEqual({
       ok: true,
-      value: {
-        reachedOnline: 12,
-        reachedOffline: 0,
-        saved: 3,
-        notSaved: 0,
-        filled: 0,
-        healed: 0,
-        followUps: 0,
-        note: "Street outreach in Ikeja.",
-      },
+      value: { ...emptyMinistryNumbers(), reachedOnline: 12, saved: 3 },
     });
   });
 
-  test("the two reached numbers must be given, though zero is fine", () => {
-    expect(normaliseMinistryReport({ reachedOnline: "5" }).ok).toBe(false);
-    expect(normaliseMinistryReport({ reachedOnline: "", reachedOffline: "2" }).ok).toBe(
-      false,
+  test("required numbers must be given, though zero is fine", () => {
+    expect(normaliseMinistryNumbers({ reachedOnline: "5" }, rules)).toEqual({
+      ok: false,
+      error: 'Enter a number for "People reached offline". Use 0 if there were none.',
+    });
+    expect(
+      normaliseMinistryNumbers({ reachedOnline: "", reachedOffline: "2" }, rules).ok,
+    ).toBe(false);
+    expect(
+      normaliseMinistryNumbers({ reachedOnline: 0, reachedOffline: 0 }, rules).ok,
+    ).toBe(true);
+  });
+
+  test("fields that are not shown are forced to zero whatever was sent", () => {
+    const parsed = normaliseMinistryNumbers(
+      { reachedOnline: "1", reachedOffline: "1", healed: "9", attendance: "40" },
+      rules,
     );
-    expect(normaliseMinistryReport({ reachedOnline: 0, reachedOffline: 0 }).ok).toBe(
+    expect(parsed.ok && parsed.value.healed).toBe(0);
+    expect(parsed.ok && parsed.value.attendance).toBe(0);
+    expect(normaliseMinistryNumbers({ healed: "many" }, { shown: [], required: [] }).ok).toBe(
       true,
     );
   });
 
   test("rejects anything that is not a whole number in range", () => {
     const base = { reachedOnline: "1", reachedOffline: "1" };
-    expect(normaliseMinistryReport({ ...base, saved: "-1" }).ok).toBe(false);
-    expect(normaliseMinistryReport({ ...base, saved: "2.5" }).ok).toBe(false);
-    expect(normaliseMinistryReport({ ...base, saved: "many" }).ok).toBe(false);
-    expect(normaliseMinistryReport({ ...base, healed: 1.5 }).ok).toBe(false);
+    expect(normaliseMinistryNumbers({ ...base, saved: "-1" }, rules).ok).toBe(false);
+    expect(normaliseMinistryNumbers({ ...base, saved: "2.5" }, rules).ok).toBe(false);
+    expect(normaliseMinistryNumbers({ ...base, saved: "many" }, rules).ok).toBe(false);
+    expect(normaliseMinistryNumbers({ ...base, filled: 1.5 }, rules).ok).toBe(false);
     expect(
-      normaliseMinistryReport({ ...base, saved: String(MINISTRY_COUNT_MAX + 1) }).ok,
+      normaliseMinistryNumbers({ ...base, saved: String(MINISTRY_COUNT_MAX + 1) }, rules).ok,
     ).toBe(false);
     expect(
-      normaliseMinistryReport({ ...base, saved: String(MINISTRY_COUNT_MAX) }).ok,
+      normaliseMinistryNumbers({ ...base, saved: String(MINISTRY_COUNT_MAX) }, rules).ok,
     ).toBe(true);
   });
+});
 
+describe("normaliseMinistryNote", () => {
   test("an empty note is stored as none, and a long one is refused", () => {
-    const base = { reachedOnline: "1", reachedOffline: "1" };
-    const blank = normaliseMinistryReport({ ...base, note: "   " });
-    expect(blank.ok && blank.value.note).toBeNull();
-    expect(
-      normaliseMinistryReport({ ...base, note: "x".repeat(MINISTRY_NOTE_MAX + 1) }).ok,
-    ).toBe(false);
+    expect(normaliseMinistryNote("  Street outreach in Ikeja.  ")).toEqual({
+      ok: true,
+      value: "Street outreach in Ikeja.",
+    });
+    expect(normaliseMinistryNote("   ")).toEqual({ ok: true, value: null });
+    expect(normaliseMinistryNote(undefined)).toEqual({ ok: true, value: null });
+    expect(normaliseMinistryNote("x".repeat(MINISTRY_NOTE_MAX + 1)).ok).toBe(false);
   });
 });
 
@@ -169,18 +181,20 @@ describe("totals", () => {
   test("adds every field across reports", () => {
     const one = { ...emptyMinistryNumbers(), reachedOnline: 4, reachedOffline: 1, saved: 2 };
     const two = { ...emptyMinistryNumbers(), reachedOnline: 6, healed: 1, followUps: 3 };
-    const total = sumMinistryNumbers([one, two]);
+    const meeting = { ...emptyMinistryNumbers(), attendance: 40, saved: 1 };
+    const total = sumMinistryNumbers([one, two, meeting]);
 
     expect(total).toEqual({
       reachedOnline: 10,
       reachedOffline: 1,
-      saved: 2,
+      attendance: 40,
+      saved: 3,
       notSaved: 0,
       filled: 0,
       healed: 1,
       followUps: 3,
     });
-    expect(totalReached(total)).toBe(11);
+    expect(totalReached(total)).toBe(51);
     expect(sumMinistryNumbers([])).toEqual(emptyMinistryNumbers());
   });
 

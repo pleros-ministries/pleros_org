@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { expect, test } from "vitest";
 
-test("uses one Hobby-compatible daily SOGP cron", () => {
+test("schedules the daily SOGP cron and the five-minute reminder dispatcher", () => {
   const config = JSON.parse(
     readFileSync(join(process.cwd(), "vercel.json"), "utf8"),
   ) as { crons?: Array<{ path: string; schedule: string }> };
@@ -11,6 +11,10 @@ test("uses one Hobby-compatible daily SOGP cron", () => {
     {
       path: "/api/cron/sogp-reminders",
       schedule: "20 4 * * *",
+    },
+    {
+      path: "/api/cron/reminder-dispatch",
+      schedule: "*/5 * * * *",
     },
   ]);
 });

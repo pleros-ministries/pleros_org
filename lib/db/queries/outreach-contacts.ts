@@ -1,58 +1,113 @@
-import { and, asc, desc, eq, gte, inArray, isNull, lte, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  desc,
+  eq,
+  gte,
+  inArray,
+  isNotNull,
+  isNull,
+  lte,
+  ne,
+  sql,
+} from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
 import { transactionDb } from "@/lib/db/transaction";
-import type { MinistryReportInput } from "@/lib/community/ministry-report";
-import type { ContactRow } from "@/lib/community/outreach-contacts";
+import { CommunityError } from "@/lib/community/errors";
+import {
+  activitySummary,
+  type ActivityKind,
+} from "@/lib/community/ministry-activities";
+import type {
+  ContactOutcomes,
+  ContactUpdate,
+  DiscipleshipStatus,
+  InteractionInput,
+  InteractionKind,
+  SalvationStatus,
+} from "@/lib/community/outreach-contacts";
+
+import { inUnit } from "./community-scope";
+import {
+  contactInteractionCount,
+  contactLastInteractionDate,
+  contactLastInteractionKind,
+} from "./ministry-sql";
 
 /**
- * People members met in outreach, kept for follow-up. They are outside
- * Pleros, so every read here is scoped: a member's own list, one location
- * group for its assigned pastor, or everything for admins. Callers check the
- * viewer with `canSeeOutreachContact` before a write.
+ * People members met in ministry, kept as lasting records with their
+ * statuses and every interaction since. They are outside Pleros, so every
+ * read here is scoped: a member's own list, one location group for its
+ * assigned pastor, or everything for admins. Callers check the viewer with
+ * `canSeeOutreachContact` before a write.
  */
 
 const contacts = schema.outreachContacts;
+const interactions = schema.outreachContactInteractions;
 const followUpUser = alias(schema.users, "follow_up_user");
+const metInteraction = alias(interactions, "met_interaction");
+
+/** A transaction handle from `transactionDb.transaction`, shared with the activity queries. */
+export type Tx = Parameters<Parameters<typeof transactionDb.transaction>[0]>[0];
 
 export type OutreachContact = {
   id: number;
+  /** The Lagos day they were first met. */
   metDate: string;
+  /** The outreach they were met at, when it still exists. */
+  activityId: number | null;
   name: string;
   phone: string | null;
   note: string | null;
+  salvationStatus: SalvationStatus;
+  discipleshipStatus: DiscipleshipStatus;
+  followUpPlan: string | null;
+  nextFollowUpDate: string | null;
+  /** When first followed up; null while still to be followed up. */
   followedUpAt: string | null;
-  followUpNote: string | null;
-  /** Who marked them followed up, when it was not the member themselves. */
+  /** Who first followed them up. */
   followedUpByName: string | null;
+  /** @deprecated Older follow-up notes now live in the interaction history. */
+  followUpNote: string | null;
+  interactionCount: number;
+  lastInteractionDate: string | null;
+  lastInteractionKind: InteractionKind | null;
 };
 
 const contactColumns = {
   id: contacts.id,
   metDate: contacts.metDate,
+  activityId: contacts.activityId,
   name: contacts.name,
   phone: contacts.phone,
   note: contacts.note,
+  salvationStatus: contacts.salvationStatus,
+  discipleshipStatus: contacts.discipleshipStatus,
+  followUpPlan: contacts.followUpPlan,
+  nextFollowUpDate: contacts.nextFollowUpDate,
   followedUpAt: contacts.followedUpAt,
   followUpNote: contacts.followUpNote,
   followedUpByName: followUpUser.name,
+  interactionCount: contactInteractionCount,
+  lastInteractionDate: contactLastInteractionDate,
+  lastInteractionKind: contactLastInteractionKind,
 };
 
-type ContactRecord = {
-  id: number;
-  metDate: string;
-  name: string;
-  phone: string | null;
-  note: string | null;
-  followedUpAt: Date | null;
-  followUpNote: string | null;
-  followedUpByName: string | null;
-};
+type ContactRecord = Omit<OutreachContact, "followedUpAt"> & { followedUpAt: Date | null };
 
 function toContact(row: ContactRecord): OutreachContact {
   return { ...row, followedUpAt: row.followedUpAt?.toISOString() ?? null };
+}
+
+function outcomesOf(row: {
+  saved: boolean | null;
+  filled: boolean | null;
+  healed: boolean | null;
+}): ContactOutcomes {
+  return { saved: row.saved ?? false, filled: row.filled ?? false, healed: row.healed ?? false };
 }
 
 // ─── A member's own list ───────────────────────────────────────────────────
@@ -72,100 +127,131 @@ export async function listContactsForMember(
   return rows.map(toContact);
 }
 
-/** The people a member recorded for one day, in the order they were added. */
-export async function listContactsForDay(
+/** A person met at an outreach, with what happened to them there. */
+export type ActivityPerson = OutreachContact & { outcomes: ContactOutcomes };
+
+/** The people a member met at one outreach, in the order they were added. */
+export async function listContactsForActivity(
   userId: string,
-  metDate: string,
-): Promise<OutreachContact[]> {
+  activityId: number,
+): Promise<ActivityPerson[]> {
   const rows = await db
-    .select(contactColumns)
+    .select({
+      ...contactColumns,
+      saved: metInteraction.saved,
+      filled: metInteraction.filled,
+      healed: metInteraction.healed,
+    })
     .from(contacts)
     .leftJoin(followUpUser, eq(followUpUser.id, contacts.followedUpBy))
-    .where(and(eq(contacts.userId, userId), eq(contacts.metDate, metDate)))
+    .leftJoin(
+      metInteraction,
+      and(
+        eq(metInteraction.contactId, contacts.id),
+        eq(metInteraction.activityId, activityId),
+        eq(metInteraction.kind, "met"),
+      ),
+    )
+    .where(and(eq(contacts.userId, userId), eq(contacts.activityId, activityId)))
     .orderBy(asc(contacts.id));
-  return rows.map(toContact);
+  return rows.map(({ saved, filled, healed, ...row }) => ({
+    ...toContact(row),
+    outcomes: outcomesOf({ saved, filled, healed }),
+  }));
+}
+
+// ─── Shared transaction steps ──────────────────────────────────────────────
+
+/**
+ * Deletes a member's people and their whole history. Refused when someone
+ * else (their pastor or the Pleros team) has logged a follow-up with one of
+ * them, so that record is not lost by accident.
+ */
+export async function removeContacts(tx: Tx, userId: string, contactIds: number[]) {
+  if (contactIds.length === 0) return;
+  const [other] = await tx
+    .select({ id: interactions.id })
+    .from(interactions)
+    .where(
+      and(
+        inArray(interactions.contactId, contactIds),
+        isNotNull(interactions.userId),
+        ne(interactions.userId, userId),
+      ),
+    )
+    .limit(1);
+  if (other) {
+    throw new CommunityError(
+      "Your pastor or the Pleros team has logged a follow-up with one of these people. Ask them before removing them.",
+    );
+  }
+  await tx
+    .delete(contacts)
+    .where(and(eq(contacts.userId, userId), inArray(contacts.id, contactIds)));
+}
+
+/** Records that these people gave their lives to Christ, never downgrading a believer. */
+export async function markContactsSaved(tx: Tx, contactIds: number[]) {
+  if (contactIds.length === 0) return;
+  await tx
+    .update(contacts)
+    .set({ salvationStatus: "saved", updatedAt: new Date() })
+    .where(
+      and(
+        inArray(contacts.id, contactIds),
+        inArray(contacts.salvationStatus, ["unknown", "not_saved"]),
+      ),
+    );
 }
 
 /**
- * Saves a day's ministry report together with the people met that day, in one
- * transaction. `people` is the full list for the day as the form now has it:
- * rows with a known id are corrected in place (their follow-up state is left
- * alone), rows without one are added, and saved people no longer in the list
- * are removed.
+ * Recomputes when each person was first followed up and by whom from their
+ * interactions (anything that is not `met`). Run after interactions are
+ * added or removed.
  */
-export async function saveReportWithContacts(input: {
-  userId: string;
-  reportDate: string;
-  report: MinistryReportInput;
-  people: ContactRow[];
-}): Promise<void> {
-  const { userId, reportDate, report, people } = input;
-  const reports = schema.ministryReports;
+export async function syncContactFollowUp(tx: Tx, contactIds: number[]) {
+  const ids = [...new Set(contactIds)];
+  if (ids.length === 0) return;
+  const idList = sql.join(
+    ids.map((id) => sql`${id}`),
+    sql`, `,
+  );
+  await tx.execute(sql`
+    update ${contacts} as c
+    set followed_up_at = f.first_at,
+        followed_up_by = f.first_by,
+        updated_at = now()
+    from (
+      select contact_id,
+             min(created_at) as first_at,
+             (array_agg(user_id order by created_at, id))[1] as first_by
+      from ${interactions}
+      where kind <> 'met' and contact_id in (${idList})
+      group by contact_id
+    ) as f
+    where c.id = f.contact_id
+  `);
+  await tx.execute(sql`
+    update ${contacts}
+    set followed_up_at = null,
+        followed_up_by = null,
+        updated_at = now()
+    where id in (${idList})
+      and not exists (
+        select 1 from ${interactions} as i
+        where i.contact_id = ${contacts}.id and i.kind <> 'met'
+      )
+  `);
+}
 
+/** A member removes one of their own people, with their history. */
+export async function deleteOwnContact(userId: string, contactId: number) {
   await transactionDb.transaction(async (tx) => {
-    await tx
-      .insert(reports)
-      .values({ userId, reportDate, ...report })
-      .onConflictDoUpdate({
-        target: [reports.userId, reports.reportDate],
-        set: { ...report, updatedAt: new Date() },
-      });
-
-    const saved = await tx
-      .select({ id: contacts.id })
-      .from(contacts)
-      .where(and(eq(contacts.userId, userId), eq(contacts.metDate, reportDate)));
-    const savedIds = new Set(saved.map((row) => row.id));
-
-    // An id that is not one of this member's rows for this day is treated as new.
-    const kept = people.filter(
-      (person): person is ContactRow & { id: number } =>
-        person.id != null && savedIds.has(person.id),
-    );
-    const added = people.filter(
-      (person) => person.id == null || !savedIds.has(person.id),
-    );
-    const keptIds = new Set(kept.map((person) => person.id));
-    const removedIds = [...savedIds].filter((id) => !keptIds.has(id));
-
-    for (const person of kept) {
-      await tx
-        .update(contacts)
-        .set({
-          name: person.name,
-          phone: person.phone,
-          note: person.note,
-          updatedAt: new Date(),
-        })
-        .where(and(eq(contacts.id, person.id), eq(contacts.userId, userId)));
-    }
-    if (added.length > 0) {
-      await tx.insert(contacts).values(
-        added.map((person) => ({
-          userId,
-          metDate: reportDate,
-          name: person.name,
-          phone: person.phone,
-          note: person.note,
-        })),
-      );
-    }
-    if (removedIds.length > 0) {
-      await tx
-        .delete(contacts)
-        .where(and(eq(contacts.userId, userId), inArray(contacts.id, removedIds)));
-    }
+    await removeContacts(tx, userId, [contactId]);
   });
 }
 
-/** Removes one of the member's own entries. */
-export async function deleteOwnContact(userId: string, contactId: number) {
-  await db
-    .delete(contacts)
-    .where(and(eq(contacts.id, contactId), eq(contacts.userId, userId)));
-}
-
-// ─── Follow-up ─────────────────────────────────────────────────────────────
+// ─── Who owns a person or an interaction ───────────────────────────────────
 
 /** Who recorded a contact and which location groups that member belongs to. */
 export async function getContactOwner(
@@ -189,33 +275,161 @@ export async function getContactOwner(
   return { userId: contact.userId, unitIds: units.map((unit) => unit.unitId) };
 }
 
-/**
- * Marks a person followed up, or puts them back on the to-do list. Marking
- * someone who is already followed up keeps who did it and when, so a note can
- * be added or corrected afterwards; leaving `note` out leaves the note alone.
- */
-export async function setContactFollowUp(
-  contactId: number,
-  followUp: { by: string; note?: string | null } | null,
-) {
+export async function getInteractionOwner(
+  interactionId: number,
+): Promise<{ contactId: number; userId: string | null; kind: InteractionKind } | null> {
+  const [row] = await db
+    .select({
+      contactId: interactions.contactId,
+      userId: interactions.userId,
+      kind: interactions.kind,
+    })
+    .from(interactions)
+    .where(eq(interactions.id, interactionId))
+    .limit(1);
+  return row ?? null;
+}
+
+// ─── One person in detail ──────────────────────────────────────────────────
+
+export type ContactInteraction = {
+  id: number;
+  interactionDate: string;
+  kind: InteractionKind;
+  outcomes: ContactOutcomes;
+  note: string | null;
+  /** Who logged it; null once that account is gone. */
+  userId: string | null;
+  userName: string | null;
+  /** The activity it was logged through, when it still exists. */
+  activity: { id: number; summary: string } | null;
+};
+
+export type ContactDetail = OutreachContact & {
+  memberName: string;
+  interactions: ContactInteraction[];
+};
+
+/** Most interactions shown for one person. */
+const INTERACTION_LIMIT = 200;
+
+/** A person with their whole history, newest touch first. */
+export async function getContactDetail(contactId: number): Promise<ContactDetail | null> {
+  const [contact] = await db
+    .select({ ...contactColumns, memberName: schema.users.name })
+    .from(contacts)
+    .innerJoin(schema.users, eq(schema.users.id, contacts.userId))
+    .leftJoin(followUpUser, eq(followUpUser.id, contacts.followedUpBy))
+    .where(eq(contacts.id, contactId))
+    .limit(1);
+  if (!contact) return null;
+
+  const activities = schema.ministryActivities;
+  const rows = await db
+    .select({
+      id: interactions.id,
+      interactionDate: interactions.interactionDate,
+      kind: interactions.kind,
+      saved: interactions.saved,
+      filled: interactions.filled,
+      healed: interactions.healed,
+      note: interactions.note,
+      userId: interactions.userId,
+      userName: schema.users.name,
+      activityId: activities.id,
+      activityKind: activities.kind,
+      activityTitle: activities.title,
+      activityMode: activities.mode,
+      activityPlatform: activities.platform,
+      activityLocation: activities.location,
+    })
+    .from(interactions)
+    .leftJoin(schema.users, eq(schema.users.id, interactions.userId))
+    .leftJoin(activities, eq(activities.id, interactions.activityId))
+    .where(eq(interactions.contactId, contactId))
+    .orderBy(desc(interactions.interactionDate), desc(interactions.id))
+    .limit(INTERACTION_LIMIT);
+
+  const { memberName, ...record } = contact;
+  return {
+    ...toContact(record),
+    memberName,
+    interactions: rows.map((row) => ({
+      id: row.id,
+      interactionDate: row.interactionDate,
+      kind: row.kind,
+      outcomes: outcomesOf(row),
+      note: row.note,
+      userId: row.userId,
+      userName: row.userName,
+      activity:
+        row.activityId != null && row.activityKind
+          ? {
+              id: row.activityId,
+              summary: activitySummary({
+                kind: row.activityKind as ActivityKind,
+                title: row.activityTitle,
+                mode: row.activityMode,
+                platform: row.activityPlatform,
+                location: row.activityLocation,
+              }),
+            }
+          : null,
+    })),
+  };
+}
+
+/** Changes a person's statuses, plan and next follow-up date. */
+export async function updateContact(contactId: number, patch: ContactUpdate) {
   await db
     .update(contacts)
-    .set(
-      followUp
-        ? {
-            followedUpAt: sql`coalesce(${contacts.followedUpAt}, now())`,
-            followedUpBy: sql`coalesce(${contacts.followedUpBy}, ${followUp.by})`,
-            ...(followUp.note === undefined ? {} : { followUpNote: followUp.note }),
-            updatedAt: new Date(),
-          }
-        : {
-            followedUpAt: null,
-            followedUpBy: null,
-            followUpNote: null,
-            updatedAt: new Date(),
-          },
-    )
+    .set({ ...patch, updatedAt: new Date() })
     .where(eq(contacts.id, contactId));
+}
+
+/**
+ * Logs a follow-up with a person. The first one marks them followed up; a
+ * salvation outcome records that they gave their life to Christ.
+ */
+export async function addContactInteraction(
+  contactId: number,
+  input: InteractionInput & { userId: string },
+): Promise<{ id: number }> {
+  return transactionDb.transaction(async (tx) => {
+    const [row] = await tx
+      .insert(interactions)
+      .values({
+        contactId,
+        userId: input.userId,
+        activityId: null,
+        interactionDate: input.interactionDate,
+        kind: input.kind,
+        ...input.outcomes,
+        note: input.note,
+      })
+      .returning({ id: interactions.id });
+    await tx
+      .update(contacts)
+      .set({
+        followedUpAt: sql`coalesce(${contacts.followedUpAt}, now())`,
+        followedUpBy: sql`coalesce(${contacts.followedUpBy}, ${input.userId})`,
+        updatedAt: new Date(),
+      })
+      .where(eq(contacts.id, contactId));
+    if (input.outcomes.saved) await markContactsSaved(tx, [contactId]);
+    return { id: row.id };
+  });
+}
+
+/** Removes one logged follow-up and recomputes when the person was first followed up. */
+export async function deleteContactInteraction(interactionId: number) {
+  await transactionDb.transaction(async (tx) => {
+    const [row] = await tx
+      .delete(interactions)
+      .where(eq(interactions.id, interactionId))
+      .returning({ contactId: interactions.contactId });
+    if (row) await syncContactFollowUp(tx, [row.contactId]);
+  });
 }
 
 // ─── Staff lists ───────────────────────────────────────────────────────────
@@ -245,21 +459,6 @@ export async function listContactsForStaff({
   pendingOnly?: boolean;
   limit?: number;
 }): Promise<StaffOutreachContact[]> {
-  const inUnit =
-    unitId != null
-      ? inArray(
-          contacts.userId,
-          db
-            .select({ userId: schema.sogpEnrollments.userId })
-            .from(schema.sogpEnrollments)
-            .innerJoin(
-              schema.unitMembers,
-              eq(schema.unitMembers.enrollmentId, schema.sogpEnrollments.id),
-            )
-            .where(eq(schema.unitMembers.unitId, unitId)),
-        )
-      : undefined;
-
   const rows = await db
     .select({ ...contactColumns, memberName: schema.users.name })
     .from(contacts)
@@ -269,7 +468,7 @@ export async function listContactsForStaff({
       and(
         gte(contacts.metDate, fromKey),
         lte(contacts.metDate, toKey),
-        inUnit,
+        inUnit(contacts.userId, unitId),
         memberUserId ? eq(contacts.userId, memberUserId) : undefined,
         pendingOnly ? isNull(contacts.followedUpAt) : undefined,
       ),
@@ -277,5 +476,64 @@ export async function listContactsForStaff({
     .orderBy(desc(contacts.metDate), desc(contacts.id))
     .limit(limit);
 
-  return rows.map((row) => ({ ...toContact(row), memberName: row.memberName }));
+  return rows.map(({ memberName, ...row }) => ({ ...toContact(row), memberName }));
+}
+
+export type StaffInteraction = {
+  interactionDate: string;
+  kind: InteractionKind;
+  outcomes: ContactOutcomes;
+  note: string | null;
+  contactName: string;
+  contactPhone: string | null;
+  /** The member who met the person. */
+  memberName: string;
+  /** Who logged this touch. */
+  loggedByName: string | null;
+};
+
+/** Every interaction in a range, for the admin export. Carries names and numbers. */
+export async function listInteractionsForStaff({
+  fromKey,
+  toKey,
+  unitId,
+  limit = 500,
+}: {
+  fromKey: string;
+  toKey: string;
+  unitId?: number | null;
+  limit?: number;
+}): Promise<StaffInteraction[]> {
+  const loggedBy = alias(schema.users, "logged_by");
+  const rows = await db
+    .select({
+      interactionDate: interactions.interactionDate,
+      kind: interactions.kind,
+      saved: interactions.saved,
+      filled: interactions.filled,
+      healed: interactions.healed,
+      note: interactions.note,
+      contactName: contacts.name,
+      contactPhone: contacts.phone,
+      memberName: schema.users.name,
+      loggedByName: loggedBy.name,
+    })
+    .from(interactions)
+    .innerJoin(contacts, eq(contacts.id, interactions.contactId))
+    .innerJoin(schema.users, eq(schema.users.id, contacts.userId))
+    .leftJoin(loggedBy, eq(loggedBy.id, interactions.userId))
+    .where(
+      and(
+        gte(interactions.interactionDate, fromKey),
+        lte(interactions.interactionDate, toKey),
+        inUnit(contacts.userId, unitId),
+      ),
+    )
+    .orderBy(desc(interactions.interactionDate), desc(interactions.id))
+    .limit(limit);
+
+  return rows.map(({ saved, filled, healed, ...row }) => ({
+    ...row,
+    outcomes: outcomesOf({ saved, filled, healed }),
+  }));
 }

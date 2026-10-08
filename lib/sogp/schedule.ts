@@ -31,7 +31,16 @@ export function resolveFirstReleaseAt(startsAt: Date) {
     day: "2-digit",
   }).format(startsAt);
 
-  return new Date(`${lagosDate}T05:00:00Z`);
+  return sogpReleaseInstant(lagosDate);
+}
+
+/**
+ * Core teachings are released at 05:00 UTC (6:00 am WAT) on their Lagos date.
+ * A whole week opens with its first release, so the Monday instant is what
+ * decides whether any teaching in that week can be opened.
+ */
+export function sogpReleaseInstant(lagosDateKey: string) {
+  return new Date(`${lagosDateKey}T05:00:00Z`);
 }
 
 export function assertMondayCohortStart(startsAt: Date) {

@@ -20,19 +20,59 @@ const card =
 
 const TOOLS_HREF = "/dashboard/sogp/discipleship";
 
-type SpaceKey = "joined" | "leading";
 type TabKey = "discussions" | "members";
 
-/** One discipleship group the viewer can open: the one they joined or the one they lead. */
+/** One discipleship group the viewer can open: the one they joined or one they lead. */
 type Space = {
-  key: SpaceKey;
+  kind: "joined" | "leading";
   groupId: number;
-  /** Short label for the switcher. */
-  label: string;
   groupName: string;
+  /** Who leads it and how full it is, shown under the name. */
+  summary: string;
   /** People listed on the Members tab (everyone in the group but the viewer). */
+  members: DiscipleshipPeer[];
   memberCount: number;
 };
+
+/** One labelled row of the switcher, so led groups never mix with the joined one. */
+function SpaceSet({
+  label,
+  spaces,
+  activeGroupId,
+  onSelect,
+}: {
+  label: string;
+  spaces: Space[];
+  activeGroupId: number | null;
+  onSelect: (groupId: number) => void;
+}) {
+  if (spaces.length === 0) return null;
+  return (
+    <div className="grid gap-1.5">
+      <p className="text-xs font-medium text-zinc-500">{label}</p>
+      <div className="flex flex-wrap items-center gap-1.5">
+        {spaces.map((space) => {
+          const selected = space.groupId === activeGroupId;
+          return (
+            <button
+              key={space.groupId}
+              type="button"
+              aria-pressed={selected}
+              onClick={() => onSelect(space.groupId)}
+              className={`h-8 max-w-full truncate rounded-full border px-3.5 text-[13px] font-medium transition-colors ${
+                selected
+                  ? "border-(--color-brand-blue) bg-(--color-brand-blue) text-white"
+                  : "border-(--color-line-strong) bg-white text-zinc-600 hover:text-zinc-900"
+              }`}
+            >
+              {space.groupName}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 function PeerRow({
   person,
@@ -82,9 +122,10 @@ function PeerRows({ people }: { people: DiscipleshipPeer[] }) {
 
 /**
  * Discipleship inside the community: a private discussion space for each
- * group the learner is part of, plus its members. Only the group's discipler
- * and current disciples can see or post in it. Check-ins, prayer requests and
- * the invite link stay in the discipleship tools.
+ * group the learner is part of (the one they joined and every one they lead),
+ * plus its members. Only the group's discipler and current disciples can see
+ * or post in it. Check-ins, prayer requests and the invite links stay in the
+ * discipleship tools.
  */
 export function CommunityDiscipleshipView({
   data,
@@ -103,38 +144,50 @@ export function CommunityDiscipleshipView({
   postingBlocked: boolean;
 }) {
   const { joined, leading } = data;
-  const ledGroupOpen = leading != null && !leading.paused;
 
-  const spaces: Space[] = [];
-  if (joined) {
-    spaces.push({
-      key: "joined",
-      groupId: joined.groupId,
-      label: `${joined.discipler.firstName}'s group`,
-      groupName: joined.groupName,
-      memberCount: joined.fellowDisciples.length + 1,
-    });
-  }
-  if (leading && ledGroupOpen && leading.disciples.length > 0) {
-    spaces.push({
-      key: "leading",
-      groupId: leading.groupId,
-      label: "Your group",
-      groupName: leading.groupName,
-      memberCount: leading.disciples.length,
-    });
-  }
+  const joinedSpace: Space | null = joined
+    ? {
+        kind: "joined",
+        groupId: joined.groupId,
+        groupName: joined.groupName,
+        summary: `Led by ${joined.discipler.firstName} · you joined ${joined.joinedMonth}`,
+        members: joined.fellowDisciples,
+        memberCount: joined.fellowDisciples.length + 1,
+      }
+    : null;
+  // A led group's space opens once its first disciple joins.
+  const ledSpaces: Space[] = leading
+    .filter((group) => !group.paused && group.disciples.length > 0)
+    .map((group) => ({
+      kind: "leading",
+      groupId: group.groupId,
+      groupName: group.groupName,
+      summary: `You lead this group · ${group.disciples.length} of ${group.capacity} disciples`,
+      members: group.disciples,
+      memberCount: group.disciples.length,
+    }));
+  const spaces = joinedSpace ? [joinedSpace, ...ledSpaces] : ledSpaces;
 
-  const [activeKey, setActiveKey] = useState<SpaceKey | null>(
-    spaces.find((space) => space.groupId === initialGroupId)?.key ??
-      spaces[0]?.key ??
+  const pausedGroups = leading.filter((group) => group.paused);
+  // Nothing to invite people to while every group the learner leads is paused.
+  const showInviteHint =
+    ledSpaces.length === 0 &&
+    (leading.length === 0 || leading.some((group) => !group.paused));
+
+  const [activeGroupId, setActiveGroupId] = useState<number | null>(
+    spaces.find((space) => space.groupId === initialGroupId)?.groupId ??
+      spaces[0]?.groupId ??
       null,
   );
   const [tab, setTab] = useState<TabKey>("discussions");
-  const active = spaces.find((space) => space.key === activeKey) ?? null;
+  const active = spaces.find((space) => space.groupId === activeGroupId) ?? null;
+  const select = (groupId: number) => {
+    setActiveGroupId(groupId);
+    setTab("discussions");
+  };
 
-  // The discipler can also post announcements to their own group.
-  const announcementReach = active?.key === "leading" ? "all" : "none";
+  // The discipler can also post announcements to a group they lead.
+  const announcementReach = active?.kind === "leading" ? "all" : "none";
 
   const tabs: Array<{ key: TabKey; label: string; count?: number }> = [
     { key: "discussions", label: "Discussions" },
@@ -166,29 +219,20 @@ export function CommunityDiscipleshipView({
         <div
           role="group"
           aria-label="Choose a discipleship group"
-          className="flex w-fit items-center gap-0.5 rounded-full border border-(--color-line-strong) bg-white p-0.5"
+          className="grid gap-3"
         >
-          {spaces.map((space) => {
-            const selected = space.key === activeKey;
-            return (
-              <button
-                key={space.key}
-                type="button"
-                aria-pressed={selected}
-                onClick={() => {
-                  setActiveKey(space.key);
-                  setTab("discussions");
-                }}
-                className={`h-8 rounded-full px-3.5 text-[13px] font-medium transition-colors ${
-                  selected
-                    ? "bg-(--color-brand-blue) text-white"
-                    : "text-zinc-600 hover:text-zinc-900"
-                }`}
-              >
-                {space.label}
-              </button>
-            );
-          })}
+          <SpaceSet
+            label="Group you're in"
+            spaces={joinedSpace ? [joinedSpace] : []}
+            activeGroupId={activeGroupId}
+            onSelect={select}
+          />
+          <SpaceSet
+            label="Groups you lead"
+            spaces={ledSpaces}
+            activeGroupId={activeGroupId}
+            onSelect={select}
+          />
         </div>
       ) : null}
 
@@ -199,11 +243,7 @@ export function CommunityDiscipleshipView({
               <h2 className="ppc-heading text-base font-semibold text-zinc-900">
                 {active.groupName}
               </h2>
-              <p className="text-sm text-zinc-500">
-                {active.key === "joined" && joined
-                  ? `Led by ${joined.discipler.firstName} · you joined ${joined.joinedMonth}`
-                  : `You lead this group · ${leading?.disciples.length ?? 0} of ${leading?.capacity ?? 0} disciples`}
-              </p>
+              <p className="text-sm text-zinc-500">{active.summary}</p>
             </div>
 
             <div
@@ -267,18 +307,14 @@ export function CommunityDiscipleshipView({
           ) : (
             <section className={`${card} overflow-hidden`}>
               <ul className="divide-y divide-zinc-100">
-                {active.key === "joined" && joined ? (
-                  <>
-                    <PeerRow
-                      person={joined.discipler}
-                      badge="Discipler"
-                      detail="Leads this group"
-                    />
-                    <PeerRows people={joined.fellowDisciples} />
-                  </>
-                ) : (
-                  <PeerRows people={leading?.disciples ?? []} />
-                )}
+                {active.kind === "joined" && joined ? (
+                  <PeerRow
+                    person={joined.discipler}
+                    badge="Discipler"
+                    detail="Leads this group"
+                  />
+                ) : null}
+                <PeerRows people={active.members} />
               </ul>
             </section>
           )}
@@ -292,22 +328,24 @@ export function CommunityDiscipleshipView({
         </p>
       ) : null}
 
-      {leading?.paused ? (
-        <p className={`${card} p-4 text-sm text-zinc-600`}>
-          Your own discipleship group has been paused by the Pleros team.
-          Contact support if you think this is a mistake.
+      {pausedGroups.map((group) => (
+        <p key={group.groupId} className={`${card} p-4 text-sm text-zinc-600`}>
+          {group.groupName} has been paused by the Pleros team. Contact support
+          if you think this is a mistake.
         </p>
-      ) : !leading || leading.disciples.length === 0 ? (
+      ))}
+
+      {showInviteHint ? (
         <p className={`${card} p-4 text-sm text-zinc-500`}>
-          No one has joined your own group yet.{" "}
+          No one has joined a group you lead yet.{" "}
           <Link
             href={TOOLS_HREF}
             className="font-medium text-(--color-brand-blue) underline underline-offset-2"
           >
-            Get your invite link
+            Get an invite link
           </Link>{" "}
-          and share it with the people you would like to walk with. Your
-          group&apos;s discussion space opens when the first person joins.
+          and share it with the people you would like to walk with. A
+          group&apos;s discussion space opens when its first person joins.
         </p>
       ) : null}
     </div>

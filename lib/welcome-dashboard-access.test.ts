@@ -94,6 +94,13 @@ describe("welcome dashboard access", () => {
     expect(accessSource).toContain('redirect("/login?returnTo=/dashboard/welcomepack")');
     expect(joinSource).toContain("requireWelcomePackAccess");
     expect(giftsSource).toContain("requireWelcomePackAccess");
+    // The hub and the setup page read a learner's own reminder settings.
+    expect(
+      source("app", "(site)", "dashboard", "welcomepack", "page.tsx"),
+    ).toContain("requireWelcomePackAccess");
+    expect(
+      source("app", "(site)", "dashboard", "welcomepack", "setup", "page.tsx"),
+    ).toContain("requireWelcomePackAccess");
   });
 
   test("dashboard routes provide immediate loading feedback during card navigation", () => {
@@ -117,6 +124,9 @@ describe("welcome dashboard access", () => {
     expect(podcastActionsSource).toContain("getDashboardActionSession");
     expect(prayerActionsSource).toContain("getDashboardActionSession");
     expect(schoolActionsSource).toContain("getDashboardActionSession");
+    expect(
+      source("app", "_actions", "notification-preferences-actions.ts"),
+    ).toContain("getDashboardActionSession");
   });
 
   test("proxy expires the retired welcome cookie", () => {

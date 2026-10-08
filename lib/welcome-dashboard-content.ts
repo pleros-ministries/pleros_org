@@ -45,7 +45,7 @@ export const welcomeDashboardSections: WelcomeDashboardSection[] = [
       {
         id: "welcome-pack",
         title: "Welcome Pack",
-        description: "Begin with your welcome, orientation, and gifts.",
+        description: "Begin with your welcome, orientation, gifts and reminders.",
         href: "/dashboard/welcomepack",
         status: "available",
         icon: MailIcon,

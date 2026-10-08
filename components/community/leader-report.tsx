@@ -1,17 +1,16 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { Fragment, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
-import {
-  MINISTRY_FIELDS,
-  type MinistryNumbers,
-} from "@/lib/community/ministry-report";
+import { ExpandButton } from "@/components/ppc/expandable-table-row";
+import { totalReached, type MinistryNumbers } from "@/lib/community/ministry-report";
 import { dateKeyLabel } from "@/lib/community/time";
 import { shiftDate } from "@/lib/sogp/daily-date";
 
 import type { OpenFlag } from "@/lib/db/queries/community-posts";
+import type { MemberActivity } from "@/lib/db/queries/ministry-activities";
 import type { StaffOutreachContact } from "@/lib/db/queries/outreach-contacts";
 import type { LeaderReport } from "@/lib/db/queries/community-reports";
 import {
@@ -19,15 +18,22 @@ import {
   resolveUnitFlag,
 } from "@/app/(site)/dashboard/community/_actions/leader-actions";
 
+import type { ContactViewer } from "./report/contact-detail";
+import { MemberActivityList } from "./report/member-activity-list";
 import { OutreachContactBrowser } from "./report/outreach-contact-browser";
 
-/** One day of the group's ministry reports, for its assigned pastor and admins. */
+/** One day of the group's ministry activities, for its assigned pastor and admins. */
 export type LeaderMinistryDay = {
   today: string;
   dateKey: string;
   memberCount: number;
-  /** Members who sent a report that day. */
-  rows: Array<{ name: string; report: MinistryNumbers & { note: string | null } }>;
+  /** Members who logged at least one activity that day. */
+  rows: Array<{
+    userId: string;
+    name: string;
+    activities: MemberActivity[];
+    totals: MinistryNumbers;
+  }>;
 };
 
 export function LeaderReportView({
@@ -36,6 +42,8 @@ export function LeaderReportView({
   ministry,
   outreach,
   unitOptions,
+  today,
+  viewer,
 }: {
   report: LeaderReport;
   /** Open reports on this group's posts and comments. */
@@ -46,9 +54,12 @@ export function LeaderReportView({
   outreach: StaffOutreachContact[] | null;
   /** Every unit the viewer manages; a switcher appears when there are several. */
   unitOptions: Array<{ id: number; name: string }>;
+  today: string;
+  viewer: ContactViewer;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const [expandedMember, setExpandedMember] = useState<string | null>(null);
   const [message, setMessage] = useState(
     "Checking in — is everything okay? We'd love to see you in the community.",
   );
@@ -141,7 +152,8 @@ export function LeaderReportView({
           </div>
           <p className="text-xs text-zinc-500">
             {ministry.rows.length} of {ministry.memberCount} members sent a
-            report. Numbers are as each person entered them.
+            report. Numbers are as each person entered them; open a row for
+            each activity and its note.
           </p>
           {ministry.rows.length > 0 ? (
             <div className="overflow-x-auto">
@@ -149,33 +161,60 @@ export function LeaderReportView({
                 <thead className="bg-zinc-50 text-zinc-500">
                   <tr>
                     <th className="px-2 py-2 font-medium">Member</th>
-                    {MINISTRY_FIELDS.map((field) => (
-                      <th key={field.key} className="px-2 py-2 text-right font-medium">
-                        {field.short}
-                      </th>
-                    ))}
-                    <th className="px-2 py-2 font-medium">Note</th>
+                    <th className="px-2 py-2 text-right font-medium">Activities</th>
+                    <th className="px-2 py-2 text-right font-medium">Reached</th>
+                    <th className="px-2 py-2 text-right font-medium">Present</th>
+                    <th className="px-2 py-2 text-right font-medium">Saved</th>
+                    <th className="px-2 py-2 text-right font-medium">Follow-ups</th>
+                    <th className="px-2 py-2" />
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-100">
-                  {ministry.rows.map((row, index) => (
-                    <tr key={`${row.name}-${index}`}>
-                      <td className="whitespace-nowrap px-2 py-2 font-medium text-zinc-900">
-                        {row.name}
-                      </td>
-                      {MINISTRY_FIELDS.map((field) => (
-                        <td
-                          key={field.key}
-                          className="px-2 py-2 text-right tabular-nums text-zinc-700"
-                        >
-                          {row.report[field.key]}
-                        </td>
-                      ))}
-                      <td className="max-w-[14rem] px-2 py-2 text-zinc-600">
-                        {row.report.note ?? ""}
-                      </td>
-                    </tr>
-                  ))}
+                  {ministry.rows.map((row) => {
+                    const open = expandedMember === row.userId;
+                    const detailId = `leader-ministry-${row.userId}`;
+                    return (
+                      <Fragment key={row.userId}>
+                        <tr>
+                          <td className="whitespace-nowrap px-2 py-2 font-medium text-zinc-900">
+                            {row.name}
+                          </td>
+                          <td className="px-2 py-2 text-right tabular-nums text-zinc-700">
+                            {row.activities.length}
+                          </td>
+                          <td className="px-2 py-2 text-right tabular-nums text-zinc-700">
+                            {totalReached(row.totals)}
+                          </td>
+                          <td className="px-2 py-2 text-right tabular-nums text-zinc-700">
+                            {row.totals.attendance}
+                          </td>
+                          <td className="px-2 py-2 text-right tabular-nums text-zinc-700">
+                            {row.totals.saved}
+                          </td>
+                          <td className="px-2 py-2 text-right tabular-nums text-zinc-700">
+                            {row.totals.followUps}
+                          </td>
+                          <td className="px-2 py-1 text-right">
+                            <ExpandButton
+                              expanded={open}
+                              controls={detailId}
+                              label={`activities for ${row.name}`}
+                              onToggle={() =>
+                                setExpandedMember(open ? null : row.userId)
+                              }
+                            />
+                          </td>
+                        </tr>
+                        {open ? (
+                          <tr id={detailId} className="bg-zinc-50/60">
+                            <td colSpan={7} className="px-3 py-2.5">
+                              <MemberActivityList activities={row.activities} />
+                            </td>
+                          </tr>
+                        ) : null}
+                      </Fragment>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -187,14 +226,17 @@ export function LeaderReportView({
         <section className="overflow-hidden rounded-sm border border-zinc-200 bg-white">
           <div className="grid gap-0.5 border-b border-zinc-100 px-4 py-3">
             <h2 className="ppc-heading text-sm font-semibold text-zinc-900">
-              People met in outreach
+              People met in ministry
             </h2>
             <p className="text-xs text-zinc-500">
-              Recorded by this group&apos;s members in the last 90 days.
+              Recorded by this group&apos;s members in the last 90 days. Open a
+              person for their history, log a follow-up or update their status.
             </p>
           </div>
           <OutreachContactBrowser
             contacts={outreach}
+            today={today}
+            viewer={viewer}
             staff
             defaultStatus="pending"
             emptyText="No one has been recorded yet."

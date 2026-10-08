@@ -76,11 +76,14 @@ function Spinner({ pending }: { pending: boolean }) {
 // ─── Discipler side ─────────────────────────────────────────────────────────
 
 export function PromptComposer({
+  groupId,
   preview,
   hasDisciples,
   suggestions = GENERIC_PROMPT_SUGGESTIONS,
   levelTitle = null,
 }: {
+  /** The led group this question goes to. */
+  groupId: number;
   preview: boolean;
   hasDisciples: boolean;
   suggestions?: string[];
@@ -94,11 +97,11 @@ export function PromptComposer({
       className="grid gap-2"
       onSubmit={(event) => {
         event.preventDefault();
-        run(() => createDiscipleshipPromptAction({ body }), () => setBody(""));
+        run(() => createDiscipleshipPromptAction({ groupId, body }), () => setBody(""));
       }}
     >
       <label htmlFor="discipleship-prompt" className="text-[0.8125rem] font-medium text-zinc-900">
-        Ask your group a check-in question
+        Ask this group a check-in question
       </label>
       <textarea
         id="discipleship-prompt"

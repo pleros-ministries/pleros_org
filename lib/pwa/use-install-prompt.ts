@@ -1,93 +1,48 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useSyncExternalStore } from "react";
 
-type BeforeInstallPromptEvent = Event & {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
-};
+import {
+  getInstallPromptStatus,
+  getServerInstallPromptStatus,
+  promptInstall,
+  subscribeToInstallPrompt,
+} from "@/lib/pwa/install-prompt-store";
 
-export type InstallPromptStatus =
-  | "pending"
-  | "installed"
-  | "installable"
-  | "ios-manual"
-  | "unsupported";
+export type { InstallPromptStatus } from "@/lib/pwa/install-prompt-store";
 
-function detectInstalled() {
-  if (typeof window === "undefined") return false;
-  const standaloneMedia = window.matchMedia?.(
-    "(display-mode: standalone)",
-  ).matches;
-  const iosStandalone =
-    (window.navigator as Navigator & { standalone?: boolean }).standalone ===
-    true;
-  return Boolean(standaloneMedia || iosStandalone);
+// Whether the browser has a share sheet never changes while the page is open,
+// so there is nothing to subscribe to.
+function subscribeToNothing() {
+  return () => {};
 }
 
-function detectIos() {
-  if (typeof navigator === "undefined") return false;
-  const ua = navigator.userAgent;
+function getCanShare() {
   return (
-    /iphone|ipad|ipod/i.test(ua) ||
-    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+    typeof navigator !== "undefined" && typeof navigator.share === "function"
   );
 }
 
+function getServerCanShare() {
+  return false;
+}
+
 export function useInstallPrompt() {
-  const [status, setStatus] = useState<InstallPromptStatus>("pending");
-  const [canShare, setCanShare] = useState(false);
-  const deferredPrompt = useRef<BeforeInstallPromptEvent | null>(null);
+  // The install event is captured by a module-level store, so it is still
+  // available here even when it fired before this component mounted.
+  const status = useSyncExternalStore(
+    subscribeToInstallPrompt,
+    getInstallPromptStatus,
+    getServerInstallPromptStatus,
+  );
 
-  useEffect(() => {
-    const onBeforeInstallPrompt = (event: Event) => {
-      event.preventDefault();
-      deferredPrompt.current = event as BeforeInstallPromptEvent;
-      setStatus("installable");
-    };
-
-    const onAppInstalled = () => {
-      deferredPrompt.current = null;
-      setStatus("installed");
-    };
-
-    window.addEventListener("beforeinstallprompt", onBeforeInstallPrompt);
-    window.addEventListener("appinstalled", onAppInstalled);
-
-    // Defer the initial read so we don't setState synchronously in the effect
-    // body, and so a `beforeinstallprompt` fired before hydration still wins.
-    const timer = window.setTimeout(() => {
-      setCanShare(
-        typeof navigator !== "undefined" &&
-          typeof navigator.share === "function",
-      );
-
-      if (detectInstalled()) {
-        setStatus("installed");
-      } else if (deferredPrompt.current) {
-        setStatus("installable");
-      } else if (detectIos()) {
-        setStatus("ios-manual");
-      } else {
-        setStatus("unsupported");
-      }
-    }, 0);
-
-    return () => {
-      window.clearTimeout(timer);
-      window.removeEventListener("beforeinstallprompt", onBeforeInstallPrompt);
-      window.removeEventListener("appinstalled", onAppInstalled);
-    };
-  }, []);
-
-  const promptInstall = useCallback(async () => {
-    const event = deferredPrompt.current;
-    if (!event) return;
-
-    await event.prompt();
-    await event.userChoice;
-    deferredPrompt.current = null;
-  }, []);
+  // Read through an external store rather than an effect so we don't setState
+  // synchronously in an effect body, and so the server render stays `false`.
+  const canShare = useSyncExternalStore(
+    subscribeToNothing,
+    getCanShare,
+    getServerCanShare,
+  );
 
   const shareApp = useCallback(async () => {
     if (

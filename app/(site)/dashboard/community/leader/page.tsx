@@ -8,7 +8,7 @@ import { managesAnyUnit, managesUnit } from "@/lib/community/permissions";
 import { listOpenFlags } from "@/lib/db/queries/community-posts";
 import { getLeaderReport } from "@/lib/db/queries/community-reports";
 import { listUnits } from "@/lib/db/queries/community-units";
-import { getMinistryDay } from "@/lib/db/queries/ministry-reports";
+import { getMinistryDay } from "@/lib/db/queries/ministry-activities";
 import { listContactsForStaff } from "@/lib/db/queries/outreach-contacts";
 import { lagosToday, shiftDate } from "@/lib/sogp/daily-date";
 
@@ -74,13 +74,24 @@ export default async function CommunityLeaderRoute({
               dateKey: ministryDate,
               memberCount: ministryRows.length,
               rows: ministryRows.flatMap((row) =>
-                row.report ? [{ name: row.name, report: row.report }] : [],
+                row.totals
+                  ? [
+                      {
+                        userId: row.userId,
+                        name: row.name,
+                        activities: row.activities,
+                        totals: row.totals,
+                      },
+                    ]
+                  : [],
               ),
             }
           : null
       }
       outreach={outreach}
       unitOptions={manageable.map((u) => ({ id: u.id, name: u.name }))}
+      today={today}
+      viewer={{ userId: ctx.userId, isAdmin: ctx.isAdmin }}
     />
   );
 }

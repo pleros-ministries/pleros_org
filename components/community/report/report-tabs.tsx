@@ -2,15 +2,14 @@ import Link from "next/link";
 
 const TABS = [
   { key: "report", label: "Report", href: "/dashboard/community/report" },
-  {
-    key: "people",
-    label: "People I met",
-    href: "/dashboard/community/report/people",
-  },
+  { key: "people", label: "People", href: "/dashboard/community/report/people" },
+  { key: "history", label: "History", href: "/dashboard/community/report/history" },
 ] as const;
 
-/** The two halves of the daily report area: the day's report, and everyone met. */
-export function ReportTabs({ active }: { active: (typeof TABS)[number]["key"] }) {
+export type ReportTab = (typeof TABS)[number]["key"];
+
+/** The three parts of the daily report area: the day's activities, everyone met, and past days. */
+export function ReportTabs({ active }: { active: ReportTab }) {
   return (
     <nav
       aria-label="Daily report sections"

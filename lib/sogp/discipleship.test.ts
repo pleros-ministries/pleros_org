@@ -2,6 +2,8 @@ import { describe, expect, test } from "vitest";
 
 import {
   DISCIPLESHIP_GROUP_MAX,
+  DISCIPLESHIP_GROUP_NAME_MAX,
+  DISCIPLESHIP_GROUPS_LED_MAX,
   GENERIC_PROMPT_SUGGESTIONS,
   buildCurriculumPromptSuggestions,
   buildWeeklyDigest,
@@ -10,9 +12,12 @@ import {
   buildDiscipleshipInviteUrl,
   buildWhatsAppUrl,
   defaultDiscipleshipGroupName,
+  evaluateCloseDiscipleshipGroup,
+  evaluateCreateDiscipleshipGroup,
   evaluateDiscipleshipJoin,
   generateInviteCode,
   isValidInviteCode,
+  validateDiscipleshipGroupName,
 } from "./discipleship";
 
 describe("generateInviteCode", () => {
@@ -44,6 +49,83 @@ describe("defaultDiscipleshipGroupName", () => {
   });
 });
 
+describe("validateDiscipleshipGroupName", () => {
+  test("trims and collapses whitespace", () => {
+    expect(validateDiscipleshipGroupName("  Campus   fellowship ")).toEqual({
+      ok: true,
+      name: "Campus fellowship",
+    });
+  });
+
+  test("rejects names that are too short, too long or not text", () => {
+    expect(validateDiscipleshipGroupName("ab").ok).toBe(false);
+    expect(validateDiscipleshipGroupName("   ").ok).toBe(false);
+    expect(validateDiscipleshipGroupName(null).ok).toBe(false);
+    expect(
+      validateDiscipleshipGroupName("x".repeat(DISCIPLESHIP_GROUP_NAME_MAX + 1)).ok,
+    ).toBe(false);
+    expect(validateDiscipleshipGroupName("x".repeat(DISCIPLESHIP_GROUP_NAME_MAX)).ok).toBe(true);
+  });
+
+  test("rejects a name the leader already uses, whatever the case", () => {
+    expect(validateDiscipleshipGroupName("family", ["Family", "Campus"])).toEqual({
+      ok: false,
+      error: "You already have a group with this name.",
+    });
+    expect(validateDiscipleshipGroupName("Friends", ["Family", "Campus"]).ok).toBe(true);
+  });
+});
+
+describe("evaluateCreateDiscipleshipGroup", () => {
+  test("allows another group below the limit", () => {
+    expect(
+      evaluateCreateDiscipleshipGroup({
+        openGroupCount: DISCIPLESHIP_GROUPS_LED_MAX - 1,
+        hasPausedGroup: false,
+      }),
+    ).toEqual({ ok: true });
+  });
+
+  test("blocks at the limit on groups led", () => {
+    expect(
+      evaluateCreateDiscipleshipGroup({
+        openGroupCount: DISCIPLESHIP_GROUPS_LED_MAX,
+        hasPausedGroup: false,
+      }),
+    ).toEqual({ ok: false, reason: "limit" });
+  });
+
+  test("blocks while any group is paused, so a pause cannot be sidestepped", () => {
+    expect(evaluateCreateDiscipleshipGroup({ openGroupCount: 1, hasPausedGroup: true })).toEqual({
+      ok: false,
+      reason: "paused",
+    });
+  });
+});
+
+describe("evaluateCloseDiscipleshipGroup", () => {
+  test("allows closing one of several active groups", () => {
+    expect(evaluateCloseDiscipleshipGroup({ status: "active", openGroupCount: 2 })).toEqual({
+      ok: true,
+    });
+  });
+
+  test("keeps the last group open", () => {
+    expect(evaluateCloseDiscipleshipGroup({ status: "active", openGroupCount: 1 })).toEqual({
+      ok: false,
+      reason: "last_group",
+    });
+  });
+
+  test("leaves a paused or already closed group alone", () => {
+    expect(evaluateCloseDiscipleshipGroup({ status: "archived", openGroupCount: 3 })).toEqual({
+      ok: false,
+      reason: "paused",
+    });
+    expect(evaluateCloseDiscipleshipGroup({ status: "closed", openGroupCount: 3 }).ok).toBe(false);
+  });
+});
+
 describe("evaluateDiscipleshipJoin", () => {
   const base = {
     viewerEnrollmentId: 2,
@@ -60,6 +142,12 @@ describe("evaluateDiscipleshipJoin", () => {
   test("blocks an archived group", () => {
     expect(
       evaluateDiscipleshipJoin({ ...base, group: { ...base.group, status: "archived" } }),
+    ).toEqual({ ok: false, reason: "archived" });
+  });
+
+  test("blocks a group its leader has closed", () => {
+    expect(
+      evaluateDiscipleshipJoin({ ...base, group: { ...base.group, status: "closed" } }),
     ).toEqual({ ok: false, reason: "archived" });
   });
 
@@ -143,6 +231,17 @@ describe("buildWeeklyDigest", () => {
       title: "Your discipleship week",
       body: "2 on track · 1 slowing down · 1 at risk · 1 check-in answer outstanding · 2 prayer requests",
     });
+  });
+
+  test("names the group when the leader runs more than one", () => {
+    expect(
+      buildWeeklyDigest({
+        statuses: ["on_track"],
+        unansweredCheckIns: 0,
+        openPrayerRequests: 0,
+        groupName: "Campus fellowship",
+      }),
+    ).toEqual({ title: "Your discipleship week", body: "Campus fellowship: 1 on track" });
   });
 
   test("returns null for an empty group", () => {

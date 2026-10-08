@@ -119,11 +119,15 @@ export async function sendDirectMessage(input: {
     if (notifyRecipient) {
       // Push text names the sender only — never the message itself.
       after(() =>
-        sendPushToUser(recipientId, {
-          title: "New message",
-          body: `${check.senderFirstName} sent you a message.`,
-          url: `/dashboard/community/messages/${input.conversationId}`,
-        }).catch((error) => console.error("Message push failed:", error)),
+        sendPushToUser(
+          recipientId,
+          {
+            title: "New message",
+            body: `${check.senderFirstName} sent you a message.`,
+            url: `/dashboard/community/messages/${input.conversationId}`,
+          },
+          { gate: "community" },
+        ).catch((error) => console.error("Message push failed:", error)),
       );
     }
 

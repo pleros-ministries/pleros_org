@@ -233,9 +233,11 @@ export const communityNotificationKindEnum = pgEnum(
   ],
 );
 
+/** `archived` is an admin pause; `closed` is the leader ending their own group. */
 export const discipleshipGroupStatusEnum = pgEnum("discipleship_group_status", [
   "active",
   "archived",
+  "closed",
 ]);
 
 export const discipleshipMembershipStatusEnum = pgEnum(
@@ -255,6 +257,46 @@ export const discipleshipContactKindEnum = pgEnum("discipleship_contact_kind", [
 export const discipleshipPrayerStatusEnum = pgEnum("discipleship_prayer_status", [
   "open",
   "answered",
+]);
+
+/** What a member logs in their daily ministry report. */
+export const ministryActivityKindEnum = pgEnum("ministry_activity_kind", [
+  "outreach",
+  "teaching_meeting",
+  "prayer_meeting",
+  "follow_up",
+  "church_service",
+  "other",
+]);
+
+/** How an outreach reached people. */
+export const outreachModeEnum = pgEnum("outreach_mode", ["online", "offline", "both"]);
+
+export const contactSalvationStatusEnum = pgEnum("contact_salvation_status", [
+  "unknown",
+  "not_saved",
+  "saved",
+  "believer",
+]);
+
+export const contactDiscipleshipStatusEnum = pgEnum("contact_discipleship_status", [
+  "not_started",
+  "following_up",
+  "in_discipleship",
+  "in_sogp",
+  "in_church",
+  "lost_contact",
+]);
+
+/** One touch with a person met in ministry; `met` belongs to the outreach they were met at. */
+export const contactInteractionKindEnum = pgEnum("contact_interaction_kind", [
+  "met",
+  "follow_up",
+  "call",
+  "whatsapp",
+  "visit",
+  "message",
+  "other",
 ]);
 
 // ─── Welcome pack leads ─────────────────────────────────────────────────────
@@ -704,6 +746,56 @@ export const prayerWatchRemindersSent = pgTable(
       t.date,
     ),
   ],
+);
+
+// ─── Learner notification preferences ───────────────────────────────────────
+//
+// One row per learner, written from the Welcome Pack setup page. A missing row
+// means the column defaults below, which match what learners received before
+// preferences existed (morning Prayer Watch reminder and community pushes).
+// Resolve rows through `resolveReminderPreferences`, never by reading columns
+// directly.
+export const learnerNotificationPreferences = pgTable(
+  "learner_notification_preferences",
+  {
+    userId: text("user_id")
+      .primaryKey()
+      .references(() => users.id, { onDelete: "cascade" }),
+    // IANA zone reported by the learner's browser; teaching, nudge and weekly
+    // reminders are timed in it. Prayer Watch always stays on Africa/Lagos.
+    timeZone: text("time_zone").notNull().default("Africa/Lagos"),
+    // Minutes after local midnight; null until the learner chooses a time.
+    teachingTimeMinutes: integer("teaching_time_minutes"),
+    teachingReminderEnabled: boolean("teaching_reminder_enabled")
+      .notNull()
+      .default(false),
+    prayerWatchMorning: boolean("prayer_watch_morning").notNull().default(true),
+    prayerWatchAfternoon: boolean("prayer_watch_afternoon")
+      .notNull()
+      .default(false),
+    prayerWatchEvening: boolean("prayer_watch_evening")
+      .notNull()
+      .default(false),
+    // Messages, replies, discipleship, Ask Pleros and Pleros updates.
+    communityEnabled: boolean("community_enabled").notNull().default(true),
+    progressNudgesEnabled: boolean("progress_nudges_enabled")
+      .notNull()
+      .default(false),
+    newContentEnabled: boolean("new_content_enabled").notNull().default(false),
+    weeklySummaryEnabled: boolean("weekly_summary_enabled")
+      .notNull()
+      .default(false),
+    appInstalledAt: timestamp("app_installed_at", { withTimezone: true }),
+    // Set when the learner saves the reminders step; until then the setup
+    // form shows its recommended ticks rather than these stored values.
+    remindersSavedAt: timestamp("reminders_saved_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
 );
 
 // ─── Prayer watch attendance ────────────────────────────────────────────────
@@ -1766,9 +1858,9 @@ export const plerosQuestionMutes = pgTable("pleros_question_mutes", {
 // ─── Community: daily ministry reports ─────────────────────────────────────
 
 /**
- * What a member did in ministry on one Lagos day, as they reported it. Their
- * Pleros activity for the day (Bible reading, Prayer Watch, SOGP, podcast) is
- * compiled live from its own tables and is never copied here.
+ * @deprecated Replaced by `ministryActivities`; migration 0046 copied every
+ * row there as an outreach activity. Nothing reads or writes this table any
+ * more. Drop it in a later migration once production is verified.
  */
 export const ministryReports = pgTable(
   "ministry_reports",
@@ -1800,9 +1892,57 @@ export const ministryReports = pgTable(
 );
 
 /**
- * Someone a member met in outreach, kept so they can be followed up. These are
- * people outside Pleros, so their details go only to the member who met them,
- * the pastor assigned to that member's location group, and admins.
+ * One ministry activity a member did on one Lagos day: an outreach, a
+ * meeting, follow-up calls and so on. A day can hold several. The numbers
+ * are as the member entered them; their Pleros activity for the day (Bible
+ * reading, Prayer Watch, SOGP, podcast) is compiled live and never copied
+ * here. Which fields a kind uses is decided in `lib/community/ministry-activities.ts`.
+ */
+export const ministryActivities = pgTable(
+  "ministry_activities",
+  {
+    id: serial("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    activityDate: date("activity_date", { mode: "string" }).notNull(),
+    kind: ministryActivityKindEnum("kind").notNull(),
+    /** A short name; required when the kind is `other`. */
+    title: text("title"),
+    /** Outreach only. */
+    mode: outreachModeEnum("mode"),
+    /** Online outreach: a key from OUTREACH_PLATFORMS, or `other:<name>`. */
+    platform: text("platform"),
+    /** Where it happened, for offline outreach and meetings. */
+    location: text("location"),
+    reachedOnline: integer("reached_online").notNull().default(0),
+    reachedOffline: integer("reached_offline").notNull().default(0),
+    /** People present at a meeting or service. */
+    attendance: integer("attendance").notNull().default(0),
+    saved: integer("saved").notNull().default(0),
+    notSaved: integer("not_saved").notNull().default(0),
+    filled: integer("filled").notNull().default(0),
+    healed: integer("healed").notNull().default(0),
+    followUps: integer("follow_ups").notNull().default(0),
+    note: text("note"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index("ministry_activities_user_date_idx").on(t.userId, t.activityDate),
+    index("ministry_activities_date_idx").on(t.activityDate),
+  ],
+);
+
+/**
+ * Someone a member met in ministry, kept as a lasting record so they can be
+ * followed up and discipled over time. These are people outside Pleros, so
+ * their details go only to the member who met them, the pastor assigned to
+ * that member's location group, and admins.
  */
 export const outreachContacts = pgTable(
   "outreach_contacts",
@@ -1812,16 +1952,33 @@ export const outreachContacts = pgTable(
     userId: text("user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    /** The Lagos day they met, matching that day's ministry report. */
+    /** The Lagos day they were first met. */
     metDate: date("met_date", { mode: "string" }).notNull(),
+    /** The outreach they were met at; null once that activity was removed. */
+    activityId: integer("activity_id").references(() => ministryActivities.id, {
+      onDelete: "set null",
+    }),
     name: text("name").notNull(),
     phone: text("phone"),
     note: text("note"),
-    /** null while the person is still to be followed up. */
+    salvationStatus: contactSalvationStatusEnum("salvation_status")
+      .notNull()
+      .default("unknown"),
+    discipleshipStatus: contactDiscipleshipStatusEnum("discipleship_status")
+      .notNull()
+      .default("not_started"),
+    /** What to do next with this person. */
+    followUpPlan: text("follow_up_plan"),
+    nextFollowUpDate: date("next_follow_up_date", { mode: "string" }),
+    /**
+     * When they were first followed up and by whom, derived from the earliest
+     * interaction that is not `met`; null while still to be followed up.
+     */
     followedUpAt: timestamp("followed_up_at", { withTimezone: true }),
     followedUpBy: text("followed_up_by").references(() => users.id, {
       onDelete: "set null",
     }),
+    /** @deprecated No longer written; copied into the interaction history. */
     followUpNote: text("follow_up_note"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
@@ -1833,6 +1990,48 @@ export const outreachContacts = pgTable(
   (t) => [
     index("outreach_contacts_user_date_idx").on(t.userId, t.metDate),
     index("outreach_contacts_date_idx").on(t.metDate),
+    index("outreach_contacts_activity_idx").on(t.activityId),
+  ],
+);
+
+/**
+ * Every touch with a person met in ministry: the outreach they were met at,
+ * then each call, visit or message afterwards, with what happened. Seen only
+ * by whoever may see the person.
+ */
+export const outreachContactInteractions = pgTable(
+  "outreach_contact_interactions",
+  {
+    id: serial("id").primaryKey(),
+    contactId: integer("contact_id")
+      .notNull()
+      .references(() => outreachContacts.id, { onDelete: "cascade" }),
+    /** Who did it; null once that account is gone. */
+    userId: text("user_id").references(() => users.id, { onDelete: "set null" }),
+    /** The activity it happened in, when logged through the daily report. */
+    activityId: integer("activity_id").references(() => ministryActivities.id, {
+      onDelete: "set null",
+    }),
+    interactionDate: date("interaction_date", { mode: "string" }).notNull(),
+    kind: contactInteractionKindEnum("kind").notNull(),
+    saved: boolean("saved").notNull().default(false),
+    filled: boolean("filled").notNull().default(false),
+    healed: boolean("healed").notNull().default(false),
+    note: text("note"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index("outreach_contact_interactions_contact_date_idx").on(
+      t.contactId,
+      t.interactionDate,
+    ),
+    index("outreach_contact_interactions_activity_idx").on(t.activityId),
+    // One entry per person per activity, so a corrected activity updates it in place.
+    uniqueIndex("outreach_contact_interactions_activity_contact_idx")
+      .on(t.activityId, t.contactId)
+      .where(sql`${t.activityId} IS NOT NULL`),
   ],
 );
 
@@ -1945,7 +2144,7 @@ export const communityRestrictions = pgTable("community_restrictions", {
 
 // ─── SOGP discipleship groups ───────────────────────────────────────────────
 
-/** One discipleship group per enrolment; the enrolee is its discipler. */
+/** A learner's discipleship groups; the enrolee leads each one as its discipler. */
 export const discipleshipGroups = pgTable(
   "discipleship_groups",
   {
@@ -1966,7 +2165,10 @@ export const discipleshipGroups = pgTable(
       .defaultNow(),
   },
   (t) => [
-    uniqueIndex("discipleship_groups_leader_idx").on(t.leaderEnrollmentId),
+    index("discipleship_groups_leader_status_idx").on(
+      t.leaderEnrollmentId,
+      t.status,
+    ),
     uniqueIndex("discipleship_groups_invite_code_idx").on(t.inviteCode),
     index("discipleship_groups_status_idx").on(t.status),
   ],

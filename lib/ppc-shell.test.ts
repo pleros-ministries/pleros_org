@@ -209,7 +209,7 @@ describe("ppc shell helpers", () => {
     });
     expect(getPpcShellContext("/ministry")).toEqual({
       label: "Ministry reports",
-      description: "Daily reach, outcomes and Pleros activity for each member",
+      description: "Daily activities, outcomes and Pleros activity for each member",
     });
     expect(getPpcShellContext("/qa")).toEqual({
       label: "Q&A inbox",

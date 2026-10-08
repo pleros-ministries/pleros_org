@@ -5,11 +5,20 @@ import {
   CONTACT_NAME_MAX,
   CONTACT_NOTE_MAX,
   FOLLOW_UP_NOTE_MAX,
+  FOLLOW_UP_PLAN_MAX,
+  INTERACTION_NOTE_MAX,
+  canDeleteInteraction,
   canSeeOutreachContact,
+  emptyOutcomes,
   filterAndSortContacts,
+  isFollowUpDue,
   normaliseContactInput,
   normaliseContactRows,
+  normaliseContactUpdate,
   normaliseFollowUpNote,
+  normaliseFollowUpRows,
+  normaliseInteractionInput,
+  outcomesLabel,
   phoneHref,
 } from "./outreach-contacts";
 
@@ -128,10 +137,41 @@ describe("normaliseContactRows", () => {
     ).toEqual({
       ok: true,
       value: [
-        { id: 7, name: "Ada", phone: "0803 555 0101", note: null },
-        { id: null, name: "Chidi", phone: null, note: "Wants a Bible" },
+        {
+          id: 7,
+          name: "Ada",
+          phone: "0803 555 0101",
+          note: null,
+          outcomes: emptyOutcomes(),
+          wantsFollowUp: false,
+        },
+        {
+          id: null,
+          name: "Chidi",
+          phone: null,
+          note: "Wants a Bible",
+          outcomes: emptyOutcomes(),
+          wantsFollowUp: false,
+        },
       ],
     });
+  });
+
+  test("reads what happened for each person", () => {
+    const parsed = normaliseContactRows([
+      { name: "Ada", saved: true, filled: "on", healed: "false", wantsFollowUp: true },
+      { name: "Chidi", saved: "true", healed: 1 },
+    ]);
+    expect(parsed.ok && parsed.value.map((person) => person.outcomes)).toEqual([
+      { saved: true, filled: true, healed: false },
+      { saved: true, filled: false, healed: true },
+    ]);
+    expect(parsed.ok && parsed.value.map((person) => person.wantsFollowUp)).toEqual([
+      true,
+      false,
+    ]);
+    expect(outcomesLabel({ saved: true, filled: true, healed: false })).toBe("Saved, Filled");
+    expect(outcomesLabel(emptyOutcomes())).toBeNull();
   });
 
   test("a saved person whose row was cleared is dropped, so they are removed", () => {
@@ -168,6 +208,169 @@ describe("normaliseContactRows", () => {
   });
 });
 
+describe("normaliseFollowUpRows", () => {
+  test("skips rows without a person and reads how each was followed up", () => {
+    expect(
+      normaliseFollowUpRows([
+        { contactId: 4, kind: "call", saved: true, note: " Prayed together " },
+        { contactId: null, kind: "visit" },
+        { contactId: 9, kind: "whatsapp" },
+      ]),
+    ).toEqual({
+      ok: true,
+      value: [
+        {
+          contactId: 4,
+          kind: "call",
+          outcomes: { saved: true, filled: false, healed: false },
+          note: "Prayed together",
+        },
+        { contactId: 9, kind: "whatsapp", outcomes: emptyOutcomes(), note: null },
+      ],
+    });
+  });
+
+  test("each person appears once and needs a kind that can be logged", () => {
+    expect(
+      normaliseFollowUpRows([
+        { contactId: 4, kind: "call" },
+        { contactId: 4, kind: "visit" },
+      ]),
+    ).toEqual({ ok: false, error: "Person 2 is listed twice." });
+    expect(normaliseFollowUpRows([{ contactId: 4, kind: "met" }])).toEqual({
+      ok: false,
+      error: "Person 1: Choose how you followed up.",
+    });
+    expect(normaliseFollowUpRows([{ contactId: 4, kind: "follow_up" }]).ok).toBe(false);
+    expect(
+      normaliseFollowUpRows([
+        { contactId: 4, kind: "call", note: "x".repeat(INTERACTION_NOTE_MAX + 1) },
+      ]).ok,
+    ).toBe(false);
+  });
+
+  test("refuses more people than the daily limit", () => {
+    const rows = Array.from({ length: CONTACTS_PER_DAY_MAX + 1 }, (_, index) => ({
+      contactId: index + 1,
+      kind: "call",
+    }));
+    expect(normaliseFollowUpRows(rows).ok).toBe(false);
+  });
+});
+
+describe("normaliseInteractionInput", () => {
+  const today = "2026-10-05";
+
+  test("reads a follow-up logged from the list", () => {
+    expect(
+      normaliseInteractionInput(
+        { kind: "visit", dateKey: "2026-10-04", healed: true, note: " Visited at home. " },
+        today,
+      ),
+    ).toEqual({
+      ok: true,
+      value: {
+        kind: "visit",
+        interactionDate: "2026-10-04",
+        outcomes: { saved: false, filled: false, healed: true },
+        note: "Visited at home.",
+      },
+    });
+  });
+
+  test("never logs a meeting, and the date cannot be in the future", () => {
+    expect(normaliseInteractionInput({ kind: "met", dateKey: today }, today)).toEqual({
+      ok: false,
+      error: "Choose how you followed up.",
+    });
+    expect(
+      normaliseInteractionInput({ kind: "call", dateKey: "2026-10-06" }, today),
+    ).toEqual({ ok: false, error: "Enter a date no later than today." });
+    expect(normaliseInteractionInput({ kind: "call", dateKey: "soon" }, today).ok).toBe(
+      false,
+    );
+    expect(normaliseInteractionInput({ kind: "call", dateKey: today }, today).ok).toBe(true);
+  });
+});
+
+describe("normaliseContactUpdate", () => {
+  test("reads both statuses, the plan and the next date", () => {
+    expect(
+      normaliseContactUpdate({
+        salvationStatus: "saved",
+        discipleshipStatus: "following_up",
+        followUpPlan: " Invite to Sunday service ",
+        nextFollowUpDate: "2026-10-12",
+      }),
+    ).toEqual({
+      ok: true,
+      value: {
+        salvationStatus: "saved",
+        discipleshipStatus: "following_up",
+        followUpPlan: "Invite to Sunday service",
+        nextFollowUpDate: "2026-10-12",
+      },
+    });
+    const bare = normaliseContactUpdate({
+      salvationStatus: "unknown",
+      discipleshipStatus: "not_started",
+      followUpPlan: "",
+      nextFollowUpDate: "",
+    });
+    expect(bare.ok && bare.value.followUpPlan).toBeNull();
+    expect(bare.ok && bare.value.nextFollowUpDate).toBeNull();
+  });
+
+  test("refuses unknown statuses, a bad date and a long plan", () => {
+    expect(
+      normaliseContactUpdate({ salvationStatus: "maybe", discipleshipStatus: "not_started" })
+        .ok,
+    ).toBe(false);
+    expect(
+      normaliseContactUpdate({ salvationStatus: "saved", discipleshipStatus: "done" }).ok,
+    ).toBe(false);
+    expect(
+      normaliseContactUpdate({
+        salvationStatus: "saved",
+        discipleshipStatus: "in_church",
+        nextFollowUpDate: "2026-02-31",
+      }).ok,
+    ).toBe(false);
+    expect(
+      normaliseContactUpdate({
+        salvationStatus: "saved",
+        discipleshipStatus: "in_church",
+        followUpPlan: "x".repeat(FOLLOW_UP_PLAN_MAX + 1),
+      }).ok,
+    ).toBe(false);
+  });
+});
+
+describe("canDeleteInteraction", () => {
+  test("whoever logged it or an admin can delete it, never a met entry", () => {
+    const own = { userId: "member_1", kind: "call" } as const;
+    expect(canDeleteInteraction({ userId: "member_1", isAdmin: false }, own)).toBe(true);
+    expect(canDeleteInteraction({ userId: "pastor", isAdmin: false }, own)).toBe(false);
+    expect(canDeleteInteraction({ userId: "staff", isAdmin: true }, own)).toBe(true);
+    expect(
+      canDeleteInteraction({ userId: "staff", isAdmin: true }, { userId: "member_1", kind: "met" }),
+    ).toBe(false);
+    expect(
+      canDeleteInteraction({ userId: "member_1", isAdmin: false }, { userId: null, kind: "call" }),
+    ).toBe(false);
+  });
+});
+
+describe("isFollowUpDue", () => {
+  test("is due once the next date has arrived", () => {
+    expect(isFollowUpDue({ nextFollowUpDate: "2026-10-05" }, "2026-10-05")).toBe(true);
+    expect(isFollowUpDue({ nextFollowUpDate: "2026-10-01" }, "2026-10-05")).toBe(true);
+    expect(isFollowUpDue({ nextFollowUpDate: "2026-10-06" }, "2026-10-05")).toBe(false);
+    expect(isFollowUpDue({ nextFollowUpDate: null }, "2026-10-05")).toBe(false);
+    expect(isFollowUpDue({}, "2026-10-05")).toBe(false);
+  });
+});
+
 describe("filterAndSortContacts", () => {
   const person = (
     id: number,
@@ -178,6 +381,9 @@ describe("filterAndSortContacts", () => {
       note: string | null;
       followedUpAt: string | null;
       memberName: string;
+      salvationStatus: "unknown" | "not_saved" | "saved" | "believer";
+      discipleshipStatus: "not_started" | "following_up" | "in_discipleship";
+      nextFollowUpDate: string | null;
     }> = {},
   ) => ({
     id,
@@ -186,15 +392,25 @@ describe("filterAndSortContacts", () => {
     phone: null,
     note: null,
     followedUpAt: null,
+    salvationStatus: "unknown" as const,
+    discipleshipStatus: "not_started" as const,
+    nextFollowUpDate: null,
     ...extra,
   });
 
   const list = [
-    person(1, "Chidi", "2026-10-03", { phone: "+234 803 555 0101", memberName: "Tolu" }),
+    person(1, "Chidi", "2026-10-03", {
+      phone: "+234 803 555 0101",
+      memberName: "Tolu",
+      salvationStatus: "saved",
+      nextFollowUpDate: "2026-10-09",
+    }),
     person(2, "Ada", "2026-10-05", {
       note: "Met at Ikeja market",
       followedUpAt: "2026-10-05T18:00:00.000Z",
       memberName: "Bisi",
+      discipleshipStatus: "following_up",
+      nextFollowUpDate: "2026-10-03",
     }),
     person(3, "Bola", "2026-10-05", { memberName: "Tolu" }),
   ];
@@ -256,6 +472,28 @@ describe("filterAndSortContacts", () => {
     expect(run({ status: "pending", keep: new Set([2]) })).toEqual([3, 2, 1]);
     expect(run({ status: "done", keep: new Set([1]) })).toEqual([2, 1]);
     expect(run({ status: "pending", keep: new Set([2]), query: "tolu" })).toEqual([3, 1]);
+  });
+
+  test("filters by salvation and discipleship status", () => {
+    expect(run({ salvation: "saved" })).toEqual([1]);
+    expect(run({ salvation: "unknown" })).toEqual([3, 2]);
+    expect(run({ discipleship: "following_up" })).toEqual([2]);
+    expect(run({ salvation: "saved", discipleship: "following_up" })).toEqual([]);
+    expect(run({ salvation: "any", discipleship: "any" })).toEqual([3, 2, 1]);
+  });
+
+  test("shows people whose next follow-up has arrived", () => {
+    expect(run({ status: "due", today: "2026-10-05" })).toEqual([2]);
+    expect(run({ status: "due", today: "2026-10-09" })).toEqual([2, 1]);
+    expect(run({ status: "due" })).toEqual([2, 1]);
+  });
+
+  test("can put the soonest next follow-up first, with no date last", () => {
+    expect(run({ sort: "next_follow_up" })).toEqual([2, 1, 3]);
+  });
+
+  test("keeps named people listed whatever the status filters say", () => {
+    expect(run({ salvation: "saved", keep: new Set([3]) })).toEqual([3, 1]);
   });
 
   test("does not change the list it was given", () => {

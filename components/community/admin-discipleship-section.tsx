@@ -36,7 +36,8 @@ export function AdminDiscipleshipSection({ overview }: { overview: DiscipleshipA
       <div className="grid gap-0.5">
         <h2 className="ppc-heading text-sm font-semibold text-zinc-900">Discipleship groups</h2>
         <p className="text-xs text-zinc-500">
-          Learner-led groups. Disciplers see progress and scores only, never answers.
+          Learner-led groups; one learner can lead several. Disciplers see progress and scores
+          only, never answers.
         </p>
       </div>
 
@@ -58,13 +59,14 @@ export function AdminDiscipleshipSection({ overview }: { overview: DiscipleshipA
             >
               <span className="grid gap-0.5">
                 <span className="font-semibold text-zinc-900">
-                  {group.leaderName}
+                  {group.groupName}
                   {group.status === "archived" ? (
                     <span className="ml-2 font-normal text-amber-700">paused</span>
                   ) : null}
                 </span>
                 <span>
-                  {group.leaderEmail} · {group.disciples} disciples · {group.prompts} check-ins
+                  Led by {group.leaderName} · {group.leaderEmail} · {group.disciples} disciples ·{" "}
+                  {group.prompts} check-ins
                 </span>
               </span>
               <button
@@ -72,7 +74,10 @@ export function AdminDiscipleshipSection({ overview }: { overview: DiscipleshipA
                 disabled={pending}
                 onClick={() => {
                   const next = group.status === "archived" ? "active" : "archived";
-                  if (next === "active" || window.confirm(`Pause ${group.leaderName}'s group?`)) {
+                  if (
+                    next === "active" ||
+                    window.confirm(`Pause ${group.groupName}, led by ${group.leaderName}?`)
+                  ) {
                     setStatus(group.groupId, next);
                   }
                 }}

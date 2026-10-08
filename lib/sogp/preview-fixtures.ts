@@ -222,7 +222,12 @@ const discipleBase = {
 
 export const discipleshipPreviewData: DiscipleshipDashboardData = {
   viewer: { enrollmentId: 1, firstName: "Tola" },
-  myGroup: {
+  ledGroups: [
+    { id: 1, name: "Tola's discipleship group", status: "active", discipleCount: 3 },
+    { id: 2, name: "Campus fellowship", status: "active", discipleCount: 0 },
+  ],
+  createGroupBlock: null,
+  selectedGroup: {
     id: 1,
     name: "Tola's discipleship group",
     inviteUrl: "https://pleros.org/sogp/discipleship/ab12cd34",

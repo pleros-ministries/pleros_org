@@ -1,41 +1,54 @@
 import { shiftDate } from "../sogp/daily-date";
 
 /**
- * Rules for the daily ministry report. Pure so the validation and the
- * three-day window are unit-tested, and so the form, tables and export all
- * read the same field list.
+ * Rules shared by every ministry activity: the number fields, the reporting
+ * window, the staff date ranges and the Pleros activity compiled beside a
+ * day. Pure so they are unit-tested and so the form, tables and export all
+ * read the same field list. Which fields a kind of activity shows lives in
+ * `ministry-activities.ts`.
  */
 
-/** The numbers a report carries, in the order they are shown everywhere. */
+/** The numbers an activity can carry, in the order they are shown everywhere. */
 export const MINISTRY_FIELDS = [
-  { key: "reachedOnline", label: "People reached online", short: "Online", required: true },
-  { key: "reachedOffline", label: "People reached offline", short: "Offline", required: true },
-  { key: "saved", label: "Gave their lives to Christ", short: "Saved", required: false },
-  { key: "notSaved", label: "Not saved", short: "Not saved", required: false },
-  { key: "filled", label: "Filled with the Holy Spirit", short: "Filled", required: false },
-  { key: "healed", label: "Healed", short: "Healed", required: false },
-  { key: "followUps", label: "Follow-ups made", short: "Follow-ups", required: false },
+  { key: "reachedOnline", label: "People reached online", short: "Online" },
+  { key: "reachedOffline", label: "People reached offline", short: "Offline" },
+  { key: "attendance", label: "People present", short: "Present" },
+  { key: "saved", label: "Gave their lives to Christ", short: "Saved" },
+  { key: "notSaved", label: "Not saved", short: "Not saved" },
+  { key: "filled", label: "Filled with the Holy Spirit", short: "Filled" },
+  { key: "healed", label: "Healed", short: "Healed" },
+  { key: "followUps", label: "Follow-ups made", short: "Follow-ups" },
 ] as const;
 
 export type MinistryFieldKey = (typeof MINISTRY_FIELDS)[number]["key"];
 export type MinistryNumbers = Record<MinistryFieldKey, number>;
-export type MinistryReportInput = MinistryNumbers & { note: string | null };
+
+/** Which number fields a form shows, and which of those must be given. */
+export type NumberRules = {
+  shown: readonly MinistryFieldKey[];
+  required: readonly MinistryFieldKey[];
+};
 
 export const MINISTRY_COUNT_MAX = 100_000;
 export const MINISTRY_NOTE_MAX = 500;
-/** A report can be sent or corrected for today and this many earlier days. */
+/** An activity can be added or corrected for today and this many earlier days. */
 export const MINISTRY_LATE_DAYS = 2;
 
 export function emptyMinistryNumbers(): MinistryNumbers {
   return {
     reachedOnline: 0,
     reachedOffline: 0,
+    attendance: 0,
     saved: 0,
     notSaved: 0,
     filled: 0,
     healed: 0,
     followUps: 0,
   };
+}
+
+export function ministryFieldLabel(key: MinistryFieldKey): string {
+  return MINISTRY_FIELDS.find((field) => field.key === key)?.label ?? key;
 }
 
 function parseCount(value: unknown): number | null {
@@ -48,19 +61,22 @@ function parseCount(value: unknown): number | null {
 }
 
 /**
- * Reads untrusted form values. The two "reached" numbers must be given (0 is
- * fine); the rest default to 0 when left blank.
+ * Reads untrusted number values. Only the fields in `rules.shown` are read;
+ * anything else is forced to 0 whatever was sent. Required fields must be
+ * given (0 is fine); the rest default to 0 when left blank.
  */
-export function normaliseMinistryReport(
-  input: Partial<Record<MinistryFieldKey, unknown>> & { note?: unknown },
-): { ok: true; value: MinistryReportInput } | { ok: false; error: string } {
+export function normaliseMinistryNumbers(
+  input: Partial<Record<MinistryFieldKey, unknown>>,
+  rules: NumberRules,
+): { ok: true; value: MinistryNumbers } | { ok: false; error: string } {
   const numbers = emptyMinistryNumbers();
 
   for (const field of MINISTRY_FIELDS) {
+    if (!rules.shown.includes(field.key)) continue;
     const raw = input[field.key];
     const blank = raw == null || (typeof raw === "string" && raw.trim() === "");
     if (blank) {
-      if (field.required) {
+      if (rules.required.includes(field.key)) {
         return {
           ok: false,
           error: `Enter a number for "${field.label}". Use 0 if there were none.`,
@@ -78,14 +94,21 @@ export function normaliseMinistryReport(
     numbers[field.key] = count;
   }
 
-  const note = typeof input.note === "string" ? input.note.trim() : "";
+  return { ok: true, value: numbers };
+}
+
+/** Reads an optional free-text note: trimmed, empty becomes null, capped. */
+export function normaliseMinistryNote(
+  value: unknown,
+): { ok: true; value: string | null } | { ok: false; error: string } {
+  const note = typeof value === "string" ? value.trim() : "";
   if (note.length > MINISTRY_NOTE_MAX) {
     return {
       ok: false,
       error: `Keep the note under ${MINISTRY_NOTE_MAX} characters.`,
     };
   }
-  return { ok: true, value: { ...numbers, note: note || null } };
+  return { ok: true, value: note || null };
 }
 
 /** Today first, then the earlier days that can still be reported, as Lagos date keys. */
@@ -107,8 +130,9 @@ export function sumMinistryNumbers(rows: MinistryNumbers[]): MinistryNumbers {
   return total;
 }
 
+/** Everyone ministered to: reached online, reached offline, or present at a meeting. */
 export function totalReached(numbers: MinistryNumbers): number {
-  return numbers.reachedOnline + numbers.reachedOffline;
+  return numbers.reachedOnline + numbers.reachedOffline + numbers.attendance;
 }
 
 // ─── Date ranges for staff views ───────────────────────────────────────────

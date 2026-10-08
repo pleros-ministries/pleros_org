@@ -13,7 +13,7 @@ import {
   UsersIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { Fragment, useState } from "react";
+import { Fragment, useState, type ReactNode } from "react";
 
 import {
   getDiscipleParticipationAction,
@@ -51,6 +51,7 @@ import {
   formatDiscipleshipDate,
   useDiscipleshipAction,
 } from "./discipleship-check-ins";
+import { GroupHeader, GroupSwitcher } from "./discipleship-groups";
 import { DiscipleFollowUp, LastContactLine } from "./discipleship-nudge";
 import { DisciplePrayerSection, LeaderPrayerList } from "./discipleship-prayer";
 import { ShareIntentButtons } from "./share-intent-buttons";
@@ -75,6 +76,8 @@ const quietButtonClass =
 const whatsappButtonClass =
   "inline-flex min-h-8 items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 text-xs font-medium text-emerald-800 transition-transform duration-150 active:scale-[0.98]";
 
+type PageView = "leading" | "member";
+
 export function DiscipleshipPage({
   data,
   preview = false,
@@ -82,8 +85,38 @@ export function DiscipleshipPage({
   data: DiscipleshipDashboardData;
   preview?: boolean;
 }) {
-  const { myGroup, myDiscipler } = data;
-  const archived = myGroup.status === "archived";
+  const { ledGroups, selectedGroup: group, myDiscipler } = data;
+  const paused = group.status === "archived";
+  const waiting = myDiscipler
+    ? myDiscipler.prompts.filter((prompt) => !prompt.response).length
+    : 0;
+  // A learner with a discipler and no disciples of their own starts on the group they are in.
+  const [view, setView] = useState<PageView>(
+    myDiscipler && ledGroups.every((led) => led.discipleCount === 0) ? "member" : "leading",
+  );
+
+  const views: Array<{ key: PageView; label: string; badge: ReactNode }> = [
+    {
+      key: "leading",
+      label: "Groups you lead",
+      badge: (
+        <span className="rounded-full bg-zinc-100 px-1.5 py-0.5 text-[0.7rem] text-zinc-600">
+          {ledGroups.length}
+        </span>
+      ),
+    },
+    {
+      key: "member",
+      label: "Group you're in",
+      badge:
+        waiting > 0 ? (
+          <span className="rounded-full bg-amber-50 px-1.5 py-0.5 text-[0.7rem] text-amber-700">
+            {waiting}
+            <span className="sr-only"> check-in{waiting === 1 ? "" : "s"} waiting</span>
+          </span>
+        ) : null,
+    },
+  ];
 
   return (
     <section className="site-font-theme min-h-screen bg-[#f6f5f1] pb-16 text-zinc-900">
@@ -105,132 +138,192 @@ export function DiscipleshipPage({
       </nav>
 
       <div className="site-shell-page sogp-shell-page grid gap-4 pb-6 pt-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-start">
-        <header className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 lg:col-span-2">
+        <header className="grid gap-3 lg:col-span-2">
           <h1 className="ppc-heading text-lg font-semibold text-zinc-900">Discipleship</h1>
-          <p className="text-[0.62rem] font-semibold uppercase tracking-[0.1em] text-zinc-400">
-            {myGroup.disciples.length} of {DISCIPLESHIP_GROUP_MAX} disciples
-          </p>
+          <div
+            role="tablist"
+            aria-label="Discipleship groups"
+            className="flex gap-5 border-b border-zinc-200"
+          >
+            {views.map((item) => {
+              const selected = view === item.key;
+              return (
+                <button
+                  key={item.key}
+                  type="button"
+                  role="tab"
+                  aria-selected={selected}
+                  onClick={() => setView(item.key)}
+                  className={`-mb-px inline-flex min-h-10 items-center gap-1.5 border-b-2 text-sm font-medium transition-colors duration-150 ${
+                    selected
+                      ? "border-[var(--color-brand-blue)] text-[var(--color-brand-blue)]"
+                      : "border-transparent text-zinc-500 hover:text-zinc-800"
+                  }`}
+                >
+                  {item.label}
+                  {item.badge}
+                </button>
+              );
+            })}
+          </div>
         </header>
 
-        <div className="grid gap-4">
-          {myDiscipler ? (
-            <DisciplerSection discipler={myDiscipler} preview={preview} />
-          ) : null}
+        {view === "leading" ? (
+          <>
+            <GroupSwitcher
+              groups={ledGroups}
+              selectedId={group.id}
+              createBlock={data.createGroupBlock}
+              preview={preview}
+            />
 
-          {archived ? (
-            <p className="rounded-sm border border-zinc-200 bg-white p-4 text-xs text-zinc-600">
-              Your discipleship group has been paused by the Pleros team. Contact support if you
-              think this is a mistake.
-            </p>
-          ) : (
-            <InviteSection data={data} preview={preview} />
-          )}
+            {/* Keyed by group so the day, open row and toggles reset when the group changes. */}
+            <Fragment key={group.id}>
+              <GroupHeader
+                group={group}
+                discipleCount={group.disciples.length}
+                openGroupCount={ledGroups.length}
+                preview={preview}
+              />
 
-          <SogpActivitySection
-            title={`Your disciples (${myGroup.disciples.length})`}
-            description="See who took part each day. Tap a disciple for their progress and follow-up."
-            icon={<UsersIcon className={iconClass} strokeWidth={2} />}
-          >
-            {myGroup.disciples.length === 0 ? (
-              <p className="text-xs text-zinc-500">
-                No one yet. Share your invite link with the people you&apos;d like to walk with
-                through SOGP.
-              </p>
+              <div className="grid gap-4">
+                {paused ? (
+                  <p className="rounded-sm border border-zinc-200 bg-white p-4 text-xs text-zinc-600">
+                    This group has been paused by the Pleros team. Contact support if you think
+                    this is a mistake.
+                  </p>
+                ) : (
+                  <InviteSection
+                    group={group}
+                    viewerFirstName={data.viewer.firstName}
+                    preview={preview}
+                  />
+                )}
+
+                <SogpActivitySection
+                  title={`Disciples (${group.disciples.length})`}
+                  description="See who took part each day. Tap a disciple for their progress and follow-up."
+                  icon={<UsersIcon className={iconClass} strokeWidth={2} />}
+                >
+                  {group.disciples.length === 0 ? (
+                    <p className="text-xs text-zinc-500">
+                      No one yet. Share this group&apos;s invite link with the people you&apos;d
+                      like to walk with through SOGP.
+                    </p>
+                  ) : (
+                    <DiscipleParticipationTable
+                      groupId={group.id}
+                      disciples={group.disciples}
+                      range={data.participationRange}
+                      preview={preview}
+                    />
+                  )}
+                </SogpActivitySection>
+              </div>
+
+              {!paused ? (
+                <div className="grid gap-4">
+                  <SogpActivitySection
+                    title="Check-ins"
+                    description="Ask a question, read each answer privately and reply to encourage them."
+                    icon={<MessageCircleQuestionIcon className={iconClass} strokeWidth={2} />}
+                  >
+                    <PromptComposer
+                      groupId={group.id}
+                      preview={preview}
+                      hasDisciples={group.disciples.length > 0}
+                      suggestions={group.promptSuggestions.suggestions}
+                      levelTitle={group.promptSuggestions.levelTitle}
+                    />
+                    <LeaderPromptList
+                      prompts={group.prompts}
+                      discipleCount={group.disciples.length}
+                      preview={preview}
+                    />
+                  </SogpActivitySection>
+
+                  <SogpActivitySection
+                    title="Prayer requests"
+                    description="Requests this group's disciples share with you. Let them know when you've prayed."
+                    icon={<HandHelpingIcon className={iconClass} strokeWidth={2} />}
+                  >
+                    <LeaderPrayerList requests={group.prayerRequests} preview={preview} />
+                  </SogpActivitySection>
+                </div>
+              ) : null}
+            </Fragment>
+          </>
+        ) : (
+          <div className="grid gap-4 lg:col-span-2 lg:max-w-2xl">
+            {myDiscipler ? (
+              <DisciplerSection discipler={myDiscipler} preview={preview} />
             ) : (
-              <DiscipleParticipationTable
-                disciples={myGroup.disciples}
-                range={data.participationRange}
-                preview={preview}
-              />
+              <p className="rounded-sm border border-zinc-200 bg-white p-4 text-xs leading-[1.5] text-zinc-600">
+                You haven&apos;t joined a discipleship group yet. When someone shares their invite
+                link with you, open it to join their group. You can belong to one group at a time.
+              </p>
             )}
-          </SogpActivitySection>
-        </div>
-
-        {!archived ? (
-          <div className="grid gap-4">
-            <SogpActivitySection
-              title="Check-ins"
-              description="Ask a question, read each answer privately and reply to encourage them."
-              icon={<MessageCircleQuestionIcon className={iconClass} strokeWidth={2} />}
-            >
-              <PromptComposer
-                preview={preview}
-                hasDisciples={myGroup.disciples.length > 0}
-                suggestions={myGroup.promptSuggestions.suggestions}
-                levelTitle={myGroup.promptSuggestions.levelTitle}
-              />
-              <LeaderPromptList
-                prompts={myGroup.prompts}
-                discipleCount={myGroup.disciples.length}
-                preview={preview}
-              />
-            </SogpActivitySection>
-
-            <SogpActivitySection
-              title="Prayer requests"
-              description="Requests your disciples share with you. Let them know when you've prayed."
-              icon={<HandHelpingIcon className={iconClass} strokeWidth={2} />}
-            >
-              <LeaderPrayerList requests={myGroup.prayerRequests} preview={preview} />
-            </SogpActivitySection>
           </div>
-        ) : null}
+        )}
       </div>
     </section>
   );
 }
 
 function InviteSection({
-  data,
+  group,
+  viewerFirstName,
   preview,
 }: {
-  data: DiscipleshipDashboardData;
+  group: DiscipleshipDashboardData["selectedGroup"];
+  viewerFirstName: string;
   preview: boolean;
 }) {
-  const { myGroup } = data;
-  const message = buildDiscipleshipShareMessage(data.viewer.firstName);
+  const message = buildDiscipleshipShareMessage(viewerFirstName);
   const hrefs = Object.fromEntries(
     PLATFORMS.map((platform) => [
       platform,
-      buildPreSogpShareIntentUrl({ platform, postUrl: myGroup.inviteUrl, message }),
+      buildPreSogpShareIntentUrl({ platform, postUrl: group.inviteUrl, message }),
     ]),
   ) as Record<PreSogpShareIntentPlatform, string>;
   const regenerate = useDiscipleshipAction(preview);
-  const full = myGroup.disciples.length >= DISCIPLESHIP_GROUP_MAX;
+  const full = group.disciples.length >= DISCIPLESHIP_GROUP_MAX;
 
   return (
     <SogpActivitySection
-      title="Your invite link"
-      description="Anyone enrolled in SOGP who opens this link can join your discipleship group."
+      title="This group's invite link"
+      description={`Anyone enrolled in SOGP who opens this link can join ${group.name}. Each of your groups has its own link.`}
       icon={<LinkIcon className={iconClass} strokeWidth={2} />}
     >
       {full ? (
         <p className="text-xs text-amber-700">
-          Your group is full. Groups have up to {DISCIPLESHIP_GROUP_MAX} people.
+          This group is full. Groups have up to {DISCIPLESHIP_GROUP_MAX} people.
         </p>
       ) : null}
       <p className="break-all rounded-sm border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs text-zinc-700">
-        {myGroup.inviteUrl}
+        {group.inviteUrl}
       </p>
       <ShareIntentButtons
         hrefs={hrefs}
-        copyValue={myGroup.inviteUrl}
-        nativeShare={{ title: "Join my SOGP discipleship group", text: message, url: myGroup.inviteUrl }}
+        copyValue={group.inviteUrl}
+        nativeShare={{ title: "Join my SOGP discipleship group", text: message, url: group.inviteUrl }}
       />
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-zinc-100 pt-3">
         <SharePhoneToggle
           id="leader-shares-phone"
-          label="Let my disciples contact me on WhatsApp"
-          initial={myGroup.leaderSharesPhone}
+          label="Let this group's disciples contact me on WhatsApp"
+          initial={group.leaderSharesPhone}
           preview={preview}
-          onChange={(sharesPhone) => setLeaderSharesPhoneAction({ sharesPhone })}
+          onChange={(sharesPhone) =>
+            setLeaderSharesPhoneAction({ groupId: group.id, sharesPhone })
+          }
         />
         <button
           type="button"
           disabled={regenerate.pending}
           onClick={() => {
-            if (window.confirm("Create a new link? Your old link will stop working.")) {
-              regenerate.run(() => regenerateInviteLinkAction());
+            if (window.confirm("Create a new link for this group? Its old link will stop working.")) {
+              regenerate.run(() => regenerateInviteLinkAction({ groupId: group.id }));
             }
           }}
           className={quietButtonClass}
@@ -280,10 +373,12 @@ const stepButtonClass =
   "inline-flex h-8 items-center rounded-sm border border-zinc-200 bg-white px-2 text-zinc-600 hover:bg-zinc-50 disabled:opacity-40";
 
 function DiscipleParticipationTable({
+  groupId,
   disciples,
   range,
   preview,
 }: {
+  groupId: number;
   disciples: DiscipleSummary[];
   range: DiscipleshipDashboardData["participationRange"];
   preview: boolean;
@@ -295,19 +390,25 @@ function DiscipleParticipationTable({
   const toggle = (id: number) => setExpandedId((current) => (current === id ? null : id));
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["discipleship", "participation", date, disciples.map((d) => d.membershipId).join()],
+    queryKey: [
+      "discipleship",
+      "participation",
+      groupId,
+      date,
+      disciples.map((d) => d.membershipId).join(),
+    ],
     queryFn: () =>
       preview
         ? Promise.resolve(previewParticipation(disciples, date))
-        : getDiscipleParticipationAction(date),
+        : getDiscipleParticipationAction(groupId, date),
     placeholderData: keepPreviousData,
   });
   const dayByMembership = new Map((data ?? []).map((day) => [day.membershipId, day]));
 
   // What each disciple reported for their ministry that day: numbers only.
   const { data: ministry } = useQuery({
-    queryKey: ["discipleship", "ministry", date],
-    queryFn: () => getDiscipleMinistryAction(date),
+    queryKey: ["discipleship", "ministry", groupId, date],
+    queryFn: () => getDiscipleMinistryAction(groupId, date),
     enabled: !preview,
     placeholderData: keepPreviousData,
   });
@@ -379,7 +480,7 @@ function DiscipleParticipationTable({
               const day = dayByMembership.get(disciple.membershipId) ?? null;
               const report = ministryByMembership.get(disciple.membershipId) ?? null;
               const reached = report
-                ? report.reachedOnline + report.reachedOffline
+                ? report.reachedOnline + report.reachedOffline + report.attendance
                 : null;
               const activities = day ? dayActivities(day) : [];
               const done = activities.filter(Boolean).length;

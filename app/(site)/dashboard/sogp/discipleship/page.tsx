@@ -10,11 +10,20 @@ export const metadata: Metadata = {
   title: "Discipleship",
 };
 
-export default async function SogpDiscipleshipPage() {
+export default async function SogpDiscipleshipPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ group?: string }>;
+}) {
   const session = await getAppSession();
   if (!session) redirect("/login?returnTo=/dashboard/sogp/discipleship");
 
-  const data = await getDiscipleshipDashboard(session.user.id);
+  // `?group=` picks which of the learner's own groups to show; the query
+  // ignores an id that isn't theirs and falls back to their first group.
+  const { group } = await searchParams;
+  const requestedGroupId = group && /^\d{1,9}$/.test(group) ? Number(group) : null;
+
+  const data = await getDiscipleshipDashboard(session.user.id, requestedGroupId);
   if (!data) redirect("/sogp/enrol");
 
   return (
