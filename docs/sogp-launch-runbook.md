@@ -7,7 +7,7 @@
 - Learner: `/dashboard/sogp`
 - Admin: `/admin/sogp`
 - Telegram webhook: `/api/telegram/sogp/webhook`
-- Reminder cron: `/api/cron/sogp-reminders`
+- Crons: `/api/cron/sogp-reminders` (daily; discipleship and checkpoint pruning) and `/api/cron/reminder-dispatch` (every five minutes; learner push reminders)
 
 Old `school-of-purpose` route files are removed. Do not recreate aliases.
 
@@ -68,7 +68,7 @@ curl --request POST "https://api.telegram.org/bot$TELEGRAM_SOGP_BOT_TOKEN/setWeb
   --data-urlencode "secret_token=$TELEGRAM_SOGP_WEBHOOK_SECRET"
 ```
 
-Verify with `getWebhookInfo`. Admin `/admin/sogp` can preview and send one-off channel broadcasts. Hobby-compatible daily cron runs at 05:00 UTC (06:00 WAT) and sends deduplicated preparation, newly released track, and next-24-hours live-class messages.
+Verify with `getWebhookInfo`. Admin `/admin/sogp` can preview and send one-off channel broadcasts. Scheduled work runs from two Vercel crons: the daily `/api/cron/sogp-reminders` at 04:20 UTC (05:20 WAT) for discipleship alerts, digests and checkpoint pruning, and `/api/cron/reminder-dispatch` every five minutes for learner push reminders. Channel broadcasts are sent from the admin composer, not on a schedule.
 
 Completed enrolments post a learner alert (running enrolment number, name, phone, country, state, year of birth, referral, cohort) to the private ops chat `TELEGRAM_SOGP_SIGNUP_CHAT_ID` via `lib/telegram/sogp-signup-alert.ts`. This is a separate chat from the public `TELEGRAM_SOGP_CHANNEL_ID` broadcast channel; the bot must be an administrator of it. Unset the var to disable the alert (enrolment is unaffected).
 

@@ -32,7 +32,9 @@ export function OrientationSurveyGate({
           href={telegramUrl}
           target="_blank"
           rel="noreferrer"
-          onClick={() => router.push("/dashboard/pre-sogp")}
+          // Telegram opens in a new tab; this tab moves on to app and
+          // reminder setup, which then continues to Pre-SOGP.
+          onClick={() => router.push("/dashboard/welcomepack/setup")}
           className="site-button-text inline-flex min-h-12 max-w-full items-center justify-center gap-2 rounded-full bg-white px-5 text-center text-xs font-semibold text-[var(--color-brand-blue)] transition-transform duration-150 hover:-translate-y-px sm:px-7 sm:text-sm"
         >
           Join the orientation group

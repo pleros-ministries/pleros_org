@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { AppShell } from "@/components/layout/app-shell";
+import { PushBindingSync } from "@/components/push/push-binding-sync";
 import { getAppSession } from "@/lib/app-session";
 import { recordDashboardVisit } from "@/lib/db/queries/admin-analytics";
 import { normalizeLearnerReturnTo } from "@/lib/sogp/auth-flow";
@@ -29,8 +30,18 @@ export default async function DashboardLayout({
   // navigation, so they skip the generic site nav/footer that wraps every
   // other dashboard route.
   if (pathname === "/dashboard/sogp" || pathname === "/dashboard/podcast") {
-    return children;
+    return (
+      <>
+        <PushBindingSync userId={appSession.user.id} />
+        {children}
+      </>
+    );
   }
 
-  return <AppShell authenticated>{children}</AppShell>;
+  return (
+    <>
+      <PushBindingSync userId={appSession.user.id} />
+      <AppShell authenticated>{children}</AppShell>
+    </>
+  );
 }

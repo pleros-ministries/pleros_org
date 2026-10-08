@@ -9,14 +9,22 @@ import {
   type CommunityActionResult,
 } from "@/lib/community/errors";
 import {
+  canDeleteInteraction,
   canSeeOutreachContact,
-  normaliseFollowUpNote,
+  normaliseContactUpdate,
+  normaliseInteractionInput,
 } from "@/lib/community/outreach-contacts";
 import {
+  addContactInteraction,
+  deleteContactInteraction,
   deleteOwnContact,
+  getContactDetail,
   getContactOwner,
-  setContactFollowUp,
+  getInteractionOwner,
+  updateContact,
+  type ContactDetail,
 } from "@/lib/db/queries/outreach-contacts";
+import { lagosToday } from "@/lib/sogp/daily-date";
 
 async function requireCommunity(): Promise<CommunityContext> {
   const ctx = await getCommunityContext();
@@ -25,10 +33,12 @@ async function requireCommunity(): Promise<CommunityContext> {
 }
 
 /** Returns expected failures as data; thrown messages are hidden in production. */
-async function run(fn: () => Promise<void>): Promise<CommunityActionResult> {
+async function run<T extends object>(
+  fn: () => Promise<T>,
+): Promise<CommunityActionResult<T>> {
   try {
-    await fn();
-    return { ok: true };
+    const value = await fn();
+    return { ...value, ok: true as const };
   } catch (error) {
     if (error instanceof CommunityError) {
       return { ok: false, error: error.message };
@@ -44,7 +54,15 @@ function revalidateContacts() {
   revalidatePath("/admin/ministry");
 }
 
-/** A member removes one of their own entries. */
+/** The viewer must be allowed to see this person: the member who met them, their pastor, or an admin. */
+async function requireContactAccess(ctx: CommunityContext, contactId: number) {
+  const owner = await getContactOwner(contactId);
+  if (!owner) throw new CommunityError("That person is no longer on the list.");
+  if (!canSeeOutreachContact(ctx, owner)) throw new Error("Forbidden");
+  return owner;
+}
+
+/** A member removes one of their own people, with their history. */
 export async function removeOutreachContactAction(
   contactId: number,
 ): Promise<CommunityActionResult> {
@@ -52,36 +70,78 @@ export async function removeOutreachContactAction(
     const ctx = await requireCommunity();
     await deleteOwnContact(ctx.userId, contactId);
     revalidateContacts();
+    return {};
   });
 }
 
-/**
- * Marks a person followed up, or puts them back on the to-do list. Pass `note`
- * to set the follow-up note; without it the note is left as it is. Allowed for
- * the member who met them, the pastor assigned to that member's location
- * group, and admins.
- */
-export async function setOutreachFollowUpAction(input: {
+/** Read-only: one person with their whole interaction history. */
+export async function getContactDetailAction(
+  contactId: number,
+): Promise<CommunityActionResult<{ detail: ContactDetail }>> {
+  return run(async () => {
+    const ctx = await requireCommunity();
+    await requireContactAccess(ctx, contactId);
+    const detail = await getContactDetail(contactId);
+    if (!detail) throw new CommunityError("That person is no longer on the list.");
+    return { detail };
+  });
+}
+
+/** Changes a person's statuses, follow-up plan and next follow-up date. */
+export async function updateContactAction(input: {
   contactId: number;
-  done: boolean;
-  note?: string;
+  salvationStatus: string;
+  discipleshipStatus: string;
+  followUpPlan: string;
+  nextFollowUpDate: string;
 }): Promise<CommunityActionResult> {
   return run(async () => {
     const ctx = await requireCommunity();
-    const owner = await getContactOwner(input.contactId);
-    if (!owner) throw new CommunityError("That person is no longer on the list.");
-    if (!canSeeOutreachContact(ctx, owner)) throw new Error("Forbidden");
-
-    await setContactFollowUp(
-      input.contactId,
-      input.done
-        ? {
-            by: ctx.userId,
-            note:
-              input.note === undefined ? undefined : normaliseFollowUpNote(input.note),
-          }
-        : null,
-    );
+    await requireContactAccess(ctx, input.contactId);
+    const parsed = normaliseContactUpdate(input);
+    if (!parsed.ok) throw new CommunityError(parsed.error);
+    await updateContact(input.contactId, parsed.value);
     revalidateContacts();
+    return {};
+  });
+}
+
+/** Logs a call, visit or message with a person. The first one marks them followed up. */
+export async function addContactInteractionAction(input: {
+  contactId: number;
+  kind: string;
+  dateKey: string;
+  saved?: boolean;
+  filled?: boolean;
+  healed?: boolean;
+  note?: string;
+}): Promise<CommunityActionResult<{ interactionId: number }>> {
+  return run(async () => {
+    const ctx = await requireCommunity();
+    await requireContactAccess(ctx, input.contactId);
+    const parsed = normaliseInteractionInput(input, lagosToday());
+    if (!parsed.ok) throw new CommunityError(parsed.error);
+    const row = await addContactInteraction(input.contactId, {
+      ...parsed.value,
+      userId: ctx.userId,
+    });
+    revalidateContacts();
+    return { interactionId: row.id };
+  });
+}
+
+/** Removes a logged follow-up: whoever logged it, or an admin. */
+export async function deleteContactInteractionAction(
+  interactionId: number,
+): Promise<CommunityActionResult> {
+  return run(async () => {
+    const ctx = await requireCommunity();
+    const interaction = await getInteractionOwner(interactionId);
+    if (!interaction) throw new CommunityError("That entry is no longer there.");
+    await requireContactAccess(ctx, interaction.contactId);
+    if (!canDeleteInteraction(ctx, interaction)) throw new Error("Forbidden");
+    await deleteContactInteraction(interactionId);
+    revalidateContacts();
+    return {};
   });
 }

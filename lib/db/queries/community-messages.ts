@@ -31,12 +31,14 @@ import {
   type MessagingParty,
   type MessagingRelation,
 } from "@/lib/community/messaging";
-import { firstNameOf } from "@/lib/community/visibility";
+import { firstNameOf, fullNameOf } from "@/lib/community/visibility";
 
 /**
- * Private messages between two community members. Peers only ever see a first
- * name and a group name; message text is returned to the two participants and,
- * for a reported message only, to admins through the moderation queue.
+ * Private messages between two community members. Peers see a first name and
+ * a group name, except in the new-message picker, which lists full names so
+ * people who share a first name can be told apart. Message text is returned to
+ * the two participants and, for a reported message only, to admins through the
+ * moderation queue.
  */
 
 const TEAM_LABEL = "Pleros team";
@@ -766,7 +768,8 @@ async function listBlockedPeerIds(userId: string): Promise<Set<string>> {
 
 export type MessageContact = {
   userId: string;
-  firstName: string;
+  /** Full name, so the picker can tell apart people who share a first name. */
+  name: string;
   unitName: string | null;
   /** Why they are suggested, e.g. "Your group leader". */
   note: string | null;
@@ -850,7 +853,7 @@ export async function listSuggestedContacts(
     if (contacts.has(row.userId)) return;
     contacts.set(row.userId, {
       userId: row.userId,
-      firstName: firstNameOf(row.firstName || row.name),
+      name: fullNameOf(row.name || row.firstName),
       unitName,
       note,
     });
@@ -862,8 +865,9 @@ export async function listSuggestedContacts(
 }
 
 /**
- * First-name search across enrolled adults. Under-18s are never listed, and an
- * under-18 viewer gets no search at all — only their suggested contacts.
+ * First-name search across enrolled adults, listed by full name. Under-18s are
+ * never listed, and an under-18 viewer gets no search at all — only their
+ * suggested contacts.
  */
 export async function searchMembers(
   ctx: CommunityContext,
@@ -911,7 +915,7 @@ export async function searchMembers(
     if (blocked.has(row.userId) || contacts.has(row.userId)) continue;
     contacts.set(row.userId, {
       userId: row.userId,
-      firstName: firstNameOf(row.firstName || row.name),
+      name: fullNameOf(row.name || row.firstName),
       unitName: row.unitName,
       note: null,
     });

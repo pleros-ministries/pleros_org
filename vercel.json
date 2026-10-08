@@ -4,6 +4,10 @@
     {
       "path": "/api/cron/sogp-reminders",
       "schedule": "20 4 * * *"
+    },
+    {
+      "path": "/api/cron/reminder-dispatch",
+      "schedule": "*/5 * * * *"
     }
   ],
   "headers": [

@@ -4,7 +4,7 @@ export const WELCOME_PACK_JOIN_POSTER_SRC =
   "/site/sogp/sogp-welcome-page-20260831.jpg";
 
 export type WelcomePackHubCard = {
-  id: "join" | "orientation" | "gifts";
+  id: "join" | "orientation" | "gifts" | "setup";
   title: string;
   description: string;
   href: string;
@@ -36,6 +36,14 @@ export function getWelcomePackHubCards(
       href: `${basePath}/gifts`,
       imageSrc:
         "/assets/dashboard/welcome-pack-main-gift/ebook-purpose-welcome-card.png",
+    },
+    {
+      id: "setup",
+      title: "App and reminders",
+      description:
+        "Install the app, turn on notifications and set your reminders.",
+      href: `${basePath}/setup`,
+      imageSrc: "/site/home/assets/dashboard-cards/4-prayer-watch-bg.webp",
     },
   ];
 }

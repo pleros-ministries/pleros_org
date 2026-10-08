@@ -39,14 +39,17 @@ export type CommunityDiscipleship = {
     discipler: { firstName: string; messageUserId: string | null };
     fellowDisciples: DiscipleshipPeer[];
   } | null;
-  /** The group the viewer leads; null until it has been created. */
-  leading: {
+  /**
+   * The open groups the viewer leads, oldest first; empty until the first is
+   * created. A group its leader has closed never appears.
+   */
+  leading: Array<{
     groupId: number;
     groupName: string;
     paused: boolean;
     capacity: number;
     disciples: DiscipleshipPeer[];
-  } | null;
+  }>;
 };
 
 const leaderEnrollment = alias(schema.sogpEnrollments, "leader_enrollment");
@@ -83,7 +86,7 @@ async function findJoinedGroup(userId: string) {
       and(
         eq(schema.sogpEnrollments.userId, userId),
         eq(schema.discipleshipMemberships.status, "active"),
-        ne(schema.discipleshipGroups.status, "archived"),
+        eq(schema.discipleshipGroups.status, "active"),
       ),
     )
     .orderBy(desc(schema.discipleshipMemberships.joinedAt))
@@ -91,9 +94,9 @@ async function findJoinedGroup(userId: string) {
   return row ?? null;
 }
 
-/** The group the viewer leads, resolved from their newest enrolment like the discipleship page. */
-async function findLedGroup(userId: string) {
-  const [row] = await db
+/** The open groups the viewer leads (active or paused), oldest first. */
+async function listLedGroups(userId: string) {
+  return db
     .select({
       id: schema.discipleshipGroups.id,
       name: schema.discipleshipGroups.name,
@@ -104,10 +107,13 @@ async function findLedGroup(userId: string) {
       schema.sogpEnrollments,
       eq(schema.sogpEnrollments.id, schema.discipleshipGroups.leaderEnrollmentId),
     )
-    .where(eq(schema.sogpEnrollments.userId, userId))
-    .orderBy(desc(schema.sogpEnrollments.createdAt))
-    .limit(1);
-  return row ?? null;
+    .where(
+      and(
+        eq(schema.sogpEnrollments.userId, userId),
+        ne(schema.discipleshipGroups.status, "closed"),
+      ),
+    )
+    .orderBy(asc(schema.discipleshipGroups.createdAt), asc(schema.discipleshipGroups.id));
 }
 
 async function listActiveDisciples(groupId: number) {
@@ -175,17 +181,18 @@ function messageIdFor(
 export async function getCommunityDiscipleship(
   viewer: CommunityContext,
 ): Promise<CommunityDiscipleship> {
-  const [joinedRow, ledRow] = await Promise.all([
+  const [joinedRow, ledRows] = await Promise.all([
     findJoinedGroup(viewer.userId),
-    findLedGroup(viewer.userId),
+    listLedGroups(viewer.userId),
   ]);
-  const [fellowRows, discipleRows] = await Promise.all([
+  // Bounded by the limit on groups one learner leads.
+  const [fellowRows, discipleRowsByGroup] = await Promise.all([
     joinedRow ? listActiveDisciples(joinedRow.groupId) : Promise.resolve([]),
-    ledRow ? listActiveDisciples(ledRow.id) : Promise.resolve([]),
+    Promise.all(ledRows.map((row) => listActiveDisciples(row.id))),
   ]);
 
   const toPeer = (
-    row: (typeof discipleRows)[number],
+    row: Awaited<ReturnType<typeof listActiveDisciples>>[number],
     relation: MessagingRelation,
   ): DiscipleshipPeer => ({
     firstName: firstNameOf(row.firstName || row.name),
@@ -217,17 +224,15 @@ export async function getCommunityDiscipleship(
             .map((row) => toPeer(row, NO_LINK)),
         }
       : null,
-    leading: ledRow
-      ? {
-          groupId: ledRow.id,
-          groupName: ledRow.name,
-          paused: ledRow.status === "archived",
-          capacity: DISCIPLESHIP_GROUP_MAX,
-          disciples: discipleRows.map((row) =>
-            toPeer(row, { ...NO_LINK, senderGuidesRecipient: true }),
-          ),
-        }
-      : null,
+    leading: ledRows.map((ledRow, index) => ({
+      groupId: ledRow.id,
+      groupName: ledRow.name,
+      paused: ledRow.status === "archived",
+      capacity: DISCIPLESHIP_GROUP_MAX,
+      disciples: (discipleRowsByGroup[index] ?? []).map((row) =>
+        toPeer(row, { ...NO_LINK, senderGuidesRecipient: true }),
+      ),
+    })),
   };
 }
 
@@ -236,7 +241,7 @@ export type DiscipleshipRailSummary = {
   discipleCount: number;
 };
 
-/** Compact "Your discipleship group" payload for the community left rail. */
+/** Compact discipleship payload for the community left rail; disciples are summed across led groups. */
 export async function getDiscipleshipRailSummary(
   userId: string,
 ): Promise<DiscipleshipRailSummary> {
@@ -260,7 +265,7 @@ export async function getDiscipleshipRailSummary(
         and(
           eq(schema.sogpEnrollments.userId, userId),
           eq(schema.discipleshipMemberships.status, "active"),
-          ne(schema.discipleshipGroups.status, "archived"),
+          eq(schema.discipleshipGroups.status, "active"),
         ),
       ),
   ]);

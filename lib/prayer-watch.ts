@@ -1,3 +1,5 @@
+import { getZonedMinutesSinceMidnight } from "./notifications/zoned-time";
+
 export const PRAYER_WATCH_YOUTUBE_URL = "https://youtube.com/@PlerosLive";
 
 // Pleros Prayer Watch — Evening Session, the channel's most recent stream
@@ -47,20 +49,6 @@ export function getMonthLabel(year: number, month: number): string {
     month: "long",
     year: "numeric",
   });
-}
-
-function getZonedMinutesSinceMidnight(date: Date, timeZone: string): number {
-  const parts = new Intl.DateTimeFormat("en-US", {
-    hour: "2-digit",
-    hour12: false,
-    minute: "2-digit",
-    timeZone,
-  }).formatToParts(date);
-
-  const hour = Number(parts.find((part) => part.type === "hour")?.value ?? "0") % 24;
-  const minute = Number(parts.find((part) => part.type === "minute")?.value ?? "0");
-
-  return hour * 60 + minute;
 }
 
 export function getNextPrayerWatchSessionId(

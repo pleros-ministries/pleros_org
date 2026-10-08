@@ -373,7 +373,7 @@ export function getPpcShellContext(pathname: string): PpcShellContext {
   if (logicalPath === "/ministry") {
     return {
       label: "Ministry reports",
-      description: "Daily reach, outcomes and Pleros activity for each member",
+      description: "Daily activities, outcomes and Pleros activity for each member",
     };
   }
 

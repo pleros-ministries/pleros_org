@@ -17,9 +17,14 @@ import {
   buildDiscipleshipInviteUrl,
   buildWhatsAppUrl,
   defaultDiscipleshipGroupName,
+  discipleshipGroupBlockMessage,
+  evaluateCloseDiscipleshipGroup,
+  evaluateCreateDiscipleshipGroup,
   evaluateDiscipleshipJoin,
   findDiscipleshipNudge,
   generateInviteCode,
+  validateDiscipleshipGroupName,
+  type DiscipleshipGroupStatus,
   type DiscipleshipJoinDecision,
   type DiscipleshipManualContactKind,
 } from "@/lib/sogp/discipleship";
@@ -48,61 +53,207 @@ export class DiscipleshipError extends Error {
 
 // ─── Groups and invites ─────────────────────────────────────────────────────
 
-/**
- * Returns the enrolment's discipleship group, creating it on first call. Both
- * unique indexes (leader, invite code) can collide under concurrency, so a
- * conflict re-reads by leader before retrying with a fresh code.
- */
-export async function ensureDiscipleshipGroup(enrollment: {
-  id: number;
-  firstName: string;
-  name: string;
-}) {
-  const existing = await getGroupByLeader(enrollment.id);
-  if (existing) return existing;
+type Tx = Parameters<Parameters<typeof transactionDb.transaction>[0]>[0];
 
-  const name = defaultDiscipleshipGroupName(
-    firstNameOf(enrollment.firstName || enrollment.name),
+type GroupRow = typeof schema.discipleshipGroups.$inferSelect;
+/** A group its leader still has: active, or paused by an admin. */
+type OpenGroupRow = GroupRow & { status: "active" | "archived" };
+
+const GROUP_UNAVAILABLE = "This discipleship group isn't available.";
+
+/** A leader's groups that have not been closed. */
+function openGroupsOf(leaderEnrollmentId: number) {
+  return and(
+    eq(schema.discipleshipGroups.leaderEnrollmentId, leaderEnrollmentId),
+    ne(schema.discipleshipGroups.status, "closed"),
   );
+}
+
+/** The leader's open groups, oldest first. A closed group never comes back. */
+async function listLedGroups(leaderEnrollmentId: number): Promise<OpenGroupRow[]> {
+  const rows = await db
+    .select()
+    .from(schema.discipleshipGroups)
+    .where(openGroupsOf(leaderEnrollmentId))
+    .orderBy(asc(schema.discipleshipGroups.createdAt), asc(schema.discipleshipGroups.id));
+  return rows as OpenGroupRow[];
+}
+
+async function getLedGroup(
+  leaderEnrollmentId: number,
+  groupId: number,
+): Promise<OpenGroupRow | null> {
+  const [group] = await db
+    .select()
+    .from(schema.discipleshipGroups)
+    .where(and(eq(schema.discipleshipGroups.id, groupId), openGroupsOf(leaderEnrollmentId)))
+    .limit(1);
+  return (group as OpenGroupRow | undefined) ?? null;
+}
+
+/** One of the leader's own groups, or a friendly error when it is paused or not theirs. */
+export async function requireActiveLedGroup(leaderEnrollmentId: number, groupId: number) {
+  const group = await getLedGroup(leaderEnrollmentId, groupId);
+  if (!group || group.status !== "active") throw new DiscipleshipError(GROUP_UNAVAILABLE);
+  return group;
+}
+
+/**
+ * Serialises a leader's group creation and closing. Nothing in the schema caps
+ * how many groups one enrolment leads, so the count is only safe while this
+ * row is held. `NO KEY UPDATE` is enough for that and, unlike `FOR UPDATE`,
+ * doesn't hold up unrelated rows being inserted against the same enrolment.
+ */
+async function lockLeader(tx: Tx, leaderEnrollmentId: number) {
+  await tx
+    .select({ id: schema.sogpEnrollments.id })
+    .from(schema.sogpEnrollments)
+    .where(eq(schema.sogpEnrollments.id, leaderEnrollmentId))
+    .for("no key update");
+}
+
+/** Inserts a group with a fresh invite code, retrying on a code collision. */
+async function insertGroup(tx: Tx, values: { leaderEnrollmentId: number; name: string }) {
   for (let attempt = 0; attempt < 5; attempt += 1) {
-    const [created] = await db
+    const [created] = await tx
       .insert(schema.discipleshipGroups)
-      .values({
-        leaderEnrollmentId: enrollment.id,
-        name,
-        inviteCode: generateInviteCode(),
-      })
+      .values({ ...values, inviteCode: generateInviteCode() })
       .onConflictDoNothing()
       .returning();
     if (created) return created;
-
-    const concurrent = await getGroupByLeader(enrollment.id);
-    if (concurrent) return concurrent;
   }
   throw new Error("Could not create a discipleship group.");
 }
 
-async function getGroupByLeader(leaderEnrollmentId: number) {
-  const [group] = await db
-    .select()
-    .from(schema.discipleshipGroups)
-    .where(eq(schema.discipleshipGroups.leaderEnrollmentId, leaderEnrollmentId))
-    .limit(1);
-  return group ?? null;
+/**
+ * Returns the enrolment's open discipleship groups, creating the first one on
+ * the first call so every learner has a group and a link to share.
+ */
+export async function ensureDiscipleshipGroups(enrollment: {
+  id: number;
+  firstName: string;
+  name: string;
+}): Promise<OpenGroupRow[]> {
+  const existing = await listLedGroups(enrollment.id);
+  if (existing.length > 0) return existing;
+
+  const name = defaultDiscipleshipGroupName(
+    firstNameOf(enrollment.firstName || enrollment.name),
+  );
+  await transactionDb.transaction(async (tx) => {
+    await lockLeader(tx, enrollment.id);
+    // A concurrent first visit may have created it while this one waited.
+    const [open] = await tx
+      .select({ id: schema.discipleshipGroups.id })
+      .from(schema.discipleshipGroups)
+      .where(openGroupsOf(enrollment.id))
+      .limit(1);
+    if (!open) await insertGroup(tx, { leaderEnrollmentId: enrollment.id, name });
+  });
+  return listLedGroups(enrollment.id);
 }
 
-async function requireActiveGroup(leaderEnrollmentId: number) {
-  const group = await getGroupByLeader(leaderEnrollmentId);
-  if (!group || group.status !== "active") {
-    throw new DiscipleshipError("Your discipleship group isn't available.");
-  }
-  return group;
+/** Starts another group for the leader, within the limit on groups led. */
+export async function createDiscipleshipGroup(input: {
+  leaderEnrollmentId: number;
+  name: unknown;
+}) {
+  return transactionDb.transaction(async (tx) => {
+    await lockLeader(tx, input.leaderEnrollmentId);
+    const open = await tx
+      .select({
+        name: schema.discipleshipGroups.name,
+        status: schema.discipleshipGroups.status,
+      })
+      .from(schema.discipleshipGroups)
+      .where(openGroupsOf(input.leaderEnrollmentId));
+
+    const decision = evaluateCreateDiscipleshipGroup({
+      openGroupCount: open.length,
+      hasPausedGroup: open.some((group) => group.status === "archived"),
+    });
+    if (!decision.ok) throw new DiscipleshipError(discipleshipGroupBlockMessage(decision.reason));
+
+    const checked = validateDiscipleshipGroupName(
+      input.name,
+      open.map((group) => group.name),
+    );
+    if (!checked.ok) throw new DiscipleshipError(checked.error);
+
+    return insertGroup(tx, { leaderEnrollmentId: input.leaderEnrollmentId, name: checked.name });
+  });
+}
+
+export async function renameDiscipleshipGroup(input: {
+  leaderEnrollmentId: number;
+  groupId: number;
+  name: unknown;
+}) {
+  const groups = await listLedGroups(input.leaderEnrollmentId);
+  const group = groups.find((candidate) => candidate.id === input.groupId);
+  if (!group || group.status !== "active") throw new DiscipleshipError(GROUP_UNAVAILABLE);
+
+  const checked = validateDiscipleshipGroupName(
+    input.name,
+    groups.filter((other) => other.id !== group.id).map((other) => other.name),
+  );
+  if (!checked.ok) throw new DiscipleshipError(checked.error);
+
+  await db
+    .update(schema.discipleshipGroups)
+    .set({ name: checked.name, updatedAt: new Date() })
+    .where(eq(schema.discipleshipGroups.id, group.id));
+}
+
+/**
+ * Closes one of the leader's groups for good: its link stops working and its
+ * disciples are released, but check-ins, prayer requests and discussions stay
+ * in the database. The same lock as creation keeps the last group from closing.
+ */
+export async function closeDiscipleshipGroup(input: {
+  leaderEnrollmentId: number;
+  groupId: number;
+}) {
+  await transactionDb.transaction(async (tx) => {
+    await lockLeader(tx, input.leaderEnrollmentId);
+    const open = await tx
+      .select({
+        id: schema.discipleshipGroups.id,
+        status: schema.discipleshipGroups.status,
+      })
+      .from(schema.discipleshipGroups)
+      .where(openGroupsOf(input.leaderEnrollmentId));
+    const group = open.find((candidate) => candidate.id === input.groupId);
+    if (!group) throw new DiscipleshipError(GROUP_UNAVAILABLE);
+
+    const decision = evaluateCloseDiscipleshipGroup({
+      status: group.status,
+      openGroupCount: open.length,
+    });
+    if (!decision.ok) throw new DiscipleshipError(discipleshipGroupBlockMessage(decision.reason));
+
+    const now = new Date();
+    await tx
+      .update(schema.discipleshipGroups)
+      .set({ status: "closed", updatedAt: now })
+      .where(eq(schema.discipleshipGroups.id, group.id));
+    // Ending the memberships frees each disciple to join another group.
+    await tx
+      .update(schema.discipleshipMemberships)
+      .set({ status: "removed", endedAt: now })
+      .where(
+        and(
+          eq(schema.discipleshipMemberships.groupId, group.id),
+          eq(schema.discipleshipMemberships.status, "active"),
+        ),
+      );
+  });
 }
 
 export type DiscipleshipInvite = {
   groupId: number;
   groupName: string;
-  status: "active" | "archived";
+  status: DiscipleshipGroupStatus;
   leaderEnrollmentId: number;
   leaderUserId: string;
   leaderFirstName: string;
@@ -128,7 +279,13 @@ export async function getDiscipleshipInvite(
       schema.sogpEnrollments,
       eq(schema.sogpEnrollments.id, schema.discipleshipGroups.leaderEnrollmentId),
     )
-    .where(eq(schema.discipleshipGroups.inviteCode, code))
+    .where(
+      and(
+        eq(schema.discipleshipGroups.inviteCode, code),
+        // A closed group's link is dead, the same as a link that never existed.
+        ne(schema.discipleshipGroups.status, "closed"),
+      ),
+    )
     .limit(1);
   if (!row) return null;
 
@@ -318,14 +475,13 @@ export async function removeDisciple(input: {
   leaderEnrollmentId: number;
   membershipId: number;
 }) {
-  const group = await requireActiveGroup(input.leaderEnrollmentId);
+  const membership = await requireLeaderMembership(input.leaderEnrollmentId, input.membershipId);
   await db
     .update(schema.discipleshipMemberships)
     .set({ status: "removed", endedAt: new Date() })
     .where(
       and(
-        eq(schema.discipleshipMemberships.id, input.membershipId),
-        eq(schema.discipleshipMemberships.groupId, group.id),
+        eq(schema.discipleshipMemberships.id, membership.membershipId),
         eq(schema.discipleshipMemberships.status, "active"),
       ),
     );
@@ -346,18 +502,28 @@ export async function setDiscipleSharesPhone(input: {
     );
 }
 
+/** WhatsApp consent is per group: a leader may share their number with one and not another. */
 export async function setLeaderSharesPhone(input: {
   leaderEnrollmentId: number;
+  groupId: number;
   sharesPhone: boolean;
 }) {
   await db
     .update(schema.discipleshipGroups)
     .set({ leaderSharesPhone: input.sharesPhone, updatedAt: new Date() })
-    .where(eq(schema.discipleshipGroups.leaderEnrollmentId, input.leaderEnrollmentId));
+    .where(
+      and(
+        eq(schema.discipleshipGroups.id, input.groupId),
+        openGroupsOf(input.leaderEnrollmentId),
+      ),
+    );
 }
 
-export async function regenerateDiscipleshipInviteCode(leaderEnrollmentId: number) {
-  const group = await requireActiveGroup(leaderEnrollmentId);
+export async function regenerateDiscipleshipInviteCode(
+  leaderEnrollmentId: number,
+  groupId: number,
+) {
+  const group = await requireActiveLedGroup(leaderEnrollmentId, groupId);
   for (let attempt = 0; attempt < 5; attempt += 1) {
     try {
       const [updated] = await db
@@ -378,9 +544,10 @@ export async function regenerateDiscipleshipInviteCode(leaderEnrollmentId: numbe
 /** Creates a prompt and returns the active disciples' user ids to notify. */
 export async function createDiscipleshipPrompt(input: {
   leaderEnrollmentId: number;
+  groupId: number;
   body: string;
 }) {
-  const group = await requireActiveGroup(input.leaderEnrollmentId);
+  const group = await requireActiveLedGroup(input.leaderEnrollmentId, input.groupId);
   const [prompt] = await db
     .insert(schema.discipleshipPrompts)
     .values({ groupId: group.id, body: input.body })
@@ -466,7 +633,7 @@ export async function replyToDiscipleshipResponse(input: {
   responseId: number;
   reply: string;
 }) {
-  const group = await requireActiveGroup(input.leaderEnrollmentId);
+  // The answer must sit in an active group this leader runs, from a current disciple.
   const [row] = await db
     .select({
       responseId: schema.discipleshipPromptResponses.id,
@@ -478,13 +645,21 @@ export async function replyToDiscipleshipResponse(input: {
       eq(schema.discipleshipPrompts.id, schema.discipleshipPromptResponses.promptId),
     )
     .innerJoin(
+      schema.discipleshipGroups,
+      and(
+        eq(schema.discipleshipGroups.id, schema.discipleshipPrompts.groupId),
+        eq(schema.discipleshipGroups.leaderEnrollmentId, input.leaderEnrollmentId),
+        eq(schema.discipleshipGroups.status, "active"),
+      ),
+    )
+    .innerJoin(
       schema.discipleshipMemberships,
       and(
         eq(
           schema.discipleshipMemberships.discipleEnrollmentId,
           schema.discipleshipPromptResponses.discipleEnrollmentId,
         ),
-        eq(schema.discipleshipMemberships.groupId, group.id),
+        eq(schema.discipleshipMemberships.groupId, schema.discipleshipPrompts.groupId),
         eq(schema.discipleshipMemberships.status, "active"),
       ),
     )
@@ -492,12 +667,7 @@ export async function replyToDiscipleshipResponse(input: {
       schema.sogpEnrollments,
       eq(schema.sogpEnrollments.id, schema.discipleshipPromptResponses.discipleEnrollmentId),
     )
-    .where(
-      and(
-        eq(schema.discipleshipPromptResponses.id, input.responseId),
-        eq(schema.discipleshipPrompts.groupId, group.id),
-      ),
-    )
+    .where(eq(schema.discipleshipPromptResponses.id, input.responseId))
     .limit(1);
   if (!row) throw new DiscipleshipError("This answer isn't available.");
 
@@ -587,9 +757,23 @@ export type DisciplerView = {
   prayerRequests: DiscipleshipPrayerRequest[];
 };
 
+/** One of the viewer's own groups, as listed in the group switcher. */
+export type LedGroupSummary = {
+  id: number;
+  name: string;
+  /** `archived` means paused by the Pleros team. */
+  status: "active" | "archived";
+  discipleCount: number;
+};
+
 export type DiscipleshipDashboardData = {
   viewer: { enrollmentId: number; firstName: string };
-  myGroup: {
+  /** Every open group the viewer leads, oldest first; never empty. */
+  ledGroups: LedGroupSummary[];
+  /** Why the viewer can't start another group right now, or null when they can. */
+  createGroupBlock: string | null;
+  /** The led group on screen: its own link, disciples, check-ins and requests. */
+  selectedGroup: {
     id: number;
     name: string;
     inviteUrl: string;
@@ -600,8 +784,9 @@ export type DiscipleshipDashboardData = {
     prayerRequests: DiscipleshipPrayerRequest[];
     promptSuggestions: { levelTitle: string | null; suggestions: string[] };
   };
+  /** The one group the viewer belongs to as a disciple, if any. */
   myDiscipler: DisciplerView | null;
-  /** Date-picker bounds for the disciples' participation table: the earliest
+  /** Date-picker bounds for the selected group's participation table: the earliest
    * Pre-SOGP start among the disciples' cohorts through today (Lagos). */
   participationRange: { start: string; end: string } | null;
 };
@@ -655,14 +840,16 @@ async function getDiscipleParticipationRange(
 }
 
 /**
- * The leader's active disciples' activity on `dateKey`. Scoped by the
- * leader's own enrolment, so a learner can only ever read their own group.
+ * One group's active disciples' activity on `dateKey`. The group is matched
+ * against the leader's own enrolment, so a learner can only ever read a group
+ * they lead.
  */
 export async function getDiscipleDailyParticipation(
   leaderEnrollmentId: number,
+  groupId: number,
   dateKey: string,
 ): Promise<DiscipleDayParticipation[]> {
-  const group = await getGroupByLeader(leaderEnrollmentId);
+  const group = await getLedGroup(leaderEnrollmentId, groupId);
   if (!group) return [];
   const members = await getActiveDiscipleEnrollments(group.id);
   if (!members.length) return [];
@@ -694,8 +881,28 @@ export async function getDiscipleDailyParticipation(
   });
 }
 
+async function countActiveMembersByGroup(groupIds: number[]) {
+  const rows = await db
+    .select({ groupId: schema.discipleshipMemberships.groupId, n: count() })
+    .from(schema.discipleshipMemberships)
+    .where(
+      and(
+        inArray(schema.discipleshipMemberships.groupId, groupIds),
+        eq(schema.discipleshipMemberships.status, "active"),
+      ),
+    )
+    .groupBy(schema.discipleshipMemberships.groupId);
+  return new Map(rows.map((row) => [row.groupId, row.n]));
+}
+
+/**
+ * The discipleship page for one learner. `requestedGroupId` picks which of
+ * their own groups to show in full; anything that isn't theirs falls back to
+ * their first group. The per-disciple reads run for that one group only.
+ */
 export async function getDiscipleshipDashboard(
   userId: string,
+  requestedGroupId?: number | null,
 ): Promise<DiscipleshipDashboardData | null> {
   const [enrollment] = await db
     .select()
@@ -705,9 +912,20 @@ export async function getDiscipleshipDashboard(
     .limit(1);
   if (!enrollment) return null;
 
-  const group = await ensureDiscipleshipGroup(enrollment);
-  const [disciples, prompts, myDiscipler, prayerRequests, promptSuggestions, participationRange] =
-    await Promise.all([
+  const groups = await ensureDiscipleshipGroups(enrollment);
+  const group = groups.find((candidate) => candidate.id === requestedGroupId) ?? groups[0];
+  if (!group) throw new Error("Could not load a discipleship group.");
+
+  const [
+    memberCounts,
+    disciples,
+    prompts,
+    myDiscipler,
+    prayerRequests,
+    promptSuggestions,
+    participationRange,
+  ] = await Promise.all([
+    countActiveMembersByGroup(groups.map((candidate) => candidate.id)),
     getDiscipleSummaries(group.id),
     getLeaderPrompts(group.id),
     getDisciplerView(enrollment.id),
@@ -716,12 +934,26 @@ export async function getDiscipleshipDashboard(
     getDiscipleParticipationRange(group.id),
   ]);
 
+  const createDecision = evaluateCreateDiscipleshipGroup({
+    openGroupCount: groups.length,
+    hasPausedGroup: groups.some((candidate) => candidate.status === "archived"),
+  });
+
   return {
     viewer: {
       enrollmentId: enrollment.id,
       firstName: firstNameOf(enrollment.firstName || enrollment.name),
     },
-    myGroup: {
+    ledGroups: groups.map((candidate) => ({
+      id: candidate.id,
+      name: candidate.name,
+      status: candidate.status,
+      discipleCount: memberCounts.get(candidate.id) ?? 0,
+    })),
+    createGroupBlock: createDecision.ok
+      ? null
+      : discipleshipGroupBlockMessage(createDecision.reason),
+    selectedGroup: {
       id: group.id,
       name: group.name,
       inviteUrl: buildDiscipleshipInviteUrl(resolvePublicSiteUrl(process.env), group.inviteCode),
@@ -1057,7 +1289,7 @@ async function getDisciplerView(discipleEnrollmentId: number): Promise<Discipler
       and(
         eq(schema.discipleshipMemberships.discipleEnrollmentId, discipleEnrollmentId),
         eq(schema.discipleshipMemberships.status, "active"),
-        ne(schema.discipleshipGroups.status, "archived"),
+        eq(schema.discipleshipGroups.status, "active"),
       ),
     )
     .limit(1);
@@ -1133,6 +1365,7 @@ export type DiscipleshipAdminOverview = {
   averageGroupSize: number;
   largestGroups: Array<{
     groupId: number;
+    groupName: string;
     leaderName: string;
     leaderEmail: string;
     status: "active" | "archived";
@@ -1143,7 +1376,11 @@ export type DiscipleshipAdminOverview = {
 
 export async function getDiscipleshipAdminOverview(): Promise<DiscipleshipAdminOverview> {
   const [groupTotals, sizes, promptCounts] = await Promise.all([
-    db.select({ n: count() }).from(schema.discipleshipGroups),
+    // Groups a leader has closed are history, not groups in use.
+    db
+      .select({ n: count() })
+      .from(schema.discipleshipGroups)
+      .where(ne(schema.discipleshipGroups.status, "closed")),
     db
       .select({
         groupId: schema.discipleshipMemberships.groupId,
@@ -1166,6 +1403,7 @@ export async function getDiscipleshipAdminOverview(): Promise<DiscipleshipAdminO
     ? await db
         .select({
           groupId: schema.discipleshipGroups.id,
+          groupName: schema.discipleshipGroups.name,
           status: schema.discipleshipGroups.status,
           leaderName: schema.sogpEnrollments.name,
           leaderEmail: schema.sogpEnrollments.email,
@@ -1191,10 +1429,11 @@ export async function getDiscipleshipAdminOverview(): Promise<DiscipleshipAdminO
     averageGroupSize: sizes.length ? Math.round((activeDisciples / sizes.length) * 10) / 10 : 0,
     largestGroups: top.flatMap((row) => {
       const leader = leaderByGroup.get(row.groupId);
-      if (!leader) return [];
+      if (!leader || leader.status === "closed") return [];
       return [
         {
           groupId: row.groupId,
+          groupName: leader.groupName,
           leaderName: leader.leaderName,
           leaderEmail: leader.leaderEmail,
           status: leader.status,
@@ -1206,6 +1445,7 @@ export async function getDiscipleshipAdminOverview(): Promise<DiscipleshipAdminO
   };
 }
 
+/** Admin pause or restore. A group its leader closed stays closed. */
 export async function setDiscipleshipGroupStatus(
   groupId: number,
   status: "active" | "archived",
@@ -1213,14 +1453,21 @@ export async function setDiscipleshipGroupStatus(
   await db
     .update(schema.discipleshipGroups)
     .set({ status, updatedAt: new Date() })
-    .where(eq(schema.discipleshipGroups.id, groupId));
+    .where(
+      and(
+        eq(schema.discipleshipGroups.id, groupId),
+        ne(schema.discipleshipGroups.status, "closed"),
+      ),
+    );
 }
 
 // ─── Nudges and contact log ─────────────────────────────────────────────────
 
-/** The leader's active disciple for `membershipId`, or a friendly error. */
+/**
+ * The active disciple for `membershipId` in any active group this leader runs,
+ * or a friendly error. Every leader action on a disciple goes through here.
+ */
 async function requireLeaderMembership(leaderEnrollmentId: number, membershipId: number) {
-  const group = await requireActiveGroup(leaderEnrollmentId);
   const [row] = await db
     .select({
       membershipId: schema.discipleshipMemberships.id,
@@ -1230,13 +1477,20 @@ async function requireLeaderMembership(leaderEnrollmentId: number, membershipId:
     })
     .from(schema.discipleshipMemberships)
     .innerJoin(
+      schema.discipleshipGroups,
+      and(
+        eq(schema.discipleshipGroups.id, schema.discipleshipMemberships.groupId),
+        eq(schema.discipleshipGroups.leaderEnrollmentId, leaderEnrollmentId),
+        eq(schema.discipleshipGroups.status, "active"),
+      ),
+    )
+    .innerJoin(
       schema.sogpEnrollments,
       eq(schema.sogpEnrollments.id, schema.discipleshipMemberships.discipleEnrollmentId),
     )
     .where(
       and(
         eq(schema.discipleshipMemberships.id, membershipId),
-        eq(schema.discipleshipMemberships.groupId, group.id),
         eq(schema.discipleshipMemberships.status, "active"),
       ),
     )
@@ -1401,10 +1655,18 @@ export async function markPrayerRequestPrayed(input: {
   leaderEnrollmentId: number;
   requestId: number;
 }) {
-  const group = await requireActiveGroup(input.leaderEnrollmentId);
+  // The request must sit in an active group this leader runs, from a current disciple.
   const [row] = await db
     .select({ discipleUserId: schema.sogpEnrollments.userId })
     .from(schema.discipleshipPrayerRequests)
+    .innerJoin(
+      schema.discipleshipGroups,
+      and(
+        eq(schema.discipleshipGroups.id, schema.discipleshipPrayerRequests.groupId),
+        eq(schema.discipleshipGroups.leaderEnrollmentId, input.leaderEnrollmentId),
+        eq(schema.discipleshipGroups.status, "active"),
+      ),
+    )
     .innerJoin(
       schema.discipleshipMemberships,
       and(
@@ -1412,7 +1674,10 @@ export async function markPrayerRequestPrayed(input: {
           schema.discipleshipMemberships.discipleEnrollmentId,
           schema.discipleshipPrayerRequests.discipleEnrollmentId,
         ),
-        eq(schema.discipleshipMemberships.groupId, group.id),
+        eq(
+          schema.discipleshipMemberships.groupId,
+          schema.discipleshipPrayerRequests.groupId,
+        ),
         eq(schema.discipleshipMemberships.status, "active"),
       ),
     )
@@ -1420,12 +1685,7 @@ export async function markPrayerRequestPrayed(input: {
       schema.sogpEnrollments,
       eq(schema.sogpEnrollments.id, schema.discipleshipPrayerRequests.discipleEnrollmentId),
     )
-    .where(
-      and(
-        eq(schema.discipleshipPrayerRequests.id, input.requestId),
-        eq(schema.discipleshipPrayerRequests.groupId, group.id),
-      ),
-    )
+    .where(eq(schema.discipleshipPrayerRequests.id, input.requestId))
     .limit(1);
   if (!row) throw new DiscipleshipError("This prayer request isn't available.");
 
@@ -1600,7 +1860,11 @@ export async function runDiscipleshipCron(now = new Date()) {
       })),
     ),
     db
-      .select({ groupId: schema.discipleshipGroups.id, userId: schema.sogpEnrollments.userId })
+      .select({
+        groupId: schema.discipleshipGroups.id,
+        groupName: schema.discipleshipGroups.name,
+        userId: schema.sogpEnrollments.userId,
+      })
       .from(schema.discipleshipGroups)
       .innerJoin(
         schema.sogpEnrollments,
@@ -1609,6 +1873,12 @@ export async function runDiscipleshipCron(now = new Date()) {
       .where(inArray(schema.discipleshipGroups.id, groupIds)),
   ]);
   const leaderByGroup = new Map(leaders.map((row) => [row.groupId, row.userId]));
+  const groupNameById = new Map(leaders.map((row) => [row.groupId, row.groupName]));
+  // A leader with several groups in this run gets one digest each, named.
+  const groupsInRunByLeader = new Map<string, number>();
+  for (const row of leaders) {
+    groupsInRunByLeader.set(row.userId, (groupsInRunByLeader.get(row.userId) ?? 0) + 1);
+  }
 
   let alerts = 0;
   for (const member of members) {
@@ -1712,6 +1982,10 @@ export async function runDiscipleshipCron(now = new Date()) {
         statuses: groupMembers.map((m) => statuses.get(m.enrollmentId) ?? null),
         unansweredCheckIns,
         openPrayerRequests: openPrayerByGroup.get(groupId) ?? 0,
+        groupName:
+          (groupsInRunByLeader.get(leaderUserId) ?? 0) > 1
+            ? (groupNameById.get(groupId) ?? null)
+            : null,
       });
       if (!digest) continue;
       if (!(await claimCheckpoint(`discipleship-digest:${groupId}:${dateKey}`, "sent"))) continue;

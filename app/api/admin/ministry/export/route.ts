@@ -10,11 +10,18 @@ import {
   getMinistryDay,
   getMinistryTotalsByDay,
   getMinistryTotalsByMember,
-} from "@/lib/db/queries/ministry-reports";
-import { listContactsForStaff } from "@/lib/db/queries/outreach-contacts";
+  listActivitiesForStaff,
+} from "@/lib/db/queries/ministry-activities";
+import {
+  listContactsForStaff,
+  listInteractionsForStaff,
+} from "@/lib/db/queries/outreach-contacts";
 import { lagosToday } from "@/lib/sogp/daily-date";
 
 export const runtime = "nodejs";
+
+/** Most rows one export sheet will hold. */
+const EXPORT_LIMIT = 50_000;
 
 function spreadsheet(buffer: Buffer, filename: string) {
   return new NextResponse(new Uint8Array(buffer), {
@@ -27,9 +34,10 @@ function spreadsheet(buffer: Buffer, filename: string) {
 }
 
 /**
- * Ministry reports as a spreadsheet, optionally for one location group:
- * `?date=` for one day (a row per member), or `?from=&to=` for a range
- * (totals per member and per day, plus the people met).
+ * Ministry activities as a spreadsheet, optionally for one location group:
+ * `?date=` for one day (a row per member and per activity), or `?from=&to=`
+ * for a range (totals per member and per day, every activity, the people
+ * met and every interaction with them).
  */
 export async function GET(request: Request) {
   try {
@@ -67,15 +75,13 @@ export async function GET(request: Request) {
     { from: search.get("from"), to: search.get("to") },
     lagosToday(),
   );
-  const [byMember, byDay, contacts] = await Promise.all([
+  const scope = { fromKey: range.from, toKey: range.to, unitId, limit: EXPORT_LIMIT };
+  const [byMember, byDay, activities, contacts, interactions] = await Promise.all([
     getMinistryTotalsByMember(range.from, range.to, { unitId }),
     getMinistryTotalsByDay(range.from, range.to, { unitId }),
-    listContactsForStaff({
-      fromKey: range.from,
-      toKey: range.to,
-      unitId,
-      limit: 50_000,
-    }),
+    listActivitiesForStaff(scope),
+    listContactsForStaff(scope),
+    listInteractionsForStaff(scope),
   ]);
 
   return spreadsheet(
@@ -84,7 +90,9 @@ export async function GET(request: Request) {
       toKey: range.to,
       byMember,
       byDay,
+      activities,
       contacts,
+      interactions,
     }),
     `ministry-reports-${range.from}-to-${range.to}.xlsx`,
   );

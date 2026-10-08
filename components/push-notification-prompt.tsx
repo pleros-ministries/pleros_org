@@ -25,7 +25,8 @@ export function PushNotificationPrompt() {
 
   if (
     pathname.startsWith("/preview/") ||
-    pathname === "/dashboard/welcomepack/join" ||
+    // Signed-in learners are offered the learner-bound subscription instead.
+    pathname.startsWith("/dashboard") ||
     !isSupported ||
     isSubscribed ||
     dismissed

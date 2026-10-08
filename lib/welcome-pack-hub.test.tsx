@@ -17,7 +17,7 @@ import {
 import { getWelcomePackHubCards } from "./welcome-pack-hub";
 
 describe("Welcome Pack hub", () => {
-  test("routes the three hub cards to dedicated subpages", () => {
+  test("routes the four hub cards to dedicated subpages", () => {
     expect(getWelcomePackHubCards("/dashboard/welcomepack")).toEqual([
       expect.objectContaining({
         title: "Welcome message",
@@ -31,6 +31,10 @@ describe("Welcome Pack hub", () => {
         title: "Gifts",
         href: "/dashboard/welcomepack/gifts",
       }),
+      expect.objectContaining({
+        title: "App and reminders",
+        href: "/dashboard/welcomepack/setup",
+      }),
     ]);
   });
 
@@ -43,19 +47,30 @@ describe("Welcome Pack hub", () => {
       "/preview/dashboard/welcomepack/join",
       "/preview/dashboard/welcomepack/orientation",
       "/preview/dashboard/welcomepack/gifts",
+      "/preview/dashboard/welcomepack/setup",
     ]);
   });
 
-  test("renders the hub as three focused destinations", () => {
+  test("renders the hub as four focused destinations", () => {
     const html = renderToStaticMarkup(<WelcomePackHubPage />);
     expect(html).toContain("Your Welcome Pack");
     expect(html).toContain("Welcome message");
     expect(html).toContain("Orientation");
     expect(html).toContain("Gifts");
+    expect(html).toContain("App and reminders");
     expect(html).toContain("font-semibold");
     expect(html).toContain("site-pathway-title");
     expect(html).not.toContain("font-bold");
     expect(html).not.toContain("Join the orientation group");
+    // First and last cards span the row, so four cards leave no orphan.
+    expect(html.match(/col-span-2/g)).toHaveLength(2);
+    expect(html).not.toContain(">Done<");
+  });
+
+  test("marks the setup card once the learner has saved their reminders", () => {
+    const html = renderToStaticMarkup(<WelcomePackHubPage setupComplete />);
+    expect(html).toContain("Done");
+    expect(html).not.toContain("font-bold");
   });
 
   test("renders the hub preview inside the shared navigation and footer", () => {
@@ -72,6 +87,22 @@ describe("Welcome Pack hub", () => {
     );
     expect(source).toContain("AppShell");
     expect(source).toContain("<AppShell>{children}</AppShell>");
+  });
+});
+
+describe("Welcome Pack handoff to setup", () => {
+  test("the Telegram step continues to app and reminder setup", () => {
+    const gate = readFileSync(
+      join(
+        process.cwd(),
+        "components",
+        "dashboard",
+        "orientation-survey-gate.tsx",
+      ),
+      "utf8",
+    );
+    expect(gate).toContain('router.push("/dashboard/welcomepack/setup")');
+    expect(gate).not.toContain('router.push("/dashboard/pre-sogp")');
   });
 });
 

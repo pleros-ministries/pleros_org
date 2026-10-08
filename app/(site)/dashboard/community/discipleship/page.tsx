@@ -22,11 +22,10 @@ export default async function CommunityDiscipleshipRoute() {
   const data = await getCommunityDiscipleship(ctx);
 
   // Load the first page for the group shown first: the one the learner
-  // joined, otherwise the one they lead once it has disciples.
+  // joined, otherwise the first group they lead that has disciples.
   const ledGroup =
-    data.leading && !data.leading.paused && data.leading.disciples.length > 0
-      ? data.leading
-      : null;
+    data.leading.find((group) => !group.paused && group.disciples.length > 0) ??
+    null;
   const initialGroupId = data.joined?.groupId ?? ledGroup?.groupId ?? null;
   const initialPosts =
     initialGroupId != null ? await getDiscipleshipPosts(initialGroupId, ctx) : [];

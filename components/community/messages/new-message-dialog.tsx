@@ -28,7 +28,7 @@ async function fetchMembers(query: string): Promise<MemberResults> {
   return (await res.json()) as MemberResults;
 }
 
-/** Find someone to message: suggested contacts first, then a first-name search. */
+/** Find someone to message by full name: suggested contacts first, then a first-name search. */
 export function NewMessageDialog({
   open,
   onOpenChange,
@@ -129,10 +129,10 @@ export function NewMessageDialog({
                     onClick={() => chat.open(member.userId)}
                     className="flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors hover:bg-zinc-50 disabled:opacity-60"
                   >
-                    <Avatar name={member.firstName} size={36} />
+                    <Avatar name={member.name} size={36} />
                     <span className="grid min-w-0">
                       <span className="truncate text-sm font-medium text-zinc-900">
-                        {member.firstName}
+                        {member.name}
                       </span>
                       <span className="truncate text-xs text-zinc-500">
                         {[member.note, member.unitName]

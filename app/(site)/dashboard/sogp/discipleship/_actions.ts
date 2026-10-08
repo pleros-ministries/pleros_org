@@ -21,12 +21,15 @@ import {
   markPrayerRequestAnswered,
   markPrayerRequestPrayed,
   sendDiscipleNudge,
-  ensureDiscipleshipGroup,
+  closeDiscipleshipGroup,
+  createDiscipleshipGroup,
   joinDiscipleshipGroup,
   leaveDiscipleshipGroup,
   regenerateDiscipleshipInviteCode,
   removeDisciple,
+  renameDiscipleshipGroup,
   replyToDiscipleshipResponse,
+  requireActiveLedGroup,
   setDiscipleSharesPhone,
   setLeaderSharesPhone,
   upsertDiscipleshipResponse,
@@ -50,15 +53,21 @@ import {
 
 const PAGE_PATH = "/dashboard/sogp/discipleship";
 
+/** The community layout and discipleship space list a learner's groups by name. */
+function revalidateCommunityDiscipleship() {
+  revalidatePath("/dashboard/community", "layout");
+}
+
 export type DiscipleshipActionResult = { ok: true } | { ok: false; error: string };
 
-/** Read-only: the signed-in leader's disciples' activity on one day. */
+/** Read-only: the activity of one of the signed-in leader's groups on one day. */
 export async function getDiscipleParticipationAction(
+  groupId: number,
   dateKey: string,
 ): Promise<DiscipleDayParticipation[]> {
   if (!DAILY_DATE_PATTERN.test(dateKey)) throw new Error("Invalid date.");
   const learner = await requireEnrolledLearner();
-  return getDiscipleDailyParticipation(learner.enrollment.id, dateKey);
+  return getDiscipleDailyParticipation(learner.enrollment.id, groupIdOf(groupId), dateKey);
 }
 
 async function requireEnrolledLearner() {
@@ -92,6 +101,62 @@ function clean(value: unknown, maxLength: number) {
   return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
 }
 
+/** A group id from the client. Whether it is the caller's own group is checked in the query. */
+function groupIdOf(value: unknown) {
+  const id = Number(value);
+  if (!Number.isInteger(id) || id <= 0) {
+    throw new DiscipleshipError("This discipleship group isn't available.");
+  }
+  return id;
+}
+
+// ─── Leading groups ─────────────────────────────────────────────────────────
+
+export async function createDiscipleshipGroupAction(input: {
+  name: string;
+}): Promise<DiscipleshipActionResult & { groupId?: number }> {
+  let groupId: number | undefined;
+  const result = await run(async () => {
+    const learner = await requireEnrolledLearner();
+    const group = await createDiscipleshipGroup({
+      leaderEnrollmentId: learner.enrollment.id,
+      name: input.name,
+    });
+    groupId = group.id;
+    revalidateCommunityDiscipleship();
+  });
+  return result.ok ? { ok: true, groupId } : result;
+}
+
+export async function renameDiscipleshipGroupAction(input: {
+  groupId: number;
+  name: string;
+}): Promise<DiscipleshipActionResult> {
+  return run(async () => {
+    const learner = await requireEnrolledLearner();
+    await renameDiscipleshipGroup({
+      leaderEnrollmentId: learner.enrollment.id,
+      groupId: groupIdOf(input.groupId),
+      name: input.name,
+    });
+    revalidateCommunityDiscipleship();
+  });
+}
+
+/** Closes a group for good: its link dies and its disciples are released. */
+export async function closeDiscipleshipGroupAction(input: {
+  groupId: number;
+}): Promise<DiscipleshipActionResult> {
+  return run(async () => {
+    const learner = await requireEnrolledLearner();
+    await closeDiscipleshipGroup({
+      leaderEnrollmentId: learner.enrollment.id,
+      groupId: groupIdOf(input.groupId),
+    });
+    revalidateCommunityDiscipleship();
+  });
+}
+
 export async function joinDiscipleshipGroupAction(input: {
   code: string;
   sharesPhone: boolean;
@@ -113,6 +178,8 @@ export async function joinDiscipleshipGroupAction(input: {
     revalidatePath("/dashboard/sogp");
 
     const leaderUserId = result.invite?.leaderUserId;
+    // The leader may run several groups, so the push says which one. It is their own name for it.
+    const groupName = result.invite?.groupName;
     if (leaderUserId) {
       after(() =>
         notifyDiscipleship({
@@ -120,7 +187,9 @@ export async function joinDiscipleshipGroupAction(input: {
           recipientUserIds: [leaderUserId],
           actorUserId: learner.userId,
           actorFirstName: learner.firstName,
-          pushBody: `${learner.firstName} joined your discipleship group.`,
+          pushBody: groupName
+            ? `${learner.firstName} joined ${groupName}.`
+            : `${learner.firstName} joined your discipleship group.`,
         }).catch((error) => console.error("Discipleship join notify failed:", error)),
       );
     }
@@ -159,37 +228,43 @@ export async function setDiscipleSharesPhoneAction(input: {
 }
 
 export async function setLeaderSharesPhoneAction(input: {
+  groupId: number;
   sharesPhone: boolean;
 }): Promise<DiscipleshipActionResult> {
   return run(async () => {
     const learner = await requireEnrolledLearner();
-    await ensureDiscipleshipGroup(learner.enrollment);
     await setLeaderSharesPhone({
       leaderEnrollmentId: learner.enrollment.id,
+      groupId: groupIdOf(input.groupId),
       sharesPhone: Boolean(input.sharesPhone),
     });
   });
 }
 
-export async function regenerateInviteLinkAction(): Promise<DiscipleshipActionResult> {
+export async function regenerateInviteLinkAction(input: {
+  groupId: number;
+}): Promise<DiscipleshipActionResult> {
   return run(async () => {
     const learner = await requireEnrolledLearner();
-    await regenerateDiscipleshipInviteCode(learner.enrollment.id);
+    await regenerateDiscipleshipInviteCode(learner.enrollment.id, groupIdOf(input.groupId));
   });
 }
 
 export async function createDiscipleshipPromptAction(input: {
+  groupId: number;
   body: string;
 }): Promise<DiscipleshipActionResult> {
   return run(async () => {
     const body = clean(input.body, DISCIPLESHIP_PROMPT_MAX_LENGTH);
     if (!body) throw new DiscipleshipError("Write a question for your group first.");
     const learner = await requireEnrolledLearner();
-    const group = await ensureDiscipleshipGroup(learner.enrollment);
+    // Ownership first, so the per-group limit is only ever read for the caller's own group.
+    const group = await requireActiveLedGroup(learner.enrollment.id, groupIdOf(input.groupId));
     await assertCanCreateDiscipleshipPrompt(group.id);
 
     const { recipientUserIds } = await createDiscipleshipPrompt({
       leaderEnrollmentId: learner.enrollment.id,
+      groupId: group.id,
       body,
     });
     after(() =>

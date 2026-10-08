@@ -36,6 +36,14 @@ export function firstNameOf(name: string): string {
   return name.trim().split(/\s+/)[0] || "Someone";
 }
 
+/**
+ * The whole name, for the new-message picker only: several members share a
+ * first name there and must be told apart. Everywhere else use `firstNameOf`.
+ */
+export function fullNameOf(name: string): string {
+  return name.trim().replace(/\s+/g, " ") || "Someone";
+}
+
 export function toPeerMember(input: {
   name: string;
   firstName: string | null;

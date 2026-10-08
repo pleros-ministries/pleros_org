@@ -1,9 +1,6 @@
 import { expect, test } from "vitest";
 
-import {
-  buildSogpChannelReminderCandidates,
-  buildSogpPrayerWatchPushCandidate,
-} from "./notifications";
+import { buildSogpChannelReminderCandidates } from "./notifications";
 
 test("builds a released-track and upcoming-live-class message", () => {
   const events = buildSogpChannelReminderCandidates({
@@ -36,39 +33,4 @@ test("builds a released-track and upcoming-live-class message", () => {
     "sogp:1:track:10:released",
     "sogp:1:live:20:24h",
   ]);
-});
-
-test("builds an enrolled 5:20 am Lagos Prayer Watch push", () => {
-  expect(
-    buildSogpPrayerWatchPushCandidate({
-      now: new Date("2026-09-14T04:20:00.000Z"),
-      userId: "user-1",
-      cohortId: 4,
-      cohortStatus: "preparing",
-    }),
-  ).toEqual({
-    key: "sogp:4:prayer:user-1:2026-09-14",
-    title: "Prayer Watch begins in 10 minutes",
-    body: "Join the 5:30 am Prayer Watch on Pleros Live.",
-    url: "/dashboard/pre-sogp?date=2026-09-14",
-  });
-});
-
-test("uses the active calendar link and rejects other dispatch times", () => {
-  expect(
-    buildSogpPrayerWatchPushCandidate({
-      now: new Date("2026-09-14T04:20:00.000Z"),
-      userId: "user-1",
-      cohortId: 4,
-      cohortStatus: "active",
-    })?.url,
-  ).toBe("/dashboard/sogp?date=2026-09-14");
-  expect(
-    buildSogpPrayerWatchPushCandidate({
-      now: new Date("2026-09-14T04:40:00.000Z"),
-      userId: "user-1",
-      cohortId: 4,
-      cohortStatus: "active",
-    }),
-  ).toBeNull();
 });

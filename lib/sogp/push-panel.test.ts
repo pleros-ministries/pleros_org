@@ -20,7 +20,5 @@ test("offers a user-initiated SOGP Prayer Watch reminder subscription", () => {
   expect(panel).not.toContain("Notification.requestPermission");
   expect(hook).toContain('/api/sogp/push/subscribe');
   expect(hook).not.toContain('/api/ppc/push/subscribe');
-  expect(globalPrompt).toContain(
-    'pathname === "/dashboard/welcomepack/join"',
-  );
+  expect(globalPrompt).toContain('pathname.startsWith("/dashboard")');
 });

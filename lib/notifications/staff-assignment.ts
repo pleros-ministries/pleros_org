@@ -68,11 +68,15 @@ export async function notifyReviewAssignment(input: ReviewAssignmentInput) {
       url: notification.url,
       ctaLabel: "Open review queue",
     }),
-    sendPushToUser(input.assignee.id, {
-      title: notification.pushTitle,
-      body: notification.pushBody,
-      url: notification.url,
-    }),
+    sendPushToUser(
+      input.assignee.id,
+      {
+        title: notification.pushTitle,
+        body: notification.pushBody,
+        url: notification.url,
+      },
+      { gate: "none" },
+    ),
   ]);
 
   return notification;
@@ -112,11 +116,15 @@ export async function notifyQaAssignment(input: QaAssignmentInput) {
       url: notification.url,
       ctaLabel: "Open Q&A inbox",
     }),
-    sendPushToUser(input.assignee.id, {
-      title: notification.pushTitle,
-      body: notification.pushBody,
-      url: notification.url,
-    }),
+    sendPushToUser(
+      input.assignee.id,
+      {
+        title: notification.pushTitle,
+        body: notification.pushBody,
+        url: notification.url,
+      },
+      { gate: "none" },
+    ),
   ]);
 
   return notification;

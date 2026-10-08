@@ -3,6 +3,7 @@ import {
   type AdminMinistryMember,
 } from "@/components/community/admin-ministry-page";
 import { requireAdmin } from "@/lib/auth/require-role";
+import { groupActivitiesByDay } from "@/lib/community/ministry-activities";
 import { isDateKey, resolveMinistryRange } from "@/lib/community/ministry-report";
 import { listUnits } from "@/lib/db/queries/community-units";
 import {
@@ -10,7 +11,7 @@ import {
   getMinistryDay,
   getMinistryTotalsByDay,
   getMinistryTotalsByMember,
-} from "@/lib/db/queries/ministry-reports";
+} from "@/lib/db/queries/ministry-activities";
 import { listContactsForStaff } from "@/lib/db/queries/outreach-contacts";
 import { lagosToday } from "@/lib/sogp/daily-date";
 import { enumerateDateKeys } from "@/lib/sogp/daily-participation";
@@ -29,7 +30,7 @@ export default async function AdminMinistryRoute({
     member?: string;
   }>;
 }) {
-  await requireAdmin();
+  const session = await requireAdmin();
 
   const today = lagosToday();
   const query = await searchParams;
@@ -59,9 +60,7 @@ export default async function AdminMinistryRoute({
 
   let member: AdminMinistryMember | null = null;
   if (history && memberUserId) {
-    const reportByDay = new Map(
-      history.reports.map((report) => [report.reportDate, report]),
-    );
+    const byDay = groupActivitiesByDay(history.activities);
     member = {
       userId: memberUserId,
       name: history.name,
@@ -70,7 +69,7 @@ export default async function AdminMinistryRoute({
         .reverse()
         .map((day) => ({
           dateKey: day,
-          report: reportByDay.get(day) ?? null,
+          activities: byDay.get(day) ?? [],
           activity: history.activity.get(day) ?? null,
         })),
     };
@@ -90,6 +89,7 @@ export default async function AdminMinistryRoute({
       contacts={contacts}
       contactLimitReached={contacts.length >= CONTACT_LIST_LIMIT}
       member={member}
+      viewer={{ userId: session.user.id, isAdmin: true }}
     />
   );
 }

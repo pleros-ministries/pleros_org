@@ -1,6 +1,7 @@
-import { ArrowLeftIcon, LockIcon } from "lucide-react";
+import { ArrowLeftIcon, CheckIcon, LockIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import type { ReactNode } from "react";
 
 import { getWelcomePackHubCards } from "../../lib/welcome-pack-hub";
 import {
@@ -83,8 +84,11 @@ function GiftCard({
 
 export function WelcomePackHubPage({
   basePath = hubPath,
+  setupComplete = false,
 }: {
   basePath?: string;
+  /** The learner has saved their reminders, so the setup card shows "Done". */
+  setupComplete?: boolean;
 }) {
   const cards = getWelcomePackHubCards(basePath);
 
@@ -99,31 +103,42 @@ export function WelcomePackHubPage({
             Your Welcome Pack
           </h1>
           <p className="site-section-intro max-w-[34rem] text-[var(--color-text-muted)]">
-            Begin with your welcome message, continue to orientation, then open
-            your gifts.
+            Begin with your welcome message, continue to orientation, open your
+            gifts, then set up your app and reminders.
           </p>
         </header>
 
         <div className="grid grid-cols-2 gap-4 sm:gap-5">
-          {cards.map((card, index) => (
+          {cards.map((card, index) => {
+            // The first and last cards span the row, so four cards sit as
+            // wide, half, half, wide with no orphan.
+            const wide = index === 0 || index === cards.length - 1;
+            const done = card.id === "setup" && setupComplete;
+            return (
             <Link
               key={card.id}
               href={card.href}
               className={`group relative grid min-h-[13rem] content-end overflow-hidden rounded-[var(--radius-md)] bg-[var(--color-brand-blue)] p-4 text-white shadow-[var(--shadow-sm)] transition-transform duration-150 hover:-translate-y-px sm:min-h-[16rem] ${
-                index === 0 ? "col-span-2" : ""
+                wide ? "col-span-2" : ""
               }`}
             >
               <Image
                 src={card.imageSrc}
                 alt=""
                 fill
-                sizes={index === 0 ? "42rem" : "21rem"}
+                sizes={wide ? "42rem" : "21rem"}
                 className="object-cover transition-transform duration-200 group-hover:scale-[1.02]"
               />
               <span
                 aria-hidden="true"
                 className="absolute inset-0 bg-[linear-gradient(0deg,rgba(0,10,70,0.72)_0%,rgba(0,10,70,0.22)_62%,transparent_100%)]"
               />
+              {done ? (
+                <span className="absolute right-3 top-3 z-10 inline-flex items-center gap-1 rounded-full bg-[var(--color-brand-lime)] px-2.5 py-1 font-[var(--font-be-vietnam-pro)] text-[0.7rem] font-semibold leading-none text-[var(--color-brand-blue)]">
+                  <CheckIcon className="size-3" strokeWidth={2.5} />
+                  Done
+                </span>
+              ) : null}
               <span className="relative z-10 grid gap-1.5">
                 <strong className="site-pathway-title text-xl font-semibold leading-none text-white">
                   {card.title}
@@ -133,7 +148,8 @@ export function WelcomePackHubPage({
                 </span>
               </span>
             </Link>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>
@@ -215,6 +231,30 @@ export function WelcomePackOrientationPage({ videoSrc }: { videoSrc: string }) {
           poster="/site/sogp/sogp-welcome-WaXgk9zqi78.jpg"
           className="aspect-video w-full rounded-[var(--radius-md)] bg-black object-cover shadow-[var(--shadow-md)]"
         />
+      </div>
+    </section>
+  );
+}
+
+/**
+ * Page frame for "App and reminders". The steps themselves are client
+ * components passed in as children, which keeps this file free of anything
+ * that needs a browser or a database.
+ */
+export function WelcomePackSetupPage({ children }: { children: ReactNode }) {
+  return (
+    <section className="site-font-theme bg-[var(--color-surface)] py-7 sm:py-10">
+      <div className="container-pleros grid max-w-[42rem] gap-6 pb-12">
+        <HubBackLink />
+        <header className="grid gap-2">
+          <h1 className="site-hero-heading text-[clamp(2rem,6vw,3.25rem)] text-[var(--color-brand-blue)]">
+            Set up your app and reminders
+          </h1>
+          <p className="site-section-intro text-[var(--color-text-muted)]">
+            Four short steps so Pleros reaches you at the right time.
+          </p>
+        </header>
+        {children}
       </div>
     </section>
   );

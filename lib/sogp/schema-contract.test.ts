@@ -27,11 +27,14 @@ import {
   dmMessages,
   dmParticipants,
   ministryReports,
+  ministryActivities,
   outreachContacts,
+  outreachContactInteractions,
   plerosQuestionMessages,
   plerosQuestionMutes,
   plerosQuestions,
   userBlocks,
+  discipleshipGroupStatusEnum,
   discipleshipGroups,
   discipleshipMemberships,
   discipleshipPrompts,
@@ -110,6 +113,42 @@ describe("SOGP schema", () => {
     expect(outreachContacts.followedUpAt).toBeDefined();
     expect(outreachContacts.followedUpBy).toBeDefined();
     expect(outreachContacts.followUpNote).toBeDefined();
+    expect(outreachContacts.activityId).toBeDefined();
+    expect(outreachContacts.salvationStatus).toBeDefined();
+    expect(outreachContacts.discipleshipStatus).toBeDefined();
+    expect(outreachContacts.followUpPlan).toBeDefined();
+    expect(outreachContacts.nextFollowUpDate).toBeDefined();
+  });
+
+  test("exports the ministry activity log", () => {
+    expect(ministryActivities.userId).toBeDefined();
+    expect(ministryActivities.activityDate).toBeDefined();
+    expect(ministryActivities.kind).toBeDefined();
+    expect(ministryActivities.title).toBeDefined();
+    expect(ministryActivities.mode).toBeDefined();
+    expect(ministryActivities.platform).toBeDefined();
+    expect(ministryActivities.location).toBeDefined();
+    expect(ministryActivities.reachedOnline).toBeDefined();
+    expect(ministryActivities.reachedOffline).toBeDefined();
+    expect(ministryActivities.attendance).toBeDefined();
+    expect(ministryActivities.saved).toBeDefined();
+    expect(ministryActivities.notSaved).toBeDefined();
+    expect(ministryActivities.filled).toBeDefined();
+    expect(ministryActivities.healed).toBeDefined();
+    expect(ministryActivities.followUps).toBeDefined();
+    expect(ministryActivities.note).toBeDefined();
+  });
+
+  test("exports the contact interaction history", () => {
+    expect(outreachContactInteractions.contactId).toBeDefined();
+    expect(outreachContactInteractions.userId).toBeDefined();
+    expect(outreachContactInteractions.activityId).toBeDefined();
+    expect(outreachContactInteractions.interactionDate).toBeDefined();
+    expect(outreachContactInteractions.kind).toBeDefined();
+    expect(outreachContactInteractions.saved).toBeDefined();
+    expect(outreachContactInteractions.filled).toBeDefined();
+    expect(outreachContactInteractions.healed).toBeDefined();
+    expect(outreachContactInteractions.note).toBeDefined();
   });
 
   test("exports the Ask Pleros tables", () => {
@@ -158,6 +197,10 @@ describe("SOGP schema", () => {
     expect(discipleshipMemberships.lastKnownStatus).toBeDefined();
     expect(discipleshipContactLogs.kind).toBeDefined();
     expect(discipleshipPrayerRequests.prayedAt).toBeDefined();
+  });
+
+  test("lets a leader close a group without reusing the admin pause", () => {
+    expect(discipleshipGroupStatusEnum.enumValues).toEqual(["active", "archived", "closed"]);
   });
 
   test("exports the community notifications table", () => {

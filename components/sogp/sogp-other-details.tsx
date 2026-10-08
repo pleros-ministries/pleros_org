@@ -50,6 +50,10 @@ function DetailRow({
 function PrayerWatchReminderCard() {
   const { isSupported, isSubscribed, isPending, subscribe } = usePushSubscription();
   const isConfigured = Boolean(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY);
+  // Which reminders arrive, and when, is the learner's own choice on the
+  // Welcome Pack setup page, so this card describes them in general terms.
+  const summary =
+    "A notification shortly before each Prayer Watch session you choose, and at your teaching time.";
 
   return (
     <div className="grid gap-3 rounded-[var(--radius-md)] bg-white p-4 shadow-sm">
@@ -58,20 +62,15 @@ function PrayerWatchReminderCard() {
         <h3 className="ppc-heading text-sm font-semibold text-zinc-900">Prayer Watch reminder</h3>
       </div>
       {isSubscribed ? (
-        <p className="text-xs leading-[1.5] text-zinc-500">
-          A browser notification at 5:20 am, ten minutes before Prayer Watch. Reminders are on.
-        </p>
+        <p className="text-xs leading-[1.5] text-zinc-500">{summary} Reminders are on.</p>
       ) : !isConfigured || !isSupported ? (
         <p className="inline-flex items-center gap-2 text-xs leading-[1.5] text-zinc-500">
           <BellOffIcon className="size-4 shrink-0" />
-          A browser notification at 5:20 am, ten minutes before Prayer Watch. Reminders are being
-          set up.
+          {summary} Reminders are being set up.
         </p>
       ) : (
         <>
-          <p className="text-xs leading-[1.5] text-zinc-500">
-            Receive one browser notification at 5:20 am, ten minutes before Morning Prayer Watch.
-          </p>
+          <p className="text-xs leading-[1.5] text-zinc-500">{summary}</p>
           <button
             type="button"
             onClick={subscribe}
@@ -82,6 +81,12 @@ function PrayerWatchReminderCard() {
           </button>
         </>
       )}
+      <Link
+        href="/dashboard/welcomepack/setup"
+        className="w-fit text-xs font-semibold text-[var(--color-brand-blue)] underline underline-offset-4"
+      >
+        Manage reminders
+      </Link>
     </div>
   );
 }

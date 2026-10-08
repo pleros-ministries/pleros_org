@@ -38,7 +38,9 @@ export function InstallAppCta() {
     pathname.startsWith("/preview/") ||
     status === "pending" ||
     status === "installed" ||
-    status === "unsupported"
+    status === "unsupported" ||
+    // A declined browser prompt cannot be shown again, so there is nothing to offer.
+    status === "dismissed"
   ) {
     return null;
   }
@@ -46,21 +48,15 @@ export function InstallAppCta() {
   return (
     <div className="site-font-theme relative flex flex-col gap-3 rounded-[var(--radius-md)] bg-[var(--color-brand-blue)] p-4 pr-10 text-white shadow-[var(--shadow-sm)] sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:p-5 sm:pr-12">
       <div className="flex items-start gap-3">
-        {/* <span
-          aria-hidden="true"
-          className="mt-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-white/12"
-        >
-          <Download className="size-4.5" />
-        </span> */}
         <div className="grid gap-1">
           <p className="site-title-text text-[0.9375rem] font-semibold leading-snug text-white">
             Add Pleros to your home screen
           </p>
           {status === "ios-manual" ? (
-            <p className="site-body-text flex flex-wrap items-center gap-1 text-[0.8125rem] leading-.5 text-white/85">
+            <p className="site-body-text flex flex-wrap items-center gap-1 text-[0.8125rem] leading-snug text-white/85">
               Tap the
-              {/* <Share className="size-3.5" aria-label="Share" /> */}
-              download button, then choose &ldquo;Add to Home Screen&rdquo;.
+              <Share aria-hidden="true" className="size-3.5" />
+              Share button, then choose &ldquo;Add to Home Screen&rdquo;.
             </p>
           ) : (
             <p className="site-body-text text-[0.8125rem] leading-snug text-white/85">
