@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { ExpandButton } from "@/components/ppc/expandable-table-row";
-import { ACTIVITY_KINDS, type ActivityKind } from "@/lib/community/ministry-activities";
+import { ALL_ACTIVITY_KINDS, type ActivityKind } from "@/lib/community/ministry-activities";
 import {
   MINISTRY_FIELDS,
   activityLines,
@@ -96,9 +96,9 @@ function rangeActivity(activity: DayActivitySummary | null): string {
   return done.length > 0 ? done.join(" · ") : "—";
 }
 
-/** "Outreach 12 · Teaching meeting 4", leaving out kinds with nothing. */
+/** "Evangelism 12 · Discipleship 4", leaving out kinds with nothing. */
 function kindSummary(byKind: Record<ActivityKind, number>): string {
-  const parts = ACTIVITY_KINDS.filter((kind) => byKind[kind.key] > 0).map(
+  const parts = ALL_ACTIVITY_KINDS.filter((kind) => byKind[kind.key] > 0).map(
     (kind) => `${kind.label} ${byKind[kind.key]}`,
   );
   return parts.length > 0 ? parts.join(" · ") : "No activities";
@@ -106,7 +106,7 @@ function kindSummary(byKind: Record<ActivityKind, number>): string {
 
 function sumKinds(rows: Array<{ byKind: Record<ActivityKind, number> }>) {
   const total = {} as Record<ActivityKind, number>;
-  for (const kind of ACTIVITY_KINDS) {
+  for (const kind of ALL_ACTIVITY_KINDS) {
     total[kind.key] = rows.reduce((sum, row) => sum + row.byKind[kind.key], 0);
   }
   return total;
@@ -301,7 +301,7 @@ export function AdminMinistryPage({
   const dayActivities = reported.flatMap((row) => row.activities);
   const dayTotals = sumMinistryNumbers(dayActivities);
   const dayKinds = {} as Record<ActivityKind, number>;
-  for (const kind of ACTIVITY_KINDS) {
+  for (const kind of ALL_ACTIVITY_KINDS) {
     dayKinds[kind.key] = dayActivities.filter((activity) => activity.kind === kind.key).length;
   }
   const rangeTotals = sumMinistryNumbers(totalsByDay);

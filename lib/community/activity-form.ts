@@ -407,7 +407,7 @@ function plural(count: number, noun: string, pluralNoun = `${noun}s`): string {
   return `${count} ${count === 1 ? noun : pluralNoun}`;
 }
 
-/** "Outreach", or "Teaching meeting · Youth fellowship". */
+/** "Evangelism", or "Teaching meeting · Youth fellowship". */
 export function activityTitle(activity: { kind: ActivityKind; title: string | null }): string {
   const label = activityKindLabel(activity.kind);
   return activity.title ? `${label} · ${activity.title}` : label;

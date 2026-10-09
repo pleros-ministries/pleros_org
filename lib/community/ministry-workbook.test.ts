@@ -70,7 +70,7 @@ describe("buildMinistryDayWorkbook", () => {
     expect(rows).toHaveLength(2);
     expect(rows[0]).toMatchObject({
       Name: "Ada",
-      Activity: "Outreach",
+      Activity: "Evangelism",
       Mode: "Online",
       Platform: "Zoom",
       "People reached online": 12,
@@ -91,7 +91,7 @@ describe("buildMinistryDayWorkbook", () => {
       Members: 2,
       "Members reporting": 1,
       Activities: 2,
-      Outreach: 1,
+      Evangelism: 1,
       "Teaching meeting": 1,
       "Prayer meeting": 0,
     });
@@ -185,7 +185,7 @@ describe("buildMinistryRangeWorkbook", () => {
     const [member] = sheetRows(buffer, "By member");
     expect(member).toMatchObject({ Name: "Ada", Days: 1, Activities: 2, "Total reached": 52 });
     const [day] = sheetRows(buffer, "By day");
-    expect(day).toMatchObject({ Date: "2026-10-05", Members: 1, Outreach: 1 });
+    expect(day).toMatchObject({ Date: "2026-10-05", Members: 1, Evangelism: 1 });
   });
 
   test("carries each person's statuses and every interaction", () => {

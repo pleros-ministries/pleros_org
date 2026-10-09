@@ -1,7 +1,7 @@
 import * as XLSX from "xlsx";
 
 import {
-  ACTIVITY_KINDS,
+  ALL_ACTIVITY_KINDS,
   activityKindLabel,
   outreachModeLabel,
   platformLabel,
@@ -51,13 +51,19 @@ function numberCells(row: MinistryNumbers | null): Record<string, number | strin
   );
 }
 
+/** A column per offered kind, plus a kind no longer offered only when it has activities. */
 function kindCells(byKind: Record<ActivityKind, number>): Record<string, number> {
-  return Object.fromEntries(ACTIVITY_KINDS.map((kind) => [kind.label, byKind[kind.key]]));
+  return Object.fromEntries(
+    ALL_ACTIVITY_KINDS.filter((kind) => kind.offered || byKind[kind.key] > 0).map((kind) => [
+      kind.label,
+      byKind[kind.key],
+    ]),
+  );
 }
 
 function countKinds(activities: Array<{ kind: ActivityKind }>): Record<ActivityKind, number> {
   const counts = {} as Record<ActivityKind, number>;
-  for (const kind of ACTIVITY_KINDS) {
+  for (const kind of ALL_ACTIVITY_KINDS) {
     counts[kind.key] = activities.filter((activity) => activity.kind === kind.key).length;
   }
   return counts;

@@ -69,7 +69,7 @@ export const welcomeDashboardSections: WelcomeDashboardSection[] = [
       {
         id: "podcast",
         title: "Podcast",
-        description: "Listen to the Pleros Podcast and keep growing in truth.",
+        description: "Follow a 30-day podcast journey and keep growing in truth.",
         href: "/dashboard/podcast",
         status: "available",
         icon: PodcastIcon,

@@ -41,8 +41,8 @@ export default async function CommunityLayout({
 
   return (
     <CommunityQueryProvider>
-      {/* A column so the phone bottom bar rests at the section's end; it brings its own bottom gap. */}
-      <section className="site-font-theme flex min-h-screen flex-col bg-[#e8edf7] pb-3 text-zinc-900 lg:pb-16">
+      {/* A column so the phone bottom bar rests flush at the section's end. */}
+      <section className="site-font-theme flex min-h-screen flex-col bg-[#e8edf7] text-zinc-900 lg:pb-16">
         <CommunityShell
           unitCard={unitCard}
           unitId={unitId}

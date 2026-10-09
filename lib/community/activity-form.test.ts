@@ -36,8 +36,9 @@ describe("stepsFor", () => {
     expect(stepsFor(null)).toEqual(["kind"]);
     expect(stepsFor("outreach")).toEqual(["kind", "where", "numbers", "people", "review"]);
     expect(stepsFor("teaching_meeting")).toEqual(["kind", "where", "numbers", "review"]);
+    expect(stepsFor("prayer_meeting")).toEqual(["kind", "where", "numbers", "review"]);
+    // An older church service still opens with its steps when corrected.
     expect(stepsFor("church_service")).toEqual(["kind", "where", "numbers", "review"]);
-    expect(stepsFor("other")).toEqual(["kind", "where", "numbers", "review"]);
     expect(stepsFor("follow_up")).toEqual(["kind", "people", "numbers", "review"]);
   });
 });
@@ -68,7 +69,7 @@ describe("validateStep", () => {
     expect(validateStep("where", outreachDraft())).toEqual({});
   });
 
-  test("something else needs a name; a meeting does not", () => {
+  test("an older something-else activity needs a name; a meeting does not", () => {
     expect(validateStep("where", withKind(emptyDraft(day), "other"))).toEqual({
       title: "Give this activity a short name.",
     });
@@ -275,7 +276,7 @@ describe("help between steps", () => {
 
 describe("describing an activity", () => {
   test("titles and key numbers read naturally", () => {
-    expect(activityTitle({ kind: "outreach", title: null })).toBe("Outreach");
+    expect(activityTitle({ kind: "outreach", title: null })).toBe("Evangelism");
     expect(activityTitle({ kind: "teaching_meeting", title: "Youth fellowship" })).toBe(
       "Teaching meeting · Youth fellowship",
     );
@@ -295,5 +296,6 @@ describe("describing an activity", () => {
     expect(
       activityKeyNumbers({ ...emptyMinistryNumbers(), kind: "follow_up", followUps: 1, healed: 1 }),
     ).toBe("1 follow-up · 1 healed");
+    expect(activityTitle({ kind: "follow_up", title: null })).toBe("Discipleship");
   });
 });

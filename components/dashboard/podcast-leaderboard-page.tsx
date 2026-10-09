@@ -10,10 +10,12 @@ import {
 } from "@/lib/podcast-leaderboard";
 import { LEADERBOARD_STREAK_MILESTONE_DAYS } from "@/lib/sogp/leaderboard-scoring";
 
+import { PodcastLeaderboardToggle } from "./podcast-leaderboard-toggle";
+
 const POINT_RULES: Array<{ label: string; value: string }> = [
   {
-    label: "Listening to one of this month’s episodes",
-    value: `${PODCAST_LEADERBOARD_POINTS.episode}`,
+    label: "Each day you listen to an episode",
+    value: `${PODCAST_LEADERBOARD_POINTS.listeningDay}`,
   },
   {
     label: "5:30 am Prayer Watch",
@@ -29,7 +31,7 @@ export function PodcastLeaderboardPage({ data }: { data: PodcastLeaderboardData 
   const me = data.me;
   const breakdown = me
     ? [
-        { label: "Episodes", value: me.breakdown.episodes },
+        { label: "Listening", value: me.breakdown.listening },
         { label: "Prayer Watch", value: me.breakdown.prayer },
         { label: "Streak bonus", value: me.breakdown.streak },
       ]
@@ -77,6 +79,11 @@ export function PodcastLeaderboardPage({ data }: { data: PodcastLeaderboardData 
                 </p>
                 <StreakBadge days={me.currentStreak} />
               </div>
+              {me.visible ? null : (
+                <p className="text-xs leading-normal text-zinc-500">
+                  Only you can see this. Turn on the switch below to appear on the board.
+                </p>
+              )}
               <dl className="grid grid-cols-3 gap-2">
                 {breakdown.map((item) => (
                   <div
@@ -93,9 +100,13 @@ export function PodcastLeaderboardPage({ data }: { data: PodcastLeaderboardData 
             </>
           ) : (
             <p className="text-xs leading-normal text-zinc-500">
-              Mark one of this month&apos;s episodes as done to join the leaderboard.
+              Mark an episode as listened this month to earn points.
             </p>
           )}
+          <PodcastLeaderboardToggle
+            visible={data.viewerVisible}
+            className="border-t border-zinc-100 pt-3"
+          />
         </SogpActivitySection>
 
         <SogpActivitySection
@@ -160,8 +171,9 @@ export function PodcastLeaderboardPage({ data }: { data: PodcastLeaderboardData 
             ))}
           </ul>
           <p className="text-[0.7rem] leading-[1.45] text-zinc-400">
-            The leaderboard starts afresh each month and shows first names only. Episodes
-            from earlier months still count towards your own progress, not your points.
+            The leaderboard starts afresh each month and lists only listeners who choose to
+            appear, by first name. A day counts once however many episodes you mark, on any
+            journey.
           </p>
         </SogpActivitySection>
       </div>

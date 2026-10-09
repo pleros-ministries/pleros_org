@@ -7,6 +7,10 @@ export type PodcastEpisodeGroup = {
   episodes: RssEpisode[];
 };
 
+export const STANDALONE_PODCAST_SERIES_ID = "standalone-episodes";
+
+const PART_NUMBER_REGEX = /(?:\(|[-–—]\s*)(?:part|pt\.?)\s*(\d+)\)?\s*$/i;
+
 function slugify(value: string): string {
   return value
     .toLowerCase()
@@ -21,6 +25,20 @@ export function getPodcastSeriesTitle(title: string): string {
     .trim();
 }
 
+/** The part number in "(Part 3)" or "- Part 3"; 0 when the title has none. */
+export function getPodcastPartNumber(title: string): number {
+  const match = title.match(PART_NUMBER_REGEX);
+  return match ? parseInt(match[1]!, 10) : 0;
+}
+
+/**
+ * A series' stable id, from its title without the part number. Spelling and
+ * case differences ("Fulfil"/"Fulfill") share one id.
+ */
+export function podcastSeriesId(seriesTitle: string): string {
+  return slugify(normalizeSeriesTitle(seriesTitle)) || STANDALONE_PODCAST_SERIES_ID;
+}
+
 export function groupPodcastEpisodesBySeries(
   episodes: RssEpisode[],
 ): PodcastEpisodeGroup[] {
@@ -28,7 +46,7 @@ export function groupPodcastEpisodesBySeries(
 
   for (const episode of episodes) {
     const title = getPodcastSeriesTitle(episode.title) || "Standalone episodes";
-    const id = slugify(normalizeSeriesTitle(title)) || "standalone-episodes";
+    const id = podcastSeriesId(title);
     const group = groups.get(id);
 
     if (group) {

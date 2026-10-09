@@ -3,6 +3,8 @@ import { describe, expect, test } from "vitest";
 import {
   ACTIVITIES_PER_DAY_MAX,
   ACTIVITY_KINDS,
+  ALL_ACTIVITY_KINDS,
+  activityKindLabel,
   ACTIVITY_PLACE_MAX,
   ACTIVITY_TITLE_MAX,
   activityFields,
@@ -30,7 +32,7 @@ describe("activityFields", () => {
   });
 
   test("meetings need the people present; follow-ups and other need nothing", () => {
-    for (const kind of ["teaching_meeting", "prayer_meeting", "church_service"] as const) {
+    for (const kind of ["teaching_meeting", "prayer_meeting"] as const) {
       expect(activityFields(kind, null)).toEqual({
         shown: ["attendance", "saved", "filled", "healed"],
         required: ["attendance"],
@@ -43,11 +45,38 @@ describe("activityFields", () => {
     expect(activityFields("other", null).required).toEqual([]);
   });
 
-  test("every kind is listed once with a label and a hint", () => {
-    const keys = ACTIVITY_KINDS.map((kind) => kind.key);
+  test("the form offers evangelism, discipleship, then the two meetings", () => {
+    expect(ACTIVITY_KINDS.map((kind) => kind.key)).toEqual([
+      "outreach",
+      "follow_up",
+      "teaching_meeting",
+      "prayer_meeting",
+    ]);
+    expect(ACTIVITY_KINDS.map((kind) => kind.label)).toEqual([
+      "Evangelism",
+      "Discipleship",
+      "Teaching meeting",
+      "Prayer meeting",
+    ]);
+    expect(activityKindLabel("outreach")).toBe("Evangelism");
+    expect(activityKindLabel("follow_up")).toBe("Discipleship");
+  });
+
+  test("church service and something else are kept only for older activities", () => {
+    expect(ALL_ACTIVITY_KINDS.filter((kind) => !kind.offered).map((kind) => kind.key)).toEqual([
+      "church_service",
+      "other",
+    ]);
+    // Older activities still read and add up.
+    expect(activityKindLabel("church_service")).toBe("Church service");
+    expect(activityFields("church_service", null).required).toEqual(["attendance"]);
+  });
+
+  test("every stored kind is listed once with a label and a hint", () => {
+    const keys = ALL_ACTIVITY_KINDS.map((kind) => kind.key);
     expect(new Set(keys).size).toBe(keys.length);
-    expect(ACTIVITY_KINDS.every((kind) => kind.label && kind.hint)).toBe(true);
-    expect(ACTIVITY_KINDS.find((kind) => kind.key === "other")?.titleRequired).toBe(true);
+    expect(ALL_ACTIVITY_KINDS.every((kind) => kind.label && kind.hint)).toBe(true);
+    expect(ALL_ACTIVITY_KINDS.find((kind) => kind.key === "other")?.titleRequired).toBe(true);
     expect(ACTIVITY_KINDS.find((kind) => kind.key === "outreach")?.people).toBe("met");
     expect(ACTIVITY_KINDS.find((kind) => kind.key === "follow_up")?.people).toBe(
       "follow_up",
@@ -181,8 +210,23 @@ describe("normaliseActivityInput", () => {
     });
   });
 
-  test("something else needs a name; outreach and follow-up ignore one", () => {
-    expect(normaliseActivityInput({ kind: "other", values: {} })).toEqual({
+  test("church service and something else can be corrected but never added", () => {
+    for (const kind of ["church_service", "other"]) {
+      expect(normaliseActivityInput({ kind, title: "Visit", values: { attendance: "4" } })).toEqual({
+        ok: false,
+        error: "Choose what you did.",
+      });
+    }
+    const corrected = normaliseActivityInput({
+      kind: "church_service",
+      values: { attendance: "120" },
+      allowRetired: true,
+    });
+    expect(corrected.ok && corrected.value.attendance).toBe(120);
+  });
+
+  test("an older something-else activity still needs its name; discipleship ignores one", () => {
+    expect(normaliseActivityInput({ kind: "other", values: {}, allowRetired: true })).toEqual({
       ok: false,
       error: "Give this activity a short name.",
     });
@@ -209,29 +253,17 @@ describe("normaliseActivityInput", () => {
   });
 
   test("long names, places and notes are refused", () => {
+    const meeting = { kind: "teaching_meeting", values: { attendance: "10" } };
     expect(
-      normaliseActivityInput({
-        kind: "other",
-        title: "x".repeat(ACTIVITY_TITLE_MAX + 1),
-        values: {},
-      }).ok,
+      normaliseActivityInput({ ...meeting, title: "x".repeat(ACTIVITY_TITLE_MAX + 1) }).ok,
     ).toBe(false);
     expect(
-      normaliseActivityInput({
-        kind: "other",
-        title: "Visit",
-        location: "x".repeat(ACTIVITY_PLACE_MAX + 1),
-        values: {},
-      }).ok,
+      normaliseActivityInput({ ...meeting, location: "x".repeat(ACTIVITY_PLACE_MAX + 1) }).ok,
     ).toBe(false);
     expect(
-      normaliseActivityInput({
-        kind: "other",
-        title: "Visit",
-        values: {},
-        note: "x".repeat(MINISTRY_NOTE_MAX + 1),
-      }).ok,
+      normaliseActivityInput({ ...meeting, note: "x".repeat(MINISTRY_NOTE_MAX + 1) }).ok,
     ).toBe(false);
+    expect(normaliseActivityInput(meeting).ok).toBe(true);
   });
 });
 
@@ -277,7 +309,7 @@ describe("platforms and summaries", () => {
         platform: null,
         location: "Ikeja",
       }),
-    ).toBe("Outreach · Offline · Ikeja");
+    ).toBe("Evangelism · Offline · Ikeja");
   });
 
   test("groups activities by day in the order given", () => {

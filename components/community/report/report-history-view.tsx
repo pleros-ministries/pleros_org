@@ -58,7 +58,7 @@ function Dot({ on, label }: { on: boolean; label: string }) {
   );
 }
 
-/** The kinds logged that day, e.g. "outreach, prayer meeting". */
+/** The kinds logged that day, e.g. "evangelism, prayer meeting". */
 function kindsOf(activities: MemberActivity[]): string {
   const seen = new Set<string>();
   for (const activity of activities) seen.add(activityKindLabel(activity.kind).toLowerCase());
