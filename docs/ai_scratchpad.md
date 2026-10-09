@@ -143,6 +143,7 @@ Consolidated 2026-08-31. Keep this file short, current, pattern-focused, and fre
 - The shared dashboard navbar exposes sign out in the desktop navbar and inside the mobile menu for full Better Auth sessions; signed-out mobile menus show `Log in`. Use the server-owned `signOutDashboardAction` to clear the session and redirect to `/login`; the client Better Auth wrapper proved unreliable for this navigation.
 - In local development, trust `http://localhost:*` and `http://127.0.0.1:*` while retaining Better Auth origin/CSRF checks; a fixed port rejects auth mutations when Next.js moves to another port.
 - `/dashboard/welcomepack/join` support copy refers to the Telegram `orientation pack` and `the next steps to take`, not an orientation message; keep its orientation-group CTA text-only with no icon.
+- Suppress the global sticky push-notification prompt on `/dashboard/welcomepack/join`; it must never cover the Telegram orientation-group CTA on mobile.
 - Reuse the shared community section and keep it flush with the footer. Keep its CTA close to copy, intro measure narrow on mobile, and image/overlay intact.
 - Greetings prefer explicit submitted names and suppress names inferred from email identifiers.
 - `/dashboard` and all Welcome Pack pages/actions/downloads accept only a valid app session; unauthenticated requests redirect to `/login` with a safe dashboard return path.
