@@ -230,6 +230,7 @@ export const communityNotificationKindEnum = pgEnum(
     "group_join_request",
     "group_join_approved",
     "pleros_reply",
+    "sogp_week_certificate",
   ],
 );
 
@@ -1381,6 +1382,42 @@ export const sogpRewardGrants = pgTable(
       t.enrollmentId,
       t.rewardKey,
     ),
+  ],
+);
+
+/**
+ * One certificate per SOGP week (curriculum level) a learner completes. It is
+ * issued automatically, and inserting the row is the claim that sends the
+ * learner's notice once. Cohort moves keep the enrolment id, so the cohort the
+ * week was earned in is part of the key.
+ */
+export const sogpWeekCertificates = pgTable(
+  "sogp_week_certificates",
+  {
+    id: serial("id").primaryKey(),
+    enrollmentId: integer("enrollment_id")
+      .notNull()
+      .references(() => sogpEnrollments.id, { onDelete: "cascade" }),
+    cohortId: integer("cohort_id")
+      .notNull()
+      .references(() => sogpCohorts.id, { onDelete: "cascade" }),
+    week: integer("week").notNull(),
+    verificationCode: text("verification_code").notNull(),
+    issuedAt: timestamp("issued_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
+  },
+  (t) => [
+    uniqueIndex("sogp_week_certificates_enrollment_cohort_week_idx").on(
+      t.enrollmentId,
+      t.cohortId,
+      t.week,
+    ),
+    uniqueIndex("sogp_week_certificates_verification_idx").on(
+      t.verificationCode,
+    ),
+    index("sogp_week_certificates_cohort_idx").on(t.cohortId),
   ],
 );
 

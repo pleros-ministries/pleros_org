@@ -14,6 +14,8 @@ export const LEARNING_PROGRESS_SHARE_PATTERN_BLUE = "#133FD4";
 export const LEARNING_PROGRESS_SHARE_ACCENT_LIGHT = "#7BA253";
 export const LEARNING_PROGRESS_SHARE_ACCENT_DARK = "#A8C98A";
 export const LEARNING_PROGRESS_SHARE_WHAT_I_LEARNT_GREEN = "#4E6E33";
+// Brand lime (`--color-brand-lime`), used for the week certificate medallion.
+export const LEARNING_PROGRESS_SHARE_LIME = "#E9ED01";
 export const LEARNING_PROGRESS_SHARE_SANS = "Poppins";
 export const LEARNING_PROGRESS_SHARE_SERIF = "Newsreader";
 

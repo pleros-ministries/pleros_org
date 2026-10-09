@@ -17,6 +17,8 @@ import {
   SOGP_ENROLLMENT_SUBJECT,
   sogpAuthCodeHtml,
   sogpEnrollmentHtml,
+  sogpWeekCertificateHtml,
+  sogpWeekCertificateSubject,
 } from "./templates";
 
 const FROM = process.env.EMAIL_FROM ?? "PPC <noreply@pleros.org>";
@@ -374,5 +376,22 @@ export async function sendPlerosReplyEmail(opts: { to: string; url: string }) {
     to: opts.to,
     subject: "Pleros has replied to your question",
     html: plerosReplyHtml({ url: opts.url }),
+  });
+}
+
+/** Congratulates a learner on completed SOGP weeks; one email however many. */
+export async function sendSogpWeekCertificateEmail(opts: {
+  to: string;
+  firstName: string;
+  weeks: Array<{ week: number; title: string }>;
+  url: string;
+}) {
+  if (!isEmailEnabled() || !resend) return null;
+
+  return resend.emails.send({
+    from: getSogpSender(process.env.EMAIL_FROM_PLEROS),
+    to: opts.to,
+    subject: sogpWeekCertificateSubject(opts.weeks.map((item) => item.week)),
+    html: sogpWeekCertificateHtml(opts),
   });
 }

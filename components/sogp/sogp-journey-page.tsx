@@ -10,6 +10,7 @@ import type { SogpJourneyData } from "@/lib/db/queries/sogp-journey";
 import { deriveSogpCalendarState } from "@/lib/sogp/calendar";
 import { getSogpDayRequirements } from "@/lib/sogp/journey";
 
+import { SogpCertificateCallout } from "./sogp-certificate-callout";
 import { SogpCourseSidebar } from "./sogp-course-sidebar";
 import { SogpDailyTasks } from "./sogp-daily-tasks";
 import { SogpOtherDetails } from "./sogp-other-details";
@@ -171,6 +172,7 @@ export function SogpJourneyPage({
         </aside>
 
         <div data-sogp-section="daily-content" className="grid min-w-0 gap-4">
+          <SogpCertificateCallout data={data} preview={preview} />
           <SogpDailyTasks
             data={data}
             selectedDay={selectedDay}

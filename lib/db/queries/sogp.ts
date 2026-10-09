@@ -559,6 +559,7 @@ export async function getAdminSogpData() {
     tracks,
     liveClasses,
     certificates,
+    weekCertificates,
     preparationRows,
     orientationSurveys,
   ] =
@@ -575,6 +576,10 @@ export async function getAdminSogpData() {
         .orderBy(asc(schema.sogpCohortTracks.curriculumOrder)),
       db.select().from(schema.sogpLiveClasses).orderBy(asc(schema.sogpLiveClasses.startsAt)),
       db.select().from(schema.sogpCertificates).orderBy(desc(schema.sogpCertificates.issuedAt)),
+      db
+        .select()
+        .from(schema.sogpWeekCertificates)
+        .orderBy(asc(schema.sogpWeekCertificates.week)),
       db
         .select({
           day: schema.sogpPreparationDays,
@@ -616,6 +621,7 @@ export async function getAdminSogpData() {
     tracks,
     liveClasses,
     certificates,
+    weekCertificates,
     preparationDays,
     orientationSurveys,
   };

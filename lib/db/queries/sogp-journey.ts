@@ -23,6 +23,14 @@ import {
   summarizeSogpLevels,
   type SogpLevelStatus,
 } from "@/lib/sogp/progression";
+import type {
+  SogpAssessmentPolicy,
+  SogpEnrollmentStatus,
+} from "@/lib/sogp/types";
+import {
+  summarizeSogpWeekAwards,
+  type SogpWeekAwardSummary,
+} from "@/lib/sogp/week-certificates";
 import { getSogpDashboardData } from "./sogp";
 import { getCohortPreparationLength } from "./sogp-preparation-length";
 
@@ -408,6 +416,7 @@ export async function setSogpReviewComplete(input: {
     .select({
       classId: schema.sogpLiveClasses.id,
       recordingUrl: schema.sogpLiveClasses.recordingUrl,
+      startsAt: schema.sogpLiveClasses.startsAt,
     })
     .from(schema.sogpEnrollments)
     .innerJoin(
@@ -423,6 +432,14 @@ export async function setSogpReviewComplete(input: {
     )
     .limit(1);
   if (!row || (input.source === "recording" && !row.recordingUrl)) {
+    throw new Error("That SOGP review is unavailable.");
+  }
+  // A review cannot be marked done before its day: it counts towards week
+  // and final certificates.
+  if (
+    input.complete &&
+    toLagosDateKey(row.startsAt) > toLagosDateKey(new Date())
+  ) {
     throw new Error("That SOGP review is unavailable.");
   }
   if (input.complete) {
@@ -511,12 +528,53 @@ export type SogpJourneyData = {
     reviewsTotal: number;
     eligible: boolean;
   };
+  certificates: {
+    policy: SogpAssessmentPolicy;
+    weeks: SogpJourneyWeekCertificate[];
+    /** The final cohort certificate; null when not issued or revoked. */
+    final: { verificationCode: string; issuedAt: string } | null;
+  };
 };
 
+export type SogpJourneyWeekCertificate = SogpWeekAwardSummary & {
+  title: string;
+  /** This cohort's certificate for the week, unless it was revoked. */
+  certificate: { verificationCode: string; issuedAt: string } | null;
+  revoked: boolean;
+};
+
+/**
+ * Server-only details about whose journey this is. Never send it to the
+ * client: it carries the learner's email and internal ids.
+ */
+export type SogpJourneyContext = {
+  userId: string;
+  enrollmentId: number;
+  enrollmentStatus: SogpEnrollmentStatus;
+  cohortId: number;
+  cohortTitle: string;
+  email: string;
+  firstName: string;
+  name: string;
+  /** Weeks that already have a row in this cohort, revoked ones included. */
+  existingWeeks: Set<number>;
+};
+
+/**
+ * Read-only. The reminder dispatcher, discipleship pages and admin completion
+ * load other people's journeys through it, so it must never award or notify.
+ */
 export async function getActiveSogpJourney(
   userId: string,
   now = new Date(),
 ): Promise<SogpJourneyData | null> {
+  return (await getActiveSogpJourneyWithContext(userId, now))?.journey ?? null;
+}
+
+export async function getActiveSogpJourneyWithContext(
+  userId: string,
+  now = new Date(),
+): Promise<{ journey: SogpJourneyData; context: SogpJourneyContext } | null> {
   const dashboard = await getSogpDashboardData(userId);
   if (!dashboard) return null;
 
@@ -529,7 +587,7 @@ export async function getActiveSogpJourney(
   const requiredReviewIds = dashboard.liveClasses
     .filter((item) => item.isRequired && item.status !== "cancelled")
     .map((item) => item.id);
-  const [prayerRows, submissionRows, reviewRows] = await Promise.all([
+  const [prayerRows, submissionRows, reviewRows, weekCertificateRows] = await Promise.all([
     db
       .select({ dateKey: schema.prayerWatchAttendance.attendedDate })
       .from(schema.prayerWatchAttendance)
@@ -569,6 +627,20 @@ export async function getActiveSogpJourney(
             ),
           )
       : Promise.resolve([]),
+    db
+      .select({
+        week: schema.sogpWeekCertificates.week,
+        verificationCode: schema.sogpWeekCertificates.verificationCode,
+        issuedAt: schema.sogpWeekCertificates.issuedAt,
+        revokedAt: schema.sogpWeekCertificates.revokedAt,
+      })
+      .from(schema.sogpWeekCertificates)
+      .where(
+        and(
+          eq(schema.sogpWeekCertificates.enrollmentId, dashboard.enrollment.id),
+          eq(schema.sogpWeekCertificates.cohortId, dashboard.cohort.id),
+        ),
+      ),
   ]);
 
   const prayerDates = new Set(prayerRows.map((row) => row.dateKey));
@@ -598,6 +670,22 @@ export async function getActiveSogpJourney(
   });
   const requiredReviews = dashboard.liveClasses.filter(
     (item) => item.isRequired && item.status !== "cancelled",
+  );
+  const weekSummaries = summarizeSogpWeekAwards({
+    dateKeys,
+    tracks: requiredTracks.map((track) => ({
+      curriculumLevel: track.curriculumLevel,
+      assessmentComplete: assessmentCompleteByTrack.get(track.id) ?? false,
+    })),
+    prayerDateKeys: prayerDates,
+    reviews: requiredReviews.map((review) => ({
+      dateKey: toLagosDateKey(review.startsAt),
+      complete: reviewCompletion.has(review.id),
+    })),
+    policy: dashboard.cohort.assessmentPolicy,
+  });
+  const weekCertificates = new Map(
+    weekCertificateRows.map((row) => [row.week, row]),
   );
   const eligibility = calculateSogpEligibility({
     completedTracks: coreCompleted,
@@ -683,7 +771,7 @@ export async function getActiveSogpJourney(
     };
   });
 
-  return {
+  const journey: SogpJourneyData = {
     generatedAt: now.toISOString(),
     todayKey,
     enrollment: { name: dashboard.enrollment.name },
@@ -715,6 +803,46 @@ export async function getActiveSogpJourney(
       reviewsCompleted: reviewCompletion.size,
       reviewsTotal: requiredReviews.length,
       eligible: eligibility.eligible,
+    },
+    certificates: {
+      policy: dashboard.cohort.assessmentPolicy,
+      weeks: weekSummaries.map((summary) => {
+        const row = weekCertificates.get(summary.week);
+        return {
+          ...summary,
+          title: getSogpLevel(summary.week).title,
+          certificate:
+            row && !row.revokedAt
+              ? {
+                  verificationCode: row.verificationCode,
+                  issuedAt: row.issuedAt.toISOString(),
+                }
+              : null,
+          revoked: Boolean(row?.revokedAt),
+        };
+      }),
+      final:
+        dashboard.certificate && !dashboard.certificate.revokedAt
+          ? {
+              verificationCode: dashboard.certificate.verificationCode,
+              issuedAt: new Date(dashboard.certificate.issuedAt).toISOString(),
+            }
+          : null,
+    },
+  };
+
+  return {
+    journey,
+    context: {
+      userId,
+      enrollmentId: dashboard.enrollment.id,
+      enrollmentStatus: dashboard.enrollment.status,
+      cohortId: dashboard.cohort.id,
+      cohortTitle: dashboard.cohort.title,
+      email: dashboard.enrollment.email,
+      firstName: dashboard.enrollment.firstName,
+      name: dashboard.enrollment.name,
+      existingWeeks: new Set(weekCertificateRows.map((row) => row.week)),
     },
   };
 }

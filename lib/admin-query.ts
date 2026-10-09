@@ -90,6 +90,13 @@ export type AdminSogpData = {
     issuedAt: string;
     revokedAt: string | null;
   }>;
+  weekCertificates: Array<{
+    enrollmentId: number;
+    cohortId: number;
+    week: number;
+    issuedAt: string;
+    revokedAt: string | null;
+  }>;
   preparationDays: Array<{
     id: number;
     cohortId: number;

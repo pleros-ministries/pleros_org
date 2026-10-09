@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { getAppSession } from "@/lib/app-session";
 import { setSogpMorningPrayerComplete } from "@/lib/db/queries/sogp-journey";
+import { scheduleSogpWeekCertificateCheck } from "@/lib/sogp/week-certificate-side-effects";
 
 export async function POST(request: Request) {
   const session = await getAppSession();
@@ -11,13 +12,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid Prayer Watch request" }, { status: 400 });
   }
   try {
-    return NextResponse.json(
-      await setSogpMorningPrayerComplete({
-        userId: session.user.id,
-        dateKey: body.dateKey,
-        complete: body.complete,
-      }),
-    );
+    const result = await setSogpMorningPrayerComplete({
+      userId: session.user.id,
+      dateKey: body.dateKey,
+      complete: body.complete,
+    });
+    if (body.complete) scheduleSogpWeekCertificateCheck(session.user.id);
+    return NextResponse.json(result);
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Prayer Watch could not be saved" },

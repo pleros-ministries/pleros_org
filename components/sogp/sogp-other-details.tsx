@@ -8,6 +8,7 @@ import type { SogpJourneyData } from "@/lib/db/queries/sogp-journey";
 import { usePushSubscription } from "@/lib/push/use-push";
 
 import { LeaderboardWidget } from "./leaderboard-widget";
+import { SogpCertificatesCard } from "./sogp-certificates-card";
 import { ShareLearningProgressDialog } from "./share-learning-progress-dialog";
 
 function progressPercent(completed: number, total: number) {
@@ -142,6 +143,8 @@ export function SogpOtherDetails({
             </div>
           ))}
         </div>
+
+        <SogpCertificatesCard data={data} preview={preview} />
 
         <DetailRow
           title="Invite friends"

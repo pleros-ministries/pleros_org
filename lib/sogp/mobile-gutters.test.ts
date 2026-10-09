@@ -12,6 +12,7 @@ const files = [
   "components/sogp/sogp-quiz.tsx",
   "components/sogp/sogp-written-response.tsx",
   "app/(site)/dashboard/sogp/certificate/page.tsx",
+  "components/sogp/sogp-certificates-page.tsx",
 ];
 
 test("every SOGP page shell applies responsive horizontal gutters", () => {

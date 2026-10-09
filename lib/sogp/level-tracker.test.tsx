@@ -13,3 +13,15 @@ test("keeps level tracking collapsed on mobile and visible in the desktop sideba
   expect(html).toMatch(/class="[^"]*\bhidden\b[^"]*\blg:grid\b/);
   expect(html.match(/Level [1-4]/g)).toHaveLength(4);
 });
+
+test("marks a level whose week certificate has been earned", () => {
+  const html = renderToStaticMarkup(
+    <SogpLevelTracker
+      levels={sogpPreviewData.levels}
+      certificates={sogpPreviewData.certificates.weeks}
+    />,
+  );
+
+  expect(html.match(/Week certificate earned/g)).toHaveLength(1);
+  expect(html.match(/Level [1-4]/g)).toHaveLength(4);
+});

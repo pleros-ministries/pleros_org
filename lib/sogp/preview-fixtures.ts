@@ -13,6 +13,8 @@ import {
 import { SOGP_LEVELS, SOGP_TRACKS } from "./curriculum";
 import { getPreparationRequirements, getSogpDayRequirements } from "./journey";
 import { buildPreSogpSeed } from "./preparation-seed";
+import { DEFAULT_SOGP_ASSESSMENT_POLICY } from "./types";
+import { summarizeSogpWeekAwards } from "./week-certificates";
 
 const cohortStartsAt = new Date("2026-09-14T06:00:00+01:00");
 const cohortEndsAt = new Date("2026-10-11T20:00:00+01:00");
@@ -182,6 +184,38 @@ export const sogpPreviewData: SogpJourneyData = {
     reviewsCompleted: 1,
     reviewsTotal: 4,
     eligible: false,
+  },
+  certificates: {
+    policy: DEFAULT_SOGP_ASSESSMENT_POLICY,
+    weeks: summarizeSogpWeekAwards({
+      dateKeys: sogpDates,
+      tracks: sogpDays.flatMap((day) =>
+        day.track
+          ? [{
+              curriculumLevel: day.track.curriculumLevel,
+              assessmentComplete: day.track.assessmentComplete,
+            }]
+          : [],
+      ),
+      prayerDateKeys: new Set(
+        sogpDays.filter((day) => day.prayerWatchComplete).map((day) => day.dateKey),
+      ),
+      reviews: sogpDays.flatMap((day) =>
+        day.review ? [{ dateKey: day.dateKey, complete: day.review.complete }] : [],
+      ),
+      policy: DEFAULT_SOGP_ASSESSMENT_POLICY,
+    }).map((summary) => ({
+      ...summary,
+      title: SOGP_LEVELS[summary.week - 1]!.title,
+      certificate: summary.week === 1
+        ? {
+            verificationCode: "SOGP-W1-PREVIEW00000",
+            issuedAt: "2026-09-19T19:30:00.000Z",
+          }
+        : null,
+      revoked: false,
+    })),
+    final: null,
   },
 };
 

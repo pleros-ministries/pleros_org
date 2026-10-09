@@ -351,6 +351,13 @@
       "when": 1791517447638,
       "tag": "0049_podcast_journeys",
       "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1791535017443,
+      "tag": "0050_sogp_week_certificates",
+      "breakpoints": true
     }
   ]
 }

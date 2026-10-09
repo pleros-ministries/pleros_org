@@ -5,7 +5,10 @@ import {
   getSogpCertificateByCode,
   getSogpCertificateOwner,
 } from "@/lib/db/queries/sogp-completion";
-import { generateSogpCertificatePdf } from "@/lib/certificate/sogp-generate";
+import {
+  formatSogpCertificateDate,
+  generateSogpCertificatePdf,
+} from "@/lib/certificate/sogp-generate";
 
 export async function GET(
   _request: Request,
@@ -25,12 +28,7 @@ export async function GET(
   const pdf = await generateSogpCertificatePdf({
     studentName: owner.enrollment.name,
     cohortTitle: owner.cohort.title,
-    issuedAt: new Intl.DateTimeFormat("en-NG", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-      timeZone: "Africa/Lagos",
-    }).format(certificate.issuedAt),
+    issuedAt: formatSogpCertificateDate(certificate.issuedAt),
     verificationCode: certificate.verificationCode,
   });
   return new NextResponse(new Uint8Array(pdf), {

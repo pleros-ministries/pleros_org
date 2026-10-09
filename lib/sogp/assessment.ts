@@ -5,7 +5,8 @@ import type {
 } from "./types";
 import { DEFAULT_SOGP_ASSESSMENT_POLICY } from "./types";
 
-function percent(part: number, whole: number) {
+/** Whole-number percentage, rounded as every SOGP certificate rule compares it. */
+export function percent(part: number, whole: number) {
   if (whole <= 0) return 0;
   return Math.round((Math.max(part, 0) / whole) * 100);
 }

@@ -11,7 +11,9 @@ export type SogpAnalyticsEvent =
   | "sogp_track_started"
   | "sogp_track_completed"
   | "sogp_live_class_opened"
-  | "sogp_certificate_issued";
+  | "sogp_certificate_issued"
+  | "sogp_week_certificate_downloaded"
+  | "sogp_week_certificate_shared";
 
 const BLOCKED_KEYS = new Set([
   "name",

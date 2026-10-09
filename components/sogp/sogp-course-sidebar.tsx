@@ -28,7 +28,7 @@ export function SogpCourseSidebar({
       </section>
 
       <div className="hidden lg:block">
-        <SogpLevelTracker levels={data.levels} />
+        <SogpLevelTracker levels={data.levels} certificates={data.certificates.weeks} />
       </div>
 
       <SogpCourseOutline

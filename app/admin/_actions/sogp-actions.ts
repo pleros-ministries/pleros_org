@@ -5,6 +5,7 @@ import { and, eq, inArray, notInArray } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 import { requireAdmin } from "@/lib/auth/require-role";
+import { scheduleSogpWeekCertificateCheck } from "@/lib/sogp/week-certificate-side-effects";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
 import { transactionDb } from "@/lib/db/transaction";
@@ -564,6 +565,7 @@ export async function correctSogpPrayerCompletion(input: {
     dateKey: input.dateKey,
     complete: input.complete,
   });
+  if (input.complete) scheduleSogpWeekCertificateCheck(enrollment.userId);
   revalidatePath("/admin/sogp");
   return { error: null as string | null, ...result };
 }
@@ -584,6 +586,7 @@ export async function correctSogpReviewCompletion(input: {
     complete: input.complete,
     source: input.source,
   });
+  if (input.complete) scheduleSogpWeekCertificateCheck(enrollment.userId);
   revalidatePath("/admin/sogp");
   return { error: null as string | null, ...result };
 }

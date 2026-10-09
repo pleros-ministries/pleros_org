@@ -88,6 +88,7 @@ describe("SOGP dashboard previews", () => {
     expect(sogpOtherDetails).toContain("bg-[var(--color-brand-sky-soft)]");
     expect(sogpOtherDetails).toContain("Other details");
     expect(sogpOtherDetails).toContain("Course progress");
+    expect(sogpOtherDetails).toContain("<SogpCertificatesCard");
     expect(sogpOtherDetails).toContain("Invite friends");
     expect(sogpOtherDetails).toContain("Share what you learnt today");
     expect(sogpOtherDetails).toContain("Prayer Watch reminder");

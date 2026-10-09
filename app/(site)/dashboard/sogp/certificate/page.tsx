@@ -1,14 +1,66 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Award, Download } from "lucide-react";
 
+import { SogpCertificatesPage } from "@/components/sogp/sogp-certificates-page";
 import { getAppSession } from "@/lib/app-session";
-import { getSogpDashboardData } from "@/lib/db/queries/sogp";
+import { getActiveSogpJourneyWithContext } from "@/lib/db/queries/sogp-journey";
+import {
+  getSogpCertificateShareUrl,
+  listSogpCertificatesForUser,
+} from "@/lib/db/queries/sogp-week-certificates";
+import { getSogpLevel } from "@/lib/sogp/curriculum";
+import { isSogpWeekNumber } from "@/lib/sogp/week-certificates";
 
+/**
+ * Every certificate the learner has: one per completed week of the current
+ * cohort, the final certificate, and any from earlier cohorts. Read-only;
+ * week certificates are awarded when the SOGP dashboard loads or after a
+ * learner completes something.
+ */
 export default async function SogpCertificatePage() {
   const session = await getAppSession();
-  if (!session) redirect("/sogp/enrol");
-  const data = await getSogpDashboardData(session.user.id);
-  if (!data?.certificate || data.certificate.revokedAt) redirect("/dashboard/sogp");
-  return <section className="site-shell-page sogp-shell-page grid min-h-[60vh] place-items-center py-16"><div className="grid max-w-xl justify-items-center gap-5 rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white p-8 text-center shadow-[var(--shadow-md)]"><span className="grid size-16 place-items-center rounded-full bg-[var(--color-brand-lime)]"><Award className="size-8 text-[var(--color-brand-blue)]"/></span><div className="grid gap-2"><p className="site-hero-eyebrow justify-center">School of God&apos;s Purpose</p><h1 className="site-section-heading text-3xl">Your certificate is ready</h1><p className="text-sm leading-[1.5] text-[var(--color-text-muted)]">Celebrate your completion and keep your digital certificate.</p></div><a href={`/api/sogp/certificate/${data.certificate.verificationCode}`} className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--color-brand-blue)] px-5 text-sm font-semibold text-white"><Download className="size-4"/> Download certificate</a><Link href="/dashboard/sogp" className="text-xs font-semibold text-[var(--color-text-muted)]">Back to SOGP</Link></div></section>;
+  if (!session) redirect("/login?returnTo=/dashboard/sogp/certificate");
+  const [loaded, all] = await Promise.all([
+    getActiveSogpJourneyWithContext(session.user.id),
+    listSogpCertificatesForUser(session.user.id),
+  ]);
+  if (!loaded) redirect("/sogp/enrol");
+
+  const { journey, context } = loaded;
+  const shareUrl = await getSogpCertificateShareUrl(context.enrollmentId);
+  const currentFinal = journey.certificates.final?.verificationCode;
+
+  return (
+    <SogpCertificatesPage
+      data={{
+        cohortTitle: context.cohortTitle,
+        todayKey: journey.todayKey,
+        policy: journey.certificates.policy,
+        weeks: journey.certificates.weeks,
+        final: journey.certificates.final,
+        earlier: {
+          weeks: all.weeks
+            .filter((item) => item.cohortId !== context.cohortId)
+            .flatMap((item) =>
+              isSogpWeekNumber(item.week)
+                ? [{
+                    cohortTitle: item.cohortTitle,
+                    week: item.week,
+                    title: getSogpLevel(item.week).title,
+                    verificationCode: item.verificationCode,
+                    issuedAt: item.issuedAt.toISOString(),
+                  }]
+                : [],
+            ),
+          finals: all.finals
+            .filter((item) => item.verificationCode !== currentFinal)
+            .map((item) => ({
+              cohortTitle: item.cohortTitle,
+              verificationCode: item.verificationCode,
+              issuedAt: item.issuedAt.toISOString(),
+            })),
+        },
+        shareUrl,
+      }}
+    />
+  );
 }

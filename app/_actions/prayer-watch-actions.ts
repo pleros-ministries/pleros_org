@@ -11,6 +11,7 @@ import {
 } from "@/lib/db/queries/prayer-watch";
 import { isValidPrayerWatchDateKey, toDateKey } from "@/lib/prayer-watch";
 import { isPrayerWatchSession } from "@/lib/prayer-watch-session";
+import { scheduleSogpWeekCertificateCheck } from "@/lib/sogp/week-certificate-side-effects";
 
 export type PrayerWatchActionState = {
   error: string | null;
@@ -44,6 +45,8 @@ export async function togglePrayerWatchAttendanceAction(
     await removePrayerWatchAttendance(session.user.id, dateKey, sessionId);
   } else {
     await logPrayerWatchAttendance(session.user.id, dateKey, sessionId);
+    // Morning Prayer Watch counts towards SOGP week certificates.
+    if (sessionId === "morning") scheduleSogpWeekCertificateCheck(session.user.id);
   }
 
   revalidatePath("/dashboard/prayer-watch");

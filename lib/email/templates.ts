@@ -681,6 +681,52 @@ export function plerosReplyHtml({ url }: { url: string }): string {
   });
 }
 
+type SogpWeekCertificateEmailProps = {
+  firstName: string;
+  weeks: Array<{ week: number; title: string }>;
+  url: string;
+};
+
+function formatWeekNumbers(weeks: number[]): string {
+  const sorted = [...weeks].sort((a, b) => a - b).map(String);
+  return sorted.length <= 1
+    ? sorted.join("")
+    : `${sorted.slice(0, -1).join(", ")} and ${sorted.at(-1)}`;
+}
+
+export function sogpWeekCertificateSubject(weeks: number[]): string {
+  return weeks.length === 1
+    ? `Your SOGP Week ${weeks[0]} certificate is ready`
+    : `Your SOGP Week ${formatWeekNumbers(weeks)} certificates are ready`;
+}
+
+/** Congratulates a learner on one or more completed SOGP weeks. */
+export function sogpWeekCertificateHtml({
+  firstName,
+  weeks,
+  url,
+}: SogpWeekCertificateEmailProps): string {
+  const sorted = [...weeks].sort((a, b) => a.week - b.week);
+  const numbers = formatWeekNumbers(sorted.map((item) => item.week));
+  const greeting = firstName.trim()
+    ? `Well done, ${escapeHtml(firstName.trim())}.`
+    : "Well done.";
+  const completed =
+    sorted.length === 1
+      ? `You completed every teaching in Week ${sorted[0]!.week}: ${escapeHtml(sorted[0]!.title)}, and kept up with Prayer Watch and the daily reviews. Your certificate is ready to download and share.`
+      : `You completed every teaching in Weeks ${numbers}, and kept up with Prayer Watch and the daily reviews. Your certificates are ready to download and share.`;
+  return brandedAuthEmailHtml({
+    eyebrow: "School of God's Purpose",
+    title: sorted.length === 1 ? `Week ${numbers} complete` : `Weeks ${numbers} complete`,
+    contentHtml: `<p style="font-family:'Be Vietnam Pro',Arial,Helvetica,sans-serif; font-size:16px; line-height:1.65; font-weight:400; margin:0 0 24px;">${greeting} ${completed}</p>`,
+    action: {
+      label: "View your certificates",
+      url: escapeHtml(url),
+    },
+    note: "Keep going. Your final SOGP certificate follows when you complete the course.",
+  });
+}
+
 export function contactSubmissionNotificationHtml({
   fullName,
   email,

@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { BellIcon } from "lucide-react";
 
 import { communityKeys } from "@/lib/community/query-keys";
+import { describeSogpWeekCertificates } from "@/lib/sogp/week-certificates";
 import { markCommunityNotificationsRead } from "@/app/(site)/dashboard/community/_actions/leader-actions";
 
 type Notification = {
@@ -70,6 +71,16 @@ function summarise(n: Notification): string {
       return `You are now a member of ${(n.payload.groupName as string) ?? "the group"}`;
     case "pleros_reply":
       return "Pleros replied to your question";
+    case "sogp_week_certificate": {
+      const weeks = Array.isArray(n.payload.weeks)
+        ? (n.payload.weeks as unknown[]).filter(
+            (week): week is number => typeof week === "number",
+          )
+        : [];
+      return weeks.length
+        ? `You earned your ${describeSogpWeekCertificates(weeks)}`
+        : "You earned a SOGP certificate";
+    }
     default:
       return "Community update";
   }

@@ -1,15 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDownIcon } from "lucide-react";
+import { AwardIcon, ChevronDownIcon } from "lucide-react";
 
 import type { SogpJourneyData } from "@/lib/db/queries/sogp-journey";
 
 export function SogpLevelTracker({
   levels,
+  certificates,
   defaultExpanded = false,
 }: {
   levels: SogpJourneyData["levels"];
+  /** Week N's certificate belongs to level N. */
+  certificates?: SogpJourneyData["certificates"]["weeks"];
   defaultExpanded?: boolean;
 }) {
   const [expanded, setExpanded] = useState(defaultExpanded);
@@ -42,6 +45,12 @@ export function SogpLevelTracker({
                 <span className="inline-flex items-center gap-2">
                   <span className={`size-2 rounded-full ${markerClass}`} />
                   <strong className="ppc-heading text-xs font-semibold text-zinc-900">Level {level.level}</strong>
+                  {certificates?.find((week) => week.week === level.level)?.certificate ? (
+                    <span className="grid size-4 place-items-center rounded-full bg-[var(--color-brand-lime)]">
+                      <AwardIcon className="size-2.5 text-[var(--color-brand-blue)]" strokeWidth={2.4} aria-hidden />
+                      <span className="sr-only">Week certificate earned</span>
+                    </span>
+                  ) : null}
                 </span>
                 <span className="text-[0.6rem] font-semibold uppercase tracking-[0.06em] text-zinc-400">{level.status.replaceAll("_", " ")}</span>
               </div>

@@ -50,6 +50,13 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 24,
   },
+  weekTitle: {
+    fontSize: 18,
+    fontWeight: 700,
+    color: "#061056",
+    marginTop: 10,
+    marginBottom: 14,
+  },
   verification: { fontSize: 9, color: "#7d889c", marginTop: 26 },
   accent: { width: 72, height: 5, backgroundColor: "#cbe96b", marginBottom: 28 },
 });
@@ -61,7 +68,14 @@ type SogpCertificateProps = {
   verificationCode: string;
 };
 
-function SogpCertificateDocument(props: SogpCertificateProps) {
+type SogpCertificateVariant =
+  | { kind: "completion" }
+  | { kind: "week"; week: number; weekTitle: string };
+
+function SogpCertificateDocument({
+  variant = { kind: "completion" },
+  ...props
+}: SogpCertificateProps & { variant?: SogpCertificateVariant }) {
   return (
     <Document>
       <Page size="A4" orientation="landscape" style={styles.page}>
@@ -69,11 +83,27 @@ function SogpCertificateDocument(props: SogpCertificateProps) {
           <Text style={styles.eyebrow}>Pleros Ministries and Missions</Text>
           <Text style={styles.title}>School of God&apos;s Purpose</Text>
           <View style={styles.accent} />
-          <Text style={styles.subtitle}>Certificate of Completion</Text>
+          <Text style={styles.subtitle}>
+            {variant.kind === "week"
+              ? `Week ${variant.week} certificate`
+              : "Certificate of Completion"}
+          </Text>
           <Text style={styles.detail}>This certifies that</Text>
           <Text style={styles.name}>{props.studentName}</Text>
-          <Text style={styles.detail}>completed the four-week SOGP curriculum</Text>
-          <Text style={styles.cohort}>{props.cohortTitle}</Text>
+          {variant.kind === "week" ? (
+            <>
+              <Text style={styles.detail}>
+                completed Week {variant.week} of the School of God&apos;s Purpose
+              </Text>
+              <Text style={styles.weekTitle}>{variant.weekTitle}</Text>
+              <Text style={styles.detail}>{props.cohortTitle}</Text>
+            </>
+          ) : (
+            <>
+              <Text style={styles.detail}>completed the four-week SOGP curriculum</Text>
+              <Text style={styles.cohort}>{props.cohortTitle}</Text>
+            </>
+          )}
           <Text style={styles.detail}>Issued {props.issuedAt}</Text>
           <Text style={styles.verification}>Verification: {props.verificationCode}</Text>
         </View>
@@ -85,4 +115,24 @@ function SogpCertificateDocument(props: SogpCertificateProps) {
 export async function generateSogpCertificatePdf(props: SogpCertificateProps) {
   const buffer = await renderToBuffer(<SogpCertificateDocument {...props} />);
   return Buffer.from(buffer);
+}
+
+export async function generateSogpWeekCertificatePdf(
+  props: SogpCertificateProps & { week: number; weekTitle: string },
+) {
+  const { week, weekTitle, ...rest } = props;
+  const buffer = await renderToBuffer(
+    <SogpCertificateDocument {...rest} variant={{ kind: "week", week, weekTitle }} />,
+  );
+  return Buffer.from(buffer);
+}
+
+/** The issue date as every SOGP certificate prints it, in Lagos time. */
+export function formatSogpCertificateDate(date: Date) {
+  return new Intl.DateTimeFormat("en-NG", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "Africa/Lagos",
+  }).format(date);
 }

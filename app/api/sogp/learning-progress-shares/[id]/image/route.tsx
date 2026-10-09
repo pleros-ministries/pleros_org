@@ -1,6 +1,3 @@
-import { readFile } from "node:fs/promises";
-import { join } from "node:path";
-
 import { ImageResponse } from "next/og";
 import type { ReactElement } from "react";
 import { NextResponse } from "next/server";
@@ -22,69 +19,17 @@ import {
   getLearningProgressShareInitials,
   getLearningProgressTeachingLabel,
 } from "@/lib/sogp/learning-progress-share";
+import {
+  getCardFonts,
+  getDarkLogoDataUri,
+  getPatternDataUri,
+  getWhiteLogoDataUri,
+} from "@/lib/sogp/share-card-assets";
+import { Avatar, CardHeader, Divider, VisitBar } from "@/lib/sogp/share-card-parts";
 
 export const runtime = "nodejs";
 
 const SIZE = { width: 1080, height: 1080 };
-
-function loadDataUri(relativePath: string): Promise<string> {
-  return readFile(join(process.cwd(), relativePath)).then(
-    (buffer) => `data:image/png;base64,${buffer.toString("base64")}`,
-  );
-}
-
-let patternDataUriPromise: Promise<string> | null = null;
-function getPatternDataUri(): Promise<string> {
-  if (!patternDataUriPromise) {
-    patternDataUriPromise = loadDataUri("public/site/sogp/share-card-pattern.png");
-  }
-  return patternDataUriPromise;
-}
-
-let darkLogoDataUriPromise: Promise<string> | null = null;
-function getDarkLogoDataUri(): Promise<string> {
-  if (!darkLogoDataUriPromise) {
-    darkLogoDataUriPromise = loadDataUri("public/site/sogp/pleros-logo-dark.png");
-  }
-  return darkLogoDataUriPromise;
-}
-
-let whiteLogoDataUriPromise: Promise<string> | null = null;
-function getWhiteLogoDataUri(): Promise<string> {
-  if (!whiteLogoDataUriPromise) {
-    whiteLogoDataUriPromise = loadDataUri("public/site/sogp/pleros-logo-white.png");
-  }
-  return whiteLogoDataUriPromise;
-}
-
-function loadFontFile(relativePath: string): Promise<Buffer> {
-  return readFile(join(process.cwd(), relativePath));
-}
-
-let cardFontsPromise: ReturnType<typeof buildCardFonts> | null = null;
-function buildCardFonts() {
-  return Promise.all([
-    loadFontFile("public/fonts/sogp-share/Poppins-Medium.ttf"),
-    loadFontFile("public/fonts/sogp-share/Poppins-SemiBold.ttf"),
-    loadFontFile("public/fonts/sogp-share/Poppins-Bold.ttf"),
-    loadFontFile("public/fonts/sogp-share/Newsreader-Medium.ttf"),
-    loadFontFile("public/fonts/sogp-share/Newsreader-MediumItalic.ttf"),
-  ]).then(
-    ([poppinsMedium, poppinsSemiBold, poppinsBold, newsreaderMedium, newsreaderMediumItalic]) => [
-      { name: SANS, data: poppinsMedium, weight: 500 as const, style: "normal" as const },
-      { name: SANS, data: poppinsSemiBold, weight: 600 as const, style: "normal" as const },
-      { name: SANS, data: poppinsBold, weight: 700 as const, style: "normal" as const },
-      { name: SERIF, data: newsreaderMedium, weight: 500 as const, style: "normal" as const },
-      { name: SERIF, data: newsreaderMediumItalic, weight: 500 as const, style: "italic" as const },
-    ],
-  );
-}
-function getCardFonts() {
-  if (!cardFontsPromise) {
-    cardFontsPromise = buildCardFonts();
-  }
-  return cardFontsPromise;
-}
 
 type ShareRenderData = {
   quote: string;
@@ -104,62 +49,6 @@ function getQuoteFontSize(quote: string, base: number, min: number): number {
   if (length <= 90) return Math.round(base * 0.85);
   if (length <= 120) return Math.round(base * 0.72);
   return min;
-}
-
-function ArrowIcon({ color }: { color: string }) {
-  return (
-    <svg
-      width={40}
-      height={40}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke={color}
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <line x1={4} y1={12} x2={19} y2={12} />
-      <polyline points="12 5 19 12 12 19" />
-    </svg>
-  );
-}
-
-function CardHeader({ tone, logoSrc }: { tone: "light" | "dark"; logoSrc: string }) {
-  const color = tone === "light" ? NAVY : "#FFFFFF";
-  return (
-    <div
-      style={{
-        display: "flex",
-        width: "100%",
-        alignItems: "flex-start",
-        justifyContent: "space-between",
-        gap: 32,
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          fontFamily: SANS,
-          fontWeight: 700,
-          fontSize: 30,
-          lineHeight: 1.16,
-          letterSpacing: "0.01em",
-          textTransform: "uppercase",
-          color,
-        }}
-      >
-        <span>School of</span>
-        <span>God&rsquo;s Purpose</span>
-      </div>
-      {/* eslint-disable-next-line @next/next/no-img-element -- satori (ImageResponse) requires a plain <img>, not next/image */}
-      <img src={logoSrc} height={72} alt="" />
-    </div>
-  );
-}
-
-function Divider({ color }: { color: string }) {
-  return <div style={{ display: "flex", width: "100%", height: 1, background: color }} />;
 }
 
 function DayBadge({
@@ -246,64 +135,6 @@ function WhatILearntRow({ labelColor, lineColor }: { labelColor: string; lineCol
         What I learnt
       </span>
       <span style={{ display: "flex", flexGrow: 1, height: 1, backgroundColor: lineColor }} />
-    </div>
-  );
-}
-
-function Avatar({ bg, color, initials }: { bg: string; color: string; initials: string }) {
-  return (
-    <span
-      style={{
-        display: "flex",
-        width: 52,
-        height: 52,
-        flexShrink: 0,
-        borderRadius: 999,
-        backgroundColor: bg,
-        color,
-        alignItems: "center",
-        justifyContent: "center",
-        fontFamily: SANS,
-        fontWeight: 600,
-        fontSize: 19,
-        letterSpacing: "0.02em",
-      }}
-    >
-      {initials}
-    </span>
-  );
-}
-
-function VisitBar({
-  bg,
-  color,
-  marginTop,
-  shadow,
-}: {
-  bg: string;
-  color: string;
-  marginTop: number;
-  shadow?: string;
-}) {
-  return (
-    <div
-      style={{
-        display: "flex",
-        marginTop,
-        height: 96,
-        flexShrink: 0,
-        borderRadius: 24,
-        backgroundColor: bg,
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "0 40px",
-        ...(shadow ? { boxShadow: shadow } : {}),
-      }}
-    >
-      <span style={{ fontFamily: SANS, fontWeight: 600, fontSize: 32, letterSpacing: "0.005em", color }}>
-        Visit pleros.org/sogp
-      </span>
-      <ArrowIcon color={color} />
     </div>
   );
 }

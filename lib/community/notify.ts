@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { listUsersWithCommunityPushOff } from "@/lib/db/queries/notification-preferences";
 import * as schema from "@/lib/db/schema";
 import { sendPushToUser } from "@/lib/push/send";
+import { sogpWeekCertificatePushBody } from "@/lib/sogp/week-certificates";
 
 type Kind =
   | "official_post"
@@ -25,7 +26,8 @@ type Kind =
   | "discipleship_post"
   | "group_join_request"
   | "group_join_approved"
-  | "pleros_reply";
+  | "pleros_reply"
+  | "sogp_week_certificate";
 
 const PUSH_COPY: Record<Kind, { title: string }> = {
   official_post: { title: "New Pleros update" },
@@ -48,6 +50,7 @@ const PUSH_COPY: Record<Kind, { title: string }> = {
   group_join_request: { title: "Someone asked to join your group" },
   group_join_approved: { title: "You're in" },
   pleros_reply: { title: "Pleros replied" },
+  sogp_week_certificate: { title: "Certificate earned" },
 };
 
 /**
@@ -96,6 +99,20 @@ export async function notify(input: {
         ),
     );
   }
+}
+
+/** One notice for every SOGP week certificate a learner has just earned. */
+export async function notifySogpWeekCertificates(input: {
+  userId: string;
+  weeks: number[];
+}) {
+  await notify({
+    userIds: [input.userId],
+    kind: "sogp_week_certificate",
+    payload: { weeks: input.weeks },
+    pushBody: sogpWeekCertificatePushBody(input.weeks),
+    pushUrl: "/dashboard/sogp/certificate",
+  });
 }
 
 /** Fan a new global post out to every enrolled learner. */

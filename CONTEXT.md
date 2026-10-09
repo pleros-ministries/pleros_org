@@ -32,6 +32,12 @@ Prayer Watch or review participation used for certification but not for level
 unlocking.
 _Avoid_: Assessment, track completion
 
+**Week certificate**:
+The certificate a learner earns for completing one SOGP week, before the final
+cohort certificate. Week N is SOGP level N and the cohort's Nth Monday-to-Sunday
+block of dates; "week" is the learner-facing name for this certificate only.
+_Avoid_: Level certificate, badge
+
 **Pre-SOGP**:
 The 14-day preparation journey immediately before a learner's SOGP cohort.
 _Avoid_: SOGP Level 0

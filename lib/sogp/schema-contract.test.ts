@@ -10,6 +10,8 @@ import {
   sogpPreparationDays,
   sogpPreparationResources,
   sogpRewardGrants,
+  sogpWeekCertificates,
+  communityNotificationKindEnum,
   prayerWatchAttendance,
   units,
   unitMembers,
@@ -54,6 +56,15 @@ describe("SOGP schema", () => {
     expect(sogpPreparationResources).toBeDefined();
     expect(sogpCertificates).toBeDefined();
     expect(sogpRewardGrants).toBeDefined();
+  });
+
+  test("keeps one week certificate per enrolment, cohort and week", () => {
+    expect(sogpWeekCertificates.enrollmentId).toBeDefined();
+    expect(sogpWeekCertificates.cohortId).toBeDefined();
+    expect(sogpWeekCertificates.week).toBeDefined();
+    expect(sogpWeekCertificates.verificationCode).toBeDefined();
+    expect(sogpWeekCertificates.revokedAt).toBeDefined();
+    expect(communityNotificationKindEnum.enumValues).toContain("sogp_week_certificate");
   });
 
   test("exports the community location-unit tables", () => {

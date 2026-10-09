@@ -378,6 +378,13 @@ export async function getAdminSogpData(): Promise<AdminSogpData> {
       issuedAt: certificate.issuedAt.toISOString(),
       revokedAt: serializeDate(certificate.revokedAt),
     })),
+    weekCertificates: data.weekCertificates.map((certificate) => ({
+      enrollmentId: certificate.enrollmentId,
+      cohortId: certificate.cohortId,
+      week: certificate.week,
+      issuedAt: certificate.issuedAt.toISOString(),
+      revokedAt: serializeDate(certificate.revokedAt),
+    })),
     preparationDays: data.preparationDays.map((day) => ({
       id: day.id,
       cohortId: day.cohortId,

@@ -8,6 +8,7 @@ import {
   submitQuizAttempt,
 } from "@/lib/db/queries/quizzes";
 import { requireSogpDayAccess } from "@/lib/sogp/server-access";
+import { scheduleSogpWeekCertificateCheck } from "@/lib/sogp/week-certificate-side-effects";
 import { canSubmitQuizAnswers } from "@/lib/student-journey";
 
 async function resolveContext(
@@ -85,6 +86,7 @@ export async function POST(
       score,
       attemptNumber: attemptCount + 1,
     });
+    if (score >= 70) scheduleSogpWeekCertificateCheck(context.session.user.id);
     return NextResponse.json({
       score,
       passed: score >= 70,

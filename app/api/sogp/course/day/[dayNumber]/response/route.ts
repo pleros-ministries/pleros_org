@@ -7,6 +7,7 @@ import {
   upsertDraft,
 } from "@/lib/db/queries/submissions";
 import { requireSogpDayAccess } from "@/lib/sogp/server-access";
+import { scheduleSogpWeekCertificateCheck } from "@/lib/sogp/week-certificate-side-effects";
 
 async function resolveContext(params: Promise<{ dayNumber: string }>) {
   const session = await getAppSession();
@@ -84,6 +85,7 @@ export async function POST(
       context.session.user.id,
       context.data.track.lesson.id,
     );
+    scheduleSogpWeekCertificateCheck(context.session.user.id);
     return NextResponse.json({ submission });
   } catch {
     return NextResponse.json({ error: "Written response is unavailable" }, { status: 403 });
