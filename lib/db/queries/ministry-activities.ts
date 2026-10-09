@@ -6,7 +6,7 @@ import { transactionDb } from "@/lib/db/transaction";
 import { CommunityError } from "@/lib/community/errors";
 import {
   ACTIVITIES_PER_DAY_MAX,
-  ACTIVITY_KINDS,
+  ALL_ACTIVITY_KINDS,
   activityKindConfig,
   type ActivityInput,
   type ActivityKind,
@@ -75,7 +75,7 @@ const sumColumns = Object.fromEntries(
 ) as Record<MinistryFieldKey, SQL<number>>;
 
 const kindCountColumns = Object.fromEntries(
-  ACTIVITY_KINDS.map((kind) => [
+  ALL_ACTIVITY_KINDS.map((kind) => [
     kind.key,
     sql<number>`count(*) filter (where ${activities.kind} = ${kind.key})::int`,
   ]),
@@ -112,7 +112,7 @@ function splitKinds<T extends Record<ActivityKind, number>>(
 ): Omit<T, ActivityKind> & { byKind: Record<ActivityKind, number> } {
   const rest: Record<string, unknown> = { ...row };
   const byKind = {} as Record<ActivityKind, number>;
-  for (const kind of ACTIVITY_KINDS) {
+  for (const kind of ALL_ACTIVITY_KINDS) {
     byKind[kind.key] = row[kind.key];
     delete rest[kind.key];
   }

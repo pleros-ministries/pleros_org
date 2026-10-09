@@ -1,4 +1,11 @@
 import type { RssEpisode } from "./anchor-rss";
+import { podcastSeries } from "./podcast-page-content";
+import {
+  getPodcastPartNumber,
+  groupPodcastEpisodesBySeries,
+  podcastSeriesId,
+  STANDALONE_PODCAST_SERIES_ID,
+} from "./podcast-progress";
 import { deriveSogpCalendarState, type SogpCalendarState } from "./sogp/calendar";
 import { toLagosDateKey } from "./sogp/formation-progress";
 
@@ -11,10 +18,80 @@ export const PODCAST_DAILY_VIEW_START_KEY = "2026-10-05";
 export type PodcastDay = {
   dateKey: string;
   state: SogpCalendarState;
-  /** The episode released that day in Lagos time; Sundays have none. */
+  /** Day N of a journey; absent on the latest-releases calendar. */
+  dayNumber?: number;
+  /**
+   * A journey day's episode, or on the latest-releases calendar the episode
+   * released that day in Lagos time (Sundays have none).
+   */
   episode: RssEpisode | null;
   episodeListened: boolean;
   prayerWatchComplete: boolean;
+};
+
+/**
+ * What a listener follows day by day, stored in `podcast_journeys.track`:
+ * the recommended Foundations plan, each new release on its day, or one
+ * series from Part 1.
+ */
+export type PodcastTrack =
+  | { kind: "foundations" }
+  | { kind: "latest" }
+  | { kind: "series"; seriesId: string };
+
+export const PODCAST_FOUNDATIONS_TRACK = "foundations";
+export const PODCAST_LATEST_TRACK = "latest";
+const PODCAST_SERIES_TRACK_PREFIX = "series:";
+
+export const PODCAST_FOUNDATIONS_TITLE = "30-day Foundations";
+export const PODCAST_LATEST_TITLE = "Latest releases";
+export const PODCAST_FOUNDATIONS_DAYS = 30;
+
+/**
+ * The recommended first journey: the Gospel, God's purpose and its pursuit,
+ * then the opening of How to Fulfil God's Purpose, one episode a day.
+ */
+export const PODCAST_FOUNDATIONS_PLAN: ReadonlyArray<{
+  title: string;
+  parts?: number;
+}> = [
+  { title: "The Place of the Gospel in Your Life" },
+  { title: "The Reality of God's Purpose" },
+  { title: "The Pursuit of God's Purpose" },
+  { title: "How to Fulfil God's Purpose", parts: 2 },
+];
+
+export type PodcastSeriesOption = {
+  id: string;
+  title: string;
+  description: string | null;
+  /** Part 1 first. */
+  episodes: RssEpisode[];
+};
+
+export type ResolvedPodcastJourney = (
+  | {
+      kind: "plan";
+      track: string;
+      title: string;
+      recommended: boolean;
+      /** Day 1 in Lagos time. */
+      startedOn: string;
+      episodes: RssEpisode[];
+    }
+  | { kind: "latest"; track: string; title: string }
+) & {
+  /** The stored choice was unavailable, so this is the next best journey. */
+  fellBack: boolean;
+};
+
+export type PodcastJourneySummary = {
+  /** Today's day number, held at the first or last day outside the journey. */
+  dayNumber: number;
+  totalDays: number;
+  listened: number;
+  /** Today is past the journey's last day. */
+  finished: boolean;
 };
 
 export type PodcastProgressSummary = {
@@ -211,5 +288,197 @@ export function summarisePodcastProgress({
       listenedGuids.has(episode.guid),
     ).length,
     episodesTotal: episodes.length,
+  };
+}
+
+export function podcastSeriesTrack(seriesId: string) {
+  return `${PODCAST_SERIES_TRACK_PREFIX}${seriesId}`;
+}
+
+/** Unknown values read as the recommended plan. */
+export function parsePodcastTrack(value: string | null | undefined): PodcastTrack {
+  if (value === PODCAST_LATEST_TRACK) return { kind: "latest" };
+  if (value?.startsWith(PODCAST_SERIES_TRACK_PREFIX)) {
+    const seriesId = value.slice(PODCAST_SERIES_TRACK_PREFIX.length);
+    if (seriesId) return { kind: "series", seriesId };
+  }
+  return { kind: "foundations" };
+}
+
+const curatedSeries = new Map<string, { title: string; description: string }>(
+  podcastSeries.map(
+    (series) =>
+      [
+        podcastSeriesId(series.title),
+        { title: series.title, description: series.description },
+      ] as const,
+  ),
+);
+
+function releaseOrder(a: RssEpisode, b: RssEpisode) {
+  return (
+    getPodcastPartNumber(a.title) - getPodcastPartNumber(b.title) ||
+    publishedTime(a) - publishedTime(b)
+  );
+}
+
+/**
+ * Every series in the feed in the order it was taught, each from Part 1.
+ * Curated titles and descriptions replace the feed's where they exist.
+ */
+export function buildPodcastSeriesCatalogue(
+  episodes: readonly RssEpisode[],
+): PodcastSeriesOption[] {
+  return groupPodcastEpisodesBySeries([...episodes])
+    .filter((group) => group.id !== STANDALONE_PODCAST_SERIES_ID)
+    .map((group) => {
+      const curated = curatedSeries.get(group.id);
+      return {
+        id: group.id,
+        title: curated?.title ?? group.title,
+        description: curated?.description ?? null,
+        episodes: [...group.episodes].sort(releaseOrder),
+      };
+    })
+    .sort(
+      (a, b) =>
+        Math.min(...a.episodes.map(publishedTime)) -
+        Math.min(...b.episodes.map(publishedTime)),
+    );
+}
+
+/** Up to 30 episodes; shorter, never broken, if the feed is missing some. */
+export function buildFoundationsPlan(
+  catalogue: readonly PodcastSeriesOption[],
+): RssEpisode[] {
+  const byId = new Map(catalogue.map((series) => [series.id, series] as const));
+
+  return PODCAST_FOUNDATIONS_PLAN.flatMap((entry) => {
+    const episodes = byId.get(podcastSeriesId(entry.title))?.episodes ?? [];
+    return entry.parts ? episodes.slice(0, entry.parts) : episodes;
+  }).slice(0, PODCAST_FOUNDATIONS_DAYS);
+}
+
+/** Whether a listener may choose this track now; used before saving it. */
+export function isPodcastTrackAvailable(
+  value: string,
+  catalogue: readonly PodcastSeriesOption[],
+) {
+  if (value === PODCAST_FOUNDATIONS_TRACK || value === PODCAST_LATEST_TRACK) {
+    return true;
+  }
+  const track = parsePodcastTrack(value);
+  return (
+    track.kind === "series" &&
+    value === podcastSeriesTrack(track.seriesId) &&
+    catalogue.some(
+      (series) => series.id === track.seriesId && series.episodes.length > 0,
+    )
+  );
+}
+
+/**
+ * Turns the stored choice into the journey to show. A series that has left
+ * the feed falls back to Foundations, and an empty Foundations (the feed is
+ * down) falls back to latest releases, whose calendar is never empty.
+ */
+export function resolvePodcastJourney({
+  track,
+  startedOn,
+  catalogue,
+}: {
+  track: string;
+  startedOn: string;
+  catalogue: readonly PodcastSeriesOption[];
+}): ResolvedPodcastJourney {
+  const parsed = parsePodcastTrack(track);
+  const latest = {
+    kind: "latest" as const,
+    track: PODCAST_LATEST_TRACK,
+    title: PODCAST_LATEST_TITLE,
+  };
+
+  if (parsed.kind === "latest") return { ...latest, fellBack: false };
+
+  if (parsed.kind === "series") {
+    const series = catalogue.find((item) => item.id === parsed.seriesId);
+    if (series?.episodes.length) {
+      return {
+        kind: "plan",
+        track: podcastSeriesTrack(series.id),
+        title: series.title,
+        recommended: false,
+        startedOn,
+        episodes: series.episodes,
+        fellBack: false,
+      };
+    }
+  }
+
+  const foundations = buildFoundationsPlan(catalogue);
+  if (foundations.length === 0) return { ...latest, fellBack: true };
+
+  return {
+    kind: "plan",
+    track: PODCAST_FOUNDATIONS_TRACK,
+    title: PODCAST_FOUNDATIONS_TITLE,
+    recommended: true,
+    startedOn,
+    episodes: foundations,
+    fellBack: parsed.kind !== "foundations",
+  };
+}
+
+/**
+ * One episode a day from the start date. Day N opens on its date; missed days
+ * stay open to catch up, and a day is complete with its episode and the
+ * morning Prayer Watch.
+ */
+export function buildPodcastJourneyDays({
+  planEpisodes,
+  startedOn,
+  todayKey,
+  listenedGuids,
+  prayerDateKeys,
+}: {
+  planEpisodes: readonly RssEpisode[];
+  startedOn: string;
+  todayKey: string;
+  listenedGuids: ReadonlySet<string>;
+  prayerDateKeys: ReadonlySet<string>;
+}): PodcastDay[] {
+  return planEpisodes.map((episode, index) => {
+    const dateKey = addDays(startedOn, index);
+    const episodeListened = listenedGuids.has(episode.guid);
+    const prayerWatchComplete = prayerDateKeys.has(dateKey);
+
+    return {
+      dateKey,
+      dayNumber: index + 1,
+      episode,
+      episodeListened,
+      prayerWatchComplete,
+      state: deriveSogpCalendarState({
+        dateKey,
+        todayKey,
+        requirements: [episodeListened, prayerWatchComplete],
+      }),
+    };
+  });
+}
+
+export function summarisePodcastJourney(
+  days: readonly PodcastDay[],
+  todayKey: string,
+): PodcastJourneySummary {
+  const lastDay = days.at(-1);
+  const finished = lastDay ? todayKey > lastDay.dateKey : false;
+  const todayIndex = days.findIndex((day) => day.dateKey === todayKey);
+
+  return {
+    dayNumber: todayIndex >= 0 ? todayIndex + 1 : finished ? days.length : 1,
+    totalDays: days.length,
+    listened: days.filter((day) => day.episodeListened).length,
+    finished,
   };
 }

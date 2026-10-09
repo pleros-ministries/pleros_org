@@ -93,9 +93,32 @@ export function PodcastDailyTasks({
     });
   }
 
+  const weekdayDayLabel = new Intl.DateTimeFormat("en-NG", {
+    weekday: "long",
+    day: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(`${day.dateKey}T00:00:00.000Z`));
   const tasks: Array<{ key: string; complete: boolean; node: ReactNode }> = [];
 
-  if (episode) {
+  // A journey shows its upcoming episodes, but each opens on its own day.
+  if (episode && isFuture) {
+    tasks.push({
+      key: "episode",
+      complete: false,
+      node: (
+        <TaskCard
+          key="episode"
+          number={1}
+          title="Episode"
+          description={episode.title}
+          complete={false}
+          locked
+        >
+          <p className="text-xs text-zinc-500">Opens on {weekdayDayLabel}.</p>
+        </TaskCard>
+      ),
+    });
+  } else if (episode) {
     tasks.push({
       key: "episode",
       complete: day.episodeListened,
@@ -183,11 +206,6 @@ export function PodcastDailyTasks({
   });
 
   const doneCount = tasks.filter((task) => task.complete).length;
-  const weekdayDayLabel = new Intl.DateTimeFormat("en-NG", {
-    weekday: "long",
-    day: "numeric",
-    timeZone: "UTC",
-  }).format(new Date(`${day.dateKey}T00:00:00.000Z`));
   const heading = isToday ? `Today, ${weekdayDayLabel}` : weekdayDayLabel;
   // The podcast releases Monday to Saturday.
   const isSunday = new Date(`${day.dateKey}T00:00:00.000Z`).getUTCDay() === 0;
@@ -208,6 +226,7 @@ export function PodcastDailyTasks({
         </span>
       </div>
       <p className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-zinc-400">
+        {day.dayNumber ? `Day ${day.dayNumber} · ` : null}
         Your {tasks.length} task{tasks.length === 1 ? "" : "s"} for{" "}
         {isToday ? "today" : weekdayDayLabel}
       </p>

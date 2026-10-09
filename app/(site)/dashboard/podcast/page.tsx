@@ -27,6 +27,8 @@ export default async function DashboardPodcastPage() {
       prayerDateKeys={journey.prayerDateKeys}
       listenerName={appSession.user.name}
       leaderboard={leaderboard}
+      track={journey.track}
+      startedOn={journey.startedOn}
     />
   );
 }

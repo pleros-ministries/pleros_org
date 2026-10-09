@@ -121,6 +121,12 @@ export async function saveMinistryActivity(
       followUps = rows.value;
     }
 
+    const activityId =
+      typeof input.activityId === "number" &&
+      Number.isInteger(input.activityId) &&
+      input.activityId > 0
+        ? input.activityId
+        : null;
     const parsed = normaliseActivityInput({
       kind: input.kind,
       title: input.title,
@@ -131,6 +137,8 @@ export async function saveMinistryActivity(
       note: input.note,
       values: input.values,
       peopleCount: followUps.length,
+      // A kind no longer offered can still be corrected; the save keeps the kind unchanged.
+      allowRetired: activityId !== null,
     });
     if (!parsed.ok) throw new CommunityError(parsed.error);
 
@@ -141,12 +149,6 @@ export async function saveMinistryActivity(
       people = rows.value;
     }
 
-    const activityId =
-      typeof input.activityId === "number" &&
-      Number.isInteger(input.activityId) &&
-      input.activityId > 0
-        ? input.activityId
-        : null;
     const saved = await saveActivity({
       userId: ctx.userId,
       activityId,

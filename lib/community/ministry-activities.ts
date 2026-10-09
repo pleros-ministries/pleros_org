@@ -43,6 +43,8 @@ export type ActivityKindConfig = {
   /** Whether the kind asks where it happened (outreach asks through its mode). */
   asksLocation: boolean;
   people: ActivityPeople;
+  /** False for kinds kept only so older activities still show. */
+  offered: boolean;
   /** Fields shown and required. Outreach adds the reached fields from its mode (see `activityFields`). */
   shown: readonly MinistryFieldKey[];
   required: readonly MinistryFieldKey[];
@@ -50,17 +52,36 @@ export type ActivityKindConfig = {
 
 const MEETING_FIELDS: readonly MinistryFieldKey[] = ["attendance", "saved", "filled", "healed"];
 
-/** Every kind a member can log, in the order the form offers them. */
-export const ACTIVITY_KINDS: readonly ActivityKindConfig[] = [
+/**
+ * Every kind that can be stored, in the order the form offers them. Church
+ * service and "something else" are no longer offered; they stay here so
+ * older activities still show and can be corrected.
+ */
+export const ALL_ACTIVITY_KINDS: readonly ActivityKindConfig[] = [
   {
+    // Stored as `outreach`; shown as evangelism.
     key: "outreach",
-    label: "Outreach",
+    label: "Evangelism",
     hint: "Sharing the gospel online or in person",
     titleLabel: null,
     titleRequired: false,
     asksLocation: false,
     people: "met",
+    offered: true,
     shown: ["saved", "notSaved", "filled", "healed", "followUps"],
+    required: [],
+  },
+  {
+    // Stored as `follow_up`; shown as discipleship.
+    key: "follow_up",
+    label: "Discipleship",
+    hint: "Calls, visits or messages with people you are discipling",
+    titleLabel: null,
+    titleRequired: false,
+    asksLocation: false,
+    people: "follow_up",
+    offered: true,
+    shown: ["followUps", "saved", "filled", "healed"],
     required: [],
   },
   {
@@ -71,6 +92,7 @@ export const ACTIVITY_KINDS: readonly ActivityKindConfig[] = [
     titleRequired: false,
     asksLocation: true,
     people: "none",
+    offered: true,
     shown: MEETING_FIELDS,
     required: ["attendance"],
   },
@@ -82,19 +104,9 @@ export const ACTIVITY_KINDS: readonly ActivityKindConfig[] = [
     titleRequired: false,
     asksLocation: true,
     people: "none",
+    offered: true,
     shown: MEETING_FIELDS,
     required: ["attendance"],
-  },
-  {
-    key: "follow_up",
-    label: "Follow-up",
-    hint: "Calls, visits or messages to people you have met",
-    titleLabel: null,
-    titleRequired: false,
-    asksLocation: false,
-    people: "follow_up",
-    shown: ["followUps", "saved", "filled", "healed"],
-    required: [],
   },
   {
     key: "church_service",
@@ -104,6 +116,7 @@ export const ACTIVITY_KINDS: readonly ActivityKindConfig[] = [
     titleRequired: false,
     asksLocation: true,
     people: "none",
+    offered: false,
     shown: MEETING_FIELDS,
     required: ["attendance"],
   },
@@ -115,17 +128,28 @@ export const ACTIVITY_KINDS: readonly ActivityKindConfig[] = [
     titleRequired: true,
     asksLocation: true,
     people: "none",
+    offered: false,
     shown: ["attendance", "saved", "filled", "healed", "followUps"],
     required: [],
   },
 ];
 
+/** The kinds a member can choose for a new activity, in the order the form offers them. */
+export const ACTIVITY_KINDS: readonly ActivityKindConfig[] = ALL_ACTIVITY_KINDS.filter(
+  (kind) => kind.offered,
+);
+
+/** True for any kind that can be stored, offered or not. */
 export function isActivityKind(value: unknown): value is ActivityKind {
+  return ALL_ACTIVITY_KINDS.some((kind) => kind.key === value);
+}
+
+export function isOfferedActivityKind(value: unknown): value is ActivityKind {
   return ACTIVITY_KINDS.some((kind) => kind.key === value);
 }
 
 export function activityKindConfig(kind: ActivityKind): ActivityKindConfig {
-  const config = ACTIVITY_KINDS.find((item) => item.key === kind);
+  const config = ALL_ACTIVITY_KINDS.find((item) => item.key === kind);
   if (!config) throw new Error(`Unknown activity kind: ${kind}`);
   return config;
 }
@@ -226,7 +250,7 @@ export function activityWhere(activity: ActivityPlace): string | null {
   return parts.length > 0 ? parts.join(" · ") : null;
 }
 
-/** One line for tables: "Outreach · Online · WhatsApp", "Teaching meeting · Youth fellowship". */
+/** One line for tables: "Evangelism · Online · WhatsApp", "Teaching meeting · Youth fellowship". */
 export function activitySummary(
   activity: ActivityPlace & { kind: ActivityKind; title: string | null },
 ): string {
@@ -290,9 +314,14 @@ export function normaliseActivityInput(input: {
   note?: unknown;
   values?: Partial<Record<MinistryFieldKey, unknown>>;
   peopleCount?: number;
+  /** Set when correcting a saved activity, whose kind may no longer be offered. */
+  allowRetired?: boolean;
 }): Result<ActivityInput> {
-  if (!isActivityKind(input.kind)) return fail("Choose what you did.");
-  const config = activityKindConfig(input.kind);
+  const known = input.allowRetired
+    ? isActivityKind(input.kind)
+    : isOfferedActivityKind(input.kind);
+  if (!known) return fail("Choose what you did.");
+  const config = activityKindConfig(input.kind as ActivityKind);
 
   let title: string | null = null;
   if (config.titleLabel) {

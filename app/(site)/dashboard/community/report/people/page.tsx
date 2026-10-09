@@ -43,7 +43,7 @@ export default async function PeopleMetRoute() {
           today={lagosToday()}
           viewer={{ userId: ctx.userId, isAdmin: ctx.isAdmin }}
           canDelete
-          emptyText="You have not recorded anyone yet. Add the people you meet when you log an outreach."
+          emptyText="You have not recorded anyone yet. Add the people you meet when you log evangelism."
         />
       </section>
     </div>

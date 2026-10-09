@@ -36,7 +36,7 @@ export type FollowUpCandidate = {
 
 const RESULT_LIMIT = 20;
 
-/** Step 2 of a follow-up: which existing people were followed up, how, and what happened. */
+/** Step 2 of discipleship: which existing people were reached, how, and what happened. */
 export function StepFollowUps({
   draft,
   errors,
@@ -83,8 +83,8 @@ export function StepFollowUps({
   if (contacts.length === 0) {
     return (
       <p className="text-sm text-zinc-500">
-        You have not recorded anyone yet. People you add in an outreach appear
-        here.
+        You have not recorded anyone yet. People you add when you log
+        evangelism appear here.
       </p>
     );
   }
@@ -92,7 +92,7 @@ export function StepFollowUps({
   return (
     <div className="grid gap-4">
       <div className="grid gap-0.5">
-        <p className="text-[13px] font-medium text-zinc-700">Who did you follow up?</p>
+        <p className="text-[13px] font-medium text-zinc-700">Who did you disciple?</p>
         <p className="text-xs text-zinc-500">
           Pick each person, say how you reached them and what happened.
         </p>

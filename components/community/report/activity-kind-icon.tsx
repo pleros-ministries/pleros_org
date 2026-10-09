@@ -3,8 +3,8 @@ import {
   ChurchIcon,
   HeartHandshakeIcon,
   MegaphoneIcon,
-  PhoneIcon,
   SparklesIcon,
+  UsersIcon,
   type LucideIcon,
 } from "lucide-react";
 
@@ -14,7 +14,7 @@ export const ACTIVITY_KIND_ICONS: Record<ActivityKind, LucideIcon> = {
   outreach: MegaphoneIcon,
   teaching_meeting: BookOpenIcon,
   prayer_meeting: HeartHandshakeIcon,
-  follow_up: PhoneIcon,
+  follow_up: UsersIcon,
   church_service: ChurchIcon,
   other: SparklesIcon,
 };

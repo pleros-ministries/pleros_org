@@ -19,18 +19,29 @@ import { SogpCalendar } from "@/components/sogp/sogp-calendar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { RssEpisode } from "@/lib/anchor-rss";
-import { buildPodcastDays, summarisePodcastProgress } from "@/lib/podcast-journey";
+import {
+  buildPodcastDays,
+  buildPodcastJourneyDays,
+  buildPodcastSeriesCatalogue,
+  podcastSeriesTrack,
+  resolvePodcastJourney,
+  summarisePodcastJourney,
+  summarisePodcastProgress,
+} from "@/lib/podcast-journey";
 import type { PodcastLeaderboardData } from "@/lib/podcast-leaderboard";
 import {
   getPodcastSeriesTitle,
   groupPodcastEpisodesBySeries,
+  STANDALONE_PODCAST_SERIES_ID,
   type PodcastEpisodeGroup,
 } from "@/lib/podcast-progress";
 import { getSogpLearningWeek } from "@/lib/sogp/calendar";
 import { cn } from "@/lib/utils";
 
 import { PodcastDailyTasks } from "./podcast-daily-tasks";
+import { PodcastJourneyCard } from "./podcast-journey-card";
 import { PodcastOtherDetails } from "./podcast-other-details";
+import { PodcastTrackPicker } from "./podcast-track-picker";
 
 const INITIAL_STATE = { error: null as string | null };
 
@@ -205,6 +216,7 @@ function PodcastSeriesGroup({
   onSetListened,
   previewMode,
   defaultCollapsed,
+  onStartJourney,
 }: {
   group: PodcastEpisodeGroup;
   listened: Set<string>;
@@ -212,6 +224,8 @@ function PodcastSeriesGroup({
   onSetListened: (episodeGuids: string[], listened: boolean) => void;
   previewMode: boolean;
   defaultCollapsed: boolean;
+  /** Opens the journey picker on this series; absent for standalone episodes. */
+  onStartJourney?: () => void;
 }) {
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
   const [state, formAction] = useActionState(
@@ -270,32 +284,46 @@ function PodcastSeriesGroup({
               isCollapsed && "invisible pointer-events-none",
             )}
           >
-            {previewMode ? (
-              <Button
-                type="button"
-                variant="primary"
-                size="sm"
-                disabled={!seriesEpisodeGuids.length || isCollapsed}
-                onClick={() => onSetListened(seriesEpisodeGuids, nextListened)}
-                className="w-fit rounded-full px-4"
-              >
-                {allEpisodesListened ? "Mark all as unlistened" : "Mark all as listened"}
-              </Button>
-            ) : (
-              <form
-                action={formAction}
-                onSubmit={() => onSetListened(seriesEpisodeGuids, nextListened)}
-              >
-                <input type="hidden" name="listened" value={nextListened ? "true" : "false"} />
-                {seriesEpisodeGuids.map((episodeGuid) => (
-                  <input key={episodeGuid} type="hidden" name="episodeGuid" value={episodeGuid} />
-                ))}
-                <MarkAllAsListenedButton
-                  allEpisodesListened={allEpisodesListened}
+            <div className="flex flex-wrap items-center gap-2">
+              {previewMode ? (
+                <Button
+                  type="button"
+                  variant="primary"
+                  size="sm"
                   disabled={!seriesEpisodeGuids.length || isCollapsed}
-                />
-              </form>
-            )}
+                  onClick={() => onSetListened(seriesEpisodeGuids, nextListened)}
+                  className="w-fit rounded-full px-4"
+                >
+                  {allEpisodesListened ? "Mark all as unlistened" : "Mark all as listened"}
+                </Button>
+              ) : (
+                <form
+                  action={formAction}
+                  onSubmit={() => onSetListened(seriesEpisodeGuids, nextListened)}
+                >
+                  <input type="hidden" name="listened" value={nextListened ? "true" : "false"} />
+                  {seriesEpisodeGuids.map((episodeGuid) => (
+                    <input key={episodeGuid} type="hidden" name="episodeGuid" value={episodeGuid} />
+                  ))}
+                  <MarkAllAsListenedButton
+                    allEpisodesListened={allEpisodesListened}
+                    disabled={!seriesEpisodeGuids.length || isCollapsed}
+                  />
+                </form>
+              )}
+              {onStartJourney ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={isCollapsed}
+                  onClick={onStartJourney}
+                  className="w-fit rounded-full px-4"
+                >
+                  Listen as a daily journey
+                </Button>
+              ) : null}
+            </div>
             {!previewMode && state.error ? (
               <p className="text-[0.75rem] text-[var(--destructive)]">{state.error}</p>
             ) : null}
@@ -351,6 +379,8 @@ export function PodcastProgressPage({
   prayerDateKeys,
   listenerName,
   leaderboard,
+  track,
+  startedOn,
 }: {
   episodes: RssEpisode[];
   listenedEpisodeGuids: string[];
@@ -361,11 +391,21 @@ export function PodcastProgressPage({
   prayerDateKeys: string[];
   listenerName: string;
   leaderboard: PodcastLeaderboardData | null;
+  /** The stored journey choice (`podcast_journeys.track`). */
+  track: string;
+  /** Day 1 of that journey in Lagos time. */
+  startedOn: string;
 }) {
   const [query, setQuery] = useState("");
   const [localListenedGuids, setLocalListenedGuids] = useState(listenedEpisodeGuids);
   const [localPrayerDateKeys, setLocalPrayerDateKeys] = useState(prayerDateKeys);
+  const [localTrack, setLocalTrack] = useState(track);
+  const [localStartedOn, setLocalStartedOn] = useState(startedOn);
   const [selectedDateKey, setSelectedDateKey] = useState(todayKey);
+  const [picker, setPicker] = useState<{ open: boolean; initialTrack: string }>({
+    open: false,
+    initialTrack: track,
+  });
   const listened = new Set(localListenedGuids);
   const prayed = new Set(localPrayerDateKeys);
   const filteredEpisodes = query.trim()
@@ -374,20 +414,40 @@ export function PodcastProgressPage({
       )
     : episodes;
   const episodeGroups = groupPodcastEpisodesBySeries(filteredEpisodes);
+  const catalogue = buildPodcastSeriesCatalogue(episodes);
+  const journey = resolvePodcastJourney({
+    track: localTrack,
+    startedOn: localStartedOn,
+    catalogue,
+  });
   // One local state feeds the calendar, the day's tasks and the full list, so
   // a tick in any of them shows in the others at once.
-  const days = buildPodcastDays({
-    episodes,
-    listenedGuids: listened,
-    prayerDateKeys: prayed,
-    todayKey,
-    startKey: calendarStartKey,
-    endKey: calendarEndKey,
-  });
-  const selectedDay =
-    days.find((day) => day.dateKey === selectedDateKey) ??
+  const days =
+    journey.kind === "plan"
+      ? buildPodcastJourneyDays({
+          planEpisodes: journey.episodes,
+          startedOn: journey.startedOn,
+          todayKey,
+          listenedGuids: listened,
+          prayerDateKeys: prayed,
+        })
+      : buildPodcastDays({
+          episodes,
+          listenedGuids: listened,
+          prayerDateKeys: prayed,
+          todayKey,
+          startKey: calendarStartKey,
+          endKey: calendarEndKey,
+        });
+  const journeySummary =
+    journey.kind === "plan" ? summarisePodcastJourney(days, todayKey) : null;
+  // Today when it is in the calendar; otherwise a finished journey opens on
+  // its last day.
+  const defaultDay =
     days.find((day) => day.dateKey === todayKey) ??
-    days[0]!;
+    (journeySummary?.finished ? days.at(-1) : days[0])!;
+  const selectedDay =
+    days.find((day) => day.dateKey === selectedDateKey) ?? defaultDay;
   const summary = summarisePodcastProgress({
     episodes,
     listenedGuids: listened,
@@ -416,6 +476,16 @@ export function PodcastProgressPage({
 
       return current.filter((guid) => !episodeGuids.includes(guid));
     });
+  }
+
+  function openPicker(initialTrack = journey.track) {
+    setPicker({ open: true, initialTrack });
+  }
+
+  function handleTrackChosen(nextTrack: string) {
+    setLocalTrack(nextTrack);
+    setLocalStartedOn(todayKey);
+    setSelectedDateKey(todayKey);
   }
 
   function setLocalPrayerComplete(dateKey: string, complete: boolean) {
@@ -449,7 +519,11 @@ export function PodcastProgressPage({
           <h1 className="ppc-heading text-2xl font-semibold tracking-[-0.02em] text-white md:text-3xl">
             Welcome, {firstName(listenerName)}
           </h1>
-          {selectedDay.episode ? (
+          {selectedDay.dayNumber ? (
+            <p className="text-xs font-medium text-white/75">
+              Day {selectedDay.dayNumber} of {days.length} · {journey.title}
+            </p>
+          ) : selectedDay.episode ? (
             <p className="text-xs font-medium text-white/75">
               {selectedDay.episode.episodeNumber
                 ? `Ep. ${selectedDay.episode.episodeNumber} · `
@@ -528,6 +602,11 @@ export function PodcastProgressPage({
         </aside>
 
         <div data-podcast-section="daily-content" className="grid min-w-0 gap-4">
+          <PodcastJourneyCard
+            journey={journey}
+            summary={journeySummary}
+            onChangeJourney={() => openPicker()}
+          />
           <PodcastDailyTasks
             // A save error belongs to the day it happened on.
             key={selectedDay.dateKey}
@@ -542,6 +621,7 @@ export function PodcastProgressPage({
         <div className="grid content-start gap-4 lg:col-start-2 xl:sticky xl:top-4 xl:col-start-auto xl:row-span-2">
           <PodcastOtherDetails
             summary={summary}
+            journeySummary={journeySummary}
             leaderboard={leaderboard}
             previewMode={previewMode}
           />
@@ -590,6 +670,11 @@ export function PodcastProgressPage({
                   onSetListened={setLocalSeriesListened}
                   previewMode={previewMode}
                   defaultCollapsed={index > 0}
+                  onStartJourney={
+                    group.id === STANDALONE_PODCAST_SERIES_ID
+                      ? undefined
+                      : () => openPicker(podcastSeriesTrack(group.id))
+                  }
                 />
               ))
             ) : (
@@ -600,6 +685,17 @@ export function PodcastProgressPage({
           </div>
         </section>
       </div>
+
+      <PodcastTrackPicker
+        open={picker.open}
+        onOpenChange={(open) => setPicker((current) => ({ ...current, open }))}
+        currentTrack={journey.track}
+        initialTrack={picker.initialTrack}
+        catalogue={catalogue}
+        listened={listened}
+        previewMode={previewMode}
+        onChosen={handleTrackChosen}
+      />
     </section>
   );
 }

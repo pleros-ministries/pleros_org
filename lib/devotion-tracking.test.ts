@@ -75,6 +75,19 @@ describe("dashboard devotion tracking", () => {
     expect(schema).toContain("podcastEpisodeProgress");
   });
 
+  test("lets a listener choose a podcast journey and opt in to the leaderboard", () => {
+    const podcastPage = source("components", "dashboard", "podcast-progress-page.tsx");
+    const journeyActions = source("app", "_actions", "podcast-journey-actions.ts");
+    const schema = source("lib", "db", "schema.ts");
+
+    expect(podcastPage).toContain("PodcastTrackPicker");
+    expect(podcastPage).toContain("PodcastJourneyCard");
+    expect(podcastPage).toContain("Listen as a daily journey");
+    expect(journeyActions).toContain("choosePodcastTrackAction");
+    expect(journeyActions).toContain("setPodcastLeaderboardVisibilityAction");
+    expect(schema).toContain("podcastJourneys");
+  });
+
   test("keeps podcast progress controls comfortable on mobile", () => {
     const podcastPage = source("components", "dashboard", "podcast-progress-page.tsx");
 

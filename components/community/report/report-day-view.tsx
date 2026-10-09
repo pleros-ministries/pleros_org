@@ -41,7 +41,7 @@ export function ReportDayView({
       <header className="grid gap-1">
         <h1 className="ppc-heading text-lg font-semibold text-zinc-900">Daily report</h1>
         <p className="max-w-md text-sm text-zinc-500">
-          Log what you did each day: outreach, meetings, follow-ups. The Pleros
+          Log what you did each day: evangelism, discipleship, meetings. The Pleros
           team, your pastor and your discipler see your numbers; only the Pleros
           team and your pastor see your notes and the people you add.
         </p>
@@ -79,7 +79,7 @@ export function ReportDayView({
               Nothing logged for {dayName(selected, today).toLowerCase()} yet.
             </p>
             <p className="max-w-xs text-sm text-zinc-500">
-              Add each thing you did: an outreach, a meeting, follow-up calls.
+              Add each thing you did: evangelism, discipleship, a meeting.
             </p>
           </div>
           <Link href={addHref} className={primaryButton}>

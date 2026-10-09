@@ -168,7 +168,7 @@ describe("MemberActivityList", () => {
         ]}
       />,
     );
-    expect(html).toContain("Outreach");
+    expect(html).toContain("Evangelism");
     expect(html).toContain("Online and offline · WhatsApp · Ikeja market");
     expect(html).toContain("12 reached · 1 saved · 3 people");
     expect(html).toContain("Good day.");

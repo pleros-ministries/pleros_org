@@ -2,8 +2,13 @@ import { ChevronRightIcon, TrophyIcon } from "lucide-react";
 import Link from "next/link";
 
 import { Avatar } from "@/components/community/avatar";
-import type { PodcastProgressSummary } from "@/lib/podcast-journey";
+import type {
+  PodcastJourneySummary,
+  PodcastProgressSummary,
+} from "@/lib/podcast-journey";
 import type { PodcastLeaderboardData } from "@/lib/podcast-leaderboard";
+
+import { PodcastLeaderboardToggle } from "./podcast-leaderboard-toggle";
 
 function progressPercent(completed: number, total: number) {
   return total ? Math.round((completed / total) * 100) : 0;
@@ -30,7 +35,7 @@ function PodcastLeaderboardWidget({
         </span>
       </div>
       <div className="grid gap-3">
-        {data.me ? (
+        {data.me?.visible ? (
           <p className="text-xs text-zinc-600">
             You&apos;re{" "}
             <strong className="ppc-heading font-semibold text-zinc-900">
@@ -38,11 +43,24 @@ function PodcastLeaderboardWidget({
             </strong>{" "}
             with {data.me.points} points.
           </p>
+        ) : data.me ? (
+          <p className="text-xs leading-normal text-zinc-600">
+            Only you can see your {data.me.points} points, which would place you{" "}
+            <strong className="ppc-heading font-semibold text-zinc-900">
+              #{data.me.rank}
+            </strong>
+            .
+          </p>
         ) : (
           <p className="text-xs leading-normal text-zinc-500">
-            Mark one of this month&apos;s episodes as done to join the leaderboard.
+            Mark an episode as listened this month to earn points.
           </p>
         )}
+        <PodcastLeaderboardToggle
+          visible={data.viewerVisible}
+          previewMode={previewMode}
+          className="border-y border-zinc-100 py-3"
+        />
         {top.length > 0 ? (
           <ol className="grid gap-2">
             {top.map((entry, index) => (
@@ -85,22 +103,34 @@ function PodcastLeaderboardWidget({
 
 export function PodcastOtherDetails({
   summary,
+  journeySummary,
   leaderboard,
   previewMode,
 }: {
   summary: PodcastProgressSummary;
+  /** Present while the listener follows a journey rather than new releases. */
+  journeySummary: PodcastJourneySummary | null;
   leaderboard: PodcastLeaderboardData | null;
   previewMode: boolean;
 }) {
   const metrics = [
-    {
-      label: "This month’s episodes",
-      value: `${summary.monthEpisodesListened}/${summary.monthEpisodesTotal}`,
-      percent: progressPercent(
-        summary.monthEpisodesListened,
-        summary.monthEpisodesTotal,
-      ),
-    },
+    journeySummary
+      ? {
+          label: "Journey episodes",
+          value: `${journeySummary.listened}/${journeySummary.totalDays}`,
+          percent: progressPercent(
+            journeySummary.listened,
+            journeySummary.totalDays,
+          ),
+        }
+      : {
+          label: "This month’s episodes",
+          value: `${summary.monthEpisodesListened}/${summary.monthEpisodesTotal}`,
+          percent: progressPercent(
+            summary.monthEpisodesListened,
+            summary.monthEpisodesTotal,
+          ),
+        },
     {
       label: "Prayer Watch this month",
       value: `${summary.prayerPercent}%`,

@@ -259,7 +259,11 @@ export const discipleshipPrayerStatusEnum = pgEnum("discipleship_prayer_status",
   "answered",
 ]);
 
-/** What a member logs in their daily ministry report. */
+/**
+ * What a member logs in their daily ministry report. `follow_up` is shown as
+ * discipleship; `church_service` and `other` are no longer offered but stay
+ * so older rows remain valid.
+ */
 export const ministryActivityKindEnum = pgEnum("ministry_activity_kind", [
   "outreach",
   "teaching_meeting",
@@ -875,6 +879,27 @@ export const podcastEpisodeProgress = pgTable(
     index("podcast_episode_progress_user_idx").on(t.userId),
   ],
 );
+
+/**
+ * One row per podcast listener: the daily journey they follow and whether
+ * they appear on the podcast leaderboard. `track` is `foundations`, `latest`
+ * or `series:<id>` (`lib/podcast-journey.ts`); `started_on` is the Lagos date
+ * of Day 1. The row is created on the listener's first visit.
+ */
+export const podcastJourneys = pgTable("podcast_journeys", {
+  userId: text("user_id")
+    .primaryKey()
+    .references(() => users.id, { onDelete: "cascade" }),
+  track: text("track").notNull().default("foundations"),
+  startedOn: date("started_on", { mode: "string" }).notNull(),
+  leaderboardVisible: boolean("leaderboard_visible").notNull().default(false),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
+});
 
 // ─── Contact submissions ────────────────────────────────────────────────────
 
@@ -1893,7 +1918,7 @@ export const ministryReports = pgTable(
 
 /**
  * One ministry activity a member did on one Lagos day: an outreach, a
- * meeting, follow-up calls and so on. A day can hold several. The numbers
+ * meeting, discipleship and so on. A day can hold several. The numbers
  * are as the member entered them; their Pleros activity for the day (Bible
  * reading, Prayer Watch, SOGP, podcast) is compiled live and never copied
  * here. Which fields a kind uses is decided in `lib/community/ministry-activities.ts`.

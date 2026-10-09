@@ -68,9 +68,10 @@ const activeClass = "bg-(--color-brand-sky) text-(--color-brand-blue)";
 
 /**
  * The community's bottom bar on phones and small tablets: the four main
- * destinations plus "More", which opens the full menu. It sticks to the bottom
- * of the screen while the community is in view and rests above the site footer
- * instead of covering it. Larger screens use the top bar and side rail.
+ * destinations plus "More", which opens the full menu. It is docked flush to the
+ * bottom edge of the screen while the community is in view and rests above the
+ * site footer instead of covering it. Larger screens use the top bar and side
+ * rail.
  */
 export function CommunityBottomBar({ onOpenMenu }: { onOpenMenu: () => void }) {
   const pathname = usePathname() ?? "";
@@ -82,7 +83,7 @@ export function CommunityBottomBar({ onOpenMenu }: { onOpenMenu: () => void }) {
   return (
     <nav
       aria-label="Community"
-      className="sticky bottom-[calc(0.75rem_+_env(safe-area-inset-bottom))] z-30 mx-3 grid grid-cols-5 rounded-(--radius-md) border border-(--color-line) bg-white p-1.5 shadow-(--shadow-lg) lg:hidden"
+      className="sticky bottom-0 z-30 grid grid-cols-5 border-t border-(--color-line) bg-white px-1.5 pt-1.5 pb-[calc(0.375rem_+_env(safe-area-inset-bottom))] lg:hidden"
     >
       {ITEMS.map((item) => {
         const Icon = item.icon;
