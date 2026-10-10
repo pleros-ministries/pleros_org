@@ -346,10 +346,11 @@ function Toast() {
 
 export function DemoShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const consolidatedHome = pathname === `${DEMO_BASE}/consolidated-home`;
   const [menuOpen, setMenuOpen] = useState(false);
   return (
     <div
-      className="min-h-dvh bg-(--color-surface-muted) text-(--color-text)"
+      className={cn("min-h-dvh text-(--color-text)", consolidatedHome ? "bg-white" : "bg-(--color-surface-muted)")}
     >
       <a
         href="#demo-main"
@@ -366,7 +367,7 @@ export function DemoShell({ children }: { children: ReactNode }) {
         <main
           id="demo-main"
           key={pathname}
-          className={cn(motion.enter, "mx-auto w-full max-w-[1120px] px-4 pb-[calc(2rem+env(safe-area-inset-bottom))] pt-6 sm:px-6 sm:pt-8 lg:px-10 lg:pb-16")}
+          className={cn(motion.enter, consolidatedHome ? "w-full" : "mx-auto w-full max-w-[1120px] px-4 pb-[calc(2rem+env(safe-area-inset-bottom))] pt-6 sm:px-6 sm:pt-8 lg:px-10 lg:pb-16")}
         >
           {children}
         </main>

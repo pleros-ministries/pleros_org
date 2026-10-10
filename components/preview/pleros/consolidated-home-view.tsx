@@ -14,5 +14,5 @@ export function ConsolidatedHomeView() {
     const entry = entries.find((item) => item.actualRoute === actual);
     return href(entry?.path ?? (actual === "/sogp/enrol" ? "destinations/pre-sogp" : "destinations/welcome-pack"));
   }
-  return <WelcomeDashboardView name={viewer.firstName} greeting={greeting} sections={sections} resolveHref={resolveHref} showInstallCta={false} className="px-0 pt-0 sm:px-0 sm:pt-0 lg:px-0 lg:pt-0" />;
+  return <WelcomeDashboardView name={viewer.firstName} greeting={greeting} sections={sections} resolveHref={resolveHref} showInstallCta={false} />;
 }
