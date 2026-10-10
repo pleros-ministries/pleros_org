@@ -26,6 +26,7 @@ export default async function DashboardWelcomePackJoinPage() {
         configuredVideoSrc ? null : WELCOME_PACK_JOIN_POSTER_SRC
       }
       surveyCompleted={surveyStatus.completed}
+      embedded
     />
   );
 }

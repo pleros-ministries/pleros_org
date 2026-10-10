@@ -9,6 +9,7 @@ import {
   mainGifts,
   type WelcomePackGift,
 } from "../../lib/welcome-pack-gifts";
+import { cn } from "../../lib/utils";
 import { OrientationSurveyGate } from "./orientation-survey-gate";
 
 const hubPath = "/dashboard/welcomepack";
@@ -161,14 +162,23 @@ export function WelcomePackJoinPage({
   videoSrc,
   videoPosterSrc,
   surveyCompleted,
+  embedded = false,
 }: {
   telegramUrl: string;
   videoSrc: string | null;
   videoPosterSrc?: string | null;
   surveyCompleted: boolean;
+  /** Inside the dashboard shell, which already provides `<main>` and the top bar. */
+  embedded?: boolean;
 }) {
+  const Root = embedded ? "div" : "main";
   return (
-    <main className="site-font-theme grid min-h-screen grid-cols-[minmax(0,1fr)] place-items-center bg-[var(--color-brand-blue)] px-5 py-10 text-white">
+    <Root
+      className={cn(
+        "site-font-theme grid grid-cols-[minmax(0,1fr)] place-items-center bg-[var(--color-brand-blue)] px-5 py-10 text-white",
+        embedded ? "min-h-[calc(100dvh-3rem)] lg:min-h-dvh" : "min-h-screen",
+      )}
+    >
       <section className="grid min-w-0 w-full max-w-full gap-7 sm:max-w-[34rem]">
         <header className="grid min-w-0 gap-3 text-center">
           <p className="site-hero-eyebrow justify-center text-[var(--color-brand-lime)]">
@@ -206,7 +216,7 @@ export function WelcomePackJoinPage({
           initialCompleted={surveyCompleted}
         />
       </section>
-    </main>
+    </Root>
   );
 }
 

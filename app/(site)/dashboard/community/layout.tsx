@@ -1,16 +1,11 @@
 import type { ReactNode } from "react";
 
 import { CommunityGrid } from "@/components/community/community-grid";
-import { CommunityLeftRail } from "@/components/community/community-left-rail";
-import { CommunityQueryProvider } from "@/components/community/community-query-provider";
 import { CommunityShell } from "@/components/community/community-shell";
 import {
   canAccessCommunity,
   getCommunityContext,
 } from "@/lib/community/context";
-import { managesAnyUnit } from "@/lib/community/permissions";
-import { getDiscipleshipRailSummary } from "@/lib/db/queries/community-discipleship";
-import { getUnitRailCard } from "@/lib/db/queries/community-units";
 
 export default async function CommunityLayout({
   children,
@@ -26,46 +21,15 @@ export default async function CommunityLayout({
     return <>{children}</>;
   }
 
-  const showLeaderTab = managesAnyUnit(ctx);
-  const unitId = ctx.unit?.id ?? null;
-
-  const [unitCard, discipleship] = await Promise.all([
-    ctx.unit
-      ? getUnitRailCard(ctx.unit.id, ctx.enrollmentId)
-      : Promise.resolve(null),
-    // Discipleship belongs to enrolled learners; admins without one skip it.
-    ctx.enrollmentId != null
-      ? getDiscipleshipRailSummary(ctx.userId)
-      : Promise.resolve(null),
-  ]);
-
+  // Navigation, unread badges and the shared query client come from the
+  // dashboard layout; this keeps only the community's title bar.
   return (
-    <CommunityQueryProvider>
-      {/* A column so the phone bottom bar rests flush at the section's end. */}
-      <section className="site-font-theme flex min-h-screen flex-col bg-[#e8edf7] text-zinc-900 lg:pb-16">
-        <CommunityShell
-          unitCard={unitCard}
-          unitId={unitId}
-          discipleship={discipleship}
-          showLeaderTab={showLeaderTab}
-        >
-          <div className="site-shell-page sogp-shell-page pb-6 pt-4">
-            <CommunityGrid
-              leftRail={
-                <CommunityLeftRail
-                  unitCard={unitCard}
-                  unitId={unitId}
-                  discipleship={discipleship}
-                  showLeaderTab={showLeaderTab}
-                  className="hidden xl:block"
-                />
-              }
-            >
-              {children}
-            </CommunityGrid>
-          </div>
-        </CommunityShell>
-      </section>
-    </CommunityQueryProvider>
+    <section className="site-font-theme flex min-h-[calc(100dvh-var(--dashboard-topbar-offset,0px))] flex-col bg-[#e8edf7] text-zinc-900">
+      <CommunityShell unitName={ctx.unit?.name ?? null}>
+        <div className="site-shell-page sogp-shell-page pb-10 pt-4">
+          <CommunityGrid>{children}</CommunityGrid>
+        </div>
+      </CommunityShell>
+    </section>
   );
 }

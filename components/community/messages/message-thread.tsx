@@ -241,7 +241,10 @@ export function MessageThread({
   const nearLimit = draft.length > DM_BODY_MAX - 200;
 
   return (
-    <section className="flex h-[calc(100dvh-9.5rem)] min-h-[26rem] flex-col overflow-hidden rounded-2xl border border-(--color-line-strong) bg-white shadow-(--shadow-sm)">
+    // Fills the viewport below the shell's phone bar (`--dashboard-topbar-offset`),
+    // the 50px community bar and the page's 1rem top and 2.5rem bottom padding,
+    // so the composer stays on screen; dvh shrinks with the on-screen keyboard.
+    <section className="flex h-[calc(100dvh-var(--dashboard-topbar-offset,0px)-6.5rem-2px)] min-h-[20rem] flex-col overflow-hidden rounded-2xl border border-(--color-line-strong) bg-white shadow-(--shadow-sm)">
       <header className="flex items-center gap-3 border-b border-zinc-100 px-3 py-2.5 sm:px-4">
         <Link
           href="/dashboard/community/messages"

@@ -25,7 +25,7 @@ describe("Pre-SOGP learner UI", () => {
       "border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)]",
     );
     expect(page).toContain(
-      'href={preview ? "/preview/dashboard" : "/dashboard"}',
+      'href="/preview/dashboard"',
     );
     expect(page).toContain(
       'className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 lg:col-span-2"',

@@ -15,21 +15,23 @@ export function StepNumbers({
   draft,
   errors,
   update,
+  compact = false,
 }: {
   draft: ActivityDraft;
   errors: StepErrors;
   update: (patch: Partial<ActivityDraft>) => void;
+  compact?: boolean;
 }) {
   if (!draft.kind) return null;
   const rules = activityFields(draft.kind, draft.mode);
 
   return (
     <div className="grid gap-4">
-      <p className="text-xs text-zinc-500">
+      {!compact ? <p className="text-xs text-zinc-500">
         {draft.kind === "follow_up"
           ? "Filled in from the people you picked. Change them if you followed up more people than you named."
           : "Use 0 if there were none. Required fields are marked *."}
-      </p>
+      </p> : null}
       <div className="grid grid-cols-2 gap-3">
         {rules.shown.map((key) => {
           const id = fieldId(`numbers.${key}`);

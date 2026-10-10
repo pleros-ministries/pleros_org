@@ -53,6 +53,7 @@ export function StepKind({
         layout="cards"
         value={draft.kind}
         onChange={onChoose}
+        onReselect={onChoose}
         invalid={Boolean(errors.kind)}
         describedBy={errors.kind ? `${id}-error` : undefined}
         options={ACTIVITY_KINDS.map((kind) => ({

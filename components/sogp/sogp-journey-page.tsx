@@ -133,15 +133,20 @@ export function SogpJourneyPage({
     : "live";
 
   return (
-    <section className="site-font-theme min-h-screen bg-[var(--color-surface-muted)] pb-16 text-zinc-900">
+    <section className="site-font-theme min-h-[calc(100dvh-var(--dashboard-topbar-offset,0px))] bg-[var(--color-surface-muted)] pb-16 text-zinc-900">
       <header className="bg-[var(--color-brand-blue)] text-white">
         <div className="site-shell-page sogp-shell-page flex items-center justify-between gap-4 py-2.5">
-          <Link
-            href={preview ? "/preview/dashboard" : "/dashboard"}
-            className="inline-flex min-h-8 items-center gap-1.5 rounded-sm px-1 text-xs font-medium text-white/85 transition-colors duration-150 hover:text-white focus-visible:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white active:scale-[0.98]"
-          >
-            <ArrowLeftIcon className="size-3.5" strokeWidth={2} /> Dashboard
-          </Link>
+          {/* The live dashboard shell carries navigation; the preview has no shell. */}
+          {preview ? (
+            <Link
+              href="/preview/dashboard"
+              className="inline-flex min-h-8 items-center gap-1.5 rounded-sm px-1 text-xs font-medium text-white/85 transition-colors duration-150 hover:text-white focus-visible:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white active:scale-[0.98]"
+            >
+              <ArrowLeftIcon className="size-3.5" strokeWidth={2} /> Dashboard
+            </Link>
+          ) : (
+            <span />
+          )}
           <span className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-white">
             SOGP
           </span>
@@ -150,7 +155,7 @@ export function SogpJourneyPage({
           <p className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-white/75">
             {data.cohort.title}
           </p>
-          <h1 className="ppc-heading text-2xl font-semibold tracking-[-0.02em] text-white md:text-3xl">
+          <h1 className="ppc-heading text-2xl font-semibold tracking-[-0.02em] text-white">
             Welcome, {firstName(data.enrollment.name)}
           </h1>
           {selectedDay.track ? (

@@ -499,15 +499,20 @@ export function PodcastProgressPage({
   }
 
   return (
-    <section className="site-font-theme min-h-screen bg-[var(--color-surface-muted)] pb-16 text-zinc-900">
+    <section className="site-font-theme min-h-[calc(100dvh-var(--dashboard-topbar-offset,0px))] bg-[var(--color-surface-muted)] pb-16 text-zinc-900">
       <header className="bg-[var(--color-brand-blue)] text-white">
         <div className="site-shell-page sogp-shell-page flex items-center justify-between gap-4 py-2.5">
-          <Link
-            href={previewMode ? "/preview/dashboard" : "/dashboard"}
-            className="inline-flex min-h-8 items-center gap-1.5 rounded-sm px-1 text-xs font-medium text-white/85 transition-colors duration-150 hover:text-white focus-visible:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white active:scale-[0.98]"
-          >
-            <ArrowLeftIcon className="size-3.5" strokeWidth={2} /> Dashboard
-          </Link>
+          {/* The live dashboard shell carries navigation; the preview has no shell. */}
+          {previewMode ? (
+            <Link
+              href="/preview/dashboard"
+              className="inline-flex min-h-8 items-center gap-1.5 rounded-sm px-1 text-xs font-medium text-white/85 transition-colors duration-150 hover:text-white focus-visible:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white active:scale-[0.98]"
+            >
+              <ArrowLeftIcon className="size-3.5" strokeWidth={2} /> Dashboard
+            </Link>
+          ) : (
+            <span />
+          )}
           <span className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-[var(--color-brand-lime)]">
             Podcast
           </span>
@@ -516,7 +521,7 @@ export function PodcastProgressPage({
           <p className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-white/75">
             Pleros Podcast
           </p>
-          <h1 className="ppc-heading text-2xl font-semibold tracking-[-0.02em] text-white md:text-3xl">
+          <h1 className="ppc-heading text-2xl font-semibold tracking-[-0.02em] text-white">
             Welcome, {firstName(listenerName)}
           </h1>
           {selectedDay.dayNumber ? (
@@ -632,7 +637,7 @@ export function PodcastProgressPage({
           className="grid min-w-0 gap-4 rounded-[var(--radius-md)] border border-zinc-200 bg-white p-4 md:p-5 lg:col-start-2"
         >
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="ppc-heading text-lg font-semibold text-zinc-900">
+            <h2 className="ppc-heading text-[15px] font-semibold text-zinc-900">
               All episodes
             </h2>
             <span className="rounded-[var(--radius-xs)] bg-[var(--color-brand-sky-soft)] px-3 py-1 text-[0.75rem] font-medium text-[var(--color-brand-blue)]">

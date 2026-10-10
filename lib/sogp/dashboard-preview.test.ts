@@ -65,7 +65,7 @@ describe("SOGP dashboard previews", () => {
     expect(prePage).toContain("Preview mode");
     expect(sogpOtherDetails).toContain("Preview mode");
     expect(sogpPage).toContain(
-      'href={preview ? "/preview/dashboard" : "/dashboard"}',
+      'href="/preview/dashboard"',
     );
     expect(sogpPage).toContain("SOGP");
 

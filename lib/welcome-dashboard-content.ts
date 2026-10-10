@@ -137,20 +137,20 @@ export const welcomeDashboardSections: WelcomeDashboardSection[] = [
 
 export function resolveWelcomeDashboardSections({
   isSogpEnrolled,
+  communityAccess = isSogpEnrolled,
   startsAt,
   now = new Date(),
 }: {
   isSogpEnrolled: boolean;
+  communityAccess?: boolean;
   startsAt: Date | null;
   now?: Date;
 }) {
   return welcomeDashboardSections.map((section) => ({
     ...section,
     cards: section.cards.map((card) => {
-      const isJourneyCard =
-        card.id === "pre-sogp" ||
-        card.id === "sogp" ||
-        card.id === "community";
+      if (card.id === "community") return communityAccess ? { ...card, href: "/dashboard/community", status: "available" as const, statusLabel: undefined } : { ...card };
+      const isJourneyCard = card.id === "pre-sogp" || card.id === "sogp";
       if (!isSogpEnrolled || !isJourneyCard) return { ...card };
 
       if (card.id === "pre-sogp") {
@@ -162,14 +162,6 @@ export function resolveWelcomeDashboardSections({
         };
       }
 
-      if (card.id === "community") {
-        return {
-          ...card,
-          href: "/dashboard/community",
-          status: "available" as const,
-          statusLabel: undefined,
-        };
-      }
 
       const countdown = startsAt ? getSogpCountdown(startsAt, now) : null;
       return {

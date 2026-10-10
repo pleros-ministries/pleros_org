@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { describe, expect, test } from "vitest";
 
 describe("dashboard typography", () => {
-  test("keeps the dashboard hero on the shared home page heading class, cards on the dashboard scale", () => {
+  test("uses the compact greeting and card scale on the dashboard home", () => {
     const dashboardSource = readFileSync(
       join(process.cwd(), "components", "dashboard", "welcome-dashboard-view.tsx"),
       "utf8",
@@ -13,13 +13,11 @@ describe("dashboard typography", () => {
       "utf8",
     );
 
-    // The hero greeting still reuses the home page's display heading.
-    expect(dashboardSource).toContain("site-hero-heading");
-    // Cards are icon-led and intentionally use the dashboard-specific type
-    // scale (defined in app/globals.css) rather than the marketing
-    // site-pathway-title / site-section-heading classes.
-    expect(dashboardSource).toContain("site-dashboard-card-title");
-    expect(dashboardSource).toContain("site-dashboard-card-body");
+    // A compact greeting, not the marketing display heading.
+    expect(dashboardSource).toContain("text-[21px]");
+    expect(dashboardSource).not.toContain("site-hero-heading");
+    // Card titles stay at or under 15px.
+    expect(dashboardSource).toContain("text-[14px] font-medium");
     expect(dashboardSource).not.toContain("site-pathway-title");
 
     // Welcome Pack is a separate, untouched surface — still on the shared
@@ -28,23 +26,17 @@ describe("dashboard typography", () => {
     expect(welcomePackSource).toContain("site-section-heading");
   });
 
-  test("uses Be Vietnam Pro explicitly for dashboard body copy", () => {
+  test("uses Be Vietnam Pro explicitly for the dashboard home and shell", () => {
     const dashboardSource = readFileSync(
       join(process.cwd(), "components", "dashboard", "welcome-dashboard-view.tsx"),
       "utf8",
     );
-
-    expect(dashboardSource).toContain("font-[var(--font-be-vietnam-pro)]");
-  });
-
-  test("keeps dashboard card titles on the dashboard type scale", () => {
-    const dashboardSource = readFileSync(
-      join(process.cwd(), "components", "dashboard", "welcome-dashboard-view.tsx"),
+    const shellSource = readFileSync(
+      join(process.cwd(), "components", "dashboard", "shell", "dashboard-shell.tsx"),
       "utf8",
     );
 
-    expect(dashboardSource).toContain(
-      "site-dashboard-card-title max-w-[16ch] text-[0.9rem]",
-    );
+    expect(dashboardSource).toContain("font-[family-name:var(--font-be-vietnam-pro)]");
+    expect(shellSource).toContain("font-[family-name:var(--font-be-vietnam-pro)]");
   });
 });

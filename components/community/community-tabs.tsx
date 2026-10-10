@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { MenuIcon, MessageCircleIcon } from "lucide-react";
+import { MessageCircleIcon } from "lucide-react";
 
 import { useUnreadMessages } from "./messages/use-unread-messages";
 import { NotificationBell } from "./notification-bell";
@@ -25,32 +25,21 @@ function useTitle(unitName: string | null): string {
 }
 
 /**
- * The brand-blue sticky sub-header at the top of every community page. On
- * phones the bottom bar carries the menu and Messages, so they are hidden here.
+ * The brand-blue sticky sub-header at the top of every community page. The
+ * dashboard shell carries the community's navigation; this keeps the title,
+ * the Messages shortcut and notifications.
  */
-export function CommunityTopBar({
-  unitName,
-  onOpenMenu,
-}: {
-  unitName: string | null;
-  onOpenMenu: () => void;
-}) {
+export function CommunityTopBar({ unitName }: { unitName: string | null }) {
   const title = useTitle(unitName);
   const unreadMessages = useUnreadMessages();
 
+  // Sticks below the dashboard shell's phone/tablet bar (a hairline keeps the
+  // two blue bars apart) and at the very top from `lg`.
   return (
-    <header className="sticky top-0 z-30 border-b border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)]">
-      <div className="site-shell-page sogp-shell-page flex min-h-12 items-center justify-between gap-3">
+    <header className="sticky top-[var(--dashboard-topbar-offset,0px)] z-30 border-y border-y-[var(--color-brand-blue)] border-t-white/15 bg-[var(--color-brand-blue)] lg:border-t-[var(--color-brand-blue)]">
+      <div className="site-shell-page sogp-shell-page flex h-12 items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2">
-          <button
-            type="button"
-            onClick={onOpenMenu}
-            aria-label="Open community menu"
-            className="-ml-1.5 hidden size-9 items-center justify-center rounded-lg text-white/85 transition-colors hover:bg-white/10 hover:text-white lg:inline-flex xl:hidden"
-          >
-            <MenuIcon className="size-5" strokeWidth={2} />
-          </button>
-          <p className="ppc-heading truncate text-base font-semibold text-white">
+          <p className="ppc-heading truncate text-[15px] font-semibold text-white">
             {title}
           </p>
         </div>
@@ -62,7 +51,7 @@ export function CommunityTopBar({
                 ? `Messages, ${unreadMessages} unread`
                 : "Messages"
             }
-            className="relative hidden size-8 items-center justify-center rounded-full text-white/85 hover:text-white lg:inline-flex"
+            className="relative inline-flex size-8 items-center justify-center rounded-full text-white/85 hover:text-white"
           >
             <MessageCircleIcon className="size-4" strokeWidth={2} />
             {unreadMessages > 0 ? (

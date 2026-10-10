@@ -6,8 +6,7 @@ import {
   useQueryClient,
   useSuspenseQuery,
 } from "@tanstack/react-query";
-import { ArrowLeftIcon, FlameIcon, InfoIcon, TrophyIcon } from "lucide-react";
-import Link from "next/link";
+import { FlameIcon, InfoIcon, TrophyIcon } from "lucide-react";
 
 import { Avatar } from "@/components/community/avatar";
 import type { LeaderboardData } from "@/lib/db/queries/sogp-leaderboard";
@@ -115,26 +114,10 @@ export function LeaderboardPage({
 
   return (
     <section className="site-font-theme min-h-screen bg-[#f6f5f1] pb-16 text-zinc-900">
-      <nav
-        aria-label="SOGP dashboard navigation"
-        className="sticky top-0 z-30 border-b border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)] shadow-sm"
-      >
-        <div className="site-shell-page sogp-shell-page flex min-h-12 items-center justify-between gap-4">
-          <Link
-            href="/dashboard/sogp"
-            className="inline-flex min-h-9 items-center gap-1.5 rounded-sm px-1 text-xs font-medium text-white/85 transition-colors duration-150 hover:text-white focus-visible:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white active:scale-[0.98]"
-          >
-            <ArrowLeftIcon className="size-3.5" strokeWidth={2} /> Dashboard
-          </Link>
-          <span className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-[var(--color-brand-lime)]">
-            SOGP
-          </span>
-        </div>
-      </nav>
-
+      {/* Navigation comes from the dashboard shell. */}
       <div className="site-shell-page sogp-shell-page grid gap-4 pb-6 pt-5">
         <header className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-          <h1 className="ppc-heading text-lg font-semibold text-zinc-900">
+          <h1 className="ppc-heading text-2xl font-semibold tracking-[-0.02em] text-zinc-900">
             Leaderboard
           </h1>
           <p className="text-[0.62rem] font-semibold uppercase tracking-[0.1em] text-zinc-400">

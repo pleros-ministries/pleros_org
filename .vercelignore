@@ -1,0 +1,14 @@
+.git/
+.next/
+node_modules/
+.env*
+!.env.example
+.vercel/
+.claude
+.superpowers
+.venv*
+tmp
+pleros-auth-cred.json
+*.tsbuildinfo
+coverage/
+docs/

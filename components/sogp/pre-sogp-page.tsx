@@ -160,20 +160,23 @@ export function PreSogpPage({
 
   return (
     <section className="site-font-theme min-h-screen bg-[#f6f5f1] pb-16 text-zinc-900">
-      <nav aria-label="Pre-SOGP dashboard navigation" className="sticky top-0 z-30 border-b border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)] shadow-sm">
-        <div className="site-shell-page sogp-shell-page flex min-h-12 items-center justify-between gap-4">
-          <Link href={preview ? "/preview/dashboard" : "/dashboard"} className="inline-flex min-h-9 items-center gap-1.5 rounded-sm px-1 text-xs font-medium text-white/85 transition-colors duration-150 hover:text-white focus-visible:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white active:scale-[0.98]">
-            <ArrowLeftIcon className="size-3.5" strokeWidth={2} /> Dashboard
-          </Link>
-        </div>
-      </nav>
+      {/* The live dashboard shell carries navigation; the standalone preview keeps its own. */}
+      {preview ? (
+        <nav aria-label="Pre-SOGP dashboard navigation" className="sticky top-[var(--dashboard-topbar-offset,0px)] z-30 border-b border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)] shadow-sm">
+          <div className="site-shell-page sogp-shell-page flex min-h-12 items-center justify-between gap-4">
+            <Link href="/preview/dashboard" className="inline-flex min-h-9 items-center gap-1.5 rounded-sm px-1 text-xs font-medium text-white/85 transition-colors duration-150 hover:text-white focus-visible:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white active:scale-[0.98]">
+              <ArrowLeftIcon className="size-3.5" strokeWidth={2} /> Dashboard
+            </Link>
+          </div>
+        </nav>
+      ) : null}
 
       <div className="site-shell-page sogp-shell-page grid gap-4 pb-6 pt-5 lg:grid-cols-[17.5rem_minmax(0,1fr)] lg:items-start">
         <header
           data-pre-sogp-section="countdown"
           className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 lg:col-span-2"
         >
-          <h1 className="ppc-heading text-lg font-semibold text-zinc-900">
+          <h1 className="ppc-heading text-2xl font-semibold tracking-[-0.02em] text-zinc-900">
             Pre-SOGP Lessons
           </h1>
         </header>
@@ -187,7 +190,7 @@ export function PreSogpPage({
               <p className="text-[0.65rem] font-semibold uppercase tracking-[0.1em] text-zinc-400">
                 Starts {preparationStartLabel}
               </p>
-              <h2 className="ppc-heading mt-1 text-base font-semibold text-zinc-900">
+              <h2 className="ppc-heading mt-1 text-[15px] font-semibold text-zinc-900">
                 Pre-SOGP is coming soon
               </h2>
             </div>
@@ -200,7 +203,7 @@ export function PreSogpPage({
           <>
             <aside
               data-pre-sogp-section="calendar"
-              className="rounded-sm border border-zinc-200 bg-white p-3 lg:sticky lg:top-[3.75rem]"
+              className={`rounded-sm border border-zinc-200 bg-white p-3 lg:sticky ${preview ? "lg:top-[3.75rem]" : "lg:top-4"}`}
             >
               <SogpCalendar
                 days={data.days}

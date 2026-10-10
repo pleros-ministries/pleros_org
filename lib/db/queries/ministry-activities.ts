@@ -33,6 +33,7 @@ import {
   toLagosDateKey,
 } from "@/lib/sogp/daily-participation";
 
+import { clearDeclaredNil, dailyReportingEnabled, lockDailyReporting } from "./daily-report-declarations";
 import { inUnit } from "./community-scope";
 import { activityMemberUnitName, activityPeopleCount } from "./ministry-sql";
 import {
@@ -416,13 +417,16 @@ export async function saveActivity(input: {
   activityId: number | null;
   dateKey: string;
   activity: ActivityInput;
+  meetingDetails?: { role: "leader" | "worker" | "member"; taught: string | null };
   people: ContactRow[];
   followUps: FollowUpRow[];
 }): Promise<{ activityId: number }> {
   const { userId, dateKey, activity } = input;
   const config = activityKindConfig(activity.kind);
 
+  const reportingV2 = dailyReportingEnabled();
   return transactionDb.transaction(async (tx) => {
+    if (reportingV2) await lockDailyReporting(tx, userId, dateKey);
     let activityId: number;
 
     if (input.activityId != null) {
@@ -473,6 +477,13 @@ export async function saveActivity(input: {
         dateKey,
         followUps: input.followUps,
       });
+    }
+    if (reportingV2) {
+      if (input.meetingDetails) {
+        await tx.insert(schema.dailyReportMeetingDetails).values({ activityId, actorUserId: userId, reportingRole: input.meetingDetails.role, taught: input.meetingDetails.taught })
+          .onConflictDoUpdate({ target: schema.dailyReportMeetingDetails.activityId, set: { reportingRole: input.meetingDetails.role, taught: input.meetingDetails.taught, actorUserId: userId, updatedAt: new Date() } });
+      }
+      await clearDeclaredNil(tx, userId, dateKey, activity.kind === "outreach" || activity.kind === "follow_up" ? "ministry" : "meetings");
     }
     return { activityId };
   });

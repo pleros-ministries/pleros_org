@@ -72,6 +72,7 @@ export function ActivityForm({
 
   function chooseKind(kind: ActivityKind) {
     setDraft((current) => (current.kind === kind ? current : withKind(current, kind)));
+    goTo(1);
   }
 
   function goTo(index: number) {
@@ -218,7 +219,7 @@ export function ActivityForm({
           ) : (
             <span />
           )}
-          <button type="submit" disabled={pending} className={primaryButton}>
+          {step !== "kind" || mode === "edit" ? <button type="submit" disabled={pending} className={primaryButton}>
             {last
               ? pending
                 ? "Saving…"
@@ -226,7 +227,7 @@ export function ActivityForm({
                   ? "Save changes"
                   : "Save activity"
               : "Next"}
-          </button>
+          </button> : null}
         </div>
       </form>
     </div>

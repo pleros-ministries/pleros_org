@@ -1,5 +1,7 @@
 "use server";
 
+import { normaliseMeetingDetails } from "@/lib/community/daily-report";
+import { dailyReportingEnabled } from "@/lib/db/queries/daily-report-declarations";
 import { revalidatePath } from "next/cache";
 
 import { getAppSession } from "@/lib/app-session";
@@ -18,6 +20,8 @@ import {
 } from "@/lib/community/ministry-activities";
 import {
   canReportFor,
+  MINISTRY_WRITE_WINDOW_MESSAGE,
+  MINISTRY_FIELDS,
   isDateKey,
   type MinistryFieldKey,
 } from "@/lib/community/ministry-report";
@@ -42,8 +46,7 @@ import type { ActivityPerson } from "@/lib/db/queries/outreach-contacts";
 import { getSogpEnrollmentByUserId } from "@/lib/db/queries/sogp";
 import { lagosToday } from "@/lib/sogp/daily-date";
 
-const WINDOW_ERROR =
-  "You can add or change an activity for today and the last two days only.";
+const WINDOW_ERROR = MINISTRY_WRITE_WINDOW_MESSAGE;
 
 async function requireCommunity(): Promise<CommunityContext> {
   const ctx = await getCommunityContext();
@@ -79,6 +82,8 @@ export type SaveActivityInput = {
   activityId?: number | null;
   dateKey: string;
   kind: string;
+  meetingRole?: string;
+  taught?: string;
   title?: string;
   mode?: string;
   platform?: string;
@@ -141,6 +146,16 @@ export async function saveMinistryActivity(
       allowRetired: activityId !== null,
     });
     if (!parsed.ok) throw new CommunityError(parsed.error);
+    let meetingDetails: { role: "leader" | "worker" | "member"; taught: string | null } | undefined;
+    if (dailyReportingEnabled() && (parsed.value.kind === "teaching_meeting" || parsed.value.kind === "prayer_meeting")) {
+      const result = normaliseMeetingDetails({ kind: parsed.value.kind, role: input.meetingRole, taught: input.taught, attendance: parsed.value.attendance });
+      if (!result.ok) throw new CommunityError(result.error);
+      meetingDetails = result.value;
+      if (meetingDetails.role === "member") {
+        for (const { key } of MINISTRY_FIELDS) if (key !== "attendance") parsed.value[key] = 0;
+      }
+    }
+
 
     let people: ContactRow[] = [];
     if (activityKindConfig(parsed.value.kind).people === "met") {
@@ -154,6 +169,7 @@ export async function saveMinistryActivity(
       activityId,
       dateKey: input.dateKey,
       activity: parsed.value,
+      meetingDetails,
       people,
       followUps,
     });

@@ -7,37 +7,28 @@ import {
   type WelcomeDashboardSection,
   type WelcomeDashboardSectionAccent,
 } from "@/lib/welcome-dashboard-content";
+import { lagosGreeting, sentenceCase } from "@/lib/dashboard/greeting";
+import { HomepageFooter } from "@/components/home/homepage-footer";
 import { InstallAppCta } from "@/components/pwa/install-app-cta";
 import { cn } from "@/lib/utils";
+
+import { focusRing, primaryButton } from "./shell/styles";
 
 function accentTokens(accent: WelcomeDashboardSectionAccent) {
   switch (accent) {
     case "gold":
-      return {
-        surface: "bg-(--questions-surface)",
-        chip: "bg-white text-(--questions-accent)",
-      };
+      return { surface: "bg-(--questions-surface)", chip: "bg-white text-(--questions-accent)" };
     case "purple":
-      return {
-        surface: "bg-(--purpose-surface)",
-        chip: "bg-white text-(--purpose-accent)",
-      };
+      return { surface: "bg-(--purpose-surface)", chip: "bg-white text-(--purpose-accent)" };
     case "green":
-      return {
-        surface: "bg-(--fulfil-surface)",
-        chip: "bg-white text-(--fulfil-accent)",
-      };
+      return { surface: "bg-(--fulfil-surface)", chip: "bg-white text-(--fulfil-accent)" };
     default:
-      return {
-        surface: "bg-(--muted)",
-        chip: "bg-white text-(--color-brand-blue)",
-      };
+      return { surface: "bg-(--muted)", chip: "bg-white text-(--color-brand-blue)" };
   }
 }
 
 function DashboardCard({
   title,
-  description,
   href,
   accent,
   icon: Icon,
@@ -56,47 +47,41 @@ function DashboardCard({
 }) {
   const { surface, chip } = accentTokens(accent);
   const className = cn(
-    "group relative flex min-h-[6.75rem] flex-col justify-between gap-2 rounded-(--radius-lg) p-3 shadow-(--shadow-sm) transition-[transform,box-shadow] duration-150 ease-out sm:min-h-[7.75rem] sm:p-3.5",
+    "group flex min-h-[7.25rem] flex-col justify-between gap-3 rounded-lg border border-(--color-line) p-3 transition-colors",
     surface,
-    href && "hover:-translate-y-px hover:shadow-(--shadow-md)",
+    href && "hover:border-(--color-brand-blue)",
+    href && focusRing,
     status === "coming_soon" && "cursor-default saturate-[0.72]",
   );
 
   const content = (
     <>
       <div className="flex items-start justify-between gap-2">
-        <span
-          className={cn(
-            "relative inline-flex size-9 items-center justify-center rounded-full shadow-(--shadow-sm)",
-            chip,
-          )}
-        >
-          <Icon className="size-4.5" strokeWidth={2} />
+        <span className={cn("relative grid size-8 place-items-center rounded-md", chip)}>
+          <Icon className="size-4" strokeWidth={1.75} aria-hidden />
           {showPlusBadge ? (
-            <span className="absolute -right-1 -bottom-1 inline-flex size-3.5 items-center justify-center rounded-full bg-(--color-brand-blue) text-white ring-2 ring-white">
-              <PlusIcon className="size-2" strokeWidth={3} />
+            <span className="absolute -bottom-1 -right-1 grid size-3.5 place-items-center rounded-full bg-(--color-brand-blue) text-white ring-2 ring-white">
+              <PlusIcon className="size-2" strokeWidth={3} aria-hidden />
             </span>
           ) : null}
         </span>
         {statusLabel ? (
-          <span className="inline-flex h-fit w-fit items-center rounded-full bg-white/85 px-2.5 py-1 font-[var(--font-be-vietnam-pro)] text-[0.6rem] font-semibold text-(--color-brand-blue) shadow-(--shadow-sm)">
+          <span className="rounded-md bg-white/85 px-1.5 py-0.5 text-[10.5px] font-medium leading-4 text-(--color-brand-blue)">
             {statusLabel}
           </span>
         ) : null}
       </div>
-      <div className="flex items-center justify-between gap-2">
-        <div className="grid min-w-0 gap-1">
-          <h2 className="site-dashboard-card-title max-w-[16ch] text-[0.9rem] text-(--color-text-strong) sm:text-[1.05rem]">
+      <div className="flex items-end justify-between gap-2">
+        <div className="grid min-w-0 gap-0.5">
+          <h3 className="text-[14px] font-medium leading-snug tracking-[-0.01em] text-(--color-text-strong)">
             {title}
-          </h2>
-          <p className="site-dashboard-card-body max-w-[22ch] text-[0.7125rem] text-(--color-text-muted)">
-            {description}
-          </p>
+          </h3>
         </div>
         {href ? (
           <ChevronRightIcon
-            className="size-4 shrink-0 text-(--color-text-muted) transition-transform duration-150 group-hover:translate-x-0.5"
-            strokeWidth={2}
+            className="size-4 shrink-0 text-(--color-text-muted) transition-transform duration-150 group-hover:translate-x-0.5 group-hover:text-(--color-brand-blue)"
+            strokeWidth={1.75}
+            aria-hidden
           />
         ) : null}
       </div>
@@ -122,9 +107,10 @@ function DashboardCard({
   );
 }
 
-function DashboardChurchMinistryStrip() {
+function DashboardChurchMinistryStrip({ resolveHref }: { resolveHref: (href: string) => string }) {
   return (
     <section
+      data-dashboard-public
       aria-labelledby="dashboard-church-ministry-title"
       className="relative mt-8 overflow-hidden bg-[linear-gradient(180deg,#f4fcff_0%,#dff5ff_100%)] px-[1.25rem] py-10 text-[var(--color-brand-blue)] sm:mt-10 sm:px-8 sm:py-12"
     >
@@ -169,7 +155,7 @@ function DashboardChurchMinistryStrip() {
         </div>
 
         <Link
-          href="/fcc"
+          href={resolveHref("/fcc")}
           className="site-button-text inline-flex min-h-[2.875rem] items-center justify-center rounded-full bg-[var(--color-brand-lime)] px-7 py-2.5 text-[0.875rem] leading-none font-semibold text-[var(--color-brand-blue)] transition-transform duration-150 hover:-translate-y-px"
         >
           Learn more
@@ -181,61 +167,79 @@ function DashboardChurchMinistryStrip() {
 
 type WelcomeDashboardViewProps = {
   name?: string;
+  /** Lagos-time greeting; worked out here when the caller passes none. */
+  greeting?: string;
+  /** The next Prayer Watch session by the Lagos schedule. */
+  prayerWatch?: { label: string; time: string; today: boolean };
   sections?: WelcomeDashboardSection[];
+  resolveHref?: (href: string) => string;
+  showInstallCta?: boolean;
+  className?: string;
 };
 
 export function WelcomeDashboardView({
   name,
+  greeting,
+  prayerWatch,
   sections = welcomeDashboardSections,
+  resolveHref = (href) => href,
+  showInstallCta = true,
+  className,
 }: WelcomeDashboardViewProps = {}) {
+  const now = new Date();
+  const hello = greeting ?? lagosGreeting(now);
+
   return (
-    <section className="site-font-theme bg-[var(--color-surface)]">
-      <header className="relative overflow-hidden bg-[var(--color-brand-blue)]">
-        <div className="container-pleros flex min-h-[4rem] max-w-[36rem] flex-col justify-end pb-5 pt-7 text-white sm:min-h-[15rem] sm:pb-8 sm:pt-10">
-          <div className="grid max-w-[19rem] gap-3">
-            <h1 className="site-hero-heading max-w-[16ch] text-[clamp(1.875rem,6vw,3.725rem)] text-white">
-              {name ? `Welcome, ${name}` : "Welcome to your Pleros Dashboard"}
-            </h1>
-            {/* <p className="font-[var(--font-be-vietnam-pro)] max-w-[28ch] text-[0.8375rem] leading-[1.35] tracking-[-0.02em] text-white/88 sm:text-[1.05rem]">
-              Start with SOGP and keep the resources for your spiritual growth, your walk, and the fulfilment of God&apos;s purpose close.
-            </p> */}
-          </div>
+    <>
+    <div className={cn("site-font-theme mx-auto grid w-full max-w-[1120px] gap-6 px-4 pb-12 pt-5 font-[family-name:var(--font-be-vietnam-pro)] sm:px-6 sm:pt-7 lg:px-10 lg:pt-9", className)}>
+      <header className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
+        <div className="grid gap-1.5">
+          <h1 data-dashboard-greeting className="text-[21px] font-medium leading-tight tracking-[-0.02em] text-(--color-text-strong)">
+            {name ? `${hello}, ${name}` : hello}
+          </h1>
         </div>
+        {prayerWatch ? (
+          <Link href={resolveHref("/dashboard/prayer-watch")} className={primaryButton}>
+            Prayer Watch · {prayerWatch.today ? "" : "tomorrow "}
+            {prayerWatch.time}
+          </Link>
+        ) : null}
       </header>
 
-      <div className="container-pleros grid max-w-[36rem] gap-7 pt-7 pb-10 sm:pt-8 sm:pb-12">
-        <div className="grid gap-6">
-          {sections.map((section) => (
-            <section key={section.id} className="grid gap-3">
-              <div className="grid gap-1">
-                <p className="font-[var(--font-be-vietnam-pro)] text-[0.6875rem] font-semibold uppercase tracking-[0.22em] text-(--color-brand-blue)">
-                  {section.title}
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                {section.cards.map((card) => (
-                  <DashboardCard
-                    key={card.id}
-                    title={card.title}
-                    description={card.description}
-                    href={card.href}
-                    accent={section.accent}
-                    icon={card.icon}
-                    showPlusBadge={card.id === "advanced-sogp"}
-                    status={card.status}
-                    statusLabel={card.statusLabel}
-                  />
-                ))}
-              </div>
-            </section>
-          ))}
-        </div>
-
-        <InstallAppCta />
+      <div className="grid gap-6 lg:grid-cols-2 lg:gap-x-5">
+        {sections.map((section) => (
+          <section key={section.id} aria-labelledby={`dashboard-${section.id}`} className="grid content-start gap-2.5">
+            <h2
+              id={`dashboard-${section.id}`}
+              className="text-[13px] font-medium tracking-[-0.01em] text-(--color-text-strong)"
+            >
+              {sentenceCase(section.title)}
+            </h2>
+            <div className="grid grid-cols-2 gap-2.5">
+              {section.cards.map((card) => (
+                <DashboardCard
+                  key={card.id}
+                  title={card.title}
+                  description={card.description}
+                  href={card.href ? resolveHref(card.href) : undefined}
+                  accent={section.accent}
+                  icon={card.icon}
+                  showPlusBadge={card.id === "advanced-sogp"}
+                  status={card.status}
+                  statusLabel={card.statusLabel}
+                />
+              ))}
+            </div>
+          </section>
+        ))}
       </div>
 
-      <DashboardChurchMinistryStrip />
-    </section>
+      {showInstallCta ? <InstallAppCta /> : null}
+
+
+    </div>
+    <DashboardChurchMinistryStrip resolveHref={resolveHref} />
+    <HomepageFooter />
+    </>
   );
 }

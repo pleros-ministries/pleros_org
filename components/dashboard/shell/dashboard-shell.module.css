@@ -1,0 +1,79 @@
+/* The shell root. Be Vietnam Pro throughout: the Sen and Suisse variables
+   that feature pages and `.ppc-heading` read resolve to it inside the shell.
+   `--dashboard-topbar-offset` is the height of the phone/tablet top bar, so a
+   page's own sticky header can sit below it (0 from `lg`, with no top bar). */
+.root {
+  --font-sen: var(--font-be-vietnam-pro);
+  --font-suisse-intl: var(--font-be-vietnam-pro);
+  --dashboard-topbar-offset: 3rem;
+}
+
+@media (min-width: 64rem) {
+  .root {
+    --dashboard-topbar-offset: 0px;
+  }
+}
+
+/* Motion for the dashboard shell. The global reduced-motion rule in
+   app/globals.css also switches the animations off. */
+
+.navPanel {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows 250ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 180ms ease-out;
+}
+
+.navPanel[data-open="true"] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.navChevron {
+  transition: transform 250ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.drawer[open] {
+  animation: drawer-in 250ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.drawer[open]::backdrop {
+  animation: fade 200ms ease-out both;
+}
+
+@keyframes drawer-in {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navPanel,
+  .navChevron {
+    transition: none;
+  }
+
+  .drawer[open],
+  .drawer[open]::backdrop {
+    animation: none;
+  }
+}
+
+/* Apply the agreed authenticated type scale to legacy feature headings only. */
+.root :global(h1) { font-size: 24px; font-weight: 500; line-height: 1.15; }
+.root :global(h1[data-dashboard-greeting]) { font-size: 21px; }
+.root :global(h2:not([data-dashboard-public] *)), .root :global(h3:not([data-dashboard-public] *)) { font-size: 15px; font-weight: 500; }
+
+/* Portaled dialogs share the same scale while an authenticated frame is mounted. */
+:global(html[data-pleros-dashboard="true"] h1) { font-size: 24px; font-weight: 500; }
+:global(html[data-pleros-dashboard="true"] h1[data-dashboard-greeting]) { font-size: 21px; }
+:global(html[data-pleros-dashboard="true"] h2:not([data-dashboard-public] *)), :global(html[data-pleros-dashboard="true"] h3:not([data-dashboard-public] *)) { font-size: 15px; font-weight: 500; }

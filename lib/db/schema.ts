@@ -1,5 +1,7 @@
 import {
   pgTable,
+  check,
+  primaryKey,
   text,
   integer,
   boolean,
@@ -2325,3 +2327,34 @@ export const discipleshipPrayerRequests = pgTable(
     index("discipleship_prayer_requests_group_created_idx").on(t.groupId, t.createdAt),
   ],
 );
+
+
+/** V2 reporting declarations: no duplicated devotional facts or ministry activity rows. */
+export const dailyReportDeclarations = pgTable("daily_report_declarations", {
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  reportDate: date("report_date", { mode: "string" }).notNull(),
+  category: text("category").$type<"devotional" | "ministry" | "meetings">().notNull(),
+  declaration: text("declaration").$type<"confirmed" | "nil">().notNull(),
+  actorUserId: text("actor_user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  primaryKey({ columns: [t.userId, t.reportDate, t.category] }),
+  index("daily_report_declarations_date_idx").on(t.reportDate, t.userId),
+  check("daily_report_declaration_category_check", sql`(${t.category} = 'devotional' and ${t.declaration} = 'confirmed') or (${t.category} in ('ministry', 'meetings') and ${t.declaration} = 'nil')`),
+  check("daily_report_declaration_actor_check", sql`${t.actorUserId} = ${t.userId}`),
+]);
+
+/** Companion table leaves legacy ministry_activities reads compatible before migration. */
+export const dailyReportMeetingDetails = pgTable("daily_report_meeting_details", {
+  activityId: integer("activity_id").primaryKey().references(() => ministryActivities.id, { onDelete: "cascade" }),
+  reportingRole: text("reporting_role").$type<"leader" | "worker" | "member">().notNull(),
+  taught: text("taught"),
+  actorUserId: text("actor_user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  index("daily_report_meeting_details_actor_idx").on(t.actorUserId),
+  check("daily_report_meeting_role_check", sql`${t.reportingRole} in ('leader', 'worker', 'member')`),
+  check("daily_report_meeting_taught_check", sql`(${t.reportingRole} = 'leader' and ${t.taught} is not null and length(trim(${t.taught})) between 1 and 500) or (${t.reportingRole} in ('worker', 'member') and ${t.taught} is null)`),
+]);

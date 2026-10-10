@@ -10,9 +10,12 @@ describe("welcome dashboard access", () => {
   test("dashboard layout requires a Better Auth session", () => {
     const layoutSource = source("app", "(site)", "dashboard", "layout.tsx");
 
-    expect(layoutSource).toContain("getAppSession");
-    expect(layoutSource).toContain("const appSession = await getAppSession()");
-    expect(layoutSource).toContain("<AppShell authenticated>");
+    const viewerSource = source("lib", "dashboard", "viewer.ts");
+
+    expect(viewerSource).toContain("const session = await getAppSession()");
+    expect(viewerSource).toContain("if (!session) return null");
+    expect(layoutSource).toContain("const viewer = await getDashboardViewer()");
+    expect(layoutSource).toContain("<DashboardShell");
     expect(layoutSource).toContain('redirect(`/login?returnTo=');
     expect(layoutSource).not.toContain("readWelcomeAccessToken");
     expect(layoutSource).not.toContain('redirect("/")');
@@ -21,7 +24,7 @@ describe("welcome dashboard access", () => {
   test("dashboard page uses the authenticated identity for display name", () => {
     const dashboardSource = source("app", "(site)", "dashboard", "page.tsx");
 
-    expect(dashboardSource).toContain("getAppSession");
+    expect(dashboardSource).toContain("await getDashboardViewer()");
     expect(dashboardSource).toContain("appSession.user.email");
     expect(dashboardSource).toContain(
       "resolveWelcomeDisplayName",
@@ -36,8 +39,12 @@ describe("welcome dashboard access", () => {
   test("dashboard resolves SOGP card access from the authenticated enrolment", () => {
     const dashboardSource = source("app", "(site)", "dashboard", "page.tsx");
 
-    expect(dashboardSource).toContain("getSogpDashboardAccess");
-    expect(dashboardSource).toContain("resolveWelcomeDashboardSections");
+    const viewerSource = source("lib", "dashboard", "viewer.ts");
+
+    expect(viewerSource).toContain("getSogpDashboardAccess(session.user.id)");
+    expect(dashboardSource).toContain(
+      "resolveWelcomeDashboardSections({ ...viewer.sogpAccess, communityAccess: viewer.capabilities.community })",
+    );
     expect(dashboardSource).toContain("sections={sections}");
   });
 
@@ -55,7 +62,7 @@ describe("welcome dashboard access", () => {
     const thankYouRouteSource = source("app", "(site)", "thankyou", "page.tsx");
 
     expect(dashboardViewSource).toContain("name?: string");
-    expect(dashboardViewSource).toContain("`Welcome, ${name}`");
+    expect(dashboardViewSource).toContain("`${hello}, ${name}`");
 
     expect(thankYouSource).toContain("name?: string");
     expect(thankYouSource).toContain(

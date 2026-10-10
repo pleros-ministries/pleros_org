@@ -32,7 +32,9 @@ export type NumberRules = {
 export const MINISTRY_COUNT_MAX = 100_000;
 export const MINISTRY_NOTE_MAX = 500;
 /** An activity can be added or corrected for today and this many earlier days. */
-export const MINISTRY_LATE_DAYS = 2;
+export const MINISTRY_LATE_DAYS = 7;
+export const MINISTRY_WRITE_WINDOW_MESSAGE =
+  `Reports can be added or corrected for today and the previous ${MINISTRY_LATE_DAYS} Lagos days. Earlier days are view only.`;
 
 export function emptyMinistryNumbers(): MinistryNumbers {
   return {
