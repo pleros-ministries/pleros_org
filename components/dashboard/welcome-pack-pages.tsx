@@ -76,8 +76,8 @@ export function WelcomePackJoinPage({
           <WelcomePackVideoPlaceholder />
         )}
 
-        {/* The survey gate is styled for the brand-blue surface. */}
-        <section className="grid min-w-0 max-w-full rounded-[var(--radius-lg)] bg-(--color-brand-blue) px-4 py-6 text-white sm:px-6">
+        {/* Live and public adapters share the survey presenter. */}
+        <section className="grid min-w-0 max-w-full rounded-[var(--radius-lg)] border border-(--color-line) bg-white p-4 sm:p-5">
           <OrientationSurveyGate
             telegramUrl={telegramUrl}
             initialCompleted={surveyCompleted}

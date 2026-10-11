@@ -80,8 +80,10 @@ function summarise(n: Notification): string {
 
 export function NotificationBell({
   tone = "dark",
+  placement = "below",
 }: {
   tone?: "dark" | "light";
+  placement?: "below" | "sidebar";
 }) {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -122,6 +124,7 @@ export function NotificationBell({
         type="button"
         onClick={toggle}
         aria-label="Community notifications"
+        aria-expanded={open}
         className={`relative inline-flex size-8 items-center justify-center rounded-full ${
           tone === "light"
             ? "text-zinc-500 hover:text-zinc-900"
@@ -142,11 +145,11 @@ export function NotificationBell({
         ) : null}
       </button>
       {open ? (
-        <div className="absolute right-0 top-9 z-40 w-72 rounded-sm border border-zinc-200 bg-white p-2 shadow-lg">
+        <div className={`absolute z-40 w-72 rounded-sm border border-zinc-200 bg-white p-2 shadow-lg ${placement === "sidebar" ? "bottom-10 left-0" : "right-0 top-9"}`}>
           {items.length === 0 ? (
             <p className="p-2 text-xs text-zinc-500">Nothing yet.</p>
           ) : (
-            <ul className="grid max-h-80 gap-1 overflow-y-auto">
+            <ul className="grid max-h-[min(20rem,calc(100dvh-5rem))] gap-1 overflow-y-auto">
               {items.map((item) => (
                 <li
                   key={item.id}

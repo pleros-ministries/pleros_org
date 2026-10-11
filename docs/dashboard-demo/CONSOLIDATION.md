@@ -43,7 +43,7 @@ Start with the shared shell and home. Then migrate Devotion and Welcome Pack, SO
 - **Resolved:** reporting write window is today plus the previous seven Lagos days, inclusive; older dates are view-only. This replaces the old today-plus-two rule and is implemented in the branch, not production.
 - **Resolved:** missing-report reminders use in-app notifications plus opted-in push; automatic reminders run at 8 pm Lagos time for that day’s incomplete report, with manual reminders also available, capped collectively at one reminder per person per Lagos day; reminders-only, no penalties or access restrictions, no live sends activated.
 - **Resolved:** Devotional prefills automatically from canonical sources, then requires one daily confirmation. No re-entry or duplicate activity storage; missing source facts remain visibly not recorded.
-- **Resolved:** church hierarchy is Pastor → Branch Pastor → Unit leader → Worker. Each leadership tier can also lead its own disciples; discipleship membership is separate from organisational supervision. The Pastor and Branch Pastors manage appointments/assignments; unit leaders do not. Branch Pastors manage only their own branch; the Pastor manages all branches. Assignment storage/enforcement is implemented behind disabled rollout gates; production activation is pending.
+- **Resolved:** church hierarchy is Pastor → Branch Pastor → Unit leader → Worker. Each leadership tier can also lead its own disciples; discipleship membership is separate from organisational supervision. The Pastor and Branch Pastors manage appointments/assignments; unit leaders do not. Branch Pastors manage only their own branch; the Pastor manages all branches. Assignment storage/enforcement is active in production; unit leader/worker population awaits the user’s list.
 
 ## Confirmed church appointments
 
@@ -64,7 +64,7 @@ Olamide Olutekunbi is an engineer with role access for testing, not a church Pas
 
 ## Implementation and deployment context
 
-The connection implementation is complete locally on `codex/authenticated-dashboard-demo`, preserving existing functionality; verification and activation are separate. See [implementation checkpoint](CONSOLIDATION-IMPLEMENTATION.md) for completed code, guarded migration work, QA limits and remaining integrations. Release/activation will be reviewed separately; no unanswered policy question blocks the current implementation.
+The connection implementation is active in production from `codex/authenticated-dashboard-demo`, preserving existing functionality; remaining acceptance limits and assignment inputs are recorded below. See [implementation checkpoint](CONSOLIDATION-IMPLEMENTATION.md) for completed code, guarded migration work, QA limits and remaining integrations. The final branch review and main merge complete release cleanup; no unanswered policy question blocks the current implementation.
 
 The connection rollout is live at https://www.pleros.org/dashboard from branch commit d4ed028. Production deployment dpl_3S6qs5TkQgQtSuVUsgk1otz1VSGs is Ready, with reporting, church, multi-branch and reminder gates configured to 1. Approved migrations 0050–0053 and the confirmed appointments are applied. Existing accounts, engineering testing access and geographic auto-assignment regions were verified unchanged. Public synthetic demo: https://pleros-rogku9kze-plerosdev.vercel.app/preview/pleros?as=d-kemi (d4ed028), verified without login; it does not expose live account data.
 

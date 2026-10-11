@@ -19,6 +19,7 @@ import {
   type PrayerWatchSessionId,
 } from "@/lib/prayer-watch";
 import { cn } from "@/lib/utils";
+import { SetupReminderChoice as ReminderCheckbox } from "../shared/setup-step";
 
 import {
   SETUP_ERROR,
@@ -56,44 +57,6 @@ function localSessionTime(
         ? ", previous day"
         : "";
   return `${formatClock(local.minutes)} your time${day}`;
-}
-
-function ReminderCheckbox({
-  name,
-  label,
-  helper,
-  checked,
-  disabled,
-  onChange,
-}: {
-  name: string;
-  label: string;
-  helper?: string | null;
-  checked: boolean;
-  disabled?: boolean;
-  onChange: (checked: boolean) => void;
-}) {
-  return (
-    <label
-      className={cn(
-        "flex items-start gap-3",
-        disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer",
-      )}
-    >
-      <input
-        type="checkbox"
-        name={name}
-        checked={checked}
-        disabled={disabled}
-        onChange={(event) => onChange(event.target.checked)}
-        className="mt-0.5 size-4 shrink-0 accent-[var(--color-brand-blue)]"
-      />
-      <span className="grid min-w-0 gap-0.5">
-        <span>{label}</span>
-        {helper ? <span className={SETUP_HELPER}>{helper}</span> : null}
-      </span>
-    </label>
-  );
 }
 
 /** Step 4: which reminders the learner wants. */

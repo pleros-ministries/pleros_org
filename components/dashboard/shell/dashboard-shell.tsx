@@ -309,7 +309,7 @@ export function DashboardShell({
         </div>
         <div className="flex items-center justify-between gap-2 border-t border-(--color-line) px-3 py-3">
           <AccountActions />
-          <NotificationBell tone="light" />
+          <NotificationBell tone="light" placement="sidebar" />
         </div>
       </aside>
 

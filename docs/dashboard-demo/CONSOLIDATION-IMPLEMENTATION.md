@@ -1,6 +1,6 @@
 # Consolidation implementation checkpoint
 
-11 October 2026. Branch `codex/authenticated-dashboard-demo`. The connection pass is committed/pushed at `f3b38c3` and its Vercel preview is Ready. No production migration, appointment, flag activation or reminder delivery has been performed.
+11 October 2026. The connection rollout is live on www.pleros.org. Migrations 0050–0053 and the confirmed Pastor/six Branch Pastor appointments are applied, with all four rollout gates enabled. Geographic assignments and existing auth roles remain independent. Unit leader/worker assignments await the user's list; test notifications remain on hold.
 
 ## Connected implementation
 
@@ -15,9 +15,11 @@
 - **Profile:** `/dashboard/profile` connects name/photo updates to Better Auth and app display name, authenticated UploadThing photo upload, existing verified password recovery, and App/reminder setup. Dedicated report push consent defaults off. No identity/auth-role changes or password handling were added.
 - **Public presentation:** formerly unsupported destination pages now have synthetic screens for devotion, training, community, reporting history, Welcome Pack, partnership and church. Actual content/seed/assets are reused where appropriate; interactions stay local and no public preview establishes a real session or sends messages/reminders. Protected downloads and certificate issuance stay protected; sample actions are labeled.
 
-## Activation is separate
+## Activation and presentation
 
-See [ROLLOUT.md](ROLLOUT.md). Generated migrations 0050–0052 are not applied. `DASHBOARD_DAILY_REPORTS_V2`, `DASHBOARD_CHURCH_V2` and `DASHBOARD_REPORT_REMINDERS_V2` default off; disabled loaders do not read new tables. The new report landing can read existing records while declarations/meeting metadata remain gated. Production data, assignments and consent are unchanged.
+See [ROLLOUT.md](ROLLOUT.md) for the applied migrations and activation checkpoint. Shared pure presenters now cover the Welcome Pack hub, gifts, orientation survey, setup cards and reminder choices. Live controllers retain authenticated persistence/device permissions; demo preferences remain local. The demo uses the existing public-media audiobook player, including seeking, chapter controls, sharing and downloads.
+
+The final review found and corrected a desktop notification-panel positioning regression: the sidebar bell opens upward into the content area with viewport-bounded scrolling.
 
 ## Verification completed in isolation
 
@@ -30,6 +32,12 @@ The user explicitly authorized verification on 11 October.
 - A built app was exercised against the isolated database through a local database bridge, using synthetic Better Auth users on 127.0.0.1 (separate cookie host from the user's localhost session). Unit-leader roster/detail access, cross-branch 404 denial, hidden notes/contacts, profile-name save/session refresh, collapsed report default, category-specific meeting choices, Member attendance 1, and role reset after changing kinds were verified in the browser. Shared drawer has one expanded parent; mobile reporting width is 410px with no overflow.
 - All 24 public destination screens rendered at desktop/mobile widths with no missing-page placeholders or horizontal overflow. Root home and footer dashboard links preserve the preview. Sample downloads are labeled; protected originals and live credential changes remain separate.
 
-Screenshots live under `screenshots/connected-*`. Actual remote photo upload, production migrations/assignments, and real notification delivery were intentionally not exercised. SQL integration used a local Postgres driver/bridge, not the hosted Neon transport.
+## Production acceptance and remaining inputs
 
-Public connection preview: https://pleros-rg17luykk-plerosdev.vercel.app/preview/pleros?as=d-kemi . Deployment `dpl_CDGYtKZSEvbJP9ZNJtrexd8xrPC7` is Ready at f3b38c3 and anonymously returns HTTP 200; its access override is deployment-scoped. Production activation gates remain off.
+The authorised production account successfully signed in as Branch Pastor. Its church structure exposed only its assigned branch, and a cross-branch report request returned 404. Daily reporting rendered the three categories and collapsed Full report; a temporary Nil declaration persisted and Undo restored the original missing-report state. Dates outside the approved write window exposed no report actions.
+
+An authenticated disposable photo upload persisted through refresh. Removing it and saving restored the original initials avatar; the existing name and disabled report-push preference were unchanged. The temporary provider object was deleted. No report facts, notification preferences or church assignments were changed by these checks, and no test notifications were sent.
+
+The latest full repository suite passed 1,080 tests; the focused suite passed 101 tests (eight opt-in database tests were skipped in this ordinary run; their separate rehearsal passed earlier). TypeScript and scoped lint passed. A final main-branch merge requires the repository's full build-and-test CI check.
+
+Remaining external inputs: real unit leader/worker assignments and approval/recipient for the held notification delivery test. Current public demo: https://www.pleros.org/preview/pleros .
