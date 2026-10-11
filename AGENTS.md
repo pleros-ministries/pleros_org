@@ -107,8 +107,8 @@ Dashboard and Welcome Pack resources require a full Better Auth app session. The
 - On this branch, report writes cover today and the previous seven Lagos days. Preserve historical read access and the existing activity keys/number validation.
 - Migration `0050_daily_reporting_v2` prepares daily declarations and companion meeting-role details without duplicating canonical devotional facts or altering existing activity columns. Do not run production migrations automatically. Keep `DASHBOARD_DAILY_REPORTS_V2` disabled until migration and live form bindings are verified. Disabled reads must not query the new tables.
 - Declaration actions derive subject/actor from the session; no proxy reporting. New activity writes and Nil declarations share a dated transaction lock; recording activity clears stale Nil.
-- Church hierarchy/permission decisions and remaining implementation are in `docs/dashboard-demo/CONSOLIDATION.md`. They are not yet production assignments. Organisational readers never gain ministry notes/contact details by title.
-- Missing-report reminders are in-app plus opted-in push, automatic at 8 pm Lagos plus manual, with one shared per-person/per-Lagos-day cap. Planning logic must not activate sends, change existing notification preferences or introduce penalties.
+- Church assignment services/pages are gated by `DASHBOARD_CHURCH_V2` and migration 0051. Pastor sees all branches; Branch Pastor sees their branch; unit leaders see report details only for directly assigned workers. App roles/geographic moderator titles grant no church access. Organisational projections exclude notes/contacts. Initial Pastor selection is explicit super-admin setup. See `docs/dashboard-demo/ROLLOUT.md`.
+- Report reminder dispatcher/manual actions require `DASHBOARD_REPORT_REMINDERS_V2`, both preceding gates, and migration 0052. In-app delivery and the shared per-person/Lagos-day checkpoint commit atomically; push requires separate explicit report consent plus existing community consent. Automatic sends begin at 8 pm Lagos; no penalties. Keep activation and production migrations separate from implementation.
 
 ## Local commands and data
 

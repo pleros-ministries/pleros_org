@@ -15,7 +15,7 @@ export type ChoiceOption<T extends string> = {
   icon?: ReactNode;
 };
 
-const focusRing = "has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-(--color-focus)";
+const focusRing = "has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-(--color-focus)";
 
 const layouts = {
   cards: {

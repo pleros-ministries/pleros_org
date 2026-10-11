@@ -18,6 +18,7 @@ import { signOutDashboardAction } from "@/app/_actions/auth-actions";
 import type { DashboardNavSection } from "@/lib/dashboard/navigation";
 import { cn } from "@/lib/utils";
 
+import { NotificationBell } from "@/components/community/notification-bell";
 import { DashboardNav } from "./dashboard-nav";
 import motion from "./dashboard-shell.module.css";
 import { compactButton, focusRing } from "./styles";
@@ -25,6 +26,7 @@ import { compactButton, focusRing } from "./styles";
 export type DashboardShellViewer = {
   name: string;
   roleLabel: string;
+  image?: string | null;
 };
 
 let mountedFrames = 0;
@@ -68,7 +70,7 @@ function Profile({ viewer, onNavigate }: { viewer: DashboardShellViewer; onNavig
         aria-hidden
         className="grid size-9 shrink-0 place-items-center rounded-full bg-(--color-brand-sky) text-[13px] font-medium text-(--color-brand-blue)"
       >
-        {initials(viewer.name)}
+        {viewer.image ? <Image src={viewer.image} alt="" width={36} height={36} unoptimized className="size-9 rounded-full object-cover" /> : initials(viewer.name)}
       </span>
       <div className="grid min-w-0 flex-1 gap-0.5">
         <p className="break-words text-[13.5px] font-medium leading-snug text-(--color-text-strong)">
@@ -78,12 +80,12 @@ function Profile({ viewer, onNavigate }: { viewer: DashboardShellViewer; onNavig
           {viewer.roleLabel}
         </p>
       </div>
-      {/* The only account settings that exist today are app and reminders. */}
+
       <Link
-        href="/dashboard/welcomepack/setup"
+        href="/dashboard/profile"
         onClick={onNavigate}
-        aria-label="App and reminder settings"
-        title="App and reminder settings"
+        aria-label="Profile settings"
+        title="Profile settings"
         className={cn(compactButton, "w-8 shrink-0 px-0 text-(--color-text-muted)")}
       >
         <SettingsIcon className="size-4" strokeWidth={1.75} aria-hidden />
@@ -277,6 +279,7 @@ export function DashboardShell({
             <p className="truncate text-[13.5px] font-medium">{viewer.name}</p>
             <p className="truncate text-[11.5px] text-white/75">{viewer.roleLabel}</p>
           </div>
+          <NotificationBell />
           <Link
             href="/dashboard"
             aria-label="Pleros dashboard"
@@ -304,8 +307,9 @@ export function DashboardShell({
         <div className="flex-1 overflow-y-auto px-3 pb-4">
           <DashboardNav sections={sections} />
         </div>
-        <div className="border-t border-(--color-line) px-3 py-3">
+        <div className="flex items-center justify-between gap-2 border-t border-(--color-line) px-3 py-3">
           <AccountActions />
+          <NotificationBell tone="light" />
         </div>
       </aside>
 

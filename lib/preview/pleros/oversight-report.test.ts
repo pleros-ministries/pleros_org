@@ -13,8 +13,23 @@ it("opens a directly overseen unit leader's individual report, excluding notes a
     expect(activity).not.toHaveProperty("followUpPeople");
   }
 });
-it("keeps unit leaders status-only and refuses access across branches", () => {
-  expect(oversightReport(state, "u-chioma", "w-tolu", state.today)).toBeNull();
+it("lets unit leaders read direct workers' details without notes or contacts", () => {
+  const report = oversightReport(state, "u-chioma", "w-tolu", state.today);
+  expect(report).not.toBeNull();
+  for (const activity of [...report!.ministry, ...report!.meetings]) {
+    expect(activity).not.toHaveProperty("note");
+    expect(activity).not.toHaveProperty("contactIds");
+    expect(activity).not.toHaveProperty("followUpPeople");
+  }
+  const indirect = structuredClone(state);
+  const worker = indirect.people.find((person) => person.id === "w-tolu")!;
+  worker.supervisorId = "u-femi";
+  expect(oversightReport(indirect, "u-chioma", worker.id, state.today)).toBeNull();
+  worker.supervisorId = "u-chioma";
+  worker.tier = "disciple";
+  expect(oversightReport(indirect, "u-chioma", worker.id, state.today)).toBeNull();
+});
+it("refuses access across branches and upward reporting access", () => {
   expect(oversightReport(state, "p-kunle", "u-amina", state.today)).toBeNull();
   expect(oversightReport(state, "w-tolu", "u-chioma", state.today)).toBeNull();
 });

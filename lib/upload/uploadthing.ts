@@ -8,6 +8,9 @@ import {
 const f = createUploadthing();
 
 export const uploadRouter = {
+  profilePhoto: f({ image: { maxFileSize: "4MB", maxFileCount: 1 } })
+    .middleware(async () => { const session = await getAppSession(); if (!session) throw new Error("Unauthorised"); return { userId: session.user.id }; })
+    .onUploadComplete(({ file }) => ({ url: file.ufsUrl })),
   audioUploader: f({
     audio: { maxFileSize: "64MB", maxFileCount: 1 },
   })

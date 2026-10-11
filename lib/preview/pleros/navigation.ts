@@ -8,6 +8,7 @@ function destination(key: string, label: string, actualRoute: string): Dashboard
 export const dashboardNavigation: { key: SectionKey; label: string; items: DashboardDestination[] }[] = [
   { key: "personal", label: "Personal", items: [
     { key: "overview", label: "Overview", path: "", actualRoute: "/dashboard" },
+    { key: "reporting-overview", label: "Reporting overview", path: "reporting-overview" },
     { key: "reports", label: "Daily reports", path: "reports", actualRoute: "/dashboard/community/report" },
     destination("report-history", "Report history", "/dashboard/community/report/history"),
     destination("partnership", "Partnership", "/partner"),

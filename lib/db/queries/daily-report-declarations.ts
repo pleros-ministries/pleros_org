@@ -1,5 +1,5 @@
 import "server-only";
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, eq, gte, lte, inArray, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
 import { transactionDb } from "@/lib/db/transaction";
@@ -60,4 +60,20 @@ export async function getOwnMeetingDetails(userId: string, dateKey: string) {
     .from(schema.dailyReportMeetingDetails)
     .innerJoin(schema.ministryActivities, eq(schema.ministryActivities.id, schema.dailyReportMeetingDetails.activityId))
     .where(and(eq(schema.ministryActivities.userId, userId), eq(schema.ministryActivities.activityDate, dateKey)));
+}
+
+export async function clearOwnDailyDeclaration(userId: string, dateKey: string, category: DailyReportCategory) {
+  requireEnabled();
+  const error = validateDailyDeclaration({ date: dateKey, today: lagosToday(), category, declaration: category === "devotional" ? "confirmed" : "nil", categoryActivityCount: 0 });
+  if (error) throw new CommunityError(error);
+  await transactionDb.transaction(async (tx) => {
+    await lockDailyReporting(tx, userId, dateKey);
+    await tx.delete(schema.dailyReportDeclarations).where(and(eq(schema.dailyReportDeclarations.userId, userId), eq(schema.dailyReportDeclarations.reportDate, dateKey), eq(schema.dailyReportDeclarations.category, category)));
+  });
+}
+
+export async function getOwnDeclarationsRange(userId: string, fromKey: string, toKey: string) {
+  if (!dailyReportingEnabled()) return [];
+  return db.select({ dateKey: schema.dailyReportDeclarations.reportDate, category: schema.dailyReportDeclarations.category, declaration: schema.dailyReportDeclarations.declaration }).from(schema.dailyReportDeclarations)
+    .where(and(eq(schema.dailyReportDeclarations.userId, userId), gte(schema.dailyReportDeclarations.reportDate, fromKey), lte(schema.dailyReportDeclarations.reportDate, toKey)));
 }

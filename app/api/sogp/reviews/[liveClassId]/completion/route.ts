@@ -1,3 +1,4 @@
+import { revalidateReportingViews } from "@/lib/dashboard/revalidate-reporting";
 import { NextResponse } from "next/server";
 
 import { getAppSession } from "@/lib/app-session";
@@ -21,14 +22,14 @@ export async function POST(
     return NextResponse.json({ error: "Invalid review completion request" }, { status: 400 });
   }
   try {
-    return NextResponse.json(
-      await setSogpReviewComplete({
+    const result = await setSogpReviewComplete({
         userId: session.user.id,
         liveClassId: id,
         complete: body.complete,
         source: body.source,
-      }),
-    );
+      });
+    revalidateReportingViews();
+    return NextResponse.json(result);
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Review completion could not be saved" },

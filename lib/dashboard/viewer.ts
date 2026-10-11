@@ -1,5 +1,7 @@
 import "server-only";
 
+import { getChurchAssignment, hasChurchDirectReports, churchOrganisationEnabled } from "@/lib/db/queries/church-organisation";
+import { canManageChurchAssignments, CHURCH_ROLE_LABELS, type ChurchRole } from "@/lib/church/permissions";
 import { cache } from "react";
 
 import { getAppSession } from "@/lib/app-session";
@@ -22,19 +24,24 @@ export const getDashboardViewer = cache(async () => {
   const session = await getAppSession();
   if (!session) return null;
 
-  const [sogpAccess, ctx] = await Promise.all([
+  const [sogpAccess, ctx, church, hasReports] = await Promise.all([
     getSogpDashboardAccess(session.user.id),
     getCommunityContext(),
+    getChurchAssignment(session.user.id),
+    hasChurchDirectReports(session.user.id),
   ]);
   const community = canAccessCommunity(ctx);
 
   const capabilities: DashboardCapabilities = {
     sogpEnrolled: sogpAccess.isSogpEnrolled,
     community,
+    reporting: community || church !== null,
     communityUnitId: community ? (ctx?.unit?.id ?? null) : null,
     discipleshipDiscussions: community && ctx?.enrollmentId != null,
     managesLocationGroups: community && ctx != null && managesAnyUnit(ctx),
     staffConsole: session.user.role !== "student",
+    churchOversight: hasReports,
+    churchAssignments: canManageChurchAssignments(church) || churchOrganisationEnabled() && session.user.role === "super_admin",
   };
 
   return {
@@ -42,7 +49,7 @@ export const getDashboardViewer = cache(async () => {
     sogpAccess,
     capabilities,
     navigation: buildDashboardNavigation(capabilities),
-    roleLabel: dashboardRoleLabel({
+    roleLabel: church ? CHURCH_ROLE_LABELS[church.role as ChurchRole] : dashboardRoleLabel({
       role: session.user.role,
       sogpEnrolled: sogpAccess.isSogpEnrolled,
       isUnitLeader: ctx?.isUnitLeader ?? false,

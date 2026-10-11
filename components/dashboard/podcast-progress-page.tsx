@@ -373,6 +373,7 @@ export function PodcastProgressPage({
   episodes,
   listenedEpisodeGuids,
   previewMode = false,
+  initialDateKey,
   todayKey,
   calendarStartKey,
   calendarEndKey,
@@ -385,6 +386,7 @@ export function PodcastProgressPage({
   episodes: RssEpisode[];
   listenedEpisodeGuids: string[];
   previewMode?: boolean;
+  initialDateKey?: string;
   todayKey: string;
   calendarStartKey: string;
   calendarEndKey: string;
@@ -401,7 +403,7 @@ export function PodcastProgressPage({
   const [localPrayerDateKeys, setLocalPrayerDateKeys] = useState(prayerDateKeys);
   const [localTrack, setLocalTrack] = useState(track);
   const [localStartedOn, setLocalStartedOn] = useState(startedOn);
-  const [selectedDateKey, setSelectedDateKey] = useState(todayKey);
+  const [selectedDateKey, setSelectedDateKey] = useState(initialDateKey && /^\d{4}-\d{2}-\d{2}$/.test(initialDateKey) && initialDateKey >= calendarStartKey && initialDateKey <= calendarEndKey && initialDateKey <= todayKey ? initialDateKey : todayKey);
   const [picker, setPicker] = useState<{ open: boolean; initialTrack: string }>({
     open: false,
     initialTrack: track,

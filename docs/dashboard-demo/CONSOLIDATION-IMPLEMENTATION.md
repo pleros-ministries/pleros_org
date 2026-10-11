@@ -1,51 +1,35 @@
 # Consolidation implementation checkpoint
 
-9 October 2026. Branch `codex/authenticated-dashboard-demo`. Work is local and uncommitted. No production migration, production deploy, real-role change or notification send has been executed.
+11 October 2026. Branch `codex/authenticated-dashboard-demo`. The previous shell/home pass is pushed at `c9616c0`; the connection pass below is local and uncommitted. No production migration, appointment, flag activation or reminder delivery has been performed.
 
-## Implemented in the branch
+## Connected implementation
 
-- Actual `/dashboard` has the shared shell, compact vertical home cards, role/capability-derived navigation and existing account sign-out/recovery. The same frame covers Podcast, SOGP, Community and focused Welcome Pack join. Static route URLs and feature guards are preserved; no preview identity/store imports enter production.
-- Server capabilities are request-cached in `lib/dashboard/viewer.ts`. Community access is checked independently from SOGP enrolment, including on the home card. A location pastor does not need SOGP enrolment to reach their permitted Community features.
-- Navigation is one expanded parent, distinct parent icons and text-only child links; mobile/tablet use a drawer. The mobile name/role bar is sticky. Feature headers use its 48px offset. Duplicate legacy navigation was removed; course/media controls and current group/message/privacy actions remain.
-- Be Vietnam Pro and the agreed compact typography apply to feature headings and portal menus while the dashboard is mounted; public typography restores on exit. Message-thread height accounts for the new shell. Real profile name/photo settings are not connected yet; current account controls expose only actual reminder settings, password recovery and sign-out.
-- Activity selection immediately opens its form, including reselecting the same choice after Back. Add/correct/remove use the same today-plus-seven-Lagos-days cutoff; future and older dates remain locked. Activity kind/day immutability and canonical numeric validation remain.
-- Demo Branch Pastors can open each supervised unit leader’s individual activity/devotional details. Unit leaders remain status-only. The individual projection excludes ministry notes, contact IDs and follow-up contact records, and refuses cross-branch reads.
+- **Common dashboard:** actual Home, SOGP, Podcast, Pre-SOGP, community and Welcome Pack use the shared capability-derived shell. Existing learning, assessment, messaging, group/privacy and Welcome Pack services remain in place. Home keeps the approved coloured cards, white background and main's church strip/footer.
+- **Daily reports:** `/dashboard/community/report` now groups existing activity records and canonical devotional facts into Devotional / Ministry / Meetings. Confirmation/Nil and Undo use session-derived actions; recording activity clears stale Nil under the shared dated transaction lock. The Full report starts collapsed. History adds category submission states and links to older read-only dates. Write window is today plus seven Lagos days.
+- **Meeting forms:** category-specific add choices feed the existing owned activity service. Leader/Worker/Member fields and teaching text use the companion metadata table, loading into edits and report cards. Member records only own attendance; Leader teaching text is required and capped at 500 characters. Historic activity kinds remain readable/editable.
+- **Devotional navigation:** selected report date carries into Prayer Watch/Bible and Podcast; Bible opens its own tab. Source saves invalidate combined reporting views without copying facts into declarations.
+- **Church organisation:** `/dashboard/church` and `/dashboard/church/[userId]` use separate branch/unit/appointment tables. Pastor can see all branches; Branch Pastor their branch; unit leader only directly assigned workers with matching unit/branch. Report projections exclude notes and contacts. Roster status reads use bounded canonical batches. Direct-report drill-down preserves the viewer; separate report controls open individual details.
+- **Appointments:** initial Pastor selection is explicit super-admin setup. Pastor and Branch Pastors manage appointments and places; branch scope is rechecked in the transaction. Writes serialize hierarchy changes; leaders with direct reports cannot change role/location until those reports are reassigned. App roles and geographic moderator rights are unchanged.
+- **Own reporting access:** an explicit church assignment also enables own reports without SOGP enrolment. This does not grant community feed, messaging or moderation access. Established location-pastor/admin privacy rights remain independently guarded.
+- **Reminders:** the existing protected dispatcher route includes the separately gated reporting dispatcher. Manual actions enforce current supervisory scope. Notification checkpoint + in-app write are atomic, with one shared recipient/current-Lagos-day cap across manual/automatic sources. Automatic delivery starts at 8 pm Lagos; push needs dedicated explicit consent and existing community consent. A push failure never duplicates a committed in-app reminder. Notifications are visible in the shared shell.
+- **Profile:** `/dashboard/profile` connects name/photo updates to Better Auth and app display name, authenticated UploadThing photo upload, existing verified password recovery, and App/reminder setup. Dedicated report push consent defaults off. No identity/auth-role changes or password handling were added.
+- **Public presentation:** formerly unsupported destination pages now have synthetic screens for devotion, training, community, reporting history, Welcome Pack, partnership and church. Actual content/seed/assets are reused where appropriate; interactions stay local and no public preview establishes a real session or sends messages/reminders. Protected downloads and certificate issuance stay protected; sample actions are labeled.
 
-## Reporting persistence prepared, not activated
+## Activation is separate
 
-`0050_daily_reporting_v2.sql` adds only two companion tables:
-- Daily declarations keyed by person/date/category, storing confirmation or explicit Nil, not duplicated devotional/activity facts. Actor and subject must match; proxy reporting is unsupported.
-- Meeting details keyed by existing activity ID, storing reporting role and what was taught. Existing activity columns/IDs remain compatible before migration.
+See [ROLLOUT.md](ROLLOUT.md). Generated migrations 0050–0052 are not applied. `DASHBOARD_DAILY_REPORTS_V2`, `DASHBOARD_CHURCH_V2` and `DASHBOARD_REPORT_REMINDERS_V2` default off; disabled loaders do not read new tables. The new report landing can read existing records while declarations/meeting metadata remain gated. Production data, assignments and consent are unchanged.
 
-`DASHBOARD_DAILY_REPORTS_V2` defaults disabled. Reads do not touch new tables while disabled; declaration writes return an expected unavailable error. Do not enable it until the migration, role-aware form bindings and isolated database checks are complete.
+## Verification completed in isolation
 
-When enabled, declarations and activity writes share a transaction-scoped user/day lock. A Nil declaration is refused when category activity exists; recording an activity clears stale Nil. The authenticated action derives the owner and strips forged actor/subject fields. Meeting metadata saves with the existing activity transaction. Member attendance is one person and other numeric fields are cleared; teaching text is retained only for Leaders.
+The user explicitly authorized verification on 11 October.
 
-Reminder planning is pure code only: 8 pm Lagos onward for today’s incomplete report, plus manual reminders on editable dates, one shared recipient/current-Lagos-day checkpoint across both sources. Channels are in-app and opted-in push. No sender/cron integration or actual sends have been activated.
+- 296 regression tests passed across 38 files; the opt-in integration suite is skipped in ordinary runs.
+- 7 additional database-backed tests passed against a temporary PostgreSQL 18 instance on a private Unix socket, with only synthetic data and mocked push delivery. They cover assignment authority/cross-branch denial, database constraints, concurrent Nil/activity writes, meeting ownership/metadata, sanitized report projections, combined reminder caps and explicit push consent.
+- Migrations 0050–0052 applied successfully to a generated pre-change schema in that isolated database. A full historical bootstrap first hit the pre-existing migration 0018 containing only `yes`; it was left untouched. The new migration tail was rehearsed independently of that legacy bootstrap defect.
+- TypeScript and scoped ESLint passed after restoring locked dependencies. Production build passed, with only the existing filesystem-tracing notices.
+- A built app was exercised against the isolated database through a local database bridge, using synthetic Better Auth users on 127.0.0.1 (separate cookie host from the user's localhost session). Unit-leader roster/detail access, cross-branch 404 denial, hidden notes/contacts, profile-name save/session refresh, collapsed report default, category-specific meeting choices, Member attendance 1, and role reset after changing kinds were verified in the browser. Shared drawer has one expanded parent; mobile reporting width is 410px with no overflow.
+- All 24 public destination screens rendered at desktop/mobile widths with no missing-page placeholders or horizontal overflow. Root home and footer dashboard links preserve the preview. Sample downloads are labeled; protected originals and live credential changes remain separate.
 
-## Local comparison route
+Screenshots live under `screenshots/connected-*`. Actual remote photo upload, production migrations/assignments, and real notification delivery were intentionally not exercised. SQL integration used a local Postgres driver/bridge, not the hosted Neon transport.
 
-`http://localhost:3011/preview/pleros/consolidated-home?as=d-kemi` renders the actual home presentation with synthetic props, preview-only links and installation controls disabled. It is not an authenticated session or proof of live data loading. Its import-isolation check passes.
-
-Screenshots:
-- `screenshots/consolidated-actual-home-mobile.jpg`
-- `screenshots/consolidated-actual-home-desktop.jpg`
-- `screenshots/after-branch-pastor-individual-report.jpg`
-
-## Still required
-
-1. Bind the real three-category reporting UI and meeting role fields to the guarded services; verify against an isolated database before migration/activation.
-2. Implement church branch/unit assignment storage, server-derived supervisory context, appointment permissions and scoped report queries. No production Church hierarchy exists yet; current location-group permissions remain distinct.
-3. Connect reminder dispatch and manual sends only after the roster and shared checkpoint are enforced, with existing notification preferences and explicit rollout authorization.
-4. Connect real profile name/photo settings without changing identity, roles or password consent.
-5. Run populated authenticated desktop/mobile/keyboard QA with an authorized isolated fixture/session. Production-backed dashboard visits can write analytics/user mappings, so no production-backed session was used for this check.
-
-The current public demo deployment is a separate fixed snapshot, not these in-progress production integrations: https://pleros-m2nr32dty-plerosdev.vercel.app/preview/pleros .
-
-## Checks completed at this checkpoint
-
-- 156 focused tests across 21 files passed (stale `.claude/worktrees` copies excluded). Includes declaration ownership and migration-gate tests, reminder clock/cap rules, reporting window, activity rules, preview isolation/scope projections, home access and existing training-preview regressions.
-- Scoped ESLint passed; `git diff --check` passed.
-- Full TypeScript check has only the five known local cache/dependency failures: removed staff route in `.next/types/validator.ts`, missing installed recharts and three xlsx references. No new changed-code errors remain.
-- Actual home presentation rendered at mobile/desktop widths through the fixture adapter; mobile title is 21px, two card columns, no horizontal overflow and no live URLs. This checks presentation, not authenticated data loading/account actions.
-- Migration was generated offline and not executed; real database transaction/constraint behaviour remains unverified until an isolated database run. The live reporting UI/role bindings must be completed before activation.
+The existing deployed public link at c9616c0 predates this pass; deployment status will be recorded after the branch push finishes.

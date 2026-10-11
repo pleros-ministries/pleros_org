@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRef, useState, type FormEvent } from "react";
 import { saveDemoProfile } from "@/lib/preview/pleros/store";
 import { useDemo } from "./demo-context";
@@ -81,9 +82,9 @@ function ProfileForm({ person }: { person: DemoPerson }) {
       <section className={cn(panel, "grid max-w-xl justify-items-start gap-3 p-4 sm:p-5")}>
         <div className="flex w-full items-center justify-between gap-3">
           <h2 className="text-[15px] font-medium text-(--color-text-strong)">Password</h2>
-          <span className="text-[12px] text-(--color-text-muted)">Not connected</span>
+          <span className="text-[12px] text-(--color-text-muted)">Your own account</span>
         </div>
-        <button type="button" className={buttonSecondary} disabled title="Password reset requires a real account and is not connected in this demo">Reset password</button>
+        <Link href="/forgot-password" className={buttonSecondary}>Reset password</Link>
       </section>
     </div>
   );

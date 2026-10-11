@@ -1,3 +1,4 @@
+import { revalidateReportingViews } from "@/lib/dashboard/revalidate-reporting";
 import { NextResponse } from "next/server";
 
 import { getAppSession } from "@/lib/app-session";
@@ -85,6 +86,7 @@ export async function POST(
       score,
       attemptNumber: attemptCount + 1,
     });
+    revalidateReportingViews();
     return NextResponse.json({
       score,
       passed: score >= 70,

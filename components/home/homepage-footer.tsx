@@ -10,13 +10,14 @@ import {
 function FooterNavGroup({
   label,
   links,
-}: HomeNavGroup | { label: string; links: readonly HomeNavLink[] }) {
+  resolveDashboardHref,
+}: (HomeNavGroup | { label: string; links: readonly HomeNavLink[] }) & { resolveDashboardHref: (href: string) => string }) {
   return (
     <div className="grid content-start gap-1.5 self-start">
       <p className="site-footer-heading">{label}</p>
       <nav className="grid gap-0.5">
         {links.map((link) => (
-          <Link key={link.href} href={link.href} className="site-footer-link">
+          <Link key={link.href} href={link.href.startsWith("/dashboard") ? resolveDashboardHref(link.href) : link.href} className="site-footer-link">
             {link.label}
           </Link>
         ))}
@@ -25,7 +26,7 @@ function FooterNavGroup({
   );
 }
 
-export function HomepageFooter() {
+export function HomepageFooter({ resolveDashboardHref = (href) => href }: { resolveDashboardHref?: (href: string) => string } = {}) {
   return (
     <footer className="site-font-theme bg-[var(--color-brand-blue)] text-white">
       <div className="site-shell-bar-inner pb-8 pt-6 lg:pb-8 lg:pt-8">
@@ -40,7 +41,7 @@ export function HomepageFooter() {
 
           <div className="grid grid-cols-1 items-start gap-y-6 sm:grid-cols-2 sm:gap-x-8 sm:gap-y-7 xl:grid-cols-3 xl:gap-x-8">
             {homeFooterNavGroups.map((group) => (
-              <FooterNavGroup key={group.label} {...group} />
+              <FooterNavGroup key={group.label} {...group} resolveDashboardHref={resolveDashboardHref} />
             ))}
           </div>
 

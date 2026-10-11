@@ -239,7 +239,7 @@ export function WelcomeDashboardView({
 
     </div>
     <DashboardChurchMinistryStrip resolveHref={resolveHref} />
-    <HomepageFooter />
+    <HomepageFooter resolveDashboardHref={resolveHref} />
     </>
   );
 }

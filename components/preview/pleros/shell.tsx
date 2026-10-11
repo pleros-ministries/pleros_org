@@ -346,7 +346,7 @@ function Toast() {
 
 export function DemoShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const consolidatedHome = pathname === `${DEMO_BASE}/consolidated-home`;
+  const consolidatedHome = pathname === DEMO_BASE || pathname === `${DEMO_BASE}/consolidated-home`;
   const [menuOpen, setMenuOpen] = useState(false);
   return (
     <div

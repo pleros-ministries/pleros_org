@@ -2,6 +2,7 @@ import { beforeEach, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({ context: vi.fn(), write: vi.fn(), revalidate: vi.fn() }));
 vi.mock("next/cache", () => ({ revalidatePath: mocks.revalidate }));
 vi.mock("@/lib/community/context", () => ({ getCommunityContext: mocks.context, canAccessCommunity: (ctx: { enrollmentId: number | null } | null) => ctx?.enrollmentId != null }));
+vi.mock("@/lib/community/reporting-access", () => ({ canAccessReporting: async (ctx: { enrollmentId: number | null } | null) => ctx?.enrollmentId != null }));
 vi.mock("@/lib/db/queries/daily-report-declarations", () => ({ declareOwnDailyReport: mocks.write }));
 import { declareDailyReport } from "@/app/(site)/dashboard/community/_actions/daily-report-actions";
 

@@ -218,6 +218,7 @@ export const communityNotificationKindEnum = pgEnum(
     "made_leader",
     "flag_resolved",
     "leader_nudge",
+  "daily_report_reminder",
     "discipleship_joined",
     "discipleship_prompt",
     "discipleship_response",
@@ -2358,3 +2359,39 @@ export const dailyReportMeetingDetails = pgTable("daily_report_meeting_details",
   check("daily_report_meeting_role_check", sql`${t.reportingRole} in ('leader', 'worker', 'member')`),
   check("daily_report_meeting_taught_check", sql`(${t.reportingRole} = 'leader' and ${t.taught} is not null and length(trim(${t.taught})) between 1 and 500) or (${t.reportingRole} in ('worker', 'member') and ${t.taught} is null)`),
 ]);
+
+// Church organisation is independent from auth roles and geographic community units.
+export const churchBranches = pgTable("church_branches", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [uniqueIndex("church_branches_name_idx").on(t.name)]);
+
+export const churchUnits = pgTable("church_units", {
+  id: serial("id").primaryKey(),
+  branchId: integer("branch_id").notNull().references(() => churchBranches.id),
+  name: text("name").notNull(),
+}, (t) => [uniqueIndex("church_units_branch_name_idx").on(t.branchId, t.name)]);
+
+export const churchAssignments = pgTable("church_assignments", {
+  userId: text("user_id").primaryKey().references(() => users.id),
+  role: text("role").notNull(),
+  branchId: integer("branch_id").references(() => churchBranches.id),
+  unitId: integer("unit_id").references(() => churchUnits.id),
+  supervisorId: text("supervisor_id").references(() => users.id),
+  assignedBy: text("assigned_by").notNull().references(() => users.id),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  index("church_assignments_supervisor_idx").on(t.supervisorId),
+  index("church_assignments_branch_idx").on(t.branchId),
+  index("church_assignments_unit_idx").on(t.unitId),
+  uniqueIndex("church_assignments_one_pastor_idx").on(t.role).where(sql`${t.role} = 'pastor'`),
+  check("church_assignment_shape", sql`(${t.role} = 'pastor' and ${t.branchId} is null and ${t.unitId} is null and ${t.supervisorId} is null) or (${t.role} = 'branch_pastor' and ${t.branchId} is not null and ${t.unitId} is null and ${t.supervisorId} is not null) or (${t.role} in ('unit_leader', 'worker') and ${t.branchId} is not null and ${t.unitId} is not null and ${t.supervisorId} is not null)`),
+  check("church_assignment_no_self_supervision", sql`${t.supervisorId} is null or ${t.supervisorId} <> ${t.userId}`),
+]);
+
+export const dailyReportPreferences = pgTable("daily_report_preferences", {
+  userId: text("user_id").primaryKey().references(() => users.id, { onDelete: "cascade" }),
+  pushEnabled: boolean("push_enabled").notNull().default(false),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});

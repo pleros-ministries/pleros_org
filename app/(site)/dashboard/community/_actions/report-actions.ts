@@ -1,12 +1,13 @@
 "use server";
 
+import { canAccessReporting } from "@/lib/community/reporting-access";
+
 import { normaliseMeetingDetails } from "@/lib/community/daily-report";
 import { dailyReportingEnabled } from "@/lib/db/queries/daily-report-declarations";
 import { revalidatePath } from "next/cache";
 
 import { getAppSession } from "@/lib/app-session";
 import {
-  canAccessCommunity,
   getCommunityContext,
   type CommunityContext,
 } from "@/lib/community/context";
@@ -50,7 +51,7 @@ const WINDOW_ERROR = MINISTRY_WRITE_WINDOW_MESSAGE;
 
 async function requireCommunity(): Promise<CommunityContext> {
   const ctx = await getCommunityContext();
-  if (!ctx || !canAccessCommunity(ctx)) throw new Error("Forbidden");
+  if (!ctx || !(await canAccessReporting(ctx))) throw new Error("Forbidden");
   return ctx;
 }
 
@@ -59,6 +60,7 @@ function revalidateReports() {
   revalidatePath("/dashboard/community/report/people");
   revalidatePath("/dashboard/community/report/history");
   revalidatePath("/dashboard/community/leader");
+  revalidatePath("/dashboard/church");
   revalidatePath("/admin/ministry");
 }
 

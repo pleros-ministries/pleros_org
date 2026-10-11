@@ -24,7 +24,7 @@ export default async function CommunityLayout({
   // Navigation, unread badges and the shared query client come from the
   // dashboard layout; this keeps only the community's title bar.
   return (
-    <section className="site-font-theme flex min-h-[calc(100dvh-var(--dashboard-topbar-offset,0px))] flex-col bg-[#e8edf7] text-zinc-900">
+    <section className="site-font-theme flex min-h-[calc(100dvh-var(--dashboard-topbar-offset,0px))] flex-col bg-white text-zinc-900">
       <CommunityShell unitName={ctx.unit?.name ?? null}>
         <div className="site-shell-page sogp-shell-page pb-10 pt-4">
           <CommunityGrid>{children}</CommunityGrid>

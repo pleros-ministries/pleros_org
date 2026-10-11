@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { BellIcon } from "lucide-react";
@@ -40,6 +41,8 @@ function summarise(n: Notification): string {
       return `You now lead ${(n.payload.unitName as string) ?? "your unit"}`;
     case "flag_resolved":
       return `Your report was ${(n.payload.outcome as string) ?? "reviewed"}`;
+    case "daily_report_reminder":
+      return "Please complete your daily report.";
     case "leader_nudge":
       return (n.payload.message as string) ?? "A note from your unit leader";
     case "discipleship_joined":
@@ -151,7 +154,7 @@ export function NotificationBell({
                     item.readAt ? "text-zinc-500" : "bg-zinc-50 text-zinc-800"
                   }`}
                 >
-                  {summarise(item)}
+                  {item.kind === "daily_report_reminder" ? <Link href={`/dashboard/community/report${typeof item.payload.day === "string" && /^\d{4}-\d{2}-\d{2}$/.test(item.payload.day) ? `?day=${item.payload.day}` : ""}`} onClick={() => setOpen(false)}>{summarise(item)}</Link> : summarise(item)}
                 </li>
               ))}
             </ul>

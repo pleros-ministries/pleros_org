@@ -34,7 +34,7 @@ export default async function DashboardLayout({
     <CommunityQueryProvider>
       <PushBindingSync userId={viewer.session.user.id} />
       <DashboardShell
-        viewer={{ name: viewer.session.user.name, roleLabel: viewer.roleLabel }}
+        viewer={{ name: viewer.session.user.name, roleLabel: viewer.roleLabel, image: viewer.session.user.image }}
         sections={viewer.navigation}
       >
         {children}

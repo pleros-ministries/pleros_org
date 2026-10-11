@@ -19,6 +19,9 @@ export type DashboardCapabilities = {
   managesLocationGroups: boolean;
   /** Any non-student role; `/admin` turns students away itself. */
   staffConsole: boolean;
+  churchOversight?: boolean;
+  churchAssignments?: boolean;
+  reporting?: boolean;
 };
 
 export type DashboardNavSectionKey =
@@ -52,7 +55,7 @@ export function buildDashboardNavigation(
   const personal: DashboardNavItem[] = [
     { key: "overview", label: "Overview", href: "/dashboard", exact: true },
   ];
-  if (caps.community) {
+  if (caps.community || caps.reporting) {
     personal.push(
       { key: "report", label: "Daily report", href: "/dashboard/community/report" },
       {
@@ -134,6 +137,9 @@ export function buildDashboardNavigation(
       label: "My disciples",
       href: "/dashboard/sogp/discipleship",
     });
+  }
+  if (caps.churchOversight || caps.churchAssignments) {
+    oversight.push({ key: "church", label: caps.churchOversight ? "Church oversight" : "Church assignments", href: "/dashboard/church" });
   }
   if (caps.community && caps.managesLocationGroups) {
     oversight.push({

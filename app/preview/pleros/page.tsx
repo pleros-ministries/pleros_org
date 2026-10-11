@@ -1,5 +1,2 @@
-import { OverviewView } from "@/components/preview/pleros/overview-view";
-
-export default function DemoOverviewPage() {
-  return <OverviewView />;
-}
+import { ConsolidatedHomeView } from "@/components/preview/pleros/consolidated-home-view";
+export default function PlerosDemoHomePage() { return <ConsolidatedHomeView />; }

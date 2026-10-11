@@ -21,11 +21,13 @@ export function ActivityCard({
   activity,
   today,
   canChange,
+  meetingDetails,
 }: {
   activity: MemberActivity;
   today: string;
   /** False once the day has left the reporting window. */
   canChange: boolean;
+  meetingDetails?: { reportingRole: string; taught: string | null };
 }) {
   const router = useRouter();
   const { run, pending, error } = useReportAction();
@@ -66,6 +68,10 @@ export function ActivityCard({
       </div>
       {where ? <p className="text-xs text-zinc-500">{where}</p> : null}
       <p className="text-[13px] text-zinc-700">{activityKeyNumbers(activity)}</p>
+      {meetingDetails ? <div className="grid gap-1 text-[13px] text-(--color-text)">
+        <p>{meetingDetails.reportingRole === "leader" ? "Leader" : meetingDetails.reportingRole === "worker" ? "Worker" : "Member"}</p>
+        {meetingDetails.taught ? <p className="whitespace-pre-wrap">{meetingDetails.taught}</p> : null}
+      </div> : null}
       {canChange ? (
         <div className="flex flex-wrap items-center gap-4 pt-0.5">
           <Link href={`/dashboard/community/report/${activity.id}`} className={textLink}>

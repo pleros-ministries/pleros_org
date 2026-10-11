@@ -1,3 +1,4 @@
+import { revalidateReportingViews } from "@/lib/dashboard/revalidate-reporting";
 import { NextResponse } from "next/server";
 
 import { getAppSession } from "@/lib/app-session";
@@ -16,13 +17,13 @@ export async function POST(
     return NextResponse.json({ error: "Invalid completion request" }, { status: 400 });
   }
   try {
-    return NextResponse.json(
-      await setPreparationLessonComplete({
+    const result = await setPreparationLessonComplete({
         userId: session.user.id,
         preparationDayId: id,
         complete: body.complete,
-      }),
-    );
+      });
+    revalidateReportingViews();
+    return NextResponse.json(result);
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Completion could not be saved" },

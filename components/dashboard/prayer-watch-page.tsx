@@ -107,6 +107,8 @@ type PrayerWatchPageProps = {
   year: number;
   month: number;
   todayKey: string;
+  initialDateKey?: string | null;
+  initialTab?: "prayer" | "bible";
   attendanceRecords: Array<{
     dateKey: string;
     session: "unspecified" | PrayerWatchSessionId;
@@ -120,16 +122,19 @@ export function PrayerWatchPage({
   todayKey,
   attendanceRecords,
   bibleReadingLogs,
+  initialDateKey = null,
+  initialTab = "prayer",
 }: PrayerWatchPageProps) {
   const attendedDateKeys = [...new Set(attendanceRecords.map((record) => record.dateKey))];
   const weeks = buildPrayerWatchCalendar({ year, month, attendedDateKeys, todayKey });
   const cells = weeks.flat();
-  const [selectedDateKey, setSelectedDateKey] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"prayer" | "bible">("prayer");
+  const [selectedDateKey, setSelectedDateKey] = useState<string | null>(initialDateKey);
+  const [activeTab, setActiveTab] = useState<"prayer" | "bible">(initialTab);
   const [selectedSession, setSelectedSession] = useState<PrayerWatchSessionId>("morning");
-  const [chaptersRead, setChaptersRead] = useState("1");
-  const [currentBook, setCurrentBook] = useState("Matthew");
-  const [currentChapter, setCurrentChapter] = useState("1");
+  const initialReading = bibleReadingLogs.find((log) => log.dateKey === initialDateKey);
+  const [chaptersRead, setChaptersRead] = useState(String(initialReading?.chaptersRead ?? 1));
+  const [currentBook, setCurrentBook] = useState(initialReading?.currentBook ?? "Matthew");
+  const [currentChapter, setCurrentChapter] = useState(String(initialReading?.currentChapter ?? 1));
   const selectedCell = selectedDateKey
     ? (cells.find((cell) => cell.dateKey === selectedDateKey) ?? null)
     : null;

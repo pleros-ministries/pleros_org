@@ -5,7 +5,7 @@ import type { DemoActivity, DemoState } from "./types";
 
 export function canSeeReportDetails(state: DemoState, viewerId: string): boolean {
   const viewer = findPerson(state, viewerId);
-  return viewer?.tier === "pastor" || viewer?.tier === "pastorate";
+  return viewer?.tier === "pastor" || viewer?.tier === "pastorate" || viewer?.tier === "unit_leader";
 }
 
 function safeActivity(activity: DemoActivity) {
@@ -18,6 +18,9 @@ function safeActivity(activity: DemoActivity) {
 /** Approved organisational report projection: no notes, contacts or interactions. */
 export function oversightReport(state: DemoState, viewerId: string, subjectId: string, day: string) {
   if (!canSeeReportDetails(state, viewerId) || !oversees(state, viewerId, subjectId)) return null;
+  const viewer = findPerson(state, viewerId);
+  const subject = findPerson(state, subjectId);
+  if (viewer?.tier === "unit_leader" && (subject?.tier !== "worker" || subject.supervisorId !== viewerId)) return null;
   const report = dayReport(state, subjectId, day);
   return { dateKey: day, statuses: report.statuses, overall: report.overall,
     devotionLines: report.devotionLines, ministry: report.ministry.map(safeActivity),

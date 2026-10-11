@@ -22,7 +22,7 @@ export default async function FocusedDashboardLayout({
   return (
     <CommunityQueryProvider>
       <DashboardShell
-        viewer={{ name: viewer.session.user.name, roleLabel: viewer.roleLabel }}
+        viewer={{ name: viewer.session.user.name, roleLabel: viewer.roleLabel, image: viewer.session.user.image }}
         sections={viewer.navigation}
       >
         {children}
