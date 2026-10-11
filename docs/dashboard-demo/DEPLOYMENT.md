@@ -23,3 +23,12 @@ The initial CLI upload included local .env, credential and development files bec
 - Devotional facts prefill from canonical sources and require one daily confirmation; persist that declaration separately, without copying facts.
 
 See [Consolidation map](CONSOLIDATION.md) for remaining backend/layout clashes.
+
+## Connection preview — 11 October 2026
+
+- Code commit: `f3b38c3`, pushed to `codex/authenticated-dashboard-demo`.
+- Public no-login demo: https://pleros-rg17luykk-plerosdev.vercel.app/preview/pleros?as=d-kemi .
+- Vercel deployment: `dpl_CDGYtKZSEvbJP9ZNJtrexd8xrPC7`, Ready; metadata matches the code commit and an anonymous request returns 200.
+- All 24 former destination placeholders now render sample screens. Root/Overview use the current shared home; Reporting overview retains earlier report metrics. Protected originals/account recovery and real sends remain separate from fixture interactions.
+- Connection verification: 296 regression tests plus 7 local-database integration checks; scoped lint, TypeScript, build and populated synthetic-session browser checks passed. See CONSOLIDATION-IMPLEMENTATION.md for limits.
+- Production migrations, appointments and reminder delivery were not performed. New gates are absent from Vercel configuration and default disabled. Temporary local database, bridge and test tabs were removed.

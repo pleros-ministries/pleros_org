@@ -49,6 +49,6 @@ Start with the shared shell and home. Then migrate Devotion and Welcome Pack, SO
 
 The connection implementation is complete locally on `codex/authenticated-dashboard-demo`, preserving existing functionality; verification and activation are separate. See [implementation checkpoint](CONSOLIDATION-IMPLEMENTATION.md) for completed code, guarded migration work, QA limits and remaining integrations. Release/activation will be reviewed separately; no unanswered policy question blocks the current implementation.
 
-The currently deployed public home is https://pleros-ic33o7x8w-plerosdev.vercel.app/preview/pleros/consolidated-home?as=d-kemi (c9616c0). Its public-access override is deployment-scoped. The newer connection pass is local, unverified and not deployed; production has not been promoted or migrated.
+The currently deployed public home is https://pleros-ic33o7x8w-plerosdev.vercel.app/preview/pleros/consolidated-home?as=d-kemi (c9616c0). Its public-access override is deployment-scoped. The connection pass is now pushed and verified at f3b38c3, with public preview https://pleros-rg17luykk-plerosdev.vercel.app/preview/pleros?as=d-kemi . Production has not been promoted or migrated.
 
 Remaining release work is verification, isolated migration rehearsal, explicit initial appointments, and activation of the prepared services. No additional product question blocks that implementation. If implementation exposes a genuinely new policy conflict, raise it separately rather than invent an answer.

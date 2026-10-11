@@ -1,6 +1,6 @@
 # Consolidation implementation checkpoint
 
-11 October 2026. Branch `codex/authenticated-dashboard-demo`. The previous shell/home pass is pushed at `c9616c0`; the connection pass below is local and uncommitted. No production migration, appointment, flag activation or reminder delivery has been performed.
+11 October 2026. Branch `codex/authenticated-dashboard-demo`. The connection pass is committed/pushed at `f3b38c3` and its Vercel preview is Ready. No production migration, appointment, flag activation or reminder delivery has been performed.
 
 ## Connected implementation
 
@@ -32,4 +32,4 @@ The user explicitly authorized verification on 11 October.
 
 Screenshots live under `screenshots/connected-*`. Actual remote photo upload, production migrations/assignments, and real notification delivery were intentionally not exercised. SQL integration used a local Postgres driver/bridge, not the hosted Neon transport.
 
-The existing deployed public link at c9616c0 predates this pass; deployment status will be recorded after the branch push finishes.
+Public connection preview: https://pleros-rg17luykk-plerosdev.vercel.app/preview/pleros?as=d-kemi . Deployment `dpl_CDGYtKZSEvbJP9ZNJtrexd8xrPC7` is Ready at f3b38c3 and anonymously returns HTTP 200; its access override is deployment-scoped. Production activation gates remain off.
