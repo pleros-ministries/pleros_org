@@ -133,7 +133,7 @@ function LedGroups() {
               aria-pressed={active}
               onClick={() => select(group.id)}
               className={cn(
-                "inline-flex min-h-10 items-center gap-2 rounded-full border px-4 text-[13.5px] font-medium transition-colors",
+                "inline-flex min-h-7 items-center gap-1.5 rounded-full border px-3 text-[12.5px] font-medium transition-colors",
                 focusRing,
                 active
                   ? "border-(--color-brand-blue) bg-(--color-brand-blue) text-white"

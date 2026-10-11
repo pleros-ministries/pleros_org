@@ -175,6 +175,7 @@ Consolidated 2026-08-31. Keep this file short, current, pattern-focused, and fre
 
 ## Copy and reset details
 
+- Filter/segmented pills use a compact 28px height and 12.5px text across the dashboard/demo. Community has one post-type filter rail; sorting uses a dropdown, with the same pure toolbar shared between live and synthetic adapters.
 - Native dashboard dropdowns always show a visible chevron with reserved end padding; cover the demo, live pages and portaled dialogs, while excluding controls that already render their own arrow. Vercel Secret pull placeholders are redactions, not actual flag values; keep non-sensitive rollout flags as Config and verify them separately.
 - Use plain devotional actions (`Save`, `Edit`) and call recorded items activities; keep backend terms such as `at the source` out of dashboard copy.
 - Prefilled public-form values remain editable without explanatory hints.

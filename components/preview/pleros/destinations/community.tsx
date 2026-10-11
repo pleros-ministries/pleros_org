@@ -18,6 +18,7 @@ import {
   UsersIcon,
 } from "lucide-react";
 
+import { FeedToolbar } from "@/components/community/feed-toolbar";
 import { COMMUNITY_TOPICS, topicLabel, type CommunityTopicKey } from "@/lib/community/topics";
 import { shiftDate } from "@/lib/sogp/daily-date";
 import { cn } from "@/lib/utils";
@@ -256,10 +257,13 @@ function PostStream({
     <div className="grid gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         {showFilters ? (
-          <div className="flex flex-wrap gap-2">
-            <Segmented label="Sort" value={sort} onChange={setSort} options={[{ key: "latest", label: "Latest" }, { key: "top", label: "Top" }, { key: "unanswered", label: "Unanswered" }]} />
-            <Segmented label="Show" value={filter} onChange={setFilter} options={[{ key: "all", label: "All" }, { key: "official", label: "Official" }, { key: "discussion", label: "Discussions" }]} />
-          </div>
+          <FeedToolbar
+            view={{ sort, filter: filter === "discussion" ? "discussions" : filter }}
+            onChange={(view) => {
+              setSort(view.sort);
+              setFilter(view.filter === "discussions" ? "discussion" : view.filter);
+            }}
+          />
         ) : <span />}
         {canPost ? (
           <button type="button" className={buttonPrimary} onClick={() => setComposing(true)}>
@@ -700,7 +704,7 @@ export function DiscipleshipDiscussionsDestination() {
       {spaces.length > 1 ? (
         <div className="flex flex-wrap gap-2" role="group" aria-label="Discipleship spaces">
           {spaces.map(({ group, role }) => (
-            <button key={group.id} type="button" aria-pressed={group.id === selected.group.id} onClick={() => setSelectedId(group.id)} className={cn("inline-flex min-h-8 items-center gap-1.5 rounded-full border px-3 text-[12.5px] font-medium", focusRing, group.id === selected.group.id ? "border-(--color-brand-blue) bg-(--color-brand-sky-soft) text-(--color-brand-blue)" : "border-(--color-line-strong) bg-white text-(--color-text-strong)")}>
+            <button key={group.id} type="button" aria-pressed={group.id === selected.group.id} onClick={() => setSelectedId(group.id)} className={cn("inline-flex min-h-7 items-center gap-1.5 rounded-full border px-3 text-[12.5px] font-medium", focusRing, group.id === selected.group.id ? "border-(--color-brand-blue) bg-(--color-brand-sky-soft) text-(--color-brand-blue)" : "border-(--color-line-strong) bg-white text-(--color-text-strong)")}>
               {group.name}
               <span className="text-(--color-text-muted)">· {role === "led" ? "Lead" : "Member"}</span>
             </button>

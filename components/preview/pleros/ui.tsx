@@ -345,7 +345,7 @@ export function Segmented<T extends string>({
               event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>("button[role='radio']")[next]?.focus();
             }}
             className={cn(
-              "inline-flex min-h-9 items-center gap-2 rounded-full px-3.5 text-[13px] font-medium transition-[background-color,color,box-shadow] duration-150",
+              "inline-flex min-h-7 items-center gap-1.5 rounded-full px-3 text-[12.5px] font-medium transition-[background-color,color,box-shadow] duration-150",
               focusRing,
               selected
                 ? "bg-white text-(--color-brand-blue) shadow-[0_1px_2px_rgba(6,16,86,0.08),0_0_0_1px_var(--color-line)]"

@@ -28,7 +28,7 @@ const primaryButtonClass =
 const quietButtonClass =
   "text-xs font-medium text-[var(--color-brand-blue)] underline-offset-4 hover:underline disabled:opacity-60";
 const chipClass =
-  "inline-flex min-h-9 shrink-0 items-center gap-1.5 rounded-full border px-3 text-xs font-medium transition-colors duration-150";
+  "inline-flex min-h-7 shrink-0 items-center gap-1.5 rounded-full border px-3 text-[12.5px] font-medium transition-colors duration-150";
 
 function ErrorText({ error }: { error: string | null }) {
   return error ? (
