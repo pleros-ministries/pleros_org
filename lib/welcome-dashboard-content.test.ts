@@ -102,38 +102,32 @@ describe("welcome dashboard content", () => {
     expect(source).toContain("WelcomePackPage");
   });
 
-  test("uses the updated resource-hub intro copy on the dashboard home", () => {
+  test("keeps the dashboard home compact, with no explanatory hero copy", () => {
     const source = readFileSync(
       join(process.cwd(), "components", "dashboard", "welcome-dashboard-view.tsx"),
       "utf8",
     );
 
-    expect(source).toContain("Start with SOGP and keep the resources");
+    expect(source).not.toContain("Start with SOGP and keep the resources");
     expect(source).not.toContain("Your resources are gathered here and tied to");
+    expect(source).toContain("text-[21px]");
+    expect(source).toContain("<InstallAppCta />");
   });
 
-  test("adds a church ministry strip above the dashboard footer", () => {
+  test("keeps a compact church ministry link on the dashboard home", () => {
     const source = readFileSync(
       join(process.cwd(), "components", "dashboard", "welcome-dashboard-view.tsx"),
       "utf8",
     );
 
-    expect(source).toContain("DashboardChurchMinistryStrip");
-    expect(source).toContain("bg-[linear-gradient(180deg,#f4fcff_0%,#dff5ff_100%)]");
-    expect(source).toContain("py-10");
-    expect(source).toContain("gap-6 sm:gap-7");
-    expect(source).toContain("/site/home/assets/pathway-card-headers/church-card-header.svg");
-    expect(source).toContain("right-[-5rem] bottom-[-3.5rem]");
-    expect(source).toContain("md:right-[-3rem] md:bottom-[-7.5rem]");
-    expect(source).toContain("bg-[linear-gradient(135deg,rgba(5,20,128,0.2)_0%,rgba(5,20,128,0.12)_58%,rgba(5,20,128,0.06)_100%)]");
-    expect(source).toContain("WebkitMaskImage");
-    expect(source).toContain("Our church ministry");
-    expect(source).toContain("text-[var(--color-text-strong)]");
-    expect(source).not.toContain("text-[rgba(5,20,128,0.78)]");
-    expect(source).toContain("grid max-w-[28rem] gap-3");
-    expect(source).toContain("Fellowship with Fullness of Christ Church");
-    expect(source).toContain('href="/fcc"');
-    expect(source).toContain("Learn more");
-    expect(source).toContain("<DashboardChurchMinistryStrip />");
+    expect(source).toContain("Fullness of Christ Church");
+    expect(source).toContain('href={resolveHref("/fcc")}');
   });
+});
+
+
+test("community access is independent of SOGP enrolment for an assigned pastor", () => {
+  const cards = resolveWelcomeDashboardSections({ isSogpEnrolled: false, communityAccess: true, startsAt: null }).flatMap((section) => section.cards);
+  expect(cards.find((card) => card.id === "community")).toMatchObject({ href: "/dashboard/community", status: "available" });
+  expect(cards.find((card) => card.id === "sogp")).toMatchObject({ status: "enrolment_required" });
 });

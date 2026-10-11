@@ -1,3 +1,4 @@
+import { revalidateReportingViews } from "@/lib/dashboard/revalidate-reporting";
 import { NextResponse } from "next/server";
 
 import { getAppSession } from "@/lib/app-session";
@@ -30,5 +31,6 @@ export async function POST(
   } else {
     await markLessonNotesRead(session.user.id, data.track.lesson.id);
   }
+  revalidateReportingViews();
   return NextResponse.json({ success: true });
 }

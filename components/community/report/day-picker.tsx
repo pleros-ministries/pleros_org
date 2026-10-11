@@ -48,7 +48,9 @@ export function DayPicker({
             href={dayHref(dateKey, today)}
             aria-current={active ? "page" : undefined}
             className={`inline-flex h-8 items-center rounded-full px-3.5 text-[13px] font-medium transition-colors ${
-              active
+              dateKey === today
+                ? `bg-(--color-brand-lime) text-(--color-brand-blue) ${active ? "ring-1 ring-inset ring-(--color-brand-blue)" : ""}`
+                : active
                 ? "bg-(--color-brand-blue) text-white"
                 : "text-zinc-600 hover:text-zinc-900"
             }`}

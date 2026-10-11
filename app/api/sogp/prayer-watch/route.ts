@@ -1,3 +1,4 @@
+import { revalidateReportingViews } from "@/lib/dashboard/revalidate-reporting";
 import { NextResponse } from "next/server";
 
 import { getAppSession } from "@/lib/app-session";
@@ -11,13 +12,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid Prayer Watch request" }, { status: 400 });
   }
   try {
-    return NextResponse.json(
-      await setSogpMorningPrayerComplete({
+    const result = await setSogpMorningPrayerComplete({
         userId: session.user.id,
         dateKey: body.dateKey,
         complete: body.complete,
-      }),
-    );
+      });
+    revalidateReportingViews();
+    return NextResponse.json(result);
   } catch (error) {
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Prayer Watch could not be saved" },

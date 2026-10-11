@@ -1,3 +1,6 @@
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { WelcomePackGiftsPage } from "@/components/dashboard/welcome-pack-pages";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, test } from "vitest";
@@ -127,7 +130,7 @@ describe("welcome pack completion wiring", () => {
     expect(pageSource).toContain("mainGifts");
     expect(pageSource).toContain("extraGifts");
     expect(pageSource).toContain("Supplementary resources are being prepared.");
-    expect(pageSource).toContain("Coming soon");
+    expect(renderToStaticMarkup(createElement(WelcomePackGiftsPage, { extraGiftsUnlocked: false }))).toContain("Coming soon");
     expect(pageSource).not.toContain("Locked until you share");
     expect(pageSource).not.toContain("confirmWelcomePackShareAction");
   });

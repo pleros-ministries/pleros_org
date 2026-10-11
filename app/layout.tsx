@@ -1,8 +1,5 @@
 import type { Metadata } from "next";
-import { GoogleAnalytics } from "@/components/google-analytics";
-import { MetaPixel } from "@/components/meta-pixel";
-import { PushNotificationPrompt } from "@/components/push-notification-prompt";
-import { ServiceWorkerRegister } from "@/components/service-worker-register";
+import { RootIntegrations } from "@/components/root-integrations";
 import { Be_Vietnam_Pro, DM_Sans, Figtree, Sen } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
@@ -99,10 +96,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="page-shell antialiased" suppressHydrationWarning>
-        <ServiceWorkerRegister />
-        <PushNotificationPrompt />
-        <GoogleAnalytics />
-        <MetaPixel />
+        <RootIntegrations />
         {children}
       </body>
     </html>

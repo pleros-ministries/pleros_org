@@ -67,7 +67,7 @@ const STATUS_DISPLAY: Record<StudentStatus, { label: string; className: string }
   generally_inconsistent: { label: "Inconsistent", className: "bg-orange-50 text-orange-700" },
   declining: { label: "Slowing down", className: "bg-orange-50 text-orange-700" },
   at_risk: { label: "At risk", className: "bg-red-50 text-red-700" },
-  unresponsive: { label: "Not active", className: "bg-zinc-100 text-zinc-600" },
+  unresponsive: { label: "Not active", className: "bg-zinc-100 text-(--color-text-muted)" },
 };
 
 const iconClass = "size-4 text-[var(--color-brand-blue)]";
@@ -100,7 +100,7 @@ export function DiscipleshipPage({
       key: "leading",
       label: "Groups you lead",
       badge: (
-        <span className="rounded-full bg-zinc-100 px-1.5 py-0.5 text-[0.7rem] text-zinc-600">
+        <span className="rounded-full bg-zinc-100 px-1.5 py-0.5 text-[0.7rem] text-(--color-text-muted)">
           {ledGroups.length}
         </span>
       ),
@@ -119,27 +119,30 @@ export function DiscipleshipPage({
   ];
 
   return (
-    <section className="site-font-theme min-h-screen bg-[#f6f5f1] pb-16 text-zinc-900">
-      <nav
-        aria-label="SOGP dashboard navigation"
-        className="sticky top-0 z-30 border-b border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)] shadow-sm"
-      >
-        <div className="site-shell-page sogp-shell-page flex min-h-12 items-center justify-between gap-4">
-          <Link
-            href={preview ? "/preview/dashboard" : "/dashboard/sogp"}
-            className="inline-flex min-h-9 items-center gap-1.5 rounded-sm px-1 text-xs font-medium text-white/85 transition-colors duration-150 hover:text-white focus-visible:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white active:scale-[0.98]"
-          >
-            <ArrowLeftIcon className="size-3.5" strokeWidth={2} /> Dashboard
-          </Link>
-          <span className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-[var(--color-brand-lime)]">
-            SOGP
-          </span>
-        </div>
-      </nav>
+    <section className="site-font-theme min-h-screen bg-[#f6f5f1] pb-16 text-(--color-text-strong)">
+      {/* The live dashboard shell carries navigation; the standalone preview keeps its own. */}
+      {preview ? (
+        <nav
+          aria-label="SOGP dashboard navigation"
+          className="sticky top-[var(--dashboard-topbar-offset,0px)] z-30 border-b border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)] shadow-sm"
+        >
+          <div className="site-shell-page sogp-shell-page flex min-h-12 items-center justify-between gap-4">
+            <Link
+              href="/preview/dashboard"
+              className="inline-flex min-h-9 items-center gap-1.5 rounded-sm px-1 text-xs font-medium text-white/85 transition-colors duration-150 hover:text-white focus-visible:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white active:scale-[0.98]"
+            >
+              <ArrowLeftIcon className="size-3.5" strokeWidth={2} /> Dashboard
+            </Link>
+            <span className="text-[0.7rem] font-medium uppercase tracking-[0.14em] text-[var(--color-brand-lime)]">
+              SOGP
+            </span>
+          </div>
+        </nav>
+      ) : null}
 
       <div className="site-shell-page sogp-shell-page grid gap-4 pb-6 pt-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-start">
         <header className="grid gap-3 lg:col-span-2">
-          <h1 className="ppc-heading text-lg font-semibold text-zinc-900">Discipleship</h1>
+          <h1 className="text-[24px] font-medium leading-[1.1] tracking-[-0.025em] text-(--color-text-strong)">Discipleship</h1>
           <div
             role="tablist"
             aria-label="Discipleship groups"
@@ -154,10 +157,10 @@ export function DiscipleshipPage({
                   role="tab"
                   aria-selected={selected}
                   onClick={() => setView(item.key)}
-                  className={`-mb-px inline-flex min-h-10 items-center gap-1.5 border-b-2 text-sm font-medium transition-colors duration-150 ${
+                  className={`-mb-px inline-flex min-h-10 items-center gap-1.5 border-b-2 text-[13px] font-medium transition-colors duration-150 ${
                     selected
                       ? "border-[var(--color-brand-blue)] text-[var(--color-brand-blue)]"
-                      : "border-transparent text-zinc-500 hover:text-zinc-800"
+                      : "border-transparent text-(--color-text-muted) hover:text-zinc-800"
                   }`}
                 >
                   {item.label}
@@ -188,7 +191,7 @@ export function DiscipleshipPage({
 
               <div className="grid gap-4">
                 {paused ? (
-                  <p className="rounded-sm border border-zinc-200 bg-white p-4 text-xs text-zinc-600">
+                  <p className="rounded-sm border border-zinc-200 bg-white p-4 text-xs text-(--color-text-muted)">
                     This group has been paused by the Pleros team. Contact support if you think
                     this is a mistake.
                   </p>
@@ -206,7 +209,7 @@ export function DiscipleshipPage({
                   icon={<UsersIcon className={iconClass} strokeWidth={2} />}
                 >
                   {group.disciples.length === 0 ? (
-                    <p className="text-xs text-zinc-500">
+                    <p className="text-xs text-(--color-text-muted)">
                       No one yet. Share this group&apos;s invite link with the people you&apos;d
                       like to walk with through SOGP.
                     </p>
@@ -258,7 +261,7 @@ export function DiscipleshipPage({
             {myDiscipler ? (
               <DisciplerSection discipler={myDiscipler} preview={preview} />
             ) : (
-              <p className="rounded-sm border border-zinc-200 bg-white p-4 text-xs leading-[1.5] text-zinc-600">
+              <p className="rounded-sm border border-zinc-200 bg-white p-4 text-xs leading-[1.5] text-(--color-text-muted)">
                 You haven&apos;t joined a discipleship group yet. When someone shares their invite
                 link with you, open it to join their group. You can belong to one group at a time.
               </p>
@@ -370,7 +373,7 @@ function dayActivities(day: DiscipleDayParticipation) {
 }
 
 const stepButtonClass =
-  "inline-flex h-8 items-center rounded-sm border border-zinc-200 bg-white px-2 text-zinc-600 hover:bg-zinc-50 disabled:opacity-40";
+  "inline-flex h-8 items-center rounded-sm border border-zinc-200 bg-white px-2 text-(--color-text-muted) hover:bg-zinc-50 disabled:opacity-40";
 
 function DiscipleParticipationTable({
   groupId,
@@ -458,7 +461,7 @@ function DiscipleParticipationTable({
 
       <div className="overflow-x-auto">
         <table className="min-w-full text-left text-xs">
-          <thead className="bg-zinc-50 text-zinc-500">
+          <thead className="bg-zinc-50 text-(--color-text-muted)">
             <tr>
               <th className="px-3 py-2.5 font-medium">Disciple</th>
               <th className="hidden px-3 py-2.5 font-medium md:table-cell">Status</th>
@@ -491,7 +494,7 @@ function DiscipleParticipationTable({
               const status = disciple.status ? STATUS_DISPLAY[disciple.status] : null;
               const statusPill = status ? (
                 <span
-                  className={`inline-block whitespace-nowrap rounded-full px-2 py-0.5 text-[0.65rem] font-semibold ${status.className}`}
+                  className={`inline-block whitespace-nowrap rounded-full px-2 py-0.5 text-[0.65rem] font-medium ${status.className}`}
                 >
                   {status.label}
                 </span>
@@ -505,11 +508,11 @@ function DiscipleParticipationTable({
                     className={`cursor-pointer hover:bg-zinc-50 ${rowTone} ${expanded ? "border-b-0" : ""}`}
                   >
                     <td className="px-3 py-3">
-                      <span className="block max-w-[11rem] truncate text-sm font-semibold text-zinc-900 sm:max-w-none">
+                      <span className="block max-w-[11rem] truncate text-sm font-medium text-(--color-text-strong) sm:max-w-none">
                         {disciple.name}
                       </span>
                       {disciple.openPrayerCount > 0 ? (
-                        <span className="mt-1 inline-block rounded-full bg-sky-50 px-2 py-0.5 text-[0.65rem] font-semibold text-[var(--color-brand-blue)]">
+                        <span className="mt-1 inline-block rounded-full bg-sky-50 px-2 py-0.5 text-[0.65rem] font-medium text-[var(--color-brand-blue)]">
                           {disciple.openPrayerCount} prayer request{disciple.openPrayerCount === 1 ? "" : "s"}
                         </span>
                       ) : null}
@@ -541,7 +544,7 @@ function DiscipleParticipationTable({
                     </td>
                     <td className="whitespace-nowrap px-3 py-3 text-right md:hidden">
                       {day ? (
-                        <span className={inactive ? "text-red-700" : "font-medium text-zinc-900"}>
+                        <span className={inactive ? "text-red-700" : "font-medium text-(--color-text-strong)"}>
                           {done}/{activities.length}
                         </span>
                       ) : (
@@ -588,7 +591,7 @@ function DiscipleParticipationTable({
         </table>
       </div>
 
-      <p className="border-t border-zinc-100 px-3 py-2 text-[0.65rem] text-zinc-500">
+      <p className="border-t border-zinc-100 px-3 py-2 text-[0.65rem] text-(--color-text-muted)">
         <span className="md:hidden">Done counts the activities they did that day. </span>
         Highlighted disciples took no part that day; — means no teaching was released.
       </p>
@@ -626,7 +629,7 @@ function DiscipleDetails({ disciple, preview }: { disciple: DiscipleSummary; pre
         <Metric label="Daily reviews" value={disciple.reviewsCompleted} max={disciple.reviewsTotal} />
       </dl>
 
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[0.7rem] text-zinc-500">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[0.7rem] text-(--color-text-muted)">
         <span>
           Average score:{" "}
           <span className="font-semibold text-zinc-800">
@@ -672,7 +675,7 @@ function DiscipleDetails({ disciple, preview }: { disciple: DiscipleSummary; pre
               remove.run(() => removeDiscipleAction({ membershipId: disciple.membershipId }));
             }
           }}
-          className="text-xs font-medium text-zinc-500 underline-offset-4 hover:text-red-700 hover:underline disabled:opacity-60"
+          className="text-xs font-medium text-(--color-text-muted) underline-offset-4 hover:text-red-700 hover:underline disabled:opacity-60"
         >
           Remove
         </button>
@@ -773,7 +776,7 @@ function DisciplerSection({
               leave.run(() => leaveDiscipleshipGroupAction());
             }
           }}
-          className="text-xs font-medium text-zinc-500 underline-offset-4 hover:text-red-700 hover:underline disabled:opacity-60"
+          className="text-xs font-medium text-(--color-text-muted) underline-offset-4 hover:text-red-700 hover:underline disabled:opacity-60"
         >
           Leave group
         </button>

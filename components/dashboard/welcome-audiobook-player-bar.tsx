@@ -30,32 +30,27 @@ export function WelcomeAudiobookPlayerBar() {
   const hasPrev = index > 0;
   const hasNext = index >= 0 && index < tracks.length - 1;
 
-  function handleSeekClick(e: React.MouseEvent<HTMLDivElement>) {
-    const rect = e.currentTarget.getBoundingClientRect();
-    seek((e.clientX - rect.left) / rect.width);
-  }
-
   return (
     <div
       role="region"
       aria-label="Audiobook player"
+      aria-hidden={!isVisible}
+      inert={!isVisible}
       className="fixed inset-x-0 bottom-0 z-[200] border-t border-zinc-200 bg-white shadow-[0_-8px_32px_rgba(6,16,86,0.12)] transition-transform duration-300"
       style={{ transform: isVisible ? "translateY(0)" : "translateY(100%)" }}
     >
-      <div
-        className="h-1 w-full cursor-pointer bg-zinc-100"
-        onClick={handleSeekClick}
-        role="slider"
+      <input
+        type="range"
+        min={0}
+        max={100}
+        step={0.1}
+        value={progress * 100}
+        onChange={(event) => seek(Number(event.target.value) / 100)}
+        disabled={duration <= 0}
         aria-label="Seek"
-        aria-valuenow={Math.round(progress * 100)}
-        aria-valuemin={0}
-        aria-valuemax={100}
-      >
-        <div
-          className="h-full bg-[var(--color-brand-blue)]"
-          style={{ width: `${progress * 100}%` }}
-        />
-      </div>
+        aria-valuetext={`${formatTime(currentTime)} of ${formatTime(duration)}`}
+        className="block h-1 w-full cursor-pointer accent-[var(--color-brand-blue)]"
+      />
 
       <div className="container-pleros flex max-w-[36rem] items-center gap-3 py-3">
         <p className="min-w-0 flex-1 truncate text-sm font-medium text-[var(--color-brand-blue)]">
@@ -80,7 +75,7 @@ export function WelcomeAudiobookPlayerBar() {
             type="button"
             onClick={togglePlay}
             aria-label={isPlaying ? "Pause" : "Play"}
-            className="flex size-9 items-center justify-center rounded-full bg-[var(--color-brand-blue)] text-white transition-colors hover:bg-[var(--color-brand-blue-hover)]"
+            className="flex size-8 items-center justify-center rounded-full bg-[var(--color-brand-blue)] text-white transition-colors hover:bg-[var(--color-brand-blue-hover)]"
           >
             {isPlaying ? (
               <Pause className="size-4" />

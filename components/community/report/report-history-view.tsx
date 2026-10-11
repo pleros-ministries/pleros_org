@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { DailyReportCategory, DailyReportStatus } from "@/lib/community/daily-report";
 
 import { activityKindLabel } from "@/lib/community/ministry-activities";
 import { totalReached, type MinistryNumbers } from "@/lib/community/ministry-report";
@@ -16,6 +17,7 @@ export type HistoryDay = {
   dateKey: string;
   activities: MemberActivity[];
   activity: DayActivitySummary;
+  statuses?: Record<DailyReportCategory, DailyReportStatus>;
 };
 
 type Period = { count: number; totals: MinistryNumbers };
@@ -110,6 +112,7 @@ export function ReportHistoryView({
                 <th className="px-2 py-2 text-right font-medium">Saved</th>
                 <th className="px-2 py-2 text-right font-medium">Follow-ups</th>
                 <th className="px-4 py-2 font-medium">Pleros</th>
+                {days.some((day) => day.statuses) ? <th className="px-4 py-2 font-medium">Reports</th> : null}
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100">
@@ -129,15 +132,14 @@ export function ReportHistoryView({
                 return (
                   <tr key={day.dateKey} className={totals ? "" : "text-zinc-400"}>
                     <td className="whitespace-nowrap px-4 py-2 font-medium text-zinc-900">
-                      {open ? (
+                      {(
                         <Link
                           href={dayHref(day.dateKey, today)}
+                          title={open ? "View or edit report" : "View report"}
                           className="text-(--color-brand-blue) underline underline-offset-2"
                         >
                           {dateKeyLabel(day.dateKey)}
                         </Link>
-                      ) : (
-                        dateKeyLabel(day.dateKey)
                       )}
                     </td>
                     <td className="px-2 py-2 text-zinc-700">
@@ -163,6 +165,7 @@ export function ReportHistoryView({
                         <Dot on={day.activity.podcastEpisodes > 0} label="Podcast" />
                       </span>
                     </td>
+                    {day.statuses ? <td className="whitespace-nowrap px-4 py-2 text-[12px]">{Object.entries(day.statuses).map(([category, status]) => <p key={category}><span className="capitalize">{category}</span> · {status === "missing" ? "Not yet" : status === "nil" ? "Nil" : "Reported"}</p>)}</td> : null}
                   </tr>
                 );
               })}

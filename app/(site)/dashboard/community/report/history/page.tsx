@@ -1,3 +1,6 @@
+import { getOwnDeclarationsRange } from "@/lib/db/queries/daily-report-declarations";
+import { dailyCategoryStatus, type DailyReportDeclaration } from "@/lib/community/daily-report";
+import { canAccessReporting } from "@/lib/community/reporting-access";
 import { redirect } from "next/navigation";
 
 import {
@@ -6,7 +9,6 @@ import {
 } from "@/components/community/report/report-history-view";
 import { getAppSession } from "@/lib/app-session";
 import {
-  canAccessCommunity,
   getCommunityContext,
 } from "@/lib/community/context";
 import { groupActivitiesByDay } from "@/lib/community/ministry-activities";
@@ -26,7 +28,7 @@ export default async function ReportHistoryRoute() {
   if (!session) redirect("/login?returnTo=/dashboard/community/report/history");
 
   const ctx = await getCommunityContext();
-  if (!ctx || !canAccessCommunity(ctx)) redirect("/sogp/enrol");
+  if (!ctx || !(await canAccessReporting(ctx))) redirect("/sogp/enrol");
 
   const today = lagosToday();
   const historyFrom = shiftDate(today, -(HISTORY_DAYS - 1));
@@ -34,10 +36,11 @@ export default async function ReportHistoryRoute() {
   const monthStart = `${today.slice(0, 8)}01`;
   const loadFrom = monthStart < historyFrom ? monthStart : historyFrom;
 
-  const [activities, activityRange, todayActivity] = await Promise.all([
+  const [activities, activityRange, todayActivity, declarations] = await Promise.all([
     listActivitiesForUser(ctx.userId, loadFrom, today),
     getActivityRange(ctx.userId, historyFrom, today),
     getDayActivity(ctx.userId, today),
+    getOwnDeclarationsRange(ctx.userId, historyFrom, today),
   ]);
   const byDay = groupActivitiesByDay(activities);
   // SOGP only applies to someone in a cohort; a quiet day still shows its dot.
@@ -54,6 +57,11 @@ export default async function ReportHistoryRoute() {
       dateKey,
       activities: byDay.get(dateKey) ?? [],
       activity: activityRange.get(dateKey) ?? quietDay,
+      statuses: Object.fromEntries((["devotional", "ministry", "meetings"] as const).map((category) => {
+        const rows = byDay.get(dateKey) ?? [];
+        const facts = activityRange.get(dateKey) ?? quietDay;
+        return [category, dailyCategoryStatus({ category, declaration: (declarations.find((row) => row.dateKey === dateKey && row.category === category)?.declaration ?? null) as DailyReportDeclaration | null, activityCount: category === "devotional" ? 0 : rows.filter((row) => category === "ministry" ? row.kind === "outreach" || row.kind === "follow_up" : row.kind !== "outreach" && row.kind !== "follow_up").length, hasDevotionalActivity: facts.bible || facts.prayerWatch || facts.podcastEpisodes > 0 || facts.sogp === true })];
+      })) as NonNullable<HistoryDay["statuses"]>,
     }));
 
   const week = activities.filter((activity) => activity.activityDate >= weekStart);

@@ -1,3 +1,4 @@
+import { canAccessReporting } from "@/lib/community/reporting-access";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
@@ -12,7 +13,6 @@ import {
   draftFromActivity,
 } from "@/lib/community/activity-form";
 import {
-  canAccessCommunity,
   getCommunityContext,
 } from "@/lib/community/context";
 import { canReportFor } from "@/lib/community/ministry-report";
@@ -20,6 +20,8 @@ import { dateKeyLabel } from "@/lib/community/time";
 import { getActivityForEdit } from "@/lib/db/queries/ministry-activities";
 import { listContactsForMember } from "@/lib/db/queries/outreach-contacts";
 import { lagosToday } from "@/lib/sogp/daily-date";
+import { dailyReportingEnabled, getOwnMeetingDetails } from "@/lib/db/queries/daily-report-declarations";
+import type { MeetingReportingRole } from "@/lib/community/daily-report";
 
 const CONTACT_LIMIT = 1000;
 
@@ -36,7 +38,7 @@ export default async function EditActivityRoute({
   if (!session) redirect(`/login?returnTo=/dashboard/community/report/${activityId}`);
 
   const ctx = await getCommunityContext();
-  if (!ctx || !canAccessCommunity(ctx)) redirect("/sogp/enrol");
+  if (!ctx || !(await canAccessReporting(ctx))) redirect("/sogp/enrol");
 
   const activity = await getActivityForEdit(ctx.userId, activityId);
   if (!activity) notFound();
@@ -73,6 +75,11 @@ export default async function EditActivityRoute({
   return (
     <ActivityForm
       mode="edit"
+      dailyReporting={dailyReportingEnabled()}
+      initialMeeting={await getOwnMeetingDetails(ctx.userId, activity.activityDate).then((rows) => {
+        const row = rows.find((item) => item.activityId === activity.id);
+        return row ? { role: row.reportingRole as MeetingReportingRole, taught: row.taught } : undefined;
+      })}
       today={today}
       dateKey={activity.activityDate}
       activityId={activity.id}

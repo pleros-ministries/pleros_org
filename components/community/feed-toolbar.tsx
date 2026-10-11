@@ -9,7 +9,7 @@ import {
   type FeedView,
 } from "@/lib/community/feed-view";
 
-/** Filter chips (All / Official / Discussions) and sort tabs for a feed. */
+/** One post-type filter rail, with sorting in a compact native dropdown. */
 export function FeedToolbar({
   view,
   onChange,
@@ -43,7 +43,7 @@ export function FeedToolbar({
                   }),
                 )
               }
-              className={`h-8 rounded-full border px-3 text-[13px] font-medium transition-colors ${
+              className={`h-7 rounded-full border px-2.5 text-[12.5px] font-medium transition-colors ${
                 active
                   ? "border-(--color-brand-blue) bg-(--color-brand-blue) text-white"
                   : "border-(--color-line-strong) bg-white text-zinc-600 hover:bg-zinc-50"
@@ -55,32 +55,18 @@ export function FeedToolbar({
         })}
       </div>
 
-      <div
-        role="group"
+      <select
         aria-label="Sort posts"
-        className="flex items-center gap-0.5 rounded-full border border-(--color-line-strong) bg-white p-0.5"
+        value={view.sort}
+        onChange={(event) =>
+          onChange(parseFeedView({ sort: event.target.value, filter: view.filter }))
+        }
+        className="h-7 max-w-[145px] rounded-md border border-(--color-line-strong) bg-white pl-2.5 text-[12.5px] font-medium text-(--color-text-strong) focus-visible:outline-2 focus-visible:outline-(--color-brand-blue)"
       >
-        {FEED_SORTS.map((sort) => {
-          const active = view.sort === sort;
-          return (
-            <button
-              key={sort}
-              type="button"
-              aria-pressed={active}
-              onClick={() =>
-                onChange(parseFeedView({ sort, filter: view.filter }))
-              }
-              className={`h-7 rounded-full px-2.5 text-[13px] font-medium transition-colors ${
-                active
-                  ? "bg-(--muted) text-(--color-brand-blue)"
-                  : "text-zinc-500 hover:text-zinc-800"
-              }`}
-            >
-              {FEED_SORT_LABELS[sort]}
-            </button>
-          );
-        })}
-      </div>
+        {FEED_SORTS.map((sort) => (
+          <option key={sort} value={sort}>{FEED_SORT_LABELS[sort]}</option>
+        ))}
+      </select>
     </div>
   );
 }

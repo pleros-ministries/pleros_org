@@ -15,7 +15,7 @@ export type ChoiceOption<T extends string> = {
   icon?: ReactNode;
 };
 
-const focusRing = "has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-(--color-focus)";
+const focusRing = "has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-(--color-focus)";
 
 const layouts = {
   cards: {
@@ -39,6 +39,7 @@ export function ChoiceGroup<T extends string>({
   name,
   value,
   onChange,
+  onReselect,
   options,
   layout = "chips",
   invalid = false,
@@ -50,6 +51,8 @@ export function ChoiceGroup<T extends string>({
   name: string;
   value: T | null;
   onChange: (value: T) => void;
+  /** Reopen an already selected activity after returning with Back. */
+  onReselect?: (value: T) => void;
   options: ReadonlyArray<ChoiceOption<T>>;
   layout?: keyof typeof layouts;
   invalid?: boolean;
@@ -80,6 +83,7 @@ export function ChoiceGroup<T extends string>({
             checked={value === option.key}
             disabled={disabled}
             onChange={() => onChange(option.key)}
+            onClick={() => { if (value === option.key) onReselect?.(option.key); }}
             className="sr-only"
           />
           {layout === "cards" ? (

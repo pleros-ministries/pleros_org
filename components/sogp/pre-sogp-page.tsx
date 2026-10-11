@@ -159,21 +159,24 @@ export function PreSogpPage({
   );
 
   return (
-    <section className="site-font-theme min-h-screen bg-[#f6f5f1] pb-16 text-zinc-900">
-      <nav aria-label="Pre-SOGP dashboard navigation" className="sticky top-0 z-30 border-b border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)] shadow-sm">
-        <div className="site-shell-page sogp-shell-page flex min-h-12 items-center justify-between gap-4">
-          <Link href={preview ? "/preview/dashboard" : "/dashboard"} className="inline-flex min-h-9 items-center gap-1.5 rounded-sm px-1 text-xs font-medium text-white/85 transition-colors duration-150 hover:text-white focus-visible:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white active:scale-[0.98]">
-            <ArrowLeftIcon className="size-3.5" strokeWidth={2} /> Dashboard
-          </Link>
-        </div>
-      </nav>
+    <section className="site-font-theme min-h-screen bg-[#f6f5f1] pb-16 text-(--color-text-strong)">
+      {/* The live dashboard shell carries navigation; the standalone preview keeps its own. */}
+      {preview ? (
+        <nav aria-label="Pre-SOGP dashboard navigation" className="sticky top-[var(--dashboard-topbar-offset,0px)] z-30 border-b border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)] shadow-sm">
+          <div className="site-shell-page sogp-shell-page flex min-h-12 items-center justify-between gap-4">
+            <Link href="/preview/dashboard" className="inline-flex min-h-9 items-center gap-1.5 rounded-sm px-1 text-xs font-medium text-white/85 transition-colors duration-150 hover:text-white focus-visible:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white active:scale-[0.98]">
+              <ArrowLeftIcon className="size-3.5" strokeWidth={2} /> Dashboard
+            </Link>
+          </div>
+        </nav>
+      ) : null}
 
       <div className="site-shell-page sogp-shell-page grid gap-4 pb-6 pt-5 lg:grid-cols-[17.5rem_minmax(0,1fr)] lg:items-start">
         <header
           data-pre-sogp-section="countdown"
           className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 lg:col-span-2"
         >
-          <h1 className="ppc-heading text-lg font-semibold text-zinc-900">
+          <h1 className="text-[24px] font-medium leading-[1.1] tracking-[-0.025em] text-(--color-text-strong)">
             Pre-SOGP Lessons
           </h1>
         </header>
@@ -184,14 +187,14 @@ export function PreSogpPage({
             className="rounded-sm border border-zinc-200 bg-white lg:col-span-2"
           >
             <div className="border-b border-zinc-100 px-4 py-3">
-              <p className="text-[0.65rem] font-semibold uppercase tracking-[0.1em] text-zinc-400">
+              <p className="text-[0.65rem] font-medium uppercase tracking-[0.1em] text-zinc-400">
                 Starts {preparationStartLabel}
               </p>
-              <h2 className="ppc-heading mt-1 text-base font-semibold text-zinc-900">
+              <h2 className="mt-1 text-[15px] font-medium tracking-[-0.015em] text-(--color-text-strong)">
                 Pre-SOGP is coming soon
               </h2>
             </div>
-            <p className="max-w-2xl p-4 text-xs leading-[1.6] text-zinc-500">
+            <p className="max-w-2xl p-4 text-xs leading-[1.6] text-(--color-text-muted)">
               Video 1 opens at 12:00 am WAT. A new lesson will open each day
               until Video {totalDays}.
             </p>
@@ -200,7 +203,7 @@ export function PreSogpPage({
           <>
             <aside
               data-pre-sogp-section="calendar"
-              className="rounded-sm border border-zinc-200 bg-white p-3 lg:sticky lg:top-[3.75rem]"
+              className={`rounded-sm border border-zinc-200 bg-white p-3 lg:sticky ${preview ? "lg:top-[3.75rem]" : "lg:top-4"}`}
             >
               <SogpCalendar
                 days={data.days}
@@ -222,7 +225,7 @@ export function PreSogpPage({
                     setShareDayNumber(selectedDay.dayNumber);
                     setShareOpen(true);
                   }}
-                  className="inline-flex min-h-8 shrink-0 items-center rounded-sm border border-[var(--color-brand-blue)] px-3 text-xs font-semibold text-[var(--color-brand-blue)]"
+                  className="inline-flex min-h-8 shrink-0 items-center rounded-sm border border-[var(--color-brand-blue)] px-3 text-xs font-medium text-[var(--color-brand-blue)]"
                 >
                   Share what you learnt today
                 </button>
@@ -275,18 +278,18 @@ export function PreSogpPage({
                     title={selectedDay.lesson.title}
                     url={selectedDay.lesson.url}
                   />
-                  <h3 className="ppc-heading text-sm font-semibold leading-[1.3] text-zinc-900">
+                  <h3 className="text-sm font-medium leading-[1.3] text-(--color-text-strong)">
                     {selectedDay.lesson.title}
                   </h3>
                 </SogpActivitySection>
               ) : (
-                <p className="rounded-sm border border-zinc-200 bg-white p-4 text-xs text-zinc-500">
+                <p className="rounded-sm border border-zinc-200 bg-white p-4 text-xs text-(--color-text-muted)">
                   {isFuture ? "This lesson opens on its date." : "Today’s lesson is being prepared."}
                 </p>
               )}
 
               {preview ? (
-                <p className="rounded-sm border border-zinc-200 bg-white p-4 text-xs text-zinc-500">Preview mode · Completion changes stay in this preview.</p>
+                <p className="rounded-sm border border-zinc-200 bg-white p-4 text-xs text-(--color-text-muted)">Preview mode · Completion changes stay in this preview.</p>
               ) : (
                 <SogpPushPanel />
               )}
@@ -297,8 +300,8 @@ export function PreSogpPage({
               className="rounded-sm border border-zinc-200 bg-white lg:col-start-2"
             >
               <div className="flex items-center justify-between gap-3 border-b border-zinc-100 px-4 py-3">
-                <h2 className="ppc-heading text-sm font-semibold text-zinc-900">Preparation progress</h2>
-                <span className="ppc-heading text-sm font-semibold text-[var(--color-brand-blue)]">{completeDays} of {totalDays} days</span>
+                <h2 className="text-[13.5px] font-medium text-(--color-text-strong)">Preparation progress</h2>
+                <span className="text-sm font-medium text-[var(--color-brand-blue)]">{completeDays} of {totalDays} days</span>
               </div>
               <div className="grid gap-3 p-4">
                 <div className="h-1.5 overflow-hidden rounded-full bg-zinc-100">

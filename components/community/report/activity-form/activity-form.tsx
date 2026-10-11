@@ -17,6 +17,9 @@ import {
   type StepId,
 } from "@/lib/community/activity-form";
 import type { ActivityKind } from "@/lib/community/ministry-activities";
+import { MINISTRY_FIELDS } from "@/lib/community/ministry-report";
+import { normaliseMeetingDetails, type MeetingReportingRole } from "@/lib/community/daily-report";
+import { MeetingFields } from "./meeting-fields";
 import { saveMinistryActivity } from "@/app/(site)/dashboard/community/_actions/report-actions";
 
 import { dayHref, dayName } from "../day-picker";
@@ -41,6 +44,9 @@ export function ActivityForm({
   activityId,
   initial,
   contacts,
+  dailyReporting = false,
+  initialMeeting,
+  category,
 }: {
   mode: "create" | "edit";
   today: string;
@@ -49,9 +55,15 @@ export function ActivityForm({
   initial: ActivityDraft;
   /** The member's people, offered by the follow-up step. */
   contacts: FollowUpCandidate[];
+  dailyReporting?: boolean;
+  initialMeeting?: { role: MeetingReportingRole; taught: string | null };
+  category?: "ministry" | "meetings";
 }) {
   const router = useRouter();
   const [draft, setDraft] = useState(initial);
+  const [meetingRole, setMeetingRole] = useState<MeetingReportingRole | null>(initialMeeting?.role ?? null);
+  const [taught, setTaught] = useState(initialMeeting?.taught ?? "");
+  const meeting = dailyReporting && (draft.kind === "teaching_meeting" || draft.kind === "prayer_meeting");
   const [stepIndex, setStepIndex] = useState(() =>
     mode === "edit" ? stepsFor(initial.kind).length - 1 : 0,
   );
@@ -71,7 +83,12 @@ export function ActivityForm({
   }
 
   function chooseKind(kind: ActivityKind) {
-    setDraft((current) => (current.kind === kind ? current : withKind(current, kind)));
+    if (draft.kind !== kind) {
+      setDraft(withKind(draft, kind));
+      setMeetingRole(null);
+      setTaught("");
+    }
+    goTo(1);
   }
 
   function goTo(index: number) {
@@ -82,6 +99,10 @@ export function ActivityForm({
 
   /** Checks the current step; on a problem shows it and focuses the first field. */
   function passes(): boolean {
+    if (meeting && (step === "numbers" || step === "review")) {
+      const result = normaliseMeetingDetails({ kind: draft.kind!, role: meetingRole, taught, attendance: Number(draft.numbers.attendance || "0") });
+      if (!result.ok) { setServerError(result.error); return false; }
+    }
     const stepErrors = validateStep(step, draft);
     if (Object.keys(stepErrors).length === 0) return true;
     setAttempted((current) => new Set(current).add(step));
@@ -119,7 +140,7 @@ export function ActivityForm({
     setServerError(null);
     startTransition(async () => {
       try {
-        const result = await saveMinistryActivity(toSaveInput(draft, activityId));
+        const result = await saveMinistryActivity({ ...toSaveInput(draft, activityId), ...(meeting ? { meetingRole: meetingRole ?? undefined, taught } : {}) });
         if (!result.ok) {
           setServerError(result.error);
           return;
@@ -176,11 +197,19 @@ export function ActivityForm({
             errors={errors}
             onChoose={chooseKind}
             locked={mode === "edit"}
+            category={category}
           />
         ) : null}
         {step === "where" ? <StepWhere draft={draft} errors={errors} update={update} /> : null}
         {step === "numbers" ? (
-          <StepNumbers draft={draft} errors={errors} update={update} />
+          <div className="grid gap-4">
+            {meeting ? <MeetingFields role={meetingRole} taught={taught} onTaught={setTaught} onRole={(role) => {
+              setMeetingRole(role);
+              if (role !== "leader") setTaught("");
+              if (role === "member") update({ numbers: Object.fromEntries(MINISTRY_FIELDS.map(({ key }) => [key, key === "attendance" ? "1" : "0"])) as ActivityDraft["numbers"] });
+            }} /> : null}
+            {!(meeting && meetingRole === "member") ? <StepNumbers draft={draft} errors={errors} update={update} /> : null}
+          </div>
         ) : null}
         {step === "people" ? (
           draft.kind === "follow_up" ? (
@@ -195,6 +224,12 @@ export function ActivityForm({
           )
         ) : null}
         {step === "review" ? (
+          <div className="grid gap-4">
+          {meeting ? <div className="grid gap-1 rounded-lg border border-(--color-line) p-3 text-[13px]">
+            <p>Your role · {meetingRole ? meetingRole[0].toUpperCase() + meetingRole.slice(1) : "Not chosen"}</p>
+            {meetingRole === "leader" && taught ? <p className="whitespace-pre-wrap">What was taught · {taught}</p> : null}
+            <button type="button" onClick={() => jump(steps.indexOf("numbers"))} className={`${textLink} w-fit`}>Edit meeting role</button>
+          </div> : null}
           <StepReview
             draft={draft}
             errors={errors}
@@ -202,6 +237,7 @@ export function ActivityForm({
             onJump={(id) => jump(steps.indexOf(id))}
             stepIndex={(id) => steps.indexOf(id)}
           />
+          </div>
         ) : null}
 
         {serverError ? (
@@ -218,7 +254,7 @@ export function ActivityForm({
           ) : (
             <span />
           )}
-          <button type="submit" disabled={pending} className={primaryButton}>
+          {step !== "kind" || mode === "edit" ? <button type="submit" disabled={pending} className={primaryButton}>
             {last
               ? pending
                 ? "Saving…"
@@ -226,7 +262,7 @@ export function ActivityForm({
                   ? "Save changes"
                   : "Save activity"
               : "Next"}
-          </button>
+          </button> : null}
         </div>
       </form>
     </div>

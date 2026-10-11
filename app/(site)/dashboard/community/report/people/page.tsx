@@ -1,10 +1,10 @@
+import { canAccessReporting } from "@/lib/community/reporting-access";
 import { redirect } from "next/navigation";
 
 import { OutreachContactBrowser } from "@/components/community/report/outreach-contact-browser";
 import { ReportTabs } from "@/components/community/report/report-tabs";
 import { getAppSession } from "@/lib/app-session";
 import {
-  canAccessCommunity,
   getCommunityContext,
 } from "@/lib/community/context";
 import { listContactsForMember } from "@/lib/db/queries/outreach-contacts";
@@ -18,7 +18,7 @@ export default async function PeopleMetRoute() {
   if (!session) redirect("/login?returnTo=/dashboard/community/report/people");
 
   const ctx = await getCommunityContext();
-  if (!ctx || !canAccessCommunity(ctx)) redirect("/sogp/enrol");
+  if (!ctx || !(await canAccessReporting(ctx))) redirect("/sogp/enrol");
 
   const contacts = await listContactsForMember(ctx.userId, LIST_LIMIT);
 

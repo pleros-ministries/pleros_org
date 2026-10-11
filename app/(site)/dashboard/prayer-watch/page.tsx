@@ -4,12 +4,16 @@ import { PrayerWatchPage } from "@/components/dashboard/prayer-watch-page";
 import { getAppSession } from "@/lib/app-session";
 import { getBibleReadingLogsForMonth } from "@/lib/db/queries/bible-reading";
 import { getPrayerWatchAttendanceForMonth } from "@/lib/db/queries/prayer-watch";
+import { isDateKey } from "@/lib/community/ministry-report";
 import { toDateKey } from "@/lib/prayer-watch";
 
-export default async function DashboardPrayerWatchPage() {
+export default async function DashboardPrayerWatchPage({ searchParams }: { searchParams: Promise<{ date?: string; tab?: string }> }) {
   const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth();
+  const todayKey = toDateKey(now);
+  const params = await searchParams;
+  const selected = isDateKey(params.date) && params.date <= todayKey ? params.date : null;
+  const year = Number((selected ?? todayKey).slice(0, 4));
+  const month = Number((selected ?? todayKey).slice(5, 7)) - 1;
 
   const appSession = await getAppSession();
 
@@ -26,7 +30,9 @@ export default async function DashboardPrayerWatchPage() {
     <PrayerWatchPage
       year={year}
       month={month}
-      todayKey={toDateKey(now)}
+      todayKey={todayKey}
+      initialDateKey={selected}
+      initialTab={params.tab === "bible" ? "bible" : "prayer"}
       attendanceRecords={attendanceRecords}
       bibleReadingLogs={bibleReadingLogs}
     />

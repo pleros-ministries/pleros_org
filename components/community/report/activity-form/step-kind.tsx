@@ -17,11 +17,13 @@ export function StepKind({
   errors,
   onChoose,
   locked,
+  category,
 }: {
   draft: ActivityDraft;
   errors: StepErrors;
   onChoose: (kind: ActivityKind) => void;
   locked: boolean;
+  category?: "ministry" | "meetings";
 }) {
   if (locked && draft.kind) {
     const config = activityKindConfig(draft.kind);
@@ -53,9 +55,10 @@ export function StepKind({
         layout="cards"
         value={draft.kind}
         onChange={onChoose}
+        onReselect={onChoose}
         invalid={Boolean(errors.kind)}
         describedBy={errors.kind ? `${id}-error` : undefined}
-        options={ACTIVITY_KINDS.map((kind) => ({
+        options={ACTIVITY_KINDS.filter((kind) => !category || (category === "ministry" ? kind.key === "outreach" || kind.key === "follow_up" : kind.key === "teaching_meeting" || kind.key === "prayer_meeting")).map((kind) => ({
           key: kind.key,
           label: kind.label,
           hint: kind.hint,

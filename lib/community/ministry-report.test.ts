@@ -92,11 +92,16 @@ describe("normaliseMinistryNote", () => {
 });
 
 describe("the reporting window", () => {
-  test("covers today and the two days before it", () => {
+  test("covers today and the previous seven Lagos days", () => {
     expect(reportableDateKeys("2026-10-05")).toEqual([
       "2026-10-05",
       "2026-10-04",
       "2026-10-03",
+      "2026-10-02",
+      "2026-10-01",
+      "2026-09-30",
+      "2026-09-29",
+      "2026-09-28",
     ]);
   });
 
@@ -105,13 +110,19 @@ describe("the reporting window", () => {
       "2026-11-01",
       "2026-10-31",
       "2026-10-30",
+      "2026-10-29",
+      "2026-10-28",
+      "2026-10-27",
+      "2026-10-26",
+      "2026-10-25",
     ]);
   });
 
   test("locks older days and refuses future ones", () => {
     expect(canReportFor("2026-10-05", "2026-10-05")).toBe(true);
     expect(canReportFor("2026-10-03", "2026-10-05")).toBe(true);
-    expect(canReportFor("2026-10-02", "2026-10-05")).toBe(false);
+    expect(canReportFor("2026-09-28", "2026-10-05")).toBe(true);
+    expect(canReportFor("2026-09-27", "2026-10-05")).toBe(false);
     expect(canReportFor("2026-10-06", "2026-10-05")).toBe(false);
     expect(canReportFor("not-a-date", "2026-10-05")).toBe(false);
   });

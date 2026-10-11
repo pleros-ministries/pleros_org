@@ -15,6 +15,7 @@ export type AppSession = {
     name: string;
     email: string;
     role: AppRole;
+    image?: string | null;
   };
 };
 
@@ -49,6 +50,7 @@ export const getAppSession = cache(async (): Promise<AppSession | null> => {
         user: {
           id: ppcUserId,
           name: authSession.user.name,
+          image: authSession.user.image ?? null,
           email: authSession.user.email,
           role: "super_admin",
         },
@@ -74,6 +76,7 @@ export const getAppSession = cache(async (): Promise<AppSession | null> => {
       user: {
         id: ppcUserId,
         name: authSession.user.name,
+        image: authSession.user.image ?? null,
         email: authSession.user.email,
         role,
       },

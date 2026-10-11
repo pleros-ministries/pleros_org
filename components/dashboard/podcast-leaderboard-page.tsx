@@ -38,7 +38,7 @@ export function PodcastLeaderboardPage({ data }: { data: PodcastLeaderboardData 
     : [];
 
   return (
-    <section className="site-font-theme min-h-screen bg-[#f6f5f1] pb-16 text-zinc-900">
+    <section className="site-font-theme min-h-screen bg-[#f6f5f1] pb-16 text-(--color-text-strong)">
       <nav
         aria-label="Podcast dashboard navigation"
         className="sticky top-0 z-30 border-b border-(--color-brand-blue) bg-(--color-brand-blue) shadow-sm"
@@ -50,7 +50,7 @@ export function PodcastLeaderboardPage({ data }: { data: PodcastLeaderboardData 
           >
             <ArrowLeftIcon className="size-3.5" strokeWidth={2} /> Podcast
           </Link>
-          <span className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-(--color-brand-lime)">
+          <span className="text-[0.7rem] font-medium uppercase tracking-[0.14em] text-(--color-brand-lime)">
             Podcast
           </span>
         </div>
@@ -58,8 +58,8 @@ export function PodcastLeaderboardPage({ data }: { data: PodcastLeaderboardData 
 
       <div className="site-shell-page sogp-shell-page grid gap-4 pb-6 pt-5">
         <header className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-          <h1 className="ppc-heading text-lg font-semibold text-zinc-900">Leaderboard</h1>
-          <p className="text-[0.62rem] font-semibold uppercase tracking-widest text-zinc-400">
+          <h1 className="text-[24px] font-medium leading-[1.1] tracking-[-0.025em] text-(--color-text-strong)">Leaderboard</h1>
+          <p className="text-[0.62rem] font-medium uppercase tracking-widest text-zinc-400">
             {data.monthLabel} · {data.total} {data.total === 1 ? "listener" : "listeners"}
           </p>
         </header>
@@ -71,16 +71,16 @@ export function PodcastLeaderboardPage({ data }: { data: PodcastLeaderboardData 
           {me ? (
             <>
               <div className="flex flex-wrap items-end justify-between gap-3">
-                <p className="ppc-heading text-2xl font-semibold text-zinc-900">
+                <p className="text-2xl font-medium text-(--color-text-strong)">
                   #{me.rank}
-                  <span className="ml-2 text-sm font-medium text-zinc-500">
+                  <span className="ml-2 text-sm font-medium text-(--color-text-muted)">
                     {me.points} points
                   </span>
                 </p>
                 <StreakBadge days={me.currentStreak} />
               </div>
               {me.visible ? null : (
-                <p className="text-xs leading-normal text-zinc-500">
+                <p className="text-xs leading-normal text-(--color-text-muted)">
                   Only you can see this. Turn on the switch below to appear on the board.
                 </p>
               )}
@@ -90,8 +90,8 @@ export function PodcastLeaderboardPage({ data }: { data: PodcastLeaderboardData 
                     key={item.label}
                     className="rounded-sm border border-zinc-200 bg-zinc-50 px-3 py-2"
                   >
-                    <dt className="text-[0.7rem] text-zinc-500">{item.label}</dt>
-                    <dd className="ppc-heading text-sm font-semibold text-zinc-900">
+                    <dt className="text-[0.7rem] text-(--color-text-muted)">{item.label}</dt>
+                    <dd className="text-[13.5px] font-medium text-(--color-text-strong)">
                       {item.value}
                     </dd>
                   </div>
@@ -99,7 +99,7 @@ export function PodcastLeaderboardPage({ data }: { data: PodcastLeaderboardData 
               </dl>
             </>
           ) : (
-            <p className="text-xs leading-normal text-zinc-500">
+            <p className="text-xs leading-normal text-(--color-text-muted)">
               Mark an episode as listened this month to earn points.
             </p>
           )}
@@ -114,7 +114,7 @@ export function PodcastLeaderboardPage({ data }: { data: PodcastLeaderboardData 
           icon={<TrophyIcon className="size-4 text-(--color-brand-blue)" strokeWidth={2} />}
         >
           {data.top.length === 0 ? (
-            <p className="text-xs text-zinc-500">No one is on the leaderboard yet.</p>
+            <p className="text-xs text-(--color-text-muted)">No one is on the leaderboard yet.</p>
           ) : (
             <ol className="grid gap-2">
               {data.top.map((entry, index) => (
@@ -127,22 +127,22 @@ export function PodcastLeaderboardPage({ data }: { data: PodcastLeaderboardData 
                       : "border-zinc-200 bg-white"
                   }`}
                 >
-                  <span className="ppc-heading w-6 shrink-0 text-center text-sm font-semibold text-zinc-500">
+                  <span className="w-6 shrink-0 text-center text-sm font-medium text-(--color-text-muted)">
                     {entry.rank}
                   </span>
                   <Avatar name={entry.name} size={32} />
                   <span className="grid min-w-0 flex-1 gap-0.5">
-                    <span className="truncate text-sm font-semibold text-zinc-900">
+                    <span className="truncate text-sm font-medium text-(--color-text-strong)">
                       {entry.name}
                       {entry.isMe ? (
-                        <span className="ml-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.08em] text-(--color-brand-blue)">
+                        <span className="ml-1.5 text-[0.65rem] font-medium uppercase tracking-[0.08em] text-(--color-brand-blue)">
                           You
                         </span>
                       ) : null}
                     </span>
                     <StreakBadge days={entry.currentStreak} />
                   </span>
-                  <span className="ppc-heading shrink-0 text-sm font-semibold text-zinc-900">
+                  <span className="shrink-0 text-sm font-medium text-(--color-text-strong)">
                     {entry.points}
                     <span className="ml-1 text-[0.65rem] font-medium text-zinc-400">pts</span>
                   </span>
@@ -161,10 +161,10 @@ export function PodcastLeaderboardPage({ data }: { data: PodcastLeaderboardData 
             {POINT_RULES.map((rule) => (
               <li
                 key={rule.label}
-                className="flex items-center justify-between gap-3 text-xs text-zinc-600"
+                className="flex items-center justify-between gap-3 text-xs text-(--color-text-muted)"
               >
                 <span>{rule.label}</span>
-                <strong className="ppc-heading font-semibold text-zinc-900">
+                <strong className="font-medium text-(--color-text-strong)">
                   +{rule.value}
                 </strong>
               </li>

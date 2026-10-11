@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { runDailyReportReminderDispatcher } from "@/lib/notifications/daily-report-dispatch";
 import { runReminderDispatcher } from "@/lib/notifications/dispatcher";
 
 // Scheduled every five minutes in vercel.json. Each run only does work for
@@ -15,5 +16,7 @@ export async function GET(request: Request) {
 
   // The dispatcher reports per-step counts and never throws: a step that
   // fails is named in `errors` and the others still run.
-  return NextResponse.json(await runReminderDispatcher(new Date()));
+  const now = new Date();
+  const [existing, reports] = await Promise.all([runReminderDispatcher(now), runDailyReportReminderDispatcher(now).catch(() => ({ enabled: true, sent: 0, failures: 1 }))]);
+  return NextResponse.json({ ...existing, reports });
 }

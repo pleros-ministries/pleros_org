@@ -5,7 +5,8 @@ import { getAppSession } from "@/lib/app-session";
 import { getPodcastJourney } from "@/lib/db/queries/podcast-journey";
 import { getPodcastLeaderboard } from "@/lib/db/queries/podcast-leaderboard";
 
-export default async function DashboardPodcastPage() {
+export default async function DashboardPodcastPage({ searchParams }: { searchParams: Promise<{ date?: string }> }) {
+  const { date } = await searchParams;
   const appSession = await getAppSession();
 
   if (!appSession) {
@@ -22,6 +23,7 @@ export default async function DashboardPodcastPage() {
       episodes={journey.episodes}
       listenedEpisodeGuids={journey.listenedEpisodeGuids}
       todayKey={journey.todayKey}
+      initialDateKey={date}
       calendarStartKey={journey.calendarStartKey}
       calendarEndKey={journey.calendarEndKey}
       prayerDateKeys={journey.prayerDateKeys}

@@ -33,6 +33,7 @@ import {
   toLagosDateKey,
 } from "@/lib/sogp/daily-participation";
 
+import { clearDeclaredNil, dailyReportingEnabled, lockDailyReporting } from "./daily-report-declarations";
 import { inUnit } from "./community-scope";
 import { activityMemberUnitName, activityPeopleCount } from "./ministry-sql";
 import {
@@ -416,13 +417,16 @@ export async function saveActivity(input: {
   activityId: number | null;
   dateKey: string;
   activity: ActivityInput;
+  meetingDetails?: { role: "leader" | "worker" | "member"; taught: string | null };
   people: ContactRow[];
   followUps: FollowUpRow[];
 }): Promise<{ activityId: number }> {
   const { userId, dateKey, activity } = input;
   const config = activityKindConfig(activity.kind);
 
+  const reportingV2 = dailyReportingEnabled();
   return transactionDb.transaction(async (tx) => {
+    if (reportingV2) await lockDailyReporting(tx, userId, dateKey);
     let activityId: number;
 
     if (input.activityId != null) {
@@ -473,6 +477,13 @@ export async function saveActivity(input: {
         dateKey,
         followUps: input.followUps,
       });
+    }
+    if (reportingV2) {
+      if (input.meetingDetails) {
+        await tx.insert(schema.dailyReportMeetingDetails).values({ activityId, actorUserId: userId, reportingRole: input.meetingDetails.role, taught: input.meetingDetails.taught })
+          .onConflictDoUpdate({ target: schema.dailyReportMeetingDetails.activityId, set: { reportingRole: input.meetingDetails.role, taught: input.meetingDetails.taught, actorUserId: userId, updatedAt: new Date() } });
+      }
+      await clearDeclaredNil(tx, userId, dateKey, activity.kind === "outreach" || activity.kind === "follow_up" ? "ministry" : "meetings");
     }
     return { activityId };
   });
@@ -1093,4 +1104,20 @@ export async function getDisciplesMinistryDay(
       ),
     )
     .groupBy(schema.discipleshipMemberships.id);
+}
+
+/** Canonical devotional facts for a pre-authorized roster, queried in bounded batches. */
+export async function getDayActivitiesForUsers(userIds: string[], dateKey: string): Promise<Map<string, DayActivity>> {
+  const ids = [...new Set(userIds)];
+  const result = new Map<string, DayActivity>();
+  for (let offset = 0; offset < ids.length; offset += NARROW_LIMIT) {
+    const chunk = ids.slice(offset, offset + NARROW_LIMIT);
+    const enrollments = await db.selectDistinctOn([schema.sogpEnrollments.userId], {
+      userId: schema.sogpEnrollments.userId, enrollmentId: schema.sogpEnrollments.id, cohortId: schema.sogpEnrollments.cohortId,
+    }).from(schema.sogpEnrollments).where(inArray(schema.sogpEnrollments.userId, chunk)).orderBy(schema.sogpEnrollments.userId, desc(schema.sogpEnrollments.createdAt));
+    const byUser = new Map(enrollments.map((row) => [row.userId, row]));
+    const members = chunk.map((userId) => ({ userId, enrollmentId: byUser.get(userId)?.enrollmentId ?? null, cohortId: byUser.get(userId)?.cohortId ?? null }));
+    for (const [userId, activity] of await loadDayActivity(members, dateKey)) result.set(userId, activity);
+  }
+  return result;
 }

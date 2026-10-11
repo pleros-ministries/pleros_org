@@ -173,30 +173,30 @@ function EpisodeRow({
         <div className="grid gap-1.5">
           <div className="flex flex-wrap items-center gap-2">
             {episode.episodeNumber ? (
-              <span className="font-[var(--font-be-vietnam-pro)] text-[0.68rem] font-bold uppercase tracking-[0.16em] text-[var(--color-brand-blue)] opacity-55">
+              <span className="text-[10px] font-medium uppercase tracking-[0.08em] text-(--color-text-muted)">
                 Ep. {episode.episodeNumber}
               </span>
             ) : null}
             {listened ? (
-              <span className="inline-flex items-center gap-1 rounded-[var(--radius-xs)] bg-[rgba(40,170,80,0.14)] px-2 py-1 font-[var(--font-be-vietnam-pro)] text-[0.68rem] font-semibold text-[var(--color-brand-green)]">
+              <span className="inline-flex items-center gap-1 rounded-full bg-(--color-brand-lime) px-2 py-0.5 text-[11px] font-medium text-(--color-brand-blue)">
                 <CheckIcon className="size-3" />
                 Listened
               </span>
             ) : null}
           </div>
 
-          <h2 className="site-pathway-title text-[1rem] leading-[1.15] sm:text-[1.15rem]">
+          <h2 className="text-[13.5px] font-medium leading-snug">
             <a
               href={episode.link}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[var(--color-brand-blue)] transition-opacity hover:opacity-75"
+              className="text-(--color-text-strong) transition-colors hover:text-(--color-brand-blue)"
             >
               {episode.title}
             </a>
           </h2>
 
-          <div className="font-[var(--font-be-vietnam-pro)] text-[0.75rem] text-[var(--color-text-muted)]">
+          <div className="text-[12px] text-[var(--color-text-muted)]">
             {episode.isoDate ? <span>{formatDate(episode.isoDate)}</span> : null}
           </div>
         </div>
@@ -256,10 +256,10 @@ function PodcastSeriesGroup({
           className="flex w-full items-start justify-between gap-3 text-left"
         >
           <div className="grid gap-1">
-            <h2 className="site-pathway-title text-[1.05rem] leading-[1.1] text-[var(--color-brand-blue)] sm:text-[1.25rem]">
+            <h2 className="text-[15px] font-medium leading-snug tracking-[-0.015em] text-(--color-text-strong)">
               {group.title}
             </h2>
-            <p className="font-[var(--font-be-vietnam-pro)] text-[0.75rem] text-[var(--color-text-muted)]">
+            <p className="text-[12px] text-[var(--color-text-muted)]">
               {listenedCount} of {group.episodes.length} listened
             </p>
           </div>
@@ -373,6 +373,7 @@ export function PodcastProgressPage({
   episodes,
   listenedEpisodeGuids,
   previewMode = false,
+  initialDateKey,
   todayKey,
   calendarStartKey,
   calendarEndKey,
@@ -385,6 +386,7 @@ export function PodcastProgressPage({
   episodes: RssEpisode[];
   listenedEpisodeGuids: string[];
   previewMode?: boolean;
+  initialDateKey?: string;
   todayKey: string;
   calendarStartKey: string;
   calendarEndKey: string;
@@ -401,7 +403,7 @@ export function PodcastProgressPage({
   const [localPrayerDateKeys, setLocalPrayerDateKeys] = useState(prayerDateKeys);
   const [localTrack, setLocalTrack] = useState(track);
   const [localStartedOn, setLocalStartedOn] = useState(startedOn);
-  const [selectedDateKey, setSelectedDateKey] = useState(todayKey);
+  const [selectedDateKey, setSelectedDateKey] = useState(initialDateKey && /^\d{4}-\d{2}-\d{2}$/.test(initialDateKey) && initialDateKey >= calendarStartKey && initialDateKey <= calendarEndKey && initialDateKey <= todayKey ? initialDateKey : todayKey);
   const [picker, setPicker] = useState<{ open: boolean; initialTrack: string }>({
     open: false,
     initialTrack: track,
@@ -499,24 +501,29 @@ export function PodcastProgressPage({
   }
 
   return (
-    <section className="site-font-theme min-h-screen bg-[var(--color-surface-muted)] pb-16 text-zinc-900">
+    <section className="site-font-theme min-h-[calc(100dvh-var(--dashboard-topbar-offset,0px))] bg-[var(--color-surface-muted)] pb-16 text-zinc-900">
       <header className="bg-[var(--color-brand-blue)] text-white">
         <div className="site-shell-page sogp-shell-page flex items-center justify-between gap-4 py-2.5">
-          <Link
-            href={previewMode ? "/preview/dashboard" : "/dashboard"}
-            className="inline-flex min-h-8 items-center gap-1.5 rounded-sm px-1 text-xs font-medium text-white/85 transition-colors duration-150 hover:text-white focus-visible:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white active:scale-[0.98]"
-          >
-            <ArrowLeftIcon className="size-3.5" strokeWidth={2} /> Dashboard
-          </Link>
+          {/* The live dashboard shell carries navigation; the preview has no shell. */}
+          {previewMode ? (
+            <Link
+              href="/preview/dashboard"
+              className="inline-flex min-h-8 items-center gap-1.5 rounded-sm px-1 text-xs font-medium text-white/85 transition-colors duration-150 hover:text-white focus-visible:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white active:scale-[0.98]"
+            >
+              <ArrowLeftIcon className="size-3.5" strokeWidth={2} /> Dashboard
+            </Link>
+          ) : (
+            <span />
+          )}
           <span className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-[var(--color-brand-lime)]">
             Podcast
           </span>
         </div>
         <div className="site-shell-page sogp-shell-page grid gap-1 pb-4 pt-1">
-          <p className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-white/75">
+          <p className="text-[10px] font-medium uppercase tracking-[0.08em] text-white/75">
             Pleros Podcast
           </p>
-          <h1 className="ppc-heading text-2xl font-semibold tracking-[-0.02em] text-white md:text-3xl">
+          <h1 className="text-[24px] font-medium leading-[1.1] tracking-[-0.025em] text-white">
             Welcome, {firstName(listenerName)}
           </h1>
           {selectedDay.dayNumber ? (
@@ -552,7 +559,7 @@ export function PodcastProgressPage({
           {weekEpisodeDays.length ? (
             <section className="hidden rounded-sm border border-zinc-200 bg-white lg:block">
               <div className="border-b border-zinc-100 px-4 py-3">
-                <h2 className="ppc-heading text-sm font-semibold text-zinc-900">
+                <h2 className="text-[13.5px] font-medium text-(--color-text-strong)">
                   This week’s episodes
                 </h2>
               </div>
@@ -583,7 +590,7 @@ export function PodcastProgressPage({
                           ) : null}
                         </span>
                         <span className="grid min-w-0 gap-0.5">
-                          <span className="text-[0.62rem] font-semibold uppercase tracking-[0.08em] text-zinc-400">
+                          <span className="text-[10px] font-medium uppercase tracking-[0.08em] text-(--color-text-muted)">
                             {weekdayFormatter.format(
                               new Date(`${day.dateKey}T00:00:00.000Z`),
                             )}
@@ -632,17 +639,17 @@ export function PodcastProgressPage({
           className="grid min-w-0 gap-4 rounded-[var(--radius-md)] border border-zinc-200 bg-white p-4 md:p-5 lg:col-start-2"
         >
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="ppc-heading text-lg font-semibold text-zinc-900">
+            <h2 className="text-[15px] font-medium tracking-[-0.015em] text-(--color-text-strong)">
               All episodes
             </h2>
-            <span className="rounded-[var(--radius-xs)] bg-[var(--color-brand-sky-soft)] px-3 py-1 text-[0.75rem] font-medium text-[var(--color-brand-blue)]">
+            <span className="rounded-full bg-[var(--color-brand-sky-soft)] px-2.5 py-0.5 text-[12px] font-medium text-[var(--color-brand-blue)]">
               {summary.episodesListened} of {summary.episodesTotal} listened
             </span>
           </div>
 
           <Link
             href="/podcast"
-            className="site-button-text group inline-flex w-fit items-center gap-1 text-[0.75rem] font-semibold tracking-[0.12em] text-[var(--color-brand-blue)] uppercase"
+            className="group inline-flex w-fit items-center gap-1 text-[12.5px] font-medium text-[var(--color-brand-blue)] hover:underline"
           >
             Open podcast
             <ArrowUpRightIcon className="size-3.5 transition-transform duration-150 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
@@ -678,7 +685,7 @@ export function PodcastProgressPage({
                 />
               ))
             ) : (
-              <p className="rounded-[var(--radius-md)] border border-[rgba(6,16,86,0.1)] bg-white px-4 py-5 font-[var(--font-be-vietnam-pro)] text-[0.875rem] text-[var(--color-text-muted)]">
+              <p className="rounded-[var(--radius-md)] border border-(--color-line) bg-white px-4 py-5 text-[13px] text-[var(--color-text-muted)]">
                 No podcast episodes match your search.
               </p>
             )}

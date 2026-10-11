@@ -1,0 +1,133 @@
+﻿PLEROS  ·  SOGP IMPLEMENTATION
+Pleros SOGP Implementation Notes
+Oct 7, 2026 • Implementation planning brief
+Implementation direction
+Extend the existing follow-up ownership and discipleship features. The immediate priority is to connect a new SOGP enrolment to an accountable, available person, make follow-up visible, and give leadership useful oversight of recorded activity.
+The recording explicitly rejects automatic discipleship-group membership. Assignment establishes responsibility for contacting the participant. The owner then talks with the participant and shares the link for the intended group; the existing invitation and join flow determines membership.
+This brief distinguishes requests from the recording, verified repository behavior, and recommended engineering design. The recommendations are a build plan, not approved organizational policy. Roster eligibility, routing precedence, oversight authority, and review cadence still need confirmation.
+Requests from the recording
+The source is a 19 minute 31 second recording of a WhatsApp group voice call, not a website demonstration. The full recording was reviewed and key passages were cross-checked. Times are approximate. Explicit decisions below have high confidence; unclear roster exceptions, names, acronyms, and report wording are not treated as settled requirements.
+Request
+	Evidence
+	Required outcome
+	Follow-up ownership
+	00:26–01:18; 10:00–11:57
+	Automatically assign an eligible person, notify them promptly, and expose whether contact happened and what response followed. Location, referral, and random routing are discussed; round robin is mentioned later. Their precedence is unsettled.
+	Oversight and reports
+	06:00–07:43
+	Represent the manually managed oversight structure in the website. Show who should meet whom and what happened down the chain. Assemble reports automatically from recorded activity.
+	Podcast participation plans
+	08:09–09:30
+	Offer a 30-day plan with one or two podcasts per day, with default and tailored choices informed by the participant’s questions and reasons for joining.
+	Multiple named groups
+	12:00–12:30; 14:02–15:25
+	Let a leader create multiple freeform groups, name them, and obtain a distinct invitation link for each. Examples are not mandatory categories.
+	Sustained progression
+	12:30–13:50
+	Help leaders support actual progression through podcast, basic, and advanced SOGP and ongoing discipleship activity. No scoring formula or automatic advancement rule is specified.
+	Deliberate group joining
+	16:03–16:18
+	Do not automatically add assigned people to a group. Reach out, invite, and send the intended group’s link.
+	
+
+Church-member groups should remain separate from outreach groups. Leaders may combine or separate online and offline outreach. The discussion asks for human engagement; it does not request automated AI outreach or a WhatsApp integration. A mention of 100 new people in a day is a capacity thought experiment, not observed traffic. A before-noon commitment concerns sending organizational details, not shipping the website.
+Verified existing foundation
+Repository baseline: main at commit 701b530bcbfd14847f73e0a1c690ffbc505a9d4e, inspected after the authorized pull on Oct 7, 2026. The repository inspection, rather than the recording, establishes the behavior below. Code anchors are listed at the end.
+Area
+	Already present
+	Consequence for this work
+	Accountable owner
+	pastor_assignments stores one pastor owner per enrolment, assignment metadata, last contact time, and contact count.
+	Reuse this ownership record. Add missing routing and activity detail without creating a competing owner relationship.
+	Location routing
+	Enrolment side effects use community unit and pastor region to select an owner. Assignable staff are pastors or admins marked isPastor.
+	Preserve location routing as an available policy. Add a deliberate fallback, retry, and unassigned queue after the policy is agreed.
+	Staff follow-up
+	A scoped My Enrollees page, pastor administration, assignment actions, and contact logging already exist.
+	Extend the existing queue and actions rather than create a parallel staff console.
+	Referrals
+	referred_by_enrollment_id records attribution.
+	A referral alone must not grant staff access or make its owner an eligible assignee.
+	Learner groups
+	Freeform group names, unique invite links, a capacity of 12, one active discipler per learner, and one led group per enrolment. The dashboard can create that default group.
+	Keep the existing group model and invitation flow. Remove only the one-led-group restriction; add explicit create, rename, select, and manage operations.
+	Assignment and joining
+	Enrolment automation assigns ownership only. The learner explicitly confirms an invitation before joining.
+	This already matches the recording. Protect the separation with regression tests.
+	Oversight
+	A location unit maps to a pastor and enrollees; a discipler leads a one-level group of disciples. No generic supervisory tree exists.
+	A cascading oversight model is new work, subject to the approved organization and access rules.
+	Enrolment jobs
+	Shared side effects run after enrolment with logged failures. Newly configured pastor regions need explicit bulk backfill.
+	Introduce reliable reconciliation and idempotent backfill; do not rely solely on a best-effort post-request callback.
+	
+
+No focused assignment or backfill tests were found in the inspection. The latest repository includes migrations through 0045. A future migration must take the next available number after rechecking the branch.
+Recommended implementation design
+The following data names and API responsibilities are proposals. Reuse equivalent existing structures where the final implementation audit finds them.
+Assignment and follow-up
+Keep pastor_assignments as the canonical enrolment-to-owner relationship. Add an explicit routing service used by enrolment, retries, and backfill. Resolve the agreed policy against approved staff and availability, persist the selected owner and policy reason, and leave a visible unassigned reason when nobody qualifies. Do not infer staff eligibility from referral attribution or group leadership.
+Store assignee availability separately from permission to view records. Availability should pause new allocation without silently removing existing assignments. Confirm who maintains the roster and whether membership is opt-in or default-on. If round robin is selected, allocate atomically so concurrent enrolments do not repeatedly choose the same person or create duplicate owners.
+Extend contact logging with a follow-up event history linked to the existing assignment and enrolment. Proposed fields are actor, contact time, channel, outcome, short necessary note, and next action or due date. Preserve existing contact count and last-contacted fields as consistent summaries. Distinguish not attempted, no response, responded, and declined; confirm the final labels and handling of declined follow-up with the product owner.
+The staff UI should show the current owner, assignment reason, last contact, next action, and authorized participant details. An admin view should expose unassigned people and failed allocation attempts. Reassignment should be an explicit authorized action with an audit record; backfill must not overwrite current owners by default.
+Reliable jobs and notifications
+Persist work that must survive request completion. A transactional outbox or equivalent durable mechanism should connect assignment changes to owner notifications. Retry safely, record terminal failures, and expose operational status. Use the existing notification channels where suitable; keep the message minimal and link to the authorized record rather than copying sensitive pastoral content.
+Add a reconciliation job for eligible enrolments without an owner and a controlled backfill operation for new region configuration. Both should be idempotent. A repeat enrolment hook, a retry, and a backfill racing together must still yield one owner and one notification per assignment event. Scheduling frequency and response-time targets remain product decisions.
+Oversight and automatically assembled reports
+Represent the confirmed supervisor-to-assignee relationships separately from learner discussion groups. A proposed oversight relationship records supervisor, subordinate, active dates, and who changed it. Validate cycles and ambiguous active parents unless the approved organization explicitly permits multiple supervisors. Reuse a current ministry or organizational hierarchy only if its meaning and access scope match this workflow.
+Provide server-side report queries for a chosen period and the caller’s permitted reporting subtree. Proposed report content is assigned count, unassigned work, attempted contact, responses, outstanding next actions, and available participation context. Provide drill-down to permitted source records and show generation time, period, and missing-data indicators. Automatically assembling a report does not replace the human recording of activity.
+Show the agreed reviewer, assignee, and next review date where one is recorded. Do not add recurring calendar invitations, external meeting integration, escalation deadlines, or a mandatory ministry-report field based on the unclear closing discussion. Confirm cadence and field definitions first. Generate reports on demand initially; add scheduled snapshots only if meeting preparation requires them.
+Multiple discipleship groups
+Remove the restriction that a leader can own only one group through a reviewed migration and query update. Preserve existing group identifiers, members, invitations, and history. Keep the current capacity, unique invitation code, learner membership constraint, and leader/member phone-consent behavior unless explicitly changed. Existing group-ID-based discussion, post, notification, invitation, and cron behavior is largely reusable.
+Change singular dashboard and community group assumptions to a list of led groups. Add a group selector and Create another group flow with an editable freeform name; include a rename operation. Every group must have its own invitation link, and all reads and mutations must carry the intended group identifier. Audit assumptions that the leader’s first or only group is always the correct group. Ownership and membership checks must remain server-side. Each leader operation must validate the selected group before returning members, prompts, prayer requests, contacts, or private activity.
+The invitation action should let the acting follow-up owner choose one of their own groups and share its link after contact. Do not expose private group contents to staff selecting a link. Persist a type or theme only if useful; a fixed taxonomy is not dictated by the recording. Assignment, reassignment, and creation of a default group must never insert group memberships or accept invitations. Joining or leaving a group must not silently change the accountable follow-up owner.
+Thirty day podcast plans and progression
+Reuse the existing content catalogue and participation records. Model a plan as an ordered 30-day schedule with one or two episodes per day, a default or tailored origin, an author, and a version. This is a proposed representation; check existing plan structures before adding tables.
+Allow the authorized discipler to tailor choices to participant-stated interests without collecting unnecessary personal details. Preserve completion history when a plan changes, define how edits affect future days, and make the chosen schedule visible to the learner. Verify the catalogue can support the intended preset before promising 60 distinct episodes. Exact listening-duration thresholds, completion rules, and progression rules need explicit definitions.
+Access and privacy
+Apply authorization in queries, mutations, reports, exports, and notifications. A shared learner group does not authorize access to another person’s pastoral record. An oversight relationship must grant only the approved scope; do not assume every supervisor can read all private notes, prayer requests, or personal questions. Prefer aggregate oversight by default and separately authorize sensitive drill-down.
+Preserve existing leader and disciple contact-consent rules when reusing contact details. Use minimal activity notes, record accountable changes, and exclude incidental personal information from the recording. The work does not authorize importing a live roster, contacting participants, granting roles, sharing private reports, or deploying changes.
+Server actions and query boundaries
+Follow the current server-action and query conventions rather than adding an unrelated API stack. Suggested boundaries are:
+* assign or reassign an enrolment: authenticated staff actor, approved routing policy, transaction, uniqueness, and audit event;
+* record a follow-up event: verified owner or explicitly authorized supervisor, validated outcome and next action, consistent contact summaries;
+* list an oversight report: period plus server-derived permitted scope, with restricted drill-down;
+* create, rename, select, and invite to a group: selected group ID with exact leader ownership; existing join confirmation remains the membership boundary;
+* save or revise a podcast plan: learner identity, authorized editor, validated catalogue references, version check, and preserved completion history.
+Derive the actor from the authenticated session; never trust a submitted staff ID or requested hierarchy scope. Test these boundaries directly, including calls made outside the UI.
+Build sequence
+1. Confirm the approved roster, routing precedence, and reporting authority. Add regression tests around the current enrolment side effects and ownership invariants before changing behavior.
+2. Implement reliable ownership allocation, an unassigned queue, availability, idempotent reconciliation and backfill, and immediate owner notification. Extend the existing follow-up log and queue.
+3. Migrate leader group ownership to support multiple groups and complete selector, creation, and per-group invitation flows. Test every assignment path for absence of membership side effects.
+4. Add the agreed oversight relationships, scoped reports, and review visibility using actual recorded events and existing participation data. Validate the report with real leaders using authorized test data.
+5. Add the 30-day podcast-plan flow after confirming content and completion semantics. Run migration, authorization, concurrency, and end-to-end tests before any deployment request.
+Acceptance checklist
+* An eligible enrolment receives exactly one approved owner or a visible unresolved status; missing location mapping never silently ends follow-up.
+* Paused or ineligible staff receive no new allocation. Referral attribution cannot grant access. Concurrent assignment and retry paths preserve ownership uniqueness.
+* A new assignment produces one timely owner notification linked to the scoped record. Retry and reconciliation do not duplicate notifications or overwrite an existing owner.
+* The staff queue records contact time, channel, outcome, and next action, while keeping contact count and last-contacted summaries consistent. No response and declined follow-up differ from no attempt.
+* Authorized leaders can inspect agreed reporting relationships and current period activity. Unauthorized peers and unrelated leaders cannot query individual records or infer private activity from report counts.
+* Reports expose their period, generation time, and underlying authorized events. Missing records are labeled as unknown, not treated as verified inactivity or completed work.
+* One authorized leader can create at least two named groups, switch between them, and retrieve distinct valid invite links. Existing membership, capacity, and invitations survive migration.
+* Assignment, reassignment, backfill, and default-group creation add no learner membership. Accepting or leaving a group does not change the follow-up owner.
+* Per-group reads and writes reject unauthorized group identifiers. A link for one group never joins the learner to another.
+* A learner can choose a 30-day, one- or two-per-day plan. Default and tailored plans are distinguishable, and editing future content preserves completed participation.
+* Existing enrolment, invitation acceptance, check-ins, prayer requests, and other unrelated group behavior pass regression checks.
+Decisions required before implementation
+* Who is on the eligible roster, who maintains availability, and how does organizational leadership map to existing pastor permissions? The recording affirms leader and sub-leader eligibility with an unclear exception; confirm the actual roster.
+* Does current location routing take precedence over eligible-referrer preference and round robin? What happens when a mapped owner is unavailable, and when may an admin reassign existing people?
+* What is the authoritative oversight tree, which supervisors may see identifiable records, and which private fields remain restricted?
+* What is the review cadence, agreed report schema, follow-up outcome vocabulary, and next-action policy? No escalation service level is specified.
+* Does multiple group ownership preserve the current capacity of 12 and one active discipler per learner? Recommended default: preserve both.
+* Who curates podcast presets, how is completion measured, and what happens to future days when a plan changes? The recording does not establish a precise daily duration or automatic advancement rule.
+Sources and code anchors
+Recording: Pastor on SOGP oversight structure - 7 October.mp4. Open the recording. Uploaded Oct 7, 2026; full duration 19:31.279. The source folder also contains an older August recording.
+Repository inspection at main 701b530bcbfd14847f73e0a1c690ffbc505a9d4e. The following links are pinned to the inspected commit:
+* Ownership schema at line 1359 and pastor eligibility at line 45.
+* Enrolment side effects at lines 53 to 73 and automatic assignment at lines 348 to 367.
+* Location unit selection at line 29, pastor administration at line 40, and assignment actions at line 15.
+* Scoped My Enrollees page at line 14 and referral attribution at line 65.
+* Learner group schema at lines 1948 to 2005, single-group creation at lines 51 to 100, and dashboard group behavior at lines 697 to 737.
+* Invitation confirmation page at lines 79 to 156, join action at lines 95 to 127, and membership query at lines 220 to 301.
+These notes describe a proposed implementation. Source statements do not establish that every requested behavior is absent from production, and the static repository inspection does not verify the deployed database or live workflows. No application implementation changes were made for this review.
+Oct 7, 2026  ·

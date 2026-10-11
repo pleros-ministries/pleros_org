@@ -1,0 +1,87 @@
+/* Motion for the /preview/pleros demo only. The global reduced-motion rule in
+   app/globals.css switches every animation here off. */
+
+.enter {
+  animation: enter 260ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+
+.sheet[open] {
+  animation: sheet-in 240ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.sheet[open]::backdrop {
+  animation: fade 200ms ease-out both;
+}
+
+.toast {
+  animation: toast-in 220ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.menu {
+  animation: menu-in 160ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  transform-origin: top right;
+}
+
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@keyframes sheet-in {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+}
+
+@media (max-width: 639px) {
+  @keyframes sheet-in {
+    from {
+      transform: translateY(32px);
+      opacity: 0;
+    }
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+}
+
+.leftSheet[open] { animation: left-sheet-in 250ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+@keyframes left-sheet-in { from { opacity: 0; transform: translateX(-24px); } }
+
+.navPanel {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 250ms cubic-bezier(0.22, 1, 0.36, 1), opacity 180ms ease-out;
+}
+.navPanel[data-open="true"] { grid-template-rows: 1fr; opacity: 1; }
+.navChevron { transition: transform 250ms cubic-bezier(0.22, 1, 0.36, 1); }
+@media (prefers-reduced-motion: reduce) {
+  .navPanel, .navChevron { transition: none; }
+}
+
+/* Keep form controls compact without changing shared/public surface tokens. */
+.fields :is(input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="hidden"]), textarea, select, [role="combobox"]) {
+  border-radius: 12px;
+}

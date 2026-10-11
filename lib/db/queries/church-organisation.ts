@@ -1,0 +1,136 @@
+import "server-only";
+import { and, eq, ilike, inArray, or, sql } from "drizzle-orm";
+import { db } from "@/lib/db";
+import { transactionDb } from "@/lib/db/transaction";
+import * as s from "@/lib/db/schema";
+import type { Tx } from "./outreach-contacts";
+import { CommunityError } from "@/lib/community/errors";
+import { canManageChurchAssignments, canReadChurchReport, churchBranchIds, validChurchParent, type ChurchAssignment, type ChurchRole } from "@/lib/church/permissions";
+
+export function churchOrganisationEnabled() { return process.env.DASHBOARD_CHURCH_V2 === "1"; }
+export function churchMultiBranchEnabled() { return churchOrganisationEnabled() && process.env.DASHBOARD_CHURCH_MULTI_BRANCH_V2 === "1"; }
+function requireEnabled() { if (!churchOrganisationEnabled()) throw new CommunityError("Church assignments are not enabled yet."); }
+export async function getChurchAssignment(userId: string): Promise<ChurchAssignment | null> {
+  if (!churchOrganisationEnabled()) return null;
+  const [row] = await db.select().from(s.churchAssignments).where(eq(s.churchAssignments.userId, userId)).limit(1);
+  if (!row) return null;
+  if (row.role === "branch_pastor" && churchMultiBranchEnabled()) {
+    const links = await db.select({ branchId: s.churchBranchPastors.branchId }).from(s.churchBranchPastors).where(eq(s.churchBranchPastors.userId, userId));
+    return { ...row, branchIds: links.map(link => link.branchId) };
+  }
+  return row;
+}
+export async function getChurchRoster(viewerId: string) {
+  const viewer = await getChurchAssignment(viewerId);
+  if (!viewer || viewer.role === "worker") return [];
+  const ids = churchBranchIds(viewer);
+  if (viewer.role === "branch_pastor" && !ids.length) return [];
+  const branchScope = churchMultiBranchEnabled() ? or(inArray(s.churchAssignments.branchId, ids), inArray(s.churchAssignments.userId, db.select({ userId: s.churchBranchPastors.userId }).from(s.churchBranchPastors).where(inArray(s.churchBranchPastors.branchId, ids)))) : inArray(s.churchAssignments.branchId, ids);
+  const scope = viewer.role === "pastor" ? undefined : viewer.role === "branch_pastor" ? branchScope : and(eq(s.churchAssignments.supervisorId, viewerId), eq(s.churchAssignments.role, "worker"), eq(s.churchAssignments.unitId, viewer.unitId!), eq(s.churchAssignments.branchId, viewer.branchId!));
+  const rows = await db.select({ userId: s.churchAssignments.userId, role: s.churchAssignments.role, branchId: s.churchAssignments.branchId, unitId: s.churchAssignments.unitId, supervisorId: s.churchAssignments.supervisorId, name: s.users.name, branchName: s.churchBranches.name, unitName: s.churchUnits.name })
+    .from(s.churchAssignments).innerJoin(s.users, eq(s.users.id, s.churchAssignments.userId))
+    .leftJoin(s.churchBranches, eq(s.churchBranches.id, s.churchAssignments.branchId))
+    .leftJoin(s.churchUnits, eq(s.churchUnits.id, s.churchAssignments.unitId)).where(scope).orderBy(s.users.name);
+  if (!churchMultiBranchEnabled() || !rows.length) return rows;
+  const links = await db.select({ userId: s.churchBranchPastors.userId, branchId: s.churchBranchPastors.branchId, name: s.churchBranches.name }).from(s.churchBranchPastors).innerJoin(s.churchBranches, eq(s.churchBranches.id, s.churchBranchPastors.branchId)).where(inArray(s.churchBranchPastors.userId, rows.map(row => row.userId)));
+  return rows.map(row => row.role === "branch_pastor" ? { ...row, branchIds: links.filter(link => link.userId === row.userId).map(link => link.branchId), branchName: links.filter(link => link.userId === row.userId).map(link => link.name).join(" · ") || null } : row);
+}
+export async function requireChurchReportAccess(viewerId: string, subjectId: string) {
+  const [viewer, subject] = await Promise.all([getChurchAssignment(viewerId), getChurchAssignment(subjectId)]);
+  if (!canReadChurchReport(viewer, subject)) throw new CommunityError("That report is outside your oversight.");
+  return subject!;
+}
+export async function getChurchStructure(viewerId: string, bootstrap = false) {
+  if (!churchOrganisationEnabled()) return { branches: [], units: [] };
+  const viewer = await getChurchAssignment(viewerId);
+  if (!bootstrap && !canManageChurchAssignments(viewer)) return { branches: [], units: [] };
+  const limited = viewer?.role === "branch_pastor";
+  const ids = churchBranchIds(viewer);
+  if (limited && !ids.length) return { branches: [], units: [] };
+  const [branches, units] = await Promise.all([
+    db.select().from(s.churchBranches).where(limited ? inArray(s.churchBranches.id, ids) : undefined),
+    db.select().from(s.churchUnits).where(limited ? inArray(s.churchUnits.branchId, ids) : undefined),
+  ]);
+  return { branches, units };
+}
+export async function loadChurchAssignmentForTransaction(tx: Tx, userId: string): Promise<ChurchAssignment | null> {
+  const [row] = await tx.select().from(s.churchAssignments).where(eq(s.churchAssignments.userId, userId));
+  if (!row) return null;
+  if (row.role !== "branch_pastor" || !churchMultiBranchEnabled()) return row;
+  const links = await tx.select({ branchId: s.churchBranchPastors.branchId }).from(s.churchBranchPastors).where(eq(s.churchBranchPastors.userId, userId));
+  return { ...row, branchIds: links.map(link => link.branchId) };
+}
+
+/** Appointment search deliberately returns names/IDs only, never contact information. */
+export async function searchChurchCandidates(viewerId: string, query: string, bootstrap = false) {
+  requireEnabled();
+  if (!bootstrap && !canManageChurchAssignments(await getChurchAssignment(viewerId))) throw new CommunityError("You cannot appoint church workers.");
+  if (query.trim().length < 2) return [];
+  const escaped = query.trim().slice(0, 80).replace(/[\\%_]/g, "\\$&");
+  return db.select({ id: s.users.id, name: s.users.name }).from(s.users).where(ilike(s.users.name, `%${escaped}%`)).orderBy(s.users.name).limit(20);
+}
+
+export async function assignChurchMember(actorId: string, input: { userId: string; role: ChurchRole; branchId: number | null; unitId: number | null; supervisorId: string | null; branchIds?: number[] }, bootstrap = false) {
+  requireEnabled();
+  if (!["pastor", "branch_pastor", "unit_leader", "worker"].includes(input.role)) throw new CommunityError("Choose a church role.");
+  return transactionDb.transaction(async (tx) => {
+    // Serialize appointment changes, including supervisor moves and initial Pastor setup.
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended('pleros:church-assignments', 0))`);
+    const actor = await loadChurchAssignmentForTransaction(tx, actorId);
+    const current = await loadChurchAssignmentForTransaction(tx, input.userId);
+    const multi = churchMultiBranchEnabled();
+    const rawBranchIds = input.branchIds ?? (input.branchId === null ? [] : [input.branchId]);
+    if (input.role === "branch_pastor" && multi && (!Array.isArray(rawBranchIds) || rawBranchIds.length > 200)) throw new CommunityError("Choose valid branch assignments.");
+    const branchIds = input.role === "branch_pastor" && multi ? [...new Set(rawBranchIds)] : [];
+    if (branchIds.some(id => !Number.isInteger(id) || id <= 0)) throw new CommunityError("Choose valid branches.");
+    const primaryBranch = input.role === "branch_pastor" && multi ? branchIds[0] ?? null : input.branchId;
+    if (!multi && input.role === "branch_pastor" && primaryBranch === null) throw new CommunityError("Choose a branch.");
+    const [user] = await tx.select({ id: s.users.id }).from(s.users).where(eq(s.users.id, input.userId));
+    if (!user) throw new CommunityError("Choose an existing member.");
+    if (input.role === "pastor") {
+      if (!bootstrap) throw new CommunityError("Only super-admin setup can appoint the Pastor.");
+      const [root] = await tx.select().from(s.churchAssignments).where(eq(s.churchAssignments.role, "pastor"));
+      if (root && root.userId !== input.userId) throw new CommunityError("A Pastor is already appointed.");
+    } else if (!actor || !canManageChurchAssignments(actor)) throw new CommunityError("You cannot manage church assignments.");
+    if (actor?.role === "branch_pastor" && (input.role === "branch_pastor" || input.role === "pastor" || !churchBranchIds(actor).includes(input.branchId!) || (current && !churchBranchIds(actor).includes(current.branchId!)))) throw new CommunityError("Manage only workers and unit leaders in your branch.");
+    const parent = input.supervisorId ? await loadChurchAssignmentForTransaction(tx, input.supervisorId) : null;
+    if (input.supervisorId === input.userId || !validChurchParent(input.role, parent, primaryBranch, input.unitId)) throw new CommunityError("Choose a supervisor in the correct branch and unit.");
+    const requestedBranches = input.role === "branch_pastor" && multi ? branchIds : primaryBranch === null ? [] : [primaryBranch];
+    if (requestedBranches.length && (await tx.select({ id: s.churchBranches.id }).from(s.churchBranches).where(inArray(s.churchBranches.id, requestedBranches))).length !== requestedBranches.length) throw new CommunityError("Choose existing branches.");
+    if (input.unitId !== null && !(await tx.select({ id: s.churchUnits.id }).from(s.churchUnits).where(and(eq(s.churchUnits.id, input.unitId), eq(s.churchUnits.branchId, input.branchId!))))[0]) throw new CommunityError("Choose a unit in that branch.");
+    const dependents = await tx.select({ id: s.churchAssignments.userId, branchId: s.churchAssignments.branchId }).from(s.churchAssignments).where(eq(s.churchAssignments.supervisorId, input.userId));
+    const dependent = dependents[0];
+    if (current?.role === "branch_pastor" && input.role === "branch_pastor" && multi && dependents.some(row => row.branchId === null || !branchIds.includes(row.branchId))) throw new CommunityError("Reassign direct reports before removing their branch.");
+    if (dependent && current && (current.role !== input.role || (current.role !== "branch_pastor" && current.branchId !== primaryBranch) || current.unitId !== input.unitId)) throw new CommunityError("Reassign this leader's direct reports before changing their role or location.");
+    const assignment = { userId: input.userId, role: input.role, branchId: primaryBranch, unitId: input.unitId, supervisorId: input.supervisorId, assignedBy: actorId };
+    await tx.insert(s.churchAssignments).values(assignment).onConflictDoUpdate({ target: s.churchAssignments.userId, set: { ...assignment, updatedAt: new Date() } });
+    if (multi) {
+      await tx.delete(s.churchBranchPastors).where(eq(s.churchBranchPastors.userId, input.userId));
+      if (branchIds.length) await tx.insert(s.churchBranchPastors).values(branchIds.map(branchId => ({ userId: input.userId, branchId })));
+    }
+  });
+}
+export async function createChurchPlace(actorId: string, input: { name: string; branchId?: number }) {
+  requireEnabled();
+  const name = input.name.trim();
+  if (!name || name.length > 100) throw new CommunityError("Enter a name under 100 characters.");
+  return transactionDb.transaction(async (tx) => {
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended('pleros:church-assignments', 0))`);
+    const actor = await loadChurchAssignmentForTransaction(tx, actorId);
+    if (!actor || !canManageChurchAssignments(actor)) throw new CommunityError("You cannot manage church assignments.");
+    if (!input.branchId) {
+      if (actor.role !== "pastor") throw new CommunityError("Only the Pastor creates branches.");
+      await tx.insert(s.churchBranches).values({ name });
+    } else {
+      if (actor.role === "branch_pastor" && !churchBranchIds(actor).includes(input.branchId)) throw new CommunityError("Choose your own branch.");
+      const [branch] = await tx.select({ id: s.churchBranches.id }).from(s.churchBranches).where(eq(s.churchBranches.id, input.branchId));
+      if (!branch) throw new CommunityError("Choose an existing branch.");
+      await tx.insert(s.churchUnits).values({ name, branchId: input.branchId });
+    }
+  });
+}
+
+export async function hasChurchDirectReports(userId: string) {
+  if (!churchOrganisationEnabled()) return false;
+  return Boolean((await db.select({ id: s.churchAssignments.userId }).from(s.churchAssignments).where(eq(s.churchAssignments.supervisorId, userId)).limit(1))[0]);
+}

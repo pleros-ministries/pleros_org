@@ -38,6 +38,8 @@ export async function togglePodcastEpisodeProgressAction(
   }
 
   revalidatePath("/dashboard/podcast");
+  revalidatePath("/dashboard/community/report");
+  revalidatePath("/dashboard/church");
   revalidatePath("/dashboard/sogp");
   return { error: null };
 }
@@ -69,6 +71,8 @@ export async function markSelectedPodcastEpisodesListenedAction(
   }
 
   revalidatePath("/dashboard/podcast");
+  revalidatePath("/dashboard/community/report");
+  revalidatePath("/dashboard/church");
   revalidatePath("/dashboard/sogp");
   return { error: null };
 }

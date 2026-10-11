@@ -64,6 +64,7 @@ export function StepWhere({
           <Field id={platformId} label="Platform *" error={errors.platform}>
             <div className="relative">
               <select
+                data-select-chevron="external"
                 {...fieldAria(platformId, errors.platform)}
                 value={draft.platform}
                 onChange={(event) => update({ platform: event.target.value })}

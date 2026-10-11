@@ -29,10 +29,12 @@ export function StepPeople({
   draft,
   errors,
   update,
+  compact = false,
 }: {
   draft: ActivityDraft;
   errors: StepErrors;
   update: (patch: Partial<ActivityDraft>) => void;
+  compact?: boolean;
 }) {
   const rows = draft.people;
   const entered = Number(draft.numbers.saved.trim() || "0");
@@ -56,15 +58,15 @@ export function StepPeople({
 
   return (
     <div className="grid gap-3">
-      <div className="grid gap-0.5">
+      {!compact ? <div className="grid gap-0.5">
         <p className="text-[13px] font-medium text-zinc-700">People you met (optional)</p>
         <p className="text-xs text-zinc-500">
           Add anyone you want to follow up. Only you, your pastor and the Pleros
           team see these names and numbers.
         </p>
-      </div>
+      </div> : null}
 
-      {entered > 0 ? (
+      {entered > 0 && !compact ? (
         <p className="text-xs text-zinc-600">
           You entered {entered} saved. Tick Saved on each person below if you know who.
         </p>
