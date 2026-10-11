@@ -175,6 +175,7 @@ Consolidated 2026-08-31. Keep this file short, current, pattern-focused, and fre
 
 ## Copy and reset details
 
+- Native dashboard dropdowns always show a visible chevron with reserved end padding; cover the demo, live pages and portaled dialogs, while excluding controls that already render their own arrow. Vercel Secret pull placeholders are redactions, not actual flag values; keep non-sensitive rollout flags as Config and verify them separately.
 - Use plain devotional actions (`Save`, `Edit`) and call recorded items activities; keep backend terms such as `at the source` out of dashboard copy.
 - Prefilled public-form values remain editable without explanatory hints.
 - Back navigation such as `Back to oversight` is a plain text link with a left arrow, without button borders/backgrounds. Preserve requested mobile heading line breaks with a wide enough measure.

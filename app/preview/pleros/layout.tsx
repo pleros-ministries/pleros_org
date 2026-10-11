@@ -34,7 +34,7 @@ export default async function PlerosDemoLayout({ children }: { children: React.R
   const today = lagosToday();
 
   return (
-    <div className={`site-font-theme ${styles.fields}`} style={productType}>
+    <div className={`pleros-select-scope site-font-theme ${styles.fields}`} style={productType}>
       <div className="font-sans text-(--color-text)">
         <Suspense fallback={<DemoLoading />}>
           <DemoProvider today={today} initialGreeting={timeOfDayGreeting(new Date())}>

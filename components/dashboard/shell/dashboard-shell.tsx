@@ -252,7 +252,7 @@ export function DashboardShell({
     <div
       className={cn(
         motion.root,
-        "site-font-theme min-h-dvh bg-white font-[family-name:var(--font-be-vietnam-pro)] text-(--color-text)",
+        "pleros-select-scope site-font-theme min-h-dvh bg-white font-[family-name:var(--font-be-vietnam-pro)] text-(--color-text)",
       )}
     >
       <a
