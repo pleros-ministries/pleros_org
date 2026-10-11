@@ -149,7 +149,7 @@ export function NotificationBell({
           {items.length === 0 ? (
             <p className="p-2 text-xs text-zinc-500">Nothing yet.</p>
           ) : (
-            <ul className="grid max-h-[min(20rem,calc(100dvh-5rem))] gap-1 overflow-y-auto">
+            <ul className="grid max-h-[min(20rem,calc(100dvh-8rem))] gap-1 overflow-y-auto">
               {items.map((item) => (
                 <li
                   key={item.id}
