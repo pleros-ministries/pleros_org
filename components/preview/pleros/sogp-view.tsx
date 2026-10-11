@@ -10,11 +10,11 @@ import {
   HandHeartIcon,
   HeadphonesIcon,
   LockIcon,
-  PauseIcon,
-  PlayIcon,
   RadioIcon,
 } from "lucide-react";
 
+import { LessonAudioControls } from "@/components/media/lesson-audio-controls";
+import { welcomeAudiobookTracks } from "@/lib/welcome-audiobook";
 import type { DayActivity } from "@/lib/community/ministry-report";
 import { SOGP_LEVELS, type SogpCurriculumTrack } from "@/lib/sogp/curriculum";
 import { cn } from "@/lib/utils";
@@ -457,7 +457,6 @@ function Lesson({ day, track, onClose }: { day: SogpDay; track: SogpCurriculumTr
     preparationDone: false,
   };
   const writable = isWritableDay(day.dateKey, today);
-  const [playing, setPlaying] = useState(false);
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [checked, setChecked] = useState(false);
   const quiz = quizFor(track);
@@ -471,31 +470,11 @@ function Lesson({ day, track, onClose }: { day: SogpDay; track: SogpCurriculumTr
     <div className="grid gap-6">
       <section className="grid gap-3">
         <h3 className="text-[14px] font-medium text-(--color-text-strong)">1. Listen</h3>
-        <div className="flex items-center gap-3 rounded-xl border border-(--color-line) bg-(--color-surface-muted) px-3 py-3">
-          <button
-            type="button"
-            onClick={() => setPlaying((value) => !value)}
-            aria-label={playing ? "Pause the sample" : "Play the sample"}
-            className={cn("grid size-10 shrink-0 place-items-center rounded-full bg-(--color-brand-blue) text-white", focusRing)}
-          >
-            {playing ? <PauseIcon className="size-4" aria-hidden /> : <PlayIcon className="size-4 translate-x-px" aria-hidden />}
-          </button>
-          <div className="grid flex-1 gap-1.5">
-            <span className="h-1 overflow-hidden rounded-full bg-white ring-1 ring-inset ring-(--color-line)">
-              <span
-                className={cn(
-                  "block h-full bg-(--color-brand-blue) transition-[width] ease-linear",
-                  playing || sogp.listened ? "w-full duration-[6000ms]" : "w-0 duration-300",
-                )}
-                onTransitionEnd={() => {
-                  if (playing && writable && !sogp.listened) save({ listened: true });
-                }}
-              />
-            </span>
-            <span className="text-[12px] text-(--color-text-muted)">
-              {sogp.listened ? "Listened" : playing ? "Playing a silent demo sample…" : "Sample player"}
-            </span>
-          </div>
+        <div className="rounded-xl border border-(--color-line) bg-(--color-brand-sky-soft) p-4">
+          <p className="mb-3 text-[12px] text-(--color-text-muted)">Sample audio · player preview</p>
+          <LessonAudioControls src={welcomeAudiobookTracks[0]!.audioUrl} onProgress={(seconds, duration) => {
+            if (writable && !sogp.listened && Number.isFinite(duration) && duration > 0 && seconds / duration >= 0.9) save({ listened: true });
+          }} />
         </div>
         <label className="inline-flex w-fit items-center gap-2 text-[13.5px]">
           <input
