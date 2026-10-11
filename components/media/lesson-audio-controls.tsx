@@ -78,7 +78,7 @@ export function LessonAudioControls({ src, onProgress }: { src: string; onProgre
         </button>
         <input type="range" min={0} max={1} step={0.05} value={muted ? 0 : volume} onChange={event => { if (audioRef.current) { audioRef.current.volume = Number(event.target.value); audioRef.current.muted = false; } }} aria-label="Teaching volume" className={`hidden h-6 w-16 accent-(--color-brand-blue) sm:block ${focusRing}`} />
       </div>
-      {download ? <a href={download.href} download={download.attachment || undefined} target="_blank" rel="noreferrer" className={`inline-flex h-8 items-center gap-1.5 rounded-md px-2 text-[12.5px] font-medium text-(--color-brand-blue) hover:bg-(--color-brand-sky-soft) ${focusRing}`}><Download className="size-3.5" aria-hidden />{download.attachment ? "Download" : "Open audio"}</a> : null}
+      {download ? <a href={download.href} download={download.attachment || undefined} target="_blank" rel="noreferrer" className={`inline-flex h-8 items-center gap-1.5 rounded-md px-2 text-[12.5px] font-medium text-(--color-brand-blue) hover:bg-(--color-brand-sky-soft) ${focusRing}`}><Download className="size-3.5" aria-hidden />Download audio</a> : null}
     </div>
     {error ? <div className="flex flex-wrap items-center gap-2 text-[12px]"><p role="alert" className="text-(--destructive)">{error}</p><button type="button" onClick={() => { setError(null); audioRef.current?.load(); }} className={`rounded-sm font-medium text-(--color-brand-blue) underline ${focusRing}`}>Reload audio</button></div> : null}
   </div>;
