@@ -113,14 +113,14 @@ export function LeaderboardPage({
     : [];
 
   return (
-    <section className="site-font-theme min-h-screen bg-[#f6f5f1] pb-16 text-zinc-900">
+    <section className="site-font-theme min-h-screen bg-[#f6f5f1] pb-16 text-(--color-text-strong)">
       {/* Navigation comes from the dashboard shell. */}
       <div className="site-shell-page sogp-shell-page grid gap-4 pb-6 pt-5">
         <header className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-          <h1 className="ppc-heading text-2xl font-semibold tracking-[-0.02em] text-zinc-900">
+          <h1 className="text-[24px] font-medium leading-[1.1] tracking-[-0.025em] text-(--color-text-strong)">
             Leaderboard
           </h1>
-          <p className="text-[0.62rem] font-semibold uppercase tracking-[0.1em] text-zinc-400">
+          <p className="text-[0.62rem] font-medium uppercase tracking-[0.1em] text-zinc-400">
             {data.cohortTitle} · {data.total}{" "}
             {data.total === 1 ? "participant" : "participants"}
           </p>
@@ -137,18 +137,18 @@ export function LeaderboardPage({
             }
           >
             <div className="flex flex-wrap items-end justify-between gap-3">
-              <p className="ppc-heading text-2xl font-semibold text-zinc-900">
+              <p className="text-2xl font-medium text-(--color-text-strong)">
                 #{me.rank}
-                <span className="ml-2 text-sm font-medium text-zinc-500">
+                <span className="ml-2 text-sm font-medium text-(--color-text-muted)">
                   {me.points} points
                 </span>
               </p>
               <StreakBadge days={me.currentStreak} />
             </div>
             {me.alias ? (
-              <p className="text-xs text-zinc-500">
+              <p className="text-xs text-(--color-text-muted)">
                 Showing on the leaderboard as{" "}
-                <strong className="font-semibold text-zinc-900">
+                <strong className="font-semibold text-(--color-text-strong)">
                   {me.alias}
                 </strong>
                 .
@@ -160,8 +160,8 @@ export function LeaderboardPage({
                   key={item.label}
                   className="rounded-sm border border-zinc-200 bg-zinc-50 px-3 py-2"
                 >
-                  <dt className="text-[0.7rem] text-zinc-500">{item.label}</dt>
-                  <dd className="ppc-heading text-sm font-semibold text-zinc-900">
+                  <dt className="text-[0.7rem] text-(--color-text-muted)">{item.label}</dt>
+                  <dd className="text-[13.5px] font-medium text-(--color-text-strong)">
                     {item.value}
                   </dd>
                 </div>
@@ -180,7 +180,7 @@ export function LeaderboardPage({
           }
         >
           {data.top.length === 0 ? (
-            <p className="text-xs text-zinc-500">
+            <p className="text-xs text-(--color-text-muted)">
               No one is on the leaderboard yet.
             </p>
           ) : (
@@ -195,22 +195,22 @@ export function LeaderboardPage({
                       : "border-zinc-200 bg-white"
                   }`}
                 >
-                  <span className="ppc-heading w-6 shrink-0 text-center text-sm font-semibold text-zinc-500">
+                  <span className="w-6 shrink-0 text-center text-sm font-medium text-(--color-text-muted)">
                     {entry.rank}
                   </span>
                   <Avatar name={entry.name} size={32} />
                   <span className="grid min-w-0 flex-1 gap-0.5">
-                    <span className="truncate text-sm font-semibold text-zinc-900">
+                    <span className="truncate text-sm font-medium text-(--color-text-strong)">
                       {entry.name}
                       {entry.isMe ? (
-                        <span className="ml-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.08em] text-[var(--color-brand-blue)]">
+                        <span className="ml-1.5 text-[0.65rem] font-medium uppercase tracking-[0.08em] text-[var(--color-brand-blue)]">
                           You
                         </span>
                       ) : null}
                     </span>
                     <StreakBadge days={entry.currentStreak} />
                   </span>
-                  <span className="ppc-heading shrink-0 text-sm font-semibold text-zinc-900">
+                  <span className="shrink-0 text-sm font-medium text-(--color-text-strong)">
                     {entry.points}
                     <span className="ml-1 text-[0.65rem] font-medium text-zinc-400">
                       pts
@@ -236,10 +236,10 @@ export function LeaderboardPage({
             {POINT_RULES.map((rule) => (
               <li
                 key={rule.label}
-                className="flex items-center justify-between gap-3 text-xs text-zinc-600"
+                className="flex items-center justify-between gap-3 text-xs text-(--color-text-muted)"
               >
                 <span>{rule.label}</span>
-                <strong className="ppc-heading font-semibold text-zinc-900">
+                <strong className="font-medium text-(--color-text-strong)">
                   +{rule.value}
                 </strong>
               </li>
@@ -277,12 +277,12 @@ export function LeaderboardPage({
                 value={aliasDraft ?? me.alias ?? ""}
                 onChange={(event) => setAliasDraft(event.target.value)}
                 disabled={alias.isPending}
-                className="h-9 min-w-0 flex-1 rounded-sm border border-zinc-200 bg-white px-3 text-sm text-zinc-900 outline-none focus:border-[var(--color-brand-blue)]"
+                className="h-9 min-w-0 flex-1 rounded-sm border border-zinc-200 bg-white px-3 text-sm text-(--color-text-strong) outline-none focus:border-[var(--color-brand-blue)]"
               />
               <button
                 type="submit"
                 disabled={alias.isPending}
-                className="inline-flex h-9 shrink-0 items-center rounded-full bg-[var(--color-brand-blue)] px-4 text-xs font-semibold text-white disabled:opacity-55"
+                className="inline-flex h-9 shrink-0 items-center rounded-full bg-[var(--color-brand-blue)] px-4 text-xs font-medium text-white disabled:opacity-55"
               >
                 Save
               </button>

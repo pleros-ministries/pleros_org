@@ -2386,7 +2386,7 @@ export const churchAssignments = pgTable("church_assignments", {
   index("church_assignments_branch_idx").on(t.branchId),
   index("church_assignments_unit_idx").on(t.unitId),
   uniqueIndex("church_assignments_one_pastor_idx").on(t.role).where(sql`${t.role} = 'pastor'`),
-  check("church_assignment_shape", sql`(${t.role} = 'pastor' and ${t.branchId} is null and ${t.unitId} is null and ${t.supervisorId} is null) or (${t.role} = 'branch_pastor' and ${t.branchId} is not null and ${t.unitId} is null and ${t.supervisorId} is not null) or (${t.role} in ('unit_leader', 'worker') and ${t.branchId} is not null and ${t.unitId} is not null and ${t.supervisorId} is not null)`),
+  check("church_assignment_shape", sql`(${t.role} = 'pastor' and ${t.branchId} is null and ${t.unitId} is null and ${t.supervisorId} is null) or (${t.role} = 'branch_pastor' and ${t.unitId} is null and ${t.supervisorId} is not null) or (${t.role} in ('unit_leader', 'worker') and ${t.branchId} is not null and ${t.unitId} is not null and ${t.supervisorId} is not null)`),
   check("church_assignment_no_self_supervision", sql`${t.supervisorId} is null or ${t.supervisorId} <> ${t.userId}`),
 ]);
 
@@ -2395,3 +2395,9 @@ export const dailyReportPreferences = pgTable("daily_report_preferences", {
   pushEnabled: boolean("push_enabled").notNull().default(false),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+/** Branch Pastors can oversee multiple explicitly assigned church branches. */
+export const churchBranchPastors = pgTable("church_branch_pastors", {
+  userId: text("user_id").notNull().references(() => churchAssignments.userId, { onDelete: "cascade" }),
+  branchId: integer("branch_id").notNull().references(() => churchBranches.id),
+}, (t) => [primaryKey({ columns: [t.userId, t.branchId] }), index("church_branch_pastors_branch_idx").on(t.branchId)]);

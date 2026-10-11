@@ -10,10 +10,10 @@ export async function findChurchMembers(query: string) {
   const session = await actor();
   return searchChurchCandidates(session.user.id, query, session.user.role === "super_admin");
 }
-export async function saveChurchAssignment(input: { userId: string; role: ChurchRole; branchId: number | null; unitId: number | null; supervisorId: string | null }) {
+export async function saveChurchAssignment(input: { userId: string; role: ChurchRole; branchId: number | null; unitId: number | null; supervisorId: string | null; branchIds?: number[] }) {
   try {
     const session = await actor();
-    await assignChurchMember(session.user.id, { userId: input.userId, role: input.role, branchId: input.branchId, unitId: input.unitId, supervisorId: input.supervisorId }, session.user.role === "super_admin");
+    await assignChurchMember(session.user.id, { userId: input.userId, role: input.role, branchId: input.branchId, unitId: input.unitId, supervisorId: input.supervisorId, branchIds: input.branchIds }, session.user.role === "super_admin");
     revalidatePath("/dashboard", "layout");
     return { ok: true as const };
   } catch (error) { if (error instanceof CommunityError) return { ok: false as const, error: error.message }; throw error; }

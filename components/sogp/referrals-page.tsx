@@ -70,7 +70,7 @@ export function ReferralsPage({
   ) as Record<PreSogpShareIntentPlatform, string>;
 
   return (
-    <section className="site-font-theme min-h-screen bg-[#f6f5f1] pb-16 text-zinc-900">
+    <section className="site-font-theme min-h-screen bg-[#f6f5f1] pb-16 text-(--color-text-strong)">
       {/* The live dashboard shell carries navigation; the standalone preview keeps its own. */}
       {preview ? (
         <nav
@@ -84,7 +84,7 @@ export function ReferralsPage({
             >
               <ArrowLeftIcon className="size-3.5" strokeWidth={2} /> Dashboard
             </Link>
-            <span className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-[var(--color-brand-lime)]">
+            <span className="text-[0.7rem] font-medium uppercase tracking-[0.14em] text-[var(--color-brand-lime)]">
               SOGP
             </span>
           </div>
@@ -93,10 +93,10 @@ export function ReferralsPage({
 
       <div className="site-shell-page sogp-shell-page grid gap-4 pb-6 pt-5">
         <header className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-          <h1 className="ppc-heading text-2xl font-semibold tracking-[-0.02em] text-zinc-900">
+          <h1 className="text-[24px] font-medium leading-[1.1] tracking-[-0.025em] text-(--color-text-strong)">
             Invite friends
           </h1>
-          <p className="text-[0.62rem] font-semibold uppercase tracking-[0.1em] text-zinc-400">
+          <p className="text-[0.62rem] font-medium uppercase tracking-[0.1em] text-zinc-400">
             {data.referredCount} joined so far
           </p>
         </header>
@@ -135,7 +135,7 @@ export function ReferralsPage({
           }
         >
           {data.referred.length === 0 ? (
-            <p className="text-xs text-zinc-500">
+            <p className="text-xs text-(--color-text-muted)">
               No one yet — share your link above to invite people.
             </p>
           ) : (
@@ -146,10 +146,10 @@ export function ReferralsPage({
                   className="grid gap-1.5 rounded-sm border border-zinc-200 bg-white p-3"
                 >
                   <div className="flex items-center justify-between gap-3">
-                    <span className="text-sm font-semibold text-zinc-900">
+                    <span className="text-sm font-medium text-(--color-text-strong)">
                       {person.firstName}
                     </span>
-                    <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[0.65rem] font-semibold uppercase tracking-[0.08em] text-zinc-600">
+                    <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[0.65rem] font-medium uppercase tracking-[0.08em] text-(--color-text-muted)">
                       {referralStageLabel(person.stage)}
                     </span>
                   </div>
@@ -161,7 +161,7 @@ export function ReferralsPage({
                       value={person.preparationDaysComplete}
                       max={data.preparationDaysTotal}
                     />
-                    <span className="shrink-0 text-[0.7rem] text-zinc-500">
+                    <span className="shrink-0 text-[0.7rem] text-(--color-text-muted)">
                       {person.preparationDaysComplete} of{" "}
                       {data.preparationDaysTotal}
                     </span>

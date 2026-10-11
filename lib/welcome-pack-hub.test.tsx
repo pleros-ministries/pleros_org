@@ -58,12 +58,13 @@ describe("Welcome Pack hub", () => {
     expect(html).toContain("Orientation");
     expect(html).toContain("Gifts");
     expect(html).toContain("App and reminders");
-    expect(html).toContain("font-semibold");
-    expect(html).toContain("site-pathway-title");
+    expect(html).toContain("text-[24px]");
+    expect(html).not.toContain("site-pathway-title");
     expect(html).not.toContain("font-bold");
     expect(html).not.toContain("Join the orientation group");
-    // First and last cards span the row, so four cards leave no orphan.
-    expect(html.match(/col-span-2/g)).toHaveLength(2);
+    for (const { href } of getWelcomePackHubCards("/dashboard/welcomepack")) {
+      expect(html).toContain(`href="${href}"`);
+    }
     expect(html).not.toContain(">Done<");
   });
 
@@ -135,16 +136,9 @@ describe("focused Welcome Pack pages", () => {
       expect(source).toContain("WELCOME_PACK_JOIN_POSTER_SRC");
     }
 
-    const componentSource = readFileSync(
-      join(
-        process.cwd(),
-        "components",
-        "dashboard",
-        "welcome-pack-pages.tsx",
-      ),
-      "utf8",
-    );
-    expect(componentSource).toContain("poster={videoPosterSrc ?? undefined}");
+    const html = renderToStaticMarkup(<WelcomePackJoinPage videoSrc="/sample.mp4" videoPosterSrc="/sample.jpg" surveyCompleted telegramUrl="https://t.me/pleros_sogp" />);
+    expect(html).toContain('poster="/sample.jpg"');
+    expect(html).toContain('src="/sample.mp4"');
   });
 
   test("preserves the square framing of the welcome video", () => {

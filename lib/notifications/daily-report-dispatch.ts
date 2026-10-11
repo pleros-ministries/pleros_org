@@ -6,6 +6,7 @@ import * as s from "@/lib/db/schema";
 import { CommunityError } from "@/lib/community/errors";
 import { isDateKey, canReportFor } from "@/lib/community/ministry-report";
 import { planDailyReportReminder } from "@/lib/community/daily-report-reminders";
+import { loadChurchAssignmentForTransaction } from "@/lib/db/queries/church-organisation";
 import { canReadChurchReport } from "@/lib/church/permissions";
 import { loadDailyReportingFacts } from "@/lib/db/queries/church-reports";
 import { lockDailyReporting } from "@/lib/db/queries/daily-report-declarations";
@@ -22,8 +23,8 @@ export async function sendDailyReportReminder(input: { subjectId: string; source
   const url = `/dashboard/community/report?day=${encodeURIComponent(dateKey)}`;
   const claimed = await transactionDb.transaction(async (tx) => {
     await lockDailyReporting(tx, input.subjectId, dateKey);
-    const [subject] = await tx.select().from(s.churchAssignments).where(eq(s.churchAssignments.userId, input.subjectId));
-    const viewer = input.viewerId ? (await tx.select().from(s.churchAssignments).where(eq(s.churchAssignments.userId, input.viewerId)))[0] ?? null : null;
+    const subject = await loadChurchAssignmentForTransaction(tx, input.subjectId);
+    const viewer = input.viewerId ? await loadChurchAssignmentForTransaction(tx, input.viewerId) : null;
     if (!subject || input.source === "manual" && !canReadChurchReport(viewer, subject)) throw new CommunityError("That person is outside your oversight.");
     const facts = await loadDailyReportingFacts(input.subjectId, dateKey);
     const plan = planDailyReportReminder({ now, subjectId: input.subjectId, reportDate: dateKey, expected: true, authorized: input.source === "automatic" || canReadChurchReport(viewer, subject), source: input.source, statuses: facts.statuses, alreadyRemindedToday: false });

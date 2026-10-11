@@ -45,10 +45,27 @@ Start with the shared shell and home. Then migrate Devotion and Welcome Pack, SO
 - **Resolved:** Devotional prefills automatically from canonical sources, then requires one daily confirmation. No re-entry or duplicate activity storage; missing source facts remain visibly not recorded.
 - **Resolved:** church hierarchy is Pastor → Branch Pastor → Unit leader → Worker. Each leadership tier can also lead its own disciples; discipleship membership is separate from organisational supervision. The Pastor and Branch Pastors manage appointments/assignments; unit leaders do not. Branch Pastors manage only their own branch; the Pastor manages all branches. Assignment storage/enforcement is implemented behind disabled rollout gates; production activation is pending.
 
+## Confirmed church appointments
+
+Geographic ministry regions remain unchanged for enrollee auto-assignment; they are separate from church branches. The Pastor account is `akintyr@gmail.com`. The confirmed branch mapping is:
+
+| Branch | Branch Pastor |
+| --- | --- |
+| Ibadan | Daniel Adeyemo |
+| Lagos | Onashile Oluseyi |
+| Ife | Finidi Lawson |
+| Osogbo | Finidi Lawson |
+| Sagamu | Oladayo Olagunju |
+| Calabar | Oladayo Olagunju |
+| Abuja | Emmanuel Thomas |
+| Kwara | Tola Ewuola (existing account: Tola) |
+
+Olamide Olutekunbi is an engineer with role access for testing, not a church Pastor. Preserve his existing testing access; do not create a church appointment or branch assignment for him. Unit leader/worker assignments await the user's list. Test notifications remain on hold.
+
 ## Implementation and deployment context
 
 The connection implementation is complete locally on `codex/authenticated-dashboard-demo`, preserving existing functionality; verification and activation are separate. See [implementation checkpoint](CONSOLIDATION-IMPLEMENTATION.md) for completed code, guarded migration work, QA limits and remaining integrations. Release/activation will be reviewed separately; no unanswered policy question blocks the current implementation.
 
-The currently deployed public home is https://pleros-ic33o7x8w-plerosdev.vercel.app/preview/pleros/consolidated-home?as=d-kemi (c9616c0). Its public-access override is deployment-scoped. The connection pass is now pushed and verified at f3b38c3, with public preview https://pleros-rg17luykk-plerosdev.vercel.app/preview/pleros?as=d-kemi . Production has not been promoted or migrated.
+The currently deployed public home is https://pleros-ic33o7x8w-plerosdev.vercel.app/preview/pleros/consolidated-home?as=d-kemi (c9616c0). Its public-access override is deployment-scoped. The connection pass is now pushed and verified at f3b38c3, with public preview https://pleros-rg17luykk-plerosdev.vercel.app/preview/pleros?as=d-kemi . Production has not been promoted. Approved migrations 0050–0052 have been applied and the explicitly selected Pastor appointed; rollout gates remain disabled. Approved additive migration 0053 has also been applied; six Branch Pastors now hold the eight confirmed branch memberships. Unit leader/worker assignments await the user’s list. Existing accounts, engineering test access and geographic auto-assignment regions were verified unchanged.
 
 Remaining release work is verification, isolated migration rehearsal, explicit initial appointments, and activation of the prepared services. No additional product question blocks that implementation. If implementation exposes a genuinely new policy conflict, raise it separately rather than invent an answer.

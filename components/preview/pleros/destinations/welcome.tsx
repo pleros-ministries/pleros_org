@@ -8,16 +8,24 @@ import {
   CheckIcon,
   ClockIcon,
   DownloadIcon,
-  LockIcon,
   PauseIcon,
   PlayIcon,
   SmartphoneIcon,
   SunriseIcon,
 } from "lucide-react";
 
+import {
+  WelcomePackGiftCard,
+  WelcomePackGiftGrid,
+  WelcomePackGiftLink,
+  WelcomePackHubGrid,
+  WelcomePackOrientationNext,
+  WelcomePackVideo,
+  isWelcomePackGiftLocked,
+} from "@/components/dashboard/shared/welcome-pack";
 import { SOGP_ORIENTATION_REASONS } from "@/lib/sogp/orientation-survey";
 import { welcomeAudiobookTracks } from "@/lib/welcome-audiobook";
-import { extraGifts, mainGifts, type WelcomePackGift } from "@/lib/welcome-pack-gifts";
+import { extraGifts, mainGifts } from "@/lib/welcome-pack-gifts";
 import { WELCOME_PACK_JOIN_POSTER_SRC, WELCOME_PACK_JOIN_VIDEO_SRC, getWelcomePackHubCards } from "@/lib/welcome-pack-hub";
 import { cn } from "@/lib/utils";
 
@@ -39,23 +47,12 @@ const CARD_DESTINATION: Record<string, string> = {
 
 export function WelcomePackDestination() {
   const { href } = useDemo();
+  // Same cards and presenter as the live hub; only the links point at preview destinations.
+  const items = getWelcomePackHubCards().map((card) => ({ ...card, href: href(CARD_DESTINATION[card.id] ?? "") }));
   return (
-    <div className="grid gap-6">
-      <PageHeader eyebrow="Welcome to SOGP" title="Welcome Pack" />
-      <div className="grid grid-cols-[minmax(0,1fr)] gap-4 sm:grid-cols-2">
-        {getWelcomePackHubCards().map((card, index) => (
-          <Link key={card.id} href={href(CARD_DESTINATION[card.id] ?? "")} className={cn(panel, "group grid overflow-hidden transition-shadow hover:shadow-[var(--shadow-md)]", focusRing)}>
-            <span className="relative aspect-[16/9] overflow-hidden bg-(--color-brand-sky-soft)">
-              <Image src={card.imageSrc} alt="" fill sizes="(min-width: 640px) 50vw, 100vw" className="object-cover transition-transform duration-300 group-hover:scale-[1.02]" />
-            </span>
-            <span className="grid gap-1 px-4 py-3.5">
-              <span className="text-[10px] font-medium uppercase tracking-[0.08em] text-(--color-text-muted)">Step {index + 1}</span>
-              <span className="text-[15px] font-medium text-(--color-text-strong)">{card.title}</span>
-              <span className="text-[12.5px] leading-snug text-(--color-text-muted)">{card.description}</span>
-            </span>
-          </Link>
-        ))}
-      </div>
+    <div className="grid max-w-[54rem] gap-6">
+      <PageHeader eyebrow="Start here" title="Your Welcome Pack" />
+      <WelcomePackHubGrid items={items} />
     </div>
   );
 }
@@ -65,9 +62,9 @@ export function JoinDestination() {
   const [reason, setReason] = useState("");
   const [answered, setAnswered] = useState(false);
   return (
-    <div className="grid max-w-[34rem] gap-6">
+    <div className="grid max-w-[38rem] gap-6">
       <PageHeader eyebrow="Welcome to SOGP" title="Your journey of Purpose starts here" />
-      <video controls playsInline preload="metadata" src={WELCOME_PACK_JOIN_VIDEO_SRC} poster={WELCOME_PACK_JOIN_POSTER_SRC} className="aspect-square w-full rounded-[var(--radius-md)] bg-black object-contain" />
+      <WelcomePackVideo src={WELCOME_PACK_JOIN_VIDEO_SRC} poster={WELCOME_PACK_JOIN_POSTER_SRC} shape="square" />
       {answered ? (
         <section className={cn(panel, "grid gap-3 p-4 sm:p-5")}>
           <p className="text-[13.5px] leading-relaxed text-(--color-text)">Join your cohort community on Telegram for your orientation pack and the next steps to take.</p>
@@ -100,35 +97,11 @@ export function JoinDestination() {
 export function OrientationDestination() {
   const { href } = useDemo();
   return (
-    <div className="grid max-w-[42rem] gap-6">
-      <PageHeader title="Orientation video" />
-      <video controls playsInline preload="metadata" src={ORIENTATION_VIDEO_SRC} poster={ORIENTATION_POSTER_SRC} className="aspect-video w-full rounded-[var(--radius-md)] bg-black object-cover" />
-      <div className="flex flex-wrap gap-2">
-        <Link href={href("destinations/gifts")} className={buttonPrimary}>Open your gifts</Link>
-        <Link href={href("destinations/welcome-pack")} className={buttonSecondary}>Welcome Pack</Link>
-      </div>
+    <div className="grid max-w-[46rem] gap-6">
+      <PageHeader eyebrow={<Link href={href("destinations/welcome-pack")} className="hover:text-(--color-brand-blue)">Welcome Pack</Link>} title="Orientation video" />
+      <WelcomePackVideo src={ORIENTATION_VIDEO_SRC} poster={ORIENTATION_POSTER_SRC} shape="wide" />
+      <WelcomePackOrientationNext giftsHref={href("destinations/gifts")} hubHref={href("destinations/welcome-pack")} />
     </div>
-  );
-}
-
-function GiftCard({ gift, action }: { gift: WelcomePackGift; action: ReactNode }) {
-  const locked = gift.buttonLabel === "Coming soon";
-  return (
-    <article className={cn(panel, "grid overflow-hidden")}>
-      <div className="relative" style={gift.imageBackgroundColor ? { backgroundColor: gift.imageBackgroundColor } : undefined}>
-        <Image src={gift.imageSrc} alt={gift.title} width={253} height={355} className={cn("h-auto w-full", locked && "opacity-55 saturate-[0.65]")} />
-        {locked ? (
-          <span className="absolute inset-0 grid place-items-center">
-            <Badge className="bg-white text-(--color-brand-blue)"><LockIcon className="size-3" aria-hidden />Coming soon</Badge>
-          </span>
-        ) : null}
-      </div>
-      <div className="grid content-start gap-1.5 px-3 pb-4 pt-3">
-        <h3 className="text-[13.5px] font-medium leading-snug text-(--color-text-strong)">{gift.title}</h3>
-        <p className="text-[12px] leading-snug text-(--color-text-muted)">{gift.description}</p>
-        <div className="mt-1">{action}</div>
-      </div>
-    </article>
   );
 }
 
@@ -142,18 +115,21 @@ export function GiftsDestination() {
     URL.revokeObjectURL(url);
   }
   return (
-    <div className="grid max-w-[40rem] gap-8">
-      <PageHeader title="Your gifts" />
+    <div className="grid max-w-[44rem] gap-8">
+      <PageHeader eyebrow={<Link href={href("destinations/welcome-pack")} className="hover:text-(--color-brand-blue)">Welcome Pack</Link>} title="Your gifts" />
       <Section title="Main gifts">
-        <div className="grid grid-cols-2 gap-4">
-          {mainGifts.map((gift) => (
-            <GiftCard
+        <WelcomePackGiftGrid>
+          {mainGifts.map((gift, index) => (
+            <WelcomePackGiftCard
               key={gift.id}
               gift={gift}
+              locked={isWelcomePackGiftLocked(gift)}
+              priority={index === 0}
               action={
                 gift.href.startsWith("/dashboard/welcomepack/audiobook") ? (
-                  <Link href={href("destinations/audiobook")} className={buttonPrimary}>{gift.buttonLabel}</Link>
+                  <WelcomePackGiftLink gift={gift} href={href("destinations/audiobook")} />
                 ) : (
+                  // The protected original stays behind sign-in; the demo offers a labelled sample.
                   <button type="button" className={buttonPrimary} onClick={() => downloadSample(gift.title)}>
                     <DownloadIcon className="size-3.5" aria-hidden />
                     Download sample
@@ -162,14 +138,14 @@ export function GiftsDestination() {
               }
             />
           ))}
-        </div>
+        </WelcomePackGiftGrid>
       </Section>
-      <Section title="More gifts">
-        <div className="grid grid-cols-2 gap-4">
+      <Section title="Extra gifts" detail="Supplementary resources are being prepared.">
+        <WelcomePackGiftGrid>
           {extraGifts.map((gift) => (
-            <GiftCard key={gift.id} gift={gift} action={<span className="text-[12px] font-medium text-(--color-text-muted)">Coming soon</span>} />
+            <WelcomePackGiftCard key={gift.id} gift={gift} locked={isWelcomePackGiftLocked(gift, false)} />
           ))}
-        </div>
+        </WelcomePackGiftGrid>
       </Section>
     </div>
   );
@@ -283,7 +259,7 @@ export function RemindersDestination() {
 
   return (
     <div className="grid max-w-[42rem] gap-5">
-      <PageHeader title="Set up your app and reminders" />
+      <PageHeader eyebrow={<Link href={href("destinations/welcome-pack")} className="hover:text-(--color-brand-blue)">Welcome Pack</Link>} title="Set up your app and reminders" />
 
       <StepCard index={1} title="Install the app" done={installed} icon={SmartphoneIcon}>
         <p className="text-[13px] leading-relaxed text-(--color-text-muted)">On iPhone, tap Share then Add to Home Screen. On Android, open the browser menu and choose Install app.</p>

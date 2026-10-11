@@ -66,6 +66,28 @@ describe.skipIf(!process.env.PLEROS_REHEARSAL_ROOT)("database-backed dashboard c
     await expect(church.assignChurchMember("p", { userId: "l1", role: "unit_leader", branchId: branch2, unitId: unit2, supervisorId: "b2" })).rejects.toThrow("direct reports");
     expect((await church.getChurchRoster("l1")).map((row) => row.userId)).toEqual(["w1"]);
   });
+  it("supports multiple branches without granting unassigned or engineering accounts oversight", async () => {
+    vi.stubEnv("DASHBOARD_CHURCH_MULTI_BRANCH_V2", "1");
+    try {
+      await runtime.db.insert(schema.churchBranchPastors).values([{ userId: "b1", branchId: branch1 }, { userId: "b2", branchId: branch2 }]);
+      await church.assignChurchMember("p", { userId: "b1", role: "branch_pastor", branchId: branch1, branchIds: [branch1, branch2], unitId: null, supervisorId: "p" });
+      expect((await church.getChurchStructure("b1")).branches.map(row => row.id).sort()).toEqual([branch1, branch2].sort());
+      expect((await church.getChurchRoster("b1")).map(row => row.userId)).toContain("w2");
+      await expect(church.requireChurchReportAccess("b1", "w2")).resolves.toMatchObject({ userId: "w2" });
+      await expect(church.assignChurchMember("p", { userId: "b1", role: "branch_pastor", branchId: null, branchIds: [], unitId: null, supervisorId: "p" })).rejects.toThrow("direct reports");
+      await church.assignChurchMember("p", { userId: "unassigned", role: "branch_pastor", branchId: null, branchIds: [], unitId: null, supervisorId: "p" });
+      expect(await church.getChurchRoster("unassigned")).toEqual([]);
+      expect(await church.getChurchStructure("unassigned")).toEqual({ branches: [], units: [] });
+      await expect(church.requireChurchReportAccess("unassigned", "w1")).rejects.toThrow("outside");
+      await runtime.db.insert(schema.users).values({ id: "engineer", name: "Synthetic engineer", email: "engineer@rehearsal.example.test", role: "super_admin", isPastor: true });
+      expect(await church.getChurchAssignment("engineer")).toBeNull();
+      expect(await church.getChurchRoster("engineer")).toEqual([]);
+      await expect(church.requireChurchReportAccess("engineer", "w1")).rejects.toThrow("outside");
+    } finally {
+      await runtime.db.delete(schema.churchAssignments).where(eq(schema.churchAssignments.userId, "unassigned"));
+      vi.stubEnv("DASHBOARD_CHURCH_MULTI_BRANCH_V2", "0");
+    }
+  });
   it("rejects invalid assignment shapes and a second Pastor at the database boundary", async () => {
     await expect(runtime.db.insert(schema.churchAssignments).values({ userId: "unassigned", role: "unit_leader", branchId: null, unitId: null, supervisorId: "b1", assignedBy: "p" })).rejects.toThrow();
     await expect(runtime.db.insert(schema.churchAssignments).values({ userId: "unassigned", role: "pastor", branchId: null, unitId: null, supervisorId: null, assignedBy: "p" })).rejects.toThrow();

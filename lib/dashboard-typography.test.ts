@@ -20,10 +20,9 @@ describe("dashboard typography", () => {
     expect(dashboardSource).toContain("text-[14px] font-medium");
     expect(dashboardSource).not.toContain("site-pathway-title");
 
-    // Welcome Pack is a separate, untouched surface — still on the shared
-    // marketing heading classes.
-    expect(welcomePackSource).toContain("site-hero-heading");
-    expect(welcomePackSource).toContain("site-section-heading");
+    // Live Welcome Pack now shares the compact dashboard presenters.
+    expect(welcomePackSource).toContain("DashboardPageHeader");
+    expect(welcomePackSource).not.toContain("site-hero-heading");
   });
 
   test("uses Be Vietnam Pro explicitly for the dashboard home and shell", () => {

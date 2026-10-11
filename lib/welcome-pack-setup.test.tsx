@@ -52,7 +52,7 @@ describe("Welcome Pack setup page", () => {
     );
 
     expect(html).toContain("Set up your app and reminders");
-    expect(html).toContain("site-hero-heading");
+    expect(html).toContain("text-[24px]");
     // The back link to the hub.
     expect(html).toContain('href="/dashboard/welcomepack"');
 

@@ -1,86 +1,32 @@
-import { ArrowLeftIcon, CheckIcon, LockIcon } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { getWelcomePackHubCards } from "../../lib/welcome-pack-hub";
-import {
-  extraGifts,
-  mainGifts,
-  type WelcomePackGift,
-} from "../../lib/welcome-pack-gifts";
+import { extraGifts, mainGifts } from "../../lib/welcome-pack-gifts";
 import { cn } from "../../lib/utils";
+import {
+  DashboardPageFrame,
+  DashboardPageHeader,
+  DashboardSection,
+  EyebrowLink,
+} from "./shared/page";
+import { dashboardFont } from "./shared/ui";
+import {
+  WelcomePackGiftCard,
+  WelcomePackGiftGrid,
+  WelcomePackGiftLink,
+  WelcomePackHubGrid,
+  WelcomePackOrientationNext,
+  WelcomePackVideo,
+  WelcomePackVideoPlaceholder,
+  isWelcomePackGiftLocked,
+} from "./shared/welcome-pack";
 import { OrientationSurveyGate } from "./orientation-survey-gate";
 
 const hubPath = "/dashboard/welcomepack";
 
-function HubBackLink() {
-  return (
-    <Link
-      href={hubPath}
-      className="inline-flex w-fit items-center gap-1.5 font-[var(--font-be-vietnam-pro)] text-xs font-semibold uppercase tracking-[0.08em] text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-brand-blue)]"
-    >
-      <ArrowLeftIcon className="size-4" />
-      Welcome Pack
-    </Link>
-  );
-}
-
-function GiftCard({
-  gift,
-  locked = false,
-}: {
-  gift: WelcomePackGift;
-  locked?: boolean;
-}) {
-  const card = (
-    <article className="group overflow-hidden rounded-[0.6875rem] bg-white shadow-[0_12px_26px_rgba(15,23,40,0.08)] ring-1 ring-[rgba(6,16,86,0.08)] transition-transform duration-150 hover:-translate-y-px">
-      <div
-        className="relative overflow-hidden rounded-t-[0.6875rem]"
-        style={
-          gift.imageBackgroundColor
-            ? { backgroundColor: gift.imageBackgroundColor }
-            : undefined
-        }
-      >
-        <Image
-          src={gift.imageSrc}
-          alt={gift.title}
-          width={253}
-          height={355}
-          className={`h-auto w-full ${locked ? "opacity-55 saturate-[0.65]" : ""}`}
-          priority={gift.id === mainGifts[0]?.id}
-        />
-        {locked ? (
-          <div className="absolute inset-0 grid place-items-center bg-[rgba(6,16,86,0.16)]">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 font-[var(--font-be-vietnam-pro)] text-[0.7rem] font-semibold text-[var(--color-brand-blue)]">
-              <LockIcon className="size-3.5" />
-              Coming soon
-            </span>
-          </div>
-        ) : null}
-      </div>
-      <div className="grid gap-2 px-3 pb-4 pt-3">
-        <h3 className="site-pathway-title text-[1.05rem] text-[var(--color-brand-blue)]">
-          {gift.title}
-        </h3>
-        <p className="font-[var(--font-be-vietnam-pro)] text-[0.76rem] leading-[1.3] text-[var(--color-text-muted)]">
-          {gift.description}
-        </p>
-        <span
-          className={`site-button-text mt-1 inline-flex w-fit items-center rounded-full px-4 py-2 text-[0.68rem] font-semibold leading-none ${
-            locked
-              ? "bg-[rgba(6,16,86,0.1)] text-[rgba(6,16,86,0.58)]"
-              : "bg-[var(--color-brand-blue)] text-white"
-          }`}
-        >
-          {locked ? "Coming soon" : gift.buttonLabel}
-        </span>
-      </div>
-    </article>
-  );
-
-  return locked ? card : <Link href={gift.href}>{card}</Link>;
+/** Eyebrow leading back to the hub on every Welcome Pack subpage. */
+function HubEyebrow({ basePath }: { basePath: string }) {
+  return <EyebrowLink href={basePath}>Welcome Pack</EyebrowLink>;
 }
 
 export function WelcomePackHubPage({
@@ -91,69 +37,16 @@ export function WelcomePackHubPage({
   /** The learner has saved their reminders, so the setup card shows "Done". */
   setupComplete?: boolean;
 }) {
-  const cards = getWelcomePackHubCards(basePath);
+  const items = getWelcomePackHubCards(basePath).map((card) => ({
+    ...card,
+    done: card.id === "setup" && setupComplete,
+  }));
 
   return (
-    <section className="site-font-theme bg-[var(--color-surface)] py-7 sm:py-10">
-      <div className="container-pleros grid max-w-[42rem] gap-7 pb-12">
-        <header className="grid gap-2">
-          <p className="site-hero-eyebrow text-[var(--color-brand-blue)]">
-            Start here
-          </p>
-          <h1 className="site-hero-heading text-[clamp(2.5rem,7vw,4rem)] text-[var(--color-brand-blue)]">
-            Your Welcome Pack
-          </h1>
-          <p className="site-section-intro max-w-[34rem] text-[var(--color-text-muted)]">
-            Begin with your welcome message, continue to orientation, open your
-            gifts, then set up your app and reminders.
-          </p>
-        </header>
-
-        <div className="grid grid-cols-2 gap-4 sm:gap-5">
-          {cards.map((card, index) => {
-            // The first and last cards span the row, so four cards sit as
-            // wide, half, half, wide with no orphan.
-            const wide = index === 0 || index === cards.length - 1;
-            const done = card.id === "setup" && setupComplete;
-            return (
-            <Link
-              key={card.id}
-              href={card.href}
-              className={`group relative grid min-h-[13rem] content-end overflow-hidden rounded-[var(--radius-md)] bg-[var(--color-brand-blue)] p-4 text-white shadow-[var(--shadow-sm)] transition-transform duration-150 hover:-translate-y-px sm:min-h-[16rem] ${
-                wide ? "col-span-2" : ""
-              }`}
-            >
-              <Image
-                src={card.imageSrc}
-                alt=""
-                fill
-                sizes={wide ? "42rem" : "21rem"}
-                className="object-cover transition-transform duration-200 group-hover:scale-[1.02]"
-              />
-              <span
-                aria-hidden="true"
-                className="absolute inset-0 bg-[linear-gradient(0deg,rgba(0,10,70,0.72)_0%,rgba(0,10,70,0.22)_62%,transparent_100%)]"
-              />
-              {done ? (
-                <span className="absolute right-3 top-3 z-10 inline-flex items-center gap-1 rounded-full bg-[var(--color-brand-lime)] px-2.5 py-1 font-[var(--font-be-vietnam-pro)] text-[0.7rem] font-semibold leading-none text-[var(--color-brand-blue)]">
-                  <CheckIcon className="size-3" strokeWidth={2.5} />
-                  Done
-                </span>
-              ) : null}
-              <span className="relative z-10 grid gap-1.5">
-                <strong className="site-pathway-title text-xl font-semibold leading-none text-white">
-                  {card.title}
-                </strong>
-                <span className="max-w-[28ch] font-[var(--font-be-vietnam-pro)] text-xs leading-[1.4] text-white/88">
-                  {card.description}
-                </span>
-              </span>
-            </Link>
-            );
-          })}
-        </div>
-      </div>
-    </section>
+    <DashboardPageFrame className="grid max-w-[54rem] gap-6">
+      <DashboardPageHeader eyebrow="Start here" title="Your Welcome Pack" />
+      <WelcomePackHubGrid items={items} />
+    </DashboardPageFrame>
   );
 }
 
@@ -173,76 +66,45 @@ export function WelcomePackJoinPage({
 }) {
   const Root = embedded ? "div" : "main";
   return (
-    <Root
-      className={cn(
-        "site-font-theme grid grid-cols-[minmax(0,1fr)] place-items-center bg-[var(--color-brand-blue)] px-5 py-10 text-white",
-        embedded ? "min-h-[calc(100dvh-3rem)] lg:min-h-dvh" : "min-h-screen",
-      )}
-    >
-      <section className="grid min-w-0 w-full max-w-full gap-7 sm:max-w-[34rem]">
-        <header className="grid min-w-0 gap-3 text-center">
-          <p className="site-hero-eyebrow justify-center text-[var(--color-brand-lime)]">
-            Welcome to SOGP
-          </p>
-          <h1 className="site-hero-heading min-w-0 text-[clamp(2.5rem,9vw,4rem)] text-white">
-            Your journey of Purpose starts here
-          </h1>
-        </header>
+    <Root className={cn("min-w-0 bg-white", dashboardFont, !embedded && "min-h-screen")}>
+      <DashboardPageFrame className="grid grid-cols-[minmax(0,1fr)] gap-6 sm:max-w-[38rem]">
+        <DashboardPageHeader eyebrow="Welcome to SOGP" title="Your journey of Purpose starts here" />
 
         {videoSrc ? (
-          <video
-            controls
-            playsInline
-            preload="metadata"
-            src={videoSrc}
-            poster={videoPosterSrc ?? undefined}
-            className="aspect-square w-full max-w-full rounded-[var(--radius-md)] bg-black object-contain shadow-[var(--shadow-lg)]"
-          />
+          <WelcomePackVideo src={videoSrc} poster={videoPosterSrc} shape="square" />
         ) : (
-          <div className="grid min-w-0 aspect-video place-items-center rounded-[var(--radius-md)] border border-white/18 bg-white/8 p-5 text-center sm:p-6">
-            <div className="grid gap-2">
-              <strong className="break-words font-[var(--font-sen)] text-lg sm:text-xl">
-                Welcome message video coming soon
-              </strong>
-              <span className="font-[var(--font-be-vietnam-pro)] text-sm text-white/72">
-                The final welcome message will appear here.
-              </span>
-            </div>
-          </div>
+          <WelcomePackVideoPlaceholder />
         )}
 
-        <OrientationSurveyGate
-          telegramUrl={telegramUrl}
-          initialCompleted={surveyCompleted}
-        />
-      </section>
+        {/* The survey gate is styled for the brand-blue surface. */}
+        <section className="grid min-w-0 max-w-full rounded-[var(--radius-lg)] bg-(--color-brand-blue) px-4 py-6 text-white sm:px-6">
+          <OrientationSurveyGate
+            telegramUrl={telegramUrl}
+            initialCompleted={surveyCompleted}
+          />
+        </section>
+      </DashboardPageFrame>
     </Root>
   );
 }
 
-export function WelcomePackOrientationPage({ videoSrc }: { videoSrc: string }) {
+export function WelcomePackOrientationPage({
+  videoSrc,
+  basePath = hubPath,
+}: {
+  videoSrc: string;
+  basePath?: string;
+}) {
   return (
-    <section className="site-font-theme bg-[var(--color-surface)] py-7 sm:py-10">
-      <div className="container-pleros grid max-w-[42rem] gap-6 pb-12">
-        <HubBackLink />
-        <header className="grid gap-2">
-          <h1 className="site-hero-heading text-[clamp(2.5rem,7vw,4rem)] text-[var(--color-brand-blue)]">
-            Orientation video
-          </h1>
-          <p className="site-section-intro text-[var(--color-text-muted)]">
-            Understand the SOGP journey and what comes next.
-          </p>
-        </header>
-        <video
-          controls
-          playsInline
-          preload="metadata"
-          src={videoSrc}
-          poster="/site/sogp/sogp-welcome-WaXgk9zqi78.jpg"
-          className="aspect-video w-full rounded-[var(--radius-md)] bg-black object-cover shadow-[var(--shadow-md)]"
-        />
-      </div>
-    </section>
+    <DashboardPageFrame className="grid max-w-[46rem] gap-6">
+      <DashboardPageHeader eyebrow={<HubEyebrow basePath={basePath} />} title="Orientation video" />
+      <WelcomePackVideo
+        src={videoSrc}
+        poster="/site/sogp/sogp-welcome-WaXgk9zqi78.jpg"
+        shape="wide"
+      />
+      <WelcomePackOrientationNext giftsHref={`${basePath}/gifts`} hubHref={basePath} />
+    </DashboardPageFrame>
   );
 }
 
@@ -251,73 +113,65 @@ export function WelcomePackOrientationPage({ videoSrc }: { videoSrc: string }) {
  * components passed in as children, which keeps this file free of anything
  * that needs a browser or a database.
  */
-export function WelcomePackSetupPage({ children }: { children: ReactNode }) {
+export function WelcomePackSetupPage({
+  children,
+  basePath = hubPath,
+}: {
+  children: ReactNode;
+  basePath?: string;
+}) {
   return (
-    <section className="site-font-theme bg-[var(--color-surface)] py-7 sm:py-10">
-      <div className="container-pleros grid max-w-[42rem] gap-6 pb-12">
-        <HubBackLink />
-        <header className="grid gap-2">
-          <h1 className="site-hero-heading text-[clamp(2rem,6vw,3.25rem)] text-[var(--color-brand-blue)]">
-            Set up your app and reminders
-          </h1>
-          <p className="site-section-intro text-[var(--color-text-muted)]">
-            Four short steps so Pleros reaches you at the right time.
-          </p>
-        </header>
-        {children}
-      </div>
-    </section>
+    <DashboardPageFrame className="grid max-w-[46rem] gap-6">
+      <DashboardPageHeader eyebrow={<HubEyebrow basePath={basePath} />} title="Set up your app and reminders" />
+      {children}
+    </DashboardPageFrame>
   );
 }
 
 export function WelcomePackGiftsPage({
   extraGiftsUnlocked,
+  basePath = hubPath,
 }: {
   extraGiftsUnlocked: boolean;
+  basePath?: string;
 }) {
   return (
-    <section className="site-font-theme bg-[var(--color-surface)] py-7 sm:py-10">
-      <div className="container-pleros grid max-w-[36rem] gap-9 pb-12">
-        <HubBackLink />
-        <header className="grid gap-2">
-          <h1 className="site-hero-heading text-[clamp(2.5rem,7vw,4rem)] text-[var(--color-brand-blue)]">
-            Your gifts
-          </h1>
-        </header>
+    <DashboardPageFrame className="grid max-w-[44rem] gap-8">
+      <DashboardPageHeader eyebrow={<HubEyebrow basePath={basePath} />} title="Your gifts" />
 
-        <section className="grid gap-4">
-          <h2 className="site-section-heading text-[1.55rem] text-[var(--color-brand-blue)]">
-            Main gifts
-          </h2>
-          <div className="grid grid-cols-2 gap-4">
-            {mainGifts.map((gift) => (
-              <GiftCard key={gift.id} gift={gift} locked={gift.locked} />
-            ))}
-          </div>
-        </section>
+      <DashboardSection title="Main gifts">
+        <WelcomePackGiftGrid>
+          {mainGifts.map((gift, index) => (
+            <WelcomePackGiftCard
+              key={gift.id}
+              gift={gift}
+              locked={isWelcomePackGiftLocked(gift)}
+              priority={index === 0}
+              action={<WelcomePackGiftLink gift={gift} />}
+            />
+          ))}
+        </WelcomePackGiftGrid>
+      </DashboardSection>
 
-        <section className="grid gap-4">
-          <div className="grid gap-1">
-            <h2 className="site-section-heading text-[1.55rem] text-[var(--color-brand-blue)]">
-              Extra gifts
-            </h2>
-            <p className="font-[var(--font-be-vietnam-pro)] text-sm text-[var(--color-text-muted)]">
-              {extraGiftsUnlocked
-                ? "Your extra gifts are unlocked."
-                : "Supplementary resources are being prepared."}
-            </p>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            {extraGifts.map((gift) => (
-              <GiftCard
-                key={gift.id}
-                gift={gift}
-                locked={!extraGiftsUnlocked}
-              />
-            ))}
-          </div>
-        </section>
-      </div>
-    </section>
+      <DashboardSection
+        title="Extra gifts"
+        detail={
+          extraGiftsUnlocked
+            ? "Your extra gifts are unlocked."
+            : "Supplementary resources are being prepared."
+        }
+      >
+        <WelcomePackGiftGrid>
+          {extraGifts.map((gift) => (
+            <WelcomePackGiftCard
+              key={gift.id}
+              gift={gift}
+              locked={isWelcomePackGiftLocked(gift, extraGiftsUnlocked)}
+              action={<WelcomePackGiftLink gift={gift} />}
+            />
+          ))}
+        </WelcomePackGiftGrid>
+      </DashboardSection>
+    </DashboardPageFrame>
   );
 }

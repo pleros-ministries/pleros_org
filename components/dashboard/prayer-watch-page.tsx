@@ -33,6 +33,8 @@ import {
   type PrayerWatchCalendarCell,
 } from "@/lib/prayer-watch";
 import { cn } from "@/lib/utils";
+import { DashboardPageFrame, DashboardPageHeader } from "@/components/dashboard/shared/page";
+import { panel, sectionTitleText } from "@/components/dashboard/shared/ui";
 
 const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -90,7 +92,7 @@ function BibleReadingProjectionFootnote({
   text: string | null;
 }) {
   return (
-    <p className="border-t border-[rgba(6,16,86,0.1)] pt-3 font-[var(--font-be-vietnam-pro)] text-[0.75rem] leading-[1.45] text-[var(--color-text-muted)]">
+    <p className="border-t border-(--color-line) pt-3 text-[12px] leading-[1.45] text-[var(--color-text-muted)]">
       {text ?? "Log your Bible reading to see your projected completion date."}
     </p>
   );
@@ -177,32 +179,24 @@ export function PrayerWatchPage({
   }
 
   return (
-    <section className="site-font-theme bg-[var(--color-surface)] pb-16 pt-5 sm:pb-20 sm:pt-6">
-      <div className="container-pleros grid max-w-[36rem] gap-8">
+    <section>
+      <DashboardPageFrame className="grid max-w-[36rem] gap-6">
         <Link
           href="/dashboard"
-          className="inline-flex w-fit items-center gap-1 font-[var(--font-be-vietnam-pro)] text-[0.8125rem] font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-brand-blue)]"
+          className="inline-flex w-fit items-center gap-1 text-[12.5px] font-medium text-(--color-text-muted) transition-colors hover:text-(--color-brand-blue)"
         >
-          <ChevronLeftIcon className="size-4" />
+          <ChevronLeftIcon className="size-3.5" aria-hidden />
           Back to dashboard
         </Link>
 
-        <div className="grid gap-2">
-          <h1 className="site-hero-heading max-w-[13ch] text-[clamp(2.4rem,6.2vw,3.45rem)] text-[var(--color-brand-blue)]">
-            Prayer Watch
-          </h1>
-          <p className="font-[var(--font-be-vietnam-pro)] max-w-[34ch] text-[0.95rem] leading-[1.42] tracking-[-0.02em] text-[var(--color-text-muted)]">
-            Log the days you join Prayer Watch live, and catch up on any watch
-            you missed.
-          </p>
-        </div>
+        <DashboardPageHeader title="Prayer Watch" />
 
-        <div className="rounded-[1.25rem] border border-[var(--color-line)] bg-white p-4 shadow-[var(--shadow-sm)] sm:p-6">
+        <div className={cn(panel, "p-4 sm:p-5")}>
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="site-pathway-title text-[1.15rem] text-[var(--color-brand-blue)] sm:text-[1.3rem]">
+            <p className={sectionTitleText}>
               {getMonthLabel(year, month)}
             </p>
-            <span className="rounded-full bg-[var(--page-accent-soft)] px-3 py-1 text-[0.75rem] font-medium text-[var(--color-brand-blue)]">
+            <span className="rounded-full bg-(--color-brand-sky-soft) px-2.5 py-0.5 text-[12px] font-medium text-(--color-brand-blue)">
               {attendedDateKeys.length} day{attendedDateKeys.length === 1 ? "" : "s"} logged
             </span>
           </div>
@@ -250,7 +244,7 @@ export function PrayerWatchPage({
             </span>
           </div>
         </div>
-      </div>
+      </DashboardPageFrame>
 
       <Dialog
         open={selectedCell !== null}
@@ -280,7 +274,7 @@ export function PrayerWatchPage({
                     type="button"
                     onClick={() => setActiveTab(value as "prayer" | "bible")}
                     className={cn(
-                      "rounded-[calc(var(--radius-sm)-2px)] px-3 py-2 text-[0.8125rem] font-semibold transition-colors",
+                      "rounded-[calc(var(--radius-sm)-2px)] px-3 py-1.5 text-[13px] font-medium transition-colors",
                       activeTab === value
                         ? "bg-white text-[var(--color-brand-blue)] shadow-[var(--shadow-sm)]"
                         : "text-[var(--color-text-muted)]",
@@ -314,7 +308,7 @@ export function PrayerWatchPage({
                             type="button"
                             onClick={() => setSelectedSession(session.id)}
                             className={cn(
-                              "grid min-h-12 content-center rounded-[calc(var(--radius-sm)-2px)] px-2 text-center text-[0.7rem] font-semibold",
+                              "grid min-h-12 content-center rounded-[calc(var(--radius-sm)-2px)] px-2 text-center text-[12px] font-medium",
                               selectedSession === session.id
                                 ? "bg-white text-[var(--color-brand-blue)] shadow-[var(--shadow-sm)]"
                                 : "text-[var(--color-text-muted)]",
@@ -326,7 +320,7 @@ export function PrayerWatchPage({
                         );
                       })}
                     </div>
-                    <p className="font-[var(--font-be-vietnam-pro)] text-[0.875rem] leading-[1.45] text-[var(--color-text-muted)]">
+                    <p className="text-[13.5px] leading-[1.45] text-[var(--color-text-muted)]">
                       {attendanceRecords.some((record) => record.dateKey === selectedCell.dateKey && record.session === selectedSession)
                         ? `You logged the ${selectedSession} Prayer Watch.`
                         : `Did you join the ${selectedSession} Prayer Watch live?`}
@@ -359,7 +353,7 @@ export function PrayerWatchPage({
                 <form action={readingFormAction} className="grid gap-4">
                   <input type="hidden" name="date" value={selectedCell.dateKey} />
                   <label className="grid gap-1.5">
-                    <span className="font-[var(--font-be-vietnam-pro)] text-[0.75rem] font-semibold text-[var(--color-brand-blue)]">
+                    <span className="text-[13px] font-medium text-(--color-text-strong)">
                       Chapters read
                     </span>
                     <Input
@@ -373,7 +367,7 @@ export function PrayerWatchPage({
                   </label>
 
                   <label className="grid gap-1.5">
-                    <span className="font-[var(--font-be-vietnam-pro)] text-[0.75rem] font-semibold text-[var(--color-brand-blue)]">
+                    <span className="text-[13px] font-medium text-(--color-text-strong)">
                       Current book
                     </span>
                     <select
@@ -383,7 +377,7 @@ export function PrayerWatchPage({
                         setCurrentBook(event.target.value);
                         setCurrentChapter("1");
                       }}
-                      className="h-10 rounded-[var(--radius-sm)] border border-[var(--color-line)] bg-white px-3 font-[var(--font-be-vietnam-pro)] text-[0.875rem] text-[var(--color-text)] outline-none transition-colors focus:border-[var(--color-brand-blue)]"
+                      className="h-10 rounded-[var(--radius-sm)] border border-[var(--color-line)] bg-white px-3 text-[14px] text-(--color-text-strong) outline-none transition-colors focus:border-[var(--color-brand-blue)]"
                     >
                       {BIBLE_BOOKS.map((book) => (
                         <option key={book.name} value={book.name}>
@@ -394,7 +388,7 @@ export function PrayerWatchPage({
                   </label>
 
                   <label className="grid gap-1.5">
-                    <span className="font-[var(--font-be-vietnam-pro)] text-[0.75rem] font-semibold text-[var(--color-brand-blue)]">
+                    <span className="text-[13px] font-medium text-(--color-text-strong)">
                       Current chapter
                     </span>
                     <Input

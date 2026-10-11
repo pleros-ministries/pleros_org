@@ -33,3 +33,12 @@ describe("church assignment permissions", () => {
     expect(validChurchParent("pastor", branch, null, null)).toBe(false);
   });
 });
+
+it("preserves multi-branch pastor scope without granting unassigned branches", () => {
+  const multi = { ...branch, branchIds: [1, 9] };
+  expect(canReadChurchReport(multi, { ...worker, branchId: 9 })).toBe(true);
+  expect(canReadChurchReport(multi, { ...worker, branchId: 10 })).toBe(false);
+  expect(validChurchParent("unit_leader", multi, 9, 20)).toBe(true);
+  expect(validChurchParent("unit_leader", multi, 10, 20)).toBe(false);
+  expect(canReadChurchReport({ ...branch, branchId: null, branchIds: [] }, worker)).toBe(false);
+});
