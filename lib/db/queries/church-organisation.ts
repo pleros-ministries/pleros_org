@@ -92,13 +92,32 @@ export async function assignChurchMember(actorId: string, input: { userId: strin
       const [root] = await tx.select().from(s.churchAssignments).where(eq(s.churchAssignments.role, "pastor"));
       if (root && root.userId !== input.userId) throw new CommunityError("A Pastor is already appointed.");
     } else if (!actor || !canManageChurchAssignments(actor)) throw new CommunityError("You cannot manage church assignments.");
-    if (actor?.role === "branch_pastor" && (input.role === "branch_pastor" || input.role === "pastor" || !churchBranchIds(actor).includes(input.branchId!) || (current && !churchBranchIds(actor).includes(current.branchId!)))) throw new CommunityError("Manage only workers and unit leaders in your branch.");
+    // Authorise the existing appointment, not just its requested replacement.
+    // Demotion must never turn a peer/senior appointment into an editable target.
+    if (actor?.role === "branch_pastor" && (
+      !["worker", "unit_leader"].includes(input.role) ||
+      (current && !["worker", "unit_leader"].includes(current.role))
+    )) throw new CommunityError("Manage only workers and unit leaders in your branch.");
+    const requestedBranches = input.role === "branch_pastor" && multi ? branchIds : primaryBranch === null ? [] : [primaryBranch];
+    // Saving in multi-branch mode replaces all membership rows, including any
+    // stale links on lower-tier appointments. Validate those removals as well.
+    const memberships = multi ? await tx.select({ branchId: s.churchBranchPastors.branchId }).from(s.churchBranchPastors).where(eq(s.churchBranchPastors.userId, input.userId)) : [];
+    const dependents = await tx.select({ id: s.churchAssignments.userId, branchId: s.churchAssignments.branchId }).from(s.churchAssignments).where(eq(s.churchAssignments.supervisorId, input.userId));
+    const affectedBranches = [...new Set([
+      ...requestedBranches,
+      ...(current?.branchId == null ? [] : [current.branchId]),
+      ...memberships.map(row => row.branchId),
+      ...dependents.flatMap(row => row.branchId === null ? [] : [row.branchId]),
+    ])];
+    if (actor?.role === "branch_pastor" && (
+      primaryBranch === null || !churchBranchIds(actor).includes(primaryBranch) ||
+      affectedBranches.some(id => !churchBranchIds(actor).includes(id))
+    )) throw new CommunityError("Manage only workers and unit leaders in your branch.");
     const parent = input.supervisorId ? await loadChurchAssignmentForTransaction(tx, input.supervisorId) : null;
     if (input.supervisorId === input.userId || !validChurchParent(input.role, parent, primaryBranch, input.unitId)) throw new CommunityError("Choose a supervisor in the correct branch and unit.");
-    const requestedBranches = input.role === "branch_pastor" && multi ? branchIds : primaryBranch === null ? [] : [primaryBranch];
-    if (requestedBranches.length && (await tx.select({ id: s.churchBranches.id }).from(s.churchBranches).where(inArray(s.churchBranches.id, requestedBranches))).length !== requestedBranches.length) throw new CommunityError("Choose existing branches.");
+    if (affectedBranches.some(id => !Number.isInteger(id) || id <= 0)) throw new CommunityError("Choose valid branches.");
+    if (affectedBranches.length && (await tx.select({ id: s.churchBranches.id }).from(s.churchBranches).where(inArray(s.churchBranches.id, affectedBranches))).length !== affectedBranches.length) throw new CommunityError("Choose existing branches.");
     if (input.unitId !== null && !(await tx.select({ id: s.churchUnits.id }).from(s.churchUnits).where(and(eq(s.churchUnits.id, input.unitId), eq(s.churchUnits.branchId, input.branchId!))))[0]) throw new CommunityError("Choose a unit in that branch.");
-    const dependents = await tx.select({ id: s.churchAssignments.userId, branchId: s.churchAssignments.branchId }).from(s.churchAssignments).where(eq(s.churchAssignments.supervisorId, input.userId));
     const dependent = dependents[0];
     if (current?.role === "branch_pastor" && input.role === "branch_pastor" && multi && dependents.some(row => row.branchId === null || !branchIds.includes(row.branchId))) throw new CommunityError("Reassign direct reports before removing their branch.");
     if (dependent && current && (current.role !== input.role || (current.role !== "branch_pastor" && current.branchId !== primaryBranch) || current.unitId !== input.unitId)) throw new CommunityError("Reassign this leader's direct reports before changing their role or location.");
