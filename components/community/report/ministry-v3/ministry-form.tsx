@@ -25,14 +25,14 @@ export function PrivateContactFields({ value, update, error }: {
   value: ContactDraft; update: (patch: Partial<ContactDraft>) => void; error?: ContactError;
 }) {
   return <div className={styles.contactFields}>
-    {([ ["name", "Full name *", "text", CONTACT_NAME_MAX], ["phone", "Phone number *", "tel", CONTACT_PHONE_MAX], ["email", "Email (optional)", "email", 254] ] as const).map(([key, label, type, maxLength]) => {
+    {([ ["name", "Full name · required", "text", CONTACT_NAME_MAX], ["phone", "Phone number · required", "tel", CONTACT_PHONE_MAX], ["email", "Email · optional", "email", 254] ] as const).map(([key, label, type, maxLength]) => {
       const id = `private-contact-${key}`;
       return <label key={key} className={styles.field} htmlFor={id}>{label}
         <input id={id} type={type} inputMode={key === "phone" ? "tel" : key === "email" ? "email" : "text"} maxLength={maxLength} value={value[key]} onChange={event => update({ [key]: event.target.value })} aria-invalid={error?.field === key || undefined} aria-describedby={error?.field === key ? `${id}-error` : undefined} />
         {error?.field === key ? <span id={`${id}-error`} className={styles.error}>{error.message}</span> : null}
       </label>;
     })}
-    <label className={styles.field} htmlFor="private-contact-note">Contact note (optional)
+    <label className={styles.field} htmlFor="private-contact-note">Contact note · optional
       <textarea id="private-contact-note" rows={4} maxLength={CONTACT_NOTE_MAX} value={value.note} onChange={event => update({ note: event.target.value })} aria-invalid={error?.field === "note" || undefined} aria-describedby={error?.field === "note" ? "private-contact-note-error" : undefined} />
       {error?.field === "note" ? <span id="private-contact-note-error" className={styles.error}>{error.message}</span> : null}
     </label>
