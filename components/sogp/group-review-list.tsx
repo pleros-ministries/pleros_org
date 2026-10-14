@@ -24,6 +24,6 @@ export function GroupReviewList({ data }: { data: GroupReviewView }) {
     {data.group?.isLeader ? <Link href="/dashboard/sogp/reviews/schedule" className={styles.primary}>Schedule group review<DashboardIcon name="plus" /></Link> : null}
     <section className={styles.section}><h2>Next group review</h2>{upcoming.length ? upcoming.map(review => card(review, true)) : <div className={styles.empty}><p>No review scheduled yet.</p><p className={styles.meta}>{data.group?.isLeader ? "Schedule a review for your group when you’re ready." : "Your group lead schedules reviews. Your learning continues meanwhile."}</p></div>}</section>
     <section className={styles.section}><h2>{data.group?.isLeader ? "Previous group reviews" : "Your attendance"}</h2>{history.length ? history.map(review => card(review, false)) : <p className={styles.meta}>No group review attendance recorded yet.</p>}</section>
-    <footer className={styles.footer}><Link href="/dashboard/sogp" className={styles.rowLink}>Continue learning<DashboardIcon name="arrow" /></Link></footer>
+    <footer className={styles.footer}><Link href="/dashboard/sogp/readiness" className={styles.rowLink}>Certification readiness<DashboardIcon name="right" size={16} /></Link><Link href="/dashboard/sogp" className={styles.rowLink}>Continue learning<DashboardIcon name="arrow" /></Link></footer>
   </section>;
 }
