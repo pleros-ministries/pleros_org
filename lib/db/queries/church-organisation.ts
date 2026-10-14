@@ -7,8 +7,9 @@ import type { Tx } from "./outreach-contacts";
 import { CommunityError } from "@/lib/community/errors";
 import { canManageChurchAssignments, canReadChurchReport, churchBranchIds, validChurchParent, type ChurchAssignment, type ChurchRole } from "@/lib/church/permissions";
 
-export function churchOrganisationEnabled() { return process.env.DASHBOARD_CHURCH_V2 === "1"; }
-export function churchMultiBranchEnabled() { return churchOrganisationEnabled() && process.env.DASHBOARD_CHURCH_MULTI_BRANCH_V2 === "1"; }
+/** Default-live (0051/0053 installed); set the flag to "0" to roll back. */
+export function churchOrganisationEnabled() { return process.env.DASHBOARD_CHURCH_V2 !== "0"; }
+export function churchMultiBranchEnabled() { return churchOrganisationEnabled() && process.env.DASHBOARD_CHURCH_MULTI_BRANCH_V2 !== "0"; }
 function requireEnabled() { if (!churchOrganisationEnabled()) throw new CommunityError("Church assignments are not enabled yet."); }
 export async function getChurchAssignment(userId: string): Promise<ChurchAssignment | null> {
   if (!churchOrganisationEnabled()) return null;
