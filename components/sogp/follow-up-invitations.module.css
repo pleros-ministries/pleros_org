@@ -49,3 +49,4 @@
 .page :is(button, a, input):focus-visible { outline: 2px solid var(--color-brand-blue); outline-offset: 3px; }
 .searchBox { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 16px; border-radius: 11px; background: var(--color-surface-muted); color: var(--color-text-muted); }
 .searchBox input { flex: 1; min-width: 0; height: 44px; border: 0; background: transparent; font: inherit; font-size: 16px; color: var(--color-text-strong); outline: none; }
+.copyRow { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 44px; padding: 0; border: 0; background: none; color: var(--color-brand-blue); font: inherit; font-weight: 500; cursor: pointer; }

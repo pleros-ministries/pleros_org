@@ -1,5 +1,6 @@
 import { dashboardFont } from "@/components/dashboard/v3/font";
 import styles from "@/components/dashboard/v3/dashboard.module.css";
+import { ShareReferral } from "@/components/sogp/share-referral";
 import { FollowUpWelcome, InvitationResponse, InviteEnrollee, MyEnrollees, SentInvitationView } from "@/components/sogp/follow-up-invitations";
 
 export const metadata = { title: "Follow-up and invitations visual preview", robots: { index: false, follow: false } };
@@ -10,7 +11,8 @@ const daysAgo = (n: number) => new Date(Date.now() - n * 86_400_000).toISOString
 /** Labelled sample data only: buttons call live actions, which refuse without a matching session. */
 export default async function Preview({ searchParams }: { searchParams: Promise<{ screen?: string }> }) {
   const { screen = "code" } = await searchParams;
-  const body = screen === "link"
+  const body = screen === "share" ? <ShareReferral code="TOLU26" url="https://example.com/sogp?ref=TOLU26" referredCount={3} />
+    : screen === "link"
     ? <FollowUpWelcome data={{ learnerFirstName: "Dayo", source: "link", ownerName: "Efe Daniels", ownerCode: null, choice: null, ownerCurrent: true }} />
     : screen === "enrollees"
       ? <MyEnrollees referralCode="NNEKA26" referralUrl="https://example.com/sogp?ref=NNEKA26" rows={[

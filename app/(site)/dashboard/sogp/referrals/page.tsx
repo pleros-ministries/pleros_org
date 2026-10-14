@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 
-import { ReferralsBoundary } from "@/components/sogp/referrals-boundary";
+import { ShareReferral } from "@/components/sogp/share-referral";
 import { getAppSession } from "@/lib/app-session";
 import { getSogpEnrollmentByUserId } from "@/lib/db/queries/sogp";
 import { getSogpReferralsDashboard } from "@/lib/db/queries/sogp-referrals";
@@ -15,5 +15,5 @@ export default async function SogpReferralsPage() {
   const initialData = await getSogpReferralsDashboard(session.user.id);
   if (!initialData) redirect("/sogp/enrol");
 
-  return <ReferralsBoundary initialData={initialData} />;
+  return <ShareReferral code={initialData.referralCode} url={initialData.referralUrl} referredCount={initialData.referredCount} />;
 }
