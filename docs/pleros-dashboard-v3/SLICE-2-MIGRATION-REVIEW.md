@@ -32,7 +32,7 @@ Rollback disables writes/UI while retaining schema-installed gate, new tables an
 
 ## Actual verification
 
-- Full regression before the mobile layout follow-up: 1,128 passed; 43 opt-in checks skipped in that run. The added date-picker regression and TypeScript check passed after the follow-up.
+- Final full regression after the mobile layout follow-up: 1,129 passed; 43 opt-in checks skipped in that run. TypeScript and scoped ESLint also passed after the follow-up.
 - Real PostgreSQL slice 2 suite: 20/20 passed, covering actual server-action identity, all four church roles, cross-owner/unit denial, all affected branches, concurrency, Nil, legacy history/deletion, overnight reporting and read-only rollback.
 - Separate appointment-permission suite: 15/15 passed.
 - TypeScript, scoped ESLint, production build and diff whitespace checks passed. Build retains two pre-existing dynamic-filesystem tracing warnings in learning-progress share images.
