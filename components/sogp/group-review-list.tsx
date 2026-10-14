@@ -10,9 +10,10 @@ export function GroupReviewList({ data }: { data: GroupReviewView }) {
   const history = data.reviews.filter(review => new Date(review.endsAt).getTime() <= now).sort((a,b) => b.startsAt.localeCompare(a.startsAt));
   function card(review: GroupReviewView["reviews"][number], future: boolean) {
     return <article className={styles.reviewCard} key={review.id}>
-      <StatusPill tone={future ? "blue" : review.attendance === "attended" ? "green" : "amber"}>{future ? "Scheduled" : review.attendance === "attended" ? "Attended" : review.attendance === "missed" ? "Missed" : "Unconfirmed"}</StatusPill>
+      <StatusPill tone={future ? "blue" : review.canConfirm ? "neutral" : review.attendance === "attended" ? "green" : "amber"}>{future ? "Scheduled" : review.canConfirm ? "Review ended" : review.attendance === "attended" ? "Attended" : review.attendance === "missed" ? "Missed" : "Unconfirmed"}</StatusPill>
+      {review.makeUpCompleted ? <StatusPill tone="green">Made up · Original Missed retained</StatusPill> : null}
       <h2 data-dashboard-learning-title className={styles.reviewTitle}>{review.title}</h2><p>{groupReviewTimeLabel(review.startsAt, review.endsAt)}</p><p className={styles.meta}>Lagos (WAT)</p><p>{review.venue}</p><p className={styles.meta}>Session leader · {review.leaderName}</p>
-      {review.canConfirm ? <Link className={styles.rowLink} href={`/dashboard/sogp/reviews/${review.id}/attendance`}>{future ? "View attendance sheet" : "Confirm attendance"}<DashboardIcon name="right" size={16} /></Link> : review.attendance === "missed" ? <p className={styles.meta}>You can keep learning. Make-up sessions will appear when they’re offered.</p> : null}
+      {review.canConfirm ? <><Link className={styles.rowLink} href={`/dashboard/sogp/reviews/${review.id}/attendance`}>{future ? "View attendance sheet" : "Confirm attendance"}<DashboardIcon name="right" size={16} /></Link>{!future ? <Link className={styles.rowLink} href={`/dashboard/sogp/reviews/${review.id}/make-up-offer`}>Offer or confirm make-ups<DashboardIcon name="right" size={16} /></Link> : null}</> : review.attendance === "missed" ? <Link className={styles.rowLink} href={`/dashboard/sogp/reviews/${review.id}/make-up`}>{review.makeUpCompleted ? "View confirmed make-up" : "Choose a make-up"}<DashboardIcon name="right" size={16} /></Link> : null}
     </article>;
   }
   return <section className={styles.page}>

@@ -42,3 +42,5 @@
 .offerTitle { font-size: 14px; font-weight: 500; }
 .offerChoice input { width: 20px; height: 20px; flex-shrink: 0; accent-color: var(--color-brand-blue); }
 .offerChoice:has(input:checked) { border-color: var(--color-brand-blue); }
+.makeUpChoice { display: grid; gap: 8px; align-content: center; justify-content: stretch; }
+.makeUpChoiceHeading { display: flex !important; align-items: center; gap: 12px !important; }

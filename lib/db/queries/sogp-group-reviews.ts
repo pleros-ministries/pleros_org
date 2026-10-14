@@ -11,7 +11,7 @@ import { parseGroupReviewSchedule } from "@/lib/sogp/group-review";
 type ReviewTx = Parameters<Parameters<typeof transactionDb.transaction>[0]>[0];
 
 /** Same owner-row → group lock order as group creation/closure. No role-label bypass. */
-async function lockOwnedGroup(tx: ReviewTx, userId: string, groupId: number) {
+export async function lockOwnedGroup(tx: ReviewTx, userId: string, groupId: number) {
   const [initial] = await tx.select({ leaderId: s.discipleshipGroups.leaderEnrollmentId }).from(s.discipleshipGroups).where(eq(s.discipleshipGroups.id, groupId));
   if (!initial) throw new CommunityError("This group is not available.");
   const [owner] = await tx.select({ id: s.sogpEnrollments.id, status: s.sogpEnrollments.status }).from(s.sogpEnrollments)
@@ -55,12 +55,14 @@ export async function getGroupReviewView(userId: string, requestedGroupId?: numb
     .leftJoin(ownAttendance, and(eq(ownAttendance.reviewId, s.sogpGroupReviews.id), inArray(ownAttendance.enrollmentId, enrollments.map(item => item.id))))
     .where(and(accessible, requestedGroupId ? eq(s.sogpGroupReviews.groupId, requestedGroupId) : group ? eq(s.sogpGroupReviews.groupId, group.id) : undefined))
     .orderBy(desc(s.sogpGroupReviews.id), desc(ownAttendance.confirmedAt)).limit(100);
+  const madeUp = rows.length ? await db.select({reviewId:s.sogpReviewMakeups.reviewId,enrollmentId:s.sogpReviewMakeups.enrollmentId}).from(s.sogpReviewMakeups)
+    .where(and(inArray(s.sogpReviewMakeups.reviewId,rows.map(row=>row.id)),inArray(s.sogpReviewMakeups.enrollmentId,enrollments.map(row=>row.id)),eq(s.sogpReviewMakeups.status,"attended"))) : [];
   return {
     groups, group,
     reviews: rows.filter(row => {
       const membership = groups.find(item => item.id === row.groupId);
       return row.attendance || membership?.isLeader || membership?.joinedAt && new Date(membership.joinedAt) <= new Date(row.startsAt);
-    }).map(row => ({ ...row, leaderName: firstNameOf(row.leaderName || row.leaderFullName), leaderFullName: undefined, startsAt: new Date(row.startsAt).toISOString(), endsAt: new Date(row.endsAt).toISOString(), canConfirm: groups.some(item => item.id === row.groupId && item.isLeader) })),
+    }).map(row => ({ ...row, makeUpCompleted:madeUp.some(makeUp=>makeUp.reviewId===row.id), leaderName: firstNameOf(row.leaderName || row.leaderFullName), leaderFullName: undefined, startsAt: new Date(row.startsAt).toISOString(), endsAt: new Date(row.endsAt).toISOString(), canConfirm: groups.some(item => item.id === row.groupId && item.isLeader) })),
   };
 }
 export type GroupReviewView = NonNullable<Awaited<ReturnType<typeof getGroupReviewView>>>;
@@ -91,7 +93,7 @@ export async function getOwnAttendanceSheet(userId: string, reviewId: number) {
     .from(s.discipleshipMemberships).innerJoin(s.sogpEnrollments, eq(s.sogpEnrollments.id, s.discipleshipMemberships.discipleEnrollmentId))
     .leftJoin(s.sogpLearningPreferences, eq(s.sogpLearningPreferences.userId, s.sogpEnrollments.userId))
     .leftJoin(s.sogpGroupReviewAttendance, and(eq(s.sogpGroupReviewAttendance.reviewId, review.id), eq(s.sogpGroupReviewAttendance.enrollmentId, s.sogpEnrollments.id)))
-    .where(and(eq(s.discipleshipMemberships.groupId, review.groupId), eq(s.discipleshipMemberships.status, "active"), lte(s.discipleshipMemberships.joinedAt, review.startsAt), ne(s.sogpEnrollments.userId, userId))).orderBy(asc(s.sogpEnrollments.firstName));
+    .where(and(eq(s.discipleshipMemberships.groupId, review.groupId), eq(s.discipleshipMemberships.status, "active"), or(lte(s.discipleshipMemberships.joinedAt, review.startsAt),isNotNull(s.sogpGroupReviewAttendance.enrollmentId)), ne(s.sogpEnrollments.userId, userId))).orderBy(asc(s.sogpEnrollments.firstName));
   return { ...review, startsAt: new Date(review.startsAt).toISOString(), endsAt: new Date(review.endsAt).toISOString(), learners: learners.map(row => ({ enrollmentId: row.enrollmentId, name: firstNameOf(row.firstName || row.name), path: row.path ?? "traditional", status: row.status })) };
 }
 export type GroupAttendanceSheet = NonNullable<Awaited<ReturnType<typeof getOwnAttendanceSheet>>>;
