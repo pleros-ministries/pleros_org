@@ -113,12 +113,12 @@ export function LearnerLoginForm({
         <form className="grid gap-4" noValidate onSubmit={passwordLogin}>
           <label className="grid gap-2" htmlFor="learner-email">
             <span className="[font-size:0.8125rem] font-medium text-[var(--color-text-strong)]">Email address</span>
-            <Input id="learner-email" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
+            <Input id="learner-email" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} required variant="muted" />
           </label>
           <div className="grid gap-2">
             <label htmlFor="learner-password" className="[font-size:0.8125rem] font-medium text-[var(--color-text-strong)]">Password</label>
             <div className="relative">
-              <Input id="learner-password" type={showPassword ? "text" : "password"} autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} required className="pr-12" />
+              <Input id="learner-password" type={showPassword ? "text" : "password"} autoComplete="current-password" value={password} onChange={(event) => setPassword(event.target.value)} required variant="muted" className="pr-12" />
               <button type="button" onClick={() => setShowPassword((current) => !current)} aria-label={showPassword ? "Hide password" : "Show password"} className="absolute inset-y-0 right-0 grid w-11 place-items-center text-[var(--color-text-muted)]">
                 {showPassword ? <EyeOff className="size-4" aria-hidden="true" /> : <Eye className="size-4" aria-hidden="true" />}
               </button>
@@ -138,12 +138,12 @@ export function LearnerLoginForm({
         <form className="grid gap-4" noValidate onSubmit={codeSent ? codeLogin : sendCode}>
           <label className="grid gap-2" htmlFor="code-email">
             <span className="[font-size:0.8125rem] font-medium text-[var(--color-text-strong)]">Email address</span>
-            <Input id="code-email" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} disabled={codeSent} required />
+            <Input id="code-email" type="email" autoComplete="email" value={email} onChange={(event) => setEmail(event.target.value)} disabled={codeSent} required variant="muted" />
           </label>
           {codeSent ? (
             <label className="grid gap-2" htmlFor="login-code">
               <span className="[font-size:0.8125rem] font-medium text-[var(--color-text-strong)]">Sign-in code</span>
-              <Input id="login-code" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={otp} onChange={(event) => setOtp(event.target.value.replace(/\D/g, "").slice(0, 6))} className="h-14 text-center text-lg tracking-[0.3em]" />
+              <Input id="login-code" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={otp} onChange={(event) => setOtp(event.target.value.replace(/\D/g, "").slice(0, 6))} variant="muted" className="h-14 text-center text-lg tracking-[0.3em]" />
             </label>
           ) : null}
           {error ? <p role="alert" className="[font-size:0.8125rem] text-red-700">{error}</p> : null}

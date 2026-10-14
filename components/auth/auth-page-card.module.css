@@ -1,0 +1,28 @@
+.pageSurface {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.075'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+}
+
+.formPane {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.028'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+}
+
+.formPane :global([data-slot="input"]),
+.formPane :global(.sogp-field-control),
+.formPane :global(select:not(.sogp-phone-country-select)) {
+  background-color: var(--color-surface-muted);
+}
+
+.formPane :global([data-slot="input"]:focus-visible),
+.formPane :global(.sogp-field-control:focus-within),
+.formPane :global(select:not(.sogp-phone-country-select):focus-visible) {
+  background-color: #fff;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .pageSurface,
+  .formPane {
+    background-image: none;
+  }
+}
