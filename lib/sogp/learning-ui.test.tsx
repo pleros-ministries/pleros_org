@@ -29,7 +29,7 @@ test("two-episode player shows individual completion and accessible media contro
   expect(html).toContain("Undo listened mark");
   expect(html).toContain("Mark listened");
   expect(html).toContain('aria-label="Play podcast"');
-  expect(html).toContain("Both episodes must be marked");
+  expect(html).toContain("Mark both listened to complete this day.");
   expect(html).not.toContain("Take quiz");
 });
 test("traditional resume uses its own saved lesson, not podcast marks", () => {

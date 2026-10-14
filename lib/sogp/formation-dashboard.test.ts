@@ -51,15 +51,21 @@ test("the journey query applies assessment and date gates to all 24 tracks", () 
     "utf8",
   );
 
-  // Track access gating lives in the dashboard query that the journey reuses.
+  // Track access gating lives in the dashboard query that the journey reuses,
+  // via the day-level wrapper (day-access.ts still delegates to the track gate).
   const dashboardSource = readFileSync(
     join(process.cwd(), "lib", "db", "queries", "sogp.ts"),
+    "utf8",
+  );
+  const dayAccessSource = readFileSync(
+    join(process.cwd(), "lib", "sogp", "day-access.ts"),
     "utf8",
   );
 
   expect(source).toContain("summarizeSogpLevels");
   expect(source).toContain("getSogpDashboardData");
-  expect(dashboardSource).toContain("canAccessSogpTrack");
+  expect(dashboardSource).toContain("canAccessSogpDay");
+  expect(dayAccessSource).toContain("canAccessSogpTrack");
   expect(dashboardSource).toContain("previousLevelComplete");
   expect(source).not.toContain("extras:");
 });

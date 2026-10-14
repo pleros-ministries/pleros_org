@@ -21,9 +21,9 @@ describe("unified ministry form", () => {
   });
   it("labels required capture fields and optional email, including accessible errors", () => {
     const html = renderToStaticMarkup(<PrivateContactFields value={{ name: "", phone: "", email: "", note: "" }} update={() => {}} error={{ field: "phone", message: "Enter a phone number." }} />);
-    expect(html).toContain("Full name *");
-    expect(html).toContain("Phone number *");
-    expect(html).toContain("Email (optional)");
+    expect(html).toContain("Full name · required");
+    expect(html).toContain("Phone number · required");
+    expect(html).toContain("Email · optional");
     expect(html).toContain('aria-invalid="true"');
     expect(html).toContain('aria-describedby="private-contact-phone-error"');
   });
