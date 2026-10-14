@@ -366,14 +366,73 @@ export async function evaluateJoinForViewer(
     group: { leaderEnrollmentId: invite.leaderEnrollmentId, status: invite.status },
     viewerActiveGroupId: membership?.groupId ?? null,
     leaderIsViewersDisciple,
-    activeMemberCount: invite.activeMemberCount,
   });
 }
 
 /**
- * Joins a group atomically: the group row is locked so the size cap holds under
- * concurrent joins, and the partial unique index guards one active discipler.
+ * Locks the group and applies every join rule inside the caller's transaction;
+ * the partial unique index guards one active discipler. Groups have no size cap. Shared by invite links and in-app invitations.
  */
+export async function joinGroupInTransaction(
+  tx: Tx,
+  input: { groupId: number; viewerEnrollmentId: number; sharesPhone: boolean },
+): Promise<DiscipleshipJoinDecision> {
+  const [group] = await tx
+    .select({
+      id: schema.discipleshipGroups.id,
+      status: schema.discipleshipGroups.status,
+      leaderEnrollmentId: schema.discipleshipGroups.leaderEnrollmentId,
+    })
+    .from(schema.discipleshipGroups)
+    .where(eq(schema.discipleshipGroups.id, input.groupId))
+    .for("update");
+  if (!group) throw new DiscipleshipError("This invite link isn't valid.");
+
+  const [[viewerMembership], [circular]] = await Promise.all([
+    tx
+      .select({ groupId: schema.discipleshipMemberships.groupId })
+      .from(schema.discipleshipMemberships)
+      .where(
+        and(
+          eq(schema.discipleshipMemberships.discipleEnrollmentId, input.viewerEnrollmentId),
+          eq(schema.discipleshipMemberships.status, "active"),
+        ),
+      )
+      .limit(1),
+    tx
+      .select({ id: schema.discipleshipMemberships.id })
+      .from(schema.discipleshipMemberships)
+      .innerJoin(
+        schema.discipleshipGroups,
+        eq(schema.discipleshipGroups.id, schema.discipleshipMemberships.groupId),
+      )
+      .where(
+        and(
+          eq(schema.discipleshipMemberships.discipleEnrollmentId, group.leaderEnrollmentId),
+          eq(schema.discipleshipMemberships.status, "active"),
+          eq(schema.discipleshipGroups.leaderEnrollmentId, input.viewerEnrollmentId),
+        ),
+      )
+      .limit(1),
+  ]);
+
+  const decision = evaluateDiscipleshipJoin({
+    viewerEnrollmentId: input.viewerEnrollmentId,
+    group,
+    viewerActiveGroupId: viewerMembership?.groupId ?? null,
+    leaderIsViewersDisciple: Boolean(circular),
+  });
+  if (!decision.ok) return decision;
+
+  await tx.insert(schema.discipleshipMemberships).values({
+    groupId: group.id,
+    discipleEnrollmentId: input.viewerEnrollmentId,
+    sharesPhone: input.sharesPhone,
+  });
+  return { ok: true };
+}
+
+/** Joins through an invite link. */
 export async function joinDiscipleshipGroup(input: {
   code: string;
   viewerEnrollmentId: number;
@@ -384,69 +443,12 @@ export async function joinDiscipleshipGroup(input: {
 
   try {
     return await transactionDb.transaction(async (tx) => {
-      const [group] = await tx
-        .select({
-          id: schema.discipleshipGroups.id,
-          status: schema.discipleshipGroups.status,
-          leaderEnrollmentId: schema.discipleshipGroups.leaderEnrollmentId,
-        })
-        .from(schema.discipleshipGroups)
-        .where(eq(schema.discipleshipGroups.id, invite.groupId))
-        .for("update");
-      if (!group) throw new DiscipleshipError("This invite link isn't valid.");
-
-      const [[memberCount], [viewerMembership], [circular]] = await Promise.all([
-        tx
-          .select({ n: count() })
-          .from(schema.discipleshipMemberships)
-          .where(
-            and(
-              eq(schema.discipleshipMemberships.groupId, group.id),
-              eq(schema.discipleshipMemberships.status, "active"),
-            ),
-          ),
-        tx
-          .select({ groupId: schema.discipleshipMemberships.groupId })
-          .from(schema.discipleshipMemberships)
-          .where(
-            and(
-              eq(schema.discipleshipMemberships.discipleEnrollmentId, input.viewerEnrollmentId),
-              eq(schema.discipleshipMemberships.status, "active"),
-            ),
-          )
-          .limit(1),
-        tx
-          .select({ id: schema.discipleshipMemberships.id })
-          .from(schema.discipleshipMemberships)
-          .innerJoin(
-            schema.discipleshipGroups,
-            eq(schema.discipleshipGroups.id, schema.discipleshipMemberships.groupId),
-          )
-          .where(
-            and(
-              eq(schema.discipleshipMemberships.discipleEnrollmentId, group.leaderEnrollmentId),
-              eq(schema.discipleshipMemberships.status, "active"),
-              eq(schema.discipleshipGroups.leaderEnrollmentId, input.viewerEnrollmentId),
-            ),
-          )
-          .limit(1),
-      ]);
-
-      const decision = evaluateDiscipleshipJoin({
+      const decision = await joinGroupInTransaction(tx, {
+        groupId: invite.groupId,
         viewerEnrollmentId: input.viewerEnrollmentId,
-        group,
-        viewerActiveGroupId: viewerMembership?.groupId ?? null,
-        leaderIsViewersDisciple: Boolean(circular),
-        activeMemberCount: memberCount?.n ?? 0,
-      });
-      if (!decision.ok) return decision;
-
-      await tx.insert(schema.discipleshipMemberships).values({
-        groupId: group.id,
-        discipleEnrollmentId: input.viewerEnrollmentId,
         sharesPhone: input.sharesPhone,
       });
-      return { ok: true as const, invite };
+      return decision.ok ? { ok: true as const, invite } : decision;
     });
   } catch (error) {
     // A concurrent join for the same learner lost the partial unique index race.
@@ -1058,7 +1060,7 @@ async function getDiscipleSummaries(groupId: number): Promise<DiscipleSummary[]>
         enrollmentCreatedAt: m.enrollmentCreatedAt,
       })),
     ),
-    // Bounded by DISCIPLESHIP_GROUP_MAX; each call reuses the learner's own
+    // One read per disciple of this one group; each call reuses the learner's own
     // dashboard read model so numbers match what the disciple sees.
     Promise.all(members.map((m) => getActiveSogpJourney(m.userId).catch(() => null))),
     db

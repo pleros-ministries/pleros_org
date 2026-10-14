@@ -36,6 +36,11 @@ function PodcastPlayer({ episode,position,canWrite }: { episode: LearningEpisode
     {error ? <div className={styles.stack}><p role="alert" className={styles.error}>{error}</p><div className={styles.tools}><button type="button" onClick={() => { void save(persistence.current.desired); }}>Retry saving position</button><button type="button" onClick={() => window.location.reload()}>Reload saved state</button></div></div> : null}
   </div>;
 }
+function dayLength(durations: (string | undefined)[]) {
+  const total = durations.reduce((sum, value) => { const parts = (value ?? "").split(":").map(Number); return parts.length > 1 && !parts.some(Number.isNaN) ? sum + parts.reduce((acc, part) => acc * 60 + part, 0) : sum; }, 0);
+  return total ? ` · ${Math.floor(total / 60)} min ${total % 60} sec of listening` : "";
+}
+
 export function ListeningPage({ data,requestedDay }: { data: LearningViewData;requestedDay?: number }) {
   const [dayNumber] = useState(requestedDay ?? learningResume(data.state)?.dayNumber ?? 1);
   const [error,setError] = useState<string | null>(null);
@@ -56,9 +61,9 @@ export function ListeningPage({ data,requestedDay }: { data: LearningViewData;re
     });
   }
   return <section className={styles.page}>
-    <header className={styles.header}><p className={styles.eyebrow}>Podcast · {state?.plan?.episodesPerDay === 2 ? "30" : "15"} min/day</p><h1>{day ? day.episodes.length === 2 ? "Your two episodes" : "Your next episode" : "Your listening plan"}</h1>{day ? <p className={styles.muted}>Day {day.dayNumber}</p> : null}</header>
+    <header className={styles.header}><p className={styles.eyebrow}>Podcast · {state?.plan?.episodesPerDay === 2 ? "30" : "15"} min/day</p><h1>{day ? day.episodes.length === 2 ? "Your two episodes" : "Your next episode" : "Your listening plan"}</h1>{day ? <p className={styles.muted}>Day {day.dayNumber}{dayLength(day.episodes.map(item => data.episodes.find(row => row.guid === item.episodeGuid)?.duration))}</p> : null}</header>
     {!day ? <div className={styles.stack}><p>No episodes are waiting on this day. Your completed history has not been removed.</p><Link className={styles.secondary} href="/dashboard/sogp/plan">Choose or edit your episodes</Link></div> : <>
-      <div className={styles.notice}><h2>{day.episodes.filter(episode => episode.listened).length} of {day.episodes.length} episodes marked listened</h2><p className={styles.meta}>{day.episodes.length === 2 ? "Both episodes must be marked listened to complete this day." : "Mark this episode listened to complete this day."} Playback ending does not mark completion.</p></div>
+      <div className={styles.dayProgress}><h2>{day.episodes.filter(episode => episode.listened).length} of {day.episodes.length} {day.episodes.length === 1 ? "episode" : "episodes"} marked listened</h2><p className={styles.meta}>{day.episodes.length === 2 ? "Mark both listened to complete this day." : "Mark it listened to complete this day."}</p></div>
       {day.episodes.map(item => { const episode = data.episodes.find(row => row.guid === item.episodeGuid), position = state?.progress.playbackPositions.find(row => row.episodeGuid === item.episodeGuid);
         return <article className={styles.episode} key={item.episodeGuid}><h2>{episode?.title ?? "Episode no longer in the catalogue"}</h2><div className={styles.metaRow}><p className={styles.meta}>Podcast · {episode?.duration || "Duration unavailable"}</p><span className={styles.meta}>{item.listened ? "Listened" : "Not marked listened"}</span></div>{episode ? <PodcastPlayer episode={episode} position={position} canWrite={data.canWrite} /> : <p>Your completion and saved position remain in your history.</p>}<button type="button" className={item.listened ? styles.secondary : styles.primary} disabled={saving || !data.canWrite} onClick={() => mark(item.episodeGuid,!item.listened)}>{saving ? "Saving…" : item.listened ? "Undo listened mark" : "Mark listened"}<DashboardIcon name="check" /></button></article>;
       })}
@@ -66,7 +71,9 @@ export function ListeningPage({ data,requestedDay }: { data: LearningViewData;re
     </>}
     {!data.canWrite ? <p className={styles.muted}>{learningWriteNotice(data)}</p> : null}
     {error ? <div className={styles.stack}><p role="alert" className={styles.error}>{error}</p><button type="button" className={styles.secondary} onClick={() => window.location.reload()}>Reload saved progress</button></div> : null}
-    <div className={styles.notice}><p>Questions are optional and don’t affect completion.</p><p className={styles.meta}>Episode-specific question delivery is not connected yet. You can still use Ask Pleros, with its existing privacy choice.</p><Link href="/dashboard/community/ask">Open Ask Pleros</Link></div>
-    <Link href="/dashboard/podcast">Existing podcast library and history</Link>
+    {/* Episode-specific question routing is unresolved; Ask Pleros keeps its own privacy choice. */}
+    <div className={styles.stack}><Link className={styles.rowButton} href="/dashboard/community/ask"><DashboardIcon name="chat" /><span>Ask a question · Optional</span><DashboardIcon name="right" size={16} /></Link><p className={styles.meta}>Questions aren’t required for completion. They go to Pleros through Ask Pleros.</p></div>
+    {day ? <p className={styles.readyNote}><DashboardIcon name="calendar" size={16} /><span>Missed days wait. {day.episodes.length === 2 ? "Mark both episodes listened" : "Mark the episode listened"} to complete this day.</span></p> : null}
+    <Link href="/dashboard/podcast">Podcast library and history</Link>
   </section>;
 }

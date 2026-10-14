@@ -48,7 +48,7 @@ export async function getGroupReviewView(userId: string, requestedGroupId?: numb
   const rows = await db.selectDistinctOn([s.sogpGroupReviews.id], {
     id: s.sogpGroupReviews.id, groupId: s.sogpGroupReviews.groupId, groupName: s.discipleshipGroups.name,
     title: s.sogpGroupReviews.title, venue: s.sogpGroupReviews.venue, startsAt: s.sogpGroupReviews.startsAt, endsAt: s.sogpGroupReviews.endsAt,
-    leaderName: leader.firstName, leaderFullName: leader.name, attendance: ownAttendance.status,
+    leaderName: leader.firstName, leaderFullName: leader.name, attendance: ownAttendance.status, attendanceEnrollmentId: ownAttendance.enrollmentId,
   }).from(s.sogpGroupReviews)
     .innerJoin(s.discipleshipGroups, eq(s.discipleshipGroups.id, s.sogpGroupReviews.groupId))
     .innerJoin(leader, eq(leader.id, s.discipleshipGroups.leaderEnrollmentId))
@@ -62,7 +62,7 @@ export async function getGroupReviewView(userId: string, requestedGroupId?: numb
     reviews: rows.filter(row => {
       const membership = groups.find(item => item.id === row.groupId);
       return row.attendance || membership?.isLeader || membership?.joinedAt && new Date(membership.joinedAt) <= new Date(row.startsAt);
-    }).map(row => ({ ...row, makeUpCompleted:madeUp.some(makeUp=>makeUp.reviewId===row.id), leaderName: firstNameOf(row.leaderName || row.leaderFullName), leaderFullName: undefined, startsAt: new Date(row.startsAt).toISOString(), endsAt: new Date(row.endsAt).toISOString(), canConfirm: groups.some(item => item.id === row.groupId && item.isLeader) })),
+    }).map(row => ({ ...row, makeUpCompleted:row.attendance==="missed"&&madeUp.some(makeUp=>makeUp.reviewId===row.id&&makeUp.enrollmentId===row.attendanceEnrollmentId), attendanceEnrollmentId: undefined, leaderName: firstNameOf(row.leaderName || row.leaderFullName), leaderFullName: undefined, startsAt: new Date(row.startsAt).toISOString(), endsAt: new Date(row.endsAt).toISOString(), canConfirm: groups.some(item => item.id === row.groupId && item.isLeader) })),
   };
 }
 export type GroupReviewView = NonNullable<Awaited<ReturnType<typeof getGroupReviewView>>>;

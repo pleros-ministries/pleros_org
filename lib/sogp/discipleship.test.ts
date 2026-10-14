@@ -1,7 +1,6 @@
 import { describe, expect, test } from "vitest";
 
 import {
-  DISCIPLESHIP_GROUP_MAX,
   DISCIPLESHIP_GROUP_NAME_MAX,
   DISCIPLESHIP_GROUPS_LED_MAX,
   GENERIC_PROMPT_SUGGESTIONS,
@@ -132,7 +131,6 @@ describe("evaluateDiscipleshipJoin", () => {
     group: { leaderEnrollmentId: 1, status: "active" as const },
     viewerActiveGroupId: null,
     leaderIsViewersDisciple: false,
-    activeMemberCount: 3,
   };
 
   test("allows a fresh learner to join", () => {
@@ -172,11 +170,6 @@ describe("evaluateDiscipleshipJoin", () => {
     });
   });
 
-  test("blocks a full group", () => {
-    expect(
-      evaluateDiscipleshipJoin({ ...base, activeMemberCount: DISCIPLESHIP_GROUP_MAX }),
-    ).toEqual({ ok: false, reason: "group_full" });
-  });
 });
 
 describe("buildWhatsAppUrl", () => {

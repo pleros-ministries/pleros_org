@@ -1,13 +1,11 @@
-import localFont from "next/font/local";
+import { Inter } from "next/font/google";
 
-export const dashboardFont = localFont({
-  src: [
-    { path: "../../../app/fonts/be-vietnam-pro/BeVietnamPro-Regular.ttf", weight: "400", style: "normal" },
-    { path: "../../../app/fonts/be-vietnam-pro/BeVietnamPro-Medium.ttf", weight: "500", style: "normal" },
-    { path: "../../../app/fonts/be-vietnam-pro/BeVietnamPro-SemiBold.ttf", weight: "600", style: "normal" },
-    { path: "../../../app/fonts/be-vietnam-pro/BeVietnamPro-Bold.ttf", weight: "700", style: "normal" },
-  ],
-  variable: "--font-be-vietnam-pro",
+/** Authenticated dashboard face. The variable optical-size axis tightens
+ *  display sizes; tracking tokens live on `.root` in dashboard.module.css. */
+export const dashboardFont = Inter({
+  subsets: ["latin"],
+  weight: "variable",
+  axes: ["opsz"],
+  variable: "--font-dashboard",
   display: "swap",
-  adjustFontFallback: false,
 });

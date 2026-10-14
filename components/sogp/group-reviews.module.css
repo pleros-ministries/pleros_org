@@ -1,10 +1,10 @@
 .page { max-width: 560px; margin-inline: auto; padding: 24px 16px max(24px, env(safe-area-inset-bottom)); display: grid; gap: 32px; color: var(--color-text-strong); font-size: 14px; line-height: 22px; }
-.page h1 { margin: 0; font-size: 24px; line-height: 32px; font-weight: 500; letter-spacing: -.5px; }
+.page h1 { margin: 0; font-size: 24px; line-height: 32px; font-weight: 500; letter-spacing: var(--dashboard-tracking-heading, -0.02em); }
 .page h2 { margin: 0; font-size: 15px; line-height: 22px; font-weight: 500; }
 .page p { margin: 0; }
 .heading { display: grid; justify-items: start; gap: 16px; }
 .section { display: grid; gap: 16px; }
-.groupPanel { display: grid; gap: 4px; padding: 16px; border: 1px solid var(--color-line); border-radius: 12px; }
+.groupPanel { border: 0 !important; background: var(--color-surface-muted);  display: grid; gap: 4px; padding: 16px; border: 1px solid var(--color-line); border-radius: 12px; }
 .groupPanel strong { font-size: 15px; font-weight: 500; }
 .meta { font-size: 13px; line-height: 20px; color: var(--color-text-muted); }
 .field { display: grid; gap: 8px; font-size: 13px; line-height: 20px; font-weight: 500; min-width: 0; }
@@ -44,3 +44,6 @@
 .offerChoice:has(input:checked) { border-color: var(--color-brand-blue); }
 .makeUpChoice { display: grid; gap: 8px; align-content: center; justify-content: stretch; }
 .makeUpChoiceHeading { display: flex !important; align-items: center; gap: 12px !important; }
+.lockedSummary { border: 0; background: var(--color-surface-muted); justify-items: stretch; }
+.lockedLine { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0; color: var(--color-text-muted); }
+.footer .primary { text-decoration: none; }

@@ -18,8 +18,10 @@ export async function getOwnFollowUpView(userId: string) {
   const enrollment = await ownEnrollment(userId);
   if (!enrollment) return null;
   const [[owner], [request]] = await Promise.all([
-    db.select({ name: s.users.name }).from(s.pastorAssignments)
+    db.select({ name: s.users.name, source: s.sogpFollowUpRoutes.source, region: s.sogpEnrollments.region }).from(s.pastorAssignments)
       .innerJoin(s.users, eq(s.users.id, s.pastorAssignments.pastorUserId))
+      .innerJoin(s.sogpEnrollments, eq(s.sogpEnrollments.id, s.pastorAssignments.enrollmentId))
+      .leftJoin(s.sogpFollowUpRoutes, and(eq(s.sogpFollowUpRoutes.enrollmentId, s.pastorAssignments.enrollmentId), eq(s.sogpFollowUpRoutes.ownerUserId, s.pastorAssignments.pastorUserId)))
       .where(eq(s.pastorAssignments.enrollmentId, enrollment.id)).limit(1),
     db.select({ reason: s.sogpFollowUpRequests.reason, status: s.sogpFollowUpRequests.status, createdAt: s.sogpFollowUpRequests.createdAt })
       .from(s.sogpFollowUpRequests).where(eq(s.sogpFollowUpRequests.enrollmentId, enrollment.id))
@@ -27,6 +29,8 @@ export async function getOwnFollowUpView(userId: string) {
   ]);
   return {
     currentName: owner?.name ?? null,
+    /** How the current owner was assigned, when this routing recorded it. */
+    assignedBy: owner?.source === "geography" ? `Assigned by location${owner.region ? ` · ${owner.region}` : ""}` : owner?.source === "code" ? "Assigned by your referral code" : owner?.source === "link" ? "Assigned by your referral link" : null,
     canRequest: enrollment.status !== "withdrawn",
     request: request ? { ...request, createdAt: new Date(request.createdAt).toISOString() } : null,
   };
@@ -51,6 +55,31 @@ export async function createOwnFollowUpRequest(userId: string, rawReason: unknow
       .where(eq(s.pastorAssignments.enrollmentId, enrollment.id)).limit(1);
     await tx.insert(s.sogpFollowUpRequests).values({ enrollmentId: enrollment.id, previousFollowUpUserId: owner?.id ?? null, reason });
   });
+  // A link arrival's "Request someone else" choice is this request. Outside the
+  // request transaction so a database without 0059 still accepts requests.
+  await db.update(s.sogpFollowUpRoutes).set({ choice: "requested", chosenAt: new Date() })
+    .where(and(eq(s.sogpFollowUpRoutes.enrollmentId, own.id), eq(s.sogpFollowUpRoutes.source, "link"), sql`${s.sogpFollowUpRoutes.choice} is null`))
+    .catch(error => console.error("Follow-up route choice update failed:", error));
+}
+
+export type FollowUpOwnerCandidate = { id: string; name: string; enrolleeCount: number; region: string | null; kind: "pastor" | "enrollee" };
+
+/**
+ * Admin-only owner choices: staff pastors and current owners with their load,
+ * plus a bounded name search across active enrollees (referral owners).
+ */
+export async function listFollowUpOwnerCandidates(search = ""): Promise<FollowUpOwnerCandidate[]> {
+  await requireAdmin();
+  const term = search.trim().slice(0, 80);
+  const load = sql<number>`(select count(*)::int from ${s.pastorAssignments} as a where a.pastor_user_id = ${s.users.id})`;
+  const region = sql<string | null>`(select e.region from ${s.sogpEnrollments} as e where e.user_id = ${s.users.id} order by e.created_at desc limit 1)`;
+  const enrolled = sql`exists (select 1 from ${s.sogpEnrollments} as e where e.user_id = ${s.users.id} and e.status <> 'withdrawn')`;
+  const rows = await db.select({ id: s.users.id, name: s.users.name, role: s.users.role, isPastor: s.users.isPastor, enrolleeCount: load, region })
+    .from(s.users)
+    .where(term ? and(sql`${s.users.name} ilike ${`%${term.replace(/[%_\\]/g, "\\$&")}%`}`, or(eq(s.users.role, "pastor"), eq(s.users.isPastor, true), enrolled))
+      : or(eq(s.users.role, "pastor"), eq(s.users.isPastor, true), sql`${load} > 0`))
+    .orderBy(asc(s.users.name)).limit(term ? 20 : 100);
+  return rows.map(row => ({ id: row.id, name: row.name, enrolleeCount: row.enrolleeCount, region: row.region || null, kind: row.role === "pastor" || row.isPastor ? "pastor" : "enrollee" }));
 }
 
 /** Existing admins only; no request reasons reach pastors or church leaders. */
@@ -80,8 +109,13 @@ export async function resolveFollowUpRequest(input: { requestId: number; decisio
       const [enrollment] = await tx.select({ status: s.sogpEnrollments.status }).from(s.sogpEnrollments).where(eq(s.sogpEnrollments.id, request.enrollmentId)).for("update");
       if (!enrollment || enrollment.status === "withdrawn") throw new CommunityError("This enrolment can no longer be reassigned.");
       if (!input.replacementUserId || input.replacementUserId === request.previousFollowUpUserId) throw new CommunityError("Choose a different follow-up person.");
-      const [candidate] = await tx.select({ id: s.users.id }).from(s.users).where(and(eq(s.users.id, input.replacementUserId), or(eq(s.users.role, "pastor"), eq(s.users.isPastor, true)))).for("share");
+      // Eligible: a staff pastor, or any enrollee with an active enrolment (referral owners).
+      // Ownership grants no staff, church or group rights. Never the learner themself.
+      const [candidate] = await tx.select({ id: s.users.id }).from(s.users).where(and(eq(s.users.id, input.replacementUserId), or(eq(s.users.role, "pastor"), eq(s.users.isPastor, true),
+        sql`exists (select 1 from ${s.sogpEnrollments} as e where e.user_id = ${s.users.id} and e.status <> 'withdrawn')`))).for("share");
       if (!candidate) throw new CommunityError("Choose an existing eligible follow-up person.");
+      const [learner] = await tx.select({ userId: s.sogpEnrollments.userId }).from(s.sogpEnrollments).where(eq(s.sogpEnrollments.id, request.enrollmentId));
+      if (learner?.userId === candidate.id) throw new CommunityError("A learner cannot follow themselves up.");
       const [current] = await tx.select({ ownerId: s.pastorAssignments.pastorUserId }).from(s.pastorAssignments).where(eq(s.pastorAssignments.enrollmentId, request.enrollmentId)).for("update");
       if ((current?.ownerId ?? null) !== request.previousFollowUpUserId) throw new CommunityError("The assignment changed after this request. Refresh and review the current assignment before proceeding.");
       const changed = await tx.insert(s.pastorAssignments).values({ enrollmentId: request.enrollmentId, pastorUserId: candidate.id, assignedBy: session.user.id })

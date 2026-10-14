@@ -21,7 +21,6 @@ import {
   MEETING_KINDS,
 } from "./daily-report";
 import {
-  DEMO_GROUP_MAX,
   DEMO_GROUP_NAME_MAX,
   DEMO_GROUP_NAME_MIN,
   DEMO_GROUPS_LED_MAX,
@@ -538,9 +537,6 @@ export function acceptInvite(state: DemoState, contactId: number): Outcome {
   if (!contact?.invite || contact.invite.status !== "invited") return fail("There is no open invitation.");
   const group = state.groups.find((item) => item.id === contact.invite!.groupId);
   if (!group || group.status !== "active") return fail("This discipleship group is no longer active.");
-  if (groupMemberIds(state, group.id).length >= DEMO_GROUP_MAX) {
-    return fail(`This group is full. Groups have up to ${DEMO_GROUP_MAX} people.`);
-  }
   if (contact.personId && joinedGroup(state, contact.personId)) {
     return fail("They are already in a discipleship group.");
   }

@@ -162,7 +162,7 @@ export function CommunityDiscipleshipView({
       kind: "leading",
       groupId: group.groupId,
       groupName: group.groupName,
-      summary: `You lead this group · ${group.disciples.length} of ${group.capacity} disciples`,
+      summary: `You lead this group · ${group.disciples.length} ${group.disciples.length === 1 ? "disciple" : "disciples"}`,
       members: group.disciples,
       memberCount: group.disciples.length,
     }));

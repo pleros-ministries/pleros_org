@@ -184,49 +184,50 @@ This is **facts-only**: selected-path progress, recorded attended/missed/explici
 
 Before certificate enforcement/issuance, inspect `lib/db/queries/sogp-completion.ts` and all issuance callers. Existing `/dashboard/sogp/certificate` renders already-issued certificates; do not revoke or reinterpret them. Obtain approved session counts/percentages/podcast qualification/cross-path rules before enabling new eligibility. Visual readiness can be completed without inventing those rules; full certification cannot.
 
-## 71-screen source register
+## 71-screen source register (updated 14 October, Claude session)
 
-Each row covers the exact indexed stems listed. This is a conservative implementation map, **not 71 accepted screens**. “Connected” means source code/live route exists; “partial” still needs behaviour or presentation. All rows still need final contract evidence and relevant state coverage. Use `screen-index.json` for precise titles/generator references.
+Visual = compared at 390px against the supplied PNG/SVG through a labelled synthetic `/preview/dashboard-v3/*` route (Inter, no horizontal overflow). Functional = saved behaviour exercised on the live database. **No row has functional acceptance yet**: no learner session or safe fixtures were available, and automated checks were deferred by the user.
 
-| Indexed stems | Route / adapter | Handoff state and next action |
+| Indexed stems | Route / preview | State |
 | --- | --- | --- |
-| `Pleros-you`, `Pleros-sidebar-open` | `/dashboard`, shared shell/v3 primitives | Connected; approved baseline; retained capability/role audit remains |
-| `Pleros-community` | `/dashboard/community`, community-home-v3/community-home query | Rebuilt and live-render checked; final source comparison remains |
-| `Pleros-control-centre` | Existing `/admin` operations | Retained, new coordinator presentation pending; do not duplicate admin home |
-| `Pleros-enrollee-details`, `Pleros-change-owner`, `Pleros-my-enrollees` | `/admin/my-enrollees`, follow-up request queue and existing assignment services | Partial; full source parity and referral-owner candidates pending |
-| `Pleros-referral-code`, `Pleros-referral-link` | Existing referral/enrolment entry points | Sharing/attribution retained; automatic owner routing and choice lifecycle pending |
-| `Pleros-reassignment-pending`, `Pleros-request-reassignment` | `/dashboard/sogp/follow-up/request` | Connected; real resolution/retry/negative-scope proof pending |
-| `Pleros-church-pastor`, `Pleros-church-branch`, `Pleros-church-appointment`, `Pleros-church-allocation`, `Pleros-church-unit`, `Pleros-church-worker` | `/dashboard/church`, `[userId]`, organisation/report services | Existing functional baseline/security patch; Paper parity and scoped acceptance pending |
-| `Pleros-create-branch`, `Pleros-appoint-branch-pastor` | Existing church actions | Map actual service/UI before rebuilding; presentation/role proof pending |
-| `Pleros-review-hierarchy-import` | No approved new import workflow | Proposal; classify explicitly, obtain authority before implementing |
-| `contacts_groups`, `saved_contacts`, `add_contact`, `contact_history` | Private contacts/report contact adapters; retained outreach browser | Partial; dedicated surfaces/source parity/privacy across readers pending |
-| `move_contact`, `contact_moved` | Contact collection proposal | Not approved as a new subsystem; separate from accepted group membership |
-| `Pleros-lesson` | Traditional course/day lesson/player | Retained; source presentation and all assessment/media controls audit |
-| `Pleros-report` | `/dashboard/community/report` under You | Connected baseline; activation/history/Nil/undo acceptance pending |
-| `Pleros-oversight` | Church scoped report drill-down | Retained/partial; direct-worker/all-branch restrictions and parity pending |
-| `Pleros-disciple` | Redesigned discipleship and disciple detail | Connected; preserve all private tools and role/privacy checks |
-| `Pleros-home-start-sogp` | `/dashboard` start card | Connected; no-owner/no-Welcome-Pack immediate-start proof pending |
-| `Pleros-onboarding-choice` | `/dashboard/sogp/path` | Connected; source-aligned chooser |
-| `Pleros-onboarding-30min`, `Pleros-onboarding-15min`, `Pleros-onboarding-ready` | Path → plan/library → resume | Connected adapters; exact separate visual states/save/back acceptance pending |
-| `Pleros-onboarding-1hour` | Chooser → `/dashboard/sogp/traditional` | Connected; traditional immediate-start/history acceptance pending |
-| `Pleros-home-1hour`, `Pleros-home-30min`, `Pleros-home-15min` | Adaptive You learning cards | Partial source state coverage; preserve named white-card variants |
-| `Pleros-onboarding-day-one` | `/dashboard/sogp/listen?day=1` | Connected; real saved playback/completion proof pending |
-| `Pleros-tracklist-suggested`, `Pleros-tracklist-reorder`, `Pleros-tracklist-review`, `Pleros-tracklist-review-15min` | `/dashboard/sogp/plan`, editor/library | Connected; full 30/60-slot edit and repeated/interrupted actions pending |
-| `Pleros-report-ministry-evangelism`, `Pleros-report-ministry-discipleship`, `Pleros-report-inline-add-contact` | ministry-v3 reporting components/actions | Source implementation exists; activation and real write acceptance pending |
-| `Pleros-report-ministry-outcomes` | Unified report optional outcomes | Proposal; definitions/unknown versus zero unresolved |
-| `Pleros-report-teaching-led`, `Pleros-report-prayer-led` | Shared meeting creation | Implemented service/form; gate/time/total/idempotency acceptance pending |
-| `Pleros-report-meeting-select`, `Pleros-report-teaching-attendee`, `Pleros-report-prayer-attendee`, `Pleros-report-meeting-missing` | Meeting selection/personal reports | Implemented service/form; selection and missing empty-state acceptance pending |
-| `Pleros-my-sogp` | `/dashboard/sogp`, learning-home | Connected; contextual referrals/reviews/readiness, final parity pending |
-| `Pleros-share-referral` | `/dashboard/sogp/referrals` | Existing per-enrollee sharing retained; new visual/owner-routing proof pending |
-| `Pleros-review-learner-list`, `Pleros-review-discipler-schedule`, `Pleros-review-leader-attendance` | `/dashboard/sogp/reviews` and children | Connected; empty/schedule live rendering only, actual writes/role proof pending |
-| `Pleros-review-missed-makeup` | `/reviews/[reviewId]/make-up` plus lead offer | Connected; synthetic visual evidence; real lifecycle unverified |
-| `Pleros-review-certification` | `/dashboard/sogp/readiness` | New committed facts checkpoint unverified; no new eligibility formula |
-| `Pleros-invite-existing-account`, `Pleros-group-invitation-pending`, `Pleros-group-invitation-accept` | New in-app invite lifecycle alongside existing group-link joins | Pending; safe discovery, explicit recipient acceptance/decline, delivery/privacy |
-| `Pleros-invite-whatsapp-link` | Existing group invite link and WhatsApp sharing | Partial retained flow; exact non-account source treatment pending |
-| `Pleros-learning-podcast-library`, `Pleros-learning-edit-full-plan` | `/dashboard/sogp/plan` | Connected; latest live library/editor snapshots, persistence/edge proof pending |
-| `Pleros-learning-switch-one-episode`, `Pleros-learning-switch-traditional` | Learning actions/plan rules/path chooser | Implemented rules; both pace directions/history and source confirmation states pending |
-| `Pleros-learning-listen-two-episodes` | `/dashboard/sogp/listen` | Connected explicit marks/Undo; real persisted two-mark/position proof pending |
-| `Pleros-learning-optional-question` | Episode question adapter not implemented | Pending routing/privacy; retained Ask Pleros is not equivalent completion |
+| `Pleros-you`, `Pleros-sidebar-open` | `/dashboard` · `/preview/dashboard-v3/home` | Approved baseline; adaptive learning cards added (start/traditional/30/15). Visual ✓ |
+| `Pleros-home-start-sogp`, `Pleros-home-1hour`, `-30min`, `-15min` | `/dashboard` cards | Built from real completions/listens/positions. Visual ✓ |
+| `Pleros-community` | `/dashboard/community` | Codex rebuild; "Needs a response" now lists group invitations, People I lead adds My enrollees |
+| `Pleros-control-centre`, `Pleros-enrollee-details`, `Pleros-change-owner` | `/admin/follow-up`, `/admin/follow-up/[id]`, `/admin/follow-up-requests` · `/preview/dashboard-v3/coordinator` | Built. Owners may be pastors or any active enrollee (never the learner). Visual ✓ |
+| `Pleros-my-enrollees` | `/dashboard/sogp/enrollees` (Community) | Built, learner-facing. Visual ✓ |
+| `Pleros-referral-code`, `Pleros-referral-link` | `/dashboard/sogp/follow-up/welcome` | Built; migration 0059 records code/link/geography and the link choice. Visual ✓ |
+| `Pleros-reassignment-pending`, `Pleros-request-reassignment` | `/dashboard/sogp/follow-up(/request)` | Retained + assignment-source line. Visual ✓ |
+| `Pleros-share-referral` | `/dashboard/sogp/referrals` | Rebuilt. Visual ✓ |
+| `Pleros-church-pastor`, `-branch`, `-unit`, `-worker` | `/dashboard/church` · `/preview/dashboard-v3/church` | Built role views from assignment scope. Visual ✓ |
+| `Pleros-church-appointment`, `-allocation`, `Pleros-create-branch`, `Pleros-appoint-branch-pastor` | `/dashboard/church/units/[id]/leader|workers`, `/branches/new`, `/branches/[id]/pastor`, `/branches/[id]/units/new` | Built on the guarded `assignChurchMember`. Schema has no branch location or unit-less workers. Visual ✓ |
+| `Pleros-oversight` | `/dashboard/church/reports` | Rebuilt (status chips, needs-a-report filter, reminders when enabled). Visual ✓ |
+| `Pleros-review-hierarchy-import` | — | Proposal; not built |
+| `contacts_groups`, `move_contact`, `contact_moved` | — | Collections are a proposal; not built |
+| `saved_contacts`, `add_contact`, `contact_history` | `/dashboard/community/report/people(/new|/private/[id])` · `/preview/dashboard-v3/contacts` | Built (Unlinked status only). Visual ✓ |
+| `Pleros-lesson` | `/dashboard/sogp/course/day/[n]` · `/preview/dashboard-v3/lesson` | Rebuilt; My notes/Transcript tabs omitted (no backing feature). Visual ✓ |
+| `Pleros-report` | `/dashboard/community/report` · `/preview/dashboard-v3/daily-report` | Rebuilt; reporting default-on. Visual ✓ |
+| `Pleros-disciple` | `/dashboard/sogp/discipleship` | Codex rebuild; 12-person cap removed |
+| `Pleros-onboarding-choice`, `-1hour`, `-30min`, `-15min`, `-ready`, `-day-one` | `/dashboard/sogp/path`, `/plan`, `/listen` · `/preview/dashboard-v3/learning` | Path chooser, traditional preview, 3-step podcast setup (preview → suggested → ready → Start day 1). Visual ✓ |
+| `Pleros-tracklist-suggested`, `-reorder`, `-review`, `-review-15min` | `/dashboard/sogp/plan` | Suggested/ready steps built; reorder uses the editor's per-episode menu (no drag). Visual ✓ |
+| `Pleros-report-ministry-evangelism`, `-discipleship`, `-inline-add-contact` | `/dashboard/community/report/new` · `/preview/dashboard-v3/report` | Aligned. Visual ✓ |
+| `Pleros-report-ministry-outcomes` | Outcomes row | Existing metrics only; definitions/unknown-vs-zero unresolved |
+| `Pleros-report-teaching-led`, `-prayer-led`, `-meeting-select`, `-teaching-attendee`, `-prayer-attendee`, `-meeting-missing` | meeting flow · `/preview/dashboard-v3/meetings` | Rebuilt; overnight end needs explicit "Ends the next day"; "Others without names"/"Additional details" omitted (proposals). Visual ✓ |
+| `Pleros-my-sogp` | `/dashboard/sogp` | Aligned; follow-up line shows routing source. Visual ✓ |
+| `Pleros-review-learner-list`, `-discipler-schedule`, `-leader-attendance`, `-missed-makeup` | `/dashboard/sogp/reviews…` · `/preview/dashboard-v3/reviews` | Aligned; Made up badge now matches the exact attendance enrolment. Visual ✓ |
+| `Pleros-review-certification` | `/dashboard/sogp/readiness` | Wording corrected; no quota formula. Visual ✓ |
+| `Pleros-invite-existing-account`, `Pleros-group-invitation-pending`, `-accept` | `/dashboard/sogp/enrollees/[id]/invite`, `/invitations/[id](/sent)` | Built (0059). Recipients limited to the leader's assigned enrollees; email masked. Visual ✓ |
+| `Pleros-invite-whatsapp-link` | `/dashboard/community/report/people/private/[id]/invite` | Built; Pleros stores/sends nothing. Visual ✓ |
+| `Pleros-learning-podcast-library`, `-edit-full-plan` | `/dashboard/sogp/plan` | Aligned. Visual ✓ |
+| `Pleros-learning-switch-one-episode`, `-switch-traditional` | path chooser confirmations | Built (preview before switching, both directions). Visual ✓ |
+| `Pleros-learning-listen-two-episodes` | `/dashboard/sogp/listen` | Aligned. Visual ✓ |
+| `Pleros-learning-optional-question` | Ask a question row → Ask Pleros | Episode-specific routing/privacy unresolved; not built |
+
+### Decisions made in this session (user)
+
+- Dashboard font is Inter (variable, optical size); headings −2% tracking.
+- Reporting v3, daily declarations, church organisation and multi-branch are default-on (`=0` rolls back). Report reminders stay opt-in.
+- Referral code/link assigns follow-up only; groups are joined through each group's own invite link or an in-app invitation. Discipleship groups have no size limit.
+- Migration 0059 (`sogp_follow_up_routes`, `discipleship_group_invitations`) applied to the confirmed shared target with existing-record digests unchanged.
 
 ## Verification and release boundaries
 

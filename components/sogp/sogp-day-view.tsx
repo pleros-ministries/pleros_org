@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
+import lesson from "./sogp-lesson.module.css";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import {
   ArrowLeft,
   ArrowRight,
-  BookOpen,
   Check,
   Circle,
   ExternalLink,
@@ -78,6 +79,7 @@ function Curriculum({ data, compact = false }: { data: DayPayload; compact?: boo
 
 export function SogpDayView({ dayNumber }: { dayNumber: number }) {
   const queryClient = useQueryClient();
+  const [tab, setTab] = useState<"overview" | "progress">("overview");
   const { data } = useSuspenseQuery({
     queryKey: ["sogp", "day", dayNumber],
     queryFn: () => fetchDay(dayNumber),
@@ -106,31 +108,39 @@ export function SogpDayView({ dayNumber }: { dayNumber: number }) {
     ["Written response submitted", data.track.progress.writtenApproved],
   ] as const;
 
+  const tracks = data.dashboard.tracks.filter((item) => item.isRequired);
+  const position = tracks.findIndex((item) => item.dayNumber === data.track.dayNumber) + 1;
+  const pad = (n: number) => String(n).padStart(2, "0");
   return (
-    <section className="site-font-theme min-h-screen bg-[var(--color-surface)] pb-20">
-      <header className="border-b border-[var(--color-line)] bg-white">
-        <div className="site-shell-page sogp-shell-page grid gap-4 py-7">
-          <Link href="/dashboard/sogp" className="inline-flex w-fit items-center gap-1 text-xs font-semibold text-[var(--color-text-muted)] hover:text-[var(--color-brand-blue)]"><ArrowLeft className="size-3.5"/> SOGP dashboard</Link>
-          <div className="grid gap-2"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-brand-blue)]">Day {data.track.dayNumber} · Week {data.track.weekNumber}</p><h1 className="font-[var(--font-sen)] text-2xl font-semibold leading-tight tracking-[-0.02em] text-[var(--color-text-strong)]">{data.track.lesson.title}</h1></div>
-        </div>
+    <section className={lesson.page}>
+      <header className={lesson.header}>
+        <p className={lesson.eyebrow}>Week {data.track.weekNumber} · Track {pad(position || data.track.dayNumber)} of {tracks.length}</p>
+        <h1>{data.track.lesson.title}</h1>
       </header>
-      <div className="site-shell-page sogp-shell-page grid gap-5 py-8 xl:grid-cols-[minmax(0,1fr)_15rem] 2xl:grid-cols-[13rem_minmax(0,1fr)_15rem]">
-        <details className="rounded-[var(--radius-md)] border border-(--color-line) bg-white p-3 xl:col-span-2 2xl:hidden">
-          <summary className="cursor-pointer text-[13px] font-medium text-(--color-brand-blue)">Course curriculum</summary>
-          <div className="mt-3"><Curriculum data={data} compact /></div>
-        </details>
-        <div className="hidden 2xl:block"><Curriculum data={data}/></div>
-        <section aria-label="Lesson content" className="grid content-start gap-5">
-          {data.track.lesson.audioUrl ? <SogpAudioPlayer key={dayNumber} dayNumber={dayNumber} src={data.track.lesson.audioUrl} listened={data.track.progress.audioListened}/> : <div className="rounded-[var(--radius-md)] border border-amber-200 bg-amber-50 p-5 text-sm text-amber-800">Teaching audio is being prepared.</div>}
-          {data.track.lesson.notesContent ? <article className="rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white p-5 md:p-8"><div className="mb-6 flex items-center justify-between gap-3"><div className="flex items-center gap-2"><BookOpen className="size-5 text-[var(--color-brand-blue)]"/><h2 className="font-[var(--font-sen)] text-[15px] font-semibold">Lesson notes</h2></div>{data.track.progress.notesRead?<span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700"><Check className="size-3.5"/> Read</span>:null}</div><div className="prose prose-sm max-w-none font-[var(--font-be-vietnam-pro)] leading-[1.7] text-[var(--color-text-strong)]" dangerouslySetInnerHTML={{__html:data.track.lesson.notesContent}}/><button type="button" disabled={data.track.progress.notesRead||notesMutation.isPending} onClick={()=>notesMutation.mutate()} className="mt-8 min-h-11 rounded-full bg-[var(--color-brand-blue)] px-5 text-sm font-semibold text-white disabled:opacity-50">{data.track.progress.notesRead?"Notes marked as read":notesMutation.isPending?"Saving":"Mark notes read"}</button></article>:null}
-          <div className="flex items-center justify-between gap-3 border-t border-[var(--color-line)] pt-5">{data.previousDay?<Link href={`/dashboard/sogp/course/day/${data.previousDay.dayNumber}`} className="inline-flex min-h-10 items-center gap-1 rounded-full border border-[var(--color-line-strong)] px-4 text-xs font-semibold"><ArrowLeft className="size-3.5"/> Day {data.previousDay.dayNumber}</Link>:<span/>}{data.nextDay?<Link href={`/dashboard/sogp/course/day/${data.nextDay.dayNumber}`} className="inline-flex min-h-10 items-center gap-1 rounded-full bg-[var(--color-brand-blue)] px-4 text-xs font-semibold text-white">Day {data.nextDay.dayNumber}<ArrowRight className="size-3.5"/></Link>:null}</div>
-        </section>
-        <aside className="grid content-start gap-4">
-          <section className="rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white p-5"><h2 className="font-[var(--font-sen)] text-[15px] font-semibold">Lesson completion</h2><div className="mt-5 grid gap-4">{signals.map(([label,complete])=><div key={label} className="grid grid-cols-[1.25rem_1fr] items-center gap-2">{complete?<span className="grid size-5 place-items-center rounded-full bg-[var(--color-brand-lime)]"><Check className="size-3 text-[var(--color-brand-blue)]"/></span>:<Circle className="size-5 text-[var(--color-line-strong)]"/>}<span className="text-xs font-medium text-[var(--color-text-strong)]">{label}</span></div>)}</div></section>
-          <section className="grid gap-2 rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white p-3"><Link href={`/dashboard/sogp/course/day/${dayNumber}/quiz`} className="flex min-h-14 items-center gap-3 rounded-[0.5rem] p-2 hover:bg-[var(--color-brand-sky)]"><HelpCircle className="size-4 text-[var(--color-brand-blue)]"/><div className="grid gap-0.5"><span className="text-xs font-semibold">Quiz</span><span className="text-[0.65rem] text-[var(--color-text-muted)]">{data.bestQuizScore===null?"Not attempted":`Best score ${data.bestQuizScore}%`}</span></div></Link><Link href={`/dashboard/sogp/course/day/${dayNumber}/response`} className="flex min-h-14 items-center gap-3 rounded-[0.5rem] p-2 hover:bg-[var(--color-brand-sky)]"><FileText className="size-4 text-[var(--color-brand-blue)]"/><div className="grid gap-0.5"><span className="text-xs font-semibold">Written response</span><span className="text-[0.65rem] text-[var(--color-text-muted)]">{data.submission?.status.replaceAll("_"," ")??"Not started"}</span></div></Link></section>
-          {telegramUrl?<a href={telegramUrl} target="_blank" rel="noreferrer" className="grid gap-3 rounded-[var(--radius-md)] bg-[var(--color-brand-blue)] p-5 text-white"><MessageCircleMore className="size-6 text-[var(--color-brand-lime)]"/><div className="grid gap-1"><span className="font-[var(--font-sen)] text-lg font-semibold">Ask your question</span><span className="text-xs leading-[1.45] text-white/75">Use text or voice note in Telegram.</span></div><span className="inline-flex items-center gap-1 text-xs font-semibold">Open Telegram <ExternalLink className="size-3.5"/></span></a>:null}
-        </aside>
+      <article className={lesson.trackCard} aria-label="Lesson audio">
+        <p className={lesson.eyebrow}>Traditional track</p>
+        <h2>Track {pad(position || data.track.dayNumber)}</h2>
+        <p className={lesson.meta}>{data.track.lesson.title} · 1 hr/day · Audio teaching</p>
+        {data.track.lesson.audioUrl ? <SogpAudioPlayer key={dayNumber} dayNumber={dayNumber} src={data.track.lesson.audioUrl} listened={data.track.progress.audioListened}/> : <p className={lesson.notice}>Teaching audio is being prepared.</p>}
+      </article>
+      <div className={lesson.tabs} role="tablist">
+        {(["overview", "progress"] as const).map((key) => <button key={key} type="button" role="tab" aria-selected={tab === key} onClick={() => setTab(key)}>{key === "overview" ? "Overview" : "Completion"}</button>)}
       </div>
+      {tab === "overview" ? (data.track.lesson.notesContent ? <article className={lesson.notes}>
+        <div className="prose prose-sm max-w-none leading-[1.7] text-[var(--color-text-strong)]" dangerouslySetInnerHTML={{__html:data.track.lesson.notesContent}}/>
+        <button type="button" className={lesson.secondary} disabled={data.track.progress.notesRead||notesMutation.isPending} onClick={()=>notesMutation.mutate()}>{data.track.progress.notesRead?"Notes marked as read":notesMutation.isPending?"Saving…":"Mark notes read"}<Check className="size-4"/></button>
+      </article> : <p className={lesson.meta}>Lesson notes are not available for this track.</p>)
+      : <ul className={lesson.signals}>{signals.map(([label,complete])=><li key={label}>{complete?<Check className="size-4 text-[var(--status-green-text)]"/>:<Circle className="size-4 text-[var(--color-line-strong)]"/>}<span>{label}</span></li>)}</ul>}
+      <div className={lesson.rows}>
+        <Link className={lesson.row} href={`/dashboard/sogp/course/day/${dayNumber}/quiz`}><HelpCircle className="size-5"/><span><strong>Your response & quiz</strong><span className={lesson.meta}>{data.bestQuizScore===null?"Quiz not attempted":`Best quiz score ${data.bestQuizScore}%`}</span></span><ArrowRight className="size-4"/></Link>
+        <Link className={lesson.row} href={`/dashboard/sogp/course/day/${dayNumber}/response`}><FileText className="size-5"/><span><strong>Written response</strong><span className={lesson.meta}>{data.submission?.status.replaceAll("_"," ")??"Not started"}</span></span><ArrowRight className="size-4"/></Link>
+        {telegramUrl?<a className={lesson.row} href={telegramUrl} target="_blank" rel="noreferrer"><MessageCircleMore className="size-5"/><span><strong>Ask your question</strong><span className={lesson.meta}>Text or voice note in Telegram</span></span><ExternalLink className="size-4"/></a>:null}
+      </div>
+      <details className={lesson.curriculum}><summary>All {tracks.length} tracks</summary><Curriculum data={data} compact /></details>
+      <footer className={lesson.footer}>
+        {data.nextDay?<Link className={lesson.primary} href={`/dashboard/sogp/course/day/${data.nextDay.dayNumber}`}>Continue after this lesson<ArrowRight className="size-4"/></Link>:<Link className={lesson.primary} href="/dashboard/sogp">Back to My SOGP<ArrowRight className="size-4"/></Link>}
+        {data.previousDay?<Link className={lesson.textLink} href={`/dashboard/sogp/course/day/${data.previousDay.dayNumber}`}><ArrowLeft className="size-4"/> Previous track</Link>:null}
+      </footer>
     </section>
   );
 }

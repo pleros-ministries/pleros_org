@@ -12,7 +12,6 @@ import {
 } from "@/app/(site)/dashboard/sogp/discipleship/_actions";
 import type { LedGroupSummary } from "@/lib/db/queries/sogp-discipleship";
 import {
-  DISCIPLESHIP_GROUP_MAX,
   DISCIPLESHIP_GROUP_NAME_MAX,
   evaluateCloseDiscipleshipGroup,
 } from "@/lib/sogp/discipleship";
@@ -139,7 +138,7 @@ export function GroupSwitcher({
             className={inputClass}
           />
           <p className="text-[0.7rem] text-zinc-500">
-            Each group has its own invite link and up to {DISCIPLESHIP_GROUP_MAX} disciples.
+            Each group has its own invite link.
           </p>
           <ErrorText error={error} />
           <div className="flex items-center justify-end gap-3">
@@ -235,7 +234,7 @@ export function GroupHeader({
               {group.name}
             </h2>
             <p className="text-[13px] font-medium text-(--color-text-muted)">
-              {discipleCount} of {DISCIPLESHIP_GROUP_MAX} disciples
+              {discipleCount} {discipleCount === 1 ? "disciple" : "disciples"}
             </p>
           </div>
           {!paused ? (

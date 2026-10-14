@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 
 import { emptyDraft, withKind, type ActivityDraft } from "@/lib/community/activity-form";
 import {
-  DISCIPLESHIP_GROUP_MAX,
   DISCIPLESHIP_GROUP_NAME_MAX,
   DISCIPLESHIP_GROUP_NAME_MIN,
   DISCIPLESHIP_GROUPS_LED_MAX,
@@ -10,7 +9,6 @@ import {
 
 import { dayReport } from "./daily-report";
 import {
-  DEMO_GROUP_MAX,
   DEMO_GROUP_NAME_MAX,
   DEMO_GROUP_NAME_MIN,
   DEMO_GROUPS_LED_MAX,
@@ -50,7 +48,6 @@ describe("fixtures", () => {
 
   it("mirror the live discipleship limits", () => {
     expect(DEMO_GROUPS_LED_MAX).toBe(DISCIPLESHIP_GROUPS_LED_MAX);
-    expect(DEMO_GROUP_MAX).toBe(DISCIPLESHIP_GROUP_MAX);
     expect(DEMO_GROUP_NAME_MIN).toBe(DISCIPLESHIP_GROUP_NAME_MIN);
     expect(DEMO_GROUP_NAME_MAX).toBe(DISCIPLESHIP_GROUP_NAME_MAX);
   });
@@ -230,7 +227,7 @@ describe("discipleship groups", () => {
     expect(groupMemberIds(state, 9).sort()).toEqual(["d-grace", "d-samuel"]);
   });
 
-  it("refuses a thirteenth member", () => {
+  it("has no group size limit", () => {
     let state = buildDemoState(TODAY);
     state = {
       ...state,
@@ -244,12 +241,8 @@ describe("discipleship groups", () => {
         })),
       ],
     };
-    expect(groupMemberIds(state, 9)).toHaveLength(12);
     state = ok(inviteContact(state, WORKER, 502, 9));
-    expect(acceptInvite(state, 502)).toEqual({
-      ok: false,
-      error: "This group is full. Groups have up to 12 people.",
-    });
+    expect(acceptInvite(state, 502).ok).toBe(true);
   });
 });
 

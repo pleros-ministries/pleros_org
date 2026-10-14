@@ -624,7 +624,7 @@ export function PastorFollowupView({
 
       <ProgressSummary enrollees={filtered} totalLabel={showAll ? "Enrollees" : "Assigned"} />
 
-      {isAdmin ? <Link href="/admin/follow-up-requests" className="inline-flex min-h-11 items-center text-sm text-(--color-brand-blue)">Review follow-up reassignment requests</Link> : null}
+      {isAdmin ? <span className="flex flex-wrap gap-4"><Link href="/admin/follow-up" className="inline-flex min-h-11 items-center text-sm text-(--color-brand-blue)">Coordinator control centre</Link><Link href="/admin/follow-up-requests" className="inline-flex min-h-11 items-center text-sm text-(--color-brand-blue)">Review follow-up reassignment requests</Link></span> : null}
 
       {selectedPastorId && cohorts.length > 0 ? (
         <PastorDailyParticipationSection

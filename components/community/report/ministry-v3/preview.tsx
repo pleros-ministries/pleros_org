@@ -15,7 +15,7 @@ export function MinistryReportPreview({ kind }: { kind: "outreach" | "follow_up"
       <Link className="grid size-11 place-items-center" aria-label="Back to dashboard preview" href="/preview/dashboard-v3"><DashboardIcon name="left" /></Link>
       <span className="text-[14px] font-medium">Record ministry</span><span className="size-11" aria-hidden />
     </header>
-    <MinistryFormV3 dateKey="2026-10-13" initialKind={kind} initialCount={kind === "outreach" ? "12" : "3"} initialContacts={[
+    <MinistryFormV3 dateKey="2026-10-13" today="2026-10-13" initialKind={kind} initialCount={kind === "outreach" ? "12" : "3"} initialContacts={[
       { key: "sample-amara", name: "Amara Okafor", phone: "+234 800 000 0101", email: null, note: null },
       { key: "sample-dayo", name: "Dayo Eze", phone: "+234 800 000 0102", email: null, note: null },
     ]} onSave={async () => {

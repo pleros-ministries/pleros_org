@@ -5,7 +5,7 @@ export function dashboardAreaForPath(href: string): DashboardArea {
   const path = href.split(/[?#]/)[0];
   const inCommunity = path === "/dashboard/community" || path.startsWith("/dashboard/community/");
   const reporting = path === "/dashboard/community/report" || path.startsWith("/dashboard/community/report/");
-  const discipleship = path === "/dashboard/sogp/discipleship" || path.startsWith("/dashboard/sogp/discipleship/");
+  const discipleship = ["/dashboard/sogp/discipleship", "/dashboard/sogp/enrollees", "/dashboard/sogp/invitations"].some(root => path === root || path.startsWith(`${root}/`));
   return discipleship || inCommunity && !reporting ? "community" : "you";
 }
 

@@ -7,6 +7,7 @@ import { CONTACTS_PER_DAY_MAX, CONTACT_NAME_MAX, CONTACT_PHONE_MAX, CONTACT_NOTE
 import { MINISTRY_FIELDS, MINISTRY_NOTE_MAX, type MinistryFieldKey } from "@/lib/community/ministry-report";
 import { OUTREACH_PLATFORMS } from "@/lib/community/ministry-activities";
 import styles from "./ministry-form.module.css";
+import { ReportDateLine } from "./report-date";
 
 type ContactDraft = { name: string; phone: string; email: string; note: string };
 type ContactError = { field: keyof ContactDraft; message: string };
@@ -24,14 +25,14 @@ export function PrivateContactFields({ value, update, error }: {
   value: ContactDraft; update: (patch: Partial<ContactDraft>) => void; error?: ContactError;
 }) {
   return <div className={styles.contactFields}>
-    {([ ["name", "Full name *", "text", CONTACT_NAME_MAX], ["phone", "Phone number *", "tel", CONTACT_PHONE_MAX], ["email", "Email (optional)", "email", 254] ] as const).map(([key, label, type, maxLength]) => {
+    {([ ["name", "Full name · required", "text", CONTACT_NAME_MAX], ["phone", "Phone number · required", "tel", CONTACT_PHONE_MAX], ["email", "Email · optional", "email", 254] ] as const).map(([key, label, type, maxLength]) => {
       const id = `private-contact-${key}`;
       return <label key={key} className={styles.field} htmlFor={id}>{label}
         <input id={id} type={type} inputMode={key === "phone" ? "tel" : key === "email" ? "email" : "text"} maxLength={maxLength} value={value[key]} onChange={event => update({ [key]: event.target.value })} aria-invalid={error?.field === key || undefined} aria-describedby={error?.field === key ? `${id}-error` : undefined} />
         {error?.field === key ? <span id={`${id}-error`} className={styles.error}>{error.message}</span> : null}
       </label>;
     })}
-    <label className={styles.field} htmlFor="private-contact-note">Contact note (optional)
+    <label className={styles.field} htmlFor="private-contact-note">Contact note · optional
       <textarea id="private-contact-note" rows={4} maxLength={CONTACT_NOTE_MAX} value={value.note} onChange={event => update({ note: event.target.value })} aria-invalid={error?.field === "note" || undefined} aria-describedby={error?.field === "note" ? "private-contact-note-error" : undefined} />
       {error?.field === "note" ? <span id="private-contact-note-error" className={styles.error}>{error.message}</span> : null}
     </label>
@@ -85,8 +86,8 @@ export function ContactSheet({ onClose, onAdd, onPersist, standalone = false }: 
 }
 
 /** Persistence is supplied by an adapter; this presenter never imports DB/auth/actions. */
-export function MinistryFormV3({ dateKey, initialKind = "outreach", initialContacts = [], initialCount = "", onSave, savedContacts = [], onCreateContact, initialDetails, readOnly = false, lockKind = false }: {
-  dateKey: string; initialKind?: "outreach" | "follow_up"; initialContacts?: MinistryContact[]; initialCount?: string;
+export function MinistryFormV3({ dateKey, today, days, onDayChange, initialKind = "outreach", initialContacts = [], initialCount = "", onSave, savedContacts = [], onCreateContact, initialDetails, readOnly = false, lockKind = false }: {
+  dateKey: string; today?: string; days?: string[]; onDayChange?: (dateKey: string) => void; initialKind?: "outreach" | "follow_up"; initialContacts?: MinistryContact[]; initialCount?: string;
   onSave: (payload: MinistryFormPayload) => Promise<{ ok: true } | { ok: false; error: string }>;
   savedContacts?: MinistryContact[]; onCreateContact?: PersistContact; readOnly?: boolean; lockKind?: boolean;
   initialDetails?: Partial<Omit<MinistryFormPayload, "dateKey" | "kind" | "contacts" | "peopleCount">>;
@@ -142,7 +143,7 @@ export function MinistryFormV3({ dateKey, initialKind = "outreach", initialConta
   }
   return <div className={styles.form} aria-busy={saving}>
     <fieldset className={styles.controls} disabled={saving || saved || readOnly}><legend className={styles.srOnly}>Ministry report</legend>
-    <p className={styles.muted}>{dateKey} · Africa/Lagos</p>
+    <ReportDateLine dateKey={dateKey} today={today} days={days} onChange={onDayChange} />
     <h1>One simple report</h1>
     <fieldset className={styles.kind}><legend className={styles.srOnly}>Ministry activity</legend>
       {([ ["outreach", "Evangelism"], ["follow_up", "Discipleship"] ] as const).map(([key, label]) => <label key={key}>
@@ -152,7 +153,7 @@ export function MinistryFormV3({ dateKey, initialKind = "outreach", initialConta
     <label className={styles.field} htmlFor="ministry-method">How did you connect?
       <select id="ministry-method" value={method} onChange={event => setMethod(event.target.value)}>{(kind === "outreach" ? ["In person", "Online", "Both"] : ["In person", "Phone call", "WhatsApp", "Mixed methods"]).map(value => <option key={value}>{value}</option>)}</select>
     </label>
-    <label className={styles.field} htmlFor="ministry-context">{kind === "outreach" && method !== "Online" ? "Where? *" : "Context (optional)"}
+    <label className={styles.field} htmlFor="ministry-context">{kind === "outreach" && method !== "Online" ? "Where? *" : "Context · optional"}
       <input id="ministry-context" value={context} maxLength={120} onChange={event => setContext(event.target.value)} />
     </label>
     {kind === "outreach" && method !== "In person" ? <div className={styles.section}>
@@ -178,7 +179,7 @@ export function MinistryFormV3({ dateKey, initialKind = "outreach", initialConta
         <button type="button" className={styles.remove} disabled={saving || saved} aria-label={`Remove ${contact.name} from report`} onClick={() => setContacts(current => current.filter(row => row.key !== contact.key))}><DashboardIcon name="close" size={16} /></button>
       </li>)}</ul> : <p className={styles.muted}>{query ? "No contacts match your search." : "No named people added. You can still save a count-only report."}</p>}
     </section>
-    <details ref={outcomesDetails} className={styles.details}><summary>Existing ministry metrics<span>Saved, filled, healed and follow-ups</span></summary>
+    <details ref={outcomesDetails} className={styles.details}><summary><DashboardIcon name="circlecheck" /><span>Outcomes · optional</span><span className={styles.muted}>Saved, filled, healed and follow-ups</span><DashboardIcon name="right" size={16} /></summary>
       <p className={styles.muted}>Existing fields are retained. Optional-outcome policy is still awaiting approval; blank entries stay unspecified. Existing numerical projections are unchanged.</p>
       {MINISTRY_FIELDS.filter(field => !["attendance", "reachedOnline", "reachedOffline", ...(kind === "follow_up" ? ["followUps", "notSaved"] : [])].includes(field.key)).map(field => <label className={styles.field} key={field.key} htmlFor={`ministry-${field.key}`}>{field.label}<input id={`ministry-${field.key}`} inputMode="numeric" value={outcomes[field.key] ?? ""} onChange={event => setOutcomes(current => ({ ...current, [field.key]: event.target.value }))} aria-invalid={outcomeError?.field === field.key || undefined} aria-describedby={outcomeError?.field === field.key ? `ministry-${field.key}-error` : undefined} />{outcomeError?.field === field.key ? <span className={styles.error} id={`ministry-${field.key}-error`}>{outcomeError.error}</span> : null}</label>)}
     </details>

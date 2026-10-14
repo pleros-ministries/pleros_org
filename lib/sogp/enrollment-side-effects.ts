@@ -1,7 +1,11 @@
 import { after } from "next/server";
 
 import { assignEnrollmentToUnit } from "@/lib/db/queries/community-units";
-import { autoAssignPastorForEnrollment } from "@/lib/db/queries/pastor-followups";
+import {
+  assignReferralOwnerForEnrollment,
+  autoAssignPastorForEnrollment,
+} from "@/lib/db/queries/pastor-followups";
+import { recordFollowUpRoute } from "@/lib/db/queries/sogp-follow-up-routes";
 import {
   attributeSogpReferral,
   ensureSogpReferralCode,
@@ -36,6 +40,8 @@ export function runSogpPostEnrollmentSideEffects(input: {
     referralSource: string;
     referralSourceOther: string;
     referredByCode: string;
+    /** Absent on setup payloads saved before code/link tracking. */
+    referredVia?: "link" | "code" | "";
   };
 }) {
   const { enrollment, cohort, userId, values } = input;
@@ -50,27 +56,41 @@ export function runSogpPostEnrollmentSideEffects(input: {
     referralSourceOther: values.referralSourceOther,
   });
 
-  after(() =>
-    attributeSogpReferral({
+  // Referral first, then geography, in one sequence: running them as
+  // separate tasks let whichever finished first claim the follow-up slot.
+  after(async () => {
+    const referrer = await attributeSogpReferral({
       enrolleeEnrollmentId: enrollment.id,
       enrolleeUserId: userId,
       code: values.referredByCode,
-    }).catch((error) => console.error("SOGP referral attribution failed:", error)),
-  );
-  after(() =>
-    ensureSogpReferralCode(enrollment.id).catch((error) =>
+    }).catch((error) => {
+      console.error("SOGP referral attribution failed:", error);
+      return null;
+    });
+    await ensureSogpReferralCode(enrollment.id).catch((error) =>
       console.error("SOGP referral code mint failed:", error),
-    ),
-  );
-  after(() =>
-    assignEnrollmentToUnit(enrollment.id)
-      .then((result) =>
-        result ? autoAssignPastorForEnrollment(enrollment.id, result.unitId) : null,
-      )
-      .catch((error) =>
-        console.error("SOGP community unit/pastor assignment failed:", error),
-      ),
-  );
+    );
+    const unit = await assignEnrollmentToUnit(enrollment.id).catch((error) => {
+      console.error("SOGP community unit assignment failed:", error);
+      return null;
+    });
+    try {
+      if (referrer) {
+        if (await assignReferralOwnerForEnrollment(enrollment.id, referrer.userId)) {
+          await recordFollowUpRoute({
+            enrollmentId: enrollment.id,
+            source: values.referredVia === "code" ? "code" : "link",
+            ownerUserId: referrer.userId,
+          });
+        }
+      } else if (unit) {
+        const ownerUserId = await autoAssignPastorForEnrollment(enrollment.id, unit.unitId);
+        if (ownerUserId) await recordFollowUpRoute({ enrollmentId: enrollment.id, source: "geography", ownerUserId });
+      }
+    } catch (error) {
+      console.error("SOGP follow-up owner assignment failed:", error);
+    }
+  });
   after(() =>
     sendSogpEnrollmentEmail({
       to: values.email,

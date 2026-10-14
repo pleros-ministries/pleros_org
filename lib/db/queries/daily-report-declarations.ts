@@ -8,9 +8,9 @@ import { validateDailyDeclaration, type DailyReportCategory, type DailyReportDec
 import { lagosToday } from "@/lib/sogp/daily-date";
 import type { Tx } from "./outreach-contacts";
 
-/** Explicit migration/rollout gate. Never query new tables before opt-in deployment. */
+/** Default-live (0050 installed). DASHBOARD_DAILY_REPORTS_V2=0 rolls back and skips the new tables. */
 export function dailyReportingEnabled(): boolean {
-  return process.env.DASHBOARD_DAILY_REPORTS_V2 === "1";
+  return process.env.DASHBOARD_DAILY_REPORTS_V2 !== "0";
 }
 function requireEnabled() {
   if (!dailyReportingEnabled()) throw new CommunityError("Daily report confirmations are not available yet.");

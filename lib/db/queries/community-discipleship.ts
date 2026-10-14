@@ -12,7 +12,6 @@ import {
   type MessagingRelation,
 } from "@/lib/community/messaging";
 import { firstNameOf, joinMonthLabel } from "@/lib/community/visibility";
-import { DISCIPLESHIP_GROUP_MAX } from "@/lib/sogp/discipleship";
 
 /**
  * A learner's discipleship relationships as shown inside the community: who
@@ -47,7 +46,6 @@ export type CommunityDiscipleship = {
     groupId: number;
     groupName: string;
     paused: boolean;
-    capacity: number;
     disciples: DiscipleshipPeer[];
   }>;
 };
@@ -228,7 +226,6 @@ export async function getCommunityDiscipleship(
       groupId: ledRow.id,
       groupName: ledRow.name,
       paused: ledRow.status === "archived",
-      capacity: DISCIPLESHIP_GROUP_MAX,
       disciples: (discipleRowsByGroup[index] ?? []).map((row) =>
         toPeer(row, { ...NO_LINK, senderGuidesRecipient: true }),
       ),

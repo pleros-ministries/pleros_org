@@ -2583,3 +2583,35 @@ export const sogpReviewMakeups = pgTable("sogp_review_makeups", {
   check("sogp_review_makeups_venue_check", sql`length(trim(${t.venue})) between 1 and 300`),
   check("sogp_review_makeups_status_check", sql`${t.status} in ('offered','chosen','attended','missed')`),
 ]);
+
+/** How a new enrolment reached its follow-up owner; link arrivals record the learner's choice. */
+export const sogpFollowUpRoutes = pgTable("sogp_follow_up_routes", {
+  enrollmentId: integer("enrollment_id").primaryKey().references(() => sogpEnrollments.id, { onDelete: "cascade" }),
+  source: text("source").$type<"code" | "link" | "geography">().notNull(),
+  ownerUserId: text("owner_user_id").references(() => users.id, { onDelete: "set null" }),
+  choice: text("choice").$type<"accepted" | "requested">(),
+  chosenAt: timestamp("chosen_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, t => [
+  index("sogp_follow_up_routes_owner_idx").on(t.ownerUserId),
+  check("sogp_follow_up_routes_source_check", sql`${t.source} in ('code','link','geography')`),
+  check("sogp_follow_up_routes_choice_check", sql`${t.choice} is null or ${t.choice} in ('accepted','requested')`),
+]);
+
+/** In-app discipleship group invitations; membership exists only after acceptance. */
+export const discipleshipGroupInvitations = pgTable("discipleship_group_invitations", {
+  id: serial("id").primaryKey(),
+  groupId: integer("group_id").notNull().references(() => discipleshipGroups.id, { onDelete: "cascade" }),
+  recipientEnrollmentId: integer("recipient_enrollment_id").notNull().references(() => sogpEnrollments.id, { onDelete: "cascade" }),
+  invitedBy: text("invited_by").references(() => users.id, { onDelete: "set null" }),
+  origin: text("origin").$type<"referral" | "in_app">().notNull(),
+  status: text("status").$type<"pending" | "accepted" | "declined" | "withdrawn">().notNull().default("pending"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  respondedAt: timestamp("responded_at", { withTimezone: true }),
+}, t => [
+  uniqueIndex("discipleship_group_invitations_pending_idx").on(t.groupId, t.recipientEnrollmentId).where(sql`${t.status} = 'pending'`),
+  index("discipleship_group_invitations_recipient_idx").on(t.recipientEnrollmentId, t.status),
+  index("discipleship_group_invitations_group_idx").on(t.groupId, t.status),
+  check("discipleship_group_invitations_origin_check", sql`${t.origin} in ('referral','in_app')`),
+  check("discipleship_group_invitations_status_check", sql`${t.status} in ('pending','accepted','declined','withdrawn')`),
+]);

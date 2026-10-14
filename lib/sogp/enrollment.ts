@@ -23,8 +23,10 @@ export type SogpEnrollmentValues = {
   utmCampaign: string;
   utmContent: string;
   utmTerm: string;
-  /** `?ref=` code of the student who referred this enrolment, if any. */
+  /** Referral code of the student who referred this enrolment, if any. */
   referredByCode: string;
+  /** How the code arrived: a shared `?ref=` link, or typed in as a code. */
+  referredVia: "link" | "code" | "";
 };
 
 export type SogpEnrollmentInput = Omit<
@@ -34,6 +36,8 @@ export type SogpEnrollmentInput = Omit<
   phoneCountryCode?: string;
   whatsappConsent?: boolean | "" | "yes" | "no" | null;
   ref?: string | null;
+  /** Code typed into the optional referral-code field. */
+  referralCode?: string | null;
 };
 export type SogpEnrollmentErrors = Partial<
   Record<
@@ -153,7 +157,9 @@ export function normalizeSogpEnrollment(
     utmContent: clean(input.utmContent, 200),
     utmTerm: clean(input.utmTerm, 200),
     // Case-sensitive; never validated so a stale/bad code can't block enrolment.
-    referredByCode: clean(input.ref, 32),
+    // A `?ref=` link wins over a typed code.
+    referredByCode: clean(input.ref, 32) || clean(input.referralCode, 32),
+    referredVia: clean(input.ref, 32) ? "link" : clean(input.referralCode, 32) ? "code" : "",
   };
 }
 

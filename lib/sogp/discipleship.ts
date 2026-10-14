@@ -9,9 +9,6 @@ import {
 import { toLagosDateKey } from "./formation-progress";
 import type { StudentStatus } from "./student-status";
 
-/** Small enough to disciple personally, and bounds the per-disciple progress reads. */
-export const DISCIPLESHIP_GROUP_MAX = 12;
-
 /** Open groups one learner may lead at a time. */
 export const DISCIPLESHIP_GROUPS_LED_MAX = 5;
 
@@ -145,7 +142,6 @@ export type DiscipleshipJoinBlock =
   | "own_group"
   | "already_in_group"
   | "circular"
-  | "group_full"
   | "archived";
 
 export type DiscipleshipJoinDecision =
@@ -163,7 +159,6 @@ export function evaluateDiscipleshipJoin(input: {
   viewerActiveGroupId: number | null;
   /** True when the group's leader is currently the viewer's disciple. */
   leaderIsViewersDisciple: boolean;
-  activeMemberCount: number;
 }): DiscipleshipJoinDecision {
   if (input.group.status !== "active") return { ok: false, reason: "archived" };
   if (input.group.leaderEnrollmentId === input.viewerEnrollmentId) {
@@ -173,9 +168,6 @@ export function evaluateDiscipleshipJoin(input: {
     return { ok: false, reason: "already_in_group" };
   }
   if (input.leaderIsViewersDisciple) return { ok: false, reason: "circular" };
-  if (input.activeMemberCount >= DISCIPLESHIP_GROUP_MAX) {
-    return { ok: false, reason: "group_full" };
-  }
   return { ok: true };
 }
 
@@ -184,7 +176,6 @@ const JOIN_BLOCK_COPY: Record<DiscipleshipJoinBlock, string> = {
   already_in_group:
     "You're already in a discipleship group. Leave your current group first if you'd like to join this one.",
   circular: "This person is already in your discipleship group, so you can't join theirs.",
-  group_full: `This group is full. Groups have up to ${DISCIPLESHIP_GROUP_MAX} people.`,
   archived: "This discipleship group is no longer active.",
 };
 

@@ -7,6 +7,7 @@ import { getDayActivity, listActivitiesForDay } from "@/lib/db/queries/ministry-
 import { getSogpDashboardData } from "@/lib/db/queries/sogp";
 import { getOwnSogpLearning } from "@/lib/db/queries/sogp-learning";
 import { learningResume } from "@/lib/sogp/learning-view";
+import { fetchAnchorEpisodes } from "@/lib/anchor-rss";
 import { getOwnDisciplerSummary } from "@/lib/db/queries/community-discipleship";
 import { lagosToday } from "@/lib/sogp/daily-date";
 import { homeReportRows, type DashboardHomeData } from "./home";
@@ -33,8 +34,27 @@ export async function getDashboardHomeData(viewer: NonNullable<Awaited<ReturnTyp
   const waiting = learningResume(state);
   const podcast = state?.path !== "traditional" && state?.plan;
   const planned = podcast ? new Set([...state.plan!.episodeGuids,...state.plan!.historyEpisodeGuids]) : null;
+  // Real facts only: course completion for traditional, saved listens/positions for podcasts.
+  let card: DashboardHomeData["card"];
+  if (!course || !state?.revision && !course.tracks.some(track => track.completed)) {
+    card = { kind: "start", href: course ? "/dashboard/sogp/path" : "/sogp/enrol" };
+  } else if (podcast && waiting) {
+    const catalogue = new Map((await fetchAnchorEpisodes().catch(() => [])).map(row => [row.guid, row]));
+    const positions = new Map(state.progress.playbackPositions.map(row => [row.episodeGuid, row.positionSeconds]));
+    const listenedSet = new Set(state.progress.listenedEpisodeGuids);
+    const parsed = waiting.episodeGuids.map(guid => {
+      const item = catalogue.get(guid), title = item?.title ?? "Episode";
+      const match = /^(.*?)\s*\((Part\s+\d+)\)\s*$/i.exec(title);
+      const durationSeconds = (item?.duration ?? "").split(":").map(Number).reduce((total, value) => Number.isNaN(value) ? total : total * 60 + value, 0);
+      return { series: match?.[1] ?? title, part: match?.[2] ?? title, duration: item?.duration ?? "", durationSeconds, positionSeconds: positions.get(guid) ?? 0, listened: listenedSet.has(guid) };
+    });
+    card = { kind: "podcast", pace: state.plan!.episodesPerDay, href: `/dashboard/sogp/listen?day=${waiting.dayNumber}`, series: parsed[0]?.series ?? "Your podcast plan", dayNumber: waiting.dayNumber,
+      episodes: parsed.map(({ part, duration, durationSeconds, positionSeconds, listened }) => ({ part, duration, durationSeconds, positionSeconds, listened })) };
+  } else if (!podcast && lesson) {
+    card = { kind: "traditional", title: lesson.lesson.title, href: `/dashboard/sogp/course/day/${lesson.dayNumber}`, completed: course.tracks.filter(track => track.completed).length, total: course.tracks.length };
+  }
   return {
-    day, community: viewer.capabilities.community, reports, support,
+    day, community: viewer.capabilities.community, reports, support, card,
     learning: podcast ? {
       title: waiting ? `Day ${waiting.dayNumber} is waiting for you` : "Your current plan is complete",
       href: waiting ? `/dashboard/sogp/listen?day=${waiting.dayNumber}` : "/dashboard/sogp/plan",

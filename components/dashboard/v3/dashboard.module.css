@@ -26,8 +26,16 @@
   --status-neutral-bg: #e9edf5; --status-neutral-text: #4a5273;
   --status-lilac-bg: #e9dffa; --status-lilac-text: #6d28d9;
   background: white; color: var(--color-text); min-height: 100dvh;
+  /* Inter treatment: headings track −2%, body slightly tight, small text and
+     uppercase eyebrows stay open for legibility. */
+  --dashboard-tracking-heading: -0.02em;
+  --dashboard-tracking-body: -0.006em;
+  --dashboard-tracking-small: 0em;
   font-size: 14px; line-height: 22px; font-synthesis: none;
+  letter-spacing: var(--dashboard-tracking-body);
 }
+.root :is(h1, h2, h3) { letter-spacing: var(--dashboard-tracking-heading); }
+.root :is(small, time) { letter-spacing: var(--dashboard-tracking-small); }
 .root *, .root *::before, .root *::after { box-sizing: border-box; }
 .header button, .dialog button, .iconButton, .lessonAction, .textAction, .planRow, .reportRow { font-family: inherit; cursor: pointer; }
 .root button:focus-visible, .root a:focus-visible { outline: 2px solid var(--color-brand-blue); outline-offset: 3px; }
@@ -46,7 +54,7 @@
 .swipePage { position: absolute; top: 0; left: 0; width: 100%; min-height: calc(100dvh - 96px); }
 .swipePage[data-area="community"] { left: 100%; }
 .swipePage[data-active="true"] { position: relative; }
-.greeting { font-size: 21px; line-height: 28px; font-weight: 500; letter-spacing: -.4px; margin: 0; }
+.greeting { font-size: 21px; line-height: 28px; font-weight: 500; letter-spacing: var(--dashboard-tracking-heading, -0.02em); margin: 0; }
 .learning { margin-top: 33px; }
 .sectionHeader { display: flex; align-items: center; justify-content: space-between; min-height: 22px; gap: 12px; }
 .sectionHeader h2, .support h2 { font-size: 15px; font-weight: 500; line-height: 22px; margin: 0; }
@@ -56,7 +64,7 @@
    this named source variation in the baseline discrepancy list. */
 .learningCard { background: var(--color-brand-blue); border-radius: var(--dashboard-card-radius); padding: 20px 20px 12px; color: white; margin-top: 19px; min-height: 228px; }
 .learningMeta { margin: 0; color: #d8e4ff; font-size: 13px; line-height: 20px; transform: translateY(-5px); }
-.lessonTitle { margin: 4px 0 0; font-size: 24px; line-height: 32px; font-weight: 500; letter-spacing: -.4px; color: white; }
+.lessonTitle { margin: 4px 0 0; font-size: 24px; line-height: 32px; font-weight: 500; letter-spacing: var(--dashboard-tracking-heading, -0.02em); color: white; }
 .progress { height: 4px; border-radius: 2px; background: #537edf; margin-top: 42px; }
 .progress span { display: block; width: 20.6667%; height: 100%; background: #dde6f6; border-radius: inherit; }
 .playbackMeta { display: flex; justify-content: space-between; font-size: 13px; line-height: 20px; color: #e1eaff; margin-top: 10px; }
@@ -130,3 +138,20 @@
   .header { max-width: 390px; margin: auto; }
   .content { max-width: 390px; margin: auto; }
 }
+/* Paper adaptive_home.py: white bordered learning cards with blue actions. */
+.whiteCard { margin-top: 19px; padding: 20px; border: 1px solid var(--color-line); border-radius: var(--dashboard-card-radius); background: white; display: grid; gap: 8px; }
+.whiteTitle { margin: 0; font-size: 24px; line-height: 32px; font-weight: 500; letter-spacing: var(--dashboard-tracking-heading, -0.02em); color: var(--color-text-strong); }
+.whiteProgress { height: 4px; margin-top: 12px; border-radius: 2px; background: var(--color-line); overflow: hidden; }
+.whiteProgress span { display: block; height: 100%; background: var(--color-brand-blue); }
+.playbackMetaDark { display: flex; justify-content: space-between; font-size: 13px; line-height: 20px; color: var(--color-text-muted); }
+.blueAction { display: flex; justify-content: space-between; align-items: center; height: var(--dashboard-control-height); margin-top: 8px; padding: 0 16px; border-radius: var(--dashboard-control-radius); background: var(--color-brand-blue); color: white; text-decoration: none; font-weight: 500; }
+.lessonAction { text-decoration: none; }
+.startCopy { margin: 8px 0 0; color: #e1eaff; font-size: 14px; line-height: 22px; }
+.homeNote { display: flex; gap: 16px; align-items: flex-start; margin: 20px 0 0; padding-bottom: 20px; border-bottom: 1px solid var(--color-line); color: var(--color-text-muted); }
+.homeNote > span { display: grid; gap: 2px; }
+.dayEpisodes { list-style: none; margin: 8px 0 0; padding: 0; }
+.dayEpisodes li { padding: 12px 0; border-bottom: 1px solid var(--color-line); }
+.dayEpisodes li:last-child { border-bottom: 0; }
+.episodeLine { display: flex; justify-content: space-between; gap: 12px; font-weight: 500; }
+.episodeLine > span:first-child { display: inline-flex; align-items: center; gap: 8px; }
+.doneText { font-size: 13px; line-height: 20px; color: var(--status-green-text); font-weight: 400; }
