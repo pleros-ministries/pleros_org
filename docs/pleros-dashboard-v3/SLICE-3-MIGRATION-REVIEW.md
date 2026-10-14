@@ -37,7 +37,7 @@ This checkpoint intentionally does not activate either gate, migrate any shared 
 - Generated 0055 was applied to disposable local PostgreSQL (`pleros_learning`, private Unix socket). Legacy journey, listen timestamp and traditional progress were seeded before migration and checked unchanged afterwards; preferences stayed empty. This was a minimal pre-change seam, not a production clone.
 - 16 real PostgreSQL service/action checks passed, plus 10 input tests: owner isolation, enrolled/withdrawn access, explicit/default choices, empty plan, concurrent retries/editors/listens, both pace/path switches, completed-slot locking, legacy Undo, first-listen timestamp preservation, playback conflicts/ownership, full-draft validation, DB constraints, readable write rollback and schema-disabled operation with new tables temporarily unavailable.
 - Full checkout regression: 1,164 passed; 59 opt-in database checks skipped in that run (the 16 above ran separately). TypeScript, scoped ESLint and production build passed; the build retains the two pre-existing learning-progress-image filesystem tracing warnings.
-- No new UI or browser evidence is claimed. `/dashboard/sogp/discipleship` still uses the retained `DiscipleshipPage` body inside the connected shared shell. Its presence is not a cache failure or proof that the redesigned body is implemented.
+- This persistence checkpoint claimed no new UI or browser evidence. A subsequent checkpoint connected the redesigned `/dashboard/sogp/discipleship` presenter, preserving existing tools; see `DISCIPLESHIP-LIVE-REVIEW.md`. Its navigation now belongs to Community. That work does not complete the pending learning path chooser, queue editor or player bindings.
 
 ## Remaining work
 
