@@ -107,7 +107,7 @@ function DashboardCard({
   );
 }
 
-function DashboardChurchMinistryStrip({ resolveHref }: { resolveHref: (href: string) => string }) {
+export function DashboardChurchMinistryStrip({ resolveHref }: { resolveHref: (href: string) => string }) {
   return (
     <section
       data-dashboard-public

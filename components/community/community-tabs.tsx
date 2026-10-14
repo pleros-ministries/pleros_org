@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import { MessageCircleIcon } from "lucide-react";
 
 import { useUnreadMessages } from "./messages/use-unread-messages";
-import { NotificationBell } from "./notification-bell";
 
 function useTitle(unitName: string | null): string {
   const pathname = usePathname() ?? "";
@@ -51,16 +50,15 @@ export function CommunityTopBar({ unitName }: { unitName: string | null }) {
                 ? `Messages, ${unreadMessages} unread`
                 : "Messages"
             }
-            className="relative inline-flex size-8 items-center justify-center rounded-full text-white/85 hover:text-white"
+            className="relative inline-flex size-11 items-center justify-center rounded-full text-white/85 hover:text-white"
           >
-            <MessageCircleIcon className="size-4" strokeWidth={2} />
+            <MessageCircleIcon className="size-5" strokeWidth={2.1} />
             {unreadMessages > 0 ? (
               <span className="absolute -right-0.5 -top-0.5 grid min-w-4 place-items-center rounded-full bg-(--color-brand-lime) px-1 text-[0.6rem] font-bold text-(--color-brand-blue)">
                 {unreadMessages > 9 ? "9+" : unreadMessages}
               </span>
             ) : null}
           </Link>
-          <NotificationBell tone="dark" />
         </div>
       </div>
     </header>

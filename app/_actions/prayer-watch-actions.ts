@@ -48,6 +48,7 @@ export async function togglePrayerWatchAttendanceAction(
 
   revalidatePath("/dashboard/prayer-watch");
   revalidatePath("/dashboard/community/report");
+  revalidatePath("/dashboard");
   revalidatePath("/dashboard/church");
   revalidatePath("/dashboard/sogp");
   revalidatePath("/dashboard/podcast");
@@ -106,6 +107,7 @@ export async function saveBibleReadingLogAction(
 
   revalidatePath("/dashboard/prayer-watch");
   revalidatePath("/dashboard/community/report");
+  revalidatePath("/dashboard");
   revalidatePath("/dashboard/church");
   return { error: null };
 }

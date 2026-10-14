@@ -86,6 +86,7 @@ async function requireEnrolledLearner() {
 async function run(action: () => Promise<void>): Promise<DiscipleshipActionResult> {
   try {
     await action();
+    revalidatePath("/dashboard");
     revalidatePath(PAGE_PATH);
     return { ok: true };
   } catch (error) {

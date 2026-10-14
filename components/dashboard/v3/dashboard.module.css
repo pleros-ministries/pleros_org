@@ -1,0 +1,130 @@
+/* Contract values scoped onto existing semantic colour names. Live/public
+   themes keep their current values until the visual baseline is approved. */
+/* Match mobile's overlay scrollbar geometry in the isolated review route;
+   vertical scrolling remains enabled. Desktop-native scrollbar gutters must
+   not reduce the canonical 390px comparison area. */
+:global(html:has([data-dashboard-v3])) { scrollbar-width: none; }
+:global(html:has([data-dashboard-v3])::-webkit-scrollbar) { width: 0; height: 0; }
+.root {
+  --color-brand-blue: #2056d6;
+  --color-text: #252b33;
+  --color-text-strong: #252b33;
+  --color-text-muted: #63676d;
+  --color-line: #e7e9ec;
+  --color-surface-muted: #f6f7f8;
+  --dashboard-gutter: 20px;
+  --dashboard-card-radius: 16px;
+  --dashboard-control-radius: 11px;
+  --dashboard-control-height: 48px;
+  --dashboard-hit-size: 44px;
+  --dashboard-status-height: 26px;
+  --dashboard-status-radius: 6px;
+  --dashboard-section-gap: 32px;
+  --status-amber-bg: #f7e4cd; --status-amber-text: #92400e;
+  --status-green-bg: #d5e8dc; --status-green-text: #166534;
+  --status-blue-bg: #e4ebfd; --status-blue-text: #2331ae;
+  --status-neutral-bg: #e9edf5; --status-neutral-text: #4a5273;
+  --status-lilac-bg: #e9dffa; --status-lilac-text: #6d28d9;
+  background: white; color: var(--color-text); min-height: 100dvh;
+  font-size: 14px; line-height: 22px; font-synthesis: none;
+}
+.root *, .root *::before, .root *::after { box-sizing: border-box; }
+.header button, .dialog button, .iconButton, .lessonAction, .textAction, .planRow, .reportRow { font-family: inherit; cursor: pointer; }
+.root button:focus-visible, .root a:focus-visible { outline: 2px solid var(--color-brand-blue); outline-offset: 3px; }
+.header { position: sticky; top: 0; z-index: 10; height: 48px; padding: 2px 8px 2px 4px; display: flex; align-items: center; justify-content: space-between; background: white; }
+.iconButton { position: relative; display: grid; place-items: center; width: var(--dashboard-hit-size); height: var(--dashboard-hit-size); border: 0; background: transparent; color: var(--color-text); flex-shrink: 0; }
+.tabs { display: flex; align-items: center; gap: 8px; transform: translateX(2px); }
+.tabs button { position: relative; height: 44px; min-width: 44px; padding: 0 8px; border: 0; background: transparent; color: var(--color-text-muted); font-size: 14px; font-weight: 400; }
+.tabs button[aria-current] { font-weight: 600; color: var(--color-text); }
+.tabs button:disabled { opacity: .55; cursor: default; }
+.tabs button[aria-current]::after { content: ""; position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; border-radius: 50%; background: var(--color-brand-blue); }
+.unread { position: absolute; top: 9px; right: 12px; width: 5px; height: 5px; border-radius: 50%; background: var(--color-brand-blue); }
+.notificationPanel { position: absolute; z-index: 50; right: 0; top: 48px; width: min(320px, calc(100vw - 16px)); border: 1px solid var(--color-line); border-radius: 11px; background: white; color: var(--color-text); padding: 8px; }
+.content { padding: 28px var(--dashboard-gutter) max(20px, env(safe-area-inset-bottom)); min-height: calc(100dvh - 48px); touch-action: pan-y pinch-zoom; }
+.swipeViewport { overflow: clip; }
+.swipeTrack { position: relative; }
+.swipePage { position: absolute; top: 0; left: 0; width: 100%; min-height: calc(100dvh - 96px); }
+.swipePage[data-area="community"] { left: 100%; }
+.swipePage[data-active="true"] { position: relative; }
+.greeting { font-size: 21px; line-height: 28px; font-weight: 500; letter-spacing: -.4px; margin: 0; }
+.learning { margin-top: 33px; }
+.sectionHeader { display: flex; align-items: center; justify-content: space-between; min-height: 22px; gap: 12px; }
+.sectionHeader h2, .support h2 { font-size: 15px; font-weight: 500; line-height: 22px; margin: 0; }
+.textAction { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; background: transparent; border: 0; color: var(--color-brand-blue); font-size: 13px !important; font-weight: 500 !important; min-height: 44px; padding: 0; margin-block: -11px; }
+/* Pleros-you source has 20px side/top inset and 12px below its 48px
+   action. This conflicts with the contract's blanket 20px padding: flag
+   this named source variation in the baseline discrepancy list. */
+.learningCard { background: var(--color-brand-blue); border-radius: var(--dashboard-card-radius); padding: 20px 20px 12px; color: white; margin-top: 19px; min-height: 228px; }
+.learningMeta { margin: 0; color: #d8e4ff; font-size: 13px; line-height: 20px; transform: translateY(-5px); }
+.lessonTitle { margin: 4px 0 0; font-size: 24px; line-height: 32px; font-weight: 500; letter-spacing: -.4px; color: white; }
+.progress { height: 4px; border-radius: 2px; background: #537edf; margin-top: 42px; }
+.progress span { display: block; width: 20.6667%; height: 100%; background: #dde6f6; border-radius: inherit; }
+.playbackMeta { display: flex; justify-content: space-between; font-size: 13px; line-height: 20px; color: #e1eaff; margin-top: 10px; }
+.lessonAction { display: flex; justify-content: space-between; align-items: center; width: 100%; height: var(--dashboard-control-height); padding: 0 16px; margin-top: 16px; border: 0; border-radius: var(--dashboard-control-radius); background: white; color: var(--color-brand-blue); font-weight: 500 !important; }
+.planRow { display: flex; align-items: center; width: 100%; text-align: left; gap: 16px; min-height: 89px; padding: 20px 0 16px; border: 0; border-bottom: 1px solid var(--color-line); background: transparent; }
+.rowIcon { color: var(--color-text-muted); flex-shrink: 0; }
+.rowCopy { display: grid; min-width: 0; gap: 2px; flex: 1; }
+.rowTitle { font-size: 14px; line-height: 22px; font-weight: 500; }
+.metadata { font-size: 13px; line-height: 20px; color: var(--color-text-muted); }
+.reports { margin-top: 29px; }
+.reportList { margin-top: 17px; }
+.reportRow { display: flex; gap: 16px; align-items: flex-start; width: 100%; min-height: 72px; text-align: left; background: transparent; border: 0; padding: 8px 0 10px; position: relative; }
+.reportRow:not(:last-child)::after { content: ""; position: absolute; left: 36px; right: 0; bottom: 6px; height: 1px; background: var(--color-line); }
+.reportRow .rowIcon { padding-top: 6px; }
+.pill { display: inline-flex; align-items: center; justify-content: center; width: fit-content; white-space: nowrap; height: var(--dashboard-status-height); border-radius: var(--dashboard-status-radius); padding: 0 8px; font-size: 12px; line-height: 18px; font-weight: 500; flex-shrink: 0; }
+.pill[data-tone="amber"] { background: var(--status-amber-bg); color: var(--status-amber-text); }
+.pill[data-tone="green"] { background: var(--status-green-bg); color: var(--status-green-text); }
+.pill[data-tone="neutral"] { background: var(--status-neutral-bg); color: var(--status-neutral-text); }
+.pill[data-tone="blue"] { background: var(--status-blue-bg); color: var(--status-blue-text); }
+.pill[data-tone="lilac"] { background: var(--status-lilac-bg); color: var(--status-lilac-text); }
+.support { margin-top: 20px; }
+.person { display: flex; align-items: center; gap: 12px; margin-top: 18px; }
+.support .person { margin-top: 15px; }
+.supportEmpty { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 18px; }
+.essentials { display: flex; flex-wrap: wrap; gap: 4px 16px; margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--color-line); }
+.essentials a { display: inline-flex; align-items: center; min-height: 44px; font-size: 13px; color: var(--color-brand-blue); }
+.avatar { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: #edf2eb; color: #52694d; font-size: 12px; font-weight: 500; flex-shrink: 0; }
+.person .textAction { font-size: 14px !important; }
+.sidebar { display: none; }
+.dialog { margin: auto; width: min(440px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); overflow: auto; border: 1px solid var(--color-line); border-radius: 20px; padding: 20px; color: var(--color-text); background: white; }
+.dialog::backdrop { background: rgb(37 43 51 / 25%); }
+.dialog h2 { font-size: 24px; line-height: 32px; font-weight: 500; }
+.dialog p { margin: 12px 0; }
+.dialog a { color: var(--color-brand-blue); display: block; padding: 11px 0; }
+.dialog button { min-height: 44px; }
+.drawer { margin: 0 auto 0 0; border-radius: 0; height: 100dvh; max-height: 100dvh; width: min(330px, 88vw); padding: 14px 20px 24px; }
+.dialogHeading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.dialogHeading h2 { margin: 0; }
+.profileLink { display: flex !important; align-items: center; gap: 12px; min-height: 72px; margin-top: 14px; text-decoration: none; }
+.profileAvatar { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: #e8eef7; color: #4b6584; font-size: 12px; font-weight: 500; flex-shrink: 0; }
+.profileName { font-size: 15px; line-height: 22px; font-weight: 500; color: var(--color-text); overflow-wrap: anywhere; }
+.profileAction { font-size: 14px; line-height: 22px; color: var(--color-brand-blue); }
+.drawerRoots { display: grid; gap: 12px; padding-block: 22px 24px; margin-top: 12px; border-block: 1px solid var(--color-line); }
+.drawerRoots a { display: flex !important; align-items: center; gap: 12px; min-height: 48px; padding: 0 12px !important; color: var(--color-text); border-radius: 10px; text-decoration: none; }
+.drawerRoots a[aria-current] { background: var(--status-blue-bg); color: var(--color-brand-blue); font-weight: 500; }
+.workspace { margin-top: 24px; }
+.workspace p { font-size: 13px; line-height: 20px; font-weight: 500; color: var(--color-text-muted); margin: 0 0 12px; }
+.workspace a { display: flex !important; align-items: center; gap: 12px; min-height: 48px; margin-bottom: 8px; padding: 0 12px !important; border-radius: 10px; text-decoration: none; color: var(--color-text); }
+.workspace a svg { color: var(--color-text-muted); flex-shrink: 0; }
+.workspace a span { flex: 1; }
+.retained { margin-top: 24px; }
+.retained summary { cursor: pointer; min-height: 44px; padding: 11px 0; }
+.retained a { color: var(--color-text); text-decoration: none; }
+.previewNote { margin: 32px 0 0; font-size: 12px; color: var(--color-text-muted); }
+@media (max-width: 359px) {
+  .reportRow { gap: 10px; flex-wrap: wrap; }
+  .reportRow .pill { margin-left: 30px; }
+  .person { flex-wrap: wrap; }
+}
+/* The pack approves mobile, not a new desktop composition. Keep the review
+   specimen at its source width while exercising the existing sidebar breakpoint. */
+@media (min-width: 40rem) {
+  .content, .header { max-width: 390px; margin-inline: auto; }
+}
+@media (min-width: 64rem) {
+  .sidebar { display: block; position: fixed; inset: 0 auto 0 0; width: 256px; padding: 24px; border-right: 1px solid var(--color-line); overflow: auto; }
+  .sidebar nav a { display: block; padding: 11px 0; color: var(--color-text); }
+  .frame { margin-left: 256px; }
+  .header { max-width: 390px; margin: auto; }
+  .content { max-width: 390px; margin: auto; }
+}

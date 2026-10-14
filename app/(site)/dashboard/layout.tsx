@@ -31,7 +31,7 @@ export default async function DashboardLayout({
   // One query client for the shell's unread badges and the community pages,
   // so a read message clears both. SOGP routes nest their own provider.
   return (
-    <CommunityQueryProvider>
+    <CommunityQueryProvider key={viewer.session.user.id}>
       <PushBindingSync userId={viewer.session.user.id} />
       <DashboardShell
         viewer={{ name: viewer.session.user.name, roleLabel: viewer.roleLabel, image: viewer.session.user.image }}

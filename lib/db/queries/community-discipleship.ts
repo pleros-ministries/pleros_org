@@ -236,6 +236,16 @@ export async function getCommunityDiscipleship(
   };
 }
 
+/** Small read-only home projection; never creates a group or exposes contact details. */
+export async function getOwnDisciplerSummary(viewer: CommunityContext): Promise<{ firstName: string; canMessage: boolean } | null> {
+  const row = await findJoinedGroup(viewer.userId);
+  if (!row) return null;
+  return {
+    firstName: firstNameOf(row.leaderFirstName || row.leaderName),
+    canMessage: messageIdFor(viewer, { userId: row.leaderUserId, birthYear: row.leaderBirthYear }, { ...NO_LINK, recipientGuidesSender: true }) !== null,
+  };
+}
+
 export type DiscipleshipRailSummary = {
   disciplerFirstName: string | null;
   discipleCount: number;

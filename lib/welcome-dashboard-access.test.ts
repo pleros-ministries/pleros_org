@@ -30,7 +30,7 @@ describe("welcome dashboard access", () => {
       "resolveWelcomeDisplayName",
     );
     expect(dashboardSource).toContain(
-      "sections={sections}",
+      "getDashboardHomeData(viewer)",
     );
     expect(dashboardSource).not.toContain("readWelcomeAccessToken");
     expect(dashboardSource).toContain('redirect("/login?returnTo=/dashboard")');
@@ -40,12 +40,12 @@ describe("welcome dashboard access", () => {
     const dashboardSource = source("app", "(site)", "dashboard", "page.tsx");
 
     const viewerSource = source("lib", "dashboard", "viewer.ts");
+    const homeSource = source("lib", "dashboard", "home-data.ts");
 
     expect(viewerSource).toContain("getSogpDashboardAccess(session.user.id)");
-    expect(dashboardSource).toContain(
-      "resolveWelcomeDashboardSections({ ...viewer.sogpAccess, communityAccess: viewer.capabilities.community })",
-    );
-    expect(dashboardSource).toContain("sections={sections}");
+    expect(homeSource).toContain("const userId = viewer.session.user.id");
+    expect(homeSource).toContain("viewer.capabilities.sogpEnrolled ? getSogpDashboardData(userId)");
+    expect(dashboardSource).toContain("getDashboardHomeData(viewer)");
   });
 
   test("dashboard and thank-you page greet visitors by their first name", () => {

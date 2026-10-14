@@ -1,16 +1,13 @@
 import { redirect } from "next/navigation";
 
-import { WelcomeDashboardView } from "@/components/dashboard/welcome-dashboard-view";
+import { DashboardHomeView } from "@/components/dashboard/v3/home-view";
+import { DashboardChurchMinistryStrip } from "@/components/dashboard/welcome-dashboard-view";
+import { HomepageFooter } from "@/components/home/homepage-footer";
+import { InstallAppCta } from "@/components/pwa/install-app-cta";
+import { getDashboardHomeData } from "@/lib/dashboard/home-data";
 import { getDashboardViewer } from "@/lib/dashboard/viewer";
 import { lagosGreeting } from "@/lib/dashboard/greeting";
-import { getZonedMinutesSinceMidnight } from "@/lib/notifications/zoned-time";
-import {
-  getNextPrayerWatchSessionId,
-  PRAYER_WATCH_SESSIONS,
-  PRAYER_WATCH_TIME_ZONE,
-} from "@/lib/prayer-watch";
 import { getWelcomePackLeadByEmail } from "@/lib/db/queries/welcome-pack-leads";
-import { resolveWelcomeDashboardSections } from "@/lib/welcome-dashboard-content";
 import { resolveWelcomeDisplayName } from "@/lib/welcome-display-name";
 
 export default async function WelcomeDashboardPage() {
@@ -29,24 +26,14 @@ export default async function WelcomeDashboardPage() {
     leadName: lead?.name,
     sessionName: appSession.user.name,
   });
-  const sections = resolveWelcomeDashboardSections({ ...viewer.sogpAccess, communityAccess: viewer.capabilities.community });
-
-  const now = new Date();
-  const nextSession = PRAYER_WATCH_SESSIONS.find(
-    (session) => session.id === getNextPrayerWatchSessionId(now),
-  )!;
-  const minutesNow = getZonedMinutesSinceMidnight(now, PRAYER_WATCH_TIME_ZONE);
+  const data = await getDashboardHomeData(viewer);
 
   return (
-    <WelcomeDashboardView
-      name={displayName ?? undefined}
-      greeting={lagosGreeting(now)}
-      prayerWatch={{
-        label: nextSession.label,
-        time: nextSession.time,
-        today: nextSession.hour * 60 + nextSession.minute >= minutesNow,
-      }}
-      sections={sections}
-    />
+    <>
+      <DashboardHomeView name={displayName ?? undefined} greeting={lagosGreeting(new Date())} data={data} />
+      <div className="mx-auto max-w-[390px] px-5"><InstallAppCta /></div>
+      <DashboardChurchMinistryStrip resolveHref={href => href} />
+      <HomepageFooter />
+    </>
   );
 }

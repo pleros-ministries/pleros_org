@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Hide development chrome only during reproducible visual captures.
+  devIndicators: process.env.PLEROS_BASELINE_CAPTURE === "1" ? false : undefined,
   outputFileTracingIncludes: {
     "/api/welcome-pack/download": ["./private/welcome-pack/**/*"],
   },

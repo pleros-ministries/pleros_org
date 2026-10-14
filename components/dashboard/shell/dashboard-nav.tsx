@@ -113,22 +113,23 @@ export function DashboardNav({
               aria-controls={id}
               onClick={() => setPicked({ pathname, key: open ? null : section.key })}
               className={cn(
-                "flex min-h-10 w-full items-center gap-2.5 rounded-md px-2 text-left text-[13.5px] font-medium text-(--color-text-strong) transition-colors hover:bg-(--color-surface-muted)",
+                "flex min-h-11 w-full items-center gap-2.5 rounded-md px-2 text-left text-[13.5px] font-medium text-(--color-text-strong) transition-colors hover:bg-(--color-surface-muted)",
                 open && "bg-(--color-surface-muted)",
                 focusRing,
               )}
             >
-              <span className="grid size-7 shrink-0 place-items-center rounded-md bg-(--color-brand-sky) text-(--color-brand-blue)">
-                <Icon className="size-4" strokeWidth={1.75} aria-hidden />
+              <span className="grid size-7 shrink-0 place-items-center text-(--color-text-muted)">
+                <Icon className="size-4" strokeWidth={2.625} aria-hidden />
               </span>
               <span className="flex-1">{section.label}</span>
               {hasBadges && !open ? <CommunityPending /> : null}
               <ChevronDownIcon
                 className={cn(
                   motion.navChevron,
-                  "size-3.5 text-(--color-text-muted)",
+                  "size-4 text-(--color-text-muted)",
                   open && "rotate-180",
                 )}
+                strokeWidth={2.625}
                 aria-hidden
               />
             </button>
@@ -147,10 +148,11 @@ export function DashboardNav({
                       <li key={item.key}>
                         <Link
                           href={item.href}
+                          prefetch={item.key === "disciples" ? false : undefined}
                           onClick={onNavigate}
                           aria-current={current ? "page" : undefined}
                           className={cn(
-                            "flex min-h-9 items-center gap-2 rounded-md pl-[2.875rem] pr-2.5 text-[13px] transition-colors",
+                            "flex min-h-11 items-center gap-2 rounded-md pl-[2.875rem] pr-2.5 text-[13px] transition-colors",
                             focusRing,
                             current
                               ? "bg-(--color-brand-sky-soft) font-medium text-(--color-brand-blue)"

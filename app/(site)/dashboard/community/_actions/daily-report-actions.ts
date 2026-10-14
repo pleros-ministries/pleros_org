@@ -14,6 +14,7 @@ export async function declareDailyReport(input: { dateKey: string; category: Dai
     const ctx = await getCommunityContext();
     if (!ctx || !(await canAccessReporting(ctx))) return { ok: false, error: "Sign in to record your report." };
     await declareOwnDailyReport(ctx.userId, { dateKey: input.dateKey, category: input.category, declaration: input.declaration });
+    revalidatePath("/dashboard");
     revalidatePath("/dashboard/community/report");
     revalidatePath("/dashboard/community/leader");
     revalidatePath("/dashboard/church");
@@ -30,6 +31,7 @@ export async function clearDailyReportDeclaration(input: { dateKey: string; cate
     if (!ctx || !(await canAccessReporting(ctx))) return { ok: false, error: "Sign in to edit your report." };
     const { clearOwnDailyDeclaration } = await import("@/lib/db/queries/daily-report-declarations");
     await clearOwnDailyDeclaration(ctx.userId, input.dateKey, input.category);
+    revalidatePath("/dashboard");
     revalidatePath("/dashboard/community/report"); revalidatePath("/dashboard/church");
     return { ok: true };
   } catch (error) { if (error instanceof CommunityError) return { ok: false, error: error.message }; throw error; }

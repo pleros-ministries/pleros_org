@@ -1,33 +1,30 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, useTransition, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useFormStatus } from "react-dom";
-import {
-  KeyRoundIcon,
-  LoaderCircleIcon,
-  LogOutIcon,
-  MenuIcon,
-  SettingsIcon,
-  XIcon,
-} from "lucide-react";
+import { motion } from "motion/react";
+import { KeyRoundIcon, LoaderCircleIcon, LogOutIcon } from "lucide-react";
 
 import { signOutDashboardAction } from "@/app/_actions/auth-actions";
+import DashboardLoading from "@/app/(site)/dashboard/loading";
+import { NotificationBell } from "@/components/community/notification-bell";
+import { DashboardIcon, RootHeader } from "@/components/dashboard/v3/primitives";
+import { dashboardFont } from "@/components/dashboard/v3/font";
+import { useTabSwipe } from "@/components/dashboard/v3/use-tab-swipe";
+import v3 from "@/components/dashboard/v3/dashboard.module.css";
 import type { DashboardNavSection } from "@/lib/dashboard/navigation";
+import { dashboardAreaForPath, dashboardAreaHref, dashboardWorkspace } from "@/lib/dashboard/shell-navigation";
+import type { DashboardArea } from "@/lib/dashboard/swipe-tabs";
 import { cn } from "@/lib/utils";
 
-import { NotificationBell } from "@/components/community/notification-bell";
 import { DashboardNav } from "./dashboard-nav";
-import motion from "./dashboard-shell.module.css";
+import frame from "./dashboard-shell.module.css";
 import { compactButton, focusRing } from "./styles";
 
-export type DashboardShellViewer = {
-  name: string;
-  roleLabel: string;
-  image?: string | null;
-};
+export type DashboardShellViewer = { name: string; roleLabel: string; image?: string | null };
 
 let mountedFrames = 0;
 let previousFonts: string[] = [];
@@ -35,11 +32,12 @@ let previousDashboardAttribute: string | null = null;
 
 function scopeDocumentTypography() {
   const root = document.documentElement;
-  const keys = ["--font-sen", "--font-suisse-intl"];
+  const keys = ["--font-be-vietnam-pro", "--font-sen", "--font-suisse-intl"];
   if (mountedFrames++ === 0) {
-    previousFonts = keys.map((key) => root.style.getPropertyValue(key));
+    previousFonts = keys.map(key => root.style.getPropertyValue(key));
     previousDashboardAttribute = root.getAttribute("data-pleros-dashboard");
-    keys.forEach((key) => root.style.setProperty(key, "var(--font-be-vietnam-pro)"));
+    root.style.setProperty("--font-be-vietnam-pro", dashboardFont.style.fontFamily);
+    keys.slice(1).forEach(key => root.style.setProperty(key, "var(--font-be-vietnam-pro)"));
     root.setAttribute("data-pleros-dashboard", "true");
   }
   return () => {
@@ -53,273 +51,168 @@ function scopeDocumentTypography() {
   };
 }
 
-function initials(name: string) {
-  return name
-    .trim()
-    .split(/\s+/)
-    .map((part) => part[0] ?? "")
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-}
-
 function Profile({ viewer, onNavigate }: { viewer: DashboardShellViewer; onNavigate?: () => void }) {
-  return (
-    <div className="flex items-start gap-2.5">
-      <span
-        aria-hidden
-        className="grid size-9 shrink-0 place-items-center rounded-full bg-(--color-brand-sky) text-[13px] font-medium text-(--color-brand-blue)"
-      >
-        {viewer.image ? <Image src={viewer.image} alt="" width={36} height={36} unoptimized className="size-9 rounded-full object-cover" /> : initials(viewer.name)}
-      </span>
-      <div className="grid min-w-0 flex-1 gap-0.5">
-        <p className="break-words text-[13.5px] font-medium leading-snug text-(--color-text-strong)">
-          {viewer.name}
-        </p>
-        <p className="break-words text-[12px] leading-snug text-(--color-text-muted)">
-          {viewer.roleLabel}
-        </p>
-      </div>
-
-      <Link
-        href="/dashboard/profile"
-        onClick={onNavigate}
-        aria-label="Profile settings"
-        title="Profile settings"
-        className={cn(compactButton, "w-8 shrink-0 px-0 text-(--color-text-muted)")}
-      >
-        <SettingsIcon className="size-4" strokeWidth={1.75} aria-hidden />
-      </Link>
-    </div>
-  );
+  const initials = viewer.name.trim().split(/\s+/).map(part => part[0] ?? "").join("").slice(0, 2).toUpperCase();
+  return <Link href="/dashboard/profile" onClick={onNavigate} className={v3.profileLink} aria-label="Profile and settings">
+    <span className={v3.profileAvatar} aria-hidden>
+      {viewer.image ? <Image src={viewer.image} alt="" width={36} height={36} unoptimized className="size-9 rounded-full object-cover" /> : initials}
+    </span>
+    <span className={v3.rowCopy}>
+      <span className={v3.profileName}>{viewer.name || "Your profile"}</span>
+      <span className={v3.metadata}>{viewer.roleLabel}</span>
+      <span className={v3.profileAction}>Profile & settings</span>
+    </span>
+    <DashboardIcon name="right" size={16} />
+  </Link>;
 }
 
 function SignOutSubmit() {
   const { pending } = useFormStatus();
-  return (
-    <button type="submit" disabled={pending} aria-busy={pending} className={cn(compactButton, "flex-1")}>
-      {pending ? (
-        <LoaderCircleIcon className="size-3.5 animate-spin" aria-hidden />
-      ) : (
-        <LogOutIcon className="size-3.5" aria-hidden />
-      )}
-      {pending ? "Signing out" : "Sign out"}
-    </button>
-  );
+  return <button type="submit" disabled={pending} aria-busy={pending} className={cn(compactButton, "flex-1")}>
+    {pending ? <LoaderCircleIcon className="size-3.5 animate-spin" aria-hidden /> : <LogOutIcon className="size-3.5" aria-hidden />}
+    {pending ? "Signing out" : "Sign out"}
+  </button>;
 }
 
 function AccountActions({ onNavigate }: { onNavigate?: () => void }) {
-  return (
-    <div className="flex gap-2">
-      <Link href="/forgot-password" onClick={onNavigate} className={cn(compactButton, "flex-1")}>
-        <KeyRoundIcon className="size-3.5" aria-hidden />
-        Password
-      </Link>
-      <form action={signOutDashboardAction} className="flex flex-1">
-        <SignOutSubmit />
-      </form>
-    </div>
-  );
+  return <div className={frame.accountActions}>
+    <Link href="/forgot-password" onClick={onNavigate} className={cn(compactButton, "flex-1")}><KeyRoundIcon className="size-3.5" aria-hidden />Password</Link>
+    <form action={signOutDashboardAction} className="flex flex-1"><SignOutSubmit /></form>
+  </div>;
 }
 
-function Logo() {
-  return (
-    <Link
-      href="/dashboard"
-      aria-label="Pleros dashboard"
-      className={cn("inline-flex h-9 items-center rounded-md bg-(--color-brand-blue) px-2.5", focusRing)}
-    >
-      <Image
-        src="/brand/white-logotype.webp"
-        alt=""
-        width={345}
-        height={177}
-        className="h-6 w-auto"
-        priority
-      />
-    </Link>
-  );
+function ShellNavigation({ sections, area, onArea, onNavigate }: {
+  sections: DashboardNavSection[]; area: DashboardArea;
+  onArea: (next: DashboardArea, animated?: boolean) => void; onNavigate?: () => void;
+}) {
+  const workspace = dashboardWorkspace(sections);
+  const community = dashboardAreaHref("community", sections);
+  return <>
+    <nav aria-label="Dashboard areas" className={v3.drawerRoots}>
+      {(["you", "community"] as const).map(next => {
+        const href = next === "you" ? "/dashboard" : community;
+        const label = next === "you" ? "You" : "Community";
+        const contents = <><DashboardIcon name={next === "you" ? "grid" : "people"} />{label}</>;
+        if (!href) return <span key={next} className={frame.unavailableArea} aria-disabled="true">{contents}</span>;
+        return <Link key={next} href={href} aria-current={area === next ? "page" : undefined} onClick={event => {
+          if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+          if (area === next) { onNavigate?.(); return; }
+          event.preventDefault();
+          onArea(next, event.detail !== 0);
+          onNavigate?.();
+        }}>{contents}</Link>;
+      })}
+    </nav>
+    <nav aria-label="Your workspace" className={v3.workspace}>
+      <p>Your workspace</p>
+      {workspace.map(item => <Link key={item.key} href={item.href} prefetch={item.key === "disciples" ? false : undefined} onClick={onNavigate}><DashboardIcon name={item.icon} /><span>{item.label}</span><DashboardIcon name="right" size={16} /></Link>)}
+    </nav>
+    <details className={v3.retained}><summary>More destinations</summary><DashboardNav sections={sections} onNavigate={onNavigate} label="All dashboard destinations" /></details>
+  </>;
 }
 
-function Drawer({
-  open,
-  onClose,
-  viewer,
-  sections,
-}: {
-  open: boolean;
-  onClose: () => void;
-  viewer: DashboardShellViewer;
-  sections: DashboardNavSection[];
+function Drawer({ open, onClose, viewer, sections, area, onArea, id }: {
+  open: boolean; onClose: () => void; viewer: DashboardShellViewer; sections: DashboardNavSection[];
+  area: DashboardArea; onArea: (next: DashboardArea, animated?: boolean) => void; id: string;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
-
   useEffect(() => {
     const dialog = ref.current;
-    if (!dialog) return;
-    if (open && !dialog.open) dialog.showModal();
-    if (!open && dialog.open) dialog.close();
+    if (open && !dialog?.open) dialog?.showModal();
+    if (!open && dialog?.open) dialog.close();
   }, [open]);
-
-  return (
-    <dialog
-      ref={ref}
-      aria-labelledby={titleId}
-      onClose={onClose}
-      onCancel={(event) => {
-        event.preventDefault();
-        onClose();
-      }}
-      onClick={(event) => {
-        if (event.target === event.currentTarget) onClose();
-      }}
-      className={cn(
-        motion.drawer,
-        "my-0 ml-0 mr-auto h-dvh max-h-dvh w-[min(300px,88vw)] max-w-[300px] border-0 bg-transparent p-0 backdrop:bg-[rgba(6,16,86,0.28)] lg:hidden",
-      )}
-    >
-      <div className="flex h-full flex-col border-r border-(--color-line) bg-white">
-        <div className="flex items-start gap-2 border-b border-(--color-line) px-4 py-3.5">
-          <h2 id={titleId} className="sr-only">
-            Dashboard navigation
-          </h2>
-          <div className="min-w-0 flex-1">
-            <Profile viewer={viewer} onNavigate={onClose} />
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close navigation"
-            className={cn(
-              "grid size-8 shrink-0 place-items-center rounded-md text-(--color-text-muted) hover:bg-(--color-surface-muted)",
-              focusRing,
-            )}
-          >
-            <XIcon className="size-4" aria-hidden />
-          </button>
-        </div>
-        <div className="flex-1 overflow-y-auto px-2 py-3">
-          <DashboardNav sections={sections} onNavigate={onClose} />
-        </div>
-        <div className="border-t border-(--color-line) px-3 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
-          <AccountActions onNavigate={onClose} />
-        </div>
-      </div>
-    </dialog>
-  );
+  return <dialog id={id} ref={ref} aria-labelledby={titleId} onClose={onClose}
+    onCancel={event => { event.preventDefault(); onClose(); }}
+    onClick={event => { if (event.target === event.currentTarget) onClose(); }}
+    className={cn(v3.dialog, v3.drawer, frame.liveDrawer)}>
+    <div className={v3.dialogHeading}><h2 id={titleId} data-dashboard-shell-title>Menu</h2><button className={v3.iconButton} onClick={onClose} aria-label="Close navigation"><DashboardIcon name="close" /></button></div>
+    <Profile viewer={viewer} onNavigate={onClose} />
+    <ShellNavigation sections={sections} area={area} onArea={onArea} onNavigate={onClose} />
+    <div className={frame.drawerAccount}><AccountActions onNavigate={onClose} /></div>
+  </dialog>;
 }
 
-/**
- * The signed-in dashboard frame: a left sidebar from `lg`, and below it a
- * compact brand bar whose menu opens the same navigation as a drawer. Pages
- * keep their own width and headers; the shell adds no page padding.
- */
-export function DashboardShell({
-  viewer,
-  sections,
-  children,
-}: {
-  viewer: DashboardShellViewer;
-  sections: DashboardNavSection[];
-  children: ReactNode;
+/** Shared authenticated frame. Its props come from getDashboardViewer(); pages
+ * remain their original server-rendered children with their own access guards. */
+export function DashboardShell({ viewer, sections, children, notificationControl }: {
+  viewer: DashboardShellViewer; sections: DashboardNavSection[]; children: ReactNode;
+  /** Pure notification slot for isolated visual tests; live callers omit it. */
+  notificationControl?: ReactNode;
 }) {
-  const pathname = usePathname();
-  const [menu, setMenu] = useState<{ open: boolean; pathname: string | null }>({
-    open: false,
-    pathname: null,
-  });
-  // A navigation closes the drawer even when it did not start from a link in it.
+  const pathname = usePathname() ?? "/dashboard";
+  const router = useRouter();
+  const routedArea = dashboardAreaForPath(pathname);
+  const [menu, setMenu] = useState<{ open: boolean; pathname: string | null }>({ open: false, pathname: null });
+  const [target, setTarget] = useState<{ from: string; area: DashboardArea } | null>(null);
+  // Transition state coordinates motion only. Next's existing Suspense/loading
+  // boundaries and page error boundaries continue to own route data states.
+  const [navigating, startNavigation] = useTransition();
+  const area = navigating && target?.from === pathname ? target.area : routedArea;
+  const remembered = useRef<Record<DashboardArea, string>>({ you: "/dashboard", community: "/dashboard/community" });
+  const scrollPositions = useRef(new Map<string, number>());
+  const restoreScroll = useRef<string | null>(null);
+  const drawerId = useId();
   const menuOpen = menu.open && menu.pathname === pathname;
   const closeMenu = () => setMenu({ open: false, pathname: null });
-
-  // Portal menus sit outside the frame; scope the same font variables to the
-  // document while this authenticated shell is mounted, and restore on exit.
+  const navigateArea = (next: DashboardArea) => {
+    const currentHref = window.location.pathname + window.location.search;
+    remembered.current[routedArea] = currentHref;
+    scrollPositions.current.set(currentHref, document.scrollingElement?.scrollTop ?? 0);
+    const href = dashboardAreaHref(next, sections, remembered.current[next]);
+    if (!href || next === routedArea && !navigating) return false;
+    restoreScroll.current = href;
+    setTarget({ from: pathname, area: next });
+    startNavigation(() => router.push(href, { scroll: false }));
+    return true;
+  };
+  const { handlers: swipeHandlers, viewportRef, trackStyle, selectTab } = useTabSwipe(area, navigateArea, routedArea);
+  const selectRootTab = (next: DashboardArea, animated = true) => {
+    if (next === routedArea && !navigating) {
+      const href = dashboardAreaHref(next, sections);
+      if (href && pathname !== href) router.push(href);
+      else if (href) document.scrollingElement?.scrollTo({ top: 0, behavior: "instant" });
+      return;
+    }
+    selectTab(next, animated);
+  };
   useEffect(scopeDocumentTypography, []);
-
-  // The drawer is hidden from `lg`, so widening the window must not leave an
-  // invisible modal blocking the page.
+  useEffect(() => {
+    const href = window.location.pathname + window.location.search;
+    if (restoreScroll.current === href) {
+      document.scrollingElement?.scrollTo({ top: scrollPositions.current.get(href) ?? 0, behavior: "instant" });
+      restoreScroll.current = null;
+    }
+  }, [pathname, navigating]);
   useEffect(() => {
     const wide = window.matchMedia("(min-width: 64rem)");
-    const onChange = () => {
-      if (wide.matches) setMenu({ open: false, pathname: null });
-    };
+    const onChange = () => { if (wide.matches) setMenu({ open: false, pathname: null }); };
     wide.addEventListener("change", onChange);
     return () => wide.removeEventListener("change", onChange);
   }, []);
 
-  return (
-    <div
-      className={cn(
-        motion.root,
-        "pleros-select-scope site-font-theme min-h-dvh bg-white font-[family-name:var(--font-be-vietnam-pro)] text-(--color-text)",
-      )}
-    >
-      <a
-        href="#dashboard-main"
-        className="sr-only z-50 rounded-md bg-white px-3 py-2 text-[13px] focus:not-sr-only focus:fixed focus:left-3 focus:top-3"
-      >
-        Skip to content
-      </a>
-
-      {/* 48px tall (`--dashboard-topbar-offset`); pages' sticky headers sit below it. */}
-      <header className="sticky top-0 z-40 bg-(--color-brand-blue) text-white lg:hidden">
-        <div className="flex h-12 items-center gap-2 px-2 sm:px-4">
-          <button
-            type="button"
-            onClick={() => setMenu({ open: true, pathname })}
-            aria-label="Open dashboard navigation"
-            aria-expanded={menuOpen}
-            aria-haspopup="dialog"
-            className="grid size-9 shrink-0 place-items-center text-white transition-opacity hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-white"
-          >
-            <MenuIcon className="size-5" strokeWidth={2} aria-hidden />
-          </button>
-          <div className="grid min-w-0 flex-1 leading-tight">
-            <p className="truncate text-[13.5px] font-medium">{viewer.name}</p>
-            <p className="truncate text-[11.5px] text-white/75">{viewer.roleLabel}</p>
-          </div>
-          <NotificationBell />
-          <Link
-            href="/dashboard"
-            aria-label="Pleros dashboard"
-            className="inline-flex shrink-0 items-center rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-          >
-            <Image
-              src="/site/home/assets/white-pleros-logomark.webp"
-              alt=""
-              width={2067}
-              height={1016}
-              className="h-5 w-auto"
-              priority
-            />
-          </Link>
+  return <div className={cn("pleros-select-scope site-font-theme min-h-dvh bg-white font-[family-name:var(--font-be-vietnam-pro)]", dashboardFont.variable, dashboardFont.className, v3.root, frame.root)}>
+    <a href="#dashboard-main" className={cn(frame.skipLink, focusRing)}>Skip to content</a>
+    <aside className={frame.liveSidebar}>
+      <div className={frame.sidebarScroll}><Profile viewer={viewer} /><ShellNavigation sections={sections} area={area} onArea={selectTab} /></div>
+      <AccountActions />
+    </aside>
+    <div className={frame.liveFrame}>
+      <RootHeader active={area} communityAvailable={dashboardAreaHref("community", sections) !== null} className={frame.liveHeader}
+        onMenu={() => setMenu({ open: true, pathname })} onTab={selectRootTab}
+        menuControl={<button className={cn(v3.iconButton, frame.mobileMenu)} onClick={() => setMenu({ open: true, pathname })} aria-label="Open dashboard navigation" aria-expanded={menuOpen} aria-controls={drawerId} aria-haspopup="dialog"><DashboardIcon name="menu" /></button>}
+        notifications={notificationControl ?? <NotificationBell tone="light" appearance="dashboard" />} />
+      <main id="dashboard-main" className={frame.routeMain} {...swipeHandlers}>
+        <div ref={viewportRef} className={frame.routeViewport} data-route-origin={routedArea}>
+          <motion.div className={v3.swipeTrack} style={trackStyle}>
+            {(["you", "community"] as const).map(pageArea => <div key={pageArea} className={cn(v3.swipePage, frame.routePage)}
+              data-area={pageArea} data-active={pageArea === area} inert={pageArea !== area} aria-hidden={pageArea !== area}>
+              {pageArea === routedArea ? children : <DashboardLoading />}
+            </div>)}
+          </motion.div>
         </div>
-      </header>
-
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-(--color-line) bg-white lg:flex">
-        <div className="px-4 pb-3 pt-4">
-          <Logo />
-        </div>
-        <div className="mx-3 mb-3 rounded-lg border border-(--color-line) px-3 py-2.5">
-          <Profile viewer={viewer} />
-        </div>
-        <div className="flex-1 overflow-y-auto px-3 pb-4">
-          <DashboardNav sections={sections} />
-        </div>
-        <div className="flex items-center justify-between gap-2 border-t border-(--color-line) px-3 py-3">
-          <AccountActions />
-          <NotificationBell tone="light" placement="sidebar" />
-        </div>
-      </aside>
-
-      <Drawer open={menuOpen} onClose={closeMenu} viewer={viewer} sections={sections} />
-
-      <div className="lg:pl-64">
-        <main id="dashboard-main" className="min-w-0">
-          {children}
-        </main>
-      </div>
+      </main>
     </div>
-  );
+    <Drawer open={menuOpen} onClose={closeMenu} viewer={viewer} sections={sections} area={area} onArea={selectTab} id={drawerId} />
+  </div>;
 }

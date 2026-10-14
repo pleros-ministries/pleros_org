@@ -8,10 +8,28 @@
   --dashboard-topbar-offset: 3rem;
 }
 
+.root { font-synthesis: none; }
+.liveHeader { max-width: none; margin: 0; width: 100%; z-index: 40; border-bottom: 1px solid var(--color-line); }
+.liveSidebar { display: none; }
+.liveFrame { min-width: 0; }
+.routeMain { min-width: 0; touch-action: pan-y pinch-zoom; }
+.routeViewport { overflow: clip; }
+.routePage { min-height: calc(100dvh - var(--dashboard-topbar-offset)); }
+.routeViewport[data-route-origin="community"] .routePage[data-area="you"] { left: -100%; }
+.routeViewport[data-route-origin="community"] .routePage[data-area="community"] { left: 0; }
+.liveDrawer { padding-bottom: max(24px, env(safe-area-inset-bottom)); }
+.drawerAccount { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--color-line); }
+.accountActions { display: flex; gap: 8px; }
+.accountActions button, .accountActions a { min-height: 44px; border-radius: 11px; }
+.unavailableArea { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 12px; color: var(--color-text-muted); opacity: .55; }
+.skipLink { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.skipLink:focus { position: fixed; top: 8px; left: 8px; z-index: 60; width: auto; height: auto; clip-path: none; padding: 12px; background: white; }
 @media (min-width: 64rem) {
-  .root {
-    --dashboard-topbar-offset: 0px;
-  }
+  .liveSidebar { display: flex; flex-direction: column; position: fixed; inset: 0 auto 0 0; width: 256px; z-index: 30; padding: 20px; border-right: 1px solid var(--color-line); background: white; }
+  .sidebarScroll { min-height: 0; flex: 1; overflow-y: auto; padding-bottom: 24px; }
+  .liveFrame { margin-left: 256px; }
+  .mobileMenu { visibility: hidden; }
+  .liveDrawer { display: none; }
 }
 
 /* Motion for the dashboard shell. The global reduced-motion rule in
@@ -69,11 +87,11 @@
 }
 
 /* Apply the agreed authenticated type scale to legacy feature headings only. */
-.root :global(h1) { font-size: 24px; font-weight: 500; line-height: 1.15; }
-.root :global(h1[data-dashboard-greeting]) { font-size: 21px; }
-.root :global(h2:not([data-dashboard-public] *)), .root :global(h3:not([data-dashboard-public] *)) { font-size: 15px; font-weight: 500; }
+.root :global(h1) { font-size: 24px; font-weight: 500; line-height: 32px; }
+.root :global(h1[data-dashboard-greeting]) { font-size: 21px; line-height: 28px; }
+.root :global(h2:not([data-dashboard-public] *):not([data-dashboard-shell-title]):not([data-dashboard-learning-title])), .root :global(h3:not([data-dashboard-public] *)) { font-size: 15px; font-weight: 500; }
 
 /* Portaled dialogs share the same scale while an authenticated frame is mounted. */
 :global(html[data-pleros-dashboard="true"] h1) { font-size: 24px; font-weight: 500; }
 :global(html[data-pleros-dashboard="true"] h1[data-dashboard-greeting]) { font-size: 21px; }
-:global(html[data-pleros-dashboard="true"] h2:not([data-dashboard-public] *)), :global(html[data-pleros-dashboard="true"] h3:not([data-dashboard-public] *)) { font-size: 15px; font-weight: 500; }
+:global(html[data-pleros-dashboard="true"] h2:not([data-dashboard-public] *):not([data-dashboard-shell-title]):not([data-dashboard-learning-title])), :global(html[data-pleros-dashboard="true"] h3:not([data-dashboard-public] *)) { font-size: 15px; font-weight: 500; }

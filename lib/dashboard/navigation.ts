@@ -63,6 +63,7 @@ export function buildDashboardNavigation(
         label: "Report history",
         href: "/dashboard/community/report/history",
       },
+      { key: "contacts", label: "Saved contacts", href: "/dashboard/community/report/people" },
     );
   }
 
