@@ -4,6 +4,7 @@ import {
   primaryKey,
   text,
   integer,
+  doublePrecision,
   boolean,
   timestamp,
   jsonb,
@@ -2467,4 +2468,46 @@ export const churchMeetingReports = pgTable("church_meeting_reports", {
   index("church_meeting_reports_user_idx").on(t.userId, t.meetingId),
   check("church_meeting_reports_participation_check", sql`${t.participation} in ('leader', 'worker', 'disciple')`),
   check("church_meeting_reports_brought_check", sql`${t.peopleBrought} between 0 and 50`),
+]);
+
+/** Explicit learner choices only: reads and migration never populate this table. */
+export const sogpLearningPreferences = pgTable("sogp_learning_preferences", {
+  userId: text("user_id").primaryKey().references(() => users.id, { onDelete: "cascade" }),
+  path: text("path").$type<"traditional" | "podcast_one" | "podcast_two">().notNull(),
+  episodesPerDay: integer("episodes_per_day").notNull(),
+  hasPodcastPlan: boolean("has_podcast_plan").notNull().default(false),
+  revision: integer("revision").notNull().default(1),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, t => [
+  check("sogp_learning_preferences_path_check", sql`${t.path} in ('traditional','podcast_one','podcast_two')`),
+  check("sogp_learning_preferences_pace_check", sql`${t.episodesPerDay} in (1,2) and (${t.path} = 'traditional' or (${t.path} = 'podcast_one' and ${t.episodesPerDay} = 1) or (${t.path} = 'podcast_two' and ${t.episodesPerDay} = 2))`),
+  check("sogp_learning_preferences_revision_check", sql`${t.revision} > 0`),
+]);
+
+/** History contains references, not completion facts; listens stay canonical. */
+export const sogpLearningPlanItems = pgTable("sogp_learning_plan_items", {
+  userId: text("user_id").notNull().references(() => sogpLearningPreferences.userId, { onDelete: "cascade" }),
+  source: text("source").$type<"queue" | "history">().notNull(),
+  position: integer("position").notNull(),
+  episodeGuid: text("episode_guid").notNull(),
+}, t => [
+  primaryKey({ columns: [t.userId,t.source,t.position] }),
+  uniqueIndex("sogp_learning_plan_items_episode_idx").on(t.userId,t.episodeGuid),
+  check("sogp_learning_plan_items_source_check", sql`${t.source} in ('queue','history')`),
+  check("sogp_learning_plan_items_position_check", sql`${t.position} >= 0`),
+  check("sogp_learning_plan_items_guid_check", sql`length(trim(${t.episodeGuid})) > 0`),
+]);
+
+/** Position is independent of listens, plan ordering and the active path. */
+export const sogpEpisodePlayback = pgTable("sogp_episode_playback", {
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  episodeGuid: text("episode_guid").notNull(),
+  positionSeconds: doublePrecision("position_seconds").notNull(),
+  revision: integer("revision").notNull().default(1),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, t => [
+  primaryKey({ columns: [t.userId,t.episodeGuid] }),
+  check("sogp_episode_playback_position_check", sql`${t.positionSeconds} >= 0 and ${t.positionSeconds} < 'Infinity'::float8`),
+  check("sogp_episode_playback_revision_check", sql`${t.revision} > 0`),
 ]);

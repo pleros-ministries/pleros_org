@@ -3,6 +3,7 @@ import { and, eq, inArray } from "drizzle-orm";
 import { db } from "@/lib/db";
 
 import * as schema from "../schema";
+import { sogpLearningSchemaReady } from "./sogp-learning-gate";
 
 function uniqueEpisodeGuids(episodeGuids: string[]) {
   return [...new Set(episodeGuids.map((guid) => guid.trim()).filter(Boolean))];
@@ -33,6 +34,15 @@ export async function markPodcastEpisodesListened(
   const uniqueGuids = uniqueEpisodeGuids(episodeGuids);
   if (!uniqueGuids.length) return;
 
+  if (sogpLearningSchemaReady()) {
+    const { withSogpLearningLock, bumpSogpLearningRevision } = await import("../sogp-learning-lock");
+    await withSogpLearningLock(userId, async tx => {
+      const changed = await tx.insert(schema.podcastEpisodeProgress).values(uniqueGuids.map(episodeGuid => ({ userId,episodeGuid }))).onConflictDoNothing({ target: [schema.podcastEpisodeProgress.userId,schema.podcastEpisodeProgress.episodeGuid] }).returning({ guid: schema.podcastEpisodeProgress.episodeGuid });
+      if (changed.length) await bumpSogpLearningRevision(tx,userId);
+    });
+    return;
+  }
+
   await db
     .insert(schema.podcastEpisodeProgress)
     .values(uniqueGuids.map((episodeGuid) => ({ userId, episodeGuid })))
@@ -50,6 +60,15 @@ export async function removePodcastEpisodesProgress(
 ) {
   const uniqueGuids = uniqueEpisodeGuids(episodeGuids);
   if (!uniqueGuids.length) return;
+
+  if (sogpLearningSchemaReady()) {
+    const { withSogpLearningLock, bumpSogpLearningRevision } = await import("../sogp-learning-lock");
+    await withSogpLearningLock(userId, async tx => {
+      const changed = await tx.delete(schema.podcastEpisodeProgress).where(and(eq(schema.podcastEpisodeProgress.userId,userId),inArray(schema.podcastEpisodeProgress.episodeGuid,uniqueGuids))).returning({ guid: schema.podcastEpisodeProgress.episodeGuid });
+      if (changed.length) await bumpSogpLearningRevision(tx,userId);
+    });
+    return;
+  }
 
   await db
     .delete(schema.podcastEpisodeProgress)
