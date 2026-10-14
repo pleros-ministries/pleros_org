@@ -17,8 +17,15 @@ export function homeReportRows(input: { devotionalCount: number; ministryCount: 
   });
 }
 
+/** Paper adaptive home cards: start (blue), traditional, podcast (white, per-episode). */
+export type HomeLearningCard =
+  | { kind: "start"; href: string }
+  | { kind: "traditional"; title: string; href: string; completed: number; total: number }
+  | { kind: "podcast"; pace: 1 | 2; href: string; series: string; episodes: { part: string; duration: string; durationSeconds: number; positionSeconds: number; listened: boolean }[]; dayNumber: number };
+
 export type DashboardHomeData = {
   day: string;
+  card?: HomeLearningCard;
   learning: { title: string; href: string; action: string; completed: number; total: number; enrolled: boolean; unit?: "tracks" | "episodes"; pathLabel?: string };
   reports: HomeReport[] | null;
   support: { firstName: string; canMessage: boolean } | null;
