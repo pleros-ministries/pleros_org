@@ -2511,3 +2511,23 @@ export const sogpEpisodePlayback = pgTable("sogp_episode_playback", {
   check("sogp_episode_playback_position_check", sql`${t.positionSeconds} >= 0 and ${t.positionSeconds} < 'Infinity'::float8`),
   check("sogp_episode_playback_revision_check", sql`${t.revision} > 0`),
 ]);
+
+/** Learner requests never mutate ownership or accepted group memberships. */
+export const sogpFollowUpRequests = pgTable("sogp_follow_up_requests", {
+  id: serial("id").primaryKey(),
+  enrollmentId: integer("enrollment_id").notNull().references(() => sogpEnrollments.id, { onDelete: "cascade" }),
+  previousFollowUpUserId: text("previous_follow_up_user_id").references(() => users.id, { onDelete: "set null" }),
+  reason: text("reason").notNull(),
+  status: text("status").$type<"pending" | "resolved" | "declined">().notNull().default("pending"),
+  reviewedBy: text("reviewed_by").references(() => users.id, { onDelete: "set null" }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+}, t => [
+  uniqueIndex("sogp_follow_up_requests_one_pending_idx").on(t.enrollmentId).where(sql`${t.status} = 'pending'`),
+  index("sogp_follow_up_requests_history_idx").on(t.enrollmentId, t.createdAt),
+  index("sogp_follow_up_requests_previous_owner_idx").on(t.previousFollowUpUserId),
+  index("sogp_follow_up_requests_reviewer_idx").on(t.reviewedBy),
+  index("sogp_follow_up_requests_queue_idx").on(t.createdAt).where(sql`${t.status} = 'pending'`),
+  check("sogp_follow_up_requests_reason_check", sql`length(trim(${t.reason})) between 1 and 2000`),
+  check("sogp_follow_up_requests_status_check", sql`${t.status} in ('pending','resolved','declined')`),
+]);
