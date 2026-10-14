@@ -4,6 +4,7 @@ import { dailyCategoryStatus, type DailyReportCategory, type DailyReportDeclarat
 import { listActivitiesForDay, getDayActivity } from "./ministry-activities";
 import { getOwnDailyDeclarations, getOwnMeetingDetails } from "./daily-report-declarations";
 import { requireChurchReportAccess } from "./church-organisation";
+import { getScopedSharedMeetingDetails } from "./shared-church-meetings";
 
 /** Internal canonical report loader. Caller must authenticate owner or enforce church scope. */
 export async function loadDailyReportingFacts(userId: string, dateKey: string) {
@@ -23,13 +24,14 @@ export async function loadDailyReportingFacts(userId: string, dateKey: string) {
 /** Only this sanitized projection reaches organisational readers. No notes/contact records/counts. */
 export async function getChurchReport(viewerId: string, subjectId: string, dateKey: string) {
   await requireChurchReportAccess(viewerId, subjectId);
-  const report = await loadDailyReportingFacts(subjectId, dateKey);
+  const [report, shared] = await Promise.all([loadDailyReportingFacts(subjectId, dateKey), getScopedSharedMeetingDetails(viewerId, subjectId, dateKey)]);
   return {
     dateKey, statuses: report.statuses, devotion: report.lines,
-    activities: report.activities.map((row) => ({
+    activities: report.activities.filter(row => !shared.has(row.id) || shared.get(row.id) !== null).map((row) => ({
       id: row.id, kind: row.kind, title: row.title, mode: row.mode, platform: row.platform, location: row.location,
       numbers: Object.fromEntries(MINISTRY_FIELDS.map(({ key }) => [key, row[key]])),
       meeting: report.meetingDetails.find((meeting) => meeting.activityId === row.id) ?? null,
+      sharedMeeting: shared.get(row.id) ?? null,
     })),
   };
 }

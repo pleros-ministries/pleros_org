@@ -9,6 +9,9 @@ import {
 } from "@/lib/community/context";
 import { listContactsForMember } from "@/lib/db/queries/outreach-contacts";
 import { lagosToday } from "@/lib/sogp/daily-date";
+import { reportingV3Enabled, reportingV3SchemaReady } from "@/lib/db/queries/reporting-v3-gate";
+import { listPrivateMinistryContacts } from "@/lib/db/queries/private-ministry-contacts";
+import { PrivateContactList } from "@/components/community/report/ministry-v3/private-contact-list";
 
 /** Most people one member's list will load; older ones drop off the end. */
 const LIST_LIMIT = 1000;
@@ -29,13 +32,12 @@ export default async function PeopleMetRoute() {
           Daily report
         </h1>
         <p className="max-w-md text-sm text-zinc-500">
-          Everyone you have met in ministry. Search and filter, log each
-          follow-up, and keep their status up to date. Only you, your pastor
-          and the Pleros team see these names and numbers.
+          {reportingV3SchemaReady() ? "New saved contacts are private to you. Your existing ministry contacts retain their original authorised access and history." : "Everyone you have met in ministry. Search and filter, log each follow-up, and keep their status up to date. Only you, your pastor and the Pleros team see these names and numbers."}
         </p>
       </header>
 
       <ReportTabs active="people" />
+      {reportingV3SchemaReady() ? <PrivateContactList initial={await listPrivateMinistryContacts(ctx.userId)} readOnly={!reportingV3Enabled()} /> : null}
 
       <section className="overflow-hidden rounded-2xl border border-(--color-line-strong) bg-white shadow-(--shadow-sm)">
         <OutreachContactBrowser

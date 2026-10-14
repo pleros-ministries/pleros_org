@@ -4,6 +4,9 @@ import { canAccessReporting } from "@/lib/community/reporting-access";
 
 import { normaliseMeetingDetails } from "@/lib/community/daily-report";
 import { dailyReportingEnabled } from "@/lib/db/queries/daily-report-declarations";
+import { reportingV3SchemaReady } from "@/lib/db/queries/reporting-v3-gate";
+import { getOwnMinistryReportV3 } from "@/lib/db/queries/ministry-report-v3";
+import { getOwnSharedMeetingReport } from "@/lib/db/queries/shared-church-meetings";
 import { revalidatePath } from "next/cache";
 
 import { getAppSession } from "@/lib/app-session";
@@ -56,6 +59,7 @@ async function requireCommunity(): Promise<CommunityContext> {
 }
 
 function revalidateReports() {
+  revalidatePath("/dashboard");
   revalidatePath("/dashboard/community/report");
   revalidatePath("/dashboard/community/report/people");
   revalidatePath("/dashboard/community/report/history");
@@ -134,6 +138,11 @@ export async function saveMinistryActivity(
       input.activityId > 0
         ? input.activityId
         : null;
+    if (reportingV3SchemaReady()) {
+      if (activityId === null) throw new CommunityError("Use the unified ministry form or select/create a shared meeting.");
+      const [unified, shared] = await Promise.all([getOwnMinistryReportV3(ctx.userId, activityId), getOwnSharedMeetingReport(ctx.userId, activityId)]);
+      if (unified || shared) throw new CommunityError("Use the updated form to correct this report.");
+    }
     const parsed = normaliseActivityInput({
       kind: input.kind,
       title: input.title,
@@ -164,6 +173,11 @@ export async function saveMinistryActivity(
       const rows = normaliseContactRows(Array.isArray(input.people) ? input.people : []);
       if (!rows.ok) throw new CommunityError(rows.error);
       people = rows.value;
+      if (reportingV3SchemaReady()) {
+        const existing = activityId === null ? null : await getActivityForEdit(ctx.userId, activityId);
+        const keptIds = new Set(existing?.people.map(person => person.id) ?? []);
+        if (people.some(person => person.id === null || !keptIds.has(person.id))) throw new CommunityError("Save new contacts through the private contact form; legacy contacts remain editable.");
+      }
     }
 
     const saved = await saveActivity({

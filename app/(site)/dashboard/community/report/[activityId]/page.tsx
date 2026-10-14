@@ -22,6 +22,12 @@ import { listContactsForMember } from "@/lib/db/queries/outreach-contacts";
 import { lagosToday } from "@/lib/sogp/daily-date";
 import { dailyReportingEnabled, getOwnMeetingDetails } from "@/lib/db/queries/daily-report-declarations";
 import type { MeetingReportingRole } from "@/lib/community/daily-report";
+import { getOwnMinistryReportV3 } from "@/lib/db/queries/ministry-report-v3";
+import { getOwnSharedMeetingReport, listMeetingUnits } from "@/lib/db/queries/shared-church-meetings";
+import { listReportContactChoices } from "@/lib/db/queries/private-ministry-contacts";
+import { LiveMinistryForm } from "@/components/community/report/ministry-v3/live-ministry-form";
+import { LiveMeetingFlow } from "@/components/community/report/ministry-v3/live-meeting-flow";
+import { reportingV3Enabled } from "@/lib/db/queries/reporting-v3-gate";
 
 const CONTACT_LIMIT = 1000;
 
@@ -44,6 +50,13 @@ export default async function EditActivityRoute({
   if (!activity) notFound();
 
   const today = lagosToday();
+  const [unified, shared] = await Promise.all([getOwnMinistryReportV3(ctx.userId, activityId), getOwnSharedMeetingReport(ctx.userId, activityId)]);
+  if (unified) return <LiveMinistryForm dateKey={activity.activityDate} today={today} activityId={activityId} readOnly={!reportingV3Enabled() || !canReportFor(activity.activityDate, today)} contacts={await listReportContactChoices(ctx.userId)} initial={{
+    dateKey: activity.activityDate, kind: activity.kind as "outreach" | "follow_up", method: unified.entry.method, context: unified.entry.context ?? "", note: activity.note ?? "", outcomes: unified.entry.enteredOutcomes, contacts: unified.contacts,
+    peopleCount: activity.kind === "follow_up" ? activity.followUps : activity.reachedOnline + activity.reachedOffline,
+    platform: activity.platform?.startsWith("other:") ? "other" : activity.platform ?? "", platformOther: activity.platform?.startsWith("other:") ? activity.platform.slice(6) : "", onlineCount: String(activity.reachedOnline), offlineCount: String(activity.reachedOffline),
+  }} />;
+  if (shared) return <LiveMeetingFlow dateKey={activity.activityDate} today={today} units={await listMeetingUnits(ctx.userId)} contacts={await listReportContactChoices(ctx.userId)} initial={shared} readOnly={!reportingV3Enabled() || !canReportFor(activity.activityDate, today)} />;
   if (!canReportFor(activity.activityDate, today)) {
     const where = activityWhere(activity);
     return (

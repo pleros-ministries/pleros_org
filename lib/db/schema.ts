@@ -2401,3 +2401,70 @@ export const churchBranchPastors = pgTable("church_branch_pastors", {
   userId: text("user_id").notNull().references(() => churchAssignments.userId, { onDelete: "cascade" }),
   branchId: integer("branch_id").notNull().references(() => churchBranches.id),
 }, (t) => [primaryKey({ columns: [t.userId, t.branchId] }), index("church_branch_pastors_branch_idx").on(t.branchId)]);
+
+/** Private-first contacts are isolated from every legacy staff reader/export. */
+export const privateMinistryContacts = pgTable("private_ministry_contacts", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id),
+  requestKey: text("request_key").notNull(),
+  name: text("name").notNull(), phone: text("phone").notNull(), email: text("email"), note: text("note"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  uniqueIndex("private_ministry_contacts_request_idx").on(t.userId, t.requestKey),
+  index("private_ministry_contacts_owner_idx").on(t.userId, t.id),
+  check("private_ministry_contacts_required_check", sql`length(trim(${t.name})) between 2 and 80 and length(trim(${t.phone})) between 7 and 30`),
+]);
+
+/** Canonical numerical projections remain in ministry_activities. */
+export const ministryReportEntries = pgTable("ministry_report_entries", {
+  activityId: integer("activity_id").primaryKey().references(() => ministryActivities.id, { onDelete: "cascade" }),
+  userId: text("user_id").notNull().references(() => users.id),
+  requestKey: text("request_key").notNull(), method: text("method").notNull(), context: text("context"),
+  enteredOutcomes: jsonb("entered_outcomes").$type<Partial<Record<import("../community/ministry-report").MinistryFieldKey, string>>>().notNull(),
+}, (t) => [uniqueIndex("ministry_report_entries_request_idx").on(t.userId, t.requestKey)]);
+
+/** Removing a report association does not remove its contact/history. */
+export const ministryReportContacts = pgTable("ministry_report_contacts", {
+  id: serial("id").primaryKey(),
+  activityId: integer("activity_id").notNull().references(() => ministryActivities.id, { onDelete: "cascade" }),
+  privateContactId: integer("private_contact_id").references(() => privateMinistryContacts.id),
+  legacyContactId: integer("legacy_contact_id").references(() => outreachContacts.id, { onDelete: "cascade" }),
+}, (t) => [
+  uniqueIndex("ministry_report_contacts_private_idx").on(t.activityId, t.privateContactId),
+  uniqueIndex("ministry_report_contacts_legacy_idx").on(t.activityId, t.legacyContactId),
+  index("ministry_report_contacts_private_contact_idx").on(t.privateContactId),
+  index("ministry_report_contacts_legacy_contact_idx").on(t.legacyContactId),
+  check("ministry_report_contacts_one_source_check", sql`(${t.privateContactId} is not null and ${t.legacyContactId} is null) or (${t.privateContactId} is null and ${t.legacyContactId} is not null)`),
+]);
+
+export const churchSharedMeetings = pgTable("church_shared_meetings", {
+  id: serial("id").primaryKey(),
+  unitId: integer("unit_id").notNull().references(() => churchUnits.id),
+  creatorUserId: text("creator_user_id").notNull().references(() => users.id),
+  requestKey: text("request_key").notNull(),
+  kind: text("kind").$type<"teaching_meeting" | "prayer_meeting">().notNull(),
+  meetingDate: date("meeting_date", { mode: "string" }).notNull(),
+  subject: text("subject"), venue: text("venue"),
+  startsAt: timestamp("starts_at", { withTimezone: true }), endsAt: timestamp("ends_at", { withTimezone: true }),
+  totalAttendance: integer("total_attendance").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  uniqueIndex("church_shared_meetings_request_idx").on(t.creatorUserId, t.requestKey),
+  index("church_shared_meetings_unit_date_idx").on(t.unitId, t.meetingDate),
+  check("church_shared_meetings_shape_check", sql`(${t.kind} = 'teaching_meeting' and length(trim(${t.subject})) between 1 and 500 and ${t.subject} is not null and ${t.venue} is null and ${t.startsAt} is null and ${t.endsAt} is null) or (${t.kind} = 'prayer_meeting' and ${t.subject} is null and length(trim(${t.venue})) between 1 and 120 and ${t.venue} is not null and ${t.startsAt} is not null and ${t.endsAt} > ${t.startsAt} and ${t.endsAt} is not null)`),
+  check("church_shared_meetings_total_check", sql`${t.totalAttendance} between 0 and 100000`),
+]);
+
+export const churchMeetingReports = pgTable("church_meeting_reports", {
+  meetingId: integer("meeting_id").notNull().references(() => churchSharedMeetings.id),
+  userId: text("user_id").notNull().references(() => users.id),
+  activityId: integer("activity_id").notNull().references(() => ministryActivities.id, { onDelete: "cascade" }),
+  participation: text("participation").$type<"leader" | "worker" | "disciple">().notNull(),
+  attended: boolean("attended").notNull(), peopleBrought: integer("people_brought").notNull(),
+}, (t) => [
+  primaryKey({ columns: [t.meetingId, t.userId] }),
+  uniqueIndex("church_meeting_reports_activity_idx").on(t.activityId),
+  index("church_meeting_reports_user_idx").on(t.userId, t.meetingId),
+  check("church_meeting_reports_participation_check", sql`${t.participation} in ('leader', 'worker', 'disciple')`),
+  check("church_meeting_reports_brought_check", sql`${t.peopleBrought} between 0 and 50`),
+]);

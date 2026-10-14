@@ -348,7 +348,7 @@ async function reconcilePeopleMet(
  * Keeps the follow-up entries of a follow-up activity in step with the rows
  * now in the form: one interaction per person, added, corrected or removed.
  */
-async function reconcileFollowUps(
+export async function reconcileFollowUps(
   tx: Tx,
   input: { userId: string; activityId: number; dateKey: string; followUps: FollowUpRow[] },
 ) {

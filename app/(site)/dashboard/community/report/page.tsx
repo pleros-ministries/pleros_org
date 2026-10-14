@@ -13,6 +13,7 @@ import {
   listActivitiesForDay,
 } from "@/lib/db/queries/ministry-activities";
 import { lagosToday } from "@/lib/sogp/daily-date";
+import { getOwnSharedMeetingDetails } from "@/lib/db/queries/shared-church-meetings";
 
 export default async function MinistryReportRoute({
   searchParams,
@@ -30,11 +31,12 @@ export default async function MinistryReportRoute({
   const { day, saved, removed } = await searchParams;
   const selected = isDateKey(day) && day <= today ? day : today;
 
-  const [activities, pleros, declarations, meetingDetails] = await Promise.all([
+  const [activities, pleros, declarations, meetingDetails, sharedDetails] = await Promise.all([
     listActivitiesForDay(ctx.userId, selected),
     getDayActivity(ctx.userId, selected),
     getOwnDailyDeclarations(ctx.userId, selected),
     getOwnMeetingDetails(ctx.userId, selected),
+    getOwnSharedMeetingDetails(ctx.userId, selected),
   ]);
 
   return (
@@ -44,7 +46,7 @@ export default async function MinistryReportRoute({
       selected={selected}
       activities={activities}
       declarations={declarations}
-      meetingDetails={meetingDetails}
+      meetingDetails={[...meetingDetails, ...sharedDetails]}
       enabled={dailyReportingEnabled()}
       pleros={activityLines(pleros)}
       flash={saved ? "saved" : removed ? "removed" : null}

@@ -28,7 +28,7 @@ const devotionalRoutes: Record<ActivityLine["key"], string> = {
 export function DailyReportView({ today, days, selected, activities, pleros, declarations, meetingDetails, enabled, flash }: {
   today: string; days: string[]; selected: string; activities: MemberActivity[]; pleros: ActivityLine[];
   declarations: { category: string; declaration: string }[];
-  meetingDetails: { activityId: number; reportingRole: string; taught: string | null }[]; enabled: boolean;
+  meetingDetails: { activityId: number; reportingRole: string; taught: string | null; shared?: boolean; attended?: boolean; peopleBrought?: number; totalAttendance?: number | null }[]; enabled: boolean;
   flash: "saved" | "removed" | null;
 }) {
   const { run, pending, error } = useReportAction();

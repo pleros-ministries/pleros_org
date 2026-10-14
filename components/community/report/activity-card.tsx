@@ -27,7 +27,7 @@ export function ActivityCard({
   today: string;
   /** False once the day has left the reporting window. */
   canChange: boolean;
-  meetingDetails?: { reportingRole: string; taught: string | null };
+  meetingDetails?: { reportingRole: string; taught: string | null; shared?: boolean; attended?: boolean; peopleBrought?: number; totalAttendance?: number | null };
 }) {
   const router = useRouter();
   const { run, pending, error } = useReportAction();
@@ -67,9 +67,9 @@ export function ActivityCard({
         ) : null}
       </div>
       {where ? <p className="text-xs text-zinc-500">{where}</p> : null}
-      <p className="text-[13px] text-zinc-700">{activityKeyNumbers(activity)}</p>
+      {!meetingDetails?.shared ? <p className="text-[13px] text-zinc-700">{activityKeyNumbers(activity)}</p> : <div className="grid gap-1 text-[13px] text-zinc-700"><p>I attended · {meetingDetails.attended ? "Yes" : "No"}</p><p>People I brought · {meetingDetails.peopleBrought}</p>{meetingDetails.totalAttendance != null ? <p>Total meeting attendance · {meetingDetails.totalAttendance}</p> : null}<p className="text-xs text-(--color-text-muted)">Personal attendance and brought-person claims are not added to the meeting total.</p></div>}
       {meetingDetails ? <div className="grid gap-1 text-[13px] text-(--color-text)">
-        <p>{meetingDetails.reportingRole === "leader" ? "Leader" : meetingDetails.reportingRole === "worker" ? "Worker" : "Member"}</p>
+        <p>{meetingDetails.reportingRole === "leader" ? "Leader" : meetingDetails.reportingRole === "worker" ? "Worker" : meetingDetails.reportingRole === "disciple" ? "Disciple" : "Member"}</p>
         {meetingDetails.taught ? <p className="whitespace-pre-wrap">{meetingDetails.taught}</p> : null}
       </div> : null}
       {canChange ? (
