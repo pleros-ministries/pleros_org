@@ -1,5 +1,5 @@
 .page { max-width: 760px; margin-inline: auto; padding: 24px 16px 48px; display: grid; gap: 32px; color: var(--color-text-strong); font-size: 14px; line-height: 22px; }
-.page h1 { font-size: 24px; line-height: 32px; font-weight: 500; margin: 0; letter-spacing: -.4px; }
+.page h1 { font-size: 24px; line-height: 32px; font-weight: 500; margin: 0; letter-spacing: var(--dashboard-tracking-heading, -0.02em); }
 .page h2 { font-size: 15px; line-height: 22px; font-weight: 500; margin: 0; }
 .page h3 { font-size: 14px; line-height: 22px; font-weight: 500; margin: 0; }
 .page p { margin: 0; }
