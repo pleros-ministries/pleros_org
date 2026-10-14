@@ -196,6 +196,8 @@ export function DiscipleshipPage({
                 preview={preview}
               />
 
+              {!preview && !paused ? <Link href={`/dashboard/sogp/reviews?group=${group.id}`} className="inline-flex min-h-11 items-center text-sm text-(--color-brand-blue)">Weekly group reviews</Link> : null}
+
               <div className={styles.column}>
                 {paused ? (
                   <p className="rounded-sm border border-zinc-200 bg-white p-4 text-xs text-(--color-text-muted)">

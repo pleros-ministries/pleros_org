@@ -2531,3 +2531,32 @@ export const sogpFollowUpRequests = pgTable("sogp_follow_up_requests", {
   check("sogp_follow_up_requests_reason_check", sql`length(trim(${t.reason})) between 1 and 2000`),
   check("sogp_follow_up_requests_status_check", sql`${t.status} in ('pending','resolved','declined')`),
 ]);
+
+export const sogpGroupReviews = pgTable("sogp_group_reviews", {
+  id: serial("id").primaryKey(),
+  groupId: integer("group_id").notNull().references(() => discipleshipGroups.id, { onDelete: "cascade" }),
+  scheduledBy: text("scheduled_by").notNull().references(() => users.id),
+  requestKey: text("request_key").notNull(),
+  title: text("title").notNull(), venue: text("venue").notNull(),
+  startsAt: timestamp("starts_at", { withTimezone: true }).notNull(),
+  endsAt: timestamp("ends_at", { withTimezone: true }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, t => [
+  uniqueIndex("sogp_group_reviews_request_idx").on(t.scheduledBy, t.requestKey),
+  index("sogp_group_reviews_group_time_idx").on(t.groupId, t.startsAt),
+  check("sogp_group_reviews_time_check", sql`${t.endsAt} > ${t.startsAt}`),
+  check("sogp_group_reviews_title_check", sql`length(trim(${t.title})) between 1 and 160`),
+  check("sogp_group_reviews_venue_check", sql`length(trim(${t.venue})) between 1 and 300`),
+]);
+export const sogpGroupReviewAttendance = pgTable("sogp_group_review_attendance", {
+  reviewId: integer("review_id").notNull().references(() => sogpGroupReviews.id, { onDelete: "cascade" }),
+  enrollmentId: integer("enrollment_id").notNull().references(() => sogpEnrollments.id, { onDelete: "cascade" }),
+  status: text("status").$type<"attended" | "missed">().notNull(),
+  confirmedBy: text("confirmed_by").references(() => users.id, { onDelete: "set null" }),
+  confirmedAt: timestamp("confirmed_at", { withTimezone: true }).notNull().defaultNow(),
+}, t => [
+  primaryKey({ columns: [t.reviewId, t.enrollmentId] }),
+  index("sogp_group_review_attendance_enrollment_idx").on(t.enrollmentId, t.reviewId),
+  index("sogp_group_review_attendance_actor_idx").on(t.confirmedBy),
+  check("sogp_group_review_attendance_status_check", sql`${t.status} in ('attended','missed')`),
+]);

@@ -118,7 +118,7 @@ export function DashboardShell({ viewer, sections, children, notificationControl
   const pathname = usePathname() ?? "/dashboard";
   const router = useRouter();
   const routedArea = dashboardAreaForPath(pathname);
-  const focusedLearning = ({ "/dashboard/sogp":"My SOGP", "/dashboard/sogp/path":"Start SOGP", "/dashboard/sogp/plan":"Edit full plan", "/dashboard/sogp/listen":"Today’s listening", "/dashboard/sogp/follow-up":"Your follow-up person", "/dashboard/sogp/follow-up/request":"Follow-up request" } as Record<string,string>)[pathname];
+  const focusedLearning = ({ "/dashboard/sogp":"My SOGP", "/dashboard/sogp/path":"Start SOGP", "/dashboard/sogp/plan":"Edit full plan", "/dashboard/sogp/listen":"Today’s listening", "/dashboard/sogp/follow-up":"Your follow-up person", "/dashboard/sogp/follow-up/request":"Follow-up request", "/dashboard/sogp/reviews":"Group reviews", "/dashboard/sogp/reviews/schedule":"Schedule group review" } as Record<string,string>)[pathname] ?? (/^\/dashboard\/sogp\/reviews\/\d+\/attendance$/.test(pathname) ? "Confirm attendance" : undefined);
   const [menu, setMenu] = useState<{ open: boolean; pathname: string | null }>({ open: false, pathname: null });
   const [target, setTarget] = useState<{ from: string; area: DashboardArea } | null>(null);
   // Transition state coordinates motion only. Next's existing Suspense/loading
