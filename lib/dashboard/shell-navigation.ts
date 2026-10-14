@@ -5,7 +5,8 @@ export function dashboardAreaForPath(href: string): DashboardArea {
   const path = href.split(/[?#]/)[0];
   const inCommunity = path === "/dashboard/community" || path.startsWith("/dashboard/community/");
   const reporting = path === "/dashboard/community/report" || path.startsWith("/dashboard/community/report/");
-  return inCommunity && !reporting ? "community" : "you";
+  const discipleship = path === "/dashboard/sogp/discipleship" || path.startsWith("/dashboard/sogp/discipleship/");
+  return discipleship || inCommunity && !reporting ? "community" : "you";
 }
 
 /** Presentation only. Every destination retains its own server guard. */
@@ -26,8 +27,6 @@ export function dashboardWorkspace(sections: DashboardNavSection[]): DashboardWo
   const workspace: DashboardWorkspaceItem[] = [];
   const learning = find("sogp") ?? find("sogp-enrol");
   if (learning) workspace.push({ ...learning, label: "My learning", icon: "book" });
-  const disciples = find("disciples");
-  if (disciples) workspace.push({ ...disciples, label: "My disciples", icon: "leaf" });
   const contacts = find("contacts");
   if (contacts) workspace.push({ ...contacts, label: "Saved contacts", icon: "people" });
   const church = find("church");

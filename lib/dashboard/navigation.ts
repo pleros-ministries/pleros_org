@@ -131,14 +131,14 @@ export function buildDashboardNavigation(
     }
   }
 
-  const oversight: DashboardNavItem[] = [];
   if (caps.sogpEnrolled) {
-    oversight.push({
+    community.push({
       key: "disciples",
       label: "My disciples",
       href: "/dashboard/sogp/discipleship",
     });
   }
+  const oversight: DashboardNavItem[] = [];
   if (caps.churchOversight || caps.churchAssignments) {
     oversight.push({ key: "church", label: caps.churchOversight ? "Church oversight" : "Church assignments", href: "/dashboard/church" });
   }
