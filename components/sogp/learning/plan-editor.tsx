@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { chooseSogpPathAction, editSogpPlanAction } from "@/app/_actions/sogp-learning-actions";
 import { moveRemainingEpisode, podcastSuggestion, learningWriteNotice, type LearningViewData } from "@/lib/sogp/learning-view";
-import { DashboardIcon, StatusPill } from "@/components/dashboard/v3/primitives";
+import { DashboardIcon } from "@/components/dashboard/v3/primitives";
 import styles from "./learning.module.css";
 
 export function PlanEditor({ data,requestedPath }: { data: LearningViewData;requestedPath?: "podcast_one" | "podcast_two" }) {
@@ -15,6 +15,7 @@ export function PlanEditor({ data,requestedPath }: { data: LearningViewData;requ
   const pace = data.state?.plan?.episodesPerDay ?? (requestedPath === "podcast_two" ? 2 : 1);
   const [draft,setDraft] = useState<string[]>(base.guids);
   const [search,setSearch] = useState("");
+  const [planSearch,setPlanSearch] = useState("");
   const [filter,setFilter] = useState("all");
   const [editingSlot,setEditingSlot] = useState<string | null>(null);
   const [showLibrary,setShowLibrary] = useState(() => !data.state?.plan);
@@ -53,25 +54,27 @@ export function PlanEditor({ data,requestedPath }: { data: LearningViewData;requ
   }
   const library = data.episodes.filter(episode => (!search || episode.title.toLowerCase().includes(search.toLowerCase())) && (filter === "all" || episode.title.toLowerCase().includes(filter)));
   return <section className={styles.page}>
-    <header className={styles.header}><p className={styles.meta}>{showLibrary ? "Build your plan" : `Podcast · ${pace === 2 ? "30" : "15"} min/day`}</p><h1>{showLibrary ? "Choose your episodes" : "Make the plan yours"}</h1><p className={styles.muted}>{showLibrary ? "Browse the library or use a suggested start. You can choose any available episodes." : "Reorder or replace remaining episodes. Completed episodes stay in your history."}</p></header>
+    <header className={styles.header}><p className={styles.eyebrow}>{showLibrary ? "Build your plan" : `Podcast · ${pace === 2 ? "30" : "15"} min/day`}</p><h1>{showLibrary ? "Choose your episodes" : "Make the plan yours"}</h1><p className={styles.muted}>{showLibrary ? "Browse the library or use a suggested start. You can choose any available episodes." : "Reorder or replace remaining episodes. Completed episodes stay in your history."}</p></header>
     {!showLibrary ? <>
-    <div className={styles.notice}><h2>{Math.ceil(draft.length / pace)} learning days · {draft.length} episodes</h2><p className={styles.meta}>{draft.filter(guid => listened.has(guid)).length} listened in this queue · {archived.size} in retained history</p><Link href="/dashboard/sogp/path">Switch path</Link></div>
-    <label className={styles.stack}>Jump to day<select defaultValue="" onChange={event => document.getElementById(`learning-day-${event.target.value}`)?.scrollIntoView({ behavior: "instant",block: "start" })}><option value="" disabled>Choose a day</option>{dayNumbers.map(day => <option key={`day-${day}`} value={day}>Day {day}</option>)}</select></label>
+    <div className={styles.notice}><h2>All {dayNumbers.length} {dayNumbers.length === 1 ? "day" : "days"} · {draft.length} episodes</h2><div className={styles.metaRow}><p className={styles.meta}>{draft.filter(guid => listened.has(guid)).length} listened · {draft.filter(guid => !listened.has(guid)).length} remaining</p><Link href="/dashboard/sogp/path" onClick={event => { if (dirty && !window.confirm("Leave without saving your plan changes?")) event.preventDefault(); }}>Switch path</Link></div>{archived.size ? <p className={styles.meta}>{archived.size} episodes in retained history</p> : null}</div>
+    <label className={styles.planSearch}><span className="sr-only">Find any episode in this plan</span><DashboardIcon name="search" /><input type="search" placeholder="Find any episode in this plan" value={planSearch} onChange={event => setPlanSearch(event.target.value)} /></label>
+    <label className={styles.stack}>Jump to day<select defaultValue="" onChange={event => { const day = event.target.value;setPlanSearch("");requestAnimationFrame(() => document.getElementById(`learning-day-${day}`)?.scrollIntoView({ behavior: "instant",block: "start" })); }}><option value="" disabled>Choose a day</option>{dayNumbers.map(day => <option key={`day-${day}`} value={day}>Day {day}</option>)}</select></label>
     <div className={styles.stack}>
       {!draft.length ? <p className={styles.muted}>No episodes selected. Browse the library below or add the optional suggestion.</p> : null}
+      {planSearch && !draft.some(guid => (episodes.get(guid)?.title ?? "Episode no longer in the catalogue").toLowerCase().includes(planSearch.toLowerCase())) ? <p className={styles.muted}>No episodes in your plan match this search.</p> : null}
       {draft.map((guid,index) => {
         const episode = episodes.get(guid), title = episode?.title ?? "Episode no longer in the catalogue", locked = listened.has(guid), position = positions.get(guid);
+        if (planSearch && !title.toLowerCase().includes(planSearch.toLowerCase())) return null;
         return <div key={guid} className={styles.stack}>
-          {index % pace === 0 ? <h2 id={`learning-day-${Math.floor(index / pace) + 1}`} style={{ scrollMarginTop: "80px" }}>Day {Math.floor(index / pace) + 1}</h2> : null}
-          <article className={styles.episode} data-locked={locked}><h3>{title}</h3><p className={styles.meta}>{episode?.duration || "Duration unavailable"} · {locked ? "Listened · Locked" : position ? `Saved at ${Math.floor(position.positionSeconds / 60)}:${String(Math.floor(position.positionSeconds % 60)).padStart(2,"0")}` : "Not started"}</p>
-            {locked ? <StatusPill tone="green">Listened</StatusPill> : <>
-              <div className={styles.tools}><button type="button" aria-expanded={editingSlot === guid} onClick={() => setEditingSlot(editingSlot === guid ? null : guid)}>Move or replace {title}</button></div>
+          {index % pace === 0 || planSearch ? <div className={styles.metaRow} id={index % pace === 0 ? `learning-day-${Math.floor(index / pace) + 1}` : undefined} style={{ scrollMarginTop: "80px" }}><h2>Day {Math.floor(index / pace) + 1}</h2><span className={styles.meta}>{draft.slice(Math.floor(index / pace) * pace,Math.floor(index / pace) * pace + pace).filter(item => listened.has(item)).length} of {draft.slice(Math.floor(index / pace) * pace,Math.floor(index / pace) * pace + pace).length} listened</span></div> : null}
+          <article className={styles.episode} data-locked={locked}><div className={styles.episodeHeading}><DashboardIcon name={locked ? "lock" : "grip-vertical"} /><div className={styles.episodeCopy}><h3>{title}</h3><p className={styles.meta}>{episode?.duration || "Duration unavailable"} · {locked ? "Listened · Locked" : position ? `Saved at ${Math.floor(position.positionSeconds / 60)}:${String(Math.floor(position.positionSeconds % 60)).padStart(2,"0")}` : "Not started"}</p></div>{!locked ? <button type="button" className={styles.episodeMenu} aria-label={`Move or replace ${title}`} aria-expanded={editingSlot === guid} onClick={() => setEditingSlot(editingSlot === guid ? null : guid)}><DashboardIcon name="more" /></button> : null}</div>
+            {!locked ? <>
               {editingSlot === guid ? <>
               <label className={styles.stack}>Move {title} to slot<select value={index} disabled={saving} onChange={event => { setDraft(moveRemainingEpisode(draft,listened,index,Number(event.target.value)));setError(null); }}>{draft.map((other,slot) => !listened.has(other) ? <option key={other} value={slot}>Day {Math.floor(slot / pace) + 1} · Episode {slot % pace + 1}</option> : null)}</select></label>
               <label className={styles.stack}>Replace {title}<select value={guid} disabled={saving} onChange={event => { setDraft(draft.map((item,slot) => slot === index ? event.target.value : item));setEditingSlot(null);setError(null); }}>{!episode ? <option value={guid}>Retain unavailable episode</option> : null}{data.episodes.filter(item => item.guid === guid || !queued.has(item.guid) && !archived.has(item.guid) && !listened.has(item.guid)).map(item => <option key={item.guid} value={item.guid}>{item.title}</option>)}</select></label>
               <div className={styles.tools}><button type="button" disabled={saving} onClick={() => remove(index)}>Remove episode</button></div>
               </> : null}
-            </>}
+            </> : null}
           </article>
         </div>;
       })}

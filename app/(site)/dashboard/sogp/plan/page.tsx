@@ -8,5 +8,7 @@ export default async function SogpPlanPage({ searchParams }: { searchParams: Pro
   const data = await getOwnLearningView(session.user.id);
   if (!data) redirect("/sogp/enrol");
   const { path } = await searchParams;
-  return <LearningBoundary mode="plan" initialData={data} requestedPath={path === "podcast_one" || path === "podcast_two" ? path : undefined} />;
+  const requestedPath = path === "podcast_one" || path === "podcast_two" ? path : undefined;
+  if (!data.state?.plan && !requestedPath) redirect("/dashboard/sogp/path");
+  return <LearningBoundary mode="plan" initialData={data} requestedPath={requestedPath} />;
 }

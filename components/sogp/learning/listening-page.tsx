@@ -7,7 +7,7 @@ import { saveSogpPlaybackAction, setSogpListenedAction } from "@/app/_actions/so
 import { readPodcastPlan } from "@/lib/sogp/podcast-plan";
 import { learningResume, learningWriteNotice, type LearningEpisode, type LearningViewData } from "@/lib/sogp/learning-view";
 import { LessonAudioControls } from "@/components/media/lesson-audio-controls";
-import { DashboardIcon, StatusPill } from "@/components/dashboard/v3/primitives";
+import { DashboardIcon } from "@/components/dashboard/v3/primitives";
 import styles from "./learning.module.css";
 
 function PodcastPlayer({ episode,position,canWrite }: { episode: LearningEpisode;position?: { positionSeconds: number;revision: number };canWrite: boolean }) {
@@ -56,11 +56,11 @@ export function ListeningPage({ data,requestedDay }: { data: LearningViewData;re
     });
   }
   return <section className={styles.page}>
-    <header className={styles.header}><p className={styles.meta}>Podcast · {state?.plan?.episodesPerDay === 2 ? "30" : "15"} min/day</p><h1>{day ? day.episodes.length === 2 ? "Your two episodes" : "Your next episode" : "Your listening plan"}</h1>{day ? <p className={styles.muted}>Day {day.dayNumber}</p> : null}</header>
+    <header className={styles.header}><p className={styles.eyebrow}>Podcast · {state?.plan?.episodesPerDay === 2 ? "30" : "15"} min/day</p><h1>{day ? day.episodes.length === 2 ? "Your two episodes" : "Your next episode" : "Your listening plan"}</h1>{day ? <p className={styles.muted}>Day {day.dayNumber}</p> : null}</header>
     {!day ? <div className={styles.stack}><p>No episodes are waiting on this day. Your completed history has not been removed.</p><Link className={styles.secondary} href="/dashboard/sogp/plan">Choose or edit your episodes</Link></div> : <>
       <div className={styles.notice}><h2>{day.episodes.filter(episode => episode.listened).length} of {day.episodes.length} episodes marked listened</h2><p className={styles.meta}>{day.episodes.length === 2 ? "Both episodes must be marked listened to complete this day." : "Mark this episode listened to complete this day."} Playback ending does not mark completion.</p></div>
       {day.episodes.map(item => { const episode = data.episodes.find(row => row.guid === item.episodeGuid), position = state?.progress.playbackPositions.find(row => row.episodeGuid === item.episodeGuid);
-        return <article className={styles.episode} key={item.episodeGuid}><h2>{episode?.title ?? "Episode no longer in the catalogue"}</h2><p className={styles.meta}>{episode?.duration || "Duration unavailable"}</p><StatusPill tone={item.listened ? "green" : "neutral"}>{item.listened ? "Listened" : "Not marked listened"}</StatusPill>{episode ? <PodcastPlayer episode={episode} position={position} canWrite={data.canWrite} /> : <p>Your completion and saved position remain in your history.</p>}<button type="button" className={item.listened ? styles.secondary : styles.primary} disabled={saving || !data.canWrite} onClick={() => mark(item.episodeGuid,!item.listened)}>{saving ? "Saving…" : item.listened ? "Undo listened mark" : "Mark listened"}<DashboardIcon name="check" /></button></article>;
+        return <article className={styles.episode} key={item.episodeGuid}><h2>{episode?.title ?? "Episode no longer in the catalogue"}</h2><div className={styles.metaRow}><p className={styles.meta}>Podcast · {episode?.duration || "Duration unavailable"}</p><span className={styles.meta}>{item.listened ? "Listened" : "Not marked listened"}</span></div>{episode ? <PodcastPlayer episode={episode} position={position} canWrite={data.canWrite} /> : <p>Your completion and saved position remain in your history.</p>}<button type="button" className={item.listened ? styles.secondary : styles.primary} disabled={saving || !data.canWrite} onClick={() => mark(item.episodeGuid,!item.listened)}>{saving ? "Saving…" : item.listened ? "Undo listened mark" : "Mark listened"}<DashboardIcon name="check" /></button></article>;
       })}
       {day.complete ? <Link className={styles.primary} href="/dashboard/sogp">Day completed · Back to My SOGP</Link> : null}
     </>}

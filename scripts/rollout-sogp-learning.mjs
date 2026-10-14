@@ -29,10 +29,12 @@ if (!applying) process.exit(0);
 if (present.length || Number(ledger[0]?.created_at ?? 0) >= migrations[0].when) throw new Error("Objects or journal are ahead/partial. Refuse blind replay.");
 const previous = journal.find(item=>item.tag==="0053_church_multi_branch_pastors");
 if (!previous || Number(ledger[0]?.created_at) !== previous.when) throw new Error("The ledger is not at the verified 0053 predecessor.");
+const previousHash = crypto.createHash("sha256").update(fs.readFileSync("drizzle/0053_church_multi_branch_pastors.sql")).digest("hex");
+if (ledger[0]?.hash !== previousHash) throw new Error("The predecessor journal hash does not match the reviewed source.");
 const oldTables = ["users","sogp_enrollments","student_progress","podcast_journeys","podcast_episode_progress"];
 // Digests stay inside the process: no learner rows or identity-bearing values
 // leave the database. Include every column to detect any accidental DML.
-const snapshotSql = oldTables.map(table=>`select '${table}' as name,count(*)::text as count,md5(coalesce(string_agg(md5(row_to_json(t)::text),',' order by md5(row_to_json(t)::text)),'')) as digest from public."${table}" t`).join(" union all ");
+const snapshotSql = oldTables.map(table=>`select '${table}' as name,count(*)::text as count,md5(coalesce(string_agg(md5(row_to_json(t)::text),',' order by md5(row_to_json(t)::text)),'')) as digest from public."${table}" t`).join(" union all ") + " order by name";
 const pool = new Pool({connectionString:url});
 const client = await pool.connect();
 try {
