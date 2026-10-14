@@ -1,6 +1,7 @@
 import { dashboardFont } from "@/components/dashboard/v3/font";
 import styles from "@/components/dashboard/v3/dashboard.module.css";
 import { ChurchHomeView } from "@/components/dashboard/church/church-home";
+import { ChurchOversight } from "@/components/dashboard/church/church-oversight";
 import { AddWorkers, AppointLeader, CreatePlace } from "@/components/dashboard/church/church-flows";
 import type { ChurchHome, ChurchPlace } from "@/lib/db/queries/church-home";
 
@@ -21,6 +22,7 @@ const place = (withLeader: boolean): ChurchPlace => ({ viewerRole: "branch_pasto
 /** Labelled sample data. Flow buttons call live actions, which refuse without a session. */
 export default async function ChurchPreview({ searchParams }: { searchParams: Promise<{ screen?: string }> }) {
   const { screen = "pastor" } = await searchParams;
-  const body = screen === "create" ? <CreatePlace /> : screen === "appoint" ? <AppointLeader place={place(false)} role="unit_leader" supervisorId="bp" /> : screen === "appoint-branch" ? <AppointLeader place={{ ...place(false), viewerRole: "pastor", pastors: [], unit: null }} role="branch_pastor" supervisorId="p" /> : screen === "allocate" ? <AddWorkers place={place(true)} /> : <ChurchHomeView data={homes[screen] ?? homes.pastor} canOversee />;
+  const body = screen === "oversight" ? <ChurchOversight day="2026-10-13" dayLabel="Tue 13 Oct" scope="Lagos branch" remindersEnabled rows={[{ userId: "a", name: "Dayo Eze", roleLabel: "Worker", group: "Welcome team", statuses: { devotional: "missing", ministry: "nil", meetings: "reported" } }, { userId: "b", name: "Nneka Musa", roleLabel: "Worker", group: "Welcome team", statuses: { devotional: "reported", ministry: "missing", meetings: "nil" } }, { userId: "c", name: "Ruth Eze", roleLabel: "Worker", group: "Welcome team", statuses: { devotional: "reported", ministry: "reported", meetings: "reported" } }]} />
+    : screen === "create" ? <CreatePlace /> : screen === "appoint" ? <AppointLeader place={place(false)} role="unit_leader" supervisorId="bp" /> : screen === "appoint-branch" ? <AppointLeader place={{ ...place(false), viewerRole: "pastor", pastors: [], unit: null }} role="branch_pastor" supervisorId="p" /> : screen === "allocate" ? <AddWorkers place={place(true)} /> : <ChurchHomeView data={homes[screen] ?? homes.pastor} canOversee />;
   return <div className={`${dashboardFont.className} ${styles.root}`} data-dashboard-v3><p className="px-4 py-2 text-xs text-(--color-text-muted)">Visual preview · sample data · nothing saved</p>{body}</div>;
 }
