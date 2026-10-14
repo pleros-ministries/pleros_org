@@ -234,7 +234,7 @@ export function GroupHeader({
             <h2 className="ppc-heading break-words text-base font-semibold text-zinc-900">
               {group.name}
             </h2>
-            <p className="text-[0.62rem] font-semibold uppercase tracking-[0.1em] text-zinc-400">
+            <p className="text-[13px] font-medium text-(--color-text-muted)">
               {discipleCount} of {DISCIPLESHIP_GROUP_MAX} disciples
             </p>
           </div>
