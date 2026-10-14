@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { chooseSogpPathAction } from "@/app/_actions/sogp-learning-actions";
-import { learningResume, type LearningViewData } from "@/lib/sogp/learning-view";
+import { learningResume, learningWriteNotice, type LearningViewData } from "@/lib/sogp/learning-view";
 import type { SogpLearningPath } from "@/lib/sogp/learning-input";
 import { switchPodcastPace } from "@/lib/sogp/podcast-plan";
 import { DashboardIcon } from "@/components/dashboard/v3/primitives";
@@ -61,7 +61,7 @@ export function PathChooser({ data }: { data: LearningViewData }) {
       {([{ key: "traditional",title: "1 hr/day",description: "Traditional one-hour tracks" },{ key: "podcast_two",title: "30 min/day",description: "2 podcast episodes/day" },{ key: "podcast_one",title: "15 min/day",description: "1 podcast episode/day" }] as const).map(option => <label className={styles.choice} key={option.key}><span><strong>{option.title}</strong><span className={styles.meta}>{option.description}</span></span><input type="radio" name="path" value={option.key} checked={path === option.key} onChange={() => { setPath(option.key);setError(null); }} /></label>)}
     </fieldset>
     <div className={styles.notice}><p>Both paths keep their own history, completions and playback positions.</p><p className={styles.meta}>Switching doesn’t transfer completion. Your podcast plan is kept when you choose Traditional.</p>{preview ? <p>{preview.episodeGuids.length} queued episodes · {Math.ceil(preview.episodeGuids.length / preview.episodesPerDay)} learning days after this choice. No remaining episodes are dropped.</p> : null}</div>
-    {!data.canWrite ? <p className={styles.muted}>New learning settings are not enabled here yet. Your existing learning remains available.</p> : null}
+    {!data.canWrite ? <p className={styles.muted}>{learningWriteNotice(data)}</p> : null}
     <div className={styles.footer}>{error ? <p role="alert" className={styles.error}>{error}</p> : null}<button className={styles.primary} type="button" disabled={saving || !data.canWrite} onClick={submit}>{saving ? "Saving…" : path && path !== "traditional" && !plan ? "Choose your episodes" : "Confirm path"}<DashboardIcon name="right" size={16} /></button></div>
   </section>;
 }

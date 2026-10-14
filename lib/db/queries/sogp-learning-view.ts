@@ -16,6 +16,7 @@ export async function getOwnLearningView(userId: string): Promise<LearningViewDa
     state,
     episodes: episodes.map(({ guid,title,duration,audioUrl }) => ({ guid,title,duration,audioUrl })),
     canWrite: sogpLearningWritesEnabled() && dashboard.learnerState !== "withdrawn",
+    writeBlockReason: dashboard.learnerState === "withdrawn" ? "withdrawn" : sogpLearningWritesEnabled() ? null : "not_enabled",
     traditional: { completed: published.filter(track => track.completed).length, total: published.length, nextTitle: next?.lesson.title ?? null, resumeHref: next ? `/dashboard/sogp/course/day/${next.dayNumber}` : "/dashboard/sogp/traditional" },
   };
 }

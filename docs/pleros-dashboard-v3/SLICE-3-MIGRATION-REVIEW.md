@@ -41,4 +41,4 @@ This checkpoint intentionally does not activate either gate, migrate any shared 
 
 ## Remaining work
 
-Bind the approved path chooser, My SOGP, podcast library/editor and explicit per-episode controls to these services. Connect a GET read adapter using TanStack Query/Suspense and error boundaries. Verify immediate start and published-content guards separately, without removing traditional assessments. Add live mobile/desktop/role evidence. Question routing/privacy and later group-review/certification decisions remain separate; no thresholds or equivalence formula are invented here.
+The path chooser, My SOGP, podcast library/editor, explicit episode controls and owned GET/TanStack/Suspense adapter have since been connected; see `SOGP-LEARNING-LIVE-REVIEW.md` for checks and evidence. Future-cohort immediate-start acceptance, matched visual review and shared activation remain pending. Question routing/privacy and later group-review/certification decisions remain separate; no thresholds or equivalence formula are invented here.

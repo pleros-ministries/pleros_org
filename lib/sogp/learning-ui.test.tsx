@@ -7,7 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { LearningViewData } from "./learning-view";
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn(),refresh: vi.fn() }) }));
 vi.mock("@/app/_actions/sogp-learning-actions", () => ({ chooseSogpPathAction: vi.fn(),editSogpPlanAction: vi.fn(),setSogpListenedAction: vi.fn(),saveSogpPlaybackAction: vi.fn() }));
-const data: LearningViewData = { state: { path: "podcast_two", revision: 3, plan: { episodesPerDay: 2, episodeGuids: ["a","b"], historyEpisodeGuids: [] }, progress: { listenedEpisodeGuids: ["a"], playbackPositions: [] } }, episodes: [], canWrite: true, traditional: { completed: 2,total: 24,nextTitle: "Saved traditional lesson",resumeHref: "/dashboard/sogp/course/day/3" } };
+const data: LearningViewData = { state: { path: "podcast_two", revision: 3, plan: { episodesPerDay: 2, episodeGuids: ["a","b"], historyEpisodeGuids: [] }, progress: { listenedEpisodeGuids: ["a"], playbackPositions: [] } }, episodes: [], canWrite: true,writeBlockReason: null, traditional: { completed: 2,total: 24,nextTitle: "Saved traditional lesson",resumeHref: "/dashboard/sogp/course/day/3" } };
 test("resume exposes the incomplete podcast day and retains traditional tools", () => {
   const html = renderToStaticMarkup(<LearningHome data={data} />);
   expect(html).toContain('href="/dashboard/sogp/listen?day=1"');
@@ -42,4 +42,9 @@ test("all three path choices remain available with a read-only explanation durin
   expect((html.match(/type="radio"/g) ?? []).length).toBe(3);
   expect(html).toContain("Your existing learning remains available");
   expect(html).toContain("Both paths keep their own history");
+});
+test("withdrawn learners get an access explanation rather than a rollout message", () => {
+  const html = renderToStaticMarkup(<QueryClientProvider client={new QueryClient()}><PathChooser data={{ ...data,canWrite: false,writeBlockReason: "withdrawn" }} /></QueryClientProvider>);
+  expect(html).toContain("This enrolment is withdrawn");
+  expect(html).not.toContain("not enabled here yet");
 });

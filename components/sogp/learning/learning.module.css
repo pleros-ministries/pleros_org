@@ -36,5 +36,8 @@
 .episodeLabel { display: flex; gap: 16px; align-items: center; min-height: 44px; }
 .episodeLabel input { width: 22px; height: 22px; flex-shrink: 0; accent-color: var(--color-brand-blue); }
 .previewAudio { max-width: 100%; width: 100%; }
+.page [data-dashboard-audio] select { width: auto; min-width: 72px; }
+.page [data-dashboard-audio] a { white-space: nowrap; }
+.page [data-dashboard-audio] svg { stroke-width: 1.75; }
 .footer { display: grid; gap: 12px; border-top: 1px solid var(--color-line); padding-top: 20px; }
 @media(min-width:64rem) { .page { padding-block: 32px 64px; } }

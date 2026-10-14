@@ -4,7 +4,7 @@ import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { chooseSogpPathAction, editSogpPlanAction } from "@/app/_actions/sogp-learning-actions";
-import { moveRemainingEpisode, podcastSuggestion, type LearningViewData } from "@/lib/sogp/learning-view";
+import { moveRemainingEpisode, podcastSuggestion, learningWriteNotice, type LearningViewData } from "@/lib/sogp/learning-view";
 import { DashboardIcon, StatusPill } from "@/components/dashboard/v3/primitives";
 import styles from "./learning.module.css";
 
@@ -81,6 +81,6 @@ export function PlanEditor({ data,requestedPath }: { data: LearningViewData;requ
       {!data.episodes.length ? <p className={styles.muted}>The episode library is unavailable. Your saved plan is unchanged. Refresh to try again.</p> : !library.length ? <p className={styles.muted}>No episodes match this search.</p> : null}
       {library.map(episode => <article key={episode.guid} className={styles.episode}><label className={styles.episodeLabel}><input type="checkbox" checked={queued.has(episode.guid)} disabled={saving || listened.has(episode.guid) || archived.has(episode.guid)} onChange={event => { if (event.target.checked) setDraft([...draft,episode.guid]);else remove(draft.indexOf(episode.guid)); }} /><span><strong>{episode.title}</strong><span className={styles.meta}>{episode.duration || "Duration unavailable"}{listened.has(episode.guid) ? " · Already listened" : ""}</span></span></label>{episode.audioUrl ? <details><summary>Preview episode</summary><audio controls preload="none" src={episode.audioUrl} className={styles.previewAudio} /></details> : <p className={styles.meta}>Preview unavailable</p>}</article>)}
     </section>
-    <div className={styles.footer}><p className={styles.meta}>Completed listens cannot be moved or replaced. Playback positions stay with their episodes.</p>{!data.canWrite ? <p className={styles.muted}>Saving new learning settings is not enabled here yet. Existing learning is still available.</p> : null}{error ? <p role="alert" className={styles.error}>{error}</p> : null}<button type="button" className={styles.primary} disabled={saving || !data.canWrite} onClick={save}>{saving ? "Saving…" : existingPlan ? "Save plan changes" : "Start my podcast plan"}<DashboardIcon name="check" /></button></div>
+    <div className={styles.footer}><p className={styles.meta}>Completed listens cannot be moved or replaced. Playback positions stay with their episodes.</p>{!data.canWrite ? <p className={styles.muted}>{learningWriteNotice(data)}</p> : null}{error ? <p role="alert" className={styles.error}>{error}</p> : null}<button type="button" className={styles.primary} disabled={saving || !data.canWrite} onClick={save}>{saving ? "Saving…" : existingPlan ? "Save plan changes" : "Start my podcast plan"}<DashboardIcon name="check" /></button></div>
   </section>;
 }

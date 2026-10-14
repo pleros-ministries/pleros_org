@@ -10,17 +10,18 @@ export function DashboardHomeView({ name, greeting, data }: { name?: string; gre
   const router = useRouter();
   const dayHref = `/dashboard/community/report?day=${encodeURIComponent(data.day)}`;
   const planHref = data.learning.enrolled ? "/dashboard/sogp" : "/sogp";
+  const unit = data.learning.unit ?? "tracks";
   return <div className={styles.content}>
     <h1 className={styles.greeting} data-dashboard-greeting>{name ? `${greeting}, ${name}` : greeting}</h1>
     <section className={styles.learning} aria-label="Continue learning">
       <div className={styles.sectionHeader}><h2>{data.learning.enrolled ? "Continue learning" : "Start learning"}</h2><Link className={styles.textAction} href={planHref}>{data.learning.enrolled ? "View plan" : "About SOGP"}</Link></div>
       <LearningCard onContinue={() => router.push(data.learning.href)} actionLabel={data.learning.action} lesson={{
-        title: data.learning.title, pathLabel: "SOGP", elapsedSeconds: data.learning.completed, durationSeconds: data.learning.total,
+        title: data.learning.title, pathLabel: data.learning.pathLabel ?? "SOGP", elapsedSeconds: data.learning.completed, durationSeconds: data.learning.total,
         elapsedLabel: String(data.learning.completed), durationLabel: String(data.learning.total), progressLabel: "SOGP progress",
         leftLabel: data.learning.total > 0 ? `${data.learning.completed} complete` : "Your learning journey",
-        rightLabel: data.learning.total > 0 ? `${data.learning.total} tracks` : "",
+        rightLabel: data.learning.total > 0 ? `${data.learning.total} ${unit}` : "",
       }} />
-      <Link className={styles.planRow} href={planHref}><span className={styles.rowIcon}><DashboardIcon name="book" /></span><span className={styles.rowCopy}><span className={styles.rowTitle}>My SOGP</span><span className={styles.metadata}>{data.learning.total > 0 ? `${data.learning.completed} of ${data.learning.total} tracks complete` : "Your learning and reviews"}</span></span><span className={styles.rowIcon}><DashboardIcon name="right" size={16} /></span></Link>
+      <Link className={styles.planRow} href={planHref}><span className={styles.rowIcon}><DashboardIcon name="book" /></span><span className={styles.rowCopy}><span className={styles.rowTitle}>My SOGP</span><span className={styles.metadata}>{data.learning.total > 0 ? `${data.learning.completed} of ${data.learning.total} ${unit} complete` : "Your learning and reviews"}</span></span><span className={styles.rowIcon}><DashboardIcon name="right" size={16} /></span></Link>
     </section>
     {data.reports ? <section className={styles.reports} aria-label="My reports">
       <div className={styles.sectionHeader}><h2>My reports</h2><Link href={dayHref} className={styles.textAction}>View day</Link></div>

@@ -10,10 +10,13 @@ import {
   getSogpEnrollmentsWithCohortByUserId,
 } from "@/lib/db/queries/sogp";
 import { canOfferJoinAnotherCohort } from "@/lib/sogp/status";
+import { traditionalDateHref } from "@/lib/sogp/learning-view";
 
-export default async function SogpDashboardPage() {
+export default async function SogpDashboardPage({ searchParams }: { searchParams: Promise<{ date?: string }> }) {
   const session = await getAppSession();
   if (!session) redirect("/login?returnTo=/dashboard/sogp");
+  const dated = traditionalDateHref((await searchParams).date);
+  if (dated) redirect(dated);
 
   const rows = await getSogpEnrollmentsWithCohortByUserId(session.user.id);
   if (rows.length === 0) redirect("/sogp/enrol");

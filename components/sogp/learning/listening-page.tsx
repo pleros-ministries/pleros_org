@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { saveSogpPlaybackAction, setSogpListenedAction } from "@/app/_actions/sogp-learning-actions";
 import { readPodcastPlan } from "@/lib/sogp/podcast-plan";
-import { learningResume, type LearningEpisode, type LearningViewData } from "@/lib/sogp/learning-view";
+import { learningResume, learningWriteNotice, type LearningEpisode, type LearningViewData } from "@/lib/sogp/learning-view";
 import { LessonAudioControls } from "@/components/media/lesson-audio-controls";
 import { DashboardIcon, StatusPill } from "@/components/dashboard/v3/primitives";
 import styles from "./learning.module.css";
@@ -65,7 +65,7 @@ export function ListeningPage({ data,requestedDay }: { data: LearningViewData;re
       })}
       {day.complete ? <Link className={styles.primary} href="/dashboard/sogp">Day completed · Back to My SOGP</Link> : null}
     </>}
-    {!data.canWrite ? <p className={styles.muted}>New progress controls are not enabled here yet. Existing podcast history and controls remain available.</p> : null}
+    {!data.canWrite ? <p className={styles.muted}>{learningWriteNotice(data)}</p> : null}
     {error ? <div className={styles.stack}><p role="alert" className={styles.error}>{error}</p><button type="button" className={styles.secondary} onClick={() => window.location.reload()}>Reload saved progress</button></div> : null}
     <div className={styles.notice}><p>Questions are optional and don’t affect completion.</p><p className={styles.meta}>Episode-specific question delivery is not connected yet. You can still use Ask Pleros, with its existing privacy choice.</p><Link href="/dashboard/community/ask">Open Ask Pleros</Link></div>
     <Link href="/dashboard/podcast">Existing podcast library and history</Link>

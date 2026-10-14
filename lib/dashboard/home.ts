@@ -19,7 +19,7 @@ export function homeReportRows(input: { devotionalCount: number; ministryCount: 
 
 export type DashboardHomeData = {
   day: string;
-  learning: { title: string; href: string; action: string; completed: number; total: number; enrolled: boolean };
+  learning: { title: string; href: string; action: string; completed: number; total: number; enrolled: boolean; unit?: "tracks" | "episodes"; pathLabel?: string };
   reports: HomeReport[] | null;
   support: { firstName: string; canMessage: boolean } | null;
   community: boolean;

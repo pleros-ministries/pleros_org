@@ -7,8 +7,17 @@ export type LearningViewData = {
   state: SogpLearningState | null;
   episodes: LearningEpisode[];
   canWrite: boolean;
+  writeBlockReason: "not_enabled" | "withdrawn" | null;
   traditional: { completed: number; total: number; nextTitle: string | null; resumeHref: string };
 };
+export function learningWriteNotice(data: LearningViewData) {
+  return data.writeBlockReason === "withdrawn" ? "This enrolment is withdrawn. Your history remains available, but learning settings cannot be changed." : "New learning settings are not enabled here yet. Your existing learning remains available.";
+}
+export function traditionalDateHref(date: string | undefined) {
+  if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
+  const parsed = new Date(`${date}T00:00:00.000Z`);
+  return Number.isFinite(parsed.getTime()) && parsed.toISOString().slice(0,10) === date ? `/dashboard/sogp/traditional?date=${date}` : null;
+}
 const normaliseTitle = (title: string) => title.replace(/[’‘]/g,"'").trim().toLowerCase();
 export function podcastSuggestion(episodes: { guid: string; title: string }[], pace: PodcastPace): string[] {
   const byTitle = new Map(episodes.map(episode => [normaliseTitle(episode.title),episode.guid]));

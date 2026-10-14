@@ -1,9 +1,10 @@
 import { beforeEach, expect, test, vi } from "vitest";
 
-const reads = vi.hoisted(() => ({ course: vi.fn(), activities: vi.fn(), devotional: vi.fn(), declarations: vi.fn(), support: vi.fn(), context: vi.fn() }));
+const reads = vi.hoisted(() => ({ course: vi.fn(), learning: vi.fn(), activities: vi.fn(), devotional: vi.fn(), declarations: vi.fn(), support: vi.fn(), context: vi.fn() }));
 vi.mock("server-only", () => ({}));
 vi.mock("@/lib/community/context", () => ({ getCommunityContext: reads.context }));
 vi.mock("@/lib/db/queries/sogp", () => ({ getSogpDashboardData: reads.course }));
+vi.mock("@/lib/db/queries/sogp-learning", () => ({ getOwnSogpLearning: reads.learning }));
 vi.mock("@/lib/db/queries/ministry-activities", () => ({ listActivitiesForDay: reads.activities, getDayActivity: reads.devotional }));
 vi.mock("@/lib/db/queries/daily-report-declarations", () => ({ getOwnDailyDeclarations: reads.declarations }));
 vi.mock("@/lib/db/queries/community-discipleship", () => ({ getOwnDisciplerSummary: reads.support }));
@@ -16,6 +17,7 @@ function viewer(enabled = true) {
 }
 beforeEach(() => {
   vi.clearAllMocks();
+  reads.learning.mockResolvedValue(null);
   reads.context.mockResolvedValue({ userId: "own-user" });
   reads.course.mockResolvedValue({
     enrollment: { email: "PRIVATE_EMAIL", phone: "PRIVATE_PHONE" },
@@ -29,6 +31,11 @@ beforeEach(() => {
   reads.devotional.mockResolvedValue({ bible: null, prayerWatch: ["morning"], podcastEpisodes: 0, sogp: null });
   reads.declarations.mockResolvedValue([]);
   reads.support.mockResolvedValue(null);
+});
+test("the You home resumes the selected podcast path without awarding traditional credit",async () => {
+  reads.learning.mockResolvedValue({ path: "podcast_two",revision: 2,plan: { episodesPerDay: 2,episodeGuids: ["a","b","c","d"],historyEpisodeGuids: ["older"] },progress: { listenedEpisodeGuids: ["a","older"],playbackPositions: [] } });
+  const data = await getDashboardHomeData(viewer());
+  expect(data.learning).toMatchObject({ title: "Day 1 is waiting for you",href: "/dashboard/sogp/listen?day=1",completed: 2,total: 5,unit: "episodes",pathLabel: "30 min/day · Podcast path" });
 });
 
 test("home reads are self-scoped, use the existing access rules, and expose a narrow DTO", async () => {

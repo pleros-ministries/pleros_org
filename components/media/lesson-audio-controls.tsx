@@ -52,7 +52,7 @@ export function LessonAudioControls({ src, onProgress, initialPositionSeconds = 
     }
   }
 
-  return <div className="grid gap-4" role="group" aria-label={`${label} audio controls`}>
+  return <div className="grid gap-4" data-dashboard-audio={dashboard || undefined} role="group" aria-label={`${label} audio controls`}>
     <audio ref={audioRef} src={src} preload="metadata"
       onLoadedMetadata={event => metadata(event.currentTarget)} onDurationChange={event => metadata(event.currentTarget)}
       onPlay={() => setPlaying(true)} onPause={event => { setPlaying(false); setWaiting(false); onSavePosition?.(event.currentTarget.currentTime); }}
@@ -71,10 +71,10 @@ export function LessonAudioControls({ src, onProgress, initialPositionSeconds = 
     </div>
     <div className="grid gap-1.5">
       <input type="range" min={0} max={100} step={0.1} value={progress} disabled={!ready} onChange={event => seek(Number(event.target.value) / 100 * duration)} aria-label={`Seek ${label}`} aria-valuetext={`${clock(time)} of ${clock(duration)}`} className={`${dashboard ? "min-h-11" : "h-6"} w-full cursor-pointer accent-(--color-brand-blue) disabled:opacity-40 ${focusRing}`} />
-      <div className="flex items-center justify-between text-[11.5px] tabular-nums text-(--color-text-muted)"><span>{clock(time)}</span><span>{ready ? `−${clock(duration - time)}` : error ? "Audio unavailable" : "Loading audio…"}</span></div>
+      <div className={`flex items-center justify-between ${dashboard ? "text-[13px]" : "text-[11.5px]"} tabular-nums text-(--color-text-muted)`}><span>{clock(time)}</span><span>{ready ? `−${clock(duration - time)}` : error ? "Audio unavailable" : "Loading audio…"}</span></div>
     </div>
-    <div className="flex items-center justify-between gap-3 border-t border-(--color-line) pt-3">
-      <label className="flex items-center gap-2 text-[12px] text-(--color-text-muted)">Speed
+    <div className={`flex ${dashboard ? "flex-wrap" : ""} items-center justify-between gap-3 border-t border-(--color-line) pt-3`}>
+      <label className={`flex shrink-0 items-center gap-2 whitespace-nowrap ${dashboard ? "text-[13px]" : "text-[12px]"} text-(--color-text-muted)`}>Speed
         <select aria-label="Playback speed" value={rate} onChange={event => { const value = Number(event.target.value); setRate(value); if (audioRef.current) audioRef.current.playbackRate = value; }} className={`${dashboard ? "min-h-11" : "h-8"} rounded-md border border-(--color-line-strong) bg-white pl-2 text-[12.5px] font-medium text-(--color-text-strong)`}>
           {[0.75, 1, 1.25, 1.5, 2].map(value => <option key={value} value={value}>{value}×</option>)}
         </select>

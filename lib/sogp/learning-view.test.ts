@@ -1,9 +1,13 @@
 import { describe, expect, test } from "vitest";
-import { podcastSuggestion, learningResume, moveRemainingEpisode } from "./learning-view";
+import { podcastSuggestion, learningResume, moveRemainingEpisode, traditionalDateHref } from "./learning-view";
 import type { SogpLearningState } from "@/lib/db/queries/sogp-learning";
 
 const state: SogpLearningState = { path: "podcast_two", revision: 2, plan: { episodesPerDay: 2, episodeGuids: ["a","b","c","d"], historyEpisodeGuids: [] }, progress: { listenedEpisodeGuids: ["a"], playbackPositions: [{ episodeGuid: "b", positionSeconds: 285, revision: 1 }] } };
 describe("live learning projections", () => {
+  test("retains valid date-pinned teaching reminders without accepting invalid or external destinations", () => {
+    expect(traditionalDateHref("2026-10-14")).toBe("/dashboard/sogp/traditional?date=2026-10-14");
+    for (const date of [undefined,"2026-02-30","https://example.test","2026-10-14&other=1"]) expect(traditionalDateHref(date)).toBeNull();
+  });
   test("resumes the partial first day, not a later calendar day", () => {
     expect(learningResume(state)).toEqual({ dayNumber: 1, listened: 1, total: 2, episodeGuids: ["a","b"] });
   });
