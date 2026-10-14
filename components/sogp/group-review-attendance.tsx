@@ -27,7 +27,7 @@ export function GroupReviewAttendance({ data, preview = false }: { data: GroupAt
   }
   return <section className={styles.page}>
     <header className={styles.heading}><h1>Record group attendance</h1><StatusPill tone="lilac">Session leader</StatusPill></header>
-    <article className={styles.reviewCard}><h2 data-dashboard-learning-title className={styles.attendanceTitle}>{data.title}</h2><p className={styles.meta}>{data.groupName}</p><p>{groupReviewTimeLabel(data.startsAt, data.endsAt)}</p><p className={styles.meta}>{data.venue} · Lagos (WAT)</p><p className={styles.meta}>Session leader · {data.leaderName}</p></article>
+    <article className={`${styles.reviewCard} ${styles.lockedSummary}`}><h2 data-dashboard-learning-title className={styles.attendanceTitle}>{data.title}</h2><p className={styles.meta}>{data.groupName}</p><p>{groupReviewTimeLabel(data.startsAt, data.endsAt)}</p><p className={styles.meta}>{data.venue} · Lagos (WAT)</p><p className={styles.lockedLine}><span className={styles.meta}>Session leader · {data.leaderName}</span><DashboardIcon name="lock" size={16} /></p></article>
     <p className={styles.meta}>You’re confirming the existing review session.</p>
     {!afterReview ? <p className={styles.info}>Attendance can be confirmed after this review has taken place.</p> : null}
     <section className={styles.section}><h2>Learners</h2>{data.learners.length ? data.learners.map(learner => {
