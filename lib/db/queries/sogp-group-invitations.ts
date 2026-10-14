@@ -35,6 +35,8 @@ export async function inviteReferredLearnerToOwnerGroup(input: {
   referrerEnrollmentId: number;
   referrerUserId: string;
   recipientEnrollmentId: number;
+  /** Code of the group invite link the learner arrived through, if any. */
+  groupInviteCode?: string | null;
 }): Promise<void> {
   const [referrer] = await db
     .select({ id: schema.sogpEnrollments.id, firstName: schema.sogpEnrollments.firstName, name: schema.users.name })
@@ -44,7 +46,9 @@ export async function inviteReferredLearnerToOwnerGroup(input: {
     .limit(1);
   if (!referrer) return;
   const groups = await ensureDiscipleshipGroups({ id: referrer.id, firstName: referrer.firstName, name: referrer.name });
-  const group = groups.find(row => row.status === "active");
+  // A group invite link names its group; a plain referral uses the oldest.
+  const group = groups.find(row => row.status === "active" && input.groupInviteCode != null && row.inviteCode === input.groupInviteCode)
+    ?? groups.find(row => row.status === "active");
   if (!group) return;
   await db
     .insert(schema.discipleshipGroupInvitations)
