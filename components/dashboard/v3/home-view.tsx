@@ -70,9 +70,5 @@ export function DashboardHomeView({ name, greeting, data }: { name?: string; gre
     <section className={styles.support} aria-label="My support"><h2>My support</h2>
       {data.support ? <div className={styles.person}><span className={styles.avatar}>{data.support.firstName.slice(0,2).toUpperCase()}</span><span className={styles.rowCopy}><span className={styles.rowTitle}>{data.support.firstName}</span><span className={styles.metadata}>Your discipler · Connected</span></span>{data.support.canMessage ? <Link href="/dashboard/community/messages" className={styles.textAction}>Message</Link> : null}</div> : <div className={styles.supportEmpty}><p className={styles.metadata}>You’re not connected to a discipler yet.</p>{data.community ? <Link href="/dashboard/community/ask" className={styles.textAction}>Ask Pleros</Link> : <Link href="/contact" className={styles.textAction}>Contact Pleros</Link>}</div>}
     </section>
-    <nav aria-label="Dashboard essentials" className={styles.essentials}>
-      <Link href="/dashboard/welcomepack">Welcome Pack</Link><Link href="/dashboard/prayer-watch">Prayer Watch</Link><Link href="/dashboard/podcast">Podcast</Link>
-      {data.learning.enrolled ? <Link href="/dashboard/pre-sogp">Pre-SOGP lessons</Link> : null}
-    </nav>
   </div>;
 }

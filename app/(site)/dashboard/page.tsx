@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 
 import { DashboardHomeView } from "@/components/dashboard/v3/home-view";
-import { DashboardChurchMinistryStrip } from "@/components/dashboard/welcome-dashboard-view";
 import { HomepageFooter } from "@/components/home/homepage-footer";
 import { InstallAppCta } from "@/components/pwa/install-app-cta";
 import { getDashboardHomeData } from "@/lib/dashboard/home-data";
@@ -32,7 +31,6 @@ export default async function WelcomeDashboardPage() {
     <>
       <DashboardHomeView name={displayName ?? undefined} greeting={lagosGreeting(new Date())} data={data} />
       <div className="mx-auto max-w-[390px] px-5"><InstallAppCta /></div>
-      <DashboardChurchMinistryStrip resolveHref={href => href} />
       <HomepageFooter />
     </>
   );
