@@ -6,7 +6,6 @@ import {
   autoAssignPastorForEnrollment,
 } from "@/lib/db/queries/pastor-followups";
 import { recordFollowUpRoute } from "@/lib/db/queries/sogp-follow-up-routes";
-import { inviteReferredLearnerToOwnerGroup } from "@/lib/db/queries/sogp-group-invitations";
 import {
   attributeSogpReferral,
   ensureSogpReferralCode,
@@ -29,8 +28,6 @@ export function runSogpPostEnrollmentSideEffects(input: {
   enrollment: typeof schema.sogpEnrollments.$inferSelect;
   cohort: typeof schema.sogpCohorts.$inferSelect;
   userId: string;
-  /** `pleros_discipleship_invite` cookie, when enrolment began from a group link. */
-  groupInviteCode?: string | null;
   values: {
     firstName: string;
     lastName: string;
@@ -92,15 +89,6 @@ export function runSogpPostEnrollmentSideEffects(input: {
       }
     } catch (error) {
       console.error("SOGP follow-up owner assignment failed:", error);
-    }
-    // A pending invitation only: the learner joins the referrer's group by accepting.
-    if (referrer) {
-      await inviteReferredLearnerToOwnerGroup({
-        referrerEnrollmentId: referrer.enrollmentId,
-        referrerUserId: referrer.userId,
-        recipientEnrollmentId: enrollment.id,
-        groupInviteCode: input.groupInviteCode,
-      }).catch((error) => console.error("SOGP referral group invitation failed:", error));
     }
   });
   after(() =>

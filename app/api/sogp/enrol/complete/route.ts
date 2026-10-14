@@ -24,7 +24,6 @@ import {
   formatSogpReferralSource,
 } from "@/lib/sogp/enrollment";
 import { runSogpPostEnrollmentSideEffects } from "@/lib/sogp/enrollment-side-effects";
-import { DISCIPLESHIP_INVITE_COOKIE } from "@/lib/sogp/discipleship";
 
 export async function POST(request: NextRequest) {
   const token = request.cookies.get(SOGP_SETUP_COOKIE)?.value;
@@ -116,7 +115,6 @@ export async function POST(request: NextRequest) {
       enrollment,
       cohort,
       userId: session.user.id,
-      groupInviteCode: request.cookies.get(DISCIPLESHIP_INVITE_COOKIE)?.value ?? null,
       values: { ...values, email: pending.email },
     });
 

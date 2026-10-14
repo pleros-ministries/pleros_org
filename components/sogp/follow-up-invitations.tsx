@@ -17,13 +17,8 @@ function relativeDay(iso: string) {
   return days <= 0 ? "Today" : days === 1 ? "Yesterday" : days < 7 ? `${days} days ago` : lagos.format(new Date(iso));
 }
 
-function InvitationLink({ invitationId, ownerName }: { invitationId: number | null; ownerName: string }) {
-  if (!invitationId) return null;
-  return <Link className={styles.secondary} href={`/dashboard/sogp/invitations/${invitationId}`}>View {first(ownerName)}’s group invitation</Link>;
-}
-
 /** Paper: Pleros-referral-code / Pleros-referral-link. */
-export function FollowUpWelcome({ data, invitationId }: { data: WelcomeData & { ownerName: string }; invitationId: number | null }) {
+export function FollowUpWelcome({ data }: { data: WelcomeData & { ownerName: string } }) {
   const router = useRouter();
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -39,7 +34,6 @@ export function FollowUpWelcome({ data, invitationId }: { data: WelcomeData & { 
     </div>
     <p>You’ve been assigned to {owner} because you joined with their referral code.</p>
     <div className={styles.info}><DashboardIcon name="people" size={16} /><p>Your follow-up assignment is ready. Group invitations are a separate step.</p></div>
-    <InvitationLink invitationId={invitationId} ownerName={data.ownerName} />
     <Link className={styles.textLink} href="/dashboard/sogp/follow-up">Need help with your assignment?</Link>
     <footer className={styles.footer}><Link className={styles.primary} href="/dashboard/sogp">Start learning<DashboardIcon name="arrow" /></Link></footer>
   </section>;
@@ -62,7 +56,6 @@ export function FollowUpWelcome({ data, invitationId }: { data: WelcomeData & { 
       {error ? <p role="alert" className={styles.error}>{error}</p> : null}
     </div> : null}
     <div className={styles.info}><DashboardIcon name="shield" size={16} /><p>This choice is for follow-up support. Joining a group is a separate step.</p></div>
-    <InvitationLink invitationId={invitationId} ownerName={data.ownerName} />
     <div className={styles.later}><Link className={styles.textLink} href="/dashboard/sogp">Start learning now</Link>{awaiting ? <span className={styles.meta}>You can make this choice later.</span> : null}</div>
   </section>;
 }
