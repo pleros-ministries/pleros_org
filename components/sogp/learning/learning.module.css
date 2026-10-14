@@ -107,3 +107,15 @@ a.rowButton { text-decoration: none; color: var(--color-text-strong); }
 .libraryList { list-style: none; margin: 0; padding: 0; }
 .libraryList li { padding: 12px 0; border-bottom: 1px solid var(--color-line); }
 .libraryRow { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.compare { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; padding: 16px; border: 1px solid var(--color-line); border-radius: 16px; }
+.compare > div { display: grid; gap: 2px; }
+.compare strong { font-size: 18px; line-height: 26px; font-weight: 500; }
+.checkList { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.checkList li { display: flex; gap: 12px; align-items: flex-start; }
+.checkList svg { flex-shrink: 0; margin-top: 3px; color: var(--status-green-text); }
+.pathCard { display: grid; gap: 4px; padding: 16px; border: 1px solid var(--color-line); border-radius: 16px; }
+.pathCard[data-target=true] { border-color: var(--status-blue-bg); background: var(--status-blue-bg); }
+.pathCard h2 { display: inline-flex; align-items: center; gap: 12px; }
+.factPanel { padding: 16px; border-radius: 12px; background: var(--status-blue-bg); }
+.factPanel svg { color: var(--color-brand-blue); }
+.blueEyebrow { color: var(--color-brand-blue); }

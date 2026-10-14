@@ -9,6 +9,7 @@ import type { SogpLearningPath } from "@/lib/sogp/learning-input";
 import { switchPodcastPace } from "@/lib/sogp/podcast-plan";
 import { DashboardIcon } from "@/components/dashboard/v3/primitives";
 import styles from "./learning.module.css";
+import { PaceSwitchConfirm, PathSwitchConfirm } from "./path-switch";
 
 export function LearningHome({ data }: { data: LearningViewData }) {
   const podcast = data.state?.path && data.state.path !== "traditional";
@@ -36,7 +37,9 @@ export function LearningHome({ data }: { data: LearningViewData }) {
 }
 
 export function PathChooser({ data }: { data: LearningViewData }) {
-  const [path,setPath] = useState<SogpLearningPath | "">(data.state?.revision ? data.state.path : "");
+  const current = data.state?.revision ? data.state.path : null;
+  const [path,setPath] = useState<SogpLearningPath | "">(current ?? "");
+  const [confirming,setConfirming] = useState(false);
   const [error,setError] = useState<string | null>(null);
   const [saving,startSave] = useTransition();
   const router = useRouter();
@@ -45,6 +48,8 @@ export function PathChooser({ data }: { data: LearningViewData }) {
   const preview = plan && path && path !== "traditional" ? switchPodcastPace(plan,path === "podcast_one" ? 1 : 2,{ listenedEpisodeGuids: new Set(data.state!.progress.listenedEpisodeGuids),playbackPositionSeconds: new Map() }) : null;
   function submit() {
     if (!path) { setError("Choose one option to continue."); return; }
+    // An existing learner previews what a switch keeps before anything is saved (Paper).
+    if (current && path !== current && !confirming) { setError(null); setConfirming(true); return; }
     if (path !== "traditional" && !plan) { router.push(`/dashboard/sogp/plan?path=${path}`); return; }
     startSave(async () => {
       try {
@@ -55,6 +60,10 @@ export function PathChooser({ data }: { data: LearningViewData }) {
       } catch { setError("Your path could not be saved. Try again; your previous choice is unchanged."); }
     });
   }
+  if (confirming && path && current) {
+    const props = { data, target: path, saving, error, onConfirm: submit, onCancel: () => { setConfirming(false); setPath(current); setError(null); } };
+    return current !== "traditional" && path !== "traditional" && plan ? <PaceSwitchConfirm {...props} /> : <PathSwitchConfirm {...props} />;
+  }
   return <section className={`${styles.page} ${styles.choicePage}`}>
     <header className={styles.header}><p className={styles.eyebrow}>Your daily commitment</p><h1>Make room to grow</h1><p className={styles.muted}>How much time will you set aside each day?</p></header>
     <fieldset className={styles.choices}><legend>Choose one option</legend>
@@ -62,6 +71,6 @@ export function PathChooser({ data }: { data: LearningViewData }) {
     </fieldset>
     {data.state?.revision ? <div className={styles.notice}><p>Both paths keep their own history, completions and playback positions.</p><p className={styles.meta}>Switching doesn’t transfer completion. Your podcast plan is kept when you choose Traditional.</p>{preview ? <p>{preview.episodeGuids.length} queued episodes · {Math.ceil(preview.episodeGuids.length / preview.episodesPerDay)} learning days after this choice. No remaining episodes are dropped.</p> : null}</div> : <p className={styles.muted}>Choose the time you can commit to.</p>}
     {!data.canWrite ? <p className={styles.muted}>{learningWriteNotice(data)}</p> : null}
-    <div className={styles.footer}>{!path ? <p className={styles.meta}>Select one option to continue</p> : null}{error ? <p role="alert" className={styles.error}>{error}</p> : null}<button className={styles.primary} type="button" disabled={saving || !data.canWrite || !path} onClick={submit}>{saving ? "Saving…" : data.state?.revision ? "Confirm path" : "Continue"}<DashboardIcon name="right" size={16} /></button></div>
+    <div className={styles.footer}>{!path ? <p className={styles.meta}>Select one option to continue</p> : null}{error ? <p role="alert" className={styles.error}>{error}</p> : null}<button className={styles.primary} type="button" disabled={saving || !data.canWrite || !path} onClick={submit}>{saving ? "Saving…" : current && path && path !== current ? "Preview this change" : current ? "Keep this path" : "Continue"}<DashboardIcon name="right" size={16} /></button></div>
   </section>;
 }
