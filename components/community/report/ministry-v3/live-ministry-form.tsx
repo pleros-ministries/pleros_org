@@ -14,10 +14,7 @@ export function LiveMinistryForm({ dateKey, today, contacts, initial, activityId
   const [day, setDay] = useState(dateKey);
   const requestKey = useRef<string | null>(null);
   return <div>
-    {!activityId ? <label className="mx-auto flex max-w-160 items-center justify-between gap-3 px-4 pt-4 text-[13px]">Report day
-      <select className="h-11 rounded-[11px] border border-(--color-line) bg-white px-3 text-[16px]" value={day} onChange={event => setDay(event.target.value)}>{reportableDateKeys(today).map(date => <option key={date}>{date}</option>)}</select>
-    </label> : null}
-    <MinistryFormV3 dateKey={day} initialKind={initial?.kind} initialCount={initial ? String(initial.peopleCount) : ""} initialContacts={initial?.contacts} initialDetails={initial} savedContacts={contacts} onCreateContact={createPrivateContactAction} readOnly={readOnly} lockKind={Boolean(activityId)} onSave={async payload => {
+    <MinistryFormV3 dateKey={day} today={today} days={activityId ? undefined : reportableDateKeys(today)} onDayChange={setDay} initialKind={initial?.kind} initialCount={initial ? String(initial.peopleCount) : ""} initialContacts={initial?.contacts} initialDetails={initial} savedContacts={contacts} onCreateContact={createPrivateContactAction} readOnly={readOnly} lockKind={Boolean(activityId)} onSave={async payload => {
       requestKey.current ??= crypto.randomUUID();
       const result = await saveUnifiedMinistryAction({ ...payload, contacts: payload.contacts.map(row => row.key), activityId, requestKey: requestKey.current });
       if (!result.ok) return result;
