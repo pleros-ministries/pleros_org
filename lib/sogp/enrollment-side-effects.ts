@@ -1,7 +1,10 @@
 import { after } from "next/server";
 
 import { assignEnrollmentToUnit } from "@/lib/db/queries/community-units";
-import { autoAssignPastorForEnrollment } from "@/lib/db/queries/pastor-followups";
+import {
+  assignReferralOwnerForEnrollment,
+  autoAssignPastorForEnrollment,
+} from "@/lib/db/queries/pastor-followups";
 import {
   attributeSogpReferral,
   ensureSogpReferralCode,
@@ -50,27 +53,31 @@ export function runSogpPostEnrollmentSideEffects(input: {
     referralSourceOther: values.referralSourceOther,
   });
 
-  after(() =>
-    attributeSogpReferral({
+  // Referral first, then geography, in one sequence: running them as
+  // separate tasks let whichever finished first claim the follow-up slot.
+  after(async () => {
+    const referrer = await attributeSogpReferral({
       enrolleeEnrollmentId: enrollment.id,
       enrolleeUserId: userId,
       code: values.referredByCode,
-    }).catch((error) => console.error("SOGP referral attribution failed:", error)),
-  );
-  after(() =>
-    ensureSogpReferralCode(enrollment.id).catch((error) =>
+    }).catch((error) => {
+      console.error("SOGP referral attribution failed:", error);
+      return null;
+    });
+    await ensureSogpReferralCode(enrollment.id).catch((error) =>
       console.error("SOGP referral code mint failed:", error),
-    ),
-  );
-  after(() =>
-    assignEnrollmentToUnit(enrollment.id)
-      .then((result) =>
-        result ? autoAssignPastorForEnrollment(enrollment.id, result.unitId) : null,
-      )
-      .catch((error) =>
-        console.error("SOGP community unit/pastor assignment failed:", error),
-      ),
-  );
+    );
+    const unit = await assignEnrollmentToUnit(enrollment.id).catch((error) => {
+      console.error("SOGP community unit assignment failed:", error);
+      return null;
+    });
+    try {
+      if (referrer) await assignReferralOwnerForEnrollment(enrollment.id, referrer.userId);
+      else if (unit) await autoAssignPastorForEnrollment(enrollment.id, unit.unitId);
+    } catch (error) {
+      console.error("SOGP follow-up owner assignment failed:", error);
+    }
+  });
   after(() =>
     sendSogpEnrollmentEmail({
       to: values.email,

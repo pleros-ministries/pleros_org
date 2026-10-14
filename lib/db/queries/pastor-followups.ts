@@ -350,6 +350,24 @@ export async function bulkAssignPastorToRegion(input: {
  * one. Never overwrites — a human assignment always wins. Called right after
  * `assignEnrollmentToUnit` during enrolment completion.
  */
+/**
+ * Approved follow-up routing: a referral code/link assigns its owner (any
+ * enrollee); a direct join falls back to the geographical pastor. Both only
+ * fill an empty slot, so an admin or earlier assignment is never replaced.
+ * Assignment grants no staff, church or group-membership rights.
+ */
+export async function assignReferralOwnerForEnrollment(
+  enrollmentId: number,
+  ownerUserId: string,
+): Promise<boolean> {
+  const inserted = await db
+    .insert(schema.pastorAssignments)
+    .values({ enrollmentId, pastorUserId: ownerUserId })
+    .onConflictDoNothing({ target: schema.pastorAssignments.enrollmentId })
+    .returning({ id: schema.pastorAssignments.id });
+  return inserted.length > 0;
+}
+
 export async function autoAssignPastorForEnrollment(
   enrollmentId: number,
   unitId: number,

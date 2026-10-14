@@ -1,4 +1,5 @@
 import { and, asc, count, desc, eq, inArray, isNull } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
@@ -11,6 +12,8 @@ import {
   type ReferralStage,
 } from "@/lib/sogp/referral";
 import { resolvePublicSiteUrl } from "@/lib/welcome-campaign";
+
+const enrollee = alias(schema.sogpEnrollments, "enrollee");
 
 function firstNameOf(value: string) {
   return value.trim().split(/\s+/)[0] || "Someone";
@@ -70,9 +73,9 @@ export async function attributeSogpReferral(input: {
   enrolleeEnrollmentId: number;
   enrolleeUserId: string;
   code: string;
-}): Promise<void> {
+}): Promise<{ enrollmentId: number; userId: string } | null> {
   const code = input.code.trim();
-  if (!code) return;
+  if (!code) return null;
 
   const [referrer] = await db
     .select({
@@ -82,7 +85,7 @@ export async function attributeSogpReferral(input: {
     .from(schema.sogpEnrollments)
     .where(eq(schema.sogpEnrollments.referralCode, code))
     .limit(1);
-  if (!referrer || referrer.userId === input.enrolleeUserId) return;
+  if (!referrer || referrer.userId === input.enrolleeUserId) return null;
 
   await db
     .update(schema.sogpEnrollments)
@@ -93,6 +96,18 @@ export async function attributeSogpReferral(input: {
         isNull(schema.sogpEnrollments.referredByEnrollmentId),
       ),
     );
+  // First write wins: report the referrer actually recorded, which may be an
+  // earlier attribution rather than this code.
+  const [recorded] = await db
+    .select({ enrollmentId: schema.sogpEnrollments.id, userId: schema.sogpEnrollments.userId })
+    .from(schema.sogpEnrollments)
+    .innerJoin(
+      enrollee,
+      eq(enrollee.referredByEnrollmentId, schema.sogpEnrollments.id),
+    )
+    .where(eq(enrollee.id, input.enrolleeEnrollmentId))
+    .limit(1);
+  return recorded ?? null;
 }
 
 export type ReferralsDashboardData = {
