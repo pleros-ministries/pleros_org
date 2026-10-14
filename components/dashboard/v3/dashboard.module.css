@@ -3,8 +3,8 @@
 /* Match mobile's overlay scrollbar geometry in the isolated review route;
    vertical scrolling remains enabled. Desktop-native scrollbar gutters must
    not reduce the canonical 390px comparison area. */
-:global(html:has([data-dashboard-v3])) { scrollbar-width: none; }
-:global(html:has([data-dashboard-v3])::-webkit-scrollbar) { width: 0; height: 0; }
+:global(html:has([data-dashboard-v3])), :global(html[data-pleros-dashboard="true"]) { scrollbar-width: none; }
+:global(html:has([data-dashboard-v3])::-webkit-scrollbar), :global(html[data-pleros-dashboard="true"]::-webkit-scrollbar) { width: 0; height: 0; }
 .root {
   --color-brand-blue: #2056d6;
   --color-text: #252b33;
@@ -92,11 +92,13 @@
 .dialog p { margin: 12px 0; }
 .dialog a { color: var(--color-brand-blue); display: block; padding: 11px 0; }
 .dialog button { min-height: 44px; }
-.drawer { margin: 0 auto 0 0; border-radius: 0; height: 100dvh; max-height: 100dvh; width: min(330px, 88vw); padding: 14px 20px 24px; }
+.drawer { margin: 0 auto 0 0; border-radius: 0; height: 100dvh; max-height: 100dvh; width: min(330px, 88vw); padding: 10px 20px 24px; }
+.drawer .dialogHeading button { margin-right: -4px; }
 .dialogHeading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .dialogHeading h2 { margin: 0; }
 .profileLink { display: flex !important; align-items: center; gap: 12px; min-height: 72px; margin-top: 14px; text-decoration: none; }
-.profileAvatar { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: #e8eef7; color: #4b6584; font-size: 12px; font-weight: 500; flex-shrink: 0; }
+.profileAvatar { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: var(--status-blue-bg); color: var(--status-blue-text); font-size: 12px; font-weight: 500; flex-shrink: 0; align-self: flex-start; margin-top: 14px; }
+.profileLink > svg { margin-right: 4px; }
 .profileName { font-size: 15px; line-height: 22px; font-weight: 500; color: var(--color-text); overflow-wrap: anywhere; }
 .profileAction { font-size: 14px; line-height: 22px; color: var(--color-brand-blue); }
 .drawerRoots { display: grid; gap: 12px; padding-block: 22px 24px; margin-top: 12px; border-block: 1px solid var(--color-line); }
@@ -104,7 +106,7 @@
 .drawerRoots a[aria-current] { background: var(--status-blue-bg); color: var(--color-brand-blue); font-weight: 500; }
 .workspace { margin-top: 24px; }
 .workspace p { font-size: 13px; line-height: 20px; font-weight: 500; color: var(--color-text-muted); margin: 0 0 12px; }
-.workspace a { display: flex !important; align-items: center; gap: 12px; min-height: 48px; margin-bottom: 8px; padding: 0 12px !important; border-radius: 10px; text-decoration: none; color: var(--color-text); }
+.workspace a { display: flex !important; align-items: center; gap: 12px; min-height: 48px; margin-bottom: 8px; padding: 0 4px 0 12px !important; border-radius: 10px; text-decoration: none; color: var(--color-text); }
 .workspace a svg { color: var(--color-text-muted); flex-shrink: 0; }
 .workspace a span { flex: 1; }
 .retained { margin-top: 24px; }

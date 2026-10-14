@@ -99,7 +99,7 @@ export function buildDashboardNavigation(
 
   const community: DashboardNavItem[] = [];
   if (caps.community) {
-    community.push({ key: "feed", label: "Feed", href: "/dashboard/community" });
+    community.push({ key: "feed", label: "Feed", href: "/dashboard/community/feed" });
     if (caps.communityUnitId != null) {
       community.push({
         key: "location-group",

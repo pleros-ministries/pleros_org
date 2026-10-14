@@ -13,7 +13,7 @@ export function dashboardAreaForPath(href: string): DashboardArea {
 export function dashboardAreaHref(area: DashboardArea, sections: DashboardNavSection[], remembered?: string): string | null {
   const feed = sections.flatMap(section => section.items).find(item => item.key === "feed");
   if (area === "community" && !feed) return null;
-  const fallback = area === "you" ? "/dashboard" : feed!.href;
+  const fallback = area === "you" ? "/dashboard" : "/dashboard/community";
   if (!remembered?.startsWith("/dashboard") || remembered.startsWith("//")) return fallback;
   const path = remembered.split(/[?#]/)[0];
   if (path !== "/dashboard" && !path.startsWith("/dashboard/")) return fallback;

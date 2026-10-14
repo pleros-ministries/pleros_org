@@ -10,6 +10,7 @@ import { DashboardIcon } from "@/components/dashboard/v3/primitives";
 
 function useTitle(unitName: string | null): string {
   const pathname = usePathname() ?? "";
+  if (pathname === "/dashboard/community/feed") return "Community feed";
   if (pathname.includes("/dashboard/community/leader")) return "Leader";
   if (pathname.includes("/dashboard/community/messages")) return "Messages";
   if (pathname.includes("/dashboard/community/discipleship")) {
@@ -40,7 +41,7 @@ export function CommunityTopBar({ unitName,navigation = [] }: { unitName: string
     <header className="sticky top-[var(--dashboard-topbar-offset,0px)] z-30 border-y border-y-[var(--color-brand-blue)] border-t-white/15 bg-[var(--color-brand-blue)] lg:border-t-[var(--color-brand-blue)]">
       <div className="site-shell-page sogp-shell-page flex h-12 items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2">
-          {navigation.length ? <details className="relative"><summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 text-[15px] font-medium text-white">{title}<DashboardIcon name="down" size={16} /></summary><nav aria-label="Community destinations" className="absolute left-0 top-full z-40 grid min-w-56 rounded-[11px] border border-(--color-line) bg-white p-2 text-(--color-text-strong)">{navigation.map(item=><Link key={item.key} href={item.href} prefetch={item.key === "disciples" ? false : undefined} className="flex min-h-11 items-center rounded-md px-3 text-sm text-(--color-text-strong)" onClick={event=>{event.currentTarget.closest("details")?.removeAttribute("open");}}>{item.label}</Link>)}</nav></details> : <p className="ppc-heading truncate text-[15px] font-medium text-white">{title}</p>}
+          {navigation.length ? <details className="relative"><summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 text-[15px] font-medium text-white">{title}<DashboardIcon name="down" size={16} /></summary><nav aria-label="Community destinations" className="absolute left-0 top-full z-40 grid min-w-56 rounded-[11px] border border-(--color-line) bg-white p-2 text-(--color-text-strong)"><Link href="/dashboard/community" className="flex min-h-11 items-center rounded-md px-3 text-sm text-(--color-text-strong)" onClick={event=>event.currentTarget.closest("details")?.removeAttribute("open")}>Community home</Link>{navigation.map(item=><Link key={item.key} href={item.href} prefetch={item.key === "disciples" ? false : undefined} className="flex min-h-11 items-center rounded-md px-3 text-sm text-(--color-text-strong)" onClick={event=>{event.currentTarget.closest("details")?.removeAttribute("open");}}>{item.label}</Link>)}</nav></details> : <p className="ppc-heading truncate text-[15px] font-medium text-white">{title}</p>}
         </div>
         <div className="flex items-center gap-1">
           <Link

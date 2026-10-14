@@ -27,11 +27,9 @@ export default async function CommunityLayout({
   const viewer = await getDashboardViewer();
   const navigation = viewer?.navigation.find(section=>section.key === "community")?.items ?? [];
   return (
-    <section className="site-font-theme flex min-h-[calc(100dvh-var(--dashboard-topbar-offset,0px))] flex-col bg-white text-zinc-900">
+    <section className="flex min-h-[calc(100dvh-var(--dashboard-topbar-offset,0px))] flex-col bg-white text-(--color-text-strong)">
       <CommunityShell unitName={ctx.unit?.name ?? null} navigation={navigation}>
-        <div className="site-shell-page sogp-shell-page pb-10 pt-4">
-          <CommunityGrid>{children}</CommunityGrid>
-        </div>
+        <CommunityGrid>{children}</CommunityGrid>
       </CommunityShell>
     </section>
   );

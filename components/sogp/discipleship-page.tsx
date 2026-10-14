@@ -238,6 +238,7 @@ export function DiscipleshipPage({
                 <div className={styles.column}>
                   <SogpActivitySection
                     title="Check-ins"
+                    id="check-ins"
                     description="Ask a question, read each answer privately and reply to encourage them."
                     icon={<MessageCircleQuestionIcon className={iconClass} strokeWidth={2} />}
                   >

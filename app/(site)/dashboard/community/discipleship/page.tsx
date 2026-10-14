@@ -12,7 +12,7 @@ import {
   getDiscipleshipPosts,
 } from "@/lib/db/queries/community-posts";
 
-export default async function CommunityDiscipleshipRoute() {
+export default async function CommunityDiscipleshipRoute({ searchParams }: { searchParams: Promise<{ group?: string }> }) {
   const session = await getAppSession();
   if (!session) redirect("/login?returnTo=/dashboard/community/discipleship");
 
@@ -26,7 +26,12 @@ export default async function CommunityDiscipleshipRoute() {
   const ledGroup =
     data.leading.find((group) => !group.paused && group.disciples.length > 0) ??
     null;
-  const initialGroupId = data.joined?.groupId ?? ledGroup?.groupId ?? null;
+  const { group } = await searchParams;
+  const requestedId = group && /^\d{1,9}$/.test(group) ? Number(group) : null;
+  const allowedRequested = requestedId !== null && (
+    data.joined?.groupId === requestedId || data.leading.some(item => item.groupId === requestedId && !item.paused && item.disciples.length > 0)
+  );
+  const initialGroupId = allowedRequested ? requestedId : data.joined?.groupId ?? ledGroup?.groupId ?? null;
   const initialPosts =
     initialGroupId != null ? await getDiscipleshipPosts(initialGroupId, ctx) : [];
 
