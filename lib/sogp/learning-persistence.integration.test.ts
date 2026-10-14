@@ -213,4 +213,15 @@ describe.skipIf(!process.env.PLEROS_LEARNING_REHEARSAL_ROOT)("SOGP learning pers
     expect((await actions.chooseSogpPathAction({ ...initial, userId: "b" })).ok).toBe(true);
     expect((await learning.getOwnSogpLearning("b"))?.plan).toBeNull();
   });
+  it("explicit episode marking is owned, idempotent, revision-safe and reversible", async () => {
+    await learning.chooseOwnSogpPath("a",initial);
+    const request = { episodeGuid: "a",listened: true,expectedRevision: 1 };
+    expect((await learning.setOwnSogpListened("a",request)).revision).toBe(2);
+    expect((await learning.setOwnSogpListened("a",request)).revision).toBe(2);
+    await expect(learning.setOwnSogpListened("a",{ episodeGuid: "b",listened: true,expectedRevision: 1 })).rejects.toThrow(/changed/i);
+    await expect(learning.setOwnSogpListened("b",request)).rejects.toThrow(/plan/i);
+    await expect(learning.setOwnSogpListened("a",{ ...request,listened: "true" })).rejects.toThrow(/mark/i);
+    expect((await learning.setOwnSogpListened("a",{ episodeGuid: "a",listened: false,expectedRevision: 2 })).progress.listenedEpisodeGuids).not.toContain("a");
+    expect((await learning.getOwnSogpLearning("a"))?.progress.listenedEpisodeGuids).toContain("older");
+  });
 });

@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 
 import { DiscipleshipInviteBanner } from "@/components/sogp/discipleship-invite-banner";
-import { SogpDashboardBoundary } from "@/components/sogp/sogp-dashboard-boundary";
+import { LearningBoundary } from "@/components/sogp/learning/learning-boundary";
+import { getOwnLearningView } from "@/lib/db/queries/sogp-learning-view";
 import { SogpJoinCohortBanner } from "@/components/sogp/sogp-join-cohort-banner";
 import { getAppSession } from "@/lib/app-session";
 import {
@@ -19,6 +20,8 @@ export default async function SogpDashboardPage() {
 
   const openCohort = await getOpenSogpCohort();
   const canJoinAnotherCohort = canOfferJoinAnotherCohort(rows, openCohort?.id ?? null);
+  const learning = await getOwnLearningView(session.user.id);
+  if (!learning) redirect("/sogp/enrol");
 
   return (
     <>
@@ -32,7 +35,7 @@ export default async function SogpDashboardPage() {
         />
       ) : null}
       <DiscipleshipInviteBanner enrollmentId={rows[0]!.enrollment.id} />
-      <SogpDashboardBoundary />
+      <LearningBoundary initialData={learning} />
     </>
   );
 }

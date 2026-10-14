@@ -4,7 +4,7 @@ import { fetchAnchorEpisodes } from "@/lib/anchor-rss";
 import { CommunityError } from "@/lib/community/errors";
 import { createPodcastPlan, editPodcastPlan, switchPodcastPace, type PodcastLearningPlan, type PodcastLearningProgress, type PodcastPace } from "@/lib/sogp/podcast-plan";
 import { learningGuid, learningPath, learningPosition, learningRequest, learningRevision, type SogpLearningPath } from "@/lib/sogp/learning-input";
-import { withSogpLearningLock, type LearningTx } from "@/lib/db/sogp-learning-lock";
+import { withSogpLearningLock, bumpSogpLearningRevision, type LearningTx } from "@/lib/db/sogp-learning-lock";
 import * as s from "@/lib/db/schema";
 import { requireSogpLearningWrites, sogpLearningSchemaReady } from "./sogp-learning-gate";
 
@@ -114,5 +114,23 @@ export async function saveOwnSogpPlayback(userId: string, value: unknown) {
     const revision = (old?.revision ?? 0) + 1;
     await tx.insert(s.sogpEpisodePlayback).values({ userId,episodeGuid,positionSeconds,revision }).onConflictDoUpdate({ target: [s.sogpEpisodePlayback.userId,s.sogpEpisodePlayback.episodeGuid],set: { positionSeconds,revision,updatedAt: sql`now()` } });
     return { episodeGuid,positionSeconds,revision };
+  });
+}
+
+/** Desired state, not a toggle: retrying a saved mark cannot undo it. */
+export async function setOwnSogpListened(userId: string, value: unknown): Promise<SogpLearningState> {
+  requireSogpLearningWrites();
+  const input = learningRequest(value), episodeGuid = learningGuid(input.episodeGuid), revision = learningRevision(input.expectedRevision);
+  if (typeof input.listened !== "boolean") throw new CommunityError("Choose whether to mark this episode listened.");
+  return withSogpLearningLock(userId,async tx => {
+    await requireEnrollment(tx,userId,true);
+    const current = await loadState(tx,userId);
+    if (!current.plan || ![...current.plan.episodeGuids,...current.plan.historyEpisodeGuids].includes(episodeGuid)) throw new CommunityError("That episode is not in your learning plan.");
+    if (current.progress.listenedEpisodeGuids.includes(episodeGuid) === input.listened) return current;
+    if (revision !== current.revision) throw new CommunityError(CHANGED);
+    if (input.listened) await tx.insert(s.podcastEpisodeProgress).values({ userId,episodeGuid }).onConflictDoNothing({ target: [s.podcastEpisodeProgress.userId,s.podcastEpisodeProgress.episodeGuid] });
+    else await tx.delete(s.podcastEpisodeProgress).where(and(eq(s.podcastEpisodeProgress.userId,userId),eq(s.podcastEpisodeProgress.episodeGuid,episodeGuid)));
+    await bumpSogpLearningRevision(tx,userId);
+    return loadState(tx,userId);
   });
 }

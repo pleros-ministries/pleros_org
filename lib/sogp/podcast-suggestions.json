@@ -1,0 +1,1653 @@
+{
+  "verifiedAt": "2026-10-13",
+  "source": "https://www.youtube.com/playlist?list=PLeX3pQHW9Ln6OrlldW4z22pJ6ptUQ-UwQ",
+  "channel": "https://www.youtube.com/@PlerosMedia",
+  "ordering": "Observed YouTube Oldest sort, beginning with Reality of God's Purpose Part 1. Suggested app defaults, not a newly published YouTube playlist.",
+  "timingNote": "15 and 30 minutes are approximate track labels. Durations are exact visible thumbnail runtimes.",
+  "suggested30EpisodeDefault": [
+    {
+      "playlistIndex": 5,
+      "title": "The Reality of God's Purpose (Part 1)",
+      "videoId": "dEcREef63Y0",
+      "url": "https://www.youtube.com/watch?v=dEcREef63Y0",
+      "duration": "15:33",
+      "durationSeconds": 933,
+      "sequence": 1,
+      "dayAtOneEpisodePerDay": 1,
+      "dayAtTwoEpisodesPerDay": 1,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 6,
+      "title": "The Reality of God's Purpose (Part 2)",
+      "videoId": "1SYZubaMsHw",
+      "url": "https://www.youtube.com/watch?v=1SYZubaMsHw",
+      "duration": "14:13",
+      "durationSeconds": 853,
+      "sequence": 2,
+      "dayAtOneEpisodePerDay": 2,
+      "dayAtTwoEpisodesPerDay": 1,
+      "slotAtTwoEpisodesPerDay": 2
+    },
+    {
+      "playlistIndex": 7,
+      "title": "The Reality of God's Purpose (Part 3)",
+      "videoId": "-HaBww89bFQ",
+      "url": "https://www.youtube.com/watch?v=-HaBww89bFQ",
+      "duration": "13:34",
+      "durationSeconds": 814,
+      "sequence": 3,
+      "dayAtOneEpisodePerDay": 3,
+      "dayAtTwoEpisodesPerDay": 2,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 8,
+      "title": "The Reality of God's Purpose (Part 4)",
+      "videoId": "UjLNXnLf5kA",
+      "url": "https://www.youtube.com/watch?v=UjLNXnLf5kA",
+      "duration": "14:11",
+      "durationSeconds": 851,
+      "sequence": 4,
+      "dayAtOneEpisodePerDay": 4,
+      "dayAtTwoEpisodesPerDay": 2,
+      "slotAtTwoEpisodesPerDay": 2
+    },
+    {
+      "playlistIndex": 9,
+      "title": "The Reality of God's Purpose (Part 5)",
+      "videoId": "zAQnxQ1EaTg",
+      "url": "https://www.youtube.com/watch?v=zAQnxQ1EaTg",
+      "duration": "14:50",
+      "durationSeconds": 890,
+      "sequence": 5,
+      "dayAtOneEpisodePerDay": 5,
+      "dayAtTwoEpisodesPerDay": 3,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 10,
+      "title": "The Reality of God's Purpose (Part 6)",
+      "videoId": "nRG0vYyifSo",
+      "url": "https://www.youtube.com/watch?v=nRG0vYyifSo",
+      "duration": "15:30",
+      "durationSeconds": 930,
+      "sequence": 6,
+      "dayAtOneEpisodePerDay": 6,
+      "dayAtTwoEpisodesPerDay": 3,
+      "slotAtTwoEpisodesPerDay": 2
+    },
+    {
+      "playlistIndex": 11,
+      "title": "The Reality of God's Purpose (Part 7)",
+      "videoId": "Qs05-1kaBV4",
+      "url": "https://www.youtube.com/watch?v=Qs05-1kaBV4",
+      "duration": "13:49",
+      "durationSeconds": 829,
+      "sequence": 7,
+      "dayAtOneEpisodePerDay": 7,
+      "dayAtTwoEpisodesPerDay": 4,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 12,
+      "title": "The Reality of God's Purpose (Part 8)",
+      "videoId": "u6muxOj3QJA",
+      "url": "https://www.youtube.com/watch?v=u6muxOj3QJA",
+      "duration": "14:18",
+      "durationSeconds": 858,
+      "sequence": 8,
+      "dayAtOneEpisodePerDay": 8,
+      "dayAtTwoEpisodesPerDay": 4,
+      "slotAtTwoEpisodesPerDay": 2
+    },
+    {
+      "playlistIndex": 13,
+      "title": "The Reality of God's Purpose (Part 9)",
+      "videoId": "JBspO_ooO7Y",
+      "url": "https://www.youtube.com/watch?v=JBspO_ooO7Y",
+      "duration": "15:40",
+      "durationSeconds": 940,
+      "sequence": 9,
+      "dayAtOneEpisodePerDay": 9,
+      "dayAtTwoEpisodesPerDay": 5,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 14,
+      "title": "The Reality of God's Purpose (Part 10)",
+      "videoId": "2QBH5MPoIEY",
+      "url": "https://www.youtube.com/watch?v=2QBH5MPoIEY",
+      "duration": "13:29",
+      "durationSeconds": 809,
+      "sequence": 10,
+      "dayAtOneEpisodePerDay": 10,
+      "dayAtTwoEpisodesPerDay": 5,
+      "slotAtTwoEpisodesPerDay": 2
+    },
+    {
+      "playlistIndex": 15,
+      "title": "The Reality of God's Purpose (Part 11)",
+      "videoId": "6v8LNmAbSaA",
+      "url": "https://www.youtube.com/watch?v=6v8LNmAbSaA",
+      "duration": "14:10",
+      "durationSeconds": 850,
+      "sequence": 11,
+      "dayAtOneEpisodePerDay": 11,
+      "dayAtTwoEpisodesPerDay": 6,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 16,
+      "title": "The Reality of God's Purpose (Part 12)",
+      "videoId": "vIHoBQR1WNg",
+      "url": "https://www.youtube.com/watch?v=vIHoBQR1WNg",
+      "duration": "15:37",
+      "durationSeconds": 937,
+      "sequence": 12,
+      "dayAtOneEpisodePerDay": 12,
+      "dayAtTwoEpisodesPerDay": 6,
+      "slotAtTwoEpisodesPerDay": 2
+    },
+    {
+      "playlistIndex": 17,
+      "title": "The Pursuit of God's Purpose (Part 1)",
+      "videoId": "28Q0bMLZnSg",
+      "url": "https://www.youtube.com/watch?v=28Q0bMLZnSg",
+      "duration": "13:56",
+      "durationSeconds": 836,
+      "sequence": 13,
+      "dayAtOneEpisodePerDay": 13,
+      "dayAtTwoEpisodesPerDay": 7,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 18,
+      "title": "The Pursuit of God's Purpose (Part 2)",
+      "videoId": "QnSUcIkYtSw",
+      "url": "https://www.youtube.com/watch?v=QnSUcIkYtSw",
+      "duration": "14:41",
+      "durationSeconds": 881,
+      "sequence": 14,
+      "dayAtOneEpisodePerDay": 14,
+      "dayAtTwoEpisodesPerDay": 7,
+      "slotAtTwoEpisodesPerDay": 2
+    },
+    {
+      "playlistIndex": 19,
+      "title": "The Pursuit of God's Purpose (Part 3)",
+      "videoId": "qkaxjfAXqvU",
+      "url": "https://www.youtube.com/watch?v=qkaxjfAXqvU",
+      "duration": "15:49",
+      "durationSeconds": 949,
+      "sequence": 15,
+      "dayAtOneEpisodePerDay": 15,
+      "dayAtTwoEpisodesPerDay": 8,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 20,
+      "title": "The Pursuit of God's Purpose (Part 4)",
+      "videoId": "BpC5m6pdVxI",
+      "url": "https://www.youtube.com/watch?v=BpC5m6pdVxI",
+      "duration": "13:51",
+      "durationSeconds": 831,
+      "sequence": 16,
+      "dayAtOneEpisodePerDay": 16,
+      "dayAtTwoEpisodesPerDay": 8,
+      "slotAtTwoEpisodesPerDay": 2
+    },
+    {
+      "playlistIndex": 21,
+      "title": "The Pursuit of God's Purpose (Part 5)",
+      "videoId": "Om2JPGEIlfo",
+      "url": "https://www.youtube.com/watch?v=Om2JPGEIlfo",
+      "duration": "13:53",
+      "durationSeconds": 833,
+      "sequence": 17,
+      "dayAtOneEpisodePerDay": 17,
+      "dayAtTwoEpisodesPerDay": 9,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 22,
+      "title": "The Pursuit of God's Purpose (Part 6)",
+      "videoId": "jhOf8h9QFHY",
+      "url": "https://www.youtube.com/watch?v=jhOf8h9QFHY",
+      "duration": "15:38",
+      "durationSeconds": 938,
+      "sequence": 18,
+      "dayAtOneEpisodePerDay": 18,
+      "dayAtTwoEpisodesPerDay": 9,
+      "slotAtTwoEpisodesPerDay": 2
+    },
+    {
+      "playlistIndex": 23,
+      "title": "The Pursuit of God's Purpose (Part 7)",
+      "videoId": "l5CnhKLOWLk",
+      "url": "https://www.youtube.com/watch?v=l5CnhKLOWLk",
+      "duration": "14:07",
+      "durationSeconds": 847,
+      "sequence": 19,
+      "dayAtOneEpisodePerDay": 19,
+      "dayAtTwoEpisodesPerDay": 10,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 24,
+      "title": "The Pursuit of God's Purpose (Part 8)",
+      "videoId": "5cRX-aA6RvE",
+      "url": "https://www.youtube.com/watch?v=5cRX-aA6RvE",
+      "duration": "13:53",
+      "durationSeconds": 833,
+      "sequence": 20,
+      "dayAtOneEpisodePerDay": 20,
+      "dayAtTwoEpisodesPerDay": 10,
+      "slotAtTwoEpisodesPerDay": 2
+    },
+    {
+      "playlistIndex": 25,
+      "title": "The Pursuit of God's Purpose (Part 9)",
+      "videoId": "TgWo8lYqSXQ",
+      "url": "https://www.youtube.com/watch?v=TgWo8lYqSXQ",
+      "duration": "15:33",
+      "durationSeconds": 933,
+      "sequence": 21,
+      "dayAtOneEpisodePerDay": 21,
+      "dayAtTwoEpisodesPerDay": 11,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 26,
+      "title": "The Pursuit of God's Purpose (Part 10)",
+      "videoId": "J8h6p9EDORo",
+      "url": "https://www.youtube.com/watch?v=J8h6p9EDORo",
+      "duration": "13:59",
+      "durationSeconds": 839,
+      "sequence": 22,
+      "dayAtOneEpisodePerDay": 22,
+      "dayAtTwoEpisodesPerDay": 11,
+      "slotAtTwoEpisodesPerDay": 2
+    },
+    {
+      "playlistIndex": 27,
+      "title": "The Pursuit of God's Purpose (Part 11)",
+      "videoId": "qq-3hIumVWw",
+      "url": "https://www.youtube.com/watch?v=qq-3hIumVWw",
+      "duration": "13:33",
+      "durationSeconds": 813,
+      "sequence": 23,
+      "dayAtOneEpisodePerDay": 23,
+      "dayAtTwoEpisodesPerDay": 12,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 28,
+      "title": "The Pursuit of God's Purpose (Part 12)",
+      "videoId": "NG1ouDWnl6o",
+      "url": "https://www.youtube.com/watch?v=NG1ouDWnl6o",
+      "duration": "14:10",
+      "durationSeconds": 850,
+      "sequence": 24,
+      "dayAtOneEpisodePerDay": 24,
+      "dayAtTwoEpisodesPerDay": 12,
+      "slotAtTwoEpisodesPerDay": 2
+    },
+    {
+      "playlistIndex": 29,
+      "title": "How to Fulfill God's Purpose (Part 1)",
+      "videoId": "EWXgKv1Eo9Q",
+      "url": "https://www.youtube.com/watch?v=EWXgKv1Eo9Q",
+      "duration": "14:03",
+      "durationSeconds": 843,
+      "sequence": 25,
+      "dayAtOneEpisodePerDay": 25,
+      "dayAtTwoEpisodesPerDay": 13,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 30,
+      "title": "How to Fulfill God's Purpose (Part 2)",
+      "videoId": "Q6gWiyM7Cik",
+      "url": "https://www.youtube.com/watch?v=Q6gWiyM7Cik",
+      "duration": "15:46",
+      "durationSeconds": 946,
+      "sequence": 26,
+      "dayAtOneEpisodePerDay": 26,
+      "dayAtTwoEpisodesPerDay": 13,
+      "slotAtTwoEpisodesPerDay": 2
+    },
+    {
+      "playlistIndex": 31,
+      "title": "How to Fulfill God's Purpose (Part 3)",
+      "videoId": "RVEbGAXaPSI",
+      "url": "https://www.youtube.com/watch?v=RVEbGAXaPSI",
+      "duration": "13:21",
+      "durationSeconds": 801,
+      "sequence": 27,
+      "dayAtOneEpisodePerDay": 27,
+      "dayAtTwoEpisodesPerDay": 14,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 32,
+      "title": "How to Fulfill God's Purpose (Part 4)",
+      "videoId": "IYkCBNGwy80",
+      "url": "https://www.youtube.com/watch?v=IYkCBNGwy80",
+      "duration": "14:11",
+      "durationSeconds": 851,
+      "sequence": 28,
+      "dayAtOneEpisodePerDay": 28,
+      "dayAtTwoEpisodesPerDay": 14,
+      "slotAtTwoEpisodesPerDay": 2
+    },
+    {
+      "playlistIndex": 33,
+      "title": "How to Fulfill God's Purpose (Part 5)",
+      "videoId": "2gzSMp6aPzI",
+      "url": "https://www.youtube.com/watch?v=2gzSMp6aPzI",
+      "duration": "15:52",
+      "durationSeconds": 952,
+      "sequence": 29,
+      "dayAtOneEpisodePerDay": 29,
+      "dayAtTwoEpisodesPerDay": 15,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 34,
+      "title": "How to Fulfil God's Purpose (Part 6)",
+      "videoId": "NUL2AN3zrYI",
+      "url": "https://www.youtube.com/watch?v=NUL2AN3zrYI",
+      "duration": "13:58",
+      "durationSeconds": 838,
+      "sequence": 30,
+      "dayAtOneEpisodePerDay": 30,
+      "dayAtTwoEpisodesPerDay": 15,
+      "slotAtTwoEpisodesPerDay": 2
+    }
+  ],
+  "suggested60EpisodeDefault": [
+    {
+      "playlistIndex": 5,
+      "title": "The Reality of God's Purpose (Part 1)",
+      "videoId": "dEcREef63Y0",
+      "url": "https://www.youtube.com/watch?v=dEcREef63Y0",
+      "duration": "15:33",
+      "durationSeconds": 933,
+      "sequence": 1,
+      "dayAtOneEpisodePerDay": 1,
+      "dayAtTwoEpisodesPerDay": 1,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 6,
+      "title": "The Reality of God's Purpose (Part 2)",
+      "videoId": "1SYZubaMsHw",
+      "url": "https://www.youtube.com/watch?v=1SYZubaMsHw",
+      "duration": "14:13",
+      "durationSeconds": 853,
+      "sequence": 2,
+      "dayAtOneEpisodePerDay": 2,
+      "dayAtTwoEpisodesPerDay": 1,
+      "slotAtTwoEpisodesPerDay": 2
+    },
+    {
+      "playlistIndex": 7,
+      "title": "The Reality of God's Purpose (Part 3)",
+      "videoId": "-HaBww89bFQ",
+      "url": "https://www.youtube.com/watch?v=-HaBww89bFQ",
+      "duration": "13:34",
+      "durationSeconds": 814,
+      "sequence": 3,
+      "dayAtOneEpisodePerDay": 3,
+      "dayAtTwoEpisodesPerDay": 2,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 8,
+      "title": "The Reality of God's Purpose (Part 4)",
+      "videoId": "UjLNXnLf5kA",
+      "url": "https://www.youtube.com/watch?v=UjLNXnLf5kA",
+      "duration": "14:11",
+      "durationSeconds": 851,
+      "sequence": 4,
+      "dayAtOneEpisodePerDay": 4,
+      "dayAtTwoEpisodesPerDay": 2,
+      "slotAtTwoEpisodesPerDay": 2
+    },
+    {
+      "playlistIndex": 9,
+      "title": "The Reality of God's Purpose (Part 5)",
+      "videoId": "zAQnxQ1EaTg",
+      "url": "https://www.youtube.com/watch?v=zAQnxQ1EaTg",
+      "duration": "14:50",
+      "durationSeconds": 890,
+      "sequence": 5,
+      "dayAtOneEpisodePerDay": 5,
+      "dayAtTwoEpisodesPerDay": 3,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 10,
+      "title": "The Reality of God's Purpose (Part 6)",
+      "videoId": "nRG0vYyifSo",
+      "url": "https://www.youtube.com/watch?v=nRG0vYyifSo",
+      "duration": "15:30",
+      "durationSeconds": 930,
+      "sequence": 6,
+      "dayAtOneEpisodePerDay": 6,
+      "dayAtTwoEpisodesPerDay": 3,
+      "slotAtTwoEpisodesPerDay": 2
+    },
+    {
+      "playlistIndex": 11,
+      "title": "The Reality of God's Purpose (Part 7)",
+      "videoId": "Qs05-1kaBV4",
+      "url": "https://www.youtube.com/watch?v=Qs05-1kaBV4",
+      "duration": "13:49",
+      "durationSeconds": 829,
+      "sequence": 7,
+      "dayAtOneEpisodePerDay": 7,
+      "dayAtTwoEpisodesPerDay": 4,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 12,
+      "title": "The Reality of God's Purpose (Part 8)",
+      "videoId": "u6muxOj3QJA",
+      "url": "https://www.youtube.com/watch?v=u6muxOj3QJA",
+      "duration": "14:18",
+      "durationSeconds": 858,
+      "sequence": 8,
+      "dayAtOneEpisodePerDay": 8,
+      "dayAtTwoEpisodesPerDay": 4,
+      "slotAtTwoEpisodesPerDay": 2
+    },
+    {
+      "playlistIndex": 13,
+      "title": "The Reality of God's Purpose (Part 9)",
+      "videoId": "JBspO_ooO7Y",
+      "url": "https://www.youtube.com/watch?v=JBspO_ooO7Y",
+      "duration": "15:40",
+      "durationSeconds": 940,
+      "sequence": 9,
+      "dayAtOneEpisodePerDay": 9,
+      "dayAtTwoEpisodesPerDay": 5,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 14,
+      "title": "The Reality of God's Purpose (Part 10)",
+      "videoId": "2QBH5MPoIEY",
+      "url": "https://www.youtube.com/watch?v=2QBH5MPoIEY",
+      "duration": "13:29",
+      "durationSeconds": 809,
+      "sequence": 10,
+      "dayAtOneEpisodePerDay": 10,
+      "dayAtTwoEpisodesPerDay": 5,
+      "slotAtTwoEpisodesPerDay": 2
+    },
+    {
+      "playlistIndex": 15,
+      "title": "The Reality of God's Purpose (Part 11)",
+      "videoId": "6v8LNmAbSaA",
+      "url": "https://www.youtube.com/watch?v=6v8LNmAbSaA",
+      "duration": "14:10",
+      "durationSeconds": 850,
+      "sequence": 11,
+      "dayAtOneEpisodePerDay": 11,
+      "dayAtTwoEpisodesPerDay": 6,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 16,
+      "title": "The Reality of God's Purpose (Part 12)",
+      "videoId": "vIHoBQR1WNg",
+      "url": "https://www.youtube.com/watch?v=vIHoBQR1WNg",
+      "duration": "15:37",
+      "durationSeconds": 937,
+      "sequence": 12,
+      "dayAtOneEpisodePerDay": 12,
+      "dayAtTwoEpisodesPerDay": 6,
+      "slotAtTwoEpisodesPerDay": 2
+    },
+    {
+      "playlistIndex": 17,
+      "title": "The Pursuit of God's Purpose (Part 1)",
+      "videoId": "28Q0bMLZnSg",
+      "url": "https://www.youtube.com/watch?v=28Q0bMLZnSg",
+      "duration": "13:56",
+      "durationSeconds": 836,
+      "sequence": 13,
+      "dayAtOneEpisodePerDay": 13,
+      "dayAtTwoEpisodesPerDay": 7,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 18,
+      "title": "The Pursuit of God's Purpose (Part 2)",
+      "videoId": "QnSUcIkYtSw",
+      "url": "https://www.youtube.com/watch?v=QnSUcIkYtSw",
+      "duration": "14:41",
+      "durationSeconds": 881,
+      "sequence": 14,
+      "dayAtOneEpisodePerDay": 14,
+      "dayAtTwoEpisodesPerDay": 7,
+      "slotAtTwoEpisodesPerDay": 2
+    },
+    {
+      "playlistIndex": 19,
+      "title": "The Pursuit of God's Purpose (Part 3)",
+      "videoId": "qkaxjfAXqvU",
+      "url": "https://www.youtube.com/watch?v=qkaxjfAXqvU",
+      "duration": "15:49",
+      "durationSeconds": 949,
+      "sequence": 15,
+      "dayAtOneEpisodePerDay": 15,
+      "dayAtTwoEpisodesPerDay": 8,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 20,
+      "title": "The Pursuit of God's Purpose (Part 4)",
+      "videoId": "BpC5m6pdVxI",
+      "url": "https://www.youtube.com/watch?v=BpC5m6pdVxI",
+      "duration": "13:51",
+      "durationSeconds": 831,
+      "sequence": 16,
+      "dayAtOneEpisodePerDay": 16,
+      "dayAtTwoEpisodesPerDay": 8,
+      "slotAtTwoEpisodesPerDay": 2
+    },
+    {
+      "playlistIndex": 21,
+      "title": "The Pursuit of God's Purpose (Part 5)",
+      "videoId": "Om2JPGEIlfo",
+      "url": "https://www.youtube.com/watch?v=Om2JPGEIlfo",
+      "duration": "13:53",
+      "durationSeconds": 833,
+      "sequence": 17,
+      "dayAtOneEpisodePerDay": 17,
+      "dayAtTwoEpisodesPerDay": 9,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 22,
+      "title": "The Pursuit of God's Purpose (Part 6)",
+      "videoId": "jhOf8h9QFHY",
+      "url": "https://www.youtube.com/watch?v=jhOf8h9QFHY",
+      "duration": "15:38",
+      "durationSeconds": 938,
+      "sequence": 18,
+      "dayAtOneEpisodePerDay": 18,
+      "dayAtTwoEpisodesPerDay": 9,
+      "slotAtTwoEpisodesPerDay": 2
+    },
+    {
+      "playlistIndex": 23,
+      "title": "The Pursuit of God's Purpose (Part 7)",
+      "videoId": "l5CnhKLOWLk",
+      "url": "https://www.youtube.com/watch?v=l5CnhKLOWLk",
+      "duration": "14:07",
+      "durationSeconds": 847,
+      "sequence": 19,
+      "dayAtOneEpisodePerDay": 19,
+      "dayAtTwoEpisodesPerDay": 10,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 24,
+      "title": "The Pursuit of God's Purpose (Part 8)",
+      "videoId": "5cRX-aA6RvE",
+      "url": "https://www.youtube.com/watch?v=5cRX-aA6RvE",
+      "duration": "13:53",
+      "durationSeconds": 833,
+      "sequence": 20,
+      "dayAtOneEpisodePerDay": 20,
+      "dayAtTwoEpisodesPerDay": 10,
+      "slotAtTwoEpisodesPerDay": 2
+    },
+    {
+      "playlistIndex": 25,
+      "title": "The Pursuit of God's Purpose (Part 9)",
+      "videoId": "TgWo8lYqSXQ",
+      "url": "https://www.youtube.com/watch?v=TgWo8lYqSXQ",
+      "duration": "15:33",
+      "durationSeconds": 933,
+      "sequence": 21,
+      "dayAtOneEpisodePerDay": 21,
+      "dayAtTwoEpisodesPerDay": 11,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 26,
+      "title": "The Pursuit of God's Purpose (Part 10)",
+      "videoId": "J8h6p9EDORo",
+      "url": "https://www.youtube.com/watch?v=J8h6p9EDORo",
+      "duration": "13:59",
+      "durationSeconds": 839,
+      "sequence": 22,
+      "dayAtOneEpisodePerDay": 22,
+      "dayAtTwoEpisodesPerDay": 11,
+      "slotAtTwoEpisodesPerDay": 2
+    },
+    {
+      "playlistIndex": 27,
+      "title": "The Pursuit of God's Purpose (Part 11)",
+      "videoId": "qq-3hIumVWw",
+      "url": "https://www.youtube.com/watch?v=qq-3hIumVWw",
+      "duration": "13:33",
+      "durationSeconds": 813,
+      "sequence": 23,
+      "dayAtOneEpisodePerDay": 23,
+      "dayAtTwoEpisodesPerDay": 12,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 28,
+      "title": "The Pursuit of God's Purpose (Part 12)",
+      "videoId": "NG1ouDWnl6o",
+      "url": "https://www.youtube.com/watch?v=NG1ouDWnl6o",
+      "duration": "14:10",
+      "durationSeconds": 850,
+      "sequence": 24,
+      "dayAtOneEpisodePerDay": 24,
+      "dayAtTwoEpisodesPerDay": 12,
+      "slotAtTwoEpisodesPerDay": 2
+    },
+    {
+      "playlistIndex": 29,
+      "title": "How to Fulfill God's Purpose (Part 1)",
+      "videoId": "EWXgKv1Eo9Q",
+      "url": "https://www.youtube.com/watch?v=EWXgKv1Eo9Q",
+      "duration": "14:03",
+      "durationSeconds": 843,
+      "sequence": 25,
+      "dayAtOneEpisodePerDay": 25,
+      "dayAtTwoEpisodesPerDay": 13,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 30,
+      "title": "How to Fulfill God's Purpose (Part 2)",
+      "videoId": "Q6gWiyM7Cik",
+      "url": "https://www.youtube.com/watch?v=Q6gWiyM7Cik",
+      "duration": "15:46",
+      "durationSeconds": 946,
+      "sequence": 26,
+      "dayAtOneEpisodePerDay": 26,
+      "dayAtTwoEpisodesPerDay": 13,
+      "slotAtTwoEpisodesPerDay": 2
+    },
+    {
+      "playlistIndex": 31,
+      "title": "How to Fulfill God's Purpose (Part 3)",
+      "videoId": "RVEbGAXaPSI",
+      "url": "https://www.youtube.com/watch?v=RVEbGAXaPSI",
+      "duration": "13:21",
+      "durationSeconds": 801,
+      "sequence": 27,
+      "dayAtOneEpisodePerDay": 27,
+      "dayAtTwoEpisodesPerDay": 14,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 32,
+      "title": "How to Fulfill God's Purpose (Part 4)",
+      "videoId": "IYkCBNGwy80",
+      "url": "https://www.youtube.com/watch?v=IYkCBNGwy80",
+      "duration": "14:11",
+      "durationSeconds": 851,
+      "sequence": 28,
+      "dayAtOneEpisodePerDay": 28,
+      "dayAtTwoEpisodesPerDay": 14,
+      "slotAtTwoEpisodesPerDay": 2
+    },
+    {
+      "playlistIndex": 33,
+      "title": "How to Fulfill God's Purpose (Part 5)",
+      "videoId": "2gzSMp6aPzI",
+      "url": "https://www.youtube.com/watch?v=2gzSMp6aPzI",
+      "duration": "15:52",
+      "durationSeconds": 952,
+      "sequence": 29,
+      "dayAtOneEpisodePerDay": 29,
+      "dayAtTwoEpisodesPerDay": 15,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 34,
+      "title": "How to Fulfil God's Purpose (Part 6)",
+      "videoId": "NUL2AN3zrYI",
+      "url": "https://www.youtube.com/watch?v=NUL2AN3zrYI",
+      "duration": "13:58",
+      "durationSeconds": 838,
+      "sequence": 30,
+      "dayAtOneEpisodePerDay": 30,
+      "dayAtTwoEpisodesPerDay": 15,
+      "slotAtTwoEpisodesPerDay": 2
+    },
+    {
+      "playlistIndex": 35,
+      "title": "How to Fulfill God's Purpose (Part 7)",
+      "videoId": "gd8cwjfH0Yw",
+      "url": "https://www.youtube.com/watch?v=gd8cwjfH0Yw",
+      "duration": "14:17",
+      "durationSeconds": 857,
+      "sequence": 31,
+      "dayAtOneEpisodePerDay": null,
+      "dayAtTwoEpisodesPerDay": 16,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 36,
+      "title": "How to Fulfill God's Purpose (Part 8)",
+      "videoId": "waPAaS6X1d4",
+      "url": "https://www.youtube.com/watch?v=waPAaS6X1d4",
+      "duration": "15:47",
+      "durationSeconds": 947,
+      "sequence": 32,
+      "dayAtOneEpisodePerDay": null,
+      "dayAtTwoEpisodesPerDay": 16,
+      "slotAtTwoEpisodesPerDay": 2
+    },
+    {
+      "playlistIndex": 37,
+      "title": "How to Fulfill God's Purpose (Part 9)",
+      "videoId": "TS7t_HVtM4w",
+      "url": "https://www.youtube.com/watch?v=TS7t_HVtM4w",
+      "duration": "14:02",
+      "durationSeconds": 842,
+      "sequence": 33,
+      "dayAtOneEpisodePerDay": null,
+      "dayAtTwoEpisodesPerDay": 17,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 38,
+      "title": "How to Fulfill God's Purpose (Part 10)",
+      "videoId": "MjeE-kbNN7s",
+      "url": "https://www.youtube.com/watch?v=MjeE-kbNN7s",
+      "duration": "14:36",
+      "durationSeconds": 876,
+      "sequence": 34,
+      "dayAtOneEpisodePerDay": null,
+      "dayAtTwoEpisodesPerDay": 17,
+      "slotAtTwoEpisodesPerDay": 2
+    },
+    {
+      "playlistIndex": 39,
+      "title": "How to Fulfill God's Purpose (Part 11)",
+      "videoId": "APPlUsxFOQc",
+      "url": "https://www.youtube.com/watch?v=APPlUsxFOQc",
+      "duration": "14:08",
+      "durationSeconds": 848,
+      "sequence": 35,
+      "dayAtOneEpisodePerDay": null,
+      "dayAtTwoEpisodesPerDay": 18,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 40,
+      "title": "How to Fulfill God's Purpose (Part 12)",
+      "videoId": "w6iWSPtOl4s",
+      "url": "https://www.youtube.com/watch?v=w6iWSPtOl4s",
+      "duration": "15:43",
+      "durationSeconds": 943,
+      "sequence": 36,
+      "dayAtOneEpisodePerDay": null,
+      "dayAtTwoEpisodesPerDay": 18,
+      "slotAtTwoEpisodesPerDay": 2
+    },
+    {
+      "playlistIndex": 41,
+      "title": "The Mind of Man (Part 1)",
+      "videoId": "cOZq7Uv91r4",
+      "url": "https://www.youtube.com/watch?v=cOZq7Uv91r4",
+      "duration": "14:13",
+      "durationSeconds": 853,
+      "sequence": 37,
+      "dayAtOneEpisodePerDay": null,
+      "dayAtTwoEpisodesPerDay": 19,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 42,
+      "title": "The Mind of Man (Part 2)",
+      "videoId": "8TGip24GHWc",
+      "url": "https://www.youtube.com/watch?v=8TGip24GHWc",
+      "duration": "13:23",
+      "durationSeconds": 803,
+      "sequence": 38,
+      "dayAtOneEpisodePerDay": null,
+      "dayAtTwoEpisodesPerDay": 19,
+      "slotAtTwoEpisodesPerDay": 2
+    },
+    {
+      "playlistIndex": 43,
+      "title": "The Mind of Man (Part 3)",
+      "videoId": "KHwCK5qgA00",
+      "url": "https://www.youtube.com/watch?v=KHwCK5qgA00",
+      "duration": "15:55",
+      "durationSeconds": 955,
+      "sequence": 39,
+      "dayAtOneEpisodePerDay": null,
+      "dayAtTwoEpisodesPerDay": 20,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 44,
+      "title": "The Mind of Man (Part 4)",
+      "videoId": "pfLV-EG0QrU",
+      "url": "https://www.youtube.com/watch?v=pfLV-EG0QrU",
+      "duration": "13:38",
+      "durationSeconds": 818,
+      "sequence": 40,
+      "dayAtOneEpisodePerDay": null,
+      "dayAtTwoEpisodesPerDay": 20,
+      "slotAtTwoEpisodesPerDay": 2
+    },
+    {
+      "playlistIndex": 45,
+      "title": "The Mind of Man (Part 5)",
+      "videoId": "XDzEpEKF25c",
+      "url": "https://www.youtube.com/watch?v=XDzEpEKF25c",
+      "duration": "13:53",
+      "durationSeconds": 833,
+      "sequence": 41,
+      "dayAtOneEpisodePerDay": null,
+      "dayAtTwoEpisodesPerDay": 21,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 46,
+      "title": "The Mind of Man (Part 6)",
+      "videoId": "tVyuPNzKC7E",
+      "url": "https://www.youtube.com/watch?v=tVyuPNzKC7E",
+      "duration": "15:34",
+      "durationSeconds": 934,
+      "sequence": 42,
+      "dayAtOneEpisodePerDay": null,
+      "dayAtTwoEpisodesPerDay": 21,
+      "slotAtTwoEpisodesPerDay": 2
+    },
+    {
+      "playlistIndex": 47,
+      "title": "The Mind of Man (Part 7)",
+      "videoId": "ThmlZHAmB_E",
+      "url": "https://www.youtube.com/watch?v=ThmlZHAmB_E",
+      "duration": "13:42",
+      "durationSeconds": 822,
+      "sequence": 43,
+      "dayAtOneEpisodePerDay": null,
+      "dayAtTwoEpisodesPerDay": 22,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 48,
+      "title": "The Mind of Man (Part 8)",
+      "videoId": "j1j77b5t_1E",
+      "url": "https://www.youtube.com/watch?v=j1j77b5t_1E",
+      "duration": "13:35",
+      "durationSeconds": 815,
+      "sequence": 44,
+      "dayAtOneEpisodePerDay": null,
+      "dayAtTwoEpisodesPerDay": 22,
+      "slotAtTwoEpisodesPerDay": 2
+    },
+    {
+      "playlistIndex": 49,
+      "title": "The Mind of Man (Part 9)",
+      "videoId": "_ajks6u5yWQ",
+      "url": "https://www.youtube.com/watch?v=_ajks6u5yWQ",
+      "duration": "13:50",
+      "durationSeconds": 830,
+      "sequence": 45,
+      "dayAtOneEpisodePerDay": null,
+      "dayAtTwoEpisodesPerDay": 23,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 50,
+      "title": "The Mind of Man (Part 10)",
+      "videoId": "fjF80P1xZPA",
+      "url": "https://www.youtube.com/watch?v=fjF80P1xZPA",
+      "duration": "15:48",
+      "durationSeconds": 948,
+      "sequence": 46,
+      "dayAtOneEpisodePerDay": null,
+      "dayAtTwoEpisodesPerDay": 23,
+      "slotAtTwoEpisodesPerDay": 2
+    },
+    {
+      "playlistIndex": 51,
+      "title": "The Mind of Man (Part 11)",
+      "videoId": "udjtpOgVLP4",
+      "url": "https://www.youtube.com/watch?v=udjtpOgVLP4",
+      "duration": "13:53",
+      "durationSeconds": 833,
+      "sequence": 47,
+      "dayAtOneEpisodePerDay": null,
+      "dayAtTwoEpisodesPerDay": 24,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 52,
+      "title": "The Mind of Man (Part 12)",
+      "videoId": "ymh-HZC6P2A",
+      "url": "https://www.youtube.com/watch?v=ymh-HZC6P2A",
+      "duration": "15:26",
+      "durationSeconds": 926,
+      "sequence": 48,
+      "dayAtOneEpisodePerDay": null,
+      "dayAtTwoEpisodesPerDay": 24,
+      "slotAtTwoEpisodesPerDay": 2
+    },
+    {
+      "playlistIndex": 53,
+      "title": "The Mind of Man (Part 13)",
+      "videoId": "z7WCZe7WyQ0",
+      "url": "https://www.youtube.com/watch?v=z7WCZe7WyQ0",
+      "duration": "14:26",
+      "durationSeconds": 866,
+      "sequence": 49,
+      "dayAtOneEpisodePerDay": null,
+      "dayAtTwoEpisodesPerDay": 25,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 54,
+      "title": "The Mind of Man (Part 14)",
+      "videoId": "TzNOzfGVFv0",
+      "url": "https://www.youtube.com/watch?v=TzNOzfGVFv0",
+      "duration": "13:44",
+      "durationSeconds": 824,
+      "sequence": 50,
+      "dayAtOneEpisodePerDay": null,
+      "dayAtTwoEpisodesPerDay": 25,
+      "slotAtTwoEpisodesPerDay": 2
+    },
+    {
+      "playlistIndex": 55,
+      "title": "The Mind of Man (Part 15)",
+      "videoId": "-h7O0OfUl3U",
+      "url": "https://www.youtube.com/watch?v=-h7O0OfUl3U",
+      "duration": "15:28",
+      "durationSeconds": 928,
+      "sequence": 51,
+      "dayAtOneEpisodePerDay": null,
+      "dayAtTwoEpisodesPerDay": 26,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 56,
+      "title": "The Mind of Man (Part 16)",
+      "videoId": "NoKl91QKS3s",
+      "url": "https://www.youtube.com/watch?v=NoKl91QKS3s",
+      "duration": "14:19",
+      "durationSeconds": 859,
+      "sequence": 52,
+      "dayAtOneEpisodePerDay": null,
+      "dayAtTwoEpisodesPerDay": 26,
+      "slotAtTwoEpisodesPerDay": 2
+    },
+    {
+      "playlistIndex": 57,
+      "title": "The Mind of Man (Part 17)",
+      "videoId": "kJHhslhBjyE",
+      "url": "https://www.youtube.com/watch?v=kJHhslhBjyE",
+      "duration": "13:41",
+      "durationSeconds": 821,
+      "sequence": 53,
+      "dayAtOneEpisodePerDay": null,
+      "dayAtTwoEpisodesPerDay": 27,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 58,
+      "title": "The Mind of Man (Part 18)",
+      "videoId": "IUVIS_XbHYs",
+      "url": "https://www.youtube.com/watch?v=IUVIS_XbHYs",
+      "duration": "15:52",
+      "durationSeconds": 952,
+      "sequence": 54,
+      "dayAtOneEpisodePerDay": null,
+      "dayAtTwoEpisodesPerDay": 27,
+      "slotAtTwoEpisodesPerDay": 2
+    },
+    {
+      "playlistIndex": 59,
+      "title": "Faith Stand (Part 1)",
+      "videoId": "t7sP_X1y3rA",
+      "url": "https://www.youtube.com/watch?v=t7sP_X1y3rA",
+      "duration": "14:12",
+      "durationSeconds": 852,
+      "sequence": 55,
+      "dayAtOneEpisodePerDay": null,
+      "dayAtTwoEpisodesPerDay": 28,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 60,
+      "title": "Faith Stand (Part 2)",
+      "videoId": "pJStpnu6RVo",
+      "url": "https://www.youtube.com/watch?v=pJStpnu6RVo",
+      "duration": "13:44",
+      "durationSeconds": 824,
+      "sequence": 56,
+      "dayAtOneEpisodePerDay": null,
+      "dayAtTwoEpisodesPerDay": 28,
+      "slotAtTwoEpisodesPerDay": 2
+    },
+    {
+      "playlistIndex": 61,
+      "title": "Faith Stand (Part 3)",
+      "videoId": "1lHyO_rYQp8",
+      "url": "https://www.youtube.com/watch?v=1lHyO_rYQp8",
+      "duration": "15:30",
+      "durationSeconds": 930,
+      "sequence": 57,
+      "dayAtOneEpisodePerDay": null,
+      "dayAtTwoEpisodesPerDay": 29,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 62,
+      "title": "Faith Stand (Part 4)",
+      "videoId": "WCYcQsQAm8o",
+      "url": "https://www.youtube.com/watch?v=WCYcQsQAm8o",
+      "duration": "14:09",
+      "durationSeconds": 849,
+      "sequence": 58,
+      "dayAtOneEpisodePerDay": null,
+      "dayAtTwoEpisodesPerDay": 29,
+      "slotAtTwoEpisodesPerDay": 2
+    },
+    {
+      "playlistIndex": 63,
+      "title": "Faith Stand (Part 5)",
+      "videoId": "1-SOCL2b-G4",
+      "url": "https://www.youtube.com/watch?v=1-SOCL2b-G4",
+      "duration": "14:21",
+      "durationSeconds": 861,
+      "sequence": 59,
+      "dayAtOneEpisodePerDay": null,
+      "dayAtTwoEpisodesPerDay": 30,
+      "slotAtTwoEpisodesPerDay": 1
+    },
+    {
+      "playlistIndex": 64,
+      "title": "Faith Stand (Part 6)",
+      "videoId": "1RDy1WjFCeM",
+      "url": "https://www.youtube.com/watch?v=1RDy1WjFCeM",
+      "duration": "14:20",
+      "durationSeconds": 860,
+      "sequence": 60,
+      "dayAtOneEpisodePerDay": null,
+      "dayAtTwoEpisodesPerDay": 30,
+      "slotAtTwoEpisodesPerDay": 2
+    }
+  ],
+  "catalogFirst70": [
+    {
+      "playlistIndex": 1,
+      "title": "The Place of the Gospel in your Life (Part 1)",
+      "videoId": "S_xHfkCZy3g",
+      "url": "https://www.youtube.com/watch?v=S_xHfkCZy3g",
+      "duration": null,
+      "durationSeconds": null
+    },
+    {
+      "playlistIndex": 2,
+      "title": "The Place of the Gospel in your Life (Part 2)",
+      "videoId": "2gXfHVAYG2A",
+      "url": "https://www.youtube.com/watch?v=2gXfHVAYG2A",
+      "duration": "15:19",
+      "durationSeconds": 919
+    },
+    {
+      "playlistIndex": 3,
+      "title": "The Place of the Gospel in your Life (Part 3)",
+      "videoId": "ai6rzhx_Hh0",
+      "url": "https://www.youtube.com/watch?v=ai6rzhx_Hh0",
+      "duration": "15:09",
+      "durationSeconds": 909
+    },
+    {
+      "playlistIndex": 4,
+      "title": "The Place of the Gospel in your Life (Part 4)",
+      "videoId": "gGJIgBcIe-4",
+      "url": "https://www.youtube.com/watch?v=gGJIgBcIe-4",
+      "duration": "13:50",
+      "durationSeconds": 830
+    },
+    {
+      "playlistIndex": 5,
+      "title": "The Reality of God's Purpose (Part 1)",
+      "videoId": "dEcREef63Y0",
+      "url": "https://www.youtube.com/watch?v=dEcREef63Y0",
+      "duration": "15:33",
+      "durationSeconds": 933
+    },
+    {
+      "playlistIndex": 6,
+      "title": "The Reality of God's Purpose (Part 2)",
+      "videoId": "1SYZubaMsHw",
+      "url": "https://www.youtube.com/watch?v=1SYZubaMsHw",
+      "duration": "14:13",
+      "durationSeconds": 853
+    },
+    {
+      "playlistIndex": 7,
+      "title": "The Reality of God's Purpose (Part 3)",
+      "videoId": "-HaBww89bFQ",
+      "url": "https://www.youtube.com/watch?v=-HaBww89bFQ",
+      "duration": "13:34",
+      "durationSeconds": 814
+    },
+    {
+      "playlistIndex": 8,
+      "title": "The Reality of God's Purpose (Part 4)",
+      "videoId": "UjLNXnLf5kA",
+      "url": "https://www.youtube.com/watch?v=UjLNXnLf5kA",
+      "duration": "14:11",
+      "durationSeconds": 851
+    },
+    {
+      "playlistIndex": 9,
+      "title": "The Reality of God's Purpose (Part 5)",
+      "videoId": "zAQnxQ1EaTg",
+      "url": "https://www.youtube.com/watch?v=zAQnxQ1EaTg",
+      "duration": "14:50",
+      "durationSeconds": 890
+    },
+    {
+      "playlistIndex": 10,
+      "title": "The Reality of God's Purpose (Part 6)",
+      "videoId": "nRG0vYyifSo",
+      "url": "https://www.youtube.com/watch?v=nRG0vYyifSo",
+      "duration": "15:30",
+      "durationSeconds": 930
+    },
+    {
+      "playlistIndex": 11,
+      "title": "The Reality of God's Purpose (Part 7)",
+      "videoId": "Qs05-1kaBV4",
+      "url": "https://www.youtube.com/watch?v=Qs05-1kaBV4",
+      "duration": "13:49",
+      "durationSeconds": 829
+    },
+    {
+      "playlistIndex": 12,
+      "title": "The Reality of God's Purpose (Part 8)",
+      "videoId": "u6muxOj3QJA",
+      "url": "https://www.youtube.com/watch?v=u6muxOj3QJA",
+      "duration": "14:18",
+      "durationSeconds": 858
+    },
+    {
+      "playlistIndex": 13,
+      "title": "The Reality of God's Purpose (Part 9)",
+      "videoId": "JBspO_ooO7Y",
+      "url": "https://www.youtube.com/watch?v=JBspO_ooO7Y",
+      "duration": "15:40",
+      "durationSeconds": 940
+    },
+    {
+      "playlistIndex": 14,
+      "title": "The Reality of God's Purpose (Part 10)",
+      "videoId": "2QBH5MPoIEY",
+      "url": "https://www.youtube.com/watch?v=2QBH5MPoIEY",
+      "duration": "13:29",
+      "durationSeconds": 809
+    },
+    {
+      "playlistIndex": 15,
+      "title": "The Reality of God's Purpose (Part 11)",
+      "videoId": "6v8LNmAbSaA",
+      "url": "https://www.youtube.com/watch?v=6v8LNmAbSaA",
+      "duration": "14:10",
+      "durationSeconds": 850
+    },
+    {
+      "playlistIndex": 16,
+      "title": "The Reality of God's Purpose (Part 12)",
+      "videoId": "vIHoBQR1WNg",
+      "url": "https://www.youtube.com/watch?v=vIHoBQR1WNg",
+      "duration": "15:37",
+      "durationSeconds": 937
+    },
+    {
+      "playlistIndex": 17,
+      "title": "The Pursuit of God's Purpose (Part 1)",
+      "videoId": "28Q0bMLZnSg",
+      "url": "https://www.youtube.com/watch?v=28Q0bMLZnSg",
+      "duration": "13:56",
+      "durationSeconds": 836
+    },
+    {
+      "playlistIndex": 18,
+      "title": "The Pursuit of God's Purpose (Part 2)",
+      "videoId": "QnSUcIkYtSw",
+      "url": "https://www.youtube.com/watch?v=QnSUcIkYtSw",
+      "duration": "14:41",
+      "durationSeconds": 881
+    },
+    {
+      "playlistIndex": 19,
+      "title": "The Pursuit of God's Purpose (Part 3)",
+      "videoId": "qkaxjfAXqvU",
+      "url": "https://www.youtube.com/watch?v=qkaxjfAXqvU",
+      "duration": "15:49",
+      "durationSeconds": 949
+    },
+    {
+      "playlistIndex": 20,
+      "title": "The Pursuit of God's Purpose (Part 4)",
+      "videoId": "BpC5m6pdVxI",
+      "url": "https://www.youtube.com/watch?v=BpC5m6pdVxI",
+      "duration": "13:51",
+      "durationSeconds": 831
+    },
+    {
+      "playlistIndex": 21,
+      "title": "The Pursuit of God's Purpose (Part 5)",
+      "videoId": "Om2JPGEIlfo",
+      "url": "https://www.youtube.com/watch?v=Om2JPGEIlfo",
+      "duration": "13:53",
+      "durationSeconds": 833
+    },
+    {
+      "playlistIndex": 22,
+      "title": "The Pursuit of God's Purpose (Part 6)",
+      "videoId": "jhOf8h9QFHY",
+      "url": "https://www.youtube.com/watch?v=jhOf8h9QFHY",
+      "duration": "15:38",
+      "durationSeconds": 938
+    },
+    {
+      "playlistIndex": 23,
+      "title": "The Pursuit of God's Purpose (Part 7)",
+      "videoId": "l5CnhKLOWLk",
+      "url": "https://www.youtube.com/watch?v=l5CnhKLOWLk",
+      "duration": "14:07",
+      "durationSeconds": 847
+    },
+    {
+      "playlistIndex": 24,
+      "title": "The Pursuit of God's Purpose (Part 8)",
+      "videoId": "5cRX-aA6RvE",
+      "url": "https://www.youtube.com/watch?v=5cRX-aA6RvE",
+      "duration": "13:53",
+      "durationSeconds": 833
+    },
+    {
+      "playlistIndex": 25,
+      "title": "The Pursuit of God's Purpose (Part 9)",
+      "videoId": "TgWo8lYqSXQ",
+      "url": "https://www.youtube.com/watch?v=TgWo8lYqSXQ",
+      "duration": "15:33",
+      "durationSeconds": 933
+    },
+    {
+      "playlistIndex": 26,
+      "title": "The Pursuit of God's Purpose (Part 10)",
+      "videoId": "J8h6p9EDORo",
+      "url": "https://www.youtube.com/watch?v=J8h6p9EDORo",
+      "duration": "13:59",
+      "durationSeconds": 839
+    },
+    {
+      "playlistIndex": 27,
+      "title": "The Pursuit of God's Purpose (Part 11)",
+      "videoId": "qq-3hIumVWw",
+      "url": "https://www.youtube.com/watch?v=qq-3hIumVWw",
+      "duration": "13:33",
+      "durationSeconds": 813
+    },
+    {
+      "playlistIndex": 28,
+      "title": "The Pursuit of God's Purpose (Part 12)",
+      "videoId": "NG1ouDWnl6o",
+      "url": "https://www.youtube.com/watch?v=NG1ouDWnl6o",
+      "duration": "14:10",
+      "durationSeconds": 850
+    },
+    {
+      "playlistIndex": 29,
+      "title": "How to Fulfill God's Purpose (Part 1)",
+      "videoId": "EWXgKv1Eo9Q",
+      "url": "https://www.youtube.com/watch?v=EWXgKv1Eo9Q",
+      "duration": "14:03",
+      "durationSeconds": 843
+    },
+    {
+      "playlistIndex": 30,
+      "title": "How to Fulfill God's Purpose (Part 2)",
+      "videoId": "Q6gWiyM7Cik",
+      "url": "https://www.youtube.com/watch?v=Q6gWiyM7Cik",
+      "duration": "15:46",
+      "durationSeconds": 946
+    },
+    {
+      "playlistIndex": 31,
+      "title": "How to Fulfill God's Purpose (Part 3)",
+      "videoId": "RVEbGAXaPSI",
+      "url": "https://www.youtube.com/watch?v=RVEbGAXaPSI",
+      "duration": "13:21",
+      "durationSeconds": 801
+    },
+    {
+      "playlistIndex": 32,
+      "title": "How to Fulfill God's Purpose (Part 4)",
+      "videoId": "IYkCBNGwy80",
+      "url": "https://www.youtube.com/watch?v=IYkCBNGwy80",
+      "duration": "14:11",
+      "durationSeconds": 851
+    },
+    {
+      "playlistIndex": 33,
+      "title": "How to Fulfill God's Purpose (Part 5)",
+      "videoId": "2gzSMp6aPzI",
+      "url": "https://www.youtube.com/watch?v=2gzSMp6aPzI",
+      "duration": "15:52",
+      "durationSeconds": 952
+    },
+    {
+      "playlistIndex": 34,
+      "title": "How to Fulfil God's Purpose (Part 6)",
+      "videoId": "NUL2AN3zrYI",
+      "url": "https://www.youtube.com/watch?v=NUL2AN3zrYI",
+      "duration": "13:58",
+      "durationSeconds": 838
+    },
+    {
+      "playlistIndex": 35,
+      "title": "How to Fulfill God's Purpose (Part 7)",
+      "videoId": "gd8cwjfH0Yw",
+      "url": "https://www.youtube.com/watch?v=gd8cwjfH0Yw",
+      "duration": "14:17",
+      "durationSeconds": 857
+    },
+    {
+      "playlistIndex": 36,
+      "title": "How to Fulfill God's Purpose (Part 8)",
+      "videoId": "waPAaS6X1d4",
+      "url": "https://www.youtube.com/watch?v=waPAaS6X1d4",
+      "duration": "15:47",
+      "durationSeconds": 947
+    },
+    {
+      "playlistIndex": 37,
+      "title": "How to Fulfill God's Purpose (Part 9)",
+      "videoId": "TS7t_HVtM4w",
+      "url": "https://www.youtube.com/watch?v=TS7t_HVtM4w",
+      "duration": "14:02",
+      "durationSeconds": 842
+    },
+    {
+      "playlistIndex": 38,
+      "title": "How to Fulfill God's Purpose (Part 10)",
+      "videoId": "MjeE-kbNN7s",
+      "url": "https://www.youtube.com/watch?v=MjeE-kbNN7s",
+      "duration": "14:36",
+      "durationSeconds": 876
+    },
+    {
+      "playlistIndex": 39,
+      "title": "How to Fulfill God's Purpose (Part 11)",
+      "videoId": "APPlUsxFOQc",
+      "url": "https://www.youtube.com/watch?v=APPlUsxFOQc",
+      "duration": "14:08",
+      "durationSeconds": 848
+    },
+    {
+      "playlistIndex": 40,
+      "title": "How to Fulfill God's Purpose (Part 12)",
+      "videoId": "w6iWSPtOl4s",
+      "url": "https://www.youtube.com/watch?v=w6iWSPtOl4s",
+      "duration": "15:43",
+      "durationSeconds": 943
+    },
+    {
+      "playlistIndex": 41,
+      "title": "The Mind of Man (Part 1)",
+      "videoId": "cOZq7Uv91r4",
+      "url": "https://www.youtube.com/watch?v=cOZq7Uv91r4",
+      "duration": "14:13",
+      "durationSeconds": 853
+    },
+    {
+      "playlistIndex": 42,
+      "title": "The Mind of Man (Part 2)",
+      "videoId": "8TGip24GHWc",
+      "url": "https://www.youtube.com/watch?v=8TGip24GHWc",
+      "duration": "13:23",
+      "durationSeconds": 803
+    },
+    {
+      "playlistIndex": 43,
+      "title": "The Mind of Man (Part 3)",
+      "videoId": "KHwCK5qgA00",
+      "url": "https://www.youtube.com/watch?v=KHwCK5qgA00",
+      "duration": "15:55",
+      "durationSeconds": 955
+    },
+    {
+      "playlistIndex": 44,
+      "title": "The Mind of Man (Part 4)",
+      "videoId": "pfLV-EG0QrU",
+      "url": "https://www.youtube.com/watch?v=pfLV-EG0QrU",
+      "duration": "13:38",
+      "durationSeconds": 818
+    },
+    {
+      "playlistIndex": 45,
+      "title": "The Mind of Man (Part 5)",
+      "videoId": "XDzEpEKF25c",
+      "url": "https://www.youtube.com/watch?v=XDzEpEKF25c",
+      "duration": "13:53",
+      "durationSeconds": 833
+    },
+    {
+      "playlistIndex": 46,
+      "title": "The Mind of Man (Part 6)",
+      "videoId": "tVyuPNzKC7E",
+      "url": "https://www.youtube.com/watch?v=tVyuPNzKC7E",
+      "duration": "15:34",
+      "durationSeconds": 934
+    },
+    {
+      "playlistIndex": 47,
+      "title": "The Mind of Man (Part 7)",
+      "videoId": "ThmlZHAmB_E",
+      "url": "https://www.youtube.com/watch?v=ThmlZHAmB_E",
+      "duration": "13:42",
+      "durationSeconds": 822
+    },
+    {
+      "playlistIndex": 48,
+      "title": "The Mind of Man (Part 8)",
+      "videoId": "j1j77b5t_1E",
+      "url": "https://www.youtube.com/watch?v=j1j77b5t_1E",
+      "duration": "13:35",
+      "durationSeconds": 815
+    },
+    {
+      "playlistIndex": 49,
+      "title": "The Mind of Man (Part 9)",
+      "videoId": "_ajks6u5yWQ",
+      "url": "https://www.youtube.com/watch?v=_ajks6u5yWQ",
+      "duration": "13:50",
+      "durationSeconds": 830
+    },
+    {
+      "playlistIndex": 50,
+      "title": "The Mind of Man (Part 10)",
+      "videoId": "fjF80P1xZPA",
+      "url": "https://www.youtube.com/watch?v=fjF80P1xZPA",
+      "duration": "15:48",
+      "durationSeconds": 948
+    },
+    {
+      "playlistIndex": 51,
+      "title": "The Mind of Man (Part 11)",
+      "videoId": "udjtpOgVLP4",
+      "url": "https://www.youtube.com/watch?v=udjtpOgVLP4",
+      "duration": "13:53",
+      "durationSeconds": 833
+    },
+    {
+      "playlistIndex": 52,
+      "title": "The Mind of Man (Part 12)",
+      "videoId": "ymh-HZC6P2A",
+      "url": "https://www.youtube.com/watch?v=ymh-HZC6P2A",
+      "duration": "15:26",
+      "durationSeconds": 926
+    },
+    {
+      "playlistIndex": 53,
+      "title": "The Mind of Man (Part 13)",
+      "videoId": "z7WCZe7WyQ0",
+      "url": "https://www.youtube.com/watch?v=z7WCZe7WyQ0",
+      "duration": "14:26",
+      "durationSeconds": 866
+    },
+    {
+      "playlistIndex": 54,
+      "title": "The Mind of Man (Part 14)",
+      "videoId": "TzNOzfGVFv0",
+      "url": "https://www.youtube.com/watch?v=TzNOzfGVFv0",
+      "duration": "13:44",
+      "durationSeconds": 824
+    },
+    {
+      "playlistIndex": 55,
+      "title": "The Mind of Man (Part 15)",
+      "videoId": "-h7O0OfUl3U",
+      "url": "https://www.youtube.com/watch?v=-h7O0OfUl3U",
+      "duration": "15:28",
+      "durationSeconds": 928
+    },
+    {
+      "playlistIndex": 56,
+      "title": "The Mind of Man (Part 16)",
+      "videoId": "NoKl91QKS3s",
+      "url": "https://www.youtube.com/watch?v=NoKl91QKS3s",
+      "duration": "14:19",
+      "durationSeconds": 859
+    },
+    {
+      "playlistIndex": 57,
+      "title": "The Mind of Man (Part 17)",
+      "videoId": "kJHhslhBjyE",
+      "url": "https://www.youtube.com/watch?v=kJHhslhBjyE",
+      "duration": "13:41",
+      "durationSeconds": 821
+    },
+    {
+      "playlistIndex": 58,
+      "title": "The Mind of Man (Part 18)",
+      "videoId": "IUVIS_XbHYs",
+      "url": "https://www.youtube.com/watch?v=IUVIS_XbHYs",
+      "duration": "15:52",
+      "durationSeconds": 952
+    },
+    {
+      "playlistIndex": 59,
+      "title": "Faith Stand (Part 1)",
+      "videoId": "t7sP_X1y3rA",
+      "url": "https://www.youtube.com/watch?v=t7sP_X1y3rA",
+      "duration": "14:12",
+      "durationSeconds": 852
+    },
+    {
+      "playlistIndex": 60,
+      "title": "Faith Stand (Part 2)",
+      "videoId": "pJStpnu6RVo",
+      "url": "https://www.youtube.com/watch?v=pJStpnu6RVo",
+      "duration": "13:44",
+      "durationSeconds": 824
+    },
+    {
+      "playlistIndex": 61,
+      "title": "Faith Stand (Part 3)",
+      "videoId": "1lHyO_rYQp8",
+      "url": "https://www.youtube.com/watch?v=1lHyO_rYQp8",
+      "duration": "15:30",
+      "durationSeconds": 930
+    },
+    {
+      "playlistIndex": 62,
+      "title": "Faith Stand (Part 4)",
+      "videoId": "WCYcQsQAm8o",
+      "url": "https://www.youtube.com/watch?v=WCYcQsQAm8o",
+      "duration": "14:09",
+      "durationSeconds": 849
+    },
+    {
+      "playlistIndex": 63,
+      "title": "Faith Stand (Part 5)",
+      "videoId": "1-SOCL2b-G4",
+      "url": "https://www.youtube.com/watch?v=1-SOCL2b-G4",
+      "duration": "14:21",
+      "durationSeconds": 861
+    },
+    {
+      "playlistIndex": 64,
+      "title": "Faith Stand (Part 6)",
+      "videoId": "1RDy1WjFCeM",
+      "url": "https://www.youtube.com/watch?v=1RDy1WjFCeM",
+      "duration": "14:20",
+      "durationSeconds": 860
+    },
+    {
+      "playlistIndex": 65,
+      "title": "Faith Stand (Part 7)",
+      "videoId": "BUQfJw5Tw4g",
+      "url": "https://www.youtube.com/watch?v=BUQfJw5Tw4g",
+      "duration": "13:59",
+      "durationSeconds": 839
+    },
+    {
+      "playlistIndex": 66,
+      "title": "Faith Stand (Part 8)",
+      "videoId": "7vIr3DnOFfs",
+      "url": "https://www.youtube.com/watch?v=7vIr3DnOFfs",
+      "duration": "14:10",
+      "durationSeconds": 850
+    },
+    {
+      "playlistIndex": 67,
+      "title": "Faith Stand (Part 9)",
+      "videoId": "kB92ORggfXo",
+      "url": "https://www.youtube.com/watch?v=kB92ORggfXo",
+      "duration": "15:48",
+      "durationSeconds": 948
+    },
+    {
+      "playlistIndex": 68,
+      "title": "Faith Stand (Part 10)",
+      "videoId": "egYhFqhNR48",
+      "url": "https://www.youtube.com/watch?v=egYhFqhNR48",
+      "duration": "14:09",
+      "durationSeconds": 849
+    },
+    {
+      "playlistIndex": 69,
+      "title": "Faith Stand (Part 11)",
+      "videoId": "PCtHMAe9xps",
+      "url": "https://www.youtube.com/watch?v=PCtHMAe9xps",
+      "duration": "13:41",
+      "durationSeconds": 821
+    },
+    {
+      "playlistIndex": 70,
+      "title": "Faith Stand (Part 12)",
+      "videoId": "lGdy37zzwR8",
+      "url": "https://www.youtube.com/watch?v=lGdy37zzwR8",
+      "duration": "15:24",
+      "durationSeconds": 924
+    }
+  ]
+}
