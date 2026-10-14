@@ -18,7 +18,9 @@ import { db } from "@/lib/db";
 import { deriveSogpLearnerState } from "@/lib/sogp/status";
 import { normalizeSogpAssessmentPolicy } from "@/lib/sogp/assessment";
 import { toLagosDateKey } from "@/lib/sogp/formation-progress";
-import { canAccessSogpTrack, summarizeSogpLevels } from "@/lib/sogp/progression";
+import { summarizeSogpLevels } from "@/lib/sogp/progression";
+import { canAccessSogpDay } from "@/lib/sogp/day-access";
+import { sogpLearningWritesEnabled } from "./sogp-learning-gate";
 import type { SogpCurriculumLevel } from "@/lib/sogp/curriculum";
 import type {
   SogpDashboardData,
@@ -426,7 +428,10 @@ export async function getSogpDashboardData(
       curriculumLevel === 1 ||
       levelSummaries.find((level) => level.level === curriculumLevel - 1)
         ?.status === "complete";
-    const accessible = canAccessSogpTrack({
+    const accessible = canAccessSogpDay({
+      learnerState: deriveSogpLearnerState({ cohortStatus: normalizeLearnerCohortStatus(row.cohort.status),enrollmentStatus: row.enrollment.status }),
+      immediateStart: sogpLearningWritesEnabled(),
+      lessonStatus: lesson.status,
       releaseAt: weekReleaseAt.get(track.weekNumber)!,
       curriculumLevel,
       previousLevelComplete,

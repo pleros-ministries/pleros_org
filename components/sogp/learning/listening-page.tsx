@@ -56,7 +56,6 @@ export function ListeningPage({ data,requestedDay }: { data: LearningViewData;re
     });
   }
   return <section className={styles.page}>
-    <Link href="/dashboard/sogp">← Back to My SOGP</Link>
     <header className={styles.header}><p className={styles.meta}>Podcast · {state?.plan?.episodesPerDay === 2 ? "30" : "15"} min/day</p><h1>{day ? day.episodes.length === 2 ? "Your two episodes" : "Your next episode" : "Your listening plan"}</h1>{day ? <p className={styles.muted}>Day {day.dayNumber}</p> : null}</header>
     {!day ? <div className={styles.stack}><p>No episodes are waiting on this day. Your completed history has not been removed.</p><Link className={styles.secondary} href="/dashboard/sogp/plan">Choose or edit your episodes</Link></div> : <>
       <div className={styles.notice}><h2>{day.episodes.filter(episode => episode.listened).length} of {day.episodes.length} episodes marked listened</h2><p className={styles.meta}>{day.episodes.length === 2 ? "Both episodes must be marked listened to complete this day." : "Mark this episode listened to complete this day."} Playback ending does not mark completion.</p></div>

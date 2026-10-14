@@ -14,23 +14,23 @@ export function LearningHome({ data }: { data: LearningViewData }) {
   const podcast = data.state?.path && data.state.path !== "traditional";
   const next = learningResume(data.state);
   const resumeHref = podcast ? next ? `/dashboard/sogp/listen?day=${next.dayNumber}` : "/dashboard/sogp/plan" : data.traditional.resumeHref;
-  return <section className={styles.page}>
-    <header className={styles.header}><h1>My SOGP</h1><p className={styles.muted}>Your learning, your pace. Your current plan and history stay with you.</p></header>
+  return <section className={`${styles.page} ${styles.homePage}`}>
+    <header className={`${styles.header} ${styles.homeHeader}`}><h1>Your learning, your pace</h1><p className={styles.muted}>Your current plan and history stay with you.</p></header>
     <article className={styles.card}>
       <p className={styles.meta}>{podcast ? data.state!.path === "podcast_two" ? "30 min/day · Podcast path" : "15 min/day · Podcast path" : "1 hr/day · Traditional SOGP"}</p>
       <h2>{podcast ? next ? `Day ${next.dayNumber} is waiting for you` : "Your current plan is complete" : data.traditional.nextTitle ?? "Your traditional learning"}</h2>
       <p>{podcast ? next ? `${next.listened} of ${next.total} episodes marked listened` : "Choose more episodes whenever you’re ready." : `${data.traditional.completed} of ${data.traditional.total} tracks completed`}</p>
       <Link className={styles.primary} href={resumeHref}>{podcast && !next ? "Edit your plan" : "Resume learning"}<DashboardIcon name="play" size={24} /></Link>
     </article>
-    <div className={styles.stack}><p>Missed a day? Your next listen waits.</p><p className={styles.meta}>Unfinished podcast episodes are never skipped. Traditional assessments keep their existing requirements.</p></div>
+    <div className={styles.stack}><p>Missed a day? Your next listen waits.</p><p className={styles.meta}>Unfinished episodes are never skipped.</p></div>
     <div className={styles.rows}>
-      <Link className={styles.row} href="/dashboard/sogp/path"><span><strong>Your learning path</strong><span className={styles.meta}>Choose or switch your daily commitment</span></span><DashboardIcon name="right" size={16} /></Link>
-      <Link className={styles.row} href="/dashboard/sogp/plan"><span><strong>Your tracklist</strong><span className={styles.meta}>Edit your podcast episodes and remaining days</span></span><DashboardIcon name="right" size={16} /></Link>
-      <Link className={styles.row} href="/dashboard/podcast"><span><strong>Podcast history and library</strong><span className={styles.meta}>Your existing listens and journeys are retained</span></span><DashboardIcon name="right" size={16} /></Link>
-      <Link className={styles.row} href="/dashboard/sogp/traditional"><span><strong>Traditional calendar and assessments</strong><span className={styles.meta}>Teaching, Prayer Watch, daily reviews and progress</span></span><DashboardIcon name="right" size={16} /></Link>
+      <Link className={styles.row} href="/dashboard/sogp/plan"><span><strong>Your tracklist</strong><span className={styles.meta}>Edit episodes or switch your path</span></span><DashboardIcon name="right" size={16} /></Link>
+      <Link className={styles.row} href="/dashboard/podcast"><span><strong>Learning history</strong><span className={styles.meta}>{data.state ? `${data.state.progress.listenedEpisodeGuids.length} episodes listened · Positions saved` : "Your saved learning and podcast history"}</span></span><DashboardIcon name="right" size={16} /></Link>
+      <div className={styles.row}><span><strong>Weekly group reviews</strong><span className={styles.meta}>Required on traditional and podcast paths</span><span className={styles.meta}>Scheduling is not available yet.</span></span></div>
     </div>
-    <div className={styles.notice}><h2>Weekly group reviews</h2><p>Required on both paths. Group scheduling and leader-confirmed attendance are not connected yet. Keep learning while this is being completed.</p></div>
-    <div className={styles.tools}><Link href="/dashboard/sogp/referrals">Share my referral</Link><Link href="/dashboard/sogp/certificate">Existing certificate status</Link><Link href="/dashboard/pre-sogp">Pre-SOGP resources</Link><Link href="/dashboard/sogp/leaderboard">Leaderboard</Link></div>
+    <section className={styles.stack}><h2>Your follow-up person</h2>{data.followUp ? <div className={styles.person}><span className={styles.avatar}>{data.followUp.name.trim().split(/\s+/).map(part=>part[0]??"").join("").slice(0,2).toUpperCase()}</span><span><strong>{data.followUp.name}</strong><span className={styles.meta}>Current follow-up</span></span></div> : <p className={styles.meta}>You can start learning before a follow-up person is assigned.</p>}<p className={styles.meta}>Reassignment is not available here yet.</p></section>
+    <section className={styles.stack}><h2>Invite someone to SOGP</h2><p className={styles.meta}>Your personal referral code and link</p><Link className={styles.primary} href="/dashboard/sogp/referrals">Share my referral<DashboardIcon name="arrow" /></Link></section>
+    <details className={styles.contextTools}><summary>Traditional learning tools</summary><div className={styles.tools}><Link href="/dashboard/sogp/traditional">Calendar and assessments</Link><Link href="/dashboard/sogp/certificate">Existing certificate status</Link><Link href="/dashboard/pre-sogp">Pre-SOGP resources</Link><Link href="/dashboard/sogp/leaderboard">Leaderboard</Link></div></details>
   </section>;
 }
 
@@ -55,13 +55,12 @@ export function PathChooser({ data }: { data: LearningViewData }) {
     });
   }
   return <section className={styles.page}>
-    <Link href="/dashboard/sogp">← Back to My SOGP</Link>
     <header className={styles.header}><p className={styles.meta}>Your daily commitment</p><h1>Make room to grow</h1><p className={styles.muted}>How much time will you set aside each day?</p></header>
     <fieldset className={styles.choices}><legend>Choose one option</legend>
       {([{ key: "traditional",title: "1 hr/day",description: "Traditional one-hour tracks" },{ key: "podcast_two",title: "30 min/day",description: "2 podcast episodes/day" },{ key: "podcast_one",title: "15 min/day",description: "1 podcast episode/day" }] as const).map(option => <label className={styles.choice} key={option.key}><span><strong>{option.title}</strong><span className={styles.meta}>{option.description}</span></span><input type="radio" name="path" value={option.key} checked={path === option.key} onChange={() => { setPath(option.key);setError(null); }} /></label>)}
     </fieldset>
     <div className={styles.notice}><p>Both paths keep their own history, completions and playback positions.</p><p className={styles.meta}>Switching doesn’t transfer completion. Your podcast plan is kept when you choose Traditional.</p>{preview ? <p>{preview.episodeGuids.length} queued episodes · {Math.ceil(preview.episodeGuids.length / preview.episodesPerDay)} learning days after this choice. No remaining episodes are dropped.</p> : null}</div>
     {!data.canWrite ? <p className={styles.muted}>{learningWriteNotice(data)}</p> : null}
-    <div className={styles.footer}>{error ? <p role="alert" className={styles.error}>{error}</p> : null}<button className={styles.primary} type="button" disabled={saving || !data.canWrite} onClick={submit}>{saving ? "Saving…" : path && path !== "traditional" && !plan ? "Choose your episodes" : "Confirm path"}<DashboardIcon name="right" size={16} /></button></div>
+    <div className={styles.footer}>{!path ? <p className={styles.meta}>Select one option to continue</p> : null}{error ? <p role="alert" className={styles.error}>{error}</p> : null}<button className={styles.primary} type="button" disabled={saving || !data.canWrite || !path} onClick={submit}>{saving ? "Saving…" : data.state?.revision ? "Confirm path" : "Continue"}<DashboardIcon name="right" size={16} /></button></div>
   </section>;
 }

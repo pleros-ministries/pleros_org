@@ -10,6 +10,7 @@
 
 .root { font-synthesis: none; }
 .liveHeader { max-width: none; margin: 0; width: 100%; z-index: 40; border-bottom: 1px solid var(--color-line); }
+.featureTitle { text-align: center; font-size: 14px; line-height: 22px; font-weight: 500; }
 .liveSidebar { display: none; }
 .liveFrame { min-width: 0; }
 .routeMain { min-width: 0; touch-action: pan-y pinch-zoom; }

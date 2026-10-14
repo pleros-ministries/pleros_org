@@ -3,6 +3,14 @@ import { describe, expect, test } from "vitest";
 import { canAccessSogpDay } from "./day-access";
 
 describe("canAccessSogpDay", () => {
+  test("immediate start admits preparing learners to published teaching before cohort release", () => {
+    expect(canAccessSogpDay({ learnerState:"preparing",now:new Date("2026-10-14"),releaseAt:new Date("2026-11-01"),curriculumLevel:1,previousLevelComplete:false,immediateStart:true,lessonStatus:"published" })).toBe(true);
+  });
+  test("immediate start does not expose drafts or admit withdrawn learners", () => {
+    const input = { learnerState:"preparing" as const,now:new Date("2026-10-14"),releaseAt:new Date("2026-10-01"),curriculumLevel:1 as const,previousLevelComplete:false,immediateStart:true };
+    expect(canAccessSogpDay({ ...input,lessonStatus:"draft" })).toBe(false);
+    expect(canAccessSogpDay({ ...input,learnerState:"withdrawn",lessonStatus:"published" })).toBe(false);
+  });
   test("allows released days and blocks future days", () => {
     expect(
       canAccessSogpDay({

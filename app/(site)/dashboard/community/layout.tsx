@@ -6,6 +6,7 @@ import {
   canAccessCommunity,
   getCommunityContext,
 } from "@/lib/community/context";
+import { getDashboardViewer } from "@/lib/dashboard/viewer";
 
 export default async function CommunityLayout({
   children,
@@ -23,9 +24,11 @@ export default async function CommunityLayout({
 
   // Navigation, unread badges and the shared query client come from the
   // dashboard layout; this keeps only the community's title bar.
+  const viewer = await getDashboardViewer();
+  const navigation = viewer?.navigation.find(section=>section.key === "community")?.items ?? [];
   return (
     <section className="site-font-theme flex min-h-[calc(100dvh-var(--dashboard-topbar-offset,0px))] flex-col bg-white text-zinc-900">
-      <CommunityShell unitName={ctx.unit?.name ?? null}>
+      <CommunityShell unitName={ctx.unit?.name ?? null} navigation={navigation}>
         <div className="site-shell-page sogp-shell-page pb-10 pt-4">
           <CommunityGrid>{children}</CommunityGrid>
         </div>

@@ -6,7 +6,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useFormStatus } from "react-dom";
 import { motion } from "motion/react";
-import { KeyRoundIcon, LoaderCircleIcon, LogOutIcon } from "lucide-react";
+import { LoaderCircleIcon, LogOutIcon } from "lucide-react";
 
 import { signOutDashboardAction } from "@/app/_actions/auth-actions";
 import DashboardLoading from "@/app/(site)/dashboard/loading";
@@ -16,11 +16,11 @@ import { dashboardFont } from "@/components/dashboard/v3/font";
 import { useTabSwipe } from "@/components/dashboard/v3/use-tab-swipe";
 import v3 from "@/components/dashboard/v3/dashboard.module.css";
 import type { DashboardNavSection } from "@/lib/dashboard/navigation";
-import { dashboardAreaForPath, dashboardAreaHref, dashboardWorkspace } from "@/lib/dashboard/shell-navigation";
+import { dashboardAreaForPath, dashboardAreaHref } from "@/lib/dashboard/shell-navigation";
 import type { DashboardArea } from "@/lib/dashboard/swipe-tabs";
 import { cn } from "@/lib/utils";
 
-import { DashboardNav } from "./dashboard-nav";
+import { DashboardMenuNavigation } from "./dashboard-menu-navigation";
 import frame from "./dashboard-shell.module.css";
 import { compactButton, focusRing } from "./styles";
 
@@ -59,7 +59,6 @@ function Profile({ viewer, onNavigate }: { viewer: DashboardShellViewer; onNavig
     </span>
     <span className={v3.rowCopy}>
       <span className={v3.profileName}>{viewer.name || "Your profile"}</span>
-      <span className={v3.metadata}>{viewer.roleLabel}</span>
       <span className={v3.profileAction}>Profile & settings</span>
     </span>
     <DashboardIcon name="right" size={16} />
@@ -74,9 +73,8 @@ function SignOutSubmit() {
   </button>;
 }
 
-function AccountActions({ onNavigate }: { onNavigate?: () => void }) {
+function AccountActions() {
   return <div className={frame.accountActions}>
-    <Link href="/forgot-password" onClick={onNavigate} className={cn(compactButton, "flex-1")}><KeyRoundIcon className="size-3.5" aria-hidden />Password</Link>
     <form action={signOutDashboardAction} className="flex flex-1"><SignOutSubmit /></form>
   </div>;
 }
@@ -85,30 +83,7 @@ function ShellNavigation({ sections, area, onArea, onNavigate }: {
   sections: DashboardNavSection[]; area: DashboardArea;
   onArea: (next: DashboardArea, animated?: boolean) => void; onNavigate?: () => void;
 }) {
-  const workspace = dashboardWorkspace(sections);
-  const community = dashboardAreaHref("community", sections);
-  return <>
-    <nav aria-label="Dashboard areas" className={v3.drawerRoots}>
-      {(["you", "community"] as const).map(next => {
-        const href = next === "you" ? "/dashboard" : community;
-        const label = next === "you" ? "You" : "Community";
-        const contents = <><DashboardIcon name={next === "you" ? "grid" : "people"} />{label}</>;
-        if (!href) return <span key={next} className={frame.unavailableArea} aria-disabled="true">{contents}</span>;
-        return <Link key={next} href={href} aria-current={area === next ? "page" : undefined} onClick={event => {
-          if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
-          if (area === next) { onNavigate?.(); return; }
-          event.preventDefault();
-          onArea(next, event.detail !== 0);
-          onNavigate?.();
-        }}>{contents}</Link>;
-      })}
-    </nav>
-    <nav aria-label="Your workspace" className={v3.workspace}>
-      <p>Your workspace</p>
-      {workspace.map(item => <Link key={item.key} href={item.href} prefetch={item.key === "disciples" ? false : undefined} onClick={onNavigate}><DashboardIcon name={item.icon} /><span>{item.label}</span><DashboardIcon name="right" size={16} /></Link>)}
-    </nav>
-    <details className={v3.retained}><summary>More destinations</summary><DashboardNav sections={sections} onNavigate={onNavigate} label="All dashboard destinations" /></details>
-  </>;
+  return <DashboardMenuNavigation sections={sections} area={area} onArea={onArea} onNavigate={onNavigate} />;
 }
 
 function Drawer({ open, onClose, viewer, sections, area, onArea, id }: {
@@ -129,7 +104,7 @@ function Drawer({ open, onClose, viewer, sections, area, onArea, id }: {
     <div className={v3.dialogHeading}><h2 id={titleId} data-dashboard-shell-title>Menu</h2><button className={v3.iconButton} onClick={onClose} aria-label="Close navigation"><DashboardIcon name="close" /></button></div>
     <Profile viewer={viewer} onNavigate={onClose} />
     <ShellNavigation sections={sections} area={area} onArea={onArea} onNavigate={onClose} />
-    <div className={frame.drawerAccount}><AccountActions onNavigate={onClose} /></div>
+    <div className={frame.drawerAccount}><AccountActions /></div>
   </dialog>;
 }
 
@@ -143,6 +118,7 @@ export function DashboardShell({ viewer, sections, children, notificationControl
   const pathname = usePathname() ?? "/dashboard";
   const router = useRouter();
   const routedArea = dashboardAreaForPath(pathname);
+  const focusedLearning = ({ "/dashboard/sogp":"My SOGP", "/dashboard/sogp/path":"Start SOGP", "/dashboard/sogp/plan":"Edit full plan", "/dashboard/sogp/listen":"Today’s listening" } as Record<string,string>)[pathname];
   const [menu, setMenu] = useState<{ open: boolean; pathname: string | null }>({ open: false, pathname: null });
   const [target, setTarget] = useState<{ from: string; area: DashboardArea } | null>(null);
   // Transition state coordinates motion only. Next's existing Suspense/loading
@@ -198,10 +174,14 @@ export function DashboardShell({ viewer, sections, children, notificationControl
       <AccountActions />
     </aside>
     <div className={frame.liveFrame}>
-      <RootHeader active={area} communityAvailable={dashboardAreaHref("community", sections) !== null} className={frame.liveHeader}
+      {focusedLearning ? <header className={cn(v3.header,frame.liveHeader)}>
+        <Link href={pathname === "/dashboard/sogp" ? "/dashboard" : "/dashboard/sogp"} onClick={event => { if (!window.dispatchEvent(new Event("pleros:learning-navigation",{cancelable:true}))) event.preventDefault(); }} className={v3.iconButton} aria-label={pathname === "/dashboard/sogp" ? "Back to You" : "Back to My SOGP"}><DashboardIcon name="left" /></Link>
+        <span className={frame.featureTitle}>{focusedLearning}</span>
+        <button type="button" className={v3.iconButton} aria-label="More options" aria-haspopup="dialog" aria-controls={drawerId} onClick={() => setMenu({ open:true,pathname })}><DashboardIcon name="more" /></button>
+      </header> : <RootHeader active={area} communityAvailable={dashboardAreaHref("community", sections) !== null} className={frame.liveHeader}
         onMenu={() => setMenu({ open: true, pathname })} onTab={selectRootTab}
         menuControl={<button className={cn(v3.iconButton, frame.mobileMenu)} onClick={() => setMenu({ open: true, pathname })} aria-label="Open dashboard navigation" aria-expanded={menuOpen} aria-controls={drawerId} aria-haspopup="dialog"><DashboardIcon name="menu" /></button>}
-        notifications={notificationControl ?? <NotificationBell tone="light" appearance="dashboard" />} />
+        notifications={notificationControl ?? <NotificationBell tone="light" appearance="dashboard" />} />}
       <main id="dashboard-main" className={frame.routeMain} {...swipeHandlers}>
         <div ref={viewportRef} className={frame.routeViewport} data-route-origin={routedArea}>
           <motion.div className={v3.swipeTrack} style={trackStyle}>

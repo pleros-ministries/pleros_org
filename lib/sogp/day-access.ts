@@ -8,7 +8,10 @@ export function canAccessSogpDay(input: {
   releaseAt: Date;
   curriculumLevel: SogpCurriculumLevel;
   previousLevelComplete: boolean;
+  immediateStart?: boolean;
+  lessonStatus?: "draft" | "published";
 }) {
   if (input.learnerState === "withdrawn") return false;
+  if (input.immediateStart) return input.lessonStatus === "published";
   return canAccessSogpTrack(input);
 }

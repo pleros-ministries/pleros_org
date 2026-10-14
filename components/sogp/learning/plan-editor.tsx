@@ -17,6 +17,7 @@ export function PlanEditor({ data,requestedPath }: { data: LearningViewData;requ
   const [search,setSearch] = useState("");
   const [filter,setFilter] = useState("all");
   const [editingSlot,setEditingSlot] = useState<string | null>(null);
+  const [showLibrary,setShowLibrary] = useState(() => !data.state?.plan);
   const [error,setError] = useState<string | null>(null);
   const [saving,startSave] = useTransition();
   const dirty = JSON.stringify(base.guids) !== JSON.stringify(draft);
@@ -31,7 +32,9 @@ export function PlanEditor({ data,requestedPath }: { data: LearningViewData;requ
     if (!dirty) return;
     const warn = (event: BeforeUnloadEvent) => { event.preventDefault();event.returnValue = ""; };
     window.addEventListener("beforeunload",warn);
-    return () => window.removeEventListener("beforeunload",warn);
+    const beforeNavigation = (event: Event) => { if (!window.confirm("Leave without saving your plan changes?")) event.preventDefault(); };
+    window.addEventListener("pleros:learning-navigation",beforeNavigation);
+    return () => { window.removeEventListener("beforeunload",warn);window.removeEventListener("pleros:learning-navigation",beforeNavigation); };
   },[dirty]);
   function remove(index: number) {
     if (draft.slice(index).some(guid => listened.has(guid))) { setError("Removing this slot would move a completed episode. Replace its episode instead.");return; }
@@ -50,8 +53,8 @@ export function PlanEditor({ data,requestedPath }: { data: LearningViewData;requ
   }
   const library = data.episodes.filter(episode => (!search || episode.title.toLowerCase().includes(search.toLowerCase())) && (filter === "all" || episode.title.toLowerCase().includes(filter)));
   return <section className={styles.page}>
-    <Link href="/dashboard/sogp" onClick={event => { if (dirty && !window.confirm("Leave without saving your plan changes?")) event.preventDefault(); }}>← Back to My SOGP</Link>
-    <header className={styles.header}><p className={styles.meta}>Podcast · {pace === 2 ? "30" : "15"} min/day</p><h1>Make the plan yours</h1><p className={styles.muted}>Reorder or replace remaining episodes. Completed episodes stay in your history.</p></header>
+    <header className={styles.header}><p className={styles.meta}>{showLibrary ? "Build your plan" : `Podcast · ${pace === 2 ? "30" : "15"} min/day`}</p><h1>{showLibrary ? "Choose your episodes" : "Make the plan yours"}</h1><p className={styles.muted}>{showLibrary ? "Browse the library or use a suggested start. You can choose any available episodes." : "Reorder or replace remaining episodes. Completed episodes stay in your history."}</p></header>
+    {!showLibrary ? <>
     <div className={styles.notice}><h2>{Math.ceil(draft.length / pace)} learning days · {draft.length} episodes</h2><p className={styles.meta}>{draft.filter(guid => listened.has(guid)).length} listened in this queue · {archived.size} in retained history</p><Link href="/dashboard/sogp/path">Switch path</Link></div>
     <label className={styles.stack}>Jump to day<select defaultValue="" onChange={event => document.getElementById(`learning-day-${event.target.value}`)?.scrollIntoView({ behavior: "instant",block: "start" })}><option value="" disabled>Choose a day</option>{dayNumbers.map(day => <option key={`day-${day}`} value={day}>Day {day}</option>)}</select></label>
     <div className={styles.stack}>
@@ -73,14 +76,15 @@ export function PlanEditor({ data,requestedPath }: { data: LearningViewData;requ
         </div>;
       })}
     </div>
-    <section className={styles.stack} aria-label="Podcast library"><h2>Choose your episodes</h2><p className={styles.muted}>Browse the library or use a suggested start. Purpose is optional. Your current plan stays active until you save.</p>
+    <button type="button" className={styles.secondary} onClick={() => setShowLibrary(true)}>Choose more episodes<DashboardIcon name="plus" /></button>
+    </> : <section className={styles.stack} aria-label="Podcast library"><h2>All podcast episodes</h2><p className={styles.muted}>Purpose is optional. Your current plan stays active until you save.</p>
       <label className={styles.stack}>Search titles or series<input type="search" value={search} onChange={event => setSearch(event.target.value)} /></label>
       <div className={styles.tools}>{["all","purpose","faith"].map(value => <button key={value} type="button" aria-pressed={filter === value} onClick={() => setFilter(value)}>{value === "all" ? "All episodes" : value === "purpose" ? "Purpose" : "Faith"}</button>)}</div>
       <button className={styles.secondary} type="button" disabled={saving || !data.episodes.length} onClick={() => { const recommendation = podcastSuggestion(data.episodes,pace).filter(guid => !queued.has(guid) && !archived.has(guid) && !listened.has(guid));setDraft([...draft,...recommendation]);setError(recommendation.length ? null : "No additional suggested episodes are currently available. You can choose from the library."); }}>Add Purpose-first suggestion<DashboardIcon name="plus" /></button>
       <p className={styles.meta} role="status">{draft.length} selected · Suggested starting length: {pace * 30} episodes. You can edit the full plan.</p>
       {!data.episodes.length ? <p className={styles.muted}>The episode library is unavailable. Your saved plan is unchanged. Refresh to try again.</p> : !library.length ? <p className={styles.muted}>No episodes match this search.</p> : null}
       {library.map(episode => <article key={episode.guid} className={styles.episode}><label className={styles.episodeLabel}><input type="checkbox" checked={queued.has(episode.guid)} disabled={saving || listened.has(episode.guid) || archived.has(episode.guid)} onChange={event => { if (event.target.checked) setDraft([...draft,episode.guid]);else remove(draft.indexOf(episode.guid)); }} /><span><strong>{episode.title}</strong><span className={styles.meta}>{episode.duration || "Duration unavailable"}{listened.has(episode.guid) ? " · Already listened" : ""}</span></span></label>{episode.audioUrl ? <details><summary>Preview episode</summary><audio controls preload="none" src={episode.audioUrl} className={styles.previewAudio} /></details> : <p className={styles.meta}>Preview unavailable</p>}</article>)}
-    </section>
-    <div className={styles.footer}><p className={styles.meta}>Completed listens cannot be moved or replaced. Playback positions stay with their episodes.</p>{!data.canWrite ? <p className={styles.muted}>{learningWriteNotice(data)}</p> : null}{error ? <p role="alert" className={styles.error}>{error}</p> : null}<button type="button" className={styles.primary} disabled={saving || !data.canWrite} onClick={save}>{saving ? "Saving…" : existingPlan ? "Save plan changes" : "Start my podcast plan"}<DashboardIcon name="check" /></button></div>
+    </section>}
+    <div className={styles.footer}><p className={styles.meta}>Completed listens cannot be moved or replaced. Playback positions stay with their episodes.</p>{!data.canWrite ? <p className={styles.muted}>{learningWriteNotice(data)}</p> : null}{error ? <p role="alert" className={styles.error}>{error}</p> : null}{showLibrary ? <button type="button" className={styles.primary} onClick={() => { if (!draft.length && !existingPlan) { setError("Choose at least one episode to continue.");return; }setShowLibrary(false);setError(null); }}>Review selected episodes<DashboardIcon name="arrow" /></button> : <button type="button" className={styles.primary} disabled={saving || !data.canWrite} onClick={save}>{saving ? "Saving…" : existingPlan ? "Save plan changes" : "Start my podcast plan"}<DashboardIcon name="check" /></button>}</div>
   </section>;
 }
