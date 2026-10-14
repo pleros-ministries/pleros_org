@@ -6,6 +6,7 @@ import { Popover } from "@base-ui/react/popover";
 import { CheckIcon, CopyIcon, SendIcon, Share2Icon } from "lucide-react";
 
 import type { PreSogpShareIntentPlatform } from "@/lib/sogp/share";
+import dashboardStyles from "./discipleship-v3.module.css";
 
 const shareButtonClassName =
   "inline-flex min-h-8 items-center gap-1.5 rounded-full bg-[var(--color-brand-blue)] px-3 text-xs font-semibold text-white transition-transform duration-150 active:scale-[0.98]";
@@ -51,11 +52,14 @@ export function ShareIntentButtons({
   hrefs,
   copyValue,
   nativeShare,
+  appearance = "default",
 }: {
   hrefs: Record<PreSogpShareIntentPlatform, string>;
   copyValue: string;
   nativeShare?: { title: string; text: string; url: string };
+  appearance?: "default" | "dashboard";
 }) {
+  const buttonStyle = appearance === "dashboard" ? dashboardStyles.primary : shareButtonClassName;
   const [canNativeShare, setCanNativeShare] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -100,7 +104,7 @@ export function ShareIntentButtons({
           rel="noreferrer"
           aria-label={label}
           style={{ backgroundColor: bg }}
-          className="inline-flex size-8 items-center justify-center rounded-full text-white transition-transform duration-150 hover:-translate-y-px active:scale-[0.98]"
+          className={appearance === "dashboard" ? `${dashboardStyles.shareChip} text-white` : "inline-flex size-8 items-center justify-center rounded-full text-white transition-transform duration-150 hover:-translate-y-px active:scale-[0.98]"}
         >
           <Glyph className="size-3.5" />
         </a>
@@ -109,7 +113,7 @@ export function ShareIntentButtons({
         type="button"
         onClick={handleCopy}
         aria-label={copied ? "Link copied" : "Copy link"}
-        className="inline-flex size-8 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-600 transition-colors hover:border-zinc-300"
+        className={appearance === "dashboard" ? `${dashboardStyles.shareChip} border border-zinc-200 bg-white text-zinc-600` : "inline-flex size-8 items-center justify-center rounded-full border border-zinc-200 bg-white text-zinc-600 transition-colors hover:border-zinc-300"}
       >
         {copied ? (
           <CheckIcon className="size-4 text-green-600" />
@@ -124,7 +128,7 @@ export function ShareIntentButtons({
   // single tap is the whole interaction — no need to also show the chips.
   if (nativeShare && canNativeShare) {
     return (
-      <button type="button" onClick={handleNativeShare} className={shareButtonClassName}>
+      <button type="button" onClick={handleNativeShare} className={buttonStyle}>
         <Share2Icon className="size-3.5" strokeWidth={2} />
         Share
       </button>
@@ -135,7 +139,7 @@ export function ShareIntentButtons({
   // button that reveals them in a popover.
   return (
     <Popover.Root>
-      <Popover.Trigger className={shareButtonClassName}>
+      <Popover.Trigger className={buttonStyle}>
         <Share2Icon className="size-3.5" strokeWidth={2} />
         Share
       </Popover.Trigger>

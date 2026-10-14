@@ -18,17 +18,14 @@ import {
 } from "@/lib/sogp/discipleship";
 
 import { useDiscipleshipAction } from "./discipleship-check-ins";
+import styles from "./discipleship-v3.module.css";
 
 const PAGE_PATH = "/dashboard/sogp/discipleship";
 
-const inputClass =
-  "h-10 w-full rounded-sm border border-zinc-200 bg-white px-3 text-base text-zinc-900 placeholder:text-zinc-400 focus-visible:border-[var(--color-brand-blue)] focus-visible:outline-none sm:text-sm";
-const primaryButtonClass =
-  "inline-flex min-h-9 items-center justify-center rounded-full bg-[var(--color-brand-blue)] px-4 text-xs font-medium text-white transition-transform duration-150 active:scale-[0.98] disabled:opacity-60";
-const quietButtonClass =
-  "text-xs font-medium text-[var(--color-brand-blue)] underline-offset-4 hover:underline disabled:opacity-60";
-const chipClass =
-  "inline-flex min-h-7 shrink-0 items-center gap-1.5 rounded-full border px-3 text-[12.5px] font-medium transition-colors duration-150";
+const inputClass = styles.input;
+const primaryButtonClass = `${styles.primary} disabled:opacity-60`;
+const quietButtonClass = `${styles.quiet} disabled:opacity-60`;
+const chipClass = styles.chip;
 
 function ErrorText({ error }: { error: string | null }) {
   return error ? (
@@ -78,7 +75,7 @@ export function GroupSwitcher({
           );
           // The preview route has no server data to switch between.
           return preview ? (
-            <span key={group.id} className={`${chipClass} ${tone}`}>
+            <span key={group.id} data-selected={selected} className={chipClass}>
               {label}
             </span>
           ) : (
@@ -87,7 +84,7 @@ export function GroupSwitcher({
               href={`${PAGE_PATH}?group=${group.id}`}
               scroll={false}
               aria-current={selected ? "page" : undefined}
-              className={`${chipClass} ${tone}`}
+              className={`${chipClass} ${!selected ? tone : ""}`}
             >
               {label}
             </Link>
@@ -191,7 +188,7 @@ export function GroupHeader({
   }).ok;
 
   return (
-    <div className="grid gap-2 rounded-sm border border-zinc-200 bg-white p-4 lg:col-span-2">
+    <div className={styles.groupHeader}>
       {renaming ? (
         <form
           className="grid gap-2 sm:max-w-md"

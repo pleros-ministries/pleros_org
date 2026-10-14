@@ -7,7 +7,7 @@ import { getAppSession } from "@/lib/app-session";
 import { getDiscipleshipDashboard } from "@/lib/db/queries/sogp-discipleship";
 
 export const metadata: Metadata = {
-  title: "Discipleship",
+  title: "My disciples",
 };
 
 export default async function SogpDiscipleshipPage({

@@ -14,6 +14,9 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Fragment, useState, type ReactNode } from "react";
+import { StatusPill, type StatusTone } from "@/components/dashboard/v3/primitives";
+import { DiscipleProfile, DiscipleshipSection as SogpActivitySection } from "./discipleship-v3";
+import styles from "./discipleship-v3.module.css";
 
 import {
   getDiscipleParticipationAction,
@@ -55,26 +58,25 @@ import { GroupHeader, GroupSwitcher } from "./discipleship-groups";
 import { DiscipleFollowUp, LastContactLine } from "./discipleship-nudge";
 import { DisciplePrayerSection, LeaderPrayerList } from "./discipleship-prayer";
 import { ShareIntentButtons } from "./share-intent-buttons";
-import { SogpActivitySection } from "./sogp-activity-section";
 
 const PLATFORMS: PreSogpShareIntentPlatform[] = ["whatsapp", "facebook", "x", "telegram"];
 
 /** Sentence-case labels and state colours for the shared status classifier. */
-const STATUS_DISPLAY: Record<StudentStatus, { label: string; className: string }> = {
-  on_track: { label: "On track", className: "bg-emerald-50 text-emerald-700" },
-  day_inconsistent: { label: "Missing some days", className: "bg-amber-50 text-amber-700" },
-  activity_inconsistent: { label: "Missing some activities", className: "bg-amber-50 text-amber-700" },
-  generally_inconsistent: { label: "Inconsistent", className: "bg-orange-50 text-orange-700" },
-  declining: { label: "Slowing down", className: "bg-orange-50 text-orange-700" },
-  at_risk: { label: "At risk", className: "bg-red-50 text-red-700" },
-  unresponsive: { label: "Not active", className: "bg-zinc-100 text-(--color-text-muted)" },
+const STATUS_DISPLAY: Record<StudentStatus, { label: string; tone: StatusTone }> = {
+  on_track: { label: "On track", tone: "green" },
+  day_inconsistent: { label: "Missing some days", tone: "amber" },
+  activity_inconsistent: { label: "Missing some activities", tone: "amber" },
+  generally_inconsistent: { label: "Inconsistent", tone: "amber" },
+  declining: { label: "Slowing down", tone: "amber" },
+  at_risk: { label: "At risk", tone: "amber" },
+  unresponsive: { label: "Not active", tone: "neutral" },
 };
 
 const iconClass = "size-4 text-[var(--color-brand-blue)]";
 const quietButtonClass =
   "text-xs font-medium text-[var(--color-brand-blue)] underline-offset-4 hover:underline disabled:opacity-60";
 const whatsappButtonClass =
-  "inline-flex min-h-8 items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 text-xs font-medium text-emerald-800 transition-transform duration-150 active:scale-[0.98]";
+  styles.primary;
 
 type PageView = "leading" | "member";
 
@@ -119,7 +121,7 @@ export function DiscipleshipPage({
   ];
 
   return (
-    <section className="site-font-theme min-h-screen bg-[#f6f5f1] pb-16 text-(--color-text-strong)">
+    <section className={styles.root} data-discipleship-v3>
       {/* The live dashboard shell carries navigation; the standalone preview keeps its own. */}
       {preview ? (
         <nav
@@ -140,13 +142,13 @@ export function DiscipleshipPage({
         </nav>
       ) : null}
 
-      <div className="site-shell-page sogp-shell-page grid gap-4 pb-6 pt-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] lg:items-start">
-        <header className="grid gap-3 lg:col-span-2">
-          <h1 className="text-[24px] font-medium leading-[1.1] tracking-[-0.025em] text-(--color-text-strong)">Discipleship</h1>
+      <div className={styles.content}>
+        <header className={styles.heading}>
+          <h1>My disciples</h1>
           <div
             role="tablist"
             aria-label="Discipleship groups"
-            className="flex gap-5 border-b border-zinc-200"
+            className={styles.tabs}
           >
             {views.map((item) => {
               const selected = view === item.key;
@@ -155,13 +157,18 @@ export function DiscipleshipPage({
                   key={item.key}
                   type="button"
                   role="tab"
+                  id={`discipleship-tab-${item.key}`}
+                  aria-controls="discipleship-panel"
                   aria-selected={selected}
+                  tabIndex={selected ? 0 : -1}
                   onClick={() => setView(item.key)}
-                  className={`-mb-px inline-flex min-h-10 items-center gap-1.5 border-b-2 text-[13px] font-medium transition-colors duration-150 ${
-                    selected
-                      ? "border-[var(--color-brand-blue)] text-[var(--color-brand-blue)]"
-                      : "border-transparent text-(--color-text-muted) hover:text-zinc-800"
-                  }`}
+                  onKeyDown={event => {
+                    if (!["ArrowLeft","ArrowRight","Home","End"].includes(event.key)) return;
+                    event.preventDefault();
+                    const target = event.key === "Home" ? "leading" : event.key === "End" ? "member" : view === "leading" ? "member" : "leading";
+                    setView(target);
+                    event.currentTarget.parentElement?.querySelector<HTMLButtonElement>(`#discipleship-tab-${target}`)?.focus();
+                  }}
                 >
                   {item.label}
                   {item.badge}
@@ -170,7 +177,7 @@ export function DiscipleshipPage({
             })}
           </div>
         </header>
-
+        <div id="discipleship-panel" role="tabpanel" aria-labelledby={`discipleship-tab-${view}`} tabIndex={0} className={styles.panel}>
         {view === "leading" ? (
           <>
             <GroupSwitcher
@@ -189,7 +196,7 @@ export function DiscipleshipPage({
                 preview={preview}
               />
 
-              <div className="grid gap-4">
+              <div className={styles.column}>
                 {paused ? (
                   <p className="rounded-sm border border-zinc-200 bg-white p-4 text-xs text-(--color-text-muted)">
                     This group has been paused by the Pleros team. Contact support if you think
@@ -216,6 +223,9 @@ export function DiscipleshipPage({
                   ) : (
                     <DiscipleParticipationTable
                       groupId={group.id}
+                      groupName={group.name}
+                      paused={paused}
+                      prompts={group.prompts}
                       disciples={group.disciples}
                       range={data.participationRange}
                       preview={preview}
@@ -225,7 +235,7 @@ export function DiscipleshipPage({
               </div>
 
               {!paused ? (
-                <div className="grid gap-4">
+                <div className={styles.column}>
                   <SogpActivitySection
                     title="Check-ins"
                     description="Ask a question, read each answer privately and reply to encourage them."
@@ -268,6 +278,7 @@ export function DiscipleshipPage({
             )}
           </div>
         )}
+        </div>
       </div>
     </section>
   );
@@ -294,8 +305,8 @@ function InviteSection({
 
   return (
     <SogpActivitySection
-      title="This group's invite link"
-      description={`Anyone enrolled in SOGP who opens this link can join ${group.name}. Each of your groups has its own link.`}
+      title="Invite someone to your group"
+      description={`Share ${group.name}'s invitation. Membership starts only after they explicitly accept.`}
       icon={<LinkIcon className={iconClass} strokeWidth={2} />}
     >
       {full ? (
@@ -303,14 +314,18 @@ function InviteSection({
           This group is full. Groups have up to {DISCIPLESHIP_GROUP_MAX} people.
         </p>
       ) : null}
-      <p className="break-all rounded-sm border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs text-zinc-700">
-        {group.inviteUrl}
-      </p>
       <ShareIntentButtons
+        appearance="dashboard"
         hrefs={hrefs}
         copyValue={group.inviteUrl}
         nativeShare={{ title: "Join my SOGP discipleship group", text: message, url: group.inviteUrl }}
       />
+      <details className={styles.inviteDetails}>
+      <summary>Invitation link and privacy settings</summary>
+      <div>
+      <p className="break-all rounded-sm border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs text-zinc-700">
+        {group.inviteUrl}
+      </p>
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-zinc-100 pt-3">
         <SharePhoneToggle
           id="leader-shares-phone"
@@ -339,6 +354,8 @@ function InviteSection({
           {regenerate.error}
         </p>
       ) : null}
+      </div>
+      </details>
     </SogpActivitySection>
   );
 }
@@ -377,11 +394,17 @@ const stepButtonClass =
 
 function DiscipleParticipationTable({
   groupId,
+  groupName,
+  paused,
+  prompts,
   disciples,
   range,
   preview,
 }: {
   groupId: number;
+  groupName: string;
+  paused: boolean;
+  prompts: DiscipleshipDashboardData["selectedGroup"]["prompts"];
   disciples: DiscipleSummary[];
   range: DiscipleshipDashboardData["participationRange"];
   preview: boolean;
@@ -490,15 +513,9 @@ function DiscipleParticipationTable({
               const inactive = day !== null && done === 0;
               const expanded = expandedId === disciple.membershipId;
               const detailsId = `disciple-${disciple.membershipId}`;
-              const rowTone = inactive ? "bg-rose-50/60" : "";
+              const rowTone = inactive ? "bg-(--status-amber-bg)" : "";
               const status = disciple.status ? STATUS_DISPLAY[disciple.status] : null;
-              const statusPill = status ? (
-                <span
-                  className={`inline-block whitespace-nowrap rounded-full px-2 py-0.5 text-[0.65rem] font-medium ${status.className}`}
-                >
-                  {status.label}
-                </span>
-              ) : null;
+              const statusPill = status ? <StatusPill tone={status.tone}>{status.label}</StatusPill> : null;
               const loadingMark = <span className="text-zinc-300">{isLoading ? "…" : "—"}</span>;
 
               return (
@@ -579,7 +596,7 @@ function DiscipleParticipationTable({
                               />
                             </div>
                           ) : null}
-                          <DiscipleDetails disciple={disciple} preview={preview} />
+                          <DiscipleDetails disciple={disciple} groupName={groupName} paused={paused} prompts={prompts} preview={preview} />
                         </div>
                       </td>
                     </tr>
@@ -601,11 +618,17 @@ function DiscipleParticipationTable({
 
 /** A disciple's overall progress, follow-up and actions — the dropdown under
  * their row in the participation table. */
-function DiscipleDetails({ disciple, preview }: { disciple: DiscipleSummary; preview: boolean }) {
+function DiscipleDetails({ disciple,groupName,paused,prompts,preview }: { disciple: DiscipleSummary; groupName: string; paused: boolean; prompts: DiscipleshipDashboardData["selectedGroup"]["prompts"]; preview: boolean }) {
   const remove = useDiscipleshipAction(preview);
 
   return (
-    <div className="grid gap-2.5 rounded-sm border border-zinc-200 bg-white p-3">
+    <DiscipleProfile name={disciple.name} groupName={groupName} paused={paused} actions={disciple.whatsappUrl ? (
+      <a href={disciple.whatsappUrl} target="_blank" rel="noopener noreferrer" className={whatsappButtonClass} onClick={() => {
+        if (!preview) void logWhatsAppContactAction({ membershipId: disciple.membershipId });
+      }}><MessageCircleIcon className="size-5" strokeWidth={2.1} />Message {disciple.firstName} on WhatsApp</a>
+    ) : <span className="text-[13px] text-(--color-text-muted)">WhatsApp not shared</span>}
+    checkIns={paused ? undefined : <><p className="text-[13px] text-(--color-text-muted)">These group check-in responses are private to you and {disciple.firstName}.</p><LeaderPromptList prompts={prompts.map(prompt => ({ ...prompt,responses: prompt.responses.filter(response => response.discipleEnrollmentId === disciple.enrollmentId) }))} discipleCount={1} preview={preview} /></>}
+    reviews={<><Metric label="Recorded daily reviews" value={disciple.reviewsCompleted} max={disciple.reviewsTotal} /><p className="text-[13px] text-(--color-text-muted)">Use the daily participation view to see recorded attendance by date. Weekly group review scheduling is not connected here yet.</p></>}>
       <p className="text-[0.7rem] text-zinc-400">
         Joined {formatDiscipleshipDate(disciple.joinedAt)}
         {disciple.lastActiveAt
@@ -637,7 +660,7 @@ function DiscipleDetails({ disciple, preview }: { disciple: DiscipleSummary; pre
           </span>
         </span>
         <span>
-          Certificate:{" "}
+          Certificate eligibility (existing rules):{" "}
           <span className={`font-semibold ${disciple.eligible ? "text-emerald-700" : "text-zinc-800"}`}>
             {disciple.eligible ? "On course to qualify" : "Not yet eligible"}
           </span>
@@ -650,23 +673,6 @@ function DiscipleDetails({ disciple, preview }: { disciple: DiscipleSummary; pre
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-zinc-100 pt-2.5">
-        {disciple.whatsappUrl ? (
-          <a
-            href={disciple.whatsappUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => {
-              if (!preview) {
-                void logWhatsAppContactAction({ membershipId: disciple.membershipId });
-              }
-            }}
-            className={whatsappButtonClass}
-          >
-            <MessageCircleIcon className="size-3.5" strokeWidth={2} /> Message on WhatsApp
-          </a>
-        ) : (
-          <span className="text-[0.7rem] text-zinc-400">WhatsApp not shared</span>
-        )}
         <button
           type="button"
           disabled={remove.pending}
@@ -685,7 +691,7 @@ function DiscipleDetails({ disciple, preview }: { disciple: DiscipleSummary; pre
           {remove.error}
         </p>
       ) : null}
-    </div>
+    </DiscipleProfile>
   );
 }
 
