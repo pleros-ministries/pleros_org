@@ -66,7 +66,7 @@ export function AddSavedContact({ onPersist }: { onPersist: PersistContact }) {
 }
 
 export type SavedContactDetail = {
-  name: string; phone: string; email: string | null; note: string | null; createdAt: string; phoneHref: string | null;
+  id: number; name: string; phone: string; email: string | null; note: string | null; createdAt: string; phoneHref: string | null;
   history: { activityId: number; date: string; kind: string }[];
 };
 const time = new Intl.DateTimeFormat("en-GB", { timeZone: "Africa/Lagos", hour: "numeric", minute: "2-digit", hour12: true });
@@ -95,6 +95,7 @@ export function SavedContactDetailView({ contact }: { contact: SavedContactDetai
         <li className={styles.row}><span className={styles.avatar}><DashboardIcon name="plus" size={16} /></span><div><strong>Contact saved</strong><span className={styles.meta}>{day.format(saved)} · {time.format(saved)} · Added by you</span></div></li>
       </ul>
     </div>
+    <Link className={styles.secondary} href={`/dashboard/community/report/people/private/${contact.id}/invite`}>Invite to a group on WhatsApp</Link>
     <div className={styles.info}><DashboardIcon name="lock" size={16} /><p>Only you can see this contact. No account, invitation or membership has been created.</p></div>
     <Link className={styles.textLink} href="/dashboard/community/report/people">Back to saved contacts</Link>
   </section>;
