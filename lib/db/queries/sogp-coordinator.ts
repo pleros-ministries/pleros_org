@@ -23,7 +23,9 @@ export type CoordinatorRow = {
 
 export async function listCoordinatorEnrollees(): Promise<CoordinatorRow[]> {
   await requireAdmin();
-  const pending = sql<boolean>`exists (select 1 from ${s.sogpFollowUpRequests} as r where r.enrollment_id = ${s.sogpEnrollments.id} and r.status = 'pending')`;
+  // Correlated outer refs stay raw text (see sogp-follow-up-requests.ts): an
+  // interpolated outer column can render bare and bind to the inner table.
+  const pending = sql<boolean>`exists (select 1 from ${s.sogpFollowUpRequests} as r where r.enrollment_id = sogp_enrollments.id and r.status = 'pending')`;
   const rows = await db.select({
     enrollmentId: s.sogpEnrollments.id, name: s.sogpEnrollments.name, cohortTitle: s.sogpCohorts.title, region: s.sogpEnrollments.region, createdAt: s.sogpEnrollments.createdAt,
     source: s.sogpFollowUpRoutes.source, ownerName: owner.name, ownerId: s.pastorAssignments.pastorUserId, requested: pending,
@@ -84,7 +86,7 @@ export async function changeFollowUpOwner(input: { enrollmentId: number; ownerUs
     const [enrollment] = await tx.select({ status: s.sogpEnrollments.status, userId: s.sogpEnrollments.userId }).from(s.sogpEnrollments).where(eq(s.sogpEnrollments.id, input.enrollmentId)).for("update");
     if (!enrollment || enrollment.status === "withdrawn") throw new CommunityError("This enrolment can no longer be reassigned.");
     if (enrollment.userId === input.ownerUserId) throw new CommunityError("A learner cannot follow themselves up.");
-    const [candidate] = await tx.select({ id: s.users.id }).from(s.users).where(and(eq(s.users.id, input.ownerUserId), sql`(${s.users.role} = 'pastor' or ${s.users.isPastor} or exists (select 1 from ${s.sogpEnrollments} as e where e.user_id = ${s.users.id} and e.status <> 'withdrawn'))`));
+    const [candidate] = await tx.select({ id: s.users.id }).from(s.users).where(and(eq(s.users.id, input.ownerUserId), sql`(${s.users.role} = 'pastor' or ${s.users.isPastor} or exists (select 1 from ${s.sogpEnrollments} as e where e.user_id = users.id and e.status <> 'withdrawn'))`));
     if (!candidate) throw new CommunityError("Choose an existing eligible follow-up person.");
     const [current] = await tx.select({ ownerId: s.pastorAssignments.pastorUserId }).from(s.pastorAssignments).where(eq(s.pastorAssignments.enrollmentId, input.enrollmentId)).for("update");
     if ((current?.ownerId ?? null) !== input.expectedOwnerId) throw new CommunityError("The assignment changed while you were reviewing. Refresh and try again.");

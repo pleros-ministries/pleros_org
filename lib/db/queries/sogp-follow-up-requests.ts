@@ -71,9 +71,11 @@ export type FollowUpOwnerCandidate = { id: string; name: string; enrolleeCount: 
 export async function listFollowUpOwnerCandidates(search = ""): Promise<FollowUpOwnerCandidate[]> {
   await requireAdmin();
   const term = search.trim().slice(0, 80);
-  const load = sql<number>`(select count(*)::int from ${s.pastorAssignments} as a where a.pastor_user_id = ${s.users.id})`;
-  const region = sql<string | null>`(select e.region from ${s.sogpEnrollments} as e where e.user_id = ${s.users.id} order by e.created_at desc limit 1)`;
-  const enrolled = sql`exists (select 1 from ${s.sogpEnrollments} as e where e.user_id = ${s.users.id} and e.status <> 'withdrawn')`;
+  // Correlated outer refs stay raw text: interpolating ${s.users.id} inside an
+  // aliased sub-select renders a bare "id" that binds to the inner table.
+  const load = sql<number>`(select count(*)::int from ${s.pastorAssignments} as a where a.pastor_user_id = users.id)`;
+  const region = sql<string | null>`(select e.region from ${s.sogpEnrollments} as e where e.user_id = users.id order by e.created_at desc limit 1)`;
+  const enrolled = sql`exists (select 1 from ${s.sogpEnrollments} as e where e.user_id = users.id and e.status <> 'withdrawn')`;
   const rows = await db.select({ id: s.users.id, name: s.users.name, role: s.users.role, isPastor: s.users.isPastor, enrolleeCount: load, region })
     .from(s.users)
     .where(term ? and(sql`${s.users.name} ilike ${`%${term.replace(/[%_\\]/g, "\\$&")}%`}`, or(eq(s.users.role, "pastor"), eq(s.users.isPastor, true), enrolled))
@@ -112,7 +114,7 @@ export async function resolveFollowUpRequest(input: { requestId: number; decisio
       // Eligible: a staff pastor, or any enrollee with an active enrolment (referral owners).
       // Ownership grants no staff, church or group rights. Never the learner themself.
       const [candidate] = await tx.select({ id: s.users.id }).from(s.users).where(and(eq(s.users.id, input.replacementUserId), or(eq(s.users.role, "pastor"), eq(s.users.isPastor, true),
-        sql`exists (select 1 from ${s.sogpEnrollments} as e where e.user_id = ${s.users.id} and e.status <> 'withdrawn')`))).for("share");
+        sql`exists (select 1 from ${s.sogpEnrollments} as e where e.user_id = users.id and e.status <> 'withdrawn')`))).for("share");
       if (!candidate) throw new CommunityError("Choose an existing eligible follow-up person.");
       const [learner] = await tx.select({ userId: s.sogpEnrollments.userId }).from(s.sogpEnrollments).where(eq(s.sogpEnrollments.id, request.enrollmentId));
       if (learner?.userId === candidate.id) throw new CommunityError("A learner cannot follow themselves up.");
