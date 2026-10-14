@@ -94,3 +94,16 @@
 .readyNote svg { flex-shrink: 0; margin-top: 2px; }
 .dayProgress { display: grid; gap: 4px; padding: 16px; border-radius: 12px; background: var(--status-blue-bg); }
 a.rowButton { text-decoration: none; color: var(--color-text-strong); }
+.planSummary { display: grid; gap: 8px; padding: 16px; border-radius: 12px; background: var(--status-blue-bg); }
+.filled { border: 0; background: var(--color-surface-muted); }
+.jumpRow { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; padding-left: 16px; border: 1px solid var(--color-line); border-radius: 11px; color: var(--color-text-muted); }
+.page .jumpRow select { width: auto; min-height: 42px; border: 0; background-color: transparent; color: var(--color-text-strong); text-align: right; }
+.listenedMeta { font-size: 13px; line-height: 20px; color: var(--status-green-text); }
+.filterPills { display: flex; flex-wrap: wrap; gap: 8px; }
+.filterPills button { min-height: 32px; padding: 0 12px; border: 0; border-radius: 6px; background: var(--color-surface-muted); color: var(--color-text-strong); font: inherit; font-size: 13px; cursor: pointer; }
+.filterPills button[aria-pressed=true] { background: var(--status-blue-bg); color: var(--color-brand-blue); font-weight: 500; }
+.suggestionCard { display: grid; gap: 4px; padding: 16px; border: 1px solid var(--color-line); border-radius: 16px; }
+.suggestionCard .rowButton { margin-top: 12px; }
+.libraryList { list-style: none; margin: 0; padding: 0; }
+.libraryList li { padding: 12px 0; border-bottom: 1px solid var(--color-line); }
+.libraryRow { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
