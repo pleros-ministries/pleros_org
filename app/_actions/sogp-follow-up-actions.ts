@@ -31,3 +31,13 @@ export async function searchFollowUpOwners(search: string) {
   try { return { ok: true as const, value: await listFollowUpOwnerCandidates(typeof search === "string" ? search : "") }; }
   catch { return { ok: false as const, error: "People could not be loaded. Try again." }; }
 }
+
+/** Coordinator direct owner change; same eligibility and stale-owner guard as request approval. */
+export async function changeEnrolleeOwner(input: { enrollmentId: number; ownerUserId: string; expectedOwnerId: string | null }) {
+  const session = await getDashboardActionSession();
+  if (!session || !hasAdminAccess(session.user.role)) return { ok: false as const, error: "Only an admin can change follow-up owners." };
+  try {
+    const { changeFollowUpOwner } = await import("@/lib/db/queries/sogp-coordinator");
+    await changeFollowUpOwner(input); refreshFollowUp(); revalidatePath("/admin/follow-up"); return { ok: true as const };
+  } catch (error) { return { ok: false as const, error: error instanceof CommunityError ? error.message : "The owner could not be changed. Try again." }; }
+}
