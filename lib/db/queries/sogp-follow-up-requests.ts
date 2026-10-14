@@ -18,8 +18,10 @@ export async function getOwnFollowUpView(userId: string) {
   const enrollment = await ownEnrollment(userId);
   if (!enrollment) return null;
   const [[owner], [request]] = await Promise.all([
-    db.select({ name: s.users.name }).from(s.pastorAssignments)
+    db.select({ name: s.users.name, source: s.sogpFollowUpRoutes.source, region: s.sogpEnrollments.region }).from(s.pastorAssignments)
       .innerJoin(s.users, eq(s.users.id, s.pastorAssignments.pastorUserId))
+      .innerJoin(s.sogpEnrollments, eq(s.sogpEnrollments.id, s.pastorAssignments.enrollmentId))
+      .leftJoin(s.sogpFollowUpRoutes, and(eq(s.sogpFollowUpRoutes.enrollmentId, s.pastorAssignments.enrollmentId), eq(s.sogpFollowUpRoutes.ownerUserId, s.pastorAssignments.pastorUserId)))
       .where(eq(s.pastorAssignments.enrollmentId, enrollment.id)).limit(1),
     db.select({ reason: s.sogpFollowUpRequests.reason, status: s.sogpFollowUpRequests.status, createdAt: s.sogpFollowUpRequests.createdAt })
       .from(s.sogpFollowUpRequests).where(eq(s.sogpFollowUpRequests.enrollmentId, enrollment.id))
@@ -27,6 +29,8 @@ export async function getOwnFollowUpView(userId: string) {
   ]);
   return {
     currentName: owner?.name ?? null,
+    /** How the current owner was assigned, when this routing recorded it. */
+    assignedBy: owner?.source === "geography" ? `Assigned by location${owner.region ? ` · ${owner.region}` : ""}` : owner?.source === "code" ? "Assigned by your referral code" : owner?.source === "link" ? "Assigned by your referral link" : null,
     canRequest: enrollment.status !== "withdrawn",
     request: request ? { ...request, createdAt: new Date(request.createdAt).toISOString() } : null,
   };
