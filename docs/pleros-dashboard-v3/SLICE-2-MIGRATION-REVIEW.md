@@ -32,13 +32,13 @@ Rollback disables writes/UI while retaining schema-installed gate, new tables an
 
 ## Actual verification
 
-- Full regression: 1,128 passed; 43 opt-in checks skipped in that run.
+- Full regression before the mobile layout follow-up: 1,128 passed; 43 opt-in checks skipped in that run. The added date-picker regression and TypeScript check passed after the follow-up.
 - Real PostgreSQL slice 2 suite: 20/20 passed, covering actual server-action identity, all four church roles, cross-owner/unit denial, all affected branches, concurrency, Nil, legacy history/deletion, overnight reporting and read-only rollback.
 - Separate appointment-permission suite: 15/15 passed.
 - TypeScript, scoped ESLint, production build and diff whitespace checks passed. Build retains two pre-existing dynamic-filesystem tracing warnings in learning-progress share images.
 - React Doctor changed-scope remains 49/100 with six advisory warnings, not a green audit: report-editor complexity, notification modal/complexity, server greeting time, motion import, branch-array lookup. This scan omits untracked new files; lint/type/build cover them.
 - Actual Better Auth/live actions were exercised against synthetic users in an isolated loopback app copy, substituting only local PostgreSQL transport and disabling tracking/push. Independent private contact save, ministry save, worker-led meeting creation and another user's Disciple attendance succeeded. Shared total stayed 12; the attendee saw no worker-private contacts and remained appointed Worker.
-- Screenshots at 390×844 and 1440×900: `evidence/slice2-live-saved-meeting-mobile.jpg`, `slice2-live-attendee-mobile.jpg`, `slice2-live-attendee-desktop.jpg`. Next.js runtime diagnostics reported no errors.
+- Screenshots at 390×844 and 1440×900: `evidence/slice2-live-attendee-mobile.jpg` and `slice2-live-attendee-desktop.jpg`. Final mobile verification corrected long-subject grid overflow and wrapped date labels: report cards end at 373px in a 390px viewport, and date labels stay single-line in their horizontal scroll region. The earlier worker mobile capture precedes this fix. Next.js runtime diagnostics reported no errors.
 
 Earlier timeout runs were interrupted by host suspension/resource contention. Final reruns passed without weakening assertions.
 

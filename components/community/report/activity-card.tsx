@@ -52,13 +52,13 @@ export function ActivityCard({
   }
 
   return (
-    <li className={`${card} grid gap-1.5 p-4`}>
+    <li className={`${card} grid min-w-0 gap-1.5 p-4`}>
       <div className="flex items-start justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2.5">
           <span className="inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-(--color-brand-sky-soft) text-(--color-brand-blue)">
             <ActivityKindIcon kind={activity.kind} />
           </span>
-          <p className="min-w-0 truncate text-sm font-medium text-zinc-900">
+          <p className="min-w-0 text-sm font-medium break-words [overflow-wrap:anywhere] text-zinc-900">
             {activityTitle(activity)}
           </p>
         </div>

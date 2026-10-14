@@ -7,6 +7,16 @@ import { ContactStatusBadges } from "../../components/community/report/contact-s
 import { MemberActivityList } from "../../components/community/report/member-activity-list";
 import { emptyDraft, withKind } from "./activity-form";
 import { emptyMinistryNumbers } from "./ministry-report";
+import { DayPicker } from "../../components/community/report/day-picker";
+
+test("date labels remain single-line non-shrinking items in the horizontal picker", () => {
+  const html = renderToStaticMarkup(<DayPicker today="2026-10-14" days={["2026-10-14", "2026-10-13", "2026-10-12"]} selected="2026-10-13" />);
+  const links = html.match(/<a\b[^>]*>/g) ?? [];
+  expect(links).toHaveLength(3);
+  for (const link of links) { expect(link).toContain("shrink-0"); expect(link).toContain("whitespace-nowrap"); }
+  expect(html).toContain('aria-current="page"');
+  expect(html).toContain("Mon 12 Oct");
+});
 
 describe("StepperHeader", () => {
   test("counts the steps once a kind is chosen and fills the bar", () => {

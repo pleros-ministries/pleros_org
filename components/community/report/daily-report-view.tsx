@@ -46,7 +46,7 @@ export function DailyReportView({ today, days, selected, activities, pleros, dec
   function declare(category: DailyReportCategory) {
     run(() => declareDailyReport({ dateKey: selected, category, declaration: category === "devotional" ? "confirmed" : "nil" }));
   }
-  return <div className="grid gap-6 text-(--color-text)">
+  return <div className="grid min-w-0 grid-cols-1 gap-6 text-(--color-text)">
     <header className="flex flex-wrap items-end justify-between gap-3">
       <div className="grid gap-1"><p className="text-[10px] uppercase tracking-wider text-(--color-text-muted)">{dateKeyLabel(selected)}</p><h1 className="font-medium text-(--color-text-strong)">Daily reports</h1></div>
       <span className="rounded-md bg-(--color-brand-sky) px-2 py-1 text-[12px] text-(--color-brand-blue)">{reported === 3 ? "Complete" : reported ? "In progress" : "Not started"}</span>
