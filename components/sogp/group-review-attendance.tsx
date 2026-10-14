@@ -12,7 +12,8 @@ export function GroupReviewAttendance({ data, preview = false }: { data: GroupAt
   const [error, setError] = useState<string | null>(null);
   const [saving, startSave] = useTransition();
   const router = useRouter();
-  const afterReview = new Date(data.endsAt).getTime() <= Date.now();
+  const [now] = useState(() => Date.now());
+  const afterReview = new Date(data.endsAt).getTime() <= now;
   function save() {
     if (preview) { setError("This visual preview does not save attendance."); return; }
     const selected = Object.entries(marks).map(([id,status]) => ({ enrollmentId: Number(id), status }));

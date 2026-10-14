@@ -5,7 +5,7 @@ import styles from "./group-reviews.module.css";
 import { groupReviewTimeLabel } from "@/lib/sogp/group-review";
 
 export function GroupReviewList({ data }: { data: GroupReviewView }) {
-  const now = Date.now();
+  const now = data.now;
   const upcoming = data.reviews.filter(review => new Date(review.endsAt).getTime() > now).sort((a,b) => a.startsAt.localeCompare(b.startsAt));
   const history = data.reviews.filter(review => new Date(review.endsAt).getTime() <= now).sort((a,b) => b.startsAt.localeCompare(a.startsAt));
   function card(review: GroupReviewView["reviews"][number], future: boolean) {

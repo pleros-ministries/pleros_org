@@ -64,7 +64,8 @@ export function FollowUpWelcome({ data }: { data: WelcomeData & { ownerName: str
 export function MyEnrollees({ rows, referralCode, referralUrl }: { rows: OwnEnrolleeRow[]; referralCode: string | null; referralUrl: string | null }) {
   const [tab, setTab] = useState<"follow" | "all">("follow");
   const [copied, setCopied] = useState(false);
-  const needsAttention = (row: OwnEnrolleeRow) => !row.lastContactedAt || Date.now() - new Date(row.lastContactedAt).getTime() > 2 * 86_400_000;
+  const [now] = useState(() => Date.now());
+  const needsAttention = (row: OwnEnrolleeRow) => !row.lastContactedAt || now - new Date(row.lastContactedAt).getTime() > 2 * 86_400_000;
   const visible = tab === "follow" ? rows.filter(needsAttention) : rows;
   async function share() {
     if (!referralUrl) return;

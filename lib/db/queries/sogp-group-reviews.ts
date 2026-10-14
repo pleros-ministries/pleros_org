@@ -58,7 +58,7 @@ export async function getGroupReviewView(userId: string, requestedGroupId?: numb
   const madeUp = rows.length ? await db.select({reviewId:s.sogpReviewMakeups.reviewId,enrollmentId:s.sogpReviewMakeups.enrollmentId}).from(s.sogpReviewMakeups)
     .where(and(inArray(s.sogpReviewMakeups.reviewId,rows.map(row=>row.id)),inArray(s.sogpReviewMakeups.enrollmentId,enrollments.map(row=>row.id)),eq(s.sogpReviewMakeups.status,"attended"))) : [];
   return {
-    groups, group,
+    groups, group, now: Date.now(),
     reviews: rows.filter(row => {
       const membership = groups.find(item => item.id === row.groupId);
       return row.attendance || membership?.isLeader || membership?.joinedAt && new Date(membership.joinedAt) <= new Date(row.startsAt);
