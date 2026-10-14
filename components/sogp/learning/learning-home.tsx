@@ -9,7 +9,7 @@ import type { SogpLearningPath } from "@/lib/sogp/learning-input";
 import { switchPodcastPace } from "@/lib/sogp/podcast-plan";
 import { DashboardIcon } from "@/components/dashboard/v3/primitives";
 import styles from "./learning.module.css";
-import { PaceSwitchConfirm, PathSwitchConfirm } from "./path-switch";
+import { PaceSwitchConfirm, PathSwitchConfirm, TraditionalPreview } from "./path-switch";
 
 export function LearningHome({ data }: { data: LearningViewData }) {
   const podcast = data.state?.path && data.state.path !== "traditional";
@@ -49,7 +49,7 @@ export function PathChooser({ data }: { data: LearningViewData }) {
   function submit() {
     if (!path) { setError("Choose one option to continue."); return; }
     // An existing learner previews what a switch keeps before anything is saved (Paper).
-    if (current && path !== current && !confirming) { setError(null); setConfirming(true); return; }
+    if ((current ? path !== current : path === "traditional") && !confirming) { setError(null); setConfirming(true); return; }
     if (path !== "traditional" && !plan) { router.push(`/dashboard/sogp/plan?path=${path}`); return; }
     startSave(async () => {
       try {
@@ -60,6 +60,7 @@ export function PathChooser({ data }: { data: LearningViewData }) {
       } catch { setError("Your path could not be saved. Try again; your previous choice is unchanged."); }
     });
   }
+  if (confirming && path === "traditional" && !current) return <TraditionalPreview data={data} saving={saving} error={error} onConfirm={submit} onCancel={() => { setConfirming(false); setError(null); }} />;
   if (confirming && path && current) {
     const props = { data, target: path, saving, error, onConfirm: submit, onCancel: () => { setConfirming(false); setPath(current); setError(null); } };
     return current !== "traditional" && path !== "traditional" && plan ? <PaceSwitchConfirm {...props} /> : <PathSwitchConfirm {...props} />;

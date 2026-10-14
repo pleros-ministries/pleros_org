@@ -79,3 +79,17 @@ export function PathSwitchConfirm({ data, target, saving, error, onConfirm, onCa
       <button type="button" className={styles.primary} disabled={saving || !data.canWrite} onClick={onConfirm}>{saving ? "Saving…" : toTraditional ? "Switch & resume traditional" : plan ? "Switch & resume podcasts" : "Switch & build my plan"}<DashboardIcon name="check" /></button></div>
   </section>;
 }
+
+/** Paper: Pleros-onboarding-1hour. First-time traditional choice is confirmed before saving. */
+export function TraditionalPreview({ data, saving, error, onConfirm, onCancel }: Omit<Props, "target">) {
+  return <section className={styles.page}>
+    <header className={styles.header}><p className={styles.eyebrow}>One-hour path</p><h1>The traditional track</h1><p className={styles.muted}>Set aside one hour for SOGP each day.</p></header>
+    <div className={styles.summaryCard}><span className={styles.meta}>Daily commitment</span><strong>1 hr/day</strong><span className={styles.meta}>Traditional one-hour tracks</span></div>
+    <div className={styles.stack}><div className={styles.metaRow}><h2>Your first day</h2><span className={styles.meta}>1:00:00 total</span></div>
+      <ol className={styles.trackList}><li><span className={styles.trackNumber}>01</span><span><strong>{data.traditional.nextTitle ?? "Track 01"}</strong><span className={styles.meta}>Traditional track · 60 min</span></span></li></ol></div>
+    <div className={styles.stack}><h2>Your daily format</h2><p className={styles.muted}>Follow the traditional SOGP tracks, with one hour set aside each day.</p></div>
+    <div className={styles.footer}>{error ? <p role="alert" className={styles.error}>{error}</p> : null}<p className={`${styles.meta} ${styles.centre}`}>1 hr/day · Traditional tracks</p>
+      <button type="button" className={styles.primary} disabled={saving || !data.canWrite} onClick={onConfirm}>{saving ? "Saving…" : "Confirm this plan"}<DashboardIcon name="check" /></button>
+      <button type="button" className={styles.secondary} disabled={saving} onClick={onCancel}>Choose another pace</button></div>
+  </section>;
+}
