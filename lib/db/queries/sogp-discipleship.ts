@@ -366,14 +366,12 @@ export async function evaluateJoinForViewer(
     group: { leaderEnrollmentId: invite.leaderEnrollmentId, status: invite.status },
     viewerActiveGroupId: membership?.groupId ?? null,
     leaderIsViewersDisciple,
-    activeMemberCount: invite.activeMemberCount,
   });
 }
 
 /**
- * Locks the group and applies every join rule inside the caller's transaction:
- * the size cap holds under concurrent joins, and the partial unique index
- * guards one active discipler. Shared by invite links and in-app invitations.
+ * Locks the group and applies every join rule inside the caller's transaction;
+ * the partial unique index guards one active discipler. Groups have no size cap. Shared by invite links and in-app invitations.
  */
 export async function joinGroupInTransaction(
   tx: Tx,
@@ -390,16 +388,7 @@ export async function joinGroupInTransaction(
     .for("update");
   if (!group) throw new DiscipleshipError("This invite link isn't valid.");
 
-  const [[memberCount], [viewerMembership], [circular]] = await Promise.all([
-    tx
-      .select({ n: count() })
-      .from(schema.discipleshipMemberships)
-      .where(
-        and(
-          eq(schema.discipleshipMemberships.groupId, group.id),
-          eq(schema.discipleshipMemberships.status, "active"),
-        ),
-      ),
+  const [[viewerMembership], [circular]] = await Promise.all([
     tx
       .select({ groupId: schema.discipleshipMemberships.groupId })
       .from(schema.discipleshipMemberships)
@@ -432,7 +421,6 @@ export async function joinGroupInTransaction(
     group,
     viewerActiveGroupId: viewerMembership?.groupId ?? null,
     leaderIsViewersDisciple: Boolean(circular),
-    activeMemberCount: memberCount?.n ?? 0,
   });
   if (!decision.ok) return decision;
 
@@ -1072,7 +1060,7 @@ async function getDiscipleSummaries(groupId: number): Promise<DiscipleSummary[]>
         enrollmentCreatedAt: m.enrollmentCreatedAt,
       })),
     ),
-    // Bounded by DISCIPLESHIP_GROUP_MAX; each call reuses the learner's own
+    // One read per disciple of this one group; each call reuses the learner's own
     // dashboard read model so numbers match what the disciple sees.
     Promise.all(members.map((m) => getActiveSogpJourney(m.userId).catch(() => null))),
     db

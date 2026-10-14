@@ -38,7 +38,6 @@ import type {
 } from "@/lib/db/queries/sogp-discipleship";
 import { clampDate, lagosToday, shiftDate } from "@/lib/sogp/daily-date";
 import {
-  DISCIPLESHIP_GROUP_MAX,
   buildDiscipleshipShareMessage,
 } from "@/lib/sogp/discipleship";
 import {
@@ -304,7 +303,6 @@ function InviteSection({
     ]),
   ) as Record<PreSogpShareIntentPlatform, string>;
   const regenerate = useDiscipleshipAction(preview);
-  const full = group.disciples.length >= DISCIPLESHIP_GROUP_MAX;
 
   return (
     <SogpActivitySection
@@ -312,11 +310,6 @@ function InviteSection({
       description={`Share ${group.name}'s invitation. Membership starts only after they explicitly accept.`}
       icon={<LinkIcon className={iconClass} strokeWidth={2} />}
     >
-      {full ? (
-        <p className="text-xs text-amber-700">
-          This group is full. Groups have up to {DISCIPLESHIP_GROUP_MAX} people.
-        </p>
-      ) : null}
       <ShareIntentButtons
         appearance="dashboard"
         hrefs={hrefs}

@@ -8,7 +8,6 @@ import { inputClass } from "@/components/community/report/styles";
 import { sumMinistryNumbers, totalReached } from "@/lib/community/ministry-report";
 import { cn } from "@/lib/utils";
 import { activitiesFor, trackerDays } from "@/lib/preview/pleros/daily-report";
-import { DEMO_GROUP_MAX } from "@/lib/preview/pleros/fixtures";
 import {
   contactsFor,
   findPerson,
@@ -258,7 +257,7 @@ function GroupPanel({ group }: { group: DemoGroup }) {
           )}
           <p className="flex flex-wrap items-center gap-2 text-[12.5px] text-(--color-text-muted)">
             <span className="tabular-nums">
-              {members.length} of {DEMO_GROUP_MAX} disciples
+              {members.length} {members.length === 1 ? "disciple" : "disciples"}
             </span>
             {paused ? <Badge tone="confirm">Paused by the Pleros team</Badge> : <Badge tone="blue">Active</Badge>}
             <span>Started {shortDate(group.createdOn)}</span>
