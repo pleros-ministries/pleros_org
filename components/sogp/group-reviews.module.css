@@ -35,3 +35,10 @@
 .attendanceChoices button { min-height: 44px; border: 1px solid var(--color-line); border-radius: 11px; background: white; color: var(--color-text-strong); font: inherit; font-weight: 500; }
 .attendanceChoices button[aria-pressed=true] { border-color: var(--color-brand-blue); background: var(--color-brand-blue); color: white; }
 .attendanceChoices button:disabled { cursor: default; }
+.offerChoices { display: grid; gap: 16px; margin: 0; padding: 0; border: 0; min-width: 0; }
+.offerChoices legend { margin-bottom: 12px; font-size: 15px; line-height: 22px; font-weight: 500; }
+.offerChoice { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 100px; padding: 16px; border: 1px solid var(--color-line); border-radius: 12px; cursor: pointer; }
+.offerChoice > span { display: grid; gap: 4px; min-width: 0; }
+.offerTitle { font-size: 14px; font-weight: 500; }
+.offerChoice input { width: 20px; height: 20px; flex-shrink: 0; accent-color: var(--color-brand-blue); }
+.offerChoice:has(input:checked) { border-color: var(--color-brand-blue); }
