@@ -20,6 +20,8 @@ export type DashboardCapabilities = {
   /** Any non-student role; `/admin` turns students away itself. */
   staffConsole: boolean;
   churchOversight?: boolean;
+  /** Holds any church appointment (worker placement, unit, branch or Pastor). */
+  churchMember?: boolean;
   churchAssignments?: boolean;
   reporting?: boolean;
 };
@@ -144,8 +146,8 @@ export function buildDashboardNavigation(
     });
   }
   const oversight: DashboardNavItem[] = [];
-  if (caps.churchOversight || caps.churchAssignments) {
-    oversight.push({ key: "church", label: caps.churchOversight ? "Church oversight" : "Church assignments", href: "/dashboard/church" });
+  if (caps.churchOversight || caps.churchAssignments || caps.churchMember) {
+    oversight.push({ key: "church", label: caps.churchAssignments ? "Church structure" : caps.churchOversight ? "Church oversight" : "My church placement", href: "/dashboard/church" });
   }
   if (caps.community && caps.managesLocationGroups) {
     oversight.push({

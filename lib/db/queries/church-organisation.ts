@@ -130,7 +130,7 @@ export async function assignChurchMember(actorId: string, input: { userId: strin
     }
   });
 }
-export async function createChurchPlace(actorId: string, input: { name: string; branchId?: number }) {
+export async function createChurchPlace(actorId: string, input: { name: string; branchId?: number }): Promise<number> {
   requireEnabled();
   const name = input.name.trim();
   if (!name || name.length > 100) throw new CommunityError("Enter a name under 100 characters.");
@@ -140,12 +140,16 @@ export async function createChurchPlace(actorId: string, input: { name: string; 
     if (!actor || !canManageChurchAssignments(actor)) throw new CommunityError("You cannot manage church assignments.");
     if (!input.branchId) {
       if (actor.role !== "pastor") throw new CommunityError("Only the Pastor creates branches.");
-      await tx.insert(s.churchBranches).values({ name });
+      const [created] = await tx.insert(s.churchBranches).values({ name }).onConflictDoNothing().returning({ id: s.churchBranches.id });
+      if (!created) throw new CommunityError("A branch with that name already exists.");
+      return created.id;
     } else {
       if (actor.role === "branch_pastor" && !churchBranchIds(actor).includes(input.branchId)) throw new CommunityError("Choose your own branch.");
       const [branch] = await tx.select({ id: s.churchBranches.id }).from(s.churchBranches).where(eq(s.churchBranches.id, input.branchId));
       if (!branch) throw new CommunityError("Choose an existing branch.");
-      await tx.insert(s.churchUnits).values({ name, branchId: input.branchId });
+      const [created] = await tx.insert(s.churchUnits).values({ name, branchId: input.branchId }).onConflictDoNothing().returning({ id: s.churchUnits.id });
+      if (!created) throw new CommunityError("That branch already has a unit with this name.");
+      return created.id;
     }
   });
 }

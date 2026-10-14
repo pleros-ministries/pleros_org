@@ -41,6 +41,7 @@ export const getDashboardViewer = cache(async () => {
     managesLocationGroups: community && ctx != null && managesAnyUnit(ctx),
     staffConsole: session.user.role !== "student",
     churchOversight: hasReports,
+    churchMember: church !== null,
     churchAssignments: canManageChurchAssignments(church) || churchOrganisationEnabled() && session.user.role === "super_admin",
   };
 

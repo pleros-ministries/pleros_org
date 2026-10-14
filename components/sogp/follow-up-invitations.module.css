@@ -47,6 +47,22 @@
 .consent { display: flex; gap: 12px; align-items: flex-start; font-size: 13px; line-height: 20px; color: var(--color-text-muted); }
 .consent input { width: 20px; height: 20px; margin: 0; flex-shrink: 0; accent-color: var(--color-brand-blue); }
 .page :is(button, a, input):focus-visible { outline: 2px solid var(--color-brand-blue); outline-offset: 3px; }
-.searchBox { display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 16px; border-radius: 11px; background: var(--color-surface-muted); color: var(--color-text-muted); }
+.searchBox { min-width: 0; display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 16px; border-radius: 11px; background: var(--color-surface-muted); color: var(--color-text-muted); }
 .searchBox input { flex: 1; min-width: 0; height: 44px; border: 0; background: transparent; font: inherit; font-size: 16px; color: var(--color-text-strong); outline: none; }
 .copyRow { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 44px; padding: 0; border: 0; background: none; color: var(--color-brand-blue); font: inherit; font-weight: 500; cursor: pointer; }
+.statRow { display: grid; grid-template-columns: repeat(3, 1fr); padding: 16px; border-radius: 16px; background: var(--color-surface-muted); }
+.statRow > div { display: grid; gap: 2px; padding-inline: 12px; border-left: 1px solid var(--color-line); }
+.statRow > div:first-child { border-left: 0; padding-left: 0; }
+.statRow strong { font-size: 24px; line-height: 32px; font-weight: 500; }
+.steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.steps span { display: grid; gap: 4px; justify-items: start; font-size: 12px; line-height: 16px; color: var(--color-text-muted); }
+.steps span b { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--color-surface-muted); font-weight: 500; }
+.steps span[data-active=true] { color: var(--color-brand-blue); }
+.steps span[data-active=true] b { background: var(--color-brand-blue); color: white; }
+.steps span[data-done=true] b { background: var(--status-blue-bg); color: var(--color-brand-blue); }
+.field { display: grid; gap: 8px; font-size: 13px; line-height: 20px; font-weight: 500; }
+.field input { height: 44px; padding: 0 16px; border: 1px solid var(--color-line); border-radius: 11px; font: inherit; font-size: 16px; font-weight: 400; color: var(--color-text-strong); }
+.choice { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--color-line); border-radius: 12px; cursor: pointer; }
+.choice[data-selected=true] { border-color: var(--color-brand-blue); background: var(--status-blue-bg); }
+.choice input { width: 20px; height: 20px; margin: 0; accent-color: var(--color-brand-blue); }
+.accent { color: var(--color-brand-blue); font-size: 13px; font-weight: 500; }

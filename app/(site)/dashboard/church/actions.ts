@@ -19,11 +19,25 @@ export async function saveChurchAssignment(input: { userId: string; role: Church
   } catch (error) { if (error instanceof CommunityError) return { ok: false as const, error: error.message }; throw error; }
 }
 export async function addChurchPlace(input: { name: string; branchId?: number }) {
-  try { const session = await actor(); await createChurchPlace(session.user.id, { name: input.name, branchId: input.branchId }); revalidatePath("/dashboard/church"); return { ok: true as const }; }
+  try { const session = await actor(); const id = await createChurchPlace(session.user.id, { name: input.name, branchId: input.branchId }); revalidatePath("/dashboard/church"); return { ok: true as const, id }; }
   catch (error) { if (error instanceof CommunityError) return { ok: false as const, error: error.message }; throw error; }
 }
 
 export async function remindChurchMember(subjectId: string, day: string) {
   try { const session = await actor(); const { sendDailyReportReminder } = await import("@/lib/notifications/daily-report-dispatch"); const result = await sendDailyReportReminder({ subjectId, reportDate: day, viewerId: session.user.id, source: "manual" }); return { ok: true as const, ...result }; }
   catch (error) { if (error instanceof CommunityError) return { ok: false as const, error: error.message }; throw error; }
+}
+
+/** Adds several members as workers in one unit under its leader; each goes through the guarded appointment service. */
+export async function addUnitWorkers(input: { unitId: number; userIds: string[] }) {
+  try {
+    const session = await actor();
+    const { getChurchPlace } = await import("@/lib/db/queries/church-home");
+    const place = await getChurchPlace(session.user.id, { unitId: input.unitId });
+    if (!place?.unit?.leader) return { ok: false as const, error: "Appoint a unit leader before adding workers." };
+    const ids = [...new Set(input.userIds)].slice(0, 50);
+    for (const userId of ids) await assignChurchMember(session.user.id, { userId, role: "worker", branchId: place.branch.id, unitId: place.unit.id, supervisorId: place.unit.leader.userId });
+    revalidatePath("/dashboard", "layout");
+    return { ok: true as const, count: ids.length };
+  } catch (error) { if (error instanceof CommunityError) return { ok: false as const, error: error.message }; throw error; }
 }
