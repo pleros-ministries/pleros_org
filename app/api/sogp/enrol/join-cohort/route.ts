@@ -76,6 +76,7 @@ export async function POST(request: NextRequest) {
         referralSource: source.referralSource,
         referralSourceOther: "",
         referredByCode: "",
+        referredVia: "",
       },
     });
 

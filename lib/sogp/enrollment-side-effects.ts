@@ -5,6 +5,8 @@ import {
   assignReferralOwnerForEnrollment,
   autoAssignPastorForEnrollment,
 } from "@/lib/db/queries/pastor-followups";
+import { recordFollowUpRoute } from "@/lib/db/queries/sogp-follow-up-routes";
+import { inviteReferredLearnerToOwnerGroup } from "@/lib/db/queries/sogp-group-invitations";
 import {
   attributeSogpReferral,
   ensureSogpReferralCode,
@@ -39,6 +41,8 @@ export function runSogpPostEnrollmentSideEffects(input: {
     referralSource: string;
     referralSourceOther: string;
     referredByCode: string;
+    /** Absent on setup payloads saved before code/link tracking. */
+    referredVia?: "link" | "code" | "";
   };
 }) {
   const { enrollment, cohort, userId, values } = input;
@@ -72,10 +76,28 @@ export function runSogpPostEnrollmentSideEffects(input: {
       return null;
     });
     try {
-      if (referrer) await assignReferralOwnerForEnrollment(enrollment.id, referrer.userId);
-      else if (unit) await autoAssignPastorForEnrollment(enrollment.id, unit.unitId);
+      if (referrer) {
+        if (await assignReferralOwnerForEnrollment(enrollment.id, referrer.userId)) {
+          await recordFollowUpRoute({
+            enrollmentId: enrollment.id,
+            source: values.referredVia === "code" ? "code" : "link",
+            ownerUserId: referrer.userId,
+          });
+        }
+      } else if (unit) {
+        const ownerUserId = await autoAssignPastorForEnrollment(enrollment.id, unit.unitId);
+        if (ownerUserId) await recordFollowUpRoute({ enrollmentId: enrollment.id, source: "geography", ownerUserId });
+      }
     } catch (error) {
       console.error("SOGP follow-up owner assignment failed:", error);
+    }
+    // A pending invitation only: the learner joins the referrer's group by accepting.
+    if (referrer) {
+      await inviteReferredLearnerToOwnerGroup({
+        referrerEnrollmentId: referrer.enrollmentId,
+        referrerUserId: referrer.userId,
+        recipientEnrollmentId: enrollment.id,
+      }).catch((error) => console.error("SOGP referral group invitation failed:", error));
     }
   });
   after(() =>

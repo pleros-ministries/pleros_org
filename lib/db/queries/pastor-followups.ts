@@ -368,21 +368,24 @@ export async function assignReferralOwnerForEnrollment(
   return inserted.length > 0;
 }
 
+/** Returns the assigned pastor only when this call filled the slot. */
 export async function autoAssignPastorForEnrollment(
   enrollmentId: number,
   unitId: number,
-): Promise<void> {
+): Promise<string | null> {
   const [region] = await db
     .select({ pastorUserId: schema.pastorRegions.pastorUserId })
     .from(schema.pastorRegions)
     .where(eq(schema.pastorRegions.unitId, unitId))
     .limit(1);
-  if (!region) return;
+  if (!region) return null;
 
-  await db
+  const inserted = await db
     .insert(schema.pastorAssignments)
     .values({ enrollmentId, pastorUserId: region.pastorUserId })
-    .onConflictDoNothing({ target: schema.pastorAssignments.enrollmentId });
+    .onConflictDoNothing({ target: schema.pastorAssignments.enrollmentId })
+    .returning({ id: schema.pastorAssignments.id });
+  return inserted.length ? region.pastorUserId : null;
 }
 
 export type PastorEnrollee = {

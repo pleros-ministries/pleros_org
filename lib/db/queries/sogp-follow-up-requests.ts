@@ -51,6 +51,11 @@ export async function createOwnFollowUpRequest(userId: string, rawReason: unknow
       .where(eq(s.pastorAssignments.enrollmentId, enrollment.id)).limit(1);
     await tx.insert(s.sogpFollowUpRequests).values({ enrollmentId: enrollment.id, previousFollowUpUserId: owner?.id ?? null, reason });
   });
+  // A link arrival's "Request someone else" choice is this request. Outside the
+  // request transaction so a database without 0059 still accepts requests.
+  await db.update(s.sogpFollowUpRoutes).set({ choice: "requested", chosenAt: new Date() })
+    .where(and(eq(s.sogpFollowUpRoutes.enrollmentId, own.id), eq(s.sogpFollowUpRoutes.source, "link"), sql`${s.sogpFollowUpRoutes.choice} is null`))
+    .catch(error => console.error("Follow-up route choice update failed:", error));
 }
 
 /** Existing admins only; no request reasons reach pastors or church leaders. */

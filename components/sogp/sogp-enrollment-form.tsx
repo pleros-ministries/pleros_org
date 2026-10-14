@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { ArrowRight, ChevronDown, LoaderCircle } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import type { CountryCode } from "libphonenumber-js/min";
 
 import { Button } from "@/components/ui/button";
@@ -171,6 +172,8 @@ export function SogpEnrollmentForm({
   defaultCountryCode: CountryCode;
 }) {
   const initialCountry = getSogpCountryOrDefault(defaultCountryCode);
+  // A shared referral link already carries its code; only direct visitors type one.
+  const arrivedWithLink = Boolean(useSearchParams().get("ref"));
 
   const [values, setValues] = useState({
     firstName: "",
@@ -180,6 +183,7 @@ export function SogpEnrollmentForm({
     birthYear: "",
     referralSource: "",
     referralSourceOther: "",
+    referralCode: "",
     whatsappConsent: "" as "" | "yes" | "no",
     phone: "",
     phoneCountryCode: defaultCountryCode as CountryCode,
@@ -435,6 +439,27 @@ export function SogpEnrollmentForm({
         }}
         onOtherSourceChange={(value) => update("referralSourceOther", value)}
       />
+      {arrivedWithLink ? null : (
+        <div className="grid gap-2">
+          <label htmlFor="referralCode" className="font-[var(--font-be-vietnam-pro)] [font-size:0.8125rem] font-medium text-[var(--color-text-strong)]">
+            Referral code
+          </label>
+          <Input
+            id="referralCode"
+            name="referralCode"
+            autoComplete="off"
+            autoCapitalize="characters"
+            maxLength={32}
+            value={values.referralCode}
+            onChange={(event) => update("referralCode", event.target.value)}
+            aria-describedby="referral-code-help"
+            placeholder="Optional"
+          />
+          <p id="referral-code-help" className="font-[var(--font-be-vietnam-pro)] [font-size:0.75rem] text-[var(--color-text-muted)]">
+            If someone gave you their code, they’ll follow up with you.
+          </p>
+        </div>
+      )}
       <fieldset
         className="grid gap-3"
         aria-invalid={Boolean(whatsappConsentError)}

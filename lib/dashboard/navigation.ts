@@ -137,6 +137,11 @@ export function buildDashboardNavigation(
       label: "My disciples",
       href: "/dashboard/sogp/discipleship",
     });
+    community.push({
+      key: "enrollees",
+      label: "My enrollees",
+      href: "/dashboard/sogp/enrollees",
+    });
   }
   const oversight: DashboardNavItem[] = [];
   if (caps.churchOversight || caps.churchAssignments) {

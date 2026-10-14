@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, desc, eq, isNull } from "drizzle-orm";
+import { and, count, desc, eq, isNull } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
@@ -10,13 +10,14 @@ import { getDashboardViewer } from "@/lib/dashboard/viewer";
 import { getCommunityDiscipleship } from "./community-discipleship";
 import { listConversations } from "./community-messages";
 import { listGroupDirectory } from "./community-groups";
+import { listOwnPendingInvitations } from "./sogp-group-invitations";
 
 /** Read-only, session-owned home. Never creates a group or loads answer text. */
 export async function getCommunityHome() {
   const ctx = await getCommunityContext();
   if (!ctx || !canAccessCommunity(ctx)) return null;
   const leader = alias(schema.sogpEnrollments, "home_leader");
-  const [conversations, discipleship, groups, viewer, responses] = await Promise.all([
+  const [conversations, discipleship, groups, viewer, responses, invitations, [owned]] = await Promise.all([
     listConversations(ctx.userId),
     getCommunityDiscipleship(ctx),
     listGroupDirectory(ctx.userId),
@@ -43,6 +44,9 @@ export async function getCommunityHome() {
       .where(isNull(schema.discipleshipPromptResponses.leaderReply))
       .orderBy(desc(schema.discipleshipPromptResponses.updatedAt))
       .limit(3),
+    // Optional section: the home still renders on a database without 0059.
+    listOwnPendingInvitations(ctx.userId).catch(() => []),
+    db.select({ n: count() }).from(schema.pastorAssignments).where(eq(schema.pastorAssignments.pastorUserId, ctx.userId)),
   ]);
 
   return {
@@ -52,6 +56,8 @@ export async function getCommunityHome() {
       firstName: firstNameOf(item.firstName || item.name),
       href: `/dashboard/sogp/discipleship?group=${item.groupId}#check-ins`,
     })),
+    invitations: invitations.map(item => ({ id: item.id, leaderFirstName: firstNameOf(item.leaderName), groupName: item.groupName })),
+    enrolleeCount: owned?.n ?? 0,
     disciplesEnabled: ctx.enrollmentId !== null,
     discipleCount: discipleship.leading.filter(group => !group.paused).reduce((total, group) => total + group.disciples.length, 0),
     church: viewer?.navigation.find(section => section.key === "oversight")?.items.find(item => item.key === "church") ?? null,
