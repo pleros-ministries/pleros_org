@@ -709,7 +709,7 @@ function Metric({
   const ready = value !== null && max !== null && max > 0;
   return (
     <div className="grid gap-1">
-      <dt className="text-[0.65rem] font-medium uppercase tracking-[0.06em] text-zinc-400">{label}</dt>
+      <dt className="text-[13px] font-medium text-(--color-text-muted)">{label}</dt>
       <dd className="grid gap-1">
         <span className="text-xs text-zinc-700">
           {ready ? `${value} of ${max}` : "Not started"}
