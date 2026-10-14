@@ -13,6 +13,8 @@ const eslintConfig = defineConfig([
     "build/**",
     "tmp/**",
     "next-env.d.ts",
+    // Local-only agent worktrees (gitignored); their build output must not be linted.
+    ".claude/**",
   ]),
 ]);
 
