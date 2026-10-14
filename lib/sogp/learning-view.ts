@@ -8,7 +8,7 @@ export type LearningViewData = {
   episodes: LearningEpisode[];
   canWrite: boolean;
   writeBlockReason: "not_enabled" | "withdrawn" | null;
-  followUp?: { name: string } | null;
+  followUp?: { name: string; source?: "code" | "link" | "geography" | null } | null;
   traditional: { completed: number; total: number; nextTitle: string | null; resumeHref: string };
 };
 export function learningWriteNotice(data: LearningViewData) {
