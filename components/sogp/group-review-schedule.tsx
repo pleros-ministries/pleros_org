@@ -21,7 +21,7 @@ export function GroupReviewSchedule({ groups, schedule, initial, reschedule }: {
   const [startTime, setStartTime] = useState(initial?.startTime ?? "");
   const [endTime, setEndTime] = useState(initial?.endTime ?? "");
   const group = groups.find(item => item.id === groupId);
-  const [venue, setVenue] = useState("");
+  const [venue, setVenue] = useState(initial?.venue ?? "");
   const [error, setError] = useState<string | null>(null);
   const [saving, startSave] = useTransition();
   const [requestKey] = useState(() => crypto.randomUUID());

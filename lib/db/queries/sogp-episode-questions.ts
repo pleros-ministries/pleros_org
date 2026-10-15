@@ -65,9 +65,9 @@ export async function askEpisodeQuestion(userId: string, raw: unknown) {
 
 export async function replyToEpisodeQuestion(userId: string, raw: unknown) {
   if (!raw || typeof raw !== "object") throw new CommunityError("Write your reply first.");
-  const input = raw as { questionId?: unknown; body?: unknown };
+  const input = raw as { questionId?: unknown; reply?: unknown };
   if (!Number.isSafeInteger(input.questionId) || Number(input.questionId) < 1) throw new CommunityError("This question is not available.");
-  const body = cleanText(input.body, BODY_MAX, "Write your reply in 2000 characters or fewer.");
+  const body = cleanText(input.reply, BODY_MAX, "Write your reply in 2000 characters or fewer.");
   const [mine] = await db.select({ id: s.sogpEnrollments.id }).from(s.sogpEnrollments).where(and(eq(s.sogpEnrollments.userId, userId), ne(s.sogpEnrollments.status, "withdrawn"))).limit(1);
   if (!mine) throw new CommunityError("Only this group’s active lead can reply.");
   const [question] = await db.select().from(s.discipleshipEpisodeQuestions)
