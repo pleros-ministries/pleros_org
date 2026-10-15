@@ -8,8 +8,9 @@ import type { CertificationFacts } from "@/lib/db/queries/sogp-certification-fac
 export const metadata={title:"Readiness visual preview",robots:{index:false,follow:false}};
 
 const sample:CertificationFacts={
-  pathLabel:"One podcast a day",podcast:true,learningDone:12,learningTotal:30,learningLabel:"Episodes listened in your saved plan",
-  resumeHref:"/preview/dashboard-v3/readiness",reviews:{attended:2,missed:1,madeUp:0,outstandingMakeups:1},certificateAvailable:false,
+  pathLabel:"One podcast a day",podcast:true,learningDone:12,learningTotal:30,learningPass:false,learningLabel:"Episodes listened in your saved plan",
+  resumeHref:"/preview/dashboard-v3/readiness",reviews:{attended:2,missed:1,madeUp:0,outstandingMakeups:1,owed:3,outstanding:1,reviewPass:false},
+  prayer:{present:20,total:28,percent:71,required:80,pass:false},meetsRequirements:false,certificateAvailable:false,
 };
 
 export default function ReadinessPreviewPage() {

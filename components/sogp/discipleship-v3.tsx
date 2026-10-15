@@ -17,12 +17,12 @@ export function DiscipleshipSection({ id,title,description,icon,action,children 
 }
 
 /** Pleros-disciple's identity block; never fills gaps with mock learning facts. */
-export function DiscipleProfile({ name,groupName,paused = false,actions,checkIns,reviews,children }: {
-  name: string; groupName: string; paused?: boolean; actions?: ReactNode; checkIns?: ReactNode; reviews?: ReactNode; children: ReactNode;
+export function DiscipleProfile({ name,groupName,paused = false,actions,checkIns,reviews,questions,children }: {
+  name: string; groupName: string; paused?: boolean; actions?: ReactNode; checkIns?: ReactNode; reviews?: ReactNode; questions?: ReactNode; children: ReactNode;
 }) {
   const id = useId();
   const [view,setView] = useState("overview");
-  const panels = [{ key: "overview",label: "Overview",body: children },...(checkIns ? [{ key: "checkins",label: "Check-ins",body: checkIns }] : []),...(reviews ? [{ key: "reviews",label: "Reviews",body: reviews }] : [])];
+  const panels = [{ key: "overview",label: "Overview",body: children },...(checkIns ? [{ key: "checkins",label: "Check-ins",body: checkIns }] : []),...(reviews ? [{ key: "reviews",label: "Reviews",body: reviews }] : []),...(questions ? [{ key: "questions",label: "Questions",body: questions }] : [])];
   const activePanel = panels.find(panel => panel.key === view) ?? panels[0]!;
   const initials = name.trim().split(/\s+/).slice(0,2).map(part => part[0]).join("").toUpperCase() || "?";
   return <section className={styles.profile} aria-label={`${name} progress and follow-up`}>

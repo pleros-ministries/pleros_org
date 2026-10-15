@@ -5,6 +5,7 @@ import { DiscipleshipPage } from "@/components/sogp/discipleship-page";
 import { SogpQueryProvider } from "@/components/sogp/sogp-query-provider";
 import { getAppSession } from "@/lib/app-session";
 import { getDiscipleshipDashboard } from "@/lib/db/queries/sogp-discipleship";
+import { getLeaderEpisodeQuestions, getOwnEpisodeQuestions } from "@/lib/db/queries/sogp-episode-questions";
 
 export const metadata: Metadata = {
   title: "My disciples",
@@ -25,10 +26,14 @@ export default async function SogpDiscipleshipPage({
 
   const data = await getDiscipleshipDashboard(session.user.id, requestedGroupId);
   if (!data) redirect("/sogp/enrol");
+  const [episodeQuestions, ownEpisodeQuestions] = await Promise.all([
+    getLeaderEpisodeQuestions(session.user.id, data.selectedGroup.id).catch(() => []),
+    getOwnEpisodeQuestions(session.user.id).catch(() => []),
+  ]);
 
   return (
     <SogpQueryProvider>
-      <DiscipleshipPage data={data} />
+      <DiscipleshipPage data={data} episodeQuestions={episodeQuestions} ownEpisodeQuestions={ownEpisodeQuestions} />
     </SogpQueryProvider>
   );
 }

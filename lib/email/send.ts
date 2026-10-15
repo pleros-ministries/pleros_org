@@ -335,6 +335,7 @@ export async function sendAskPlerosStaffNotification(opts: {
   message: string;
   isFollowUp: boolean;
   isAnonymous: boolean;
+  episodeTitle?: string | null;
   adminUrl: string;
 }) {
   const to = resolveAskPlerosInbox(process.env);

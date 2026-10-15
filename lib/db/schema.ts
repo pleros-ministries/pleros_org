@@ -232,6 +232,8 @@ export const communityNotificationKindEnum = pgEnum(
     "discipleship_prayed",
     "discipleship_prayer_answered",
     "discipleship_post",
+    "discipleship_question",
+    "discipleship_question_reply",
     "group_join_request",
     "group_join_approved",
     "pleros_reply",
@@ -1837,6 +1839,9 @@ export const plerosQuestions = pgTable(
       .references(() => users.id, { onDelete: "cascade" }),
     isAnonymous: boolean("is_anonymous").notNull(),
     status: qaStatusEnum("status").notNull().default("open"),
+    /** Episode context when asked from a learning page; null for plain Ask Pleros. */
+    episodeGuid: text("episode_guid"),
+    episodeTitle: text("episode_title"),
     /** True while Pleros has replied and the asker has not opened it. */
     askerUnread: boolean("asker_unread").notNull().default(false),
     lastMessageAt: timestamp("last_message_at", { withTimezone: true })
@@ -2331,6 +2336,40 @@ export const discipleshipPrayerRequests = pgTable(
   ],
 );
 
+/** A learner's question on a podcast episode, routed to their active discipler. */
+export const discipleshipEpisodeQuestions = pgTable(
+  "discipleship_episode_questions",
+  {
+    id: serial("id").primaryKey(),
+    askerEnrollmentId: integer("asker_enrollment_id")
+      .notNull()
+      .references(() => sogpEnrollments.id, { onDelete: "cascade" }),
+    groupId: integer("group_id")
+      .notNull()
+      .references(() => discipleshipGroups.id, { onDelete: "cascade" }),
+    disciplerEnrollmentId: integer("discipler_enrollment_id")
+      .notNull()
+      .references(() => sogpEnrollments.id, { onDelete: "cascade" }),
+    episodeGuid: text("episode_guid").notNull(),
+    episodeTitle: text("episode_title").notNull(),
+    body: text("body").notNull(),
+    reply: text("reply"),
+    repliedAt: timestamp("replied_at", { withTimezone: true }),
+    askerUnread: boolean("asker_unread").notNull().default(false),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    index("discipleship_episode_questions_group_created_idx").on(t.groupId, t.createdAt),
+    index("discipleship_episode_questions_asker_idx").on(t.askerEnrollmentId, t.createdAt),
+    check("discipleship_episode_questions_body_check", sql`length(trim(${t.body})) between 1 and 2000`),
+  ],
+);
+
 
 /** V2 reporting declarations: no duplicated devotional facts or ministry activity rows. */
 export const dailyReportDeclarations = pgTable("daily_report_declarations", {
@@ -2555,11 +2594,15 @@ export const sogpGroupReviewAttendance = pgTable("sogp_group_review_attendance",
   status: text("status").$type<"attended" | "missed">().notNull(),
   confirmedBy: text("confirmed_by").references(() => users.id, { onDelete: "set null" }),
   confirmedAt: timestamp("confirmed_at", { withTimezone: true }).notNull().defaultNow(),
+  /** First confirmation, kept when a lead corrects attendance within the allowed window. */
+  originalStatus: text("original_status").$type<"attended" | "missed">(),
+  originalConfirmedAt: timestamp("original_confirmed_at", { withTimezone: true }),
 }, t => [
   primaryKey({ columns: [t.reviewId, t.enrollmentId] }),
   index("sogp_group_review_attendance_enrollment_idx").on(t.enrollmentId, t.reviewId),
   index("sogp_group_review_attendance_actor_idx").on(t.confirmedBy),
   check("sogp_group_review_attendance_status_check", sql`${t.status} in ('attended','missed')`),
+  check("sogp_group_review_attendance_original_status_check", sql`${t.originalStatus} is null or ${t.originalStatus} in ('attended','missed')`),
 ]);
 
 export const sogpReviewMakeups = pgTable("sogp_review_makeups", {

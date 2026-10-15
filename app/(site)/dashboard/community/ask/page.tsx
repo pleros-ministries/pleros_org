@@ -8,12 +8,20 @@ import {
 } from "@/lib/community/context";
 import { listQuestionsForAsker } from "@/lib/db/queries/ask-pleros";
 
-export default async function AskPlerosRoute() {
+export default async function AskPlerosRoute({
+  searchParams,
+}: {
+  searchParams: Promise<{ episodeGuid?: string; episodeTitle?: string }>;
+}) {
   const session = await getAppSession();
   if (!session) redirect("/login?returnTo=/dashboard/community/ask");
 
   const ctx = await getCommunityContext();
   if (!ctx || !canAccessCommunity(ctx)) redirect("/sogp/enrol");
 
-  return <AskPlerosView questions={await listQuestionsForAsker(ctx.userId)} />;
+  const { episodeGuid, episodeTitle } = await searchParams;
+  const episode = episodeGuid?.trim() && episodeTitle?.trim() && episodeGuid.length <= 200 && episodeTitle.length <= 300
+    ? { guid: episodeGuid.trim(), title: episodeTitle.trim() }
+    : undefined;
+  return <AskPlerosView questions={await listQuestionsForAsker(ctx.userId)} episode={episode} />;
 }

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { DashboardIcon, StatusPill } from "@/components/dashboard/v3/primitives";
+import { CancelReviewButton } from "./group-review-cancel";
 import type { GroupReviewView } from "@/lib/db/queries/sogp-group-reviews";
 import styles from "./group-reviews.module.css";
 import { groupReviewTimeLabel } from "@/lib/sogp/group-review";
@@ -13,7 +14,7 @@ export function GroupReviewList({ data }: { data: GroupReviewView }) {
       <StatusPill tone={future ? "blue" : review.canConfirm ? "neutral" : review.attendance === "attended" ? "green" : "amber"}>{future ? "Scheduled" : review.canConfirm ? "Review ended" : review.attendance === "attended" ? "Attended" : review.attendance === "missed" ? "Missed" : "Unconfirmed"}</StatusPill>
       {review.makeUpCompleted ? <StatusPill tone="green">Made up · Original Missed retained</StatusPill> : null}
       <h2 data-dashboard-learning-title className={styles.reviewTitle}>{review.title}</h2>{future || review.canConfirm ? <><p>{groupReviewTimeLabel(review.startsAt, review.endsAt)}</p><p className={styles.meta}>Lagos (WAT)</p><p>{review.venue}</p><p className={styles.meta}>Session leader · {review.leaderName}</p></> : <p className={styles.meta}>{new Intl.DateTimeFormat("en-GB", { timeZone: "Africa/Lagos", weekday: "short", day: "numeric", month: "short", year: "numeric" }).format(new Date(review.startsAt))}{review.attendance ? ` · Confirmed by ${review.leaderName}` : ""}</p>}
-      {review.canConfirm ? <><Link className={styles.rowLink} href={`/dashboard/sogp/reviews/${review.id}/attendance`}>{future ? "View attendance sheet" : "Confirm attendance"}<DashboardIcon name="right" size={16} /></Link>{!future ? <Link className={styles.rowLink} href={`/dashboard/sogp/reviews/${review.id}/make-up-offer`}>Offer or confirm make-ups<DashboardIcon name="right" size={16} /></Link> : null}</> : review.attendance === "missed" ? <Link className={styles.rowLink} href={`/dashboard/sogp/reviews/${review.id}/make-up`}>{review.makeUpCompleted ? "View confirmed make-up" : "Choose a make-up"}<DashboardIcon name="right" size={16} /></Link> : null}
+      {review.canConfirm ? <><Link className={styles.rowLink} href={`/dashboard/sogp/reviews/${review.id}/attendance`}>{future ? "View attendance sheet" : "Confirm attendance"}<DashboardIcon name="right" size={16} /></Link>{future ? <><Link className={styles.rowLink} href={`/dashboard/sogp/reviews/${review.id}/reschedule`}>Reschedule<DashboardIcon name="right" size={16} /></Link><CancelReviewButton reviewId={review.id} /></> : <Link className={styles.rowLink} href={`/dashboard/sogp/reviews/${review.id}/make-up-offer`}>Offer or confirm make-ups<DashboardIcon name="right" size={16} /></Link>}</> : review.attendance === "missed" ? <Link className={styles.rowLink} href={`/dashboard/sogp/reviews/${review.id}/make-up`}>{review.makeUpCompleted ? "View confirmed make-up" : "Choose a make-up"}<DashboardIcon name="right" size={16} /></Link> : null}
     </article>;
   }
   return <section className={styles.page}>

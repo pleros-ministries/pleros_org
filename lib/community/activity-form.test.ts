@@ -88,7 +88,7 @@ describe("validateStep", () => {
       numbers: { ...draft.numbers, reachedOnline: "12", reachedOffline: "0", saved: "two" },
     });
     expect(validateStep("numbers", typed)).toEqual({
-      "numbers.saved": '"Gave their lives to Christ" must be a whole number from 0 to 100,000.',
+      "numbers.saved": '"Believed the Gospel" must be a whole number from 0 to 100,000.',
     });
     expect(firstErrorId(validateStep("numbers", typed))).toBe("activity-numbers.saved");
     expect(fieldId("mode")).toBe("activity-mode");
@@ -195,7 +195,6 @@ describe("reading a saved activity in and out", () => {
       notSaved: "0",
       filled: "0",
       healed: "0",
-      followUps: "0",
     });
     expect(input.people[0]).toMatchObject({ id: 7, name: "Ada", saved: true, wantsFollowUp: true });
     expect(input.followUps).toEqual([]);
@@ -230,8 +229,8 @@ describe("reading a saved activity in and out", () => {
       people: [],
     });
     expect(draft.followUps.map((row) => row.kind)).toEqual(["call", "other"]);
-    // The count of follow-ups made is a number of its own, not the list of people.
-    expect(draft.numbers.followUps).toBe("2");
+    // Follow-ups live in the picked people, not in a number: the count is not surfaced.
+    expect(draft.numbers.followUps).toBe("");
     expect(toSaveInput(draft).followUps).toEqual([
       { contactId: 7, kind: "call", saved: false, filled: true, healed: false, note: "Prayed" },
       { contactId: 8, kind: "other", saved: false, filled: false, healed: false, note: "" },
@@ -249,7 +248,7 @@ describe("help between steps", () => {
       ],
     };
     const filled = prefillFromFollowUps(draft);
-    expect(filled.numbers.followUps).toBe("2");
+    expect(filled.numbers.followUps).toBe("");
     expect(filled.numbers.saved).toBe("1");
     expect(filled.numbers.filled).toBe("1");
     expect(filled.numbers.healed).toBe("");

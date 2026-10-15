@@ -88,15 +88,18 @@ export async function listFollowUpOwnerCandidates(search = ""): Promise<FollowUp
 export async function listFollowUpRequests() {
   await requireAdmin();
   const owner = alias(s.users, "request_current_owner");
+  // Raw outer ref: an interpolated outer column renders bare inside an aliased
+  // sub-select and binds to the inner table.
+  const ownerActive = sql<boolean>`exists (select 1 from ${s.sogpEnrollments} as e where e.user_id = pastor_assignments.pastor_user_id and e.status <> 'withdrawn')`;
   const rows = await db.select({
     id: s.sogpFollowUpRequests.id, reason: s.sogpFollowUpRequests.reason, createdAt: s.sogpFollowUpRequests.createdAt,
-    learnerName: s.sogpEnrollments.name, currentOwnerName: owner.name,
+    learnerName: s.sogpEnrollments.name, currentOwnerName: owner.name, ownerActive,
   }).from(s.sogpFollowUpRequests)
     .innerJoin(s.sogpEnrollments, eq(s.sogpEnrollments.id, s.sogpFollowUpRequests.enrollmentId))
     .leftJoin(s.pastorAssignments, eq(s.pastorAssignments.enrollmentId, s.sogpEnrollments.id))
     .leftJoin(owner, eq(owner.id, s.pastorAssignments.pastorUserId))
     .where(eq(s.sogpFollowUpRequests.status, "pending")).orderBy(asc(s.sogpFollowUpRequests.createdAt)).limit(100);
-  return rows.map(row => ({ ...row, createdAt: new Date(row.createdAt).toISOString() }));
+  return rows.map(row => ({ ...row, createdAt: new Date(row.createdAt).toISOString(), ownerWithdrawn: row.currentOwnerName != null && !row.ownerActive }));
 }
 export type FollowUpQueueRow = Awaited<ReturnType<typeof listFollowUpRequests>>[number];
 

@@ -31,7 +31,7 @@ export const QUESTION_STATUS_LABEL = {
   closed: "Closed",
 } as const;
 
-function AskForm() {
+function AskForm({ episode }: { episode?: { guid: string; title: string } }) {
   const router = useRouter();
   const [body, setBody] = useState("");
   // The asker chooses every time; nothing is preselected.
@@ -47,7 +47,7 @@ function AskForm() {
     }
     startTransition(async () => {
       try {
-        const result = await askPleros({ body, visibility });
+        const result = await askPleros({ body, visibility, episodeGuid: episode?.guid, episodeTitle: episode?.title });
         if (!result.ok) {
           setError(result.error);
           return;
@@ -67,6 +67,7 @@ function AskForm() {
         submit();
       }}
     >
+      {episode ? <p className="rounded-xl bg-zinc-50 px-3 py-2 text-[13px] text-zinc-700">About this episode: {episode.title}</p> : null}
       <label className="grid gap-1 text-[13px] font-medium text-zinc-700">
         Your question *
         <textarea
@@ -124,8 +125,10 @@ function AskForm() {
 /** Ask the ministry a private question, and see the conversations already started. */
 export function AskPlerosView({
   questions,
+  episode,
 }: {
   questions: AskerQuestionSummary[];
+  episode?: { guid: string; title: string };
 }) {
   return (
     <div className="grid gap-4">
@@ -139,7 +142,7 @@ export function AskPlerosView({
         </p>
       </header>
 
-      <AskForm />
+      <AskForm episode={episode} />
 
       <section className={`${card} overflow-hidden`}>
         <h2 className="ppc-heading border-b border-zinc-100 px-4 py-3 text-sm font-semibold text-zinc-900">
@@ -175,6 +178,7 @@ export function AskPlerosView({
                       {QUESTION_STATUS_LABEL[question.status]}
                     </span>
                     {question.isAnonymous ? <span>Anonymous</span> : null}
+                    {question.episodeTitle ? <span>About: {question.episodeTitle}</span> : null}
                     <span>{relativeTime(question.lastMessageAt)}</span>
                     {question.unread ? (
                       <span className="font-medium text-(--color-brand-blue)">

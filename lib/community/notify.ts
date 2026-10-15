@@ -23,6 +23,8 @@ type Kind =
   | "discipleship_prayed"
   | "discipleship_prayer_answered"
   | "discipleship_post"
+  | "discipleship_question"
+  | "discipleship_question_reply"
   | "group_join_request"
   | "group_join_approved"
   | "pleros_reply";
@@ -45,6 +47,8 @@ const PUSH_COPY: Record<Kind, { title: string }> = {
   discipleship_prayed: { title: "Someone prayed for you" },
   discipleship_prayer_answered: { title: "A prayer was answered" },
   discipleship_post: { title: "New in your discipleship group" },
+  discipleship_question: { title: "A disciple asked about an episode" },
+  discipleship_question_reply: { title: "Your discipler replied" },
   group_join_request: { title: "Someone asked to join your group" },
   group_join_approved: { title: "You're in" },
   pleros_reply: { title: "Pleros replied" },

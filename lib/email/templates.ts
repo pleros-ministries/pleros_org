@@ -612,6 +612,8 @@ export type AskPlerosStaffNotificationProps = {
   groupName: string | null;
   message: string;
   isFollowUp: boolean;
+  /** Episode the question was asked on, if any. */
+  episodeTitle?: string | null;
   adminUrl: string;
 };
 
@@ -624,10 +626,12 @@ export function askPlerosStaffNotificationHtml({
   groupName,
   message,
   isFollowUp,
+  episodeTitle,
   adminUrl,
 }: AskPlerosStaffNotificationProps): string {
   const safeAsker = escapeHtml(askerLabel);
   const safeGroup = groupName ? escapeHtml(groupName) : null;
+  const safeEpisode = episodeTitle ? escapeHtml(episodeTitle) : null;
   const safeMessage = escapeHtml(message);
   const safeAdminUrl = escapeHtml(adminUrl);
   const heading = isFollowUp ? "Follow-up on a question" : "New question for Pleros";
@@ -648,6 +652,7 @@ export function askPlerosStaffNotificationHtml({
       <tbody>
         <tr><td style="padding: 10px 12px; background: #fafafa; width: 140px; color: #58657a;">Asked by</td><td style="padding: 10px 12px;">${safeAsker}</td></tr>
         ${safeGroup ? `<tr><td style="padding: 10px 12px; background: #fafafa; width: 140px; color: #58657a;">Group</td><td style="padding: 10px 12px;">${safeGroup}</td></tr>` : ""}
+        ${safeEpisode ? `<tr><td style="padding: 10px 12px; background: #fafafa; width: 140px; color: #58657a;">About episode</td><td style="padding: 10px 12px;">${safeEpisode}</td></tr>` : ""}
       </tbody>
     </table>
   </div>

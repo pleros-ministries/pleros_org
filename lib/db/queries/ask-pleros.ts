@@ -70,6 +70,7 @@ export type AskerQuestionSummary = {
   isAnonymous: boolean;
   unread: boolean;
   preview: string;
+  episodeTitle: string | null;
   lastMessageAt: string;
 };
 
@@ -83,6 +84,7 @@ export async function listQuestionsForAsker(
       isAnonymous: questions.isAnonymous,
       unread: questions.askerUnread,
       firstMessage: firstMessageSql,
+      episodeTitle: questions.episodeTitle,
       lastMessageAt: questions.lastMessageAt,
     })
     .from(questions)
@@ -96,6 +98,7 @@ export async function listQuestionsForAsker(
     isAnonymous: row.isAnonymous,
     unread: row.unread,
     preview: preview(row.firstMessage),
+    episodeTitle: row.episodeTitle,
     lastMessageAt: row.lastMessageAt.toISOString(),
   }));
 }
@@ -179,11 +182,17 @@ export async function createQuestion(input: {
   askerId: string;
   isAnonymous: boolean;
   body: string;
+  episode?: { guid: string; title: string } | null;
 }): Promise<{ id: number }> {
   return transactionDb.transaction(async (tx) => {
     const [question] = await tx
       .insert(questions)
-      .values({ askerId: input.askerId, isAnonymous: input.isAnonymous })
+      .values({
+        askerId: input.askerId,
+        isAnonymous: input.isAnonymous,
+        episodeGuid: input.episode?.guid ?? null,
+        episodeTitle: input.episode?.title ?? null,
+      })
       .returning({ id: questions.id });
     await tx.insert(messages).values({
       questionId: question.id,
@@ -258,6 +267,7 @@ export type StaffQuestionSummary = {
   status: QuestionStatus;
   asker: StaffAskerView;
   preview: string;
+  episodeTitle: string | null;
   lastMessageAt: string;
 };
 
@@ -271,6 +281,7 @@ export async function listQuestionsForStaff(): Promise<StaffQuestionSummary[]> {
       name: staffNameSql,
       groupName: staffGroupSql,
       firstMessage: firstMessageSql,
+      episodeTitle: questions.episodeTitle,
       lastMessageAt: questions.lastMessageAt,
     })
     .from(questions)
@@ -283,6 +294,7 @@ export async function listQuestionsForStaff(): Promise<StaffQuestionSummary[]> {
     status: row.status,
     asker: staffAskerView(row),
     preview: preview(row.firstMessage),
+    episodeTitle: row.episodeTitle,
     lastMessageAt: row.lastMessageAt.toISOString(),
   }));
 }
@@ -291,6 +303,7 @@ export type StaffQuestion = {
   id: number;
   status: QuestionStatus;
   asker: StaffAskerView;
+  episodeTitle: string | null;
   createdAt: string;
   messages: QuestionMessage[];
 };
@@ -305,6 +318,7 @@ export async function getQuestionForStaff(
       isAnonymous: questions.isAnonymous,
       name: staffNameSql,
       groupName: staffGroupSql,
+      episodeTitle: questions.episodeTitle,
       createdAt: questions.createdAt,
     })
     .from(questions)
@@ -317,6 +331,7 @@ export async function getQuestionForStaff(
     id: row.id,
     status: row.status,
     asker: staffAskerView(row),
+    episodeTitle: row.episodeTitle,
     createdAt: row.createdAt.toISOString(),
     messages: await listMessages(questionId),
   };

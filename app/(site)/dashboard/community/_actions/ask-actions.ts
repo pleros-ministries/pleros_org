@@ -85,6 +85,7 @@ function emailStaff(questionId: number, message: string, isFollowUp: boolean) {
         message,
         isFollowUp,
         isAnonymous: question.asker.anonymous,
+        episodeTitle: question.episodeTitle,
         adminUrl: `${resolvePublicSiteUrl(process.env)}/admin/questions?question=${questionId}`,
       });
       if (!result.ok && result.reason !== "missing_inbox") {
@@ -100,6 +101,8 @@ function emailStaff(questionId: number, message: string, isFollowUp: boolean) {
 export async function askPleros(input: {
   body: string;
   visibility: string;
+  episodeGuid?: string;
+  episodeTitle?: string;
 }): Promise<CommunityActionResult<{ id: number }>> {
   return run(async () => {
     const ctx = await requireCommunity();
@@ -117,10 +120,17 @@ export async function askPleros(input: {
     if (!parsed.ok) throw new CommunityError(parsed.error);
     await assertWithinLimits(ctx.userId, "question");
 
+    const guid = input.episodeGuid?.trim() ?? "";
+    const title = input.episodeTitle?.trim() ?? "";
+    if ((!guid && title) || (guid && !title) || guid.length > 200 || title.length > 300) {
+      throw new CommunityError("This episode is no longer available for questions.");
+    }
+    const episode = guid && title ? { guid, title } : null;
     const question = await createQuestion({
       askerId: ctx.userId,
       isAnonymous,
       body: parsed.body,
+      episode,
     });
     emailStaff(question.id, parsed.body, false);
 

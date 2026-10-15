@@ -481,3 +481,65 @@ export async function deletePrayerRequestAction(input: {
     });
   });
 }
+
+// ─── Episode questions ──────────────────────────────────────────────────────
+
+export async function getEpisodeQuestionRouteAction(): Promise<{ kind: "discipler" | "ask-pleros" }> {
+  const session = await getAppSession();
+  if (!session) throw new Error("Log in to continue.");
+  const { getEpisodeQuestionRoute } = await import("@/lib/db/queries/sogp-episode-questions");
+  return getEpisodeQuestionRoute(session.user.id);
+}
+
+export async function askEpisodeQuestionAction(input: {
+  episodeGuid: string;
+  episodeTitle: string;
+  body: string;
+}): Promise<DiscipleshipActionResult> {
+  return run(async () => {
+    const learner = await requireEnrolledLearner();
+    const { askEpisodeQuestion } = await import("@/lib/db/queries/sogp-episode-questions");
+    const { disciplerUserId } = await askEpisodeQuestion(learner.userId, input);
+    if (disciplerUserId) {
+      after(() =>
+        notifyDiscipleship({
+          kind: "discipleship_question",
+          recipientUserIds: [disciplerUserId],
+          actorUserId: learner.userId,
+          actorFirstName: learner.firstName,
+          pushBody: `${learner.firstName} asked a question about an episode.`,
+        }).catch((error) => console.error("Episode question notify failed:", error)),
+      );
+    }
+  });
+}
+
+export async function replyToEpisodeQuestionAction(input: {
+  questionId: number;
+  reply: string;
+}): Promise<DiscipleshipActionResult> {
+  return run(async () => {
+    const learner = await requireEnrolledLearner();
+    const { replyToEpisodeQuestion } = await import("@/lib/db/queries/sogp-episode-questions");
+    const { askerUserId } = await replyToEpisodeQuestion(learner.userId, input);
+    if (askerUserId) {
+      after(() =>
+        notifyDiscipleship({
+          kind: "discipleship_question_reply",
+          recipientUserIds: [askerUserId],
+          actorUserId: learner.userId,
+          actorFirstName: learner.firstName,
+          pushBody: `${learner.firstName} replied to your episode question.`,
+        }).catch((error) => console.error("Episode reply notify failed:", error)),
+      );
+    }
+  });
+}
+
+export async function markEpisodeQuestionsReadAction(): Promise<DiscipleshipActionResult> {
+  return run(async () => {
+    const learner = await requireEnrolledLearner();
+    const { markEpisodeQuestionsRead } = await import("@/lib/db/queries/sogp-episode-questions");
+    await markEpisodeQuestionsRead(learner.userId);
+  });
+}

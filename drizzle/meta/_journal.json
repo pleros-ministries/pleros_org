@@ -1,426 +1,440 @@
 {
-  "version": "7",
-  "dialect": "postgresql",
-  "entries": [
-    {
-      "idx": 0,
-      "version": "7",
-      "when": 1774541795222,
-      "tag": "0000_add_staff_assignments",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1780746134428,
-      "tag": "0001_tan_albert_cleary",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1780934154180,
-      "tag": "0002_contact_submissions",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1783154833718,
-      "tag": "0003_welcome_pack_leads",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1783157525149,
-      "tag": "0004_ppc_written_submission_unique",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1783816800000,
-      "tag": "0005_devotion_tracking",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1784937600000,
-      "tag": "0006_super_admin_setup_claims",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "7",
-      "when": 1785196800000,
-      "tag": "0007_dashboard_visit_summaries",
-      "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "7",
-      "when": 1786505768537,
-      "tag": "0008_massive_gravity",
-      "breakpoints": true
-    },
-    {
-      "idx": 9,
-      "version": "7",
-      "when": 1787391902261,
-      "tag": "0009_sogp_platform",
-      "breakpoints": true
-    },
-    {
-      "idx": 10,
-      "version": "7",
-      "when": 1787394847662,
-      "tag": "0010_sogp_formation_tracking",
-      "breakpoints": true
-    },
-    {
-      "idx": 11,
-      "version": "7",
-      "when": 1787728791500,
-      "tag": "0011_sogp_feedback_round_two",
-      "breakpoints": true
-    },
-    {
-      "idx": 12,
-      "version": "7",
-      "when": 1787740285419,
-      "tag": "0012_sogp_birth_year",
-      "breakpoints": true
-    },
-    {
-      "idx": 13,
-      "version": "7",
-      "when": 1787916705097,
-      "tag": "0013_sogp_referral_source",
-      "breakpoints": true
-    },
-    {
-      "idx": 14,
-      "version": "7",
-      "when": 1787917653316,
-      "tag": "0014_sogp_whatsapp_consent",
-      "breakpoints": true
-    },
-    {
-      "idx": 15,
-      "version": "7",
-      "when": 1787954310788,
-      "tag": "0015_sogp_dashboard_restructure",
-      "breakpoints": true
-    },
-    {
-      "idx": 16,
-      "version": "7",
-      "when": 1788119650000,
-      "tag": "0016_sogp_four_level_curriculum",
-      "breakpoints": true
-    },
-    {
-      "idx": 17,
-      "version": "7",
-      "when": 1788172505000,
-      "tag": "0017_sogp_pending_enrolments",
-      "breakpoints": true
-    },
-    {
-      "idx": 18,
-      "version": "7",
-      "when": 1788511940015,
-      "tag": "0018_sogp_referrals",
-      "breakpoints": true
-    },
-    {
-      "idx": 19,
-      "version": "7",
-      "when": 1788991516040,
-      "tag": "0019_community_units",
-      "breakpoints": true
-    },
-    {
-      "idx": 20,
-      "version": "7",
-      "when": 1789021630172,
-      "tag": "0020_community_posts",
-      "breakpoints": true
-    },
-    {
-      "idx": 21,
-      "version": "7",
-      "when": 1789024237899,
-      "tag": "0021_community_discussion",
-      "breakpoints": true
-    },
-    {
-      "idx": 22,
-      "version": "7",
-      "when": 1789025971834,
-      "tag": "0022_community_notifications",
-      "breakpoints": true
-    },
-    {
-      "idx": 23,
-      "version": "7",
-      "when": 1789030021199,
-      "tag": "0023_community_feed_redesign",
-      "breakpoints": true
-    },
-    {
-      "idx": 24,
-      "version": "7",
-      "when": 1789216035311,
-      "tag": "0024_old_victor_mancha",
-      "breakpoints": true
-    },
-    {
-      "idx": 25,
-      "version": "7",
-      "when": 1789222902371,
-      "tag": "0025_kind_tinkerer",
-      "breakpoints": true
-    },
-    {
-      "idx": 26,
-      "version": "7",
-      "when": 1789225841544,
-      "tag": "0026_robust_talon",
-      "breakpoints": true
-    },
-    {
-      "idx": 27,
-      "version": "7",
-      "when": 1789531312861,
-      "tag": "0027_fuzzy_vargas",
-      "breakpoints": true
-    },
-    {
-      "idx": 28,
-      "version": "7",
-      "when": 1789617801566,
-      "tag": "0028_loving_sentinel",
-      "breakpoints": true
-    },
-    {
-      "idx": 29,
-      "version": "7",
-      "when": 1789681727369,
-      "tag": "0029_sogp_learning_progress_share_templates",
-      "breakpoints": true
-    },
-    {
-      "idx": 30,
-      "version": "7",
-      "when": 1789970315802,
-      "tag": "0030_sogp_leaderboard_opt_out",
-      "breakpoints": true
-    },
-    {
-      "idx": 31,
-      "version": "7",
-      "when": 1790111740980,
-      "tag": "0031_sogp_leaderboard_alias",
-      "breakpoints": true
-    },
-    {
-      "idx": 32,
-      "version": "7",
-      "when": 1790231029915,
-      "tag": "0032_sogp_learning_progress_share_kind",
-      "breakpoints": true
-    },
-    {
-      "idx": 33,
-      "version": "7",
-      "when": 1790238268257,
-      "tag": "0033_sogp_daily_review_required_percent",
-      "breakpoints": true
-    },
-    {
-      "idx": 34,
-      "version": "7",
-      "when": 1790531275709,
-      "tag": "0034_sogp_discipleship",
-      "breakpoints": true
-    },
-    {
-      "idx": 35,
-      "version": "7",
-      "when": 1790533123345,
-      "tag": "0035_sogp_discipleship_phase_two",
-      "breakpoints": true
-    },
-    {
-      "idx": 36,
-      "version": "7",
-      "when": 1790923700884,
-      "tag": "0036_sogp_enrollment_fullness",
-      "breakpoints": true
-    },
-    {
-      "idx": 37,
-      "version": "7",
-      "when": 1791011166823,
-      "tag": "0037_sogp_cohort_transfers",
-      "breakpoints": true
-    },
-    {
-      "idx": 38,
-      "version": "7",
-      "when": 1791184188340,
-      "tag": "0038_community_discussions",
-      "breakpoints": true
-    },
-    {
-      "idx": 39,
-      "version": "7",
-      "when": 1791184226152,
-      "tag": "0039_community_direct_messages",
-      "breakpoints": true
-    },
-    {
-      "idx": 40,
-      "version": "7",
-      "when": 1791184237622,
-      "tag": "0040_community_restrictions",
-      "breakpoints": true
-    },
-    {
-      "idx": 41,
-      "version": "7",
-      "when": 1791208139356,
-      "tag": "0041_community_discipleship_posts",
-      "breakpoints": true
-    },
-    {
-      "idx": 42,
-      "version": "7",
-      "when": 1791209766036,
-      "tag": "0042_community_member_groups",
-      "breakpoints": true
-    },
-    {
-      "idx": 43,
-      "version": "7",
-      "when": 1791211291419,
-      "tag": "0043_ask_pleros",
-      "breakpoints": true
-    },
-    {
-      "idx": 44,
-      "version": "7",
-      "when": 1791233501870,
-      "tag": "0044_ministry_reports",
-      "breakpoints": true
-    },
-    {
-      "idx": 45,
-      "version": "7",
-      "when": 1791234962155,
-      "tag": "0045_outreach_contacts",
-      "breakpoints": true
-    },
-    {
-      "idx": 46,
-      "version": "7",
-      "when": 1791406577930,
-      "tag": "0046_ministry_activities",
-      "breakpoints": true
-    },
-    {
-      "idx": 47,
-      "version": "7",
-      "when": 1791409851689,
-      "tag": "0047_discipleship_multi_groups",
-      "breakpoints": true
-    },
-    {
-      "idx": 48,
-      "version": "7",
-      "when": 1791410041301,
-      "tag": "0048_learner_notification_preferences",
-      "breakpoints": true
-    },
-    {
-      "idx": 49,
-      "version": "7",
-      "when": 1791517447638,
-      "tag": "0049_podcast_journeys",
-      "breakpoints": true
-    },
-    {
-      "idx": 50,
-      "version": "7",
-      "when": 1791577332175,
-      "tag": "0050_daily_reporting_v2",
-      "breakpoints": true
-    },
-    {
-      "idx": 51,
-      "version": "7",
-      "when": 1791678466852,
-      "tag": "0051_church_organisation_v2",
-      "breakpoints": true
-    },
-    {
-      "idx": 52,
-      "version": "7",
-      "when": 1791678572786,
-      "tag": "0052_daily_report_push_preferences",
-      "breakpoints": true
-    },
-    {
-      "idx": 53,
-      "version": "7",
-      "when": 1791682263143,
-      "tag": "0053_church_multi_branch_pastors",
-      "breakpoints": true
-    },
-    {
-      "idx": 54,
-      "version": "7",
-      "when": 1791922487148,
-      "tag": "0054_reporting_v3",
-      "breakpoints": true
-    },
-    {
-      "idx": 55,
-      "version": "7",
-      "when": 1791964741014,
-      "tag": "0055_sogp_learning_v3",
-      "breakpoints": true
-    },
-    {
-      "idx": 56,
-      "version": "7",
-      "when": 1791986546453,
-      "tag": "0056_sogp_follow_up_requests",
-      "breakpoints": true
-    },
-    {
-      "idx": 57,
-      "version": "7",
-      "when": 1791987968667,
-      "tag": "0057_sogp_group_reviews",
-      "breakpoints": true
-    },
-    {
-      "idx": 58,
-      "version": "7",
-      "when": 1791994269803,
-      "tag": "0058_sogp_review_makeups",
-      "breakpoints": true
-    },
-    {
-      "idx": 59,
-      "version": "7",
-      "when": 1791998559484,
-      "tag": "0059_follow_up_routes_group_invitations",
-      "breakpoints": true
-    }
-  ]
+ "version": "7",
+ "dialect": "postgresql",
+ "entries": [
+  {
+   "idx": 0,
+   "version": "7",
+   "when": 1774541795222,
+   "tag": "0000_add_staff_assignments",
+   "breakpoints": true
+  },
+  {
+   "idx": 1,
+   "version": "7",
+   "when": 1780746134428,
+   "tag": "0001_tan_albert_cleary",
+   "breakpoints": true
+  },
+  {
+   "idx": 2,
+   "version": "7",
+   "when": 1780934154180,
+   "tag": "0002_contact_submissions",
+   "breakpoints": true
+  },
+  {
+   "idx": 3,
+   "version": "7",
+   "when": 1783154833718,
+   "tag": "0003_welcome_pack_leads",
+   "breakpoints": true
+  },
+  {
+   "idx": 4,
+   "version": "7",
+   "when": 1783157525149,
+   "tag": "0004_ppc_written_submission_unique",
+   "breakpoints": true
+  },
+  {
+   "idx": 5,
+   "version": "7",
+   "when": 1783816800000,
+   "tag": "0005_devotion_tracking",
+   "breakpoints": true
+  },
+  {
+   "idx": 6,
+   "version": "7",
+   "when": 1784937600000,
+   "tag": "0006_super_admin_setup_claims",
+   "breakpoints": true
+  },
+  {
+   "idx": 7,
+   "version": "7",
+   "when": 1785196800000,
+   "tag": "0007_dashboard_visit_summaries",
+   "breakpoints": true
+  },
+  {
+   "idx": 8,
+   "version": "7",
+   "when": 1786505768537,
+   "tag": "0008_massive_gravity",
+   "breakpoints": true
+  },
+  {
+   "idx": 9,
+   "version": "7",
+   "when": 1787391902261,
+   "tag": "0009_sogp_platform",
+   "breakpoints": true
+  },
+  {
+   "idx": 10,
+   "version": "7",
+   "when": 1787394847662,
+   "tag": "0010_sogp_formation_tracking",
+   "breakpoints": true
+  },
+  {
+   "idx": 11,
+   "version": "7",
+   "when": 1787728791500,
+   "tag": "0011_sogp_feedback_round_two",
+   "breakpoints": true
+  },
+  {
+   "idx": 12,
+   "version": "7",
+   "when": 1787740285419,
+   "tag": "0012_sogp_birth_year",
+   "breakpoints": true
+  },
+  {
+   "idx": 13,
+   "version": "7",
+   "when": 1787916705097,
+   "tag": "0013_sogp_referral_source",
+   "breakpoints": true
+  },
+  {
+   "idx": 14,
+   "version": "7",
+   "when": 1787917653316,
+   "tag": "0014_sogp_whatsapp_consent",
+   "breakpoints": true
+  },
+  {
+   "idx": 15,
+   "version": "7",
+   "when": 1787954310788,
+   "tag": "0015_sogp_dashboard_restructure",
+   "breakpoints": true
+  },
+  {
+   "idx": 16,
+   "version": "7",
+   "when": 1788119650000,
+   "tag": "0016_sogp_four_level_curriculum",
+   "breakpoints": true
+  },
+  {
+   "idx": 17,
+   "version": "7",
+   "when": 1788172505000,
+   "tag": "0017_sogp_pending_enrolments",
+   "breakpoints": true
+  },
+  {
+   "idx": 18,
+   "version": "7",
+   "when": 1788511940015,
+   "tag": "0018_sogp_referrals",
+   "breakpoints": true
+  },
+  {
+   "idx": 19,
+   "version": "7",
+   "when": 1788991516040,
+   "tag": "0019_community_units",
+   "breakpoints": true
+  },
+  {
+   "idx": 20,
+   "version": "7",
+   "when": 1789021630172,
+   "tag": "0020_community_posts",
+   "breakpoints": true
+  },
+  {
+   "idx": 21,
+   "version": "7",
+   "when": 1789024237899,
+   "tag": "0021_community_discussion",
+   "breakpoints": true
+  },
+  {
+   "idx": 22,
+   "version": "7",
+   "when": 1789025971834,
+   "tag": "0022_community_notifications",
+   "breakpoints": true
+  },
+  {
+   "idx": 23,
+   "version": "7",
+   "when": 1789030021199,
+   "tag": "0023_community_feed_redesign",
+   "breakpoints": true
+  },
+  {
+   "idx": 24,
+   "version": "7",
+   "when": 1789216035311,
+   "tag": "0024_old_victor_mancha",
+   "breakpoints": true
+  },
+  {
+   "idx": 25,
+   "version": "7",
+   "when": 1789222902371,
+   "tag": "0025_kind_tinkerer",
+   "breakpoints": true
+  },
+  {
+   "idx": 26,
+   "version": "7",
+   "when": 1789225841544,
+   "tag": "0026_robust_talon",
+   "breakpoints": true
+  },
+  {
+   "idx": 27,
+   "version": "7",
+   "when": 1789531312861,
+   "tag": "0027_fuzzy_vargas",
+   "breakpoints": true
+  },
+  {
+   "idx": 28,
+   "version": "7",
+   "when": 1789617801566,
+   "tag": "0028_loving_sentinel",
+   "breakpoints": true
+  },
+  {
+   "idx": 29,
+   "version": "7",
+   "when": 1789681727369,
+   "tag": "0029_sogp_learning_progress_share_templates",
+   "breakpoints": true
+  },
+  {
+   "idx": 30,
+   "version": "7",
+   "when": 1789970315802,
+   "tag": "0030_sogp_leaderboard_opt_out",
+   "breakpoints": true
+  },
+  {
+   "idx": 31,
+   "version": "7",
+   "when": 1790111740980,
+   "tag": "0031_sogp_leaderboard_alias",
+   "breakpoints": true
+  },
+  {
+   "idx": 32,
+   "version": "7",
+   "when": 1790231029915,
+   "tag": "0032_sogp_learning_progress_share_kind",
+   "breakpoints": true
+  },
+  {
+   "idx": 33,
+   "version": "7",
+   "when": 1790238268257,
+   "tag": "0033_sogp_daily_review_required_percent",
+   "breakpoints": true
+  },
+  {
+   "idx": 34,
+   "version": "7",
+   "when": 1790531275709,
+   "tag": "0034_sogp_discipleship",
+   "breakpoints": true
+  },
+  {
+   "idx": 35,
+   "version": "7",
+   "when": 1790533123345,
+   "tag": "0035_sogp_discipleship_phase_two",
+   "breakpoints": true
+  },
+  {
+   "idx": 36,
+   "version": "7",
+   "when": 1790923700884,
+   "tag": "0036_sogp_enrollment_fullness",
+   "breakpoints": true
+  },
+  {
+   "idx": 37,
+   "version": "7",
+   "when": 1791011166823,
+   "tag": "0037_sogp_cohort_transfers",
+   "breakpoints": true
+  },
+  {
+   "idx": 38,
+   "version": "7",
+   "when": 1791184188340,
+   "tag": "0038_community_discussions",
+   "breakpoints": true
+  },
+  {
+   "idx": 39,
+   "version": "7",
+   "when": 1791184226152,
+   "tag": "0039_community_direct_messages",
+   "breakpoints": true
+  },
+  {
+   "idx": 40,
+   "version": "7",
+   "when": 1791184237622,
+   "tag": "0040_community_restrictions",
+   "breakpoints": true
+  },
+  {
+   "idx": 41,
+   "version": "7",
+   "when": 1791208139356,
+   "tag": "0041_community_discipleship_posts",
+   "breakpoints": true
+  },
+  {
+   "idx": 42,
+   "version": "7",
+   "when": 1791209766036,
+   "tag": "0042_community_member_groups",
+   "breakpoints": true
+  },
+  {
+   "idx": 43,
+   "version": "7",
+   "when": 1791211291419,
+   "tag": "0043_ask_pleros",
+   "breakpoints": true
+  },
+  {
+   "idx": 44,
+   "version": "7",
+   "when": 1791233501870,
+   "tag": "0044_ministry_reports",
+   "breakpoints": true
+  },
+  {
+   "idx": 45,
+   "version": "7",
+   "when": 1791234962155,
+   "tag": "0045_outreach_contacts",
+   "breakpoints": true
+  },
+  {
+   "idx": 46,
+   "version": "7",
+   "when": 1791406577930,
+   "tag": "0046_ministry_activities",
+   "breakpoints": true
+  },
+  {
+   "idx": 47,
+   "version": "7",
+   "when": 1791409851689,
+   "tag": "0047_discipleship_multi_groups",
+   "breakpoints": true
+  },
+  {
+   "idx": 48,
+   "version": "7",
+   "when": 1791410041301,
+   "tag": "0048_learner_notification_preferences",
+   "breakpoints": true
+  },
+  {
+   "idx": 49,
+   "version": "7",
+   "when": 1791517447638,
+   "tag": "0049_podcast_journeys",
+   "breakpoints": true
+  },
+  {
+   "idx": 50,
+   "version": "7",
+   "when": 1791577332175,
+   "tag": "0050_daily_reporting_v2",
+   "breakpoints": true
+  },
+  {
+   "idx": 51,
+   "version": "7",
+   "when": 1791678466852,
+   "tag": "0051_church_organisation_v2",
+   "breakpoints": true
+  },
+  {
+   "idx": 52,
+   "version": "7",
+   "when": 1791678572786,
+   "tag": "0052_daily_report_push_preferences",
+   "breakpoints": true
+  },
+  {
+   "idx": 53,
+   "version": "7",
+   "when": 1791682263143,
+   "tag": "0053_church_multi_branch_pastors",
+   "breakpoints": true
+  },
+  {
+   "idx": 54,
+   "version": "7",
+   "when": 1791922487148,
+   "tag": "0054_reporting_v3",
+   "breakpoints": true
+  },
+  {
+   "idx": 55,
+   "version": "7",
+   "when": 1791964741014,
+   "tag": "0055_sogp_learning_v3",
+   "breakpoints": true
+  },
+  {
+   "idx": 56,
+   "version": "7",
+   "when": 1791986546453,
+   "tag": "0056_sogp_follow_up_requests",
+   "breakpoints": true
+  },
+  {
+   "idx": 57,
+   "version": "7",
+   "when": 1791987968667,
+   "tag": "0057_sogp_group_reviews",
+   "breakpoints": true
+  },
+  {
+   "idx": 58,
+   "version": "7",
+   "when": 1791994269803,
+   "tag": "0058_sogp_review_makeups",
+   "breakpoints": true
+  },
+  {
+   "idx": 59,
+   "version": "7",
+   "when": 1791998559484,
+   "tag": "0059_follow_up_routes_group_invitations",
+   "breakpoints": true
+  },
+  {
+   "idx": 60,
+   "version": "7",
+   "when": 1792103067583,
+   "tag": "0060_review_attendance_corrections",
+   "breakpoints": true
+  },
+  {
+   "idx": 61,
+   "version": 7,
+   "when": 1792103637069,
+   "tag": "0061_episode_questions",
+   "breakpoints": true
+  }
+ ]
 }

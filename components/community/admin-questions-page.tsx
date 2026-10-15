@@ -156,6 +156,9 @@ export function AdminQuestionsPage({
                       <span className="line-clamp-2 text-zinc-600">
                         {question.preview}
                       </span>
+                      {question.episodeTitle ? (
+                        <span className="text-zinc-400">About: {question.episodeTitle}</span>
+                      ) : null}
                     </Link>
                   </li>
                 );
@@ -178,6 +181,7 @@ export function AdminQuestionsPage({
                       : (selected.asker.groupName ?? "No location group")}
                     {" · "}
                     {timeFmt.format(new Date(selected.createdAt))}
+                    {selected.episodeTitle ? ` · About: ${selected.episodeTitle}` : ""}
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-3 text-xs">

@@ -373,8 +373,9 @@ export function canJumpTo(steps: StepId[], index: number, draft: ActivityDraft):
 // ─── Help between steps ────────────────────────────────────────────────────
 
 /**
- * Fills blank numbers of a follow-up from the people picked: how many were
- * followed up and what happened. Typed numbers are left alone.
+ * Fills blank outcome numbers of a follow-up from the people picked: what
+ * happened. Typed numbers are left alone. Follow-ups themselves live in the
+ * picked people, not in a number.
  */
 export function prefillFromFollowUps(draft: ActivityDraft): ActivityDraft {
   if (draft.kind !== "follow_up") return draft;
@@ -383,7 +384,6 @@ export function prefillFromFollowUps(draft: ActivityDraft): ActivityDraft {
   const fill = (key: MinistryFieldKey, count: number) => {
     if (blank(numbers[key]) && count > 0) numbers[key] = String(count);
   };
-  fill("followUps", picks.length);
   fill("saved", picks.filter((row) => row.saved).length);
   fill("filled", picks.filter((row) => row.filled).length);
   fill("healed", picks.filter((row) => row.healed).length);

@@ -19,7 +19,7 @@ describe("live reporting input", () => {
   });
   it("retains unspecified optional inputs separately from legacy numerical projections", () => {
     const report = parseMinistryReport({ kind: "follow_up", peopleCount: 3, contacts: [], outcomes: { saved: "", healed: "0" }, context: "", note: "", method: "Phone call" });
-    expect(report.activity.followUps).toBe(3);
+    expect(report.activity.followUps).toBe(0);
     expect(report.enteredOutcomes).toEqual({ saved: "", healed: "0" });
   });
   it("Teaching uses one subject and Prayer never accepts a subject", () => {

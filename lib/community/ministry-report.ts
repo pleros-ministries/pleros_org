@@ -13,10 +13,10 @@ export const MINISTRY_FIELDS = [
   { key: "reachedOnline", label: "People reached online", short: "Online" },
   { key: "reachedOffline", label: "People reached offline", short: "Offline" },
   { key: "attendance", label: "People present", short: "Present" },
-  { key: "saved", label: "Gave their lives to Christ", short: "Saved" },
+  { key: "saved", label: "Believed the Gospel", short: "Saved" },
   { key: "notSaved", label: "Not saved", short: "Not saved" },
-  { key: "filled", label: "Filled with the Holy Spirit", short: "Filled" },
-  { key: "healed", label: "Healed", short: "Healed" },
+  { key: "filled", label: "Filled with the Holy Ghost", short: "Filled" },
+  { key: "healed", label: "Testified healed", short: "Healed" },
   { key: "followUps", label: "Follow-ups made", short: "Follow-ups" },
 ] as const;
 

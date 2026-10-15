@@ -45,15 +45,15 @@ export function parseMinistryReport(value: unknown): { activity: ActivityInput; 
   const outcomes = inputRecord(input.outcomes ?? {});
   const enteredOutcomes: Partial<Record<MinistryFieldKey, string>> = {};
   const values: Partial<Record<MinistryFieldKey, string>> = {};
-  for (const { key } of MINISTRY_FIELDS) if ((input.kind === "follow_up" ? ["saved", "filled", "healed"] : ["saved", "notSaved", "filled", "healed", "followUps"]).includes(key) && key in outcomes) {
+  for (const { key } of MINISTRY_FIELDS) if ((input.kind === "follow_up" ? ["saved", "filled", "healed"] : ["saved", "notSaved", "filled", "healed"]).includes(key) && key in outcomes) {
     if (typeof outcomes[key] !== "string") throw new CommunityError("Enter valid ministry numbers.");
     const raw = (outcomes[key] as string).trim();
     if (raw) reportCount(raw);
     values[key] = raw; enteredOutcomes[key] = raw;
   }
   let mode: "online" | "offline" | "both" | undefined;
-  if (input.kind === "follow_up") values.followUps = String(count);
-  else {
+  // Follow-ups live in the people picked, not in a number, so discipleship sets no counts here.
+  if (input.kind !== "follow_up") {
     mode = method === "Online" ? "online" : method === "Both" ? "both" : "offline";
     if (mode === "both") {
       const online = reportCount(input.onlineCount), offline = reportCount(input.offlineCount);

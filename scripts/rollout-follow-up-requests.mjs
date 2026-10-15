@@ -1,4 +1,4 @@
-/** Explicit additive 0056 / --group-reviews (0057) / --make-ups (0058) / --routes-invitations (0059). */
+/** Explicit additive 0056 / --group-reviews (0057) / --make-ups (0058) / --routes-invitations (0059) / --review-corrections (0060) / --episode-questions (0061). */
 import fs from "node:fs";
 import crypto from "node:crypto";
 import dotenv from "dotenv";
@@ -14,7 +14,7 @@ const fingerprint = crypto.createHash("sha256").update(target.hostname.replace("
 const approved = "d3d229e68f00b0a26fb78f2dd4081adae7f4ffcf5d6a920c03329c525dfc88c1";
 if (fingerprint !== approved) throw new Error("This is not the previously confirmed shared target.");
 const journal = JSON.parse(fs.readFileSync("drizzle/meta/_journal.json", "utf8")).entries;
-const migrationNumber = process.argv.includes("--routes-invitations") ? 59 : process.argv.includes("--make-ups") ? 58 : process.argv.includes("--group-reviews") ? 57 : 56;
+const migrationNumber = process.argv.includes("--episode-questions") ? 61 : process.argv.includes("--review-corrections") ? 60 : process.argv.includes("--routes-invitations") ? 59 : process.argv.includes("--make-ups") ? 58 : process.argv.includes("--group-reviews") ? 57 : 56;
 const previous = journal.find(row => row.idx === migrationNumber - 1);
 const current = journal.find(row => row.idx === migrationNumber);
 const contents = fs.readFileSync(`drizzle/${current.tag}.sql`, "utf8");
@@ -25,7 +25,7 @@ const pool = new Pool({ connectionString: url });
 const client = await pool.connect();
 try {
   const tail = (await client.query("select hash,created_at from drizzle.__drizzle_migrations order by created_at desc limit 1")).rows[0];
-  const tables = migrationNumber === 59 ? ["sogp_follow_up_routes", "discipleship_group_invitations"] : migrationNumber === 58 ? ["sogp_review_makeups"] : migrationNumber === 57 ? ["sogp_group_reviews", "sogp_group_review_attendance"] : ["sogp_follow_up_requests"];
+  const tables = migrationNumber === 61 ? ["discipleship_episode_questions"] : migrationNumber === 60 ? [] : migrationNumber === 59 ? ["sogp_follow_up_routes", "discipleship_group_invitations"] : migrationNumber === 58 ? ["sogp_review_makeups"] : migrationNumber === 57 ? ["sogp_group_reviews", "sogp_group_review_attendance"] : ["sogp_follow_up_requests"];
   const present = (await client.query("select table_name from information_schema.tables where table_schema='public' and table_name=any($1)", [tables])).rows;
   console.log(JSON.stringify({ mode: applying ? "apply" : "dry-run", endpointFingerprint: fingerprint, migration: current.tag, predecessorMatches: tail?.hash === previousHash && Number(tail?.created_at) === previous.when, existingTables: present.map(row => row.table_name) }));
   if (!applying) process.exitCode = 0;
@@ -37,7 +37,10 @@ try {
     await client.query("select pg_advisory_xact_lock(hashtextextended('pleros:dashboard-migration-tail',0))");
     const fresh = (await client.query("select hash,created_at from drizzle.__drizzle_migrations order by created_at desc limit 1")).rows[0];
     if (fresh?.hash !== previousHash || Number(fresh?.created_at) !== previous.when) throw new Error("Journal changed after preflight.");
-    const preserved = ["users", "sogp_enrollments", "pastor_assignments", "student_progress", "podcast_episode_progress", "discipleship_memberships", "sogp_live_classes", "sogp_live_class_attendance", "sogp_certificates", ...(migrationNumber >= 57 ? ["sogp_follow_up_requests"] : []), ...(migrationNumber >= 58 ? ["sogp_group_reviews", "sogp_group_review_attendance"] : []), ...(migrationNumber === 59 ? ["sogp_review_makeups", "discipleship_groups", "pastor_regions"] : [])];
+    // 0061 ALTERs pleros_questions (two nullable episode columns): ADD COLUMN is
+    // value-neutral but changes its row digest, so it is verified by column
+    // presence below instead of the digest comparison.
+    const preserved = ["users", "sogp_enrollments", "pastor_assignments", "student_progress", "podcast_episode_progress", "discipleship_memberships", "sogp_live_classes", "sogp_live_class_attendance", "sogp_certificates", ...(migrationNumber >= 57 ? ["sogp_follow_up_requests"] : []), ...(migrationNumber >= 58 ? ["sogp_group_reviews", "sogp_group_review_attendance"] : []), ...(migrationNumber === 59 ? ["sogp_review_makeups", "discipleship_groups", "pastor_regions"] : []), ...(migrationNumber >= 61 ? ["discipleship_groups"] : [])];
     const snapshotSql = preserved.map(table => `select '${table}' as name,count(*)::text as count,md5(coalesce(string_agg(md5(row_to_json(t)::text),',' order by md5(row_to_json(t)::text)),'')) as digest from public."${table}" t`).join(" union all ") + " order by name";
     const before = (await client.query(snapshotSql)).rows;
     await client.query(contents);

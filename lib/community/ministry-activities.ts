@@ -68,7 +68,7 @@ export const ALL_ACTIVITY_KINDS: readonly ActivityKindConfig[] = [
     asksLocation: false,
     people: "met",
     offered: true,
-    shown: ["saved", "notSaved", "filled", "healed", "followUps"],
+    shown: ["saved", "notSaved", "filled", "healed"],
     required: [],
   },
   {
@@ -81,7 +81,7 @@ export const ALL_ACTIVITY_KINDS: readonly ActivityKindConfig[] = [
     asksLocation: false,
     people: "follow_up",
     offered: true,
-    shown: ["followUps", "saved", "filled", "healed"],
+    shown: ["saved", "filled", "healed"],
     required: [],
   },
   {
@@ -294,15 +294,10 @@ function text(value: unknown): string {
   return typeof value === "string" ? value.replace(/\s+/g, " ").trim() : "";
 }
 
-function isBlank(value: unknown): boolean {
-  return value == null || (typeof value === "string" && value.trim() === "");
-}
-
 /**
  * Reads untrusted form values for one activity. The kind decides which
  * fields are read; anything a kind does not ask for is dropped or zeroed.
- * For a follow-up, "Follow-ups made" defaults to the number of people rows
- * sent (`peopleCount`) when left blank.
+ * Follow-ups live in the people picked, not in a number.
  */
 export function normaliseActivityInput(input: {
   kind?: unknown;
@@ -371,9 +366,6 @@ export function normaliseActivityInput(input: {
   }
 
   const values: Partial<Record<MinistryFieldKey, unknown>> = { ...(input.values ?? {}) };
-  if (config.key === "follow_up" && isBlank(values.followUps) && input.peopleCount != null) {
-    values.followUps = String(input.peopleCount);
-  }
   const numbers = normaliseMinistryNumbers(values, activityFields(config.key, mode));
   if (!numbers.ok) return numbers;
   const note = normaliseMinistryNote(input.note);

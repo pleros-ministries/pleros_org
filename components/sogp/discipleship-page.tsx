@@ -56,6 +56,7 @@ import {
 import { GroupHeader, GroupSwitcher } from "./discipleship-groups";
 import { DiscipleFollowUp, LastContactLine } from "./discipleship-nudge";
 import { DisciplePrayerSection, LeaderPrayerList } from "./discipleship-prayer";
+import { LeaderEpisodeQuestionList, OwnEpisodeQuestionList } from "./discipleship-episode-questions";
 import { ShareIntentButtons } from "./share-intent-buttons";
 
 const PLATFORMS: PreSogpShareIntentPlatform[] = ["whatsapp", "facebook", "x", "telegram"];
@@ -82,9 +83,13 @@ type PageView = "leading" | "member";
 export function DiscipleshipPage({
   data,
   preview = false,
+  episodeQuestions = [],
+  ownEpisodeQuestions = [],
 }: {
   data: DiscipleshipDashboardData;
   preview?: boolean;
+  episodeQuestions?: import("@/lib/db/queries/sogp-episode-questions").LeaderEpisodeQuestion[];
+  ownEpisodeQuestions?: import("@/lib/db/queries/sogp-episode-questions").OwnEpisodeQuestion[];
 }) {
   const { ledGroups, selectedGroup: group, myDiscipler } = data;
   const paused = group.status === "archived";
@@ -227,6 +232,7 @@ export function DiscipleshipPage({
                       groupName={group.name}
                       paused={paused}
                       prompts={group.prompts}
+                      episodeQuestions={episodeQuestions}
                       disciples={group.disciples}
                       range={data.participationRange}
                       preview={preview}
@@ -271,7 +277,7 @@ export function DiscipleshipPage({
         ) : (
           <div className="grid gap-4 lg:col-span-2 lg:max-w-2xl">
             {myDiscipler ? (
-              <DisciplerSection discipler={myDiscipler} preview={preview} />
+              <DisciplerSection discipler={myDiscipler} preview={preview} ownEpisodeQuestions={ownEpisodeQuestions} />
             ) : (
               <p className="rounded-sm border border-zinc-200 bg-white p-4 text-xs leading-[1.5] text-(--color-text-muted)">
                 You haven&apos;t joined a discipleship group yet. When someone shares their invite
@@ -393,6 +399,7 @@ function DiscipleParticipationTable({
   groupName,
   paused,
   prompts,
+  episodeQuestions,
   disciples,
   range,
   preview,
@@ -401,6 +408,7 @@ function DiscipleParticipationTable({
   groupName: string;
   paused: boolean;
   prompts: DiscipleshipDashboardData["selectedGroup"]["prompts"];
+  episodeQuestions: import("@/lib/db/queries/sogp-episode-questions").LeaderEpisodeQuestion[];
   disciples: DiscipleSummary[];
   range: DiscipleshipDashboardData["participationRange"];
   preview: boolean;
@@ -592,7 +600,7 @@ function DiscipleParticipationTable({
                               />
                             </div>
                           ) : null}
-                          <DiscipleDetails disciple={disciple} groupName={groupName} paused={paused} prompts={prompts} preview={preview} />
+                          <DiscipleDetails disciple={disciple} groupName={groupName} paused={paused} prompts={prompts} episodeQuestions={episodeQuestions.filter(question => question.askerEnrollmentId === disciple.enrollmentId)} preview={preview} />
                         </div>
                       </td>
                     </tr>
@@ -614,7 +622,7 @@ function DiscipleParticipationTable({
 
 /** A disciple's overall progress, follow-up and actions — the dropdown under
  * their row in the participation table. */
-function DiscipleDetails({ disciple,groupName,paused,prompts,preview }: { disciple: DiscipleSummary; groupName: string; paused: boolean; prompts: DiscipleshipDashboardData["selectedGroup"]["prompts"]; preview: boolean }) {
+function DiscipleDetails({ disciple,groupName,paused,prompts,episodeQuestions,preview }: { disciple: DiscipleSummary; groupName: string; paused: boolean; prompts: DiscipleshipDashboardData["selectedGroup"]["prompts"]; episodeQuestions: import("@/lib/db/queries/sogp-episode-questions").LeaderEpisodeQuestion[]; preview: boolean }) {
   const remove = useDiscipleshipAction(preview);
 
   return (
@@ -624,6 +632,7 @@ function DiscipleDetails({ disciple,groupName,paused,prompts,preview }: { discip
       }}><MessageCircleIcon className="size-5" strokeWidth={2.1} />Message {disciple.firstName} on WhatsApp</a>
     ) : <span className="text-[13px] text-(--color-text-muted)">WhatsApp not shared</span>}
     checkIns={paused ? undefined : <><p className="text-[13px] text-(--color-text-muted)">These group check-in responses are private to you and {disciple.firstName}.</p><LeaderPromptList prompts={prompts.map(prompt => ({ ...prompt,responses: prompt.responses.filter(response => response.discipleEnrollmentId === disciple.enrollmentId) }))} discipleCount={1} preview={preview} /></>}
+    questions={paused || !episodeQuestions.length ? undefined : <LeaderEpisodeQuestionList questions={episodeQuestions} preview={preview} />}
     reviews={<><Metric label="Recorded daily reviews" value={disciple.reviewsCompleted} max={disciple.reviewsTotal} /><p className="text-[13px] text-(--color-text-muted)">Use the daily participation view to see recorded attendance by date. Weekly group review scheduling is not connected here yet.</p></>}>
       <p className="text-[0.7rem] text-zinc-400">
         Joined {formatDiscipleshipDate(disciple.joinedAt)}
@@ -720,9 +729,11 @@ function Metric({
 function DisciplerSection({
   discipler,
   preview,
+  ownEpisodeQuestions,
 }: {
   discipler: NonNullable<DiscipleshipDashboardData["myDiscipler"]>;
   preview: boolean;
+  ownEpisodeQuestions: import("@/lib/db/queries/sogp-episode-questions").OwnEpisodeQuestion[];
 }) {
   const leave = useDiscipleshipAction(preview);
   const waiting = discipler.prompts.filter((prompt) => !prompt.response).length;
@@ -753,6 +764,7 @@ function DisciplerSection({
         leaderFirstName={discipler.leaderFirstName}
         preview={preview}
       />
+      <OwnEpisodeQuestionList questions={ownEpisodeQuestions} leaderFirstName={discipler.leaderFirstName} preview={preview} />
       <DisciplePrayerSection
         requests={discipler.prayerRequests}
         leaderFirstName={discipler.leaderFirstName}

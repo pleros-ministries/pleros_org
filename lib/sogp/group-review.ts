@@ -1,4 +1,11 @@
 export type GroupReviewScheduleInput = { groupId: number; title: string; date: string; startTime: string; endTime: string; venue: string; requestKey: string };
+/** Corrections stay open for 7 days after confirmation, counted in whole days. */
+export const REVIEW_CORRECTION_WINDOW_DAYS = 7;
+export function canCorrectReviewAttendance(confirmedAt: Date | string, now: Date | string = new Date()): boolean {
+  const confirmed = new Date(confirmedAt).getTime();
+  if (!Number.isFinite(confirmed)) return false;
+  return new Date(now).getTime() - confirmed <= REVIEW_CORRECTION_WINDOW_DAYS * 86_400_000;
+}
 export function groupReviewTimeLabel(startsAt: string, endsAt: string) {
   const date = new Intl.DateTimeFormat("en-GB", { timeZone: "Africa/Lagos", weekday: "short", day: "numeric", month: "short", year: "numeric" });
   const clock = new Intl.DateTimeFormat("en-GB", { timeZone: "Africa/Lagos", hour: "numeric", minute: "2-digit", hour12: true });

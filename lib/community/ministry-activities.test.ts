@@ -20,7 +20,7 @@ import { MINISTRY_NOTE_MAX, emptyMinistryNumbers } from "./ministry-report";
 describe("activityFields", () => {
   test("outreach asks for the reached numbers its mode needs", () => {
     expect(activityFields("outreach", "online")).toEqual({
-      shown: ["reachedOnline", "saved", "notSaved", "filled", "healed", "followUps"],
+      shown: ["reachedOnline", "saved", "notSaved", "filled", "healed"],
       required: ["reachedOnline"],
     });
     expect(activityFields("outreach", "offline").required).toEqual(["reachedOffline"]);
@@ -39,7 +39,7 @@ describe("activityFields", () => {
       });
     }
     expect(activityFields("follow_up", null)).toEqual({
-      shown: ["followUps", "saved", "filled", "healed"],
+      shown: ["saved", "filled", "healed"],
       required: [],
     });
     expect(activityFields("other", null).required).toEqual([]);
@@ -239,15 +239,15 @@ describe("normaliseActivityInput", () => {
     expect(parsed.ok && parsed.value.location).toBeNull();
   });
 
-  test("a follow-up defaults its count to the people sent, unless typed", () => {
+  test("a follow-up keeps its count at zero; follow-ups live in the people sent", () => {
     const blank = normaliseActivityInput({ kind: "follow_up", values: {}, peopleCount: 3 });
-    expect(blank.ok && blank.value.followUps).toBe(3);
+    expect(blank.ok && blank.value.followUps).toBe(0);
     const typed = normaliseActivityInput({
       kind: "follow_up",
       values: { followUps: "5" },
       peopleCount: 3,
     });
-    expect(typed.ok && typed.value.followUps).toBe(5);
+    expect(typed.ok && typed.value.followUps).toBe(0);
     const none = normaliseActivityInput({ kind: "follow_up", values: {} });
     expect(none.ok && none.value.followUps).toBe(0);
   });

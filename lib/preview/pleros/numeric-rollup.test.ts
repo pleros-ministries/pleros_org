@@ -20,7 +20,7 @@ it("keeps recorded numbers numeric when activities also hold follow-up interacti
     },
   });
   if (!result.ok) throw new Error(result.error);
-  expect(dayReport(result.state, "w-tolu", today).numbers.followUps).toBe(3);
+  expect(dayReport(result.state, "w-tolu", today).numbers.followUps).toBe(0);
   const totals = coverage(result.state, ["w-tolu", "w-sade", "w-emeka"], today);
   for (const field of MINISTRY_FIELDS) {
     expect(typeof totals.numbers[field.key]).toBe("number");
