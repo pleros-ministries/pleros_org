@@ -145,12 +145,12 @@ export async function getAdminDashboardData(): Promise<AdminDashboardData> {
         })
       : [
           {
-            label: "Registrants",
+            label: "Learners",
             value: registrants.length,
-            hint: `${stats.activeStudents} PPC accounts · ${registrants.length - ppcAccounts} welcome only`,
+            hint: `${stats.activeStudents} learning accounts · ${registrants.length - ppcAccounts} welcome only`,
           },
           {
-            label: "PPC avg. progress",
+            label: "Average learning progress",
             value: `${stats.averageProgress}%`,
             hint: "Across cohort",
           },

@@ -43,7 +43,7 @@ describe("admin registrants", () => {
       leadId: 7,
       name: "Ada Student",
       email: "ada@example.com",
-      sourceLabel: "PPC + welcome",
+      sourceLabel: "Learning + welcome",
       accountStatus: "ppc_account",
       ppc: {
         currentLevel: 2,

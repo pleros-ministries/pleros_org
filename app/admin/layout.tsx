@@ -8,8 +8,8 @@ import { getAppSession } from "@/lib/app-session";
 import { getChurchAssignment } from "@/lib/db/queries/church-organisation";
 import { dashboardFont } from "@/components/dashboard/v3/font";
 export const metadata: Metadata = {
-  title: "PPC Admin",
-  description: "Pleros Perfecting Courses staff administration",
+  title: "Pleros Admin",
+  description: "Pleros operations and administration",
 };
 
 const PUBLIC_ADMIN_PATHS = new Set([

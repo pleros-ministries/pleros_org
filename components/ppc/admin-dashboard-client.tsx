@@ -143,7 +143,7 @@ export function AdminDashboardClient() {
                 <ArrowRight className="size-3.5 text-zinc-300" />
               </div>
               <p className="mt-3 text-xs font-medium text-zinc-900">
-                Registrants
+                Learners
               </p>
               <p className="mt-1 text-[11px] text-zinc-500">
                 View signups, progress, and status

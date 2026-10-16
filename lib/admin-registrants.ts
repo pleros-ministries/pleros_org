@@ -74,10 +74,10 @@ function serializeDate(value: Date | string): string {
 
 function buildSourceLabel(sources: AdminRegistrantSource[]) {
   if (sources.includes("ppc") && sources.includes("welcome")) {
-    return "PPC + welcome";
+    return "Learning + welcome";
   }
 
-  return sources.includes("ppc") ? "PPC" : "Welcome";
+  return sources.includes("ppc") ? "Learning" : "Welcome";
 }
 
 export function buildAdminRegistrantSummaries(input: {

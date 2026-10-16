@@ -38,12 +38,12 @@ export default async function AdminStudentDetailPage({
       <div className="grid gap-6">
         <Breadcrumb
           items={[
-            { label: "Registrants", href: "/admin/students" },
+            { label: "Learners", href: "/admin/students" },
             { label: lead.name ?? lead.email },
           ]}
         />
         <PageHeader
-          title={lead.name ?? "Welcome registrant"}
+          title={lead.name ?? "Welcome contact"}
           description={lead.email}
         />
 
@@ -73,9 +73,9 @@ export default async function AdminStudentDetailPage({
             </div>
             <div>
               <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-400">
-                PPC progress
+                Learning progress
               </p>
-              <p className="mt-1 text-xs text-zinc-500">No PPC account yet</p>
+              <p className="mt-1 text-xs text-zinc-500">No learning account yet</p>
             </div>
             <div>
               <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-400">
@@ -146,7 +146,7 @@ export default async function AdminStudentDetailPage({
     <div className="grid gap-6">
       <Breadcrumb
         items={[
-          { label: "Registrants", href: "/admin/students" },
+          { label: "Learners", href: "/admin/students" },
           { label: student.name },
         ]}
       />

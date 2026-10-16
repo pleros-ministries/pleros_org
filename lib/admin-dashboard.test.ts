@@ -317,7 +317,7 @@ describe("admin dashboard helpers", () => {
       {
         label: "New users",
         value: 7,
-        hint: "3 PPC accounts · 5 welcome leads",
+        hint: "3 learning accounts · 5 welcome leads",
       },
       {
         label: "Devotion participation",
@@ -327,7 +327,7 @@ describe("admin dashboard helpers", () => {
       {
         label: "Training overview",
         value: "42%",
-        hint: "18 PPC students · 2 reviews · 1 Q&A",
+        hint: "18 learners · 2 reviews · 1 Q&A",
       },
     ]);
   });

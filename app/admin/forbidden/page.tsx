@@ -25,7 +25,7 @@ export default function AdminForbiddenPage() {
             href="/ppc"
             className="inline-flex h-10 items-center rounded-sm border border-zinc-300 px-4 text-sm font-semibold text-zinc-800 hover:bg-zinc-100"
           >
-            Go to student portal
+            Go to learning portal
           </Link>
         </div>
       </section>

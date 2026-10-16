@@ -24,9 +24,9 @@ export default async function AdminEntryPage() {
           <StaffLoginPanel />
 
           <p className="mt-4 text-[11px] text-zinc-400">
-            Student access remains at{" "}
+            Learner access remains in the{" "}
             <Link href="/ppc" className="underline">
-              /ppc
+              learning portal
             </Link>
             .
           </p>

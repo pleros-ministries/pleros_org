@@ -87,7 +87,7 @@ describe("ppc shell helpers", () => {
         roles: ["super_admin", "admin"],
       },
       {
-        label: "Registrants",
+        label: "Learners",
         path: "/students",
         icon: "students",
         roles: ["super_admin", "admin", "instructor"],
@@ -198,11 +198,11 @@ describe("ppc shell helpers", () => {
       description: "Course operations overview",
     });
     expect(getPpcShellContext("/students")).toEqual({
-      label: "Registrants",
-      description: "All signups and progress status",
+      label: "Learners",
+      description: "All learners, signups, and progress status",
     });
     expect(getPpcShellContext("/students/student-1")).toEqual({
-      label: "Registrant detail",
+      label: "Learner detail",
       description: "Profile, progress, and support history",
     });
     expect(getPpcShellContext("/review")).toEqual({
@@ -282,7 +282,7 @@ describe("ppc shell helpers", () => {
 
   test("falls back safely for unknown routes", () => {
     expect(getPpcShellContext("/something-unexpected")).toEqual({
-      label: "PPC platform",
+      label: "Learning platform",
       description: "Course administration and learning",
     });
   });

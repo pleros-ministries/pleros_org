@@ -62,7 +62,7 @@ export function RegistrantListClient({
   const columns: Column<AdminRegistrantSummary>[] = [
     {
       key: "name",
-      label: "Registrant",
+      label: "Learner",
       sortable: true,
       render: (row) => (
         <button
@@ -87,7 +87,7 @@ export function RegistrantListClient({
         <div className="grid gap-1">
           <span className="text-xs text-zinc-700">{row.sourceLabel}</span>
           <StatusBadge
-            status={row.accountStatus === "ppc_account" ? "PPC account" : "Welcome only"}
+            status={row.accountStatus === "ppc_account" ? "Learning account" : "Welcome only"}
             variant={accountStatusVariant(row.accountStatus)}
           />
         </div>
@@ -95,7 +95,7 @@ export function RegistrantListClient({
     },
     {
       key: "ppc",
-      label: "PPC progress",
+      label: "Learning progress",
       render: (row) =>
         row.ppc ? (
           <div className="grid min-w-[150px] gap-1">
@@ -111,7 +111,7 @@ export function RegistrantListClient({
             </div>
           </div>
         ) : (
-          <StatusBadge status="No PPC account" />
+          <StatusBadge status="No learning account" />
         ),
       className: "min-w-[180px]",
     },
@@ -170,7 +170,7 @@ export function RegistrantListClient({
           <Search className="pointer-events-none absolute left-2 top-1/2 size-3.5 -translate-y-1/2 text-zinc-400" />
           <input
             type="text"
-            placeholder="Search registrants..."
+            placeholder="Search learners..."
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             className="h-8 w-full rounded-sm border border-zinc-200 bg-white pl-7 pr-3 text-xs text-zinc-700 outline-none placeholder:text-zinc-400 focus:border-zinc-400 focus:ring-1 focus:ring-zinc-200"
@@ -187,7 +187,7 @@ export function RegistrantListClient({
             )}
           >
             <option value="all">All sources</option>
-            <option value="ppc">PPC</option>
+            <option value="ppc">Learning</option>
             <option value="welcome">Welcome</option>
           </select>
           <ChevronDown className="pointer-events-none absolute right-2 top-1/2 size-3 -translate-y-1/2 text-zinc-400" />
@@ -203,7 +203,7 @@ export function RegistrantListClient({
             )}
           >
             <option value="all">All accounts</option>
-            <option value="ppc_account">PPC accounts</option>
+            <option value="ppc_account">Learning accounts</option>
             <option value="welcome_only">Welcome only</option>
           </select>
           <ChevronDown className="pointer-events-none absolute right-2 top-1/2 size-3 -translate-y-1/2 text-zinc-400" />
@@ -214,7 +214,7 @@ export function RegistrantListClient({
         columns={columns}
         data={filtered as (AdminRegistrantSummary & Record<string, unknown>)[]}
         onRowClick={(row) => router.push(`${basePath}/students/${row.id}`)}
-        emptyMessage="No registrants found"
+        emptyMessage="No learners found"
         getRowKey={(row) => row.id}
       />
     </div>

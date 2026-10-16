@@ -88,7 +88,7 @@ export default function AdminNotificationsPage() {
     <div className="grid gap-6">
       <PageHeader
         title="Notifications"
-        description="Operational status for PPC email, push alerts, and reminder policy"
+        description="Operational status for learning email, push alerts, and reminder policy"
       />
 
       <section className="grid grid-cols-2 gap-3 sm:grid-cols-3">

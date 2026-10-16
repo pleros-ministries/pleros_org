@@ -360,7 +360,7 @@ export function getSuperAdminOverviewCards(
     {
       label: "New users",
       value: input.newUsers.distinctPeopleLast7Days,
-      hint: `${input.newUsers.ppcAccountsLast7Days} PPC accounts · ${input.newUsers.welcomeLeadsLast7Days} welcome leads`,
+      hint: `${input.newUsers.ppcAccountsLast7Days} learning accounts · ${input.newUsers.welcomeLeadsLast7Days} welcome leads`,
     },
     {
       label: "Devotion participation",
@@ -370,7 +370,7 @@ export function getSuperAdminOverviewCards(
     {
       label: "Training overview",
       value: `${input.training.averageProgress}%`,
-      hint: `${input.training.activeStudents} PPC students · ${input.training.pendingReviews} reviews · ${input.training.openQa} Q&A`,
+      hint: `${input.training.activeStudents} learners · ${input.training.pendingReviews} reviews · ${input.training.openQa} Q&A`,
     },
   ];
 }
