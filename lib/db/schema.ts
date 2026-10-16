@@ -1473,6 +1473,7 @@ export const pastorAssignments = pgTable(
     pastorUserId: text("pastor_user_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
+    discipleshipGroupId: integer("discipleship_group_id").references(() => discipleshipGroups.id, { onDelete: "set null" }),
     assignedBy: text("assigned_by").references(() => users.id),
     assignedAt: timestamp("assigned_at", { withTimezone: true })
       .notNull()
@@ -1484,6 +1485,7 @@ export const pastorAssignments = pgTable(
     // Exactly one pastor per enrolment.
     uniqueIndex("pastor_assignments_enrollment_idx").on(t.enrollmentId),
     index("pastor_assignments_pastor_idx").on(t.pastorUserId),
+    index("pastor_assignments_group_idx").on(t.discipleshipGroupId),
   ],
 );
 
@@ -2172,6 +2174,8 @@ export const discipleshipGroups = pgTable(
       .references(() => sogpEnrollments.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
     inviteCode: text("invite_code").notNull(),
+    /** Permanent system group used by branch-authorised follow-up assignments. */
+    isDefault: boolean("is_default").notNull().default(false),
     /** Consent for disciples to see a WhatsApp shortcut to the discipler. */
     leaderSharesPhone: boolean("leader_shares_phone").notNull().default(false),
     status: discipleshipGroupStatusEnum("status").notNull().default("active"),
@@ -2188,6 +2192,9 @@ export const discipleshipGroups = pgTable(
       t.status,
     ),
     uniqueIndex("discipleship_groups_invite_code_idx").on(t.inviteCode),
+    uniqueIndex("discipleship_groups_default_leader_idx")
+      .on(t.leaderEnrollmentId)
+      .where(sql`${t.isDefault} = true`),
     index("discipleship_groups_status_idx").on(t.status),
   ],
 );
@@ -2425,6 +2432,47 @@ export const churchBranchPastors = pgTable("church_branch_pastors", {
   userId: text("user_id").notNull().references(() => churchAssignments.userId, { onDelete: "cascade" }),
   branchId: integer("branch_id").notNull().references(() => churchBranches.id),
 }, (t) => [primaryKey({ columns: [t.userId, t.branchId] }), index("church_branch_pastors_branch_idx").on(t.branchId)]);
+
+/** Ordinary church membership is distinct from organisational appointment. */
+export const churchBranchMemberships = pgTable("church_branch_memberships", {
+  userId: text("user_id").primaryKey().references(() => users.id, { onDelete: "cascade" }),
+  branchId: integer("branch_id").notNull().references(() => churchBranches.id),
+  assignedBy: text("assigned_by").notNull().references(() => users.id),
+  assignedAt: timestamp("assigned_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [index("church_branch_memberships_branch_idx").on(t.branchId)]);
+
+/** Operational branch placement for an SOGP enrolment, including non-members. */
+export const sogpEnrollmentBranches = pgTable("sogp_enrollment_branches", {
+  enrollmentId: integer("enrollment_id").primaryKey().references(() => sogpEnrollments.id, { onDelete: "cascade" }),
+  branchId: integer("branch_id").notNull().references(() => churchBranches.id),
+  assignedBy: text("assigned_by").notNull().references(() => users.id),
+  assignedAt: timestamp("assigned_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [index("sogp_enrollment_branches_branch_idx").on(t.branchId)]);
+
+export const sogpBranchTransferStatusEnum = pgEnum("sogp_branch_transfer_status", [
+  "pending",
+  "accepted",
+  "declined",
+  "cancelled",
+]);
+
+/** Audit trail for immediate branch-to-branch enrollee transfers. */
+export const sogpBranchTransfers = pgTable("sogp_branch_transfers", {
+  id: serial("id").primaryKey(),
+  enrollmentId: integer("enrollment_id").notNull().references(() => sogpEnrollments.id, { onDelete: "cascade" }),
+  fromBranchId: integer("from_branch_id").references(() => churchBranches.id),
+  toBranchId: integer("to_branch_id").notNull().references(() => churchBranches.id),
+  requestedBy: text("requested_by").notNull().references(() => users.id),
+  respondedBy: text("responded_by").references(() => users.id),
+  status: sogpBranchTransferStatusEnum("status").notNull().default("pending"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  respondedAt: timestamp("responded_at", { withTimezone: true }),
+}, (t) => [
+  uniqueIndex("sogp_branch_transfers_pending_enrollment_idx").on(t.enrollmentId).where(sql`${t.status} = 'pending'`),
+  index("sogp_branch_transfers_destination_idx").on(t.toBranchId, t.status),
+]);
 
 /** Private-first contacts are isolated from every legacy staff reader/export. */
 export const privateMinistryContacts = pgTable("private_ministry_contacts", {

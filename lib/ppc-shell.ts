@@ -1,4 +1,5 @@
 import type { AppRole } from "./app-role";
+import type { ChurchRole } from "./church/permissions";
 
 export type PpcShellIcon =
   | "dashboard"
@@ -19,6 +20,7 @@ export type PpcShellNavItem = {
   path: string;
   icon: PpcShellIcon;
   roles: AppRole[];
+  churchRoles?: ChurchRole[];
 };
 
 export type PpcShellContext = {
@@ -96,6 +98,7 @@ export const PPC_SHELL_NAV_ITEMS: PpcShellNavItem[] = [
     // Also visible to admins — an admin flagged `isPastor` needs a way to
     // reach their own assigned enrollees; other admins just see it empty.
     roles: ["super_admin", "admin", "pastor"],
+    churchRoles: ["pastor", "branch_pastor"],
   },
   {
     label: "Staff",
@@ -164,8 +167,14 @@ export function getLogicalPpcShellPath(pathname: string): string {
   return normalizePath(logicalPath || "/");
 }
 
-export function getVisiblePpcShellNavItems(role: AppRole): PpcShellNavItem[] {
-  return PPC_SHELL_NAV_ITEMS.filter((item) => item.roles.includes(role));
+export function getVisiblePpcShellNavItems(role: AppRole, churchRole?: string | null): PpcShellNavItem[] {
+  const churchAdmin = churchRole === "pastor" || churchRole === "branch_pastor";
+  return PPC_SHELL_NAV_ITEMS
+    .filter((item) =>
+      item.roles.includes(role) && !(churchAdmin && role === "student") ||
+      churchAdmin && item.churchRoles?.includes(churchRole),
+    )
+    .map((item) => churchAdmin && item.path === "/my-enrollees" ? { ...item, label: "Enrollees" } : item);
 }
 
 export function isPpcShellNavItemActive(

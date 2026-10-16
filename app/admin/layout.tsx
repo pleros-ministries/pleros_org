@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { PpcAppFrame } from "@/components/ppc/ppc-app-frame";
 import { QueryProvider } from "@/components/query-provider";
 import { getAppSession } from "@/lib/app-session";
+import { getChurchAssignment } from "@/lib/db/queries/church-organisation";
 export const metadata: Metadata = {
   title: "PPC Admin",
   description: "Pleros Perfecting Courses staff administration",
@@ -29,7 +30,14 @@ export default async function AdminRootLayout({ children }: { children: React.Re
     requestHeaders.get("x-pleros-pathname") ?? "",
   );
 
-  if (session?.user.role === "student") {
+  const churchAssignment = session
+    ? await getChurchAssignment(session.user.id)
+    : null;
+  const isChurchAdmin =
+    churchAssignment?.role === "pastor" ||
+    churchAssignment?.role === "branch_pastor";
+
+  if (session?.user.role === "student" && !isChurchAdmin) {
     redirect("/ppc");
   }
 

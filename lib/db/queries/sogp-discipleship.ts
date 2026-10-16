@@ -69,13 +69,13 @@ function openGroupsOf(leaderEnrollmentId: number) {
   );
 }
 
-/** The leader's open groups, oldest first. A closed group never comes back. */
+/** The permanent default first, then the leader's other open groups oldest first. */
 async function listLedGroups(leaderEnrollmentId: number): Promise<OpenGroupRow[]> {
   const rows = await db
     .select()
     .from(schema.discipleshipGroups)
     .where(openGroupsOf(leaderEnrollmentId))
-    .orderBy(asc(schema.discipleshipGroups.createdAt), asc(schema.discipleshipGroups.id));
+    .orderBy(desc(schema.discipleshipGroups.isDefault), asc(schema.discipleshipGroups.createdAt), asc(schema.discipleshipGroups.id));
   return rows as OpenGroupRow[];
 }
 
@@ -113,7 +113,7 @@ async function lockLeader(tx: Tx, leaderEnrollmentId: number) {
 }
 
 /** Inserts a group with a fresh invite code, retrying on a code collision. */
-async function insertGroup(tx: Tx, values: { leaderEnrollmentId: number; name: string }) {
+async function insertGroup(tx: Tx, values: { leaderEnrollmentId: number; name: string; isDefault?: boolean }) {
   for (let attempt = 0; attempt < 5; attempt += 1) {
     const [created] = await tx
       .insert(schema.discipleshipGroups)
@@ -126,8 +126,8 @@ async function insertGroup(tx: Tx, values: { leaderEnrollmentId: number; name: s
 }
 
 /**
- * Returns the enrolment's open discipleship groups, creating the first one on
- * the first call so every learner has a group and a link to share.
+ * Returns the enrolment's open discipleship groups. New enrolments and the
+ * backfill create the permanent default eagerly; this repairs any missing row.
  */
 export async function ensureDiscipleshipGroups(enrollment: {
   id: number;
@@ -135,20 +135,20 @@ export async function ensureDiscipleshipGroups(enrollment: {
   name: string;
 }): Promise<OpenGroupRow[]> {
   const existing = await listLedGroups(enrollment.id);
-  if (existing.length > 0) return existing;
+  if (existing.some((group) => group.isDefault)) return existing;
 
   const name = defaultDiscipleshipGroupName(
     firstNameOf(enrollment.firstName || enrollment.name),
   );
   await transactionDb.transaction(async (tx) => {
     await lockLeader(tx, enrollment.id);
-    // A concurrent first visit may have created it while this one waited.
-    const [open] = await tx
+    // A concurrent enrolment or first visit may have created it while this one waited.
+    const [defaultGroup] = await tx
       .select({ id: schema.discipleshipGroups.id })
       .from(schema.discipleshipGroups)
-      .where(openGroupsOf(enrollment.id))
+      .where(and(openGroupsOf(enrollment.id), eq(schema.discipleshipGroups.isDefault, true)))
       .limit(1);
-    if (!open) await insertGroup(tx, { leaderEnrollmentId: enrollment.id, name });
+    if (!defaultGroup) await insertGroup(tx, { leaderEnrollmentId: enrollment.id, name, isDefault: true });
   });
   return listLedGroups(enrollment.id);
 }
@@ -192,6 +192,7 @@ export async function renameDiscipleshipGroup(input: {
   const groups = await listLedGroups(input.leaderEnrollmentId);
   const group = groups.find((candidate) => candidate.id === input.groupId);
   if (!group || group.status !== "active") throw new DiscipleshipError(GROUP_UNAVAILABLE);
+  if (group.isDefault) throw new DiscipleshipError("The default SOGP discipleship group cannot be renamed.");
 
   const checked = validateDiscipleshipGroupName(
     input.name,
@@ -220,11 +221,13 @@ export async function closeDiscipleshipGroup(input: {
       .select({
         id: schema.discipleshipGroups.id,
         status: schema.discipleshipGroups.status,
+        isDefault: schema.discipleshipGroups.isDefault,
       })
       .from(schema.discipleshipGroups)
       .where(openGroupsOf(input.leaderEnrollmentId));
     const group = open.find((candidate) => candidate.id === input.groupId);
     if (!group) throw new DiscipleshipError(GROUP_UNAVAILABLE);
+    if (group.isDefault) throw new DiscipleshipError("The default SOGP discipleship group cannot be closed.");
 
     const decision = evaluateCloseDiscipleshipGroup({
       status: group.status,

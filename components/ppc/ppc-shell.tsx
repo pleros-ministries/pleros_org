@@ -55,6 +55,7 @@ type PpcShellProps = {
   session: AppSession;
   studentLevelNavItems?: PpcStudentLevelNavItem[];
   pathnameOverride?: string;
+  churchRole?: string | null;
 };
 
 type SidebarNavigationProps = {
@@ -458,6 +459,7 @@ type SidebarShellProps = {
   onNavigate?: (href: string) => void;
   onToggleCollapse?: () => void;
   signOutHref: string;
+  churchRole?: string | null;
 };
 
 function SidebarShell({
@@ -470,8 +472,9 @@ function SidebarShell({
   onNavigate,
   onToggleCollapse,
   signOutHref,
+  churchRole,
 }: SidebarShellProps) {
-  const visibleNavItems = getVisiblePpcShellNavItems(session.user.role);
+  const visibleNavItems = getVisiblePpcShellNavItems(session.user.role, churchRole);
   const homeHref = getRoleDefaultPath(session.user.role);
 
   return (
@@ -557,6 +560,7 @@ export function PpcShell({
   session,
   studentLevelNavItems,
   pathnameOverride,
+  churchRole,
 }: PpcShellProps) {
   const router = useRouter();
   const currentPathname = usePathname();
@@ -584,7 +588,7 @@ export function PpcShell({
     }
 
     const prefetchRoutes = () => {
-      getVisiblePpcShellNavItems(session.user.role)
+      getVisiblePpcShellNavItems(session.user.role, churchRole)
         .filter((item) => PREFETCHED_ADMIN_PATHS.has(item.path))
         .forEach((item) => {
           router.prefetch(resolvePpcHref(pathname, item.path));
@@ -598,7 +602,7 @@ export function PpcShell({
 
     const timeoutId = window.setTimeout(prefetchRoutes, 0);
     return () => window.clearTimeout(timeoutId);
-  }, [pathname, router, session.user.role]);
+  }, [churchRole, pathname, router, session.user.role]);
 
   useEffect(() => {
     try {
@@ -652,6 +656,7 @@ export function PpcShell({
                 session={session}
                 studentLevelNavItems={studentLevelNavItems}
                 signOutHref={signOutHref}
+                churchRole={churchRole}
                 onToggleCollapse={() => setIsSidebarCollapsed((current) => !current)}
                 onNavigate={setPendingPathname}
               />
@@ -702,6 +707,7 @@ export function PpcShell({
             session={session}
             studentLevelNavItems={studentLevelNavItems}
             signOutHref={signOutHref}
+            churchRole={churchRole}
             onNavigate={(href) => {
               setPendingPathname(href);
               setIsMobileNavOpen(false);

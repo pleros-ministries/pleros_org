@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, inArray, or } from "drizzle-orm";
+import { and, asc, desc, eq, inArray } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 
@@ -184,7 +184,8 @@ export async function getSogpReportData(): Promise<SogpReportRawData> {
         email: schema.users.email,
       })
       .from(schema.users)
-      .where(or(eq(schema.users.role, "pastor"), eq(schema.users.isPastor, true)))
+      .innerJoin(schema.churchAssignments, eq(schema.churchAssignments.userId, schema.users.id))
+      .where(inArray(schema.churchAssignments.role, ["pastor", "branch_pastor"]))
       .orderBy(asc(schema.users.name)),
   ]);
 

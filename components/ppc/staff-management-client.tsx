@@ -73,7 +73,7 @@ export function StaffManagementClient({
 }: StaffManagementClientProps) {
   const queryClient = useQueryClient();
   const [email, setEmail] = useState("");
-  const [role, setRole] = useState<"admin" | "instructor" | "pastor">("admin");
+  const [role, setRole] = useState<"admin" | "instructor">("admin");
   const [feedback, setFeedback] = useState<{
     tone: "default" | "error";
     message: string;
@@ -85,9 +85,7 @@ export function StaffManagementClient({
   const [grantCandidates, setGrantCandidates] = useState<StaffCandidate[]>([]);
   const [grantSearching, setGrantSearching] = useState(false);
   const [grantSelected, setGrantSelected] = useState<StaffCandidate | null>(null);
-  const [grantRole, setGrantRole] = useState<"admin" | "instructor" | "pastor">(
-    "pastor",
-  );
+  const [grantRole, setGrantRole] = useState<"admin" | "instructor">("admin");
   const [grantFeedback, setGrantFeedback] = useState<{
     tone: "default" | "error";
     message: string;
@@ -276,13 +274,12 @@ export function StaffManagementClient({
             <select
               value={role}
               onChange={(event) =>
-                setRole(event.target.value as "admin" | "instructor" | "pastor")
+                setRole(event.target.value as "admin" | "instructor")
               }
               className="h-8 rounded-sm border border-zinc-300 bg-white px-2.5 text-xs outline-none focus:border-zinc-700"
             >
               <option value="admin">Admin</option>
               <option value="instructor">Instructor</option>
-              <option value="pastor">Pastor</option>
             </select>
           </label>
 
@@ -398,13 +395,12 @@ export function StaffManagementClient({
             <select
               value={grantRole}
               onChange={(event) =>
-                setGrantRole(event.target.value as "admin" | "instructor" | "pastor")
+                setGrantRole(event.target.value as "admin" | "instructor")
               }
               className="h-8 rounded-sm border border-zinc-300 bg-white px-2.5 text-xs outline-none focus:border-zinc-700"
             >
               <option value="admin">Admin</option>
               <option value="instructor">Instructor</option>
-              <option value="pastor">Pastor</option>
             </select>
           </label>
 

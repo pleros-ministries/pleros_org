@@ -40,6 +40,8 @@ export const getDashboardViewer = cache(async () => {
     discipleshipDiscussions: community && ctx?.enrollmentId != null,
     managesLocationGroups: community && ctx != null && managesAnyUnit(ctx),
     staffConsole: session.user.role !== "student",
+    staffWorkspace: session.user.role === "student" ? undefined : session.user.role,
+    churchAdministration: church?.role === "pastor" || church?.role === "branch_pastor" ? church.role : undefined,
     churchOversight: hasReports,
     churchMember: church !== null,
     churchAssignments: canManageChurchAssignments(church) || churchOrganisationEnabled() && session.user.role === "super_admin",

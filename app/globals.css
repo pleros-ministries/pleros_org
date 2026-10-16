@@ -1450,20 +1450,20 @@
   color: var(--color-brand-blue);
 }
 
-/* A consistent native dropdown cue across live/dashboard demo controls and portals.
-   Custom selects that already render a chevron keep their existing icon. */
-:is(.pleros-select-scope, html[data-pleros-dashboard="true"]) select:not([multiple]):not([size]):not(.sogp-field-select):not(.sogp-phone-country-select):not([data-select-chevron="external"]) {
+/* A consistent native dropdown cue app-wide. Custom selects that already
+   render a chevron keep their existing icon. */
+select:not([multiple]):not([size]):not(.sogp-field-select):not(.sogp-phone-country-select):not([data-select-chevron="external"]) {
   appearance: none;
   -webkit-appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23011585' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 12px center;
+  background-position: right 18px center;
   background-size: 16px 16px;
-  padding-inline-end: 2.5rem;
+  padding-inline-end: 3rem;
   cursor: pointer;
 }
-:is(.pleros-select-scope, html[data-pleros-dashboard="true"]) select:dir(rtl) {
-  background-position: left 12px center;
+select:dir(rtl):not([multiple]):not([size]):not(.sogp-field-select):not(.sogp-phone-country-select):not([data-select-chevron="external"]) {
+  background-position: left 18px center;
 }
 
 /* Strips the browser's own arrow so our chevron is the only one showing. */

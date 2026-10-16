@@ -25,6 +25,34 @@ describe("connected dashboard navigation", () => {
     expect(ordinary.some(item => item.href === "/dashboard/church")).toBe(false);
     expect(dashboardWorkspace(buildDashboardNavigation({ ...member, churchOversight: true })).some(item => item.label === "Church oversight")).toBe(true);
   });
+  test("staff receive a role-scoped workspace destination", () => {
+    const cases = [
+      ["admin", "Admin", "/admin"],
+      ["super_admin", "Admin", "/admin"],
+      ["instructor", "Instructor workspace", "/admin"],
+      ["pastor", "My enrollees", "/admin/my-enrollees"],
+    ] as const;
+
+    for (const [staffWorkspace, label, href] of cases) {
+      const workspace = dashboardWorkspace(
+        buildDashboardNavigation({ ...member, staffConsole: false, staffWorkspace }),
+      );
+      expect(workspace).toContainEqual(expect.objectContaining({ label, href }));
+    }
+  });
+  test("church Pastor and Branch Pastor appointments receive the Admin workspace", () => {
+    for (const churchAdministration of ["pastor", "branch_pastor"] as const) {
+      const workspace = dashboardWorkspace(
+        buildDashboardNavigation({
+          ...member,
+          staffConsole: false,
+          staffWorkspace: undefined,
+          churchAdministration,
+        }),
+      );
+      expect(workspace).toContainEqual(expect.objectContaining({ label: "Admin", href: "/admin" }));
+    }
+  });
   test("church-only reporting does not grant community feed access", () => {
     const sections = buildDashboardNavigation({ ...member, community: false, sogpEnrolled: false, reporting: true, discipleshipDiscussions: false });
     expect(dashboardAreaHref("community", sections)).toBeNull();

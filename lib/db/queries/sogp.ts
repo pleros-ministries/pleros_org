@@ -28,11 +28,40 @@ import type {
 } from "@/lib/sogp/types";
 import type { SogpEnrollmentValues } from "@/lib/sogp/enrollment";
 import type { SogpOtpPurpose } from "@/lib/sogp/enrollment-auth";
+import { DEFAULT_DISCIPLESHIP_GROUP_NAME, generateInviteCode } from "@/lib/sogp/discipleship";
 
 import * as schema from "../schema";
 
 function dateKey(value: Date) {
   return value.toISOString().slice(0, 10);
+}
+
+async function ensureDefaultSogpGroup(enrollmentId: number) {
+  const [existing] = await db.select({ id: schema.discipleshipGroups.id })
+    .from(schema.discipleshipGroups)
+    .where(and(
+      eq(schema.discipleshipGroups.leaderEnrollmentId, enrollmentId),
+      eq(schema.discipleshipGroups.isDefault, true),
+    ))
+    .limit(1);
+  if (existing) return;
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    await db.insert(schema.discipleshipGroups).values({
+      leaderEnrollmentId: enrollmentId,
+      name: DEFAULT_DISCIPLESHIP_GROUP_NAME,
+      inviteCode: generateInviteCode(),
+      isDefault: true,
+    }).onConflictDoNothing();
+    const [created] = await db.select({ id: schema.discipleshipGroups.id })
+      .from(schema.discipleshipGroups)
+      .where(and(
+        eq(schema.discipleshipGroups.leaderEnrollmentId, enrollmentId),
+        eq(schema.discipleshipGroups.isDefault, true),
+      ))
+      .limit(1);
+    if (created) return;
+  }
+  throw new Error("Could not create the default SOGP discipleship group.");
 }
 
 export async function getOpenSogpCohort() {
@@ -157,6 +186,7 @@ export async function upsertSogpEnrollment(input: SogpEnrollmentCreateInput) {
     .returning();
 
   if (!enrollment) throw new Error("SOGP enrolment could not be saved.");
+  await ensureDefaultSogpGroup(enrollment.id);
   return enrollment;
 }
 

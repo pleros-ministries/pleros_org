@@ -14,6 +14,7 @@ export const DISCIPLESHIP_GROUPS_LED_MAX = 5;
 
 export const DISCIPLESHIP_GROUP_NAME_MIN = 3;
 export const DISCIPLESHIP_GROUP_NAME_MAX = 60;
+export const DEFAULT_DISCIPLESHIP_GROUP_NAME = "SOGP Discipleship Group";
 
 /** `archived` is an admin pause; `closed` is the leader ending their own group. */
 export type DiscipleshipGroupStatus = "active" | "archived" | "closed";
@@ -55,8 +56,8 @@ export function buildDiscipleshipShareMessage(firstName: string): string {
 }
 
 export function defaultDiscipleshipGroupName(firstName: string): string {
-  const name = firstName.trim();
-  return name ? `${name}'s discipleship group` : "Discipleship group";
+  void firstName;
+  return DEFAULT_DISCIPLESHIP_GROUP_NAME;
 }
 
 // ─── Leading several groups ─────────────────────────────────────────────────

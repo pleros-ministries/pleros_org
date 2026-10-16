@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { motion } from "motion/react";
-import { buildDashboardNavigation } from "@/lib/dashboard/navigation";
 import type { DashboardArea } from "@/lib/dashboard/swipe-tabs";
 import { useTabSwipe } from "./use-tab-swipe";
 import { DashboardIcon, LearningCard, ReportRow, RootHeader } from "./primitives";
@@ -19,11 +18,9 @@ const panels: Record<string, { title: string; copy: string; href?: string }> = {
 };
 
 /** Frozen synthetic baseline. No session, DB, notification or media writes. */
-export function DashboardBaseline({ role = "learner" }: { role?: "learner" | "pastor" | "unit-leader" }) {
+export function DashboardBaseline({ role = "learner" }: { role?: "learner" | "pastor" | "unit-leader" | "admin" | "instructor" }) {
   // These are display fixtures, never an authorisation source. Linked live
   // destinations still derive access from the real session on the server.
-  const navigation = buildDashboardNavigation({ sogpEnrolled: true, community: true, reporting: true, communityUnitId: null, discipleshipDiscussions: true, managesLocationGroups: role === "pastor", staffConsole: role === "pastor", churchOversight: role !== "learner", churchAssignments: role === "pastor" });
-  const links = navigation.flatMap(section => section.items);
   const [panel, setPanel] = useState<string | null>(null);
   const [area, setArea] = useState<DashboardArea>("you");
   const scrollPositions = useRef({ you: 0, community: 0 });
@@ -46,12 +43,14 @@ export function DashboardBaseline({ role = "learner" }: { role?: "learner" | "pa
     { label: "My learning", icon: "book" as const, href: "/dashboard/sogp" },
     { label: "My disciples", icon: "leaf" as const, href: "/dashboard/sogp/discipleship" },
     { label: "Saved contacts", icon: "people" as const, href: "/dashboard/community/report/people" },
-    ...(role !== "learner" ? [{ label: "Church oversight", icon: "building" as const, href: "/dashboard/church" }] : []),
+    ...(role === "pastor" || role === "unit-leader" ? [{ label: "Church oversight", icon: "building" as const, href: "/dashboard/church" }] : []),
+    ...(role === "admin" ? [{ label: "Admin", icon: "building" as const, href: "/admin" }] : []),
+    ...(role === "instructor" ? [{ label: "Instructor workspace", icon: "building" as const, href: "/admin" }] : []),
+    ...(role === "pastor" ? [{ label: "Pastor workspace", icon: "people" as const, href: "/admin/my-enrollees" }] : []),
   ];
   const nav = <>
     <nav aria-label="Dashboard areas" className={styles.drawerRoots}><Link prefetch={false} href="/dashboard" aria-current="page"><DashboardIcon name="grid" />You</Link><Link prefetch={false} href="/dashboard/community"><DashboardIcon name="people" />Community</Link></nav>
     <nav aria-label="Your workspace" className={styles.workspace}><p>Your workspace</p>{workspace.map(item => <Link prefetch={false} key={item.label} href={item.href}><DashboardIcon name={item.icon} /><span>{item.label}</span><DashboardIcon name="right" size={16} /></Link>)}</nav>
-    <details className={styles.retained}><summary>More destinations</summary><nav aria-label="Retained dashboard destinations">{links.map(link => <Link prefetch={false} key={link.key} href={link.href}>{link.label}</Link>)}<Link prefetch={false} href="/forgot-password">Password recovery</Link></nav></details>
   </>;
   return <div className={styles.root} data-dashboard-v3>
     <aside className={styles.sidebar}>{profile}{nav}</aside>
@@ -71,7 +70,7 @@ export function DashboardBaseline({ role = "learner" }: { role?: "learner" | "pa
           <div className={styles.sectionHeader}><h2>My reports</h2><button className={styles.textAction} onClick={() => setPanel("reports")}>View day</button></div>
           <div className={styles.reportList}>
             <ReportRow icon="book" title="Devotional" description="3 activities logged" status="Not confirmed" tone="amber" onClick={() => setPanel("reports")} />
-            <ReportRow icon="heart" title="Ministry" description="No activity declared" status="Nil declared" tone="neutral" onClick={() => setPanel("reports")} />
+            <ReportRow icon="heart" title="Ministry" description="No activity declared" status="Nil declared" tone="lilac" onClick={() => setPanel("reports")} />
             <ReportRow icon="people" title="Meetings" description="1 meeting recorded" status="Reported" tone="green" onClick={() => setPanel("reports")} />
           </div>
         </section>

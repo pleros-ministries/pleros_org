@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { addChurchPlace, addUnitWorkers, findChurchMembers, saveChurchAssignment } from "@/app/(site)/dashboard/church/actions";
+import { addChurchPlace, addUnitWorkers, findChurchMembers, saveChurchAssignment, saveChurchBranchMembership } from "@/app/(site)/dashboard/church/actions";
 import { DashboardIcon, StatusPill } from "@/components/dashboard/v3/primitives";
 import type { ChurchPlace } from "@/lib/db/queries/church-home";
 import styles from "@/components/sogp/follow-up-invitations.module.css";
@@ -29,6 +29,33 @@ function PeopleSearch({ multiple, chosen, onChange, exclude = [] }: { multiple: 
       const selected = picked.has(person.id);
       return <label key={person.id} className={styles.choice} data-selected={selected}><input type={multiple ? "checkbox" : "radio"} name="church-person" checked={selected} onChange={() => onChange(multiple ? selected ? chosen.filter(row => row.id !== person.id) : [...chosen, person] : [person])} /><span className={styles.avatar}>{initials(person.name)}</span><span><strong>{person.name}</strong><span className={styles.meta} style={{ display: "block" }}>Church member</span></span></label>;
     })}</div> : results ? <p className={styles.muted}>No members match.</p> : null}
+  </div>;
+}
+
+export function PlaceChurchMember({ branches }: { branches: Array<{ id: number; name: string }> }) {
+  const [chosen, setChosen] = useState<Person[]>([]);
+  const [branchId, setBranchId] = useState(branches[0]?.id ?? 0);
+  const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState<string | null>(null);
+  const [pending, start] = useTransition();
+  function save() {
+    const person = chosen[0];
+    if (!person || !branchId) { setError("Choose a church member and branch."); return; }
+    start(async () => {
+      const result = await saveChurchBranchMembership({ userId: person.id, branchId });
+      if (!result.ok) { setError(result.error); return; }
+      setSaved(`${person.name} was placed in ${branches.find(branch => branch.id === branchId)?.name}.`);
+      setChosen([]); setError(null);
+    });
+  }
+  return <div className={styles.section}>
+    <div className={styles.sectionHead}><h2>Church member placement</h2><StatusPill tone="neutral">Branch only</StatusPill></div>
+    <p className={styles.muted}>Place ordinary members in a branch without giving them a staff or church-office role.</p>
+    <PeopleSearch multiple={false} chosen={chosen} onChange={setChosen} />
+    <label className={styles.field}>Branch<select value={branchId} onChange={event => setBranchId(Number(event.target.value))}>{branches.map(branch => <option key={branch.id} value={branch.id}>{branch.name}</option>)}</select></label>
+    {error ? <p className={styles.error} role="alert">{error}</p> : null}
+    {saved ? <p className={styles.accent}>{saved}</p> : null}
+    <button type="button" className={styles.primary} disabled={pending || !chosen.length || !branchId} onClick={save}>{pending ? "Saving…" : "Place in branch"}<DashboardIcon name="check" /></button>
   </div>;
 }
 

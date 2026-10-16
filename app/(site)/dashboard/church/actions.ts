@@ -2,7 +2,7 @@
 import { revalidatePath } from "next/cache";
 import { getAppSession } from "@/lib/app-session";
 import { CommunityError } from "@/lib/community/errors";
-import { assignChurchMember, createChurchPlace, searchChurchCandidates } from "@/lib/db/queries/church-organisation";
+import { assignChurchBranchMembership, assignChurchMember, createChurchPlace, searchChurchCandidates } from "@/lib/db/queries/church-organisation";
 import type { ChurchRole } from "@/lib/church/permissions";
 
 async function actor() { const session = await getAppSession(); if (!session) throw new CommunityError("Sign in to manage church assignments."); return session; }
@@ -15,6 +15,15 @@ export async function saveChurchAssignment(input: { userId: string; role: Church
     const session = await actor();
     await assignChurchMember(session.user.id, { userId: input.userId, role: input.role, branchId: input.branchId, unitId: input.unitId, supervisorId: input.supervisorId, branchIds: input.branchIds }, session.user.role === "super_admin");
     revalidatePath("/dashboard", "layout");
+    return { ok: true as const };
+  } catch (error) { if (error instanceof CommunityError) return { ok: false as const, error: error.message }; throw error; }
+}
+export async function saveChurchBranchMembership(input: { userId: string; branchId: number }) {
+  try {
+    const session = await actor();
+    await assignChurchBranchMembership(session.user.id, input);
+    revalidatePath("/dashboard/church");
+    revalidatePath("/admin/my-enrollees");
     return { ok: true as const };
   } catch (error) { if (error instanceof CommunityError) return { ok: false as const, error: error.message }; throw error; }
 }

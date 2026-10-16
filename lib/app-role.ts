@@ -5,7 +5,7 @@ export type AppRole =
   | "student"
   | "pastor";
 
-export type StaffInviteRole = "admin" | "instructor" | "pastor";
+export type StaffInviteRole = "admin" | "instructor";
 
 export function isAppRole(value: string): value is AppRole {
   return (

@@ -171,6 +171,12 @@ describe("ppc shell helpers", () => {
     expect(getVisiblePpcShellNavItems("pastor").map((item) => item.path)).toEqual([
       "/my-enrollees",
     ]);
+    expect(
+      getVisiblePpcShellNavItems("student", "branch_pastor").map(({ label, path }) => ({ label, path })),
+    ).toEqual([{ label: "Enrollees", path: "/my-enrollees" }]);
+    expect(
+      getVisiblePpcShellNavItems("student", "pastor").map(({ label, path }) => ({ label, path })),
+    ).toEqual([{ label: "Enrollees", path: "/my-enrollees" }]);
   });
 
   test("normalizes logical paths with or without /ppc prefix", () => {

@@ -1,5 +1,5 @@
 import "server-only";
-import { and, eq, ilike, inArray, or, sql } from "drizzle-orm";
+import { and, eq, ilike, inArray, ne, or, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { transactionDb } from "@/lib/db/transaction";
 import * as s from "@/lib/db/schema";
@@ -129,6 +129,39 @@ export async function assignChurchMember(actorId: string, input: { userId: strin
       if (branchIds.length) await tx.insert(s.churchBranchPastors).values(branchIds.map(branchId => ({ userId: input.userId, branchId })));
     }
   });
+}
+
+/** Places any signed-up church member in one branch without giving them an organisational role. */
+export async function assignChurchBranchMembership(actorId: string, input: { userId: string; branchId: number }) {
+  requireEnabled();
+  const actor = await getChurchAssignment(actorId);
+  if (!canManageChurchAssignments(actor)) throw new CommunityError("You cannot place church members.");
+  if (actor?.role === "branch_pastor" && !churchBranchIds(actor).includes(input.branchId)) {
+    throw new CommunityError("Choose one of your branches.");
+  }
+  const [[user], [branch]] = await Promise.all([
+    db.select({ id: s.users.id }).from(s.users).where(eq(s.users.id, input.userId)).limit(1),
+    db.select({ id: s.churchBranches.id }).from(s.churchBranches).where(eq(s.churchBranches.id, input.branchId)).limit(1),
+  ]);
+  if (!user || !branch) throw new CommunityError("Choose an existing member and branch.");
+  await db.insert(s.churchBranchMemberships).values({
+    userId: input.userId,
+    branchId: input.branchId,
+    assignedBy: actorId,
+  }).onConflictDoUpdate({
+    target: s.churchBranchMemberships.userId,
+    set: { branchId: input.branchId, assignedBy: actorId, updatedAt: new Date() },
+  });
+  const enrollments = await db.select({ id: s.sogpEnrollments.id })
+    .from(s.sogpEnrollments)
+    .where(and(eq(s.sogpEnrollments.userId, input.userId), ne(s.sogpEnrollments.status, "withdrawn")));
+  if (enrollments.length) {
+    await db.insert(s.sogpEnrollmentBranches).values(enrollments.map(enrollment => ({
+      enrollmentId: enrollment.id,
+      branchId: input.branchId,
+      assignedBy: actorId,
+    }))).onConflictDoNothing();
+  }
 }
 export async function createChurchPlace(actorId: string, input: { name: string; branchId?: number }): Promise<number> {
   requireEnabled();

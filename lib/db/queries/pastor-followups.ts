@@ -43,11 +43,7 @@ export type PastorSummary = {
 };
 
 /**
- * Admin CRM rollup: everyone who can hold pastor assignments, plus their
- * activity — dedicated `role = "pastor"` accounts, plus any admin/super_admin
- * explicitly marked `isPastor` (see `setAdminPastorFlag`). Being an admin
- * alone does not put you on this list; an admin has to be assigned the
- * pastor flag first.
+ * Admin CRM rollup for church-appointed Pastor and Branch Pastors.
  */
 export async function listPastors(): Promise<PastorSummary[]> {
   const rows = await db
@@ -62,6 +58,10 @@ export async function listPastors(): Promise<PastorSummary[]> {
       lastReviewedAt: sql<string | null>`max(${schema.writtenSubmissions.reviewedAt})`,
     })
     .from(schema.users)
+    .innerJoin(
+      schema.churchAssignments,
+      eq(schema.churchAssignments.userId, schema.users.id),
+    )
     .leftJoin(
       schema.pastorAssignments,
       eq(schema.pastorAssignments.pastorUserId, schema.users.id),
@@ -70,9 +70,7 @@ export async function listPastors(): Promise<PastorSummary[]> {
       schema.writtenSubmissions,
       eq(schema.writtenSubmissions.reviewedBy, schema.users.id),
     )
-    .where(
-      or(eq(schema.users.role, "pastor"), eq(schema.users.isPastor, true)),
-    )
+    .where(inArray(schema.churchAssignments.role, ["pastor", "branch_pastor"]))
     .groupBy(schema.users.id, schema.users.name, schema.users.email)
     .orderBy(asc(schema.users.name));
 

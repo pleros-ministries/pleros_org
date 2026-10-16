@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { getAppSession } from "@/lib/app-session";
+import { getChurchAssignment } from "@/lib/db/queries/church-organisation";
 
 export default async function AdminAppLayout({
   children,
@@ -13,7 +14,12 @@ export default async function AdminAppLayout({
     redirect("/admin");
   }
 
-  if (session.user.role === "student") {
+  const churchAssignment = await getChurchAssignment(session.user.id);
+  const isChurchAdmin =
+    churchAssignment?.role === "pastor" ||
+    churchAssignment?.role === "branch_pastor";
+
+  if (session.user.role === "student" && !isChurchAdmin) {
     redirect("/ppc");
   }
 

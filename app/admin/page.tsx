@@ -1,8 +1,11 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { AdminDashboardClient } from "@/components/ppc/admin-dashboard-client";
 import { StaffLoginPanel } from "@/components/ppc/staff-login-panel";
 import { getAppSession } from "@/lib/app-session";
+import { hasAdminAccess } from "@/lib/app-role";
+import { getChurchAssignment } from "@/lib/db/queries/church-organisation";
 
 export default async function AdminEntryPage() {
   const session = await getAppSession();
@@ -30,6 +33,16 @@ export default async function AdminEntryPage() {
         </section>
       </main>
     );
+  }
+
+  if (!hasAdminAccess(session.user.role)) {
+    const churchAssignment = await getChurchAssignment(session.user.id);
+    if (
+      churchAssignment?.role === "pastor" ||
+      churchAssignment?.role === "branch_pastor"
+    ) {
+      redirect("/admin/my-enrollees");
+    }
   }
 
   return <AdminDashboardClient />;

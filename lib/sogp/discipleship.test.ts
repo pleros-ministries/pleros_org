@@ -42,9 +42,9 @@ describe("buildDiscipleshipInviteUrl", () => {
 });
 
 describe("defaultDiscipleshipGroupName", () => {
-  test("uses the first name when present", () => {
-    expect(defaultDiscipleshipGroupName("Tola")).toBe("Tola's discipleship group");
-    expect(defaultDiscipleshipGroupName(" ")).toBe("Discipleship group");
+  test("uses the shared permanent SOGP group name for every enrollee", () => {
+    expect(defaultDiscipleshipGroupName("Tola")).toBe("SOGP Discipleship Group");
+    expect(defaultDiscipleshipGroupName(" ")).toBe("SOGP Discipleship Group");
   });
 });
 

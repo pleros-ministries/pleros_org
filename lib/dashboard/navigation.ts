@@ -19,6 +19,10 @@ export type DashboardCapabilities = {
   managesLocationGroups: boolean;
   /** Any non-student role; `/admin` turns students away itself. */
   staffConsole: boolean;
+  /** Direct, role-scoped destination rendered in the dashboard workspace. */
+  staffWorkspace?: Extract<AppRole, "super_admin" | "admin" | "instructor" | "pastor">;
+  /** Church appointment that carries a scoped administration workspace. */
+  churchAdministration?: "pastor" | "branch_pastor";
   churchOversight?: boolean;
   /** Holds any church appointment (worker placement, unit, branch or Pastor). */
   churchMember?: boolean;
@@ -156,8 +160,16 @@ export function buildDashboardNavigation(
       href: "/dashboard/community/leader",
     });
   }
-  if (caps.staffConsole) {
-    oversight.push({ key: "admin", label: "Admin console", href: "/admin" });
+  if (caps.staffWorkspace === "super_admin" || caps.staffWorkspace === "admin" || caps.churchAdministration) {
+    oversight.push({ key: "admin", label: "Admin", href: "/admin" });
+  } else if (caps.staffWorkspace === "instructor") {
+    oversight.push({ key: "instructor-workspace", label: "Instructor workspace", href: "/admin" });
+  } else if (caps.staffWorkspace === "pastor") {
+    oversight.push({ key: "pastor-workspace", label: "My enrollees", href: "/admin/my-enrollees" });
+  } else if (caps.staffConsole) {
+    // Backwards-compatible inventory for non-viewer callers. Live viewers use
+    // the explicit role-scoped destination above.
+    oversight.push({ key: "admin", label: "Admin", href: "/admin" });
   }
 
   const welcome: DashboardNavItem[] = [

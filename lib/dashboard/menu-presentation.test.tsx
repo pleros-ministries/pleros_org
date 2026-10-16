@@ -1,4 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
+import fs from "node:fs";
+import path from "node:path";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { expect,test,vi } from "vitest";
 import { DashboardMenuNavigation } from "@/components/dashboard/shell/dashboard-menu-navigation";
@@ -19,4 +21,19 @@ test("church tools remain capability-scoped and absent for ordinary learners",()
   const html = renderToStaticMarkup(<QueryClientProvider client={new QueryClient()}><DashboardMenuNavigation sections={sections} area="you" onArea={()=>{}} /></QueryClientProvider>);
   expect(html).toContain('href="/dashboard/church"');
   expect(html).not.toContain('href="/dashboard/community"');
+});
+test("the drawer renders the admin workspace without restoring the destination dump",()=>{
+  const sections = buildDashboardNavigation({ sogpEnrolled:true,community:true,communityUnitId:9,discipleshipDiscussions:true,managesLocationGroups:false,staffConsole:false,staffWorkspace:"super_admin" });
+  const html = renderToStaticMarkup(<QueryClientProvider client={new QueryClient()}><DashboardMenuNavigation sections={sections} area="you" onArea={()=>{}} /></QueryClientProvider>);
+  expect(html).toContain('href="/admin"');
+  expect(html).toContain(">Admin<");
+  expect(html).not.toContain("More destinations");
+});
+test("the isolated baseline does not preserve the retired destination dump",()=>{
+  const source = fs.readFileSync(path.join(process.cwd(), "components/dashboard/v3/baseline.tsx"), "utf8");
+  const styles = fs.readFileSync(path.join(process.cwd(), "components/dashboard/v3/dashboard.module.css"), "utf8");
+  expect(source).not.toContain("More destinations");
+  expect(source).not.toContain("Retained dashboard destinations");
+  expect(styles).not.toContain(".retained");
+  expect(styles).not.toContain(".essentials");
 });

@@ -13,10 +13,7 @@ import {
   revokeStaffInvite,
   setUserStaffRole,
 } from "@/lib/db/queries/staff-invites";
-import {
-  setAdminPastorFlag,
-  unassignAllForPastor,
-} from "@/lib/db/queries/pastor-followups";
+import { unassignAllForPastor } from "@/lib/db/queries/pastor-followups";
 import { sendStaffAssignmentNotification, sendStaffInvite } from "@/lib/email/send";
 import {
   ensureAppUserRecord,
@@ -179,7 +176,7 @@ export async function grantExistingUserStaffRole(input: {
   await requireAdmin();
 
   if (!isStaffInviteRole(input.role)) {
-    return { error: "Choose admin, instructor, or pastor." };
+    return { error: "Choose admin or instructor." };
   }
 
   const user = await getAppUserById(input.userId);
@@ -188,23 +185,14 @@ export async function grantExistingUserStaffRole(input: {
   }
 
   // Emails in SUPER_ADMIN_EMAILS have their `role` pinned to "super_admin" on
-  // every session load (see lib/app-session.ts / ensureAppUserRecord) so
-  // they can never be locked out — any other role written to `users.role`
-  // for them gets silently reverted within moments. Pastor access for such
-  // an account has to go through the same `isPastor` flag the "Also a
-  // pastor" admin toggle uses, which that pinning never touches.
+  // every session load, so they can never be locked out or reassigned here.
   const isFixedSuperAdmin = isConfiguredSuperAdminEmail(user.email);
-  if (isFixedSuperAdmin && input.role !== "pastor") {
+  if (isFixedSuperAdmin) {
     return {
       error: `${user.name} is a permanent super admin and already has full access — there's nothing to grant.`,
     };
   }
-
-  if (isFixedSuperAdmin) {
-    await setAdminPastorFlag(user.id, true);
-  } else {
-    await setUserStaffRole(user.id, input.role);
-  }
+  await setUserStaffRole(user.id, input.role);
 
   // Same origin-normalization `buildStaffInviteUrl` uses, minus the
   // invite-token path segment — this links straight to the admin login.

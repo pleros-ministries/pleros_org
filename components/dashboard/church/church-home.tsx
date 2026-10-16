@@ -4,6 +4,7 @@ import { useState } from "react";
 import { DashboardIcon, StatusPill } from "@/components/dashboard/v3/primitives";
 import type { ChurchBranchSummary, ChurchHome } from "@/lib/db/queries/church-home";
 import styles from "@/components/sogp/follow-up-invitations.module.css";
+import { PlaceChurchMember } from "./church-flows";
 
 const initials = (name: string) => name.trim().split(/\s+/).slice(0, 2).map(part => part[0]?.toUpperCase() ?? "").join("");
 const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
@@ -51,6 +52,7 @@ export function ChurchHomeView({ data, canOversee }: { data: ChurchHome; canOver
         <UnitRows branch={branch} manage />
       </article>) : <p className={styles.muted}>No branches yet. Create the first branch to start.</p>}
     </div>
+    <PlaceChurchMember branches={data.branches} />
     {oversight}
   </section>;
 
@@ -67,6 +69,7 @@ export function ChurchHomeView({ data, canOversee }: { data: ChurchHome; canOver
         {branch.units.some(unit => !unit.leader) ? <Link className={styles.secondary} href={`/dashboard/church/units/${branch.units.find(unit => !unit.leader)!.id}/leader`}>Appoint a unit leader</Link> : null}
       </div>
     </> : <p className={styles.muted}>No branch is assigned to you yet.</p>}
+    <PlaceChurchMember branches={data.branches} />
     {oversight}
   </section>;
 }

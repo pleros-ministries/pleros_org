@@ -31,5 +31,7 @@ export function dashboardWorkspace(sections: DashboardNavSection[]): DashboardWo
   if (contacts) workspace.push({ ...contacts, label: "Saved contacts", icon: "people" });
   const church = find("church");
   if (church) workspace.push({ ...church, icon: "building" });
+  const staff = find("admin") ?? find("instructor-workspace") ?? find("pastor-workspace");
+  if (staff) workspace.push({ ...staff, icon: staff.key === "pastor-workspace" ? "people" : "building" });
   return workspace;
 }

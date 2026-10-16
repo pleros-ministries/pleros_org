@@ -3,6 +3,7 @@ import { getGraduations } from "@/lib/db/queries/graduations";
 import { getLevels } from "@/lib/db/queries/lessons";
 import { buildStudentLevelNavItems } from "@/lib/ppc-shell";
 import { PpcShell } from "@/components/ppc/ppc-shell";
+import { getChurchAssignment } from "@/lib/db/queries/church-organisation";
 
 type PpcAppFrameProps = {
   children: React.ReactNode;
@@ -13,6 +14,7 @@ export async function PpcAppFrame({
   children,
   session,
 }: PpcAppFrameProps) {
+  const church = await getChurchAssignment(session.user.id);
   const studentLevelNavItems =
     session.user.role === "student"
       ? buildStudentLevelNavItems(
@@ -24,7 +26,7 @@ export async function PpcAppFrame({
       : undefined;
 
   return (
-    <PpcShell session={session} studentLevelNavItems={studentLevelNavItems}>
+    <PpcShell session={session} studentLevelNavItems={studentLevelNavItems} churchRole={church?.role}>
       {children}
     </PpcShell>
   );
