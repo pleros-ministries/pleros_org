@@ -48,14 +48,15 @@
 .tabs button[aria-current]::after { content: ""; position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; border-radius: 50%; background: var(--color-brand-blue); }
 .unread { position: absolute; top: 9px; right: 12px; width: 5px; height: 5px; border-radius: 50%; background: var(--color-brand-blue); }
 .notificationPanel { position: absolute; z-index: 50; right: 0; top: 48px; width: min(320px, calc(100vw - 16px)); border: 1px solid var(--color-line); border-radius: 11px; background: white; color: var(--color-text); padding: 8px; }
-.content { padding: 28px var(--dashboard-gutter) max(20px, env(safe-area-inset-bottom)); min-height: calc(100dvh - 48px); touch-action: pan-y pinch-zoom; }
+.content { padding: 28px var(--dashboard-gutter) max(20px, env(safe-area-inset-bottom)); min-height: calc(100dvh - 48px); background: var(--color-community-canvas); touch-action: pan-y pinch-zoom; }
 .swipeViewport { overflow: clip; }
 .swipeTrack { position: relative; }
 .swipePage { position: absolute; top: 0; left: 0; width: 100%; min-height: calc(100dvh - 96px); }
 .swipePage[data-area="community"] { left: 100%; }
 .swipePage[data-active="true"] { position: relative; }
 .greeting { font-size: 21px; line-height: 28px; font-weight: 500; letter-spacing: var(--dashboard-tracking-heading, -0.02em); margin: 0; }
-.learning { margin-top: 33px; }
+.learning, .reports, .support { padding: 16px; border-radius: var(--dashboard-card-radius); background: white; box-shadow: var(--shadow-sm); }
+.learning { margin-top: 24px; }
 .sectionHeader { display: flex; align-items: center; justify-content: space-between; min-height: 22px; gap: 12px; }
 .sectionHeader h2, .support h2 { font-size: 15px; font-weight: 500; line-height: 22px; margin: 0; }
 .textAction { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; background: transparent; border: 0; color: var(--color-brand-blue); font-size: 13px !important; font-weight: 500 !important; min-height: 44px; padding: 0; margin-block: -11px; }
@@ -69,12 +70,12 @@
 .progress span { display: block; width: 20.6667%; height: 100%; background: #dde6f6; border-radius: inherit; }
 .playbackMeta { display: flex; justify-content: space-between; font-size: 13px; line-height: 20px; color: #e1eaff; margin-top: 10px; }
 .lessonAction { display: flex; justify-content: space-between; align-items: center; width: 100%; height: var(--dashboard-control-height); padding: 0 16px; margin-top: 16px; border: 0; border-radius: var(--dashboard-control-radius); background: white; color: var(--color-brand-blue); font-weight: 500 !important; }
-.planRow { display: flex; align-items: center; width: 100%; text-align: left; gap: 16px; min-height: 89px; padding: 20px 0 16px; border: 0; border-bottom: 1px solid var(--color-line); background: transparent; }
+.planRow { display: flex; align-items: center; width: 100%; text-align: left; gap: 16px; min-height: 89px; padding: 20px 0 0; border: 0; background: transparent; }
 .rowIcon { color: var(--color-text-muted); flex-shrink: 0; }
 .rowCopy { display: grid; min-width: 0; gap: 2px; flex: 1; }
 .rowTitle { font-size: 14px; line-height: 22px; font-weight: 500; }
 .metadata { font-size: 13px; line-height: 20px; color: var(--color-text-muted); }
-.reports { margin-top: 29px; }
+.reports { margin-top: 20px; }
 .reportList { margin-top: 17px; }
 .reportRow { display: flex; gap: 16px; align-items: flex-start; width: 100%; min-height: 72px; text-align: left; background: transparent; border: 0; padding: 8px 0 10px; position: relative; }
 .reportRow:not(:last-child)::after { content: ""; position: absolute; left: 36px; right: 0; bottom: 6px; height: 1px; background: var(--color-line); }

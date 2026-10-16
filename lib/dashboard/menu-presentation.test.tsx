@@ -44,6 +44,14 @@ test("the live dashboard keeps current learning on the blue card treatment",()=>
   expect(source).toContain("styles.learningCard");
   expect(source).not.toContain("<article className={styles.whiteCard}");
 });
+test("the You and Community homes use the raised-card canvas treatment",()=>{
+  const you = fs.readFileSync(path.join(process.cwd(), "components/dashboard/v3/dashboard.module.css"), "utf8");
+  const community = fs.readFileSync(path.join(process.cwd(), "components/community/community-home-v3.module.css"), "utf8");
+  expect(you).toMatch(/\.content \{[^}]*background: var\(--color-community-canvas\)/);
+  expect(you).toMatch(/\.learning, \.reports, \.support \{[^}]*background: white;[^}]*box-shadow: var\(--shadow-sm\)/);
+  expect(community).toMatch(/\.home \{[^}]*background: var\(--color-community-canvas\)/);
+  expect(community).toMatch(/\.section \{[^}]*background: white;[^}]*box-shadow: var\(--shadow-sm\)/);
+});
 test("the Community home keeps the section switcher available",()=>{
   const source = fs.readFileSync(path.join(process.cwd(), "components/community/community-shell.tsx"), "utf8");
   expect(source).toContain("<CommunityTopBar unitName={unitName} navigation={navigation} />");

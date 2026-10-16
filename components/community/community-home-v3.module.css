@@ -1,16 +1,16 @@
 /* Pleros-community source: 16px gutter, 72px message tile, 12px panels.
    Device clock/home indicator are intentionally not application content. */
-.home { width: 100%; max-width: 560px; margin-inline: auto; padding: 28px 16px max(32px, env(safe-area-inset-bottom)); color: var(--color-text-strong); }
+.home { width: 100%; max-width: 560px; min-height: calc(100dvh - 104px); margin-inline: auto; padding: 28px 16px max(32px, env(safe-area-inset-bottom)); background: var(--color-community-canvas); color: var(--color-text-strong); }
 .heading h1 { margin: 0; font-size: 24px; line-height: 32px; font-weight: 500; letter-spacing: var(--dashboard-tracking-heading, -0.02em); }
 .heading p { margin: 4px 0 0; font-size: 14px; line-height: 22px; color: var(--color-text-muted); }
-.messages { display: flex; align-items: center; gap: 20px; min-height: 72px; padding: 14px 24px; margin-top: 32px; border-radius: 12px; background: var(--color-surface-muted); text-decoration: none; color: inherit; }
+.messages { display: flex; align-items: center; gap: 20px; min-height: 72px; padding: 14px 16px; margin-top: 24px; border-radius: var(--dashboard-card-radius); background: white; box-shadow: var(--shadow-sm); text-decoration: none; color: inherit; }
 .icon { display: flex; flex-shrink: 0; color: var(--color-text-muted); }
 .blueIcon { display: flex; color: var(--color-brand-blue); }
 .copy { display: grid; gap: 2px; min-width: 0; flex: 1; }
 .rowTitle { font-size: 15px; line-height: 22px; font-weight: 500; overflow-wrap: anywhere; }
 .meta { font-size: 13px; line-height: 20px; color: var(--color-text-muted); }
 .badge { display: grid; place-items: center; min-width: 24px; height: 24px; padding-inline: 6px; border-radius: 50%; font-size: 12px; line-height: 18px; background: var(--color-brand-blue); color: white; }
-.section { margin-top: 32px; }
+.section { margin-top: 20px; padding: 16px; border-radius: var(--dashboard-card-radius); background: white; box-shadow: var(--shadow-sm); }
 .sectionHeading { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 22px; margin-bottom: 12px; }
 .sectionHeading h2 { margin: 0; font-size: 15px; line-height: 22px; font-weight: 500; }
 .sectionHeading a { display: inline-flex; align-items: center; min-height: 44px; margin-block: -11px; color: var(--color-brand-blue); font-size: 13px; line-height: 20px; font-weight: 500; text-decoration: none; }
@@ -27,7 +27,7 @@
 .row { display: flex; align-items: center; gap: 20px; min-height: 72px; padding: 14px 0; color: inherit; text-decoration: none; }
 .row + .row { border-top: 1px solid var(--color-line); }
 .groupList .row { min-height: 78px; }
-.contextLinks { display: flex; flex-wrap: wrap; gap: 8px 24px; padding-top: 16px; margin-top: 32px; border-top: 1px solid var(--color-line); }
+.contextLinks { display: flex; flex-wrap: wrap; gap: 8px 24px; padding: 10px 16px; margin-top: 20px; border-radius: var(--dashboard-card-radius); background: white; box-shadow: var(--shadow-sm); }
 .contextLinks a { display: inline-flex; align-items: center; min-height: 44px; color: var(--color-brand-blue); font-size: 13px; font-weight: 500; text-decoration: none; }
 .home a:focus-visible { outline: 2px solid var(--color-brand-blue); outline-offset: 3px; }
 @media (min-width: 64rem) { .home { padding-top: 40px; } }
