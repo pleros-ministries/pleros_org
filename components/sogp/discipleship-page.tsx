@@ -104,7 +104,7 @@ export function DiscipleshipPage({
   const views: Array<{ key: PageView; label: string; badge: ReactNode }> = [
     {
       key: "leading",
-      label: "Groups you lead",
+      label: "People you disciple",
       badge: (
         <span className="rounded-full bg-zinc-100 px-1.5 py-0.5 text-[0.7rem] text-(--color-text-muted)">
           {ledGroups.length}
@@ -113,7 +113,7 @@ export function DiscipleshipPage({
     },
     {
       key: "member",
-      label: "Group you're in",
+      label: "Your own discipler",
       badge:
         waiting > 0 ? (
           <span className="rounded-full bg-amber-50 px-1.5 py-0.5 text-[0.7rem] text-amber-700">
@@ -148,7 +148,7 @@ export function DiscipleshipPage({
 
       <div className={styles.content}>
         <header className={styles.heading}>
-          <h1>My disciples</h1>
+          <h1>SOGP discipleship</h1>
           <div
             role="tablist"
             aria-label="Discipleship groups"
@@ -180,6 +180,11 @@ export function DiscipleshipPage({
               );
             })}
           </div>
+          <p className={styles.viewExplainer}>
+            {view === "leading"
+              ? "Your leader group is where people assigned to you appear. You lead this group; it is not the group tracking your own learning."
+              : "This is the group you belong to as a learner. Your discipler sees your progress here."}
+          </p>
         </header>
         <div id="discipleship-panel" role="tabpanel" aria-labelledby={`discipleship-tab-${view}`} tabIndex={0} className={styles.panel}>
         {view === "leading" ? (

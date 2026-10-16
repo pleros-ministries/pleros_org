@@ -19,10 +19,11 @@ import {
 import { PageHeader } from "@/components/ppc/page-header";
 import { StatCard } from "@/components/ppc/stat-card";
 import { ADMIN_QUERY_KEYS } from "@/lib/admin-query";
+import styles from "./admin-dashboard-v3.module.css";
 
 function AdminDashboardSkeleton() {
   return (
-    <div className="grid gap-6" aria-busy="true" aria-label="Loading dashboard">
+    <div className={`${styles.root} grid gap-6`} aria-busy="true" aria-label="Loading dashboard">
       <PageHeader title="Dashboard" description="Loading course operations" />
       <section className="grid grid-cols-2 gap-3 xl:grid-cols-4">
         {Array.from({ length: 4 }).map((_, index) => (
@@ -53,7 +54,7 @@ export function AdminDashboardClient() {
 
   if (isError || !data) {
     return (
-      <div className="grid gap-6">
+      <div className={`${styles.root} grid gap-6`}>
         <PageHeader
           title="Dashboard"
           description="Course operations overview"
@@ -66,7 +67,7 @@ export function AdminDashboardClient() {
   }
 
   return (
-    <div className="grid gap-6">
+    <div className={`${styles.root} grid gap-6`}>
       <PageHeader
         title="Dashboard"
         description="Course operations overview"

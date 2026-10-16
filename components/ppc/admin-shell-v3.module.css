@@ -1,0 +1,131 @@
+.root {
+  --color-brand-blue: #2056d6;
+  --color-text: #252b33;
+  --color-text-strong: #252b33;
+  --color-text-muted: #63676d;
+  --color-line: #e7e9ec;
+  --color-surface-muted: #f6f7f8;
+  --status-blue-bg: #e4ebfd;
+  --status-blue-text: #2331ae;
+  background: var(--color-surface-muted);
+  color: var(--color-text);
+  font-family: var(--font-dashboard), Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 22px;
+  letter-spacing: -0.006em;
+}
+
+.root :global(.ppc-heading) {
+  font-family: inherit;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.root :global(.font-semibold) {
+  font-weight: 500;
+}
+
+.shellGrid {
+  max-width: none;
+  gap: 0;
+  padding: 0;
+  background: var(--color-surface-muted);
+}
+
+.sidebarColumn {
+  border-right: 1px solid var(--color-line);
+  background: #fff;
+}
+
+.sidebarSticky {
+  top: 0;
+  height: 100dvh;
+}
+
+.sidebarCard {
+  border: 0;
+  box-shadow: none;
+}
+
+.root nav a {
+  border-radius: 10px;
+  font-weight: 400;
+}
+
+.root nav a[aria-current="page"] {
+  border-color: var(--status-blue-bg);
+  background: var(--status-blue-bg);
+  color: var(--status-blue-text);
+  box-shadow: none;
+  font-weight: 500;
+}
+
+.contentColumn {
+  gap: 0;
+  background: var(--color-surface-muted);
+}
+
+.topbar {
+  min-height: 64px;
+  margin-inline: 0;
+  border-color: var(--color-line);
+  background: rgba(255, 255, 255, 0.96);
+  color: var(--color-text-strong);
+  box-shadow: none;
+  backdrop-filter: blur(12px);
+}
+
+.topbarTitle {
+  color: var(--color-text-strong);
+  font-size: 15px;
+  line-height: 22px;
+  font-weight: 500;
+}
+
+.menuButton {
+  border-color: var(--color-line);
+  border-radius: 11px;
+  background: #fff;
+  color: var(--color-text-strong);
+}
+
+.menuButton:hover {
+  background: var(--color-surface-muted);
+}
+
+.role {
+  color: var(--color-text-muted);
+}
+
+.roleIcon {
+  color: var(--color-text-muted);
+}
+
+.main {
+  padding: 0 20px 48px;
+  background: var(--color-surface-muted);
+}
+
+.root button:focus-visible,
+.root a:focus-visible {
+  outline: 2px solid var(--color-brand-blue);
+  outline-offset: 3px;
+}
+
+@media (min-width: 64rem) {
+  .shellGrid {
+    grid-template-columns: 256px minmax(0, 1fr);
+  }
+
+  .main {
+    padding-inline: 32px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .root * {
+    scroll-behavior: auto;
+    transition-duration: 0s;
+    animation-duration: 0s;
+  }
+}

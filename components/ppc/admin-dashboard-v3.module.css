@@ -1,0 +1,130 @@
+.root {
+  --color-brand-blue: #2056d6;
+  --color-text: #252b33;
+  --color-text-strong: #252b33;
+  --color-text-muted: #63676d;
+  --color-line: #e7e9ec;
+  --color-surface-muted: #f6f7f8;
+  max-width: 1200px;
+  margin-inline: auto;
+  padding-block: 28px 48px;
+  gap: 32px;
+  color: var(--color-text);
+}
+
+.root > :global(section) {
+  gap: 16px;
+}
+
+.root > :global(section:first-of-type) > article {
+  min-height: 126px;
+  padding: 20px;
+  border: 1px solid var(--color-line);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(15 23 40 / 4%), 0 10px 24px rgb(15 23 40 / 4%);
+}
+
+.root > :global(section:first-of-type) > article p:first-child {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 500;
+}
+
+.root > :global(section:first-of-type) > article p:nth-child(2) {
+  margin-top: 8px;
+  color: var(--color-text-strong);
+  font-size: 28px;
+  line-height: 34px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.root > :global(section:first-of-type) > article p:last-child {
+  margin-top: 4px;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.root > :global(section:nth-of-type(2)) {
+  gap: 32px;
+}
+
+.root > :global(section:nth-of-type(2)) > article {
+  padding: 20px;
+  border: 1px solid var(--color-line);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(15 23 40 / 4%), 0 10px 24px rgb(15 23 40 / 4%);
+}
+
+.root > :global(section:nth-of-type(2)) > article h3 {
+  color: var(--color-text-strong);
+  font-size: 15px;
+  line-height: 22px;
+  font-weight: 500;
+}
+
+.root > :global(section:nth-of-type(2)) > article h3 + p,
+.root > :global(section:nth-of-type(2)) > article h3 ~ p {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.root > :global(section:nth-of-type(2)) > article:first-child > div:last-child {
+  gap: 0;
+  margin-top: 16px;
+}
+
+.root > :global(section:nth-of-type(2)) > article:first-child > div:last-child > a {
+  min-height: 88px;
+  padding: 16px;
+  border: 1px solid var(--color-line);
+  border-radius: 11px;
+  background: var(--color-surface-muted);
+}
+
+.root > :global(section:nth-of-type(2)) > article:first-child > div:last-child > a:hover {
+  border-color: #cfd4dc;
+  background: #fff;
+}
+
+.root :global(.rounded-sm) {
+  border-radius: 11px;
+}
+
+.root :global(.font-semibold) {
+  font-weight: 500;
+}
+
+.root a {
+  text-decoration: none;
+}
+
+.root a:focus-visible,
+.root button:focus-visible {
+  outline: 2px solid var(--color-brand-blue);
+  outline-offset: 3px;
+}
+
+@media (max-width: 39.99rem) {
+  .root {
+    padding-top: 24px;
+    gap: 28px;
+  }
+
+  .root > :global(section:first-of-type) > article {
+    min-height: 112px;
+    padding: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .root * {
+    transition-duration: 0s;
+    animation-duration: 0s;
+  }
+}

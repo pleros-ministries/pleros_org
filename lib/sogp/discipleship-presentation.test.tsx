@@ -41,8 +41,8 @@ describe("connected Discipleship presentation", () => {
   });
   it("renders the redesigned page identity while retaining leader tools", () => {
     const html = render(discipleshipPreviewData);
-    expect(html).toContain(">My disciples</h1>");
-    for (const text of ["Groups you lead", "Group you", "Campus fellowship", "New group", "Rename", "Grace Adeyemi", "Samuel Okafor", "Blessing Eze", "Previous day", "Next day", "Check-ins", "Prayer requests"]) expect(html).toContain(text);
+    expect(html).toContain(">SOGP discipleship</h1>");
+    for (const text of ["People you disciple", "Your own discipler", "not the group tracking your own learning", "Campus fellowship", "New group", "Rename", "Grace Adeyemi", "Samuel Okafor", "Blessing Eze", "Previous day", "Next day", "Check-ins", "Prayer requests"]) expect(html).toContain(text);
   });
   it("keeps group member check-ins, prayer requests, consent and leave controls", () => {
     const data = { ...discipleshipPreviewData, ledGroups: discipleshipPreviewData.ledGroups.map(group => ({ ...group,discipleCount: 0 })) };

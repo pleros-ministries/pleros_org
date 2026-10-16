@@ -49,6 +49,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { PpcRouteLoadingSkeleton } from "@/components/ppc/route-loading-skeleton";
+import adminStyles from "./admin-shell-v3.module.css";
 
 type PpcShellProps = {
   children: React.ReactNode;
@@ -577,6 +578,7 @@ export function PpcShell({
   const isNavigating = pendingPathname !== null && pendingPathname !== pathname;
   const navigationPathname = pendingPathname ?? pathname;
   const navigationLogicalPathname = getLogicalPpcShellPath(navigationPathname);
+  const isAdminShell = pathname.startsWith("/admin");
 
   useEffect(() => {
     setPendingPathname(null);
@@ -631,10 +633,16 @@ export function PpcShell({
   }, [hasLoadedSidebarPreference, isSidebarCollapsed]);
 
   return (
-    <div className="ppc-theme min-h-screen overflow-x-hidden bg-zinc-100/80 text-zinc-900">
+    <div
+      className={cn(
+        "ppc-theme min-h-screen overflow-x-hidden bg-zinc-100/80 text-zinc-900",
+        isAdminShell && adminStyles.root,
+      )}
+    >
       <div
         className={cn(
           "mx-auto min-h-screen w-full max-w-[1520px] grid-cols-1 gap-3 px-3 pb-3 sm:px-4 lg:grid lg:gap-4 lg:p-4",
+          isAdminShell && adminStyles.shellGrid,
           isSidebarCollapsed
             ? "lg:grid-cols-[92px_minmax(0,1fr)]"
             : "lg:grid-cols-[282px_minmax(0,1fr)]",
@@ -644,10 +652,11 @@ export function PpcShell({
           className={cn(
             "hidden lg:flex",
             hasLoadedSidebarPreference ? "opacity-100" : "opacity-0",
+            isAdminShell && adminStyles.sidebarColumn,
           )}
         >
-          <div className="sticky top-4 h-[calc(100vh-2rem)] w-full">
-            <div className="flex h-full flex-col rounded-none border border-zinc-200/90 bg-white shadow-[0_1px_2px_rgba(15,23,40,0.04),0_12px_28px_rgba(15,23,40,0.06)]">
+          <div className={cn("sticky top-4 h-[calc(100vh-2rem)] w-full", isAdminShell && adminStyles.sidebarSticky)}>
+            <div className={cn("flex h-full flex-col rounded-none border border-zinc-200/90 bg-white shadow-[0_1px_2px_rgba(15,23,40,0.04),0_12px_28px_rgba(15,23,40,0.06)]", isAdminShell && adminStyles.sidebarCard)}>
               <SidebarShell
                 pathname={pathname}
                 logicalPathname={navigationLogicalPathname}
@@ -664,30 +673,30 @@ export function PpcShell({
           </div>
         </aside>
 
-        <div className="flex min-w-0 flex-1 flex-col gap-3">
-          <header className="sticky top-0 z-20 -mx-3 flex min-h-14 items-center justify-between border-b border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)] px-4 py-2 text-white shadow-sm sm:-mx-4 sm:px-6 lg:top-0">
+        <div className={cn("flex min-w-0 flex-1 flex-col gap-3", isAdminShell && adminStyles.contentColumn)}>
+          <header className={cn("sticky top-0 z-20 -mx-3 flex min-h-14 items-center justify-between border-b border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)] px-4 py-2 text-white shadow-sm sm:-mx-4 sm:px-6 lg:top-0", isAdminShell && adminStyles.topbar)}>
             <div className="flex min-w-0 items-center gap-3">
               <button
                 type="button"
                 onClick={() => setIsMobileNavOpen(true)}
-                className="inline-flex size-10 items-center justify-center rounded-sm border border-white/20 bg-white/10 text-white transition-colors hover:bg-white/15 lg:hidden"
+                className={cn("inline-flex size-10 items-center justify-center rounded-sm border border-white/20 bg-white/10 text-white transition-colors hover:bg-white/15 lg:hidden", isAdminShell && adminStyles.menuButton)}
                 aria-label="Open sidebar"
               >
                 <Menu className="size-4" />
               </button>
               <div className="min-w-0">
-                <p className="ppc-heading truncate text-base font-semibold tracking-[-0.025em] text-white sm:text-lg">
+                <p className={cn("ppc-heading truncate text-base font-semibold tracking-[-0.025em] text-white sm:text-lg", isAdminShell && adminStyles.topbarTitle)}>
                   {shellTitle}
                 </p>
               </div>
             </div>
-            <div className="hidden items-center gap-2 text-[11px] text-white/75 lg:flex">
-              <GraduationCap className="size-3.5 text-white/60" />
+            <div className={cn("hidden items-center gap-2 text-[11px] text-white/75 lg:flex", isAdminShell && adminStyles.role)}>
+              <GraduationCap className={cn("size-3.5 text-white/60", isAdminShell && adminStyles.roleIcon)} />
               <span>{roleLabel}</span>
             </div>
           </header>
 
-          <main className="min-w-0 flex-1 px-1 pb-4 sm:px-2">
+          <main className={cn("min-w-0 flex-1 px-1 pb-4 sm:px-2", isAdminShell && adminStyles.main)}>
             {isNavigating ? <PendingAdminRoute pathname={pendingPathname} /> : children}
           </main>
         </div>

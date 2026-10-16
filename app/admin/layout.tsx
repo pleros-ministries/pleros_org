@@ -6,6 +6,7 @@ import { PpcAppFrame } from "@/components/ppc/ppc-app-frame";
 import { QueryProvider } from "@/components/query-provider";
 import { getAppSession } from "@/lib/app-session";
 import { getChurchAssignment } from "@/lib/db/queries/church-organisation";
+import { dashboardFont } from "@/components/dashboard/v3/font";
 export const metadata: Metadata = {
   title: "PPC Admin",
   description: "Pleros Perfecting Courses staff administration",
@@ -42,7 +43,10 @@ export default async function AdminRootLayout({ children }: { children: React.Re
   }
 
   return (
-    <div className="ppc-theme">
+    <div
+      className={`ppc-theme ${dashboardFont.className} ${dashboardFont.variable}`}
+      data-admin-v3
+    >
       {session && !isPublicAdminPage ? (
         <QueryProvider userId={session.user.id}>
           <PpcAppFrame session={session}>{children}</PpcAppFrame>
