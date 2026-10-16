@@ -18,5 +18,8 @@ export async function GET(request: Request) {
   // fails is named in `errors` and the others still run.
   const now = new Date();
   const [existing, reports] = await Promise.all([runReminderDispatcher(now), runDailyReportReminderDispatcher(now).catch(() => ({ enabled: true, sent: 0, failures: 1 }))]);
+  // Counts only, no learner data: persisted nowhere else, so keep one
+  // structured line per run for Vercel log queries when sends look off.
+  console.info("reminder-dispatch", JSON.stringify({ ...existing, reports }));
   return NextResponse.json({ ...existing, reports });
 }

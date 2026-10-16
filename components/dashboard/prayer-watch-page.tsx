@@ -34,6 +34,7 @@ import {
 } from "@/lib/prayer-watch";
 import { cn } from "@/lib/utils";
 import { DashboardPageFrame, DashboardPageHeader } from "@/components/dashboard/shared/page";
+import { PrayerReminderPrompt } from "@/components/dashboard/prayer-reminder-prompt";
 import { panel, sectionTitleText } from "@/components/dashboard/shared/ui";
 
 const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -190,6 +191,8 @@ export function PrayerWatchPage({
         </Link>
 
         <DashboardPageHeader title="Prayer Watch" />
+
+        <PrayerReminderPrompt variant="card" />
 
         <div className={cn(panel, "p-4 sm:p-5")}>
           <div className="flex flex-wrap items-center justify-between gap-3">

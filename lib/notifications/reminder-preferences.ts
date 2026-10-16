@@ -28,15 +28,14 @@ export type ReminderPreferences = {
 };
 
 /**
- * What a learner with no saved row receives. This equals what every learner
- * received before preferences existed, so nobody gains or loses a push until
- * they save the setup form.
+ * What a learner with no saved row receives. All three Prayer Watch sessions
+ * are on by user decision; nothing else starts until they save the setup form.
  */
 export const DEFAULT_REMINDER_PREFERENCES: ReminderPreferences = {
   timeZone: LAGOS_TIME_ZONE,
   teachingTimeMinutes: null,
   teachingReminderEnabled: false,
-  prayerWatch: { morning: true, afternoon: false, evening: false },
+  prayerWatch: { morning: true, afternoon: true, evening: true },
   communityEnabled: true,
   progressNudgesEnabled: false,
   newContentEnabled: false,
@@ -160,7 +159,7 @@ export type ReminderSetupView = {
  * recommended set. Nothing in it is sent until they press save.
  */
 export const RECOMMENDED_REMINDER_CHOICES: ReminderChoices = {
-  prayerWatch: { morning: true, afternoon: false, evening: false },
+  prayerWatch: { morning: true, afternoon: true, evening: true },
   teachingReminderEnabled: true,
   communityEnabled: true,
   progressNudgesEnabled: true,

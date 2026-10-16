@@ -110,14 +110,15 @@ describe("push sending", () => {
 });
 
 describe("anonymous subscribers", () => {
-  test("the unscheduled public routes are left as they were", () => {
+  test("the unscheduled public route is left as it was", () => {
     // Scheduled sends to public-site subscribers are a separate decision, so
-    // these routes still exist and are still not in vercel.json.
+    // this route still exists and is still not in vercel.json. The old
+    // prayer-watch-reminder route was deleted; the dispatcher owns those sends.
     const crons = (
       JSON.parse(source("vercel.json")) as { crons: Array<{ path: string }> }
     ).crons.map((cron) => cron.path);
 
-    for (const name of ["prayer-watch-reminder", "new-video-check"]) {
+    for (const name of ["new-video-check"]) {
       expect(
         existsSync(join(process.cwd(), "app", "api", "cron", name, "route.ts")),
       ).toBe(true);

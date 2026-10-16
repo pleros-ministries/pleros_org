@@ -206,7 +206,7 @@ async function sendPrayerWatchReminders(
     const due = prayerWatchDue(session, lagosDateKey);
     if (!isDue(due, now, PRAYER_WATCH_WINDOW_MS)) continue;
 
-    // Enrolled learners get their saved choice or the default (morning only).
+    // Enrolled learners get their saved choice or the default (all three sessions).
     // Anyone else only once they have saved the reminders step themselves.
     const recipients = audience.filter(
       (member) =>

@@ -5,6 +5,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useUploadThing } from "@/lib/upload/uploadthing-client";
 import { saveProfile, saveReportPushPreference } from "@/app/(site)/dashboard/profile/actions";
+import { PrayerReminderPrompt } from "@/components/dashboard/prayer-reminder-prompt";
 import { compactButton, primaryButton } from "./shell/styles";
 import { inputClass } from "@/components/community/report/styles";
 
@@ -23,7 +24,7 @@ export function ProfileSettings({ initialName, initialImage, reportPreferences, 
       <button disabled={pending || isUploading} className={`${primaryButton} w-fit`}>{pending ? "Saving…" : "Save"}</button>
     </form>
     <div className="flex flex-wrap gap-2"><Link href="/forgot-password" className={compactButton}>Reset password</Link><Link href="/dashboard/welcomepack/setup" className={compactButton}>App and reminders</Link></div>
-    {reportPreferences ? <form className="grid gap-3 rounded-xl border border-(--color-line) p-4" onSubmit={(event) => { event.preventDefault(); start(async () => { try { const result = await saveReportPushPreference(reportPush); setMessage(result.ok ? "Reminder preference saved." : result.error); if (result.ok) router.refresh(); } catch { setMessage("Could not save your reminder preference."); } }); }}><label className="flex items-start gap-2 text-[13px]"><input type="checkbox" checked={reportPush} onChange={(event) => setReportPush(event.target.checked)} />Send push reminders for missing reports at 8 pm</label><button className={`${compactButton} w-fit`} disabled={pending}>Save reminders</button></form> : null}
+    {reportPreferences ? <form className="grid gap-3 rounded-xl border border-(--color-line) p-4" onSubmit={(event) => { event.preventDefault(); start(async () => { try { const result = await saveReportPushPreference(reportPush); setMessage(result.ok ? "Reminder preference saved." : result.error); if (result.ok) router.refresh(); } catch { setMessage("Could not save your reminder preference."); } }); }}><label className="flex items-start gap-2 text-[13px]"><input type="checkbox" checked={reportPush} onChange={(event) => setReportPush(event.target.checked)} />Send push reminders for missing reports at 8 pm</label><button className={`${compactButton} w-fit`} disabled={pending}>Save reminders</button><PrayerReminderPrompt variant="row" /></form> : null}
     {message ? <p role="status" className="text-[13px]">{message}</p> : null}
   </div>;
 }

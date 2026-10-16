@@ -15,7 +15,7 @@ Only after the relevant tables and flows are verified:
 - `DASHBOARD_DAILY_REPORTS_V2=1` enables confirmation/Nil and meeting role metadata. It must remain off until the full migration set needed by enabled features is present.
 - `DASHBOARD_CHURCH_V2=1` enables assignment reads/writes and church oversight.
 - `DASHBOARD_CHURCH_MULTI_BRANCH_V2=1` requires migration 0053 and enables multiple explicitly assigned branches per Branch Pastor. Geographic enrollee auto-assignment regions remain separate.
-- `DASHBOARD_REPORT_REMINDERS_V2=1` requires both preceding gates, plus migration 0052. It enables manual sends, automatic 8 pm Lagos dispatch and the explicit push preference in Profile settings. Keep off until notification delivery is authorized.
+- Report reminders are live wherever the two preceding gates and migration 0052 hold (user decision: no opt-in flag). This covers manual sends, automatic 8 pm Lagos dispatch and the explicit push preference in Profile settings.
 
 Disabled services return before reading the new tables. Existing activity recording and established community/privacy rules remain in place. Deployment does not migrate tables automatically.
 

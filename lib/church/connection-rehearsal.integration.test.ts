@@ -36,7 +36,7 @@ describe.skipIf(!process.env.PLEROS_REHEARSAL_ROOT)("database-backed dashboard c
   let branch1: number; let branch2: number; let unit1: number; let unit2: number;
   beforeAll(async () => {
     vi.useFakeTimers({ toFake: ["Date"] }); vi.setSystemTime(new Date("2026-10-11T20:00:00Z"));
-    vi.stubEnv("DASHBOARD_DAILY_REPORTS_V2", "1"); vi.stubEnv("DASHBOARD_CHURCH_V2", "1"); vi.stubEnv("DASHBOARD_REPORT_REMINDERS_V2", "1");
+    vi.stubEnv("DASHBOARD_DAILY_REPORTS_V2", "1"); vi.stubEnv("DASHBOARD_CHURCH_V2", "1");
     [church, reports, declarations, activities, notifications, schema] = await Promise.all([
       import("@/lib/db/queries/church-organisation"), import("@/lib/db/queries/church-reports"), import("@/lib/db/queries/daily-report-declarations"),
       import("@/lib/db/queries/ministry-activities"), import("@/lib/notifications/daily-report-dispatch"), import("@/lib/db/schema"),

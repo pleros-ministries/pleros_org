@@ -39,11 +39,11 @@ describe("resolving saved preferences", () => {
     const preferences = resolveReminderPreferences(null);
 
     expect(preferences).toEqual(DEFAULT_REMINDER_PREFERENCES);
-    // Morning Prayer Watch and community pushes on; nothing new.
+    // All three Prayer Watch sessions and community pushes on; nothing else.
     expect(preferences.prayerWatch).toEqual({
       morning: true,
-      afternoon: false,
-      evening: false,
+      afternoon: true,
+      evening: true,
     });
     expect(preferences.communityEnabled).toBe(true);
     expect(preferences.teachingReminderEnabled).toBe(false);
@@ -55,10 +55,10 @@ describe("resolving saved preferences", () => {
 
   test("never hands out the shared default objects", () => {
     const first = resolveReminderPreferences(null);
-    first.prayerWatch.evening = true;
+    first.prayerWatch.evening = false;
 
-    expect(resolveReminderPreferences(null).prayerWatch.evening).toBe(false);
-    expect(DEFAULT_REMINDER_PREFERENCES.prayerWatch.evening).toBe(false);
+    expect(resolveReminderPreferences(null).prayerWatch.evening).toBe(true);
+    expect(DEFAULT_REMINDER_PREFERENCES.prayerWatch.evening).toBe(true);
   });
 
   test("maps every stored column", () => {
