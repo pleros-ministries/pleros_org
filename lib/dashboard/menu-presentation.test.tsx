@@ -37,3 +37,14 @@ test("the isolated baseline does not preserve the retired destination dump",()=>
   expect(styles).not.toContain(".retained");
   expect(styles).not.toContain(".essentials");
 });
+test("the live dashboard keeps current learning on the blue card treatment",()=>{
+  const source = fs.readFileSync(path.join(process.cwd(), "components/dashboard/v3/home-view.tsx"), "utf8");
+  expect(source).toContain("styles.adaptiveLearningCard");
+  expect(source).toContain("styles.learningCard");
+  expect(source).not.toContain("<article className={styles.whiteCard}");
+});
+test("the Community home keeps the section switcher available",()=>{
+  const source = fs.readFileSync(path.join(process.cwd(), "components/community/community-shell.tsx"), "utf8");
+  expect(source).toContain("<CommunityTopBar unitName={unitName} navigation={navigation} />");
+  expect(source).not.toContain("!home ?");
+});

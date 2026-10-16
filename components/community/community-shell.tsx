@@ -1,7 +1,4 @@
-"use client";
-
 import type { ReactNode } from "react";
-import { usePathname } from "next/navigation";
 
 import { CommunityTopBar } from "./community-tabs";
 import type { DashboardNavItem } from "@/lib/dashboard/navigation";
@@ -19,10 +16,9 @@ export function CommunityShell({
   children: ReactNode;
   navigation?: DashboardNavItem[];
 }) {
-  const home = usePathname() === "/dashboard/community";
   return (
     <>
-      {!home ? <CommunityTopBar unitName={unitName} navigation={navigation} /> : null}
+      <CommunityTopBar unitName={unitName} navigation={navigation} />
       <div className="flex-1">{children}</div>
     </>
   );

@@ -11,7 +11,7 @@ function Progress({ value, total, label }: { value: number; total: number; label
   return <div className={styles.whiteProgress} role="progressbar" aria-label={label} aria-valuemin={0} aria-valuemax={total} aria-valuenow={value}><span style={{ width: `${total > 0 ? Math.min(100, value / total * 100) : 0}%` }} /></div>;
 }
 
-/** Paper adaptive cards (adaptive_home.py): white bordered, blue actions; Start SOGP stays blue. */
+/** The current learning surface stays brand-blue across every SOGP pace. */
 function AdaptiveLearning({ card, planHref }: { card: HomeLearningCard; planHref: string }) {
   if (card.kind === "start") return <section className={styles.learning} aria-label="Your next step">
     <div className={styles.sectionHeader}><h2>Your next step</h2></div>
@@ -20,26 +20,26 @@ function AdaptiveLearning({ card, planHref }: { card: HomeLearningCard; planHref
   </section>;
   const header = <div className={styles.sectionHeader}><h2>Continue learning</h2><Link className={styles.textAction} href={planHref}>View plan</Link></div>;
   if (card.kind === "traditional") return <section className={styles.learning} aria-label="Continue learning">{header}
-    <article className={styles.whiteCard}><p className={styles.metadata}>Traditional track · 1 hr/day</p><h2 className={styles.whiteTitle} data-dashboard-learning-title>{card.title}</h2><Progress value={card.completed} total={card.total} label="Tracks completed" /><div className={styles.playbackMetaDark}><span>{card.completed} completed</span><span>{card.total} tracks</span></div><Link className={styles.blueAction} href={card.href}>Resume track<DashboardIcon name="play" size={24} /></Link></article>
+    <article className={`${styles.learningCard} ${styles.adaptiveLearningCard}`}><p className={styles.learningMeta}>Traditional track · 1 hr/day</p><h2 className={styles.lessonTitle} data-dashboard-learning-title>{card.title}</h2><Progress value={card.completed} total={card.total} label="Tracks completed" /><div className={styles.playbackMeta}><span>{card.completed} completed</span><span>{card.total} tracks</span></div><Link className={styles.lessonAction} href={card.href}>Resume track<DashboardIcon name="play" size={24} /></Link></article>
     <Link className={styles.planRow} href={planHref}><span className={styles.rowIcon}><DashboardIcon name="book" /></span><span className={styles.rowCopy}><span className={styles.rowTitle}>{card.completed} traditional {card.completed === 1 ? "track" : "tracks"} completed</span><span className={styles.metadata}>Your place in your course is saved.</span></span><span className={styles.rowIcon}><DashboardIcon name="right" size={16} /></span></Link>
   </section>;
   const current = card.episodes.findIndex(episode => !episode.listened);
   const active = card.episodes[current] ?? card.episodes[0];
   return <section className={styles.learning} aria-label="Continue learning">{header}
-    <article className={styles.whiteCard}>
-      <p className={styles.metadata}>Podcast plan · {card.pace === 2 ? "30" : "15"} min/day</p>
+    <article className={`${styles.learningCard} ${styles.adaptiveLearningCard}`}>
+      <p className={styles.learningMeta}>Podcast plan · {card.pace === 2 ? "30" : "15"} min/day</p>
       {card.pace === 2 ? <>
-        <h2 className={styles.whiteTitle} data-dashboard-learning-title>Today’s two episodes</h2><p className={styles.metadata}>{card.series}</p>
+        <h2 className={styles.lessonTitle} data-dashboard-learning-title>Today’s two episodes</h2><p className={styles.learningSubmeta}>{card.series}</p>
         <ul className={styles.dayEpisodes}>{card.episodes.map((episode, index) => <li key={index}>
-          <div className={styles.episodeLine}><span>{episode.listened ? <DashboardIcon name="check" size={16} /> : null}{episode.part}{episode.listened && episode.durationSeconds ? ` · ${clock(episode.durationSeconds)}` : ""}</span><span className={episode.listened ? styles.doneText : styles.metadata}>{episode.listened ? "Completed" : episode.positionSeconds ? "In progress" : "Not started"}</span></div>
-          {!episode.listened && index === current ? <><Progress value={episode.positionSeconds} total={episode.durationSeconds} label={`${episode.part} playback`} /><div className={styles.playbackMetaDark}><span>{clock(episode.positionSeconds)} elapsed</span><span>{episode.durationSeconds ? `${clock(episode.durationSeconds)} total` : ""}</span></div></> : null}
+          <div className={styles.episodeLine}><span>{episode.listened ? <DashboardIcon name="check" size={16} /> : null}{episode.part}{episode.listened && episode.durationSeconds ? ` · ${clock(episode.durationSeconds)}` : ""}</span><span className={styles.learningSubmeta}>{episode.listened ? "Completed" : episode.positionSeconds ? "In progress" : "Not started"}</span></div>
+          {!episode.listened && index === current ? <><Progress value={episode.positionSeconds} total={episode.durationSeconds} label={`${episode.part} playback`} /><div className={styles.playbackMeta}><span>{clock(episode.positionSeconds)} elapsed</span><span>{episode.durationSeconds ? `${clock(episode.durationSeconds)} total` : ""}</span></div></> : null}
         </li>)}</ul>
-        <Link className={styles.blueAction} href={card.href}>{active?.positionSeconds ? "Resume" : "Start"} episode {String(current + 1).padStart(2, "0")}<DashboardIcon name="play" size={24} /></Link>
+        <Link className={styles.lessonAction} href={card.href}>{active?.positionSeconds ? "Resume" : "Start"} episode {String(current + 1).padStart(2, "0")}<DashboardIcon name="play" size={24} /></Link>
       </> : <>
-        <h2 className={styles.whiteTitle} data-dashboard-learning-title>{card.series}</h2><p className={styles.metadata}>{active?.part} · 1 episode today</p>
+        <h2 className={styles.lessonTitle} data-dashboard-learning-title>{card.series}</h2><p className={styles.learningSubmeta}>{active?.part} · 1 episode today</p>
         <Progress value={active?.positionSeconds ?? 0} total={active?.durationSeconds ?? 0} label="Episode playback" />
-        <div className={styles.playbackMetaDark}><span>{clock(active?.positionSeconds ?? 0)} elapsed</span><span>{active?.durationSeconds ? `${clock(active.durationSeconds)} total` : ""}</span></div>
-        <Link className={styles.blueAction} href={card.href}>{active?.positionSeconds ? "Resume episode" : "Start episode"}<DashboardIcon name="play" size={24} /></Link>
+        <div className={styles.playbackMeta}><span>{clock(active?.positionSeconds ?? 0)} elapsed</span><span>{active?.durationSeconds ? `${clock(active.durationSeconds)} total` : ""}</span></div>
+        <Link className={styles.lessonAction} href={card.href}>{active?.positionSeconds ? "Resume episode" : "Start episode"}<DashboardIcon name="play" size={24} /></Link>
       </>}
     </article>
     <Link className={styles.planRow} href={planHref}><span className={styles.rowIcon}><DashboardIcon name="headphones" /></span><span className={styles.rowCopy}><span className={styles.rowTitle}>Your podcast path</span><span className={styles.metadata}>Day {card.dayNumber}{active ? ` · ${active.part} · ${clock(active.positionSeconds)}${active.durationSeconds ? ` of ${clock(active.durationSeconds)}` : ""} listened` : ""}</span></span><span className={styles.rowIcon}><DashboardIcon name="right" size={16} /></span></Link>

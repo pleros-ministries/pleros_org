@@ -133,13 +133,22 @@
   .header { max-width: 390px; margin: auto; }
   .content { max-width: 390px; margin: auto; }
 }
-/* Paper adaptive_home.py: white bordered learning cards with blue actions. */
+/* Retained for non-current white learning surfaces. The signed-in dashboard's
+   current/Now Playing card uses the blue learning-card treatment above. */
 .whiteCard { margin-top: 19px; padding: 20px; border: 1px solid var(--color-line); border-radius: var(--dashboard-card-radius); background: white; display: grid; gap: 8px; }
 .whiteTitle { margin: 0; font-size: 24px; line-height: 32px; font-weight: 500; letter-spacing: var(--dashboard-tracking-heading, -0.02em); color: var(--color-text-strong); }
 .whiteProgress { height: 4px; margin-top: 12px; border-radius: 2px; background: var(--color-line); overflow: hidden; }
 .whiteProgress span { display: block; height: 100%; background: var(--color-brand-blue); }
 .playbackMetaDark { display: flex; justify-content: space-between; font-size: 13px; line-height: 20px; color: var(--color-text-muted); }
 .blueAction { display: flex; justify-content: space-between; align-items: center; height: var(--dashboard-control-height); margin-top: 8px; padding: 0 16px; border-radius: var(--dashboard-control-radius); background: var(--color-brand-blue); color: white; text-decoration: none; font-weight: 500; }
+.adaptiveLearningCard { display: grid; gap: 8px; min-height: 0; }
+.adaptiveLearningCard .learningMeta { transform: none; }
+.adaptiveLearningCard .whiteProgress { margin-top: 12px; background: #537edf; }
+.adaptiveLearningCard .whiteProgress span { background: #dde6f6; }
+.learningSubmeta { margin: 0; color: #d8e4ff; font-size: 13px; line-height: 20px; }
+.adaptiveLearningCard .lessonAction { margin-top: 8px; text-decoration: none; }
+.adaptiveLearningCard .dayEpisodes li { border-color: rgb(255 255 255 / 20%); }
+.adaptiveLearningCard .episodeLine { color: white; }
 .lessonAction { text-decoration: none; }
 .startCopy { margin: 8px 0 0; color: #e1eaff; font-size: 14px; line-height: 22px; }
 .homeNote { display: flex; gap: 16px; align-items: flex-start; margin: 20px 0 0; padding-bottom: 20px; border-bottom: 1px solid var(--color-line); color: var(--color-text-muted); }

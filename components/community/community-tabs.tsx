@@ -27,10 +27,9 @@ function useTitle(unitName: string | null): string {
 }
 
 /**
- * The white sticky contextual header at the top of every inner community
- * page (approved 2026-10-16 mockup). The dashboard shell carries the
- * community's navigation; this keeps the contextual title, the destinations
- * dropdown, and the Messages shortcut with unread state.
+ * The white sticky contextual header at the top of every community page.
+ * The title is the section switcher, so the full Community destination list
+ * remains reachable from both the home screen and deeper pages.
  */
 export function CommunityTopBar({ unitName,navigation = [] }: { unitName: string | null;navigation?: DashboardNavItem[] }) {
   const title = useTitle(unitName);
