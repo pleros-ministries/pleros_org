@@ -29,13 +29,13 @@ export function ActionMenu({
     <Popover.Root open={open} onOpenChange={setOpen}>
       <Popover.Trigger
         aria-label={label}
-        className={`inline-flex size-8 shrink-0 items-center justify-center rounded-full text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700 ${className}`}
+        className={`inline-flex size-8 shrink-0 items-center justify-center rounded-full text-[var(--color-community-muted)] transition-colors hover:bg-[var(--color-community-canvas)] hover:text-[var(--color-community-ink)] ${className}`}
       >
         <EllipsisIcon className="size-[18px]" strokeWidth={2} />
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner sideOffset={6} align="end">
-          <Popover.Popup className="site-font-theme z-50 w-52 rounded-xl border border-zinc-200 bg-white p-1.5 text-sm shadow-lg outline-none">
+          <Popover.Popup className="site-font-theme z-50 w-52 rounded-xl border border-[var(--color-community-edge)] bg-white p-1.5 text-sm shadow-lg outline-none">
             <div className="grid gap-0.5">
               {actions.map((action) => {
                 const Icon = action.icon;
@@ -47,13 +47,13 @@ export function ActionMenu({
                       setOpen(false);
                       action.onSelect();
                     }}
-                    className={`flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors hover:bg-zinc-50 ${
-                      action.danger ? "text-red-700" : "text-zinc-700"
+                    className={`flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors hover:bg-[var(--color-community-canvas)] ${
+                      action.danger ? "text-red-700" : "text-[var(--color-community-ink)]"
                     }`}
                   >
                     <Icon
                       className={`size-4 ${
-                        action.danger ? "text-red-600" : "text-zinc-400"
+                        action.danger ? "text-red-600" : "text-[var(--color-community-muted)]"
                       }`}
                       strokeWidth={2}
                     />

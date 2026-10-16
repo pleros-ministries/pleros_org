@@ -25,7 +25,7 @@ export function PostBody({
     <div className="grid gap-1">
       <p
         ref={ref}
-        className={`whitespace-pre-line text-[15px] leading-relaxed text-zinc-800 ${
+        className={`whitespace-pre-line text-[15px] leading-relaxed text-[var(--color-community-ink)] ${
           clamp ? "line-clamp-[10]" : ""
         }`}
       >
@@ -35,7 +35,7 @@ export function PostBody({
         <button
           type="button"
           onClick={() => setExpanded((v) => !v)}
-          className="w-fit text-sm font-medium text-[var(--color-brand-blue)] hover:underline"
+          className="w-fit text-sm font-medium text-[var(--color-community-blue)] hover:underline"
         >
           {expanded ? "Show less" : "Read more"}
         </button>

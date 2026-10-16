@@ -30,7 +30,7 @@ const PRIVACY_OPTIONS: Array<{
 ];
 
 const fieldClass =
-  "w-full rounded-xl border border-zinc-200 px-3 text-base font-normal outline-none focus:border-zinc-300";
+  "w-full rounded-xl border border-[var(--color-community-edge)] px-3 text-base font-normal outline-none focus:border-[var(--color-community-edge-strong)]";
 
 /** Name, description and privacy fields shared by creating and editing a group. */
 export function GroupFormFields({
@@ -42,7 +42,7 @@ export function GroupFormFields({
 }) {
   return (
     <>
-      <label className="grid gap-1 text-[13px] font-medium text-zinc-700">
+      <label className="grid gap-1 text-[13px] font-medium text-[var(--color-community-ink)]">
         Group name *
         <input
           value={values.name}
@@ -53,7 +53,7 @@ export function GroupFormFields({
         />
       </label>
 
-      <label className="grid gap-1 text-[13px] font-medium text-zinc-700">
+      <label className="grid gap-1 text-[13px] font-medium text-[var(--color-community-ink)]">
         What is it for?
         <textarea
           value={values.description}
@@ -67,7 +67,7 @@ export function GroupFormFields({
       </label>
 
       <fieldset className="grid gap-2">
-        <legend className="mb-1 text-[13px] font-medium text-zinc-700">
+        <legend className="mb-1 text-[13px] font-medium text-[var(--color-community-ink)]">
           Who can see it?
         </legend>
         {PRIVACY_OPTIONS.map((option) => (
@@ -81,10 +81,10 @@ export function GroupFormFields({
               className="mt-1 size-4 accent-[var(--color-brand-blue)]"
             />
             <span className="grid">
-              <span className="text-sm font-medium text-zinc-900">
+              <span className="text-sm font-medium text-[var(--color-community-ink)]">
                 {option.label}
               </span>
-              <span className="text-xs text-zinc-500">{option.help}</span>
+              <span className="text-xs text-[var(--color-community-muted)]">{option.help}</span>
             </span>
           </label>
         ))}

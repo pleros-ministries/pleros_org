@@ -100,17 +100,17 @@ function QuotedPost({ post }: { post: NonNullable<FeedPost["sharedFrom"]> }) {
   return (
     <Link
       href={`/dashboard/community/post/${post.id}`}
-      className="mt-1 block rounded-xl border border-zinc-200 bg-zinc-50/70 p-3 transition-colors hover:bg-zinc-100/70"
+      className="mt-1 block rounded-xl border border-[var(--color-community-edge)] bg-[var(--color-community-canvas)] p-3 transition-colors hover:bg-[var(--color-community-edge)]"
     >
       <div className="flex items-center gap-2">
         <Avatar name={post.authorName} size={24} />
-        <p className="text-xs font-semibold text-zinc-700">{post.authorName}</p>
+        <p className="text-xs font-semibold text-[var(--color-community-ink)]">{post.authorName}</p>
       </div>
-      <p className="mt-1.5 line-clamp-4 whitespace-pre-line text-sm leading-relaxed text-zinc-600">
+      <p className="mt-1.5 line-clamp-4 whitespace-pre-line text-sm leading-relaxed text-[var(--color-community-ink)]">
         {post.body}
       </p>
       {post.images.length > 0 ? (
-        <p className="mt-1 text-xs text-zinc-400">
+        <p className="mt-1 text-xs text-[var(--color-community-muted)]">
           {post.images.length} photo{post.images.length === 1 ? "" : "s"}
         </p>
       ) : null}
@@ -173,7 +173,7 @@ function PostEditForm({
   });
 
   const fieldClass =
-    "w-full rounded-xl border border-zinc-200 px-3 text-base outline-none focus:border-zinc-300 sm:text-[15px]";
+    "w-full rounded-xl border border-[var(--color-community-edge)] px-3 text-base outline-none focus:border-[var(--color-community-edge-strong)] sm:text-[15px]";
 
   return (
     <form
@@ -211,7 +211,7 @@ function PostEditForm({
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
             aria-label="Topic"
-            className="h-9 rounded-lg border border-zinc-200 px-2 text-sm"
+            className="h-9 rounded-lg border border-[var(--color-community-edge)] px-2 text-sm"
           >
             <option value="">No topic</option>
             {COMMUNITY_TOPICS.map((option) => (
@@ -225,14 +225,14 @@ function PostEditForm({
           <button
             type="button"
             onClick={onDone}
-            className="text-sm text-zinc-500 hover:underline"
+            className="text-sm text-[var(--color-community-muted)] hover:underline"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={saveMutation.isPending}
-            className="inline-flex h-9 items-center rounded-lg bg-[var(--color-brand-blue)] px-4 text-sm font-semibold text-white disabled:opacity-50"
+            className="inline-flex h-9 items-center rounded-lg bg-[var(--color-community-blue)] px-4 text-sm font-semibold text-white disabled:opacity-50"
           >
             {saveMutation.isPending ? "Saving…" : "Save"}
           </button>
@@ -348,16 +348,9 @@ export function PostCard({
       : isUnit
         ? (post.unitName ?? "Group")
         : "Community";
-  const railClass = staysInGroup
-    ? "before:bg-(--purpose-accent)"
-    : isUnit
-      ? "before:bg-(--fulfil-accent)"
-      : "before:bg-(--color-brand-blue)";
   const pillClass = staysInGroup
-    ? "bg-(--purpose-accent-soft) text-(--purpose-accent)"
-    : isUnit
-      ? "bg-(--fulfil-accent-soft) text-(--fulfil-accent)"
-      : "bg-(--muted) text-(--color-brand-blue)";
+    ? "bg-[var(--color-community-violet-soft)] text-[var(--color-community-violet-ink)]"
+    : "bg-[var(--color-community-sky-soft)] text-[var(--color-community-sky-ink)]";
   const roleLabel = isDiscipleship
     ? post.authorKind === "leader"
       ? "Discipler"
@@ -435,39 +428,39 @@ export function PostCard({
   }
 
   const actionButton =
-    "flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-sm font-medium transition-colors";
+    "inline-flex min-h-[28px] items-center justify-center gap-2 rounded-full px-2.5 text-sm font-medium transition-colors";
   const alertText = notice ?? chat.error;
 
   return (
     <article
-      className={`group relative overflow-hidden rounded-2xl border border-(--color-line-strong) bg-white shadow-[0_2px_12px_rgba(6,16,86,0.09)] transition-[transform,box-shadow] duration-150 ease-out hover:-translate-y-px hover:shadow-(--shadow-md) sm:shadow-(--shadow-sm) before:pointer-events-none before:absolute before:inset-y-0 before:left-0 before:w-1 before:content-[''] sm:before:w-0.75 ${railClass}`}
+      className="rounded-2xl border border-[var(--color-community-edge)] bg-white"
     >
       <div className="grid gap-3 p-4 sm:p-5">
         <div className="flex items-start gap-3">
           <Avatar name={post.authorName} size={40} />
           <div className="min-w-0 flex-1">
-            <p className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-sm font-semibold text-zinc-900">
+            <p className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[13px] font-medium leading-[20px] text-[var(--color-community-ink)]">
               {post.authorName}
               <span
-                className={`inline-flex items-center rounded-full px-2 py-0.5 text-[0.7rem] font-medium ${pillClass}`}
+                className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium leading-[16px] ${pillClass}`}
               >
                 {scopeLabel}
               </span>
             </p>
-            <p className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-zinc-500">
+            <p className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[13px] leading-[20px] text-[var(--color-community-muted)]">
               {post.pinned ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[0.7rem] font-medium text-amber-700">
+                <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-community-violet-soft)] px-2 py-0.5 text-[11px] font-medium leading-[16px] text-[var(--color-community-violet-ink)]">
                   <PinIcon className="size-3" strokeWidth={2} />
                   Pinned
                 </span>
               ) : null}
               {post.kind === "official" ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-(--muted) px-2 py-0.5 text-[0.7rem] font-medium text-(--color-brand-blue)">
+                <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-community-sky-soft)] px-2 py-0.5 text-[11px] font-medium leading-[16px] text-[var(--color-community-sky-ink)]">
                   <MegaphoneIcon className="size-3" strokeWidth={2} />
                   {staysInGroup ? "Announcement" : "Official"}
                 </span>
               ) : topic ? (
-                <span className="inline-flex items-center rounded-full bg-zinc-100 px-2 py-0.5 text-[0.7rem] font-medium text-zinc-600">
+                <span className="inline-flex items-center rounded-full bg-[var(--color-community-canvas)] px-2 py-0.5 text-[11px] font-medium leading-[16px] text-[var(--color-community-muted)]">
                   {topic}
                 </span>
               ) : null}
@@ -493,7 +486,7 @@ export function PostCard({
         ) : (
           <>
             {post.title ? (
-              <h2 className="ppc-heading text-base font-semibold text-zinc-900">
+              <h2 className="text-[15px] font-medium leading-[22px] tracking-[-0.02em] text-[var(--color-community-ink)]">
                 {startExpanded ? (
                   post.title
                 ) : (
@@ -518,15 +511,12 @@ export function PostCard({
         {post.sharedFrom ? <QuotedPost post={post.sharedFrom} /> : null}
 
         {reactionCount > 0 || post.commentCount > 0 || post.shareCount > 0 ? (
-          <div className="flex items-center justify-between text-xs text-zinc-500">
+          <div className="flex items-center justify-between text-[13px] text-[var(--color-community-muted)]">
             <span className="flex items-center gap-1.5">
               {reactionCount > 0 ? (
-                <>
-                  <span className="inline-flex size-4 items-center justify-center rounded-full bg-[var(--color-brand-blue)] text-white">
-                    <ThumbsUpIcon className="size-2.5" strokeWidth={2.5} />
-                  </span>
-                  {reactionCount}
-                </>
+                <span className="font-medium text-[var(--color-community-blue)]">
+                  {reactionCount} like{reactionCount === 1 ? "" : "s"}
+                </span>
               ) : null}
             </span>
             <span className="flex gap-3">
@@ -550,16 +540,16 @@ export function PostCard({
         ) : null}
       </div>
 
-      <div className="mx-3 flex items-center gap-1 border-t border-zinc-100 py-1">
-        <button
+      <div className="mx-3 flex items-center gap-1 border-t border-[var(--color-community-edge)] py-1">
+        <span className="grid min-h-[44px] min-w-[44px] flex-1 place-items-center"><button
           type="button"
           disabled={pending}
           onClick={like}
           aria-pressed={reacted}
-          className={`${actionButton} ${
+          className={`${actionButton} w-full ${
             reacted
-              ? "text-[var(--color-brand-blue)]"
-              : "text-zinc-600 hover:bg-zinc-50"
+              ? "bg-[var(--color-community-blue)] text-white"
+              : "text-[var(--color-community-ink)]"
           }`}
         >
           <ThumbsUpIcon
@@ -568,29 +558,29 @@ export function PostCard({
             fill={reacted ? "currentColor" : "none"}
           />
           Like
-        </button>
-        <button
+        </button></span>
+        <span className="grid min-h-[44px] min-w-[44px] flex-1 place-items-center"><button
           type="button"
           onClick={() => setShowComments((v) => !v)}
-          className={`${actionButton} text-zinc-600 hover:bg-zinc-50`}
+          className={`${actionButton} w-full text-[var(--color-community-ink)]`}
         >
           <MessageCircleIcon className="size-[18px]" strokeWidth={2} />
           Comment
-        </button>
+        </button></span>
         {/* A post in a discipleship or member group has no Share. */}
         {staysInGroup ? null : (
-          <ShareMenu
+          <span className="grid min-h-[44px] min-w-[44px] flex-1 place-items-center"><ShareMenu
             post={post}
             viewerUnitName={viewerUnitName}
             canRepost={canRepost}
             onShared={invalidateFeed}
-            className={`${actionButton} text-zinc-600 hover:bg-zinc-50`}
-          />
+            className={`${actionButton} w-full text-[var(--color-community-ink)]`}
+          /></span>
         )}
       </div>
 
       {showComments ? (
-        <div className="border-t border-zinc-100 bg-zinc-50/50 px-4 py-4 sm:px-5">
+        <div className="border-t border-[var(--color-community-edge)] bg-white px-4 py-4 sm:px-5">
           <CommentThread
             postId={post.id}
             viewerName={viewerName}
@@ -670,7 +660,7 @@ function ShareMenu({
   }
 
   const menuItem =
-    "flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-zinc-700 transition-colors hover:bg-zinc-50";
+    "flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-left text-[var(--color-community-ink)] transition-colors hover:bg-[var(--color-community-canvas)]";
 
   return (
     <Popover.Root
@@ -686,7 +676,7 @@ function ShareMenu({
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner sideOffset={8} align="end">
-          <Popover.Popup className="z-50 w-64 rounded-xl border border-zinc-200 bg-white p-1.5 text-sm shadow-lg outline-none">
+          <Popover.Popup className="z-50 w-64 rounded-xl border border-[var(--color-community-edge)] bg-white p-1.5 text-sm shadow-lg outline-none">
             {mode === "menu" ? (
               <div className="grid gap-0.5">
                 {canRepost ? (
@@ -696,14 +686,14 @@ function ShareMenu({
                     className={menuItem}
                   >
                     <Repeat2Icon
-                      className="size-4 text-zinc-400"
+                      className="size-4 text-[var(--color-community-muted)]"
                       strokeWidth={2}
                     />
                     Share to feed
                   </button>
                 ) : null}
                 <button type="button" onClick={copy} className={menuItem}>
-                  <CopyIcon className="size-4 text-zinc-400" strokeWidth={2} />
+                  <CopyIcon className="size-4 text-[var(--color-community-muted)]" strokeWidth={2} />
                   {copied ? "Link copied" : "Copy link"}
                 </button>
                 <a
@@ -712,7 +702,7 @@ function ShareMenu({
                   rel="noreferrer"
                   className={menuItem}
                 >
-                  <SendIcon className="size-4 text-zinc-400" strokeWidth={2} />
+                  <SendIcon className="size-4 text-[var(--color-community-muted)]" strokeWidth={2} />
                   WhatsApp
                 </a>
                 <a
@@ -721,7 +711,7 @@ function ShareMenu({
                   rel="noreferrer"
                   className={menuItem}
                 >
-                  <SendIcon className="size-4 text-zinc-400" strokeWidth={2} />
+                  <SendIcon className="size-4 text-[var(--color-community-muted)]" strokeWidth={2} />
                   Telegram
                 </a>
               </div>
@@ -735,7 +725,7 @@ function ShareMenu({
                   onChange={(e) => setNote(e.target.value)}
                   placeholder="Say something about this…"
                   rows={3}
-                  className="rounded-lg border border-zinc-200 p-2 text-sm"
+                  className="rounded-lg border border-[var(--color-community-edge)] p-2 text-sm"
                 />
                 {viewerUnitName ? (
                   <select
@@ -743,7 +733,7 @@ function ShareMenu({
                     onChange={(e) =>
                       setScope(e.target.value as "global" | "unit")
                     }
-                    className="h-9 rounded-lg border border-zinc-200 px-2 text-sm"
+                    className="h-9 rounded-lg border border-[var(--color-community-edge)] px-2 text-sm"
                   >
                     <option value="global">To the community</option>
                     <option value="unit">To {viewerUnitName}</option>
@@ -752,7 +742,7 @@ function ShareMenu({
                 <button
                   type="submit"
                   disabled={pending}
-                  className="inline-flex h-9 items-center justify-center rounded-lg bg-[var(--color-brand-blue)] px-3 text-sm font-semibold text-white disabled:opacity-50"
+                  className="inline-flex h-9 items-center justify-center rounded-lg bg-[var(--color-community-blue)] px-3 text-sm font-semibold text-white disabled:opacity-50"
                 >
                   {pending ? "Sharing…" : "Share"}
                 </button>
@@ -929,7 +919,7 @@ export function CommentThread({
   return (
     <div className="grid gap-3">
       {canComment ? null : (
-        <p className="text-xs text-zinc-500">Join this group to comment.</p>
+        <p className="text-xs text-[var(--color-community-muted)]">Join this group to comment.</p>
       )}
       <form
         className={canComment ? "flex items-start gap-2" : "hidden"}
@@ -938,7 +928,7 @@ export function CommentThread({
         <Avatar name={viewerName} size={32} className="mt-0.5" />
         <div className="min-w-0 flex-1">
           {replyTo != null ? (
-            <p className="mb-1 text-xs text-zinc-500">
+            <p className="mb-1 text-xs text-[var(--color-community-muted)]">
               Replying ·{" "}
               <button
                 type="button"
@@ -955,12 +945,12 @@ export function CommentThread({
               onChange={(e) => setBody(e.target.value)}
               placeholder="Write a comment…"
               rows={1}
-              className="min-h-9 flex-1 resize-none rounded-2xl border border-zinc-200 bg-white px-3 py-2 text-sm outline-none focus:border-zinc-300"
+              className="min-h-9 flex-1 resize-none rounded-2xl border border-[var(--color-community-edge)] bg-white px-3 py-2 text-sm outline-none"
             />
             <button
               type="submit"
               disabled={pending}
-              className="inline-flex h-9 shrink-0 items-center rounded-full bg-[var(--color-brand-blue)] px-4 text-sm font-semibold text-white disabled:opacity-50"
+              className="inline-flex h-9 shrink-0 items-center rounded-full bg-[var(--color-community-blue)] px-4 text-sm font-medium text-white disabled:opacity-50"
             >
               Post
             </button>
@@ -974,20 +964,20 @@ export function CommentThread({
       </form>
 
       {isLoading ? (
-        <p className="text-xs text-zinc-400">Loading comments…</p>
+        <p className="text-xs text-[var(--color-community-muted)]">Loading comments…</p>
       ) : isError ? (
-        <p className="text-xs text-zinc-500">
+        <p className="text-xs text-[var(--color-community-muted)]">
           Couldn&apos;t load comments.{" "}
           <button
             type="button"
             onClick={() => refetch()}
-            className="underline underline-offset-2 hover:text-zinc-700"
+            className="underline underline-offset-2 hover:text-[var(--color-community-ink)]"
           >
             Retry
           </button>
         </p>
       ) : comments.length === 0 ? (
-        <p className="text-xs text-zinc-400">No comments yet. Be the first.</p>
+        <p className="text-xs text-[var(--color-community-muted)]">No comments yet. Be the first.</p>
       ) : (
         <ul className="grid gap-3">
           {topLevel.map((comment) => (
@@ -1067,20 +1057,20 @@ function CommentRow({
       <Avatar name={comment.authorName} size={32} />
       <div className="min-w-0 flex-1">
         {comment.body == null ? (
-          <p className="rounded-2xl bg-zinc-100 px-3 py-2 text-sm italic text-zinc-400">
+          <p className="rounded-2xl bg-[var(--color-community-canvas)] px-3 py-2 text-sm italic text-[var(--color-community-muted)]">
             This comment was hidden.
           </p>
         ) : (
-          <div className="inline-block max-w-full rounded-2xl bg-zinc-100 px-3 py-2">
-            <p className="text-xs font-semibold text-zinc-900">
+          <div className="inline-block max-w-full rounded-2xl bg-[var(--color-community-canvas)] px-3 py-2">
+            <p className="text-[13px] font-medium text-[var(--color-community-ink)]">
               {comment.authorName}
             </p>
-            <p className="whitespace-pre-line break-words text-sm leading-relaxed text-zinc-800">
+            <p className="whitespace-pre-line break-words text-sm leading-relaxed text-[var(--color-community-ink)]">
               {comment.body}
             </p>
           </div>
         )}
-        <div className="mt-1 flex flex-wrap items-center gap-3 pl-3 text-xs text-zinc-500">
+        <div className="mt-1 flex flex-wrap items-center gap-3 pl-3 text-xs text-[var(--color-community-muted)]">
           <button
             type="button"
             disabled={pending}
@@ -1088,7 +1078,7 @@ function CommentRow({
             aria-pressed={comment.reactedByMe}
             className={
               comment.reactedByMe
-                ? "font-semibold text-[var(--color-brand-blue)]"
+                ? "font-medium text-[var(--color-community-blue)]"
                 : "hover:underline"
             }
           >
@@ -1099,7 +1089,7 @@ function CommentRow({
               Reply
             </button>
           ) : null}
-          <span className="text-zinc-400">
+          <span className="text-[var(--color-community-muted)]">
             {relativeTime(comment.createdAt)}
           </span>
           {comment.messageUserId ? (
@@ -1131,7 +1121,7 @@ function CommentRow({
               type="button"
               disabled={pending}
               onClick={() => onModerate("restore")}
-              className="text-[var(--color-brand-blue)] hover:underline"
+              className="text-[var(--color-community-blue)] hover:underline"
             >
               Restore
             </button>

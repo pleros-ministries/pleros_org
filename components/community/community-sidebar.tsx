@@ -8,7 +8,7 @@ function snippet(post: { title: string | null; body: string }) {
 }
 
 const card =
-  "rounded-2xl border border-(--color-line-strong) bg-white p-5 shadow-(--shadow-sm)";
+  "rounded-2xl border border-[var(--color-community-edge)] bg-white p-5 ";
 
 export function CommunitySidebar({
   data,
@@ -21,19 +21,19 @@ export function CommunitySidebar({
     <aside className={className}>
       <div className="grid gap-4 lg:sticky lg:top-16">
         <section className={card}>
-          <h2 className="text-sm font-semibold text-zinc-900">Latest posts</h2>
+          <h2 className="text-sm font-semibold text-[var(--color-community-ink)]">Latest posts</h2>
           {data.latest.length === 0 ? (
-            <p className="mt-2 text-sm text-zinc-400">Nothing yet.</p>
+            <p className="mt-2 text-sm text-[var(--color-community-muted)]">Nothing yet.</p>
           ) : (
             <ul className="mt-3 grid gap-3">
               {data.latest.map((post) => (
                 <li key={post.id}>
                   <Link
                     href={`/dashboard/community/post/${post.id}`}
-                    className="block text-sm leading-snug text-zinc-700 hover:text-[var(--color-brand-blue)]"
+                    className="block text-sm leading-snug text-[var(--color-community-ink)] hover:text-[var(--color-community-blue)]"
                   >
                     <span className="line-clamp-2">{snippet(post)}</span>
-                    <span className="text-xs text-zinc-400">
+                    <span className="text-xs text-[var(--color-community-muted)]">
                       {" "}
                       · {post.authorName}
                     </span>
@@ -45,11 +45,11 @@ export function CommunitySidebar({
         </section>
 
         <section className={card}>
-          <h2 className="text-sm font-semibold text-zinc-900">
+          <h2 className="text-sm font-semibold text-[var(--color-community-ink)]">
             Active discussions
           </h2>
           {data.active.length === 0 ? (
-            <p className="mt-2 text-sm text-zinc-400">
+            <p className="mt-2 text-sm text-[var(--color-community-muted)]">
               No discussions yet. Comment on a post to start one.
             </p>
           ) : (
@@ -58,15 +58,15 @@ export function CommunitySidebar({
                 <li key={post.id}>
                   <Link
                     href={`/dashboard/community/post/${post.id}`}
-                    className="flex items-start gap-2 text-sm leading-snug text-zinc-700 hover:text-[var(--color-brand-blue)]"
+                    className="flex items-start gap-2 text-sm leading-snug text-[var(--color-community-ink)] hover:text-[var(--color-community-blue)]"
                   >
                     <MessageCircleIcon
-                      className="mt-0.5 size-3.5 shrink-0 text-zinc-400"
+                      className="mt-0.5 size-3.5 shrink-0 text-[var(--color-community-muted)]"
                       strokeWidth={2}
                     />
                     <span>
                       <span className="line-clamp-2">{snippet(post)}</span>
-                      <span className="text-xs text-zinc-400">
+                      <span className="text-xs text-[var(--color-community-muted)]">
                         {" "}
                         · {post.commentCount} comment
                         {post.commentCount === 1 ? "" : "s"}

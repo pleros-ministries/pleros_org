@@ -22,7 +22,7 @@ export function MessageButton({
         type="button"
         disabled={pending}
         onClick={() => open(userId)}
-        className={`inline-flex h-8 items-center gap-1.5 rounded-full border border-(--color-line-strong) bg-white px-3 text-xs font-medium text-(--color-brand-blue) transition-colors hover:bg-(--muted) disabled:opacity-60 ${className}`}
+        className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-[var(--color-community-edge)] bg-white px-4 text-[14px] font-medium text-[var(--color-community-blue)] transition-colors disabled:opacity-60 ${className}`}
       >
         <MessageCircleIcon className="size-3.5" strokeWidth={2} />
         {pending ? "Opening…" : label}

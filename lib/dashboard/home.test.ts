@@ -4,7 +4,7 @@ import { homeReportRows } from "./home";
 test("canonical devotional facts never manufacture a confirmation", () => {
   const rows = homeReportRows({ devotionalCount: 3, ministryCount: 0, meetingCount: 1, declarations: [{ category: "ministry", declaration: "nil" }] });
   expect(rows.map(row => row.status)).toEqual(["Not confirmed", "Nil declared", "Reported"]);
-  expect(rows.map(row => row.tone)).toEqual(["amber", "neutral", "green"]);
+  expect(rows.map(row => row.tone)).toEqual(["amber", "lilac", "green"]);
 });
 test("missing reports remain different from explicit Nil, including disabled declaration reads", () => {
   expect(homeReportRows({ devotionalCount: 0, ministryCount: 0, meetingCount: 0, declarations: [] }).map(row => row.status)).toEqual(["Not reported", "Not reported", "Not reported"]);

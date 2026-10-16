@@ -63,8 +63,8 @@ const IN_CONVERSATION = /^\/dashboard\/community\/messages\/\d+/;
 const itemClass =
   "relative grid min-h-12 content-center justify-items-center gap-1 rounded-[0.45rem] text-[0.62rem] font-semibold transition-colors";
 const idleClass =
-  "text-(--color-text-muted) hover:bg-(--color-brand-sky) hover:text-(--color-brand-blue)";
-const activeClass = "bg-(--color-brand-sky) text-(--color-brand-blue)";
+  "text-(--color-text-muted) hover:bg-(--color-brand-sky) hover:text-[var(--color-community-blue)]";
+const activeClass = "bg-(--color-brand-sky) text-[var(--color-community-blue)]";
 
 /**
  * The community's bottom bar on phones and small tablets: the four main
@@ -100,7 +100,7 @@ export function CommunityBottomBar({ onOpenMenu }: { onOpenMenu: () => void }) {
               {item.key === "messages" && unreadMessages > 0 ? (
                 <span
                   aria-label={`${unreadMessages} unread`}
-                  className="absolute -right-2.5 -top-1.5 grid min-w-4 place-items-center rounded-full bg-(--color-brand-blue) px-1 text-[0.6rem] font-bold leading-4 text-white"
+                  className="absolute -right-2.5 -top-1.5 grid min-w-4 place-items-center rounded-full bg-[var(--color-community-blue)] px-1 text-[0.6rem] font-bold leading-4 text-white"
                 >
                   {unreadMessages > 9 ? "9+" : unreadMessages}
                 </span>
@@ -108,7 +108,7 @@ export function CommunityBottomBar({ onOpenMenu }: { onOpenMenu: () => void }) {
               {item.key === "ask" && unreadQuestions > 0 ? (
                 <span
                   aria-label="Pleros has replied"
-                  className="absolute -right-1 -top-0.5 size-2 rounded-full bg-(--color-brand-blue)"
+                  className="absolute -right-1 -top-0.5 size-2 rounded-full bg-[var(--color-community-blue)]"
                 />
               ) : null}
             </span>

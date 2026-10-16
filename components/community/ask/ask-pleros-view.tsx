@@ -10,7 +10,7 @@ import type { AskerQuestionSummary } from "@/lib/db/queries/ask-pleros";
 import { askPleros } from "@/app/(site)/dashboard/community/_actions/ask-actions";
 
 const card =
-  "rounded-2xl border border-(--color-line-strong) bg-white shadow-(--shadow-sm)";
+  "rounded-2xl border border-[var(--color-community-edge)] bg-white ";
 
 const VISIBILITY_OPTIONS = [
   {
@@ -67,8 +67,8 @@ function AskForm({ episode }: { episode?: { guid: string; title: string } }) {
         submit();
       }}
     >
-      {episode ? <p className="rounded-xl bg-zinc-50 px-3 py-2 text-[13px] text-zinc-700">About this episode: {episode.title}</p> : null}
-      <label className="grid gap-1 text-[13px] font-medium text-zinc-700">
+      {episode ? <p className="rounded-xl bg-[var(--color-community-canvas)] px-3 py-2 text-[13px] text-[var(--color-community-ink)]">About this episode: {episode.title}</p> : null}
+      <label className="grid gap-1 text-[13px] font-medium text-[var(--color-community-ink)]">
         Your question *
         <textarea
           value={body}
@@ -77,12 +77,12 @@ function AskForm({ episode }: { episode?: { guid: string; title: string } }) {
           maxLength={QUESTION_BODY_MAX}
           required
           placeholder="Ask anything. Only the Pleros team will read it."
-          className="w-full resize-none rounded-xl border border-zinc-200 px-3 py-2.5 text-base font-normal leading-relaxed outline-none focus:border-zinc-300"
+          className="w-full resize-none rounded-xl border border-[var(--color-community-edge)] px-3 py-2.5 text-base font-normal leading-relaxed outline-none focus:border-[var(--color-community-edge-strong)]"
         />
       </label>
 
       <fieldset className="grid gap-2.5">
-        <legend className="mb-1.5 text-[13px] font-medium text-zinc-700">
+        <legend className="mb-1.5 text-[13px] font-medium text-[var(--color-community-ink)]">
           How do you want to ask? *
         </legend>
         {VISIBILITY_OPTIONS.map((option) => (
@@ -96,10 +96,10 @@ function AskForm({ episode }: { episode?: { guid: string; title: string } }) {
               className="mt-1 size-4 accent-[var(--color-brand-blue)]"
             />
             <span className="grid">
-              <span className="text-sm font-medium text-zinc-900">
+              <span className="text-sm font-medium text-[var(--color-community-ink)]">
                 {option.label}
               </span>
-              <span className="text-xs text-zinc-500">{option.help}</span>
+              <span className="text-xs text-[var(--color-community-muted)]">{option.help}</span>
             </span>
           </label>
         ))}
@@ -114,7 +114,7 @@ function AskForm({ episode }: { episode?: { guid: string; title: string } }) {
       <button
         type="submit"
         disabled={pending}
-        className="inline-flex h-10 w-fit items-center rounded-full bg-(--color-brand-blue) px-5 text-sm font-semibold text-white disabled:opacity-60"
+        className="inline-flex h-10 w-fit items-center rounded-full bg-[var(--color-community-blue)] px-5 text-sm font-semibold text-white disabled:opacity-60"
       >
         {pending ? "Sending…" : "Send to Pleros"}
       </button>
@@ -133,10 +133,10 @@ export function AskPlerosView({
   return (
     <div className="grid gap-4">
       <header className="grid gap-1">
-        <h1 className="ppc-heading text-lg font-semibold text-zinc-900">
+        <h1 className="text-lg font-semibold text-[var(--color-community-ink)]">
           Ask Pleros
         </h1>
-        <p className="max-w-md text-sm text-zinc-500">
+        <p className="max-w-md text-sm text-[var(--color-community-muted)]">
           Ask the Pleros team a question in private. No one else in the
           community sees it, and you choose whether we see your name.
         </p>
@@ -145,34 +145,34 @@ export function AskPlerosView({
       <AskForm episode={episode} />
 
       <section className={`${card} overflow-hidden`}>
-        <h2 className="ppc-heading border-b border-zinc-100 px-4 py-3 text-sm font-semibold text-zinc-900">
+        <h2 className="border-b border-[var(--color-community-edge)] px-4 py-3 text-sm font-semibold text-[var(--color-community-ink)]">
           Your questions
         </h2>
         {questions.length === 0 ? (
-          <p className="px-4 py-4 text-sm text-zinc-500">
+          <p className="px-4 py-4 text-sm text-[var(--color-community-muted)]">
             You have not asked anything yet.
           </p>
         ) : (
-          <ul className="divide-y divide-zinc-100">
+          <ul className="divide-y divide-[var(--color-community-edge)]">
             {questions.map((question) => (
               <li key={question.id}>
                 <Link
                   href={`/dashboard/community/ask/${question.id}`}
-                  className="grid gap-1 px-4 py-3 transition-colors hover:bg-zinc-50"
+                  className="grid gap-1 px-4 py-3 transition-colors hover:bg-[var(--color-community-canvas)]"
                 >
                   <span
-                    className={`line-clamp-2 text-sm text-zinc-900 ${
+                    className={`line-clamp-2 text-sm text-[var(--color-community-ink)] ${
                       question.unread ? "font-semibold" : ""
                     }`}
                   >
                     {question.preview}
                   </span>
-                  <span className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-zinc-500">
+                  <span className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[var(--color-community-muted)]">
                     <span
                       className={`rounded-full px-2 py-0.5 text-[0.7rem] font-medium ${
                         question.status === "answered"
-                          ? "bg-(--muted) text-(--color-brand-blue)"
-                          : "bg-zinc-100 text-zinc-600"
+                          ? "bg-[var(--color-community-sky-soft)] text-[var(--color-community-blue)]"
+                          : "bg-[var(--color-community-canvas)] text-[var(--color-community-ink)]"
                       }`}
                     >
                       {QUESTION_STATUS_LABEL[question.status]}
@@ -181,7 +181,7 @@ export function AskPlerosView({
                     {question.episodeTitle ? <span>About: {question.episodeTitle}</span> : null}
                     <span>{relativeTime(question.lastMessageAt)}</span>
                     {question.unread ? (
-                      <span className="font-medium text-(--color-brand-blue)">
+                      <span className="font-medium text-[var(--color-community-blue)]">
                         New reply
                       </span>
                     ) : null}

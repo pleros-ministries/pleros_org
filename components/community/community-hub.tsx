@@ -26,7 +26,7 @@ export function CommunityHub({
 }) {
   return (
     <div className="grid gap-4">
-      <h1 className="ppc-heading text-lg font-semibold text-zinc-900">
+      <h1 className="text-lg font-semibold text-[var(--color-community-ink)]">
         Community
       </h1>
 

@@ -16,7 +16,7 @@ import { MessageButton } from "./messages/message-button";
 import { PostFeed } from "./post-feed";
 
 const card =
-  "rounded-2xl border border-(--color-line-strong) bg-white shadow-(--shadow-sm)";
+  "rounded-2xl border border-[var(--color-community-edge)] bg-white ";
 
 const TOOLS_HREF = "/dashboard/sogp/discipleship";
 
@@ -49,7 +49,7 @@ function SpaceSet({
   if (spaces.length === 0) return null;
   return (
     <div className="grid gap-1.5">
-      <p className="text-xs font-medium text-zinc-500">{label}</p>
+      <p className="text-xs font-medium text-[var(--color-community-muted)]">{label}</p>
       <div className="flex flex-wrap items-center gap-1.5">
         {spaces.map((space) => {
           const selected = space.groupId === activeGroupId;
@@ -61,8 +61,8 @@ function SpaceSet({
               onClick={() => onSelect(space.groupId)}
               className={`h-8 max-w-full truncate rounded-full border px-3.5 text-[13px] font-medium transition-colors ${
                 selected
-                  ? "border-(--color-brand-blue) bg-(--color-brand-blue) text-white"
-                  : "border-(--color-line-strong) bg-white text-zinc-600 hover:text-zinc-900"
+                  ? "border-[var(--color-community-blue)] bg-[var(--color-community-blue)] text-white"
+                  : "border-[var(--color-community-edge)] bg-white text-[var(--color-community-ink)] hover:text-[var(--color-community-ink)]"
               }`}
             >
               {space.groupName}
@@ -88,15 +88,15 @@ function PeerRow({
       <span className="flex min-w-0 items-center gap-2.5">
         <Avatar name={person.firstName} size={32} />
         <span className="grid min-w-0">
-          <span className="flex items-center gap-1.5 font-medium text-zinc-900">
+          <span className="flex items-center gap-1.5 font-medium text-[var(--color-community-ink)]">
             <span className="truncate">{person.firstName}</span>
             {badge ? (
-              <span className="rounded-full bg-(--muted) px-2 py-0.5 text-[0.7rem] font-medium text-(--color-brand-blue)">
+              <span className="rounded-full bg-[var(--color-community-sky-soft)] px-2 py-0.5 text-[0.7rem] font-medium text-[var(--color-community-blue)]">
                 {badge}
               </span>
             ) : null}
           </span>
-          <span className="text-xs text-zinc-500">{detail}</span>
+          <span className="text-xs text-[var(--color-community-muted)]">{detail}</span>
         </span>
       </span>
       {person.messageUserId ? (
@@ -198,17 +198,17 @@ export function CommunityDiscipleshipView({
     <div className="grid gap-4">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div className="grid gap-1">
-          <h1 className="ppc-heading text-lg font-semibold text-zinc-900">
+          <h1 className="text-lg font-semibold text-[var(--color-community-ink)]">
             Discipleship
           </h1>
-          <p className="max-w-md text-sm text-zinc-500">
+          <p className="max-w-md text-sm text-[var(--color-community-muted)]">
             A private space for you and the people you walk with through SOGP.
             Only your group can see what is shared here.
           </p>
         </div>
         <Link
           href={TOOLS_HREF}
-          className="inline-flex h-9 items-center gap-1.5 rounded-full border border-(--color-line-strong) bg-white px-3.5 text-[13px] font-medium text-(--color-brand-blue)"
+          className="inline-flex h-9 items-center gap-1.5 rounded-full border border-[var(--color-community-edge)] bg-white px-3.5 text-[13px] font-medium text-[var(--color-community-blue)]"
         >
           Discipleship tools
           <ArrowRightIcon className="size-4" strokeWidth={2} />
@@ -240,16 +240,16 @@ export function CommunityDiscipleshipView({
         <>
           <section className={`${card} grid gap-3 p-4 sm:p-5`}>
             <div className="grid gap-1">
-              <h2 className="ppc-heading text-base font-semibold text-zinc-900">
+              <h2 className="text-base font-semibold text-[var(--color-community-ink)]">
                 {active.groupName}
               </h2>
-              <p className="text-sm text-zinc-500">{active.summary}</p>
+              <p className="text-sm text-[var(--color-community-muted)]">{active.summary}</p>
             </div>
 
             <div
               role="tablist"
               aria-label="Group sections"
-              className="-mb-4 flex gap-5 border-t border-zinc-100 pt-1 sm:-mb-5"
+              className="-mb-4 flex gap-5 border-t border-[var(--color-community-edge)] pt-1 sm:-mb-5"
             >
               {tabs.map((item) => {
                 const selected = tab === item.key;
@@ -262,13 +262,13 @@ export function CommunityDiscipleshipView({
                     onClick={() => setTab(item.key)}
                     className={`-mb-px inline-flex items-center gap-1.5 border-b-2 py-2.5 text-sm font-medium transition-colors ${
                       selected
-                        ? "border-(--color-brand-blue) text-(--color-brand-blue)"
-                        : "border-transparent text-zinc-500 hover:text-zinc-800"
+                        ? "border-[var(--color-community-blue)] text-[var(--color-community-blue)]"
+                        : "border-transparent text-[var(--color-community-muted)] hover:text-[var(--color-community-ink)]"
                     }`}
                   >
                     {item.label}
                     {item.count != null ? (
-                      <span className="rounded-full bg-zinc-100 px-1.5 py-0.5 text-[0.7rem] text-zinc-600">
+                      <span className="rounded-full bg-[var(--color-community-canvas)] px-1.5 py-0.5 text-[0.7rem] text-[var(--color-community-ink)]">
                         {item.count}
                       </span>
                     ) : null}
@@ -306,7 +306,7 @@ export function CommunityDiscipleshipView({
             </>
           ) : (
             <section className={`${card} overflow-hidden`}>
-              <ul className="divide-y divide-zinc-100">
+              <ul className="divide-y divide-[var(--color-community-edge)]">
                 {active.kind === "joined" && joined ? (
                   <PeerRow
                     person={joined.discipler}
@@ -322,25 +322,25 @@ export function CommunityDiscipleshipView({
       ) : null}
 
       {!joined ? (
-        <p className={`${card} p-4 text-sm text-zinc-500`}>
+        <p className={`${card} p-4 text-sm text-[var(--color-community-muted)]`}>
           You have not joined a discipleship group yet. When someone shares
           their invite link with you, their group appears here.
         </p>
       ) : null}
 
       {pausedGroups.map((group) => (
-        <p key={group.groupId} className={`${card} p-4 text-sm text-zinc-600`}>
+        <p key={group.groupId} className={`${card} p-4 text-sm text-[var(--color-community-ink)]`}>
           {group.groupName} has been paused by the Pleros team. Contact support
           if you think this is a mistake.
         </p>
       ))}
 
       {showInviteHint ? (
-        <p className={`${card} p-4 text-sm text-zinc-500`}>
+        <p className={`${card} p-4 text-sm text-[var(--color-community-muted)]`}>
           No one has joined a group you lead yet.{" "}
           <Link
             href={TOOLS_HREF}
-            className="font-medium text-(--color-brand-blue) underline underline-offset-2"
+            className="font-medium text-[var(--color-community-blue)] underline underline-offset-2"
           >
             Get an invite link
           </Link>{" "}

@@ -111,16 +111,16 @@ export function PostFeed({
       <FeedToolbar view={view} onChange={setView} />
 
       {isPending ? (
-        <p className="rounded-2xl border border-(--color-line-strong) bg-white p-5 text-sm text-zinc-400 shadow-(--shadow-sm)">
+        <p className="rounded-2xl border border-[var(--color-community-edge)] bg-white p-5 text-sm text-[var(--color-community-muted)] ">
           Loading posts…
         </p>
       ) : isError && posts.length === 0 ? (
-        <p className="rounded-2xl border border-(--color-line-strong) bg-white p-5 text-sm text-zinc-500 shadow-(--shadow-sm)">
+        <p className="rounded-2xl border border-[var(--color-community-edge)] bg-white p-5 text-sm text-[var(--color-community-muted)] ">
           Couldn&apos;t load posts.{" "}
           <button
             type="button"
             onClick={() => refetch()}
-            className="underline underline-offset-2 hover:text-zinc-700"
+            className="underline underline-offset-2 hover:text-[var(--color-community-ink)]"
           >
             Retry
           </button>
@@ -141,7 +141,7 @@ export function PostFeed({
           type="button"
           onClick={() => fetchNextPage()}
           disabled={isFetchingNextPage}
-          className="mx-auto rounded-full border border-(--color-line-strong) bg-white px-5 py-2 text-sm font-medium text-zinc-700 shadow-(--shadow-sm) transition-colors hover:bg-zinc-50 disabled:opacity-60"
+          className="mx-auto rounded-full border border-[var(--color-community-edge)] bg-white px-5 py-2 text-sm font-medium text-[var(--color-community-ink)]  transition-colors hover:bg-[var(--color-community-canvas)] disabled:opacity-60"
         >
           {isFetchingNextPage ? "Loading…" : "Load more"}
         </button>

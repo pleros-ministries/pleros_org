@@ -145,7 +145,7 @@ export function NotificationBell({
         aria-haspopup="dialog"
         className={appearance === "dashboard" ? dashboardStyles.iconButton : `relative inline-flex size-8 items-center justify-center rounded-full ${
           tone === "light"
-            ? "text-zinc-500 hover:text-zinc-900"
+            ? "text-[var(--color-community-muted)] hover:text-[var(--color-community-ink)]"
             : "text-white/85 hover:text-white"
         }`}
       >
@@ -154,8 +154,8 @@ export function NotificationBell({
           <span
             className={`absolute -right-0.5 -top-0.5 grid min-w-4 place-items-center rounded-full px-1 text-[0.6rem] font-bold ${
               tone === "light"
-                ? "bg-[var(--color-brand-blue)] text-white"
-                : "bg-[var(--color-brand-lime)] text-[var(--color-brand-blue)]"
+                ? "bg-[var(--color-community-blue)] text-white"
+                : "bg-[var(--color-brand-lime)] text-[var(--color-community-blue)]"
             }`}
           >
             {unread > 9 ? "9+" : unread}
@@ -163,16 +163,16 @@ export function NotificationBell({
         ) : null}
       </button>
       {open ? (
-        <div id={panelId} role="dialog" aria-label="Notifications" className={appearance === "dashboard" ? dashboardStyles.notificationPanel : `absolute z-40 w-72 rounded-sm border border-zinc-200 bg-white p-2 shadow-lg ${placement === "sidebar" ? "bottom-10 left-0" : "right-0 top-9"}`}>
-          {error ? <div role="alert" className="p-2 text-sm"><p>Notifications couldn’t be loaded.</p><button className="mt-2 min-h-11 text-(--color-brand-blue)" onClick={() => void refetch()}>Try again</button></div> : !data ? <p role="status" className="p-2 text-sm text-(--color-text-muted)">Loading notifications…</p> : items.length === 0 ? (
-            <p className="p-2 text-xs text-zinc-500">Nothing yet.</p>
+        <div id={panelId} role="dialog" aria-label="Notifications" className={appearance === "dashboard" ? dashboardStyles.notificationPanel : `absolute z-40 w-72 rounded-sm border border-[var(--color-community-edge)] bg-white p-2 shadow-lg ${placement === "sidebar" ? "bottom-10 left-0" : "right-0 top-9"}`}>
+          {error ? <div role="alert" className="p-2 text-sm"><p>Notifications couldn’t be loaded.</p><button className="mt-2 min-h-11 text-[var(--color-community-blue)]" onClick={() => void refetch()}>Try again</button></div> : !data ? <p role="status" className="p-2 text-sm text-(--color-text-muted)">Loading notifications…</p> : items.length === 0 ? (
+            <p className="p-2 text-xs text-[var(--color-community-muted)]">Nothing yet.</p>
           ) : (
             <ul className="grid max-h-[min(20rem,calc(100dvh-8rem))] gap-1 overflow-y-auto">
               {items.map((item) => (
                 <li
                   key={item.id}
                   className={`rounded-sm px-2 py-1.5 text-xs ${
-                    item.readAt ? "text-zinc-500" : "bg-zinc-50 text-zinc-800"
+                    item.readAt ? "text-[var(--color-community-muted)]" : "bg-[var(--color-community-canvas)] text-[var(--color-community-ink)]"
                   }`}
                 >
                   {item.kind === "daily_report_reminder" ? <Link href={`/dashboard/community/report${typeof item.payload.day === "string" && /^\d{4}-\d{2}-\d{2}$/.test(item.payload.day) ? `?day=${item.payload.day}` : ""}`} onClick={() => setOpen(false)}>{summarise(item)}</Link> : summarise(item)}

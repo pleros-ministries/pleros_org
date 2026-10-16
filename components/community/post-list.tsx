@@ -21,7 +21,7 @@ export function PostList({
 }) {
   if (posts.length === 0) {
     return (
-      <p className="rounded-2xl border border-(--color-line-strong) bg-white p-5 text-sm text-zinc-500 shadow-(--shadow-sm)">
+      <p className="rounded-2xl border border-[var(--color-community-edge)] bg-white p-5 text-sm text-[var(--color-community-muted)] ">
         {emptyText}
       </p>
     );

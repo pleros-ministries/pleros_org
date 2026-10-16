@@ -1,0 +1,62 @@
+{
+  "ink": {
+    "foreground": "#252b33",
+    "background": "#ffffff",
+    "ratio": 14.27,
+    "normalTextPass": true
+  },
+  "muted": {
+    "foreground": "#63676d",
+    "background": "#ffffff",
+    "ratio": 5.69,
+    "normalTextPass": true
+  },
+  "action": {
+    "foreground": "#2056d6",
+    "background": "#ffffff",
+    "ratio": 6.24,
+    "normalTextPass": true
+  },
+  "learningMeta": {
+    "foreground": "#d8e4ff",
+    "background": "#2056d6",
+    "ratio": 4.89,
+    "normalTextPass": true
+  },
+  "learningSupport": {
+    "foreground": "#e1eaff",
+    "background": "#2056d6",
+    "ratio": 5.18,
+    "normalTextPass": true
+  },
+  "amber": {
+    "foreground": "#92400e",
+    "background": "#f7e4cd",
+    "ratio": 5.72,
+    "normalTextPass": true
+  },
+  "green": {
+    "foreground": "#166534",
+    "background": "#d5e8dc",
+    "ratio": 5.57,
+    "normalTextPass": true
+  },
+  "neutral": {
+    "foreground": "#4a5273",
+    "background": "#e9edf5",
+    "ratio": 6.52,
+    "normalTextPass": true
+  },
+  "blue": {
+    "foreground": "#2331ae",
+    "background": "#e4ebfd",
+    "ratio": 8.29,
+    "normalTextPass": true
+  },
+  "lilac": {
+    "foreground": "#6d28d9",
+    "background": "#e9dffa",
+    "ratio": 5.55,
+    "normalTextPass": true
+  }
+}

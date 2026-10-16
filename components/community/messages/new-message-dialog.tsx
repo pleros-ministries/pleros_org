@@ -67,7 +67,7 @@ export function NewMessageDialog({
     >
       <DialogContent className="site-font-theme">
         <DialogHeader>
-          <DialogTitle className="text-lg font-semibold">New message</DialogTitle>
+          <DialogTitle className="text-lg font-medium">New message</DialogTitle>
           <DialogDescription className="text-sm">
             {canSearch
               ? "Search by first name, or pick someone below."
@@ -79,7 +79,7 @@ export function NewMessageDialog({
           <label className="relative block">
             <span className="sr-only">Search members by first name</span>
             <SearchIcon
-              className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400"
+              className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--color-community-muted)]"
               strokeWidth={2}
             />
             <input
@@ -88,7 +88,7 @@ export function NewMessageDialog({
               placeholder="First name"
               autoFocus
               maxLength={40}
-              className="h-11 w-full rounded-xl border border-zinc-200 pl-9 pr-3 text-base outline-none focus:border-zinc-300"
+              className="h-11 w-full rounded-xl border border-[var(--color-community-edge)] pl-9 pr-3 text-base outline-none focus:border-[var(--color-community-edge-strong)]"
             />
           </label>
         ) : null}
@@ -101,11 +101,11 @@ export function NewMessageDialog({
 
         <div className="max-h-72 min-h-24 overflow-y-auto">
           {isError ? (
-            <p className="py-3 text-sm text-zinc-500">
+            <p className="py-3 text-sm text-[var(--color-community-muted)]">
               Couldn&apos;t load members. Try again.
             </p>
           ) : members.length === 0 ? (
-            <p className="py-3 text-sm text-zinc-500">
+            <p className="py-3 text-sm text-[var(--color-community-muted)]">
               {isFetching
                 ? "Searching…"
                 : searching
@@ -117,7 +117,7 @@ export function NewMessageDialog({
           ) : (
             <ul className="grid gap-0.5">
               {!searching ? (
-                <li className="px-1 pb-1 text-xs font-medium text-zinc-500">
+                <li className="px-1 pb-1 text-xs font-medium text-[var(--color-community-muted)]">
                   Suggested
                 </li>
               ) : null}
@@ -127,14 +127,14 @@ export function NewMessageDialog({
                     type="button"
                     disabled={chat.pending}
                     onClick={() => chat.open(member.userId)}
-                    className="flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors hover:bg-zinc-50 disabled:opacity-60"
+                    className="flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors hover:bg-[var(--color-community-canvas)] disabled:opacity-60"
                   >
                     <Avatar name={member.name} size={36} />
                     <span className="grid min-w-0">
-                      <span className="truncate text-sm font-medium text-zinc-900">
+                      <span className="truncate text-sm font-medium text-[var(--color-community-ink)]">
                         {member.name}
                       </span>
-                      <span className="truncate text-xs text-zinc-500">
+                      <span className="truncate text-xs text-[var(--color-community-muted)]">
                         {[member.note, member.unitName]
                           .filter(Boolean)
                           .join(" · ") || "Community member"}

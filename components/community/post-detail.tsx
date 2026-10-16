@@ -32,7 +32,7 @@ export function PostDetail({
     <div className="grid gap-3">
       <Link
         href={back.href}
-        className="inline-flex w-fit items-center gap-1.5 text-xs font-medium text-zinc-500 transition-colors hover:text-[var(--color-brand-blue)]"
+        className="inline-flex w-fit items-center gap-1.5 text-xs font-medium text-[var(--color-community-muted)] transition-colors hover:text-[var(--color-community-blue)]"
       >
         <ArrowLeftIcon className="size-3.5" strokeWidth={2} /> {back.label}
       </Link>

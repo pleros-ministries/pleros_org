@@ -742,23 +742,6 @@ export const notificationCheckpoints = pgTable("notification_checkpoints", {
     .defaultNow(),
 });
 
-export const prayerWatchRemindersSent = pgTable(
-  "prayer_watch_reminders_sent",
-  {
-    sessionId: text("session_id").notNull(),
-    date: date("date", { mode: "string" }).notNull(),
-    sentAt: timestamp("sent_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
-  },
-  (t) => [
-    uniqueIndex("prayer_watch_reminders_sent_session_date_idx").on(
-      t.sessionId,
-      t.date,
-    ),
-  ],
-);
-
 // ─── Learner notification preferences ───────────────────────────────────────
 //
 // One row per learner, written from the Welcome Pack setup page. A missing row

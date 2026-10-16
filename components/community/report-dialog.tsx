@@ -100,7 +100,7 @@ export function ReportDialog({
               {REASONS.map((option) => (
                 <label
                   key={option}
-                  className="flex items-center gap-2.5 text-sm text-zinc-800"
+                  className="flex items-center gap-2.5 text-sm text-[var(--color-community-ink)]"
                 >
                   <input
                     type="radio"
@@ -115,14 +115,14 @@ export function ReportDialog({
               ))}
             </fieldset>
 
-            <label className="grid gap-1 text-[13px] font-medium text-zinc-700">
+            <label className="grid gap-1 text-[13px] font-medium text-[var(--color-community-ink)]">
               Anything to add? (optional)
               <textarea
                 value={detail}
                 onChange={(event) => setDetail(event.target.value)}
                 rows={2}
                 maxLength={300}
-                className="resize-none rounded-xl border border-zinc-200 p-2.5 text-base font-normal outline-none focus:border-zinc-300 sm:text-sm"
+                className="resize-none rounded-xl border border-[var(--color-community-edge)] p-2.5 text-base font-normal outline-none focus:border-[var(--color-community-edge-strong)] sm:text-sm"
               />
             </label>
 

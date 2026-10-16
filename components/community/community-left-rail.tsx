@@ -7,7 +7,7 @@ import { CommunityNav } from "./community-nav";
 import { PrayerWatchRail } from "./prayer-watch-rail";
 
 const card =
-  "rounded-2xl border border-(--color-line-strong) bg-white p-5 shadow-(--shadow-sm)";
+  "rounded-2xl border border-[var(--color-community-edge)] bg-white p-5 ";
 
 function cohortLine(cohort: UnitRailCard["cohort"]) {
   if (!cohort) return null;
@@ -57,8 +57,8 @@ export function CommunityRailContent({
           onClick={onNavigate}
           className={`${card} block transition-colors hover:border-zinc-300`}
         >
-          <p className="text-xs font-medium text-zinc-500">Your group</p>
-          <p className="mt-1 flex items-center gap-1.5 text-sm font-semibold text-zinc-900">
+          <p className="text-xs font-medium text-[var(--color-community-muted)]">Your group</p>
+          <p className="mt-1 flex items-center gap-1.5 text-sm font-semibold text-[var(--color-community-ink)]">
             {unitCard.flag ? (
               <span aria-hidden className="text-base leading-none">
                 {unitCard.flag}
@@ -66,7 +66,7 @@ export function CommunityRailContent({
             ) : null}
             {unitCard.name}
           </p>
-          <p className="mt-1 text-xs text-zinc-500">
+          <p className="mt-1 text-xs text-[var(--color-community-muted)]">
             {unitCard.memberCount} member
             {unitCard.memberCount === 1 ? "" : "s"}
             {unitCard.leaderFirstName
@@ -74,7 +74,7 @@ export function CommunityRailContent({
               : " · no leader yet"}
           </p>
           {cohort ? (
-            <p className="mt-2 inline-flex items-center rounded-full bg-(--muted) px-2 py-0.5 text-[0.7rem] font-medium text-(--color-brand-blue)">
+            <p className="mt-2 inline-flex items-center rounded-full bg-[var(--color-community-sky-soft)] px-2 py-0.5 text-[0.7rem] font-medium text-[var(--color-community-blue)]">
               {cohort}
             </p>
           ) : null}
@@ -87,8 +87,8 @@ export function CommunityRailContent({
           onClick={onNavigate}
           className={`${card} block transition-colors hover:border-zinc-300`}
         >
-          <p className="text-xs font-medium text-zinc-500">Discipleship</p>
-          <p className="mt-1 text-sm font-semibold text-zinc-900">
+          <p className="text-xs font-medium text-[var(--color-community-muted)]">Discipleship</p>
+          <p className="mt-1 text-sm font-semibold text-[var(--color-community-ink)]">
             {discipleshipLine(discipleship)}
           </p>
         </Link>

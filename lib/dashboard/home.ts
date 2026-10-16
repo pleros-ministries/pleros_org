@@ -12,7 +12,7 @@ export function homeReportRows(input: { devotionalCount: number; ministryCount: 
     return {
       category, title: category === "devotional" ? "Devotional" : category === "ministry" ? "Ministry" : "Meetings",
       description: count > 0 ? `${count} ${category === "meetings" ? `meeting${count === 1 ? "" : "s"} recorded` : `activit${count === 1 ? "y" : "ies"} logged`}` : status === "Nil declared" ? "No activity declared" : "No activity logged",
-      status, tone: confirmed || storedStatus === "reported" ? "green" : status === "Not confirmed" ? "amber" : "neutral",
+      status, tone: confirmed || storedStatus === "reported" ? "green" : status === "Not confirmed" ? "amber" : status === "Nil declared" ? "lilac" : "neutral",
     };
   });
 }

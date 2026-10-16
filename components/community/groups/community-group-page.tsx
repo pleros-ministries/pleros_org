@@ -41,7 +41,7 @@ import { useGroupAction } from "./use-group-action";
 type TabKey = "discussions" | "members" | "requests" | "about";
 
 const card =
-  "rounded-2xl border border-(--color-line-strong) bg-white shadow-(--shadow-sm)";
+  "rounded-2xl border border-[var(--color-community-edge)] bg-white ";
 
 const ROLE_LABEL = { owner: "Owner", moderator: "Moderator", member: null } as const;
 
@@ -187,7 +187,7 @@ export function CommunityGroupPage({
     <div className="grid gap-4">
       <Link
         href="/dashboard/community/groups"
-        className="inline-flex w-fit items-center gap-1.5 text-xs font-medium text-zinc-500 transition-colors hover:text-(--color-brand-blue)"
+        className="inline-flex w-fit items-center gap-1.5 text-xs font-medium text-[var(--color-community-muted)] transition-colors hover:text-[var(--color-community-blue)]"
       >
         <ArrowLeftIcon className="size-3.5" strokeWidth={2} /> All groups
       </Link>
@@ -195,11 +195,11 @@ export function CommunityGroupPage({
       <header className={`${card} grid gap-3 p-4 sm:p-5`}>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="grid min-w-0 gap-1.5">
-            <h1 className="ppc-heading text-lg font-semibold text-zinc-900">
+            <h1 className="text-lg font-semibold text-[var(--color-community-ink)]">
               {detail.name}
             </h1>
-            <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-zinc-500">
-              <span className="inline-flex items-center gap-1 rounded-full bg-zinc-100 px-2 py-0.5 text-[0.7rem] font-medium text-zinc-600">
+            <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-[var(--color-community-muted)]">
+              <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-community-canvas)] px-2 py-0.5 text-[0.7rem] font-medium text-[var(--color-community-ink)]">
                 <PrivacyIcon className="size-3" strokeWidth={2} />
                 {detail.privacy === "public" ? "Public group" : "Private group"}
               </span>
@@ -211,7 +211,7 @@ export function CommunityGroupPage({
               {detail.memberCount} member{detail.memberCount === 1 ? "" : "s"}
             </p>
             {detail.description ? (
-              <p className="max-w-prose whitespace-pre-line text-sm text-zinc-700">
+              <p className="max-w-prose whitespace-pre-line text-sm text-[var(--color-community-ink)]">
                 {detail.description}
               </p>
             ) : null}
@@ -228,7 +228,7 @@ export function CommunityGroupPage({
                     run(() => leaveCommunityGroup(detail.id));
                   }
                 }}
-                className="inline-flex h-9 items-center rounded-full border border-(--color-line-strong) bg-white px-4 text-[13px] font-medium text-zinc-600 disabled:opacity-60"
+                className="inline-flex h-9 items-center rounded-full border border-[var(--color-community-edge)] bg-white px-4 text-[13px] font-medium text-[var(--color-community-ink)] disabled:opacity-60"
               >
                 Leave group
               </button>
@@ -246,7 +246,7 @@ export function CommunityGroupPage({
         <div
           role="tablist"
           aria-label="Group sections"
-          className="-mb-4 flex gap-5 overflow-x-auto border-t border-zinc-100 pt-1 sm:-mb-5"
+          className="-mb-4 flex gap-5 overflow-x-auto border-t border-[var(--color-community-edge)] pt-1 sm:-mb-5"
         >
           {tabs.map((item) => {
             const selected = tab === item.key;
@@ -259,13 +259,13 @@ export function CommunityGroupPage({
                 onClick={() => setTab(item.key)}
                 className={`-mb-px inline-flex shrink-0 items-center gap-1.5 border-b-2 py-2.5 text-sm font-medium transition-colors ${
                   selected
-                    ? "border-(--color-brand-blue) text-(--color-brand-blue)"
-                    : "border-transparent text-zinc-500 hover:text-zinc-800"
+                    ? "border-[var(--color-community-blue)] text-[var(--color-community-blue)]"
+                    : "border-transparent text-[var(--color-community-muted)] hover:text-[var(--color-community-ink)]"
                 }`}
               >
                 {item.label}
                 {item.count != null ? (
-                  <span className="rounded-full bg-zinc-100 px-1.5 py-0.5 text-[0.7rem] text-zinc-600">
+                  <span className="rounded-full bg-[var(--color-community-canvas)] px-1.5 py-0.5 text-[0.7rem] text-[var(--color-community-ink)]">
                     {item.count}
                   </span>
                 ) : null}
@@ -277,7 +277,7 @@ export function CommunityGroupPage({
 
       {tab === "discussions" ? (
         !viewer.canView ? (
-          <p className={`${card} p-4 text-sm text-zinc-600`}>
+          <p className={`${card} p-4 text-sm text-[var(--color-community-ink)]`}>
             {archived
               ? "This group is closed."
               : "This is a private group. Only its members can see what is shared here."}
@@ -285,7 +285,7 @@ export function CommunityGroupPage({
         ) : (
           <>
             {archived ? (
-              <p className={`${card} p-4 text-sm text-zinc-600`}>
+              <p className={`${card} p-4 text-sm text-[var(--color-community-ink)]`}>
                 This group is closed, so nothing new can be posted.
               </p>
             ) : viewer.canPost ? (
@@ -297,7 +297,7 @@ export function CommunityGroupPage({
                 postingBlocked={postingBlocked}
               />
             ) : (
-              <p className={`${card} p-4 text-sm text-zinc-600`}>
+              <p className={`${card} p-4 text-sm text-[var(--color-community-ink)]`}>
                 Join this group to post and comment.
               </p>
             )}
@@ -318,7 +318,7 @@ export function CommunityGroupPage({
       {tab === "members" ? (
         viewer.canView ? (
           <section className={`${card} overflow-hidden`}>
-            <ul className="divide-y divide-zinc-100">
+            <ul className="divide-y divide-[var(--color-community-edge)]">
               {detail.members.map((member) => {
                 const role = ROLE_LABEL[member.role];
                 return (
@@ -329,18 +329,18 @@ export function CommunityGroupPage({
                     <span className="flex min-w-0 items-center gap-2.5">
                       <Avatar name={member.firstName} size={32} />
                       <span className="grid min-w-0">
-                        <span className="flex items-center gap-1.5 font-medium text-zinc-900">
+                        <span className="flex items-center gap-1.5 font-medium text-[var(--color-community-ink)]">
                           <span className="truncate">
                             {member.firstName}
                             {member.isYou ? " (you)" : ""}
                           </span>
                           {role ? (
-                            <span className="rounded-full bg-(--muted) px-2 py-0.5 text-[0.7rem] font-medium text-(--color-brand-blue)">
+                            <span className="rounded-full bg-[var(--color-community-sky-soft)] px-2 py-0.5 text-[0.7rem] font-medium text-[var(--color-community-blue)]">
                               {role}
                             </span>
                           ) : null}
                         </span>
-                        <span className="text-xs text-zinc-500">
+                        <span className="text-xs text-[var(--color-community-muted)]">
                           Joined {member.joinedMonth}
                         </span>
                       </span>
@@ -360,7 +360,7 @@ export function CommunityGroupPage({
             </ul>
           </section>
         ) : (
-          <p className={`${card} p-4 text-sm text-zinc-600`}>
+          <p className={`${card} p-4 text-sm text-[var(--color-community-ink)]`}>
             Only members can see who is in a private group.
           </p>
         )
@@ -369,11 +369,11 @@ export function CommunityGroupPage({
       {tab === "requests" ? (
         <section className={`${card} overflow-hidden`}>
           {detail.requests.length === 0 ? (
-            <p className="p-4 text-sm text-zinc-500">
+            <p className="p-4 text-sm text-[var(--color-community-muted)]">
               No one is waiting to join.
             </p>
           ) : (
-            <ul className="divide-y divide-zinc-100">
+            <ul className="divide-y divide-[var(--color-community-edge)]">
               {detail.requests.map((request) => (
                 <li
                   key={request.memberId}
@@ -382,10 +382,10 @@ export function CommunityGroupPage({
                   <span className="flex min-w-0 items-center gap-2.5">
                     <Avatar name={request.firstName} size={32} />
                     <span className="grid min-w-0">
-                      <span className="truncate font-medium text-zinc-900">
+                      <span className="truncate font-medium text-[var(--color-community-ink)]">
                         {request.firstName}
                       </span>
-                      <span className="text-xs text-zinc-500">
+                      <span className="text-xs text-[var(--color-community-muted)]">
                         Requested · {relativeTime(request.requestedAt)}
                       </span>
                     </span>
@@ -402,7 +402,7 @@ export function CommunityGroupPage({
                           }),
                         )
                       }
-                      className="inline-flex h-8 items-center rounded-full bg-(--color-brand-blue) px-3.5 text-xs font-semibold text-white disabled:opacity-60"
+                      className="inline-flex h-8 items-center rounded-full bg-[var(--color-community-blue)] px-3.5 text-xs font-semibold text-white disabled:opacity-60"
                     >
                       Approve
                     </button>
@@ -417,7 +417,7 @@ export function CommunityGroupPage({
                           }),
                         )
                       }
-                      className="inline-flex h-8 items-center rounded-full border border-(--color-line-strong) bg-white px-3.5 text-xs font-medium text-zinc-600 disabled:opacity-60"
+                      className="inline-flex h-8 items-center rounded-full border border-[var(--color-community-edge)] bg-white px-3.5 text-xs font-medium text-[var(--color-community-ink)] disabled:opacity-60"
                     >
                       Decline
                     </button>
@@ -430,7 +430,7 @@ export function CommunityGroupPage({
       ) : null}
 
       {tab === "about" ? (
-        <section className={`${card} grid gap-3 p-4 text-sm text-zinc-700 sm:p-5`}>
+        <section className={`${card} grid gap-3 p-4 text-sm text-[var(--color-community-ink)] sm:p-5`}>
           {editing && canEdit ? (
             <GroupEditForm
               key={detail.id}
@@ -448,24 +448,24 @@ export function CommunityGroupPage({
                 {detail.description ||
                   "This group has not added a description yet."}
               </p>
-              <dl className="grid gap-2 border-t border-zinc-100 pt-3 text-[13px]">
+              <dl className="grid gap-2 border-t border-[var(--color-community-edge)] pt-3 text-[13px]">
                 <div className="flex justify-between gap-3">
-                  <dt className="text-zinc-500">Privacy</dt>
-                  <dd className="text-right font-medium text-zinc-900">
+                  <dt className="text-[var(--color-community-muted)]">Privacy</dt>
+                  <dd className="text-right font-medium text-[var(--color-community-ink)]">
                     {detail.privacy === "public"
                       ? "Public: anyone in the community can read and join"
                       : "Private: only members see discussions; joining needs approval"}
                   </dd>
                 </div>
                 <div className="flex justify-between gap-3">
-                  <dt className="text-zinc-500">Members</dt>
-                  <dd className="font-medium text-zinc-900">
+                  <dt className="text-[var(--color-community-muted)]">Members</dt>
+                  <dd className="font-medium text-[var(--color-community-ink)]">
                     {detail.memberCount}
                   </dd>
                 </div>
                 <div className="flex justify-between gap-3">
-                  <dt className="text-zinc-500">Started</dt>
-                  <dd className="font-medium text-zinc-900">
+                  <dt className="text-[var(--color-community-muted)]">Started</dt>
+                  <dd className="font-medium text-[var(--color-community-ink)]">
                     {detail.createdMonth}
                   </dd>
                 </div>
@@ -474,7 +474,7 @@ export function CommunityGroupPage({
                 <button
                   type="button"
                   onClick={() => setEditing(true)}
-                  className="w-fit font-medium text-(--color-brand-blue) underline underline-offset-4"
+                  className="w-fit font-medium text-[var(--color-community-blue)] underline underline-offset-4"
                 >
                   Edit group
                 </button>
@@ -517,14 +517,14 @@ function GroupEditForm({
         <button
           type="submit"
           disabled={pending}
-          className="inline-flex h-9 items-center rounded-full bg-(--color-brand-blue) px-4 text-[13px] font-semibold text-white disabled:opacity-60"
+          className="inline-flex h-9 items-center rounded-full bg-[var(--color-community-blue)] px-4 text-[13px] font-semibold text-white disabled:opacity-60"
         >
           {pending ? "Saving…" : "Save changes"}
         </button>
         <button
           type="button"
           onClick={onDone}
-          className="text-sm text-zinc-500 hover:underline"
+          className="text-sm text-[var(--color-community-muted)] hover:underline"
         >
           Cancel
         </button>

@@ -1,0 +1,41 @@
+{
+  "context": {
+    "font": "dashboardFont",
+    "height": 43.99305725097656,
+    "line": "24px",
+    "size": "16px",
+    "weight": "400",
+    "width": 358.00347900390625
+  },
+  "fonts": "loaded",
+  "heading": {
+    "font": "dashboardFont",
+    "height": 31.99652862548828,
+    "line": "32px",
+    "size": "24px",
+    "weight": "500",
+    "width": 358.00347900390625
+  },
+  "overflow": false,
+  "save": {
+    "font": "dashboardFont",
+    "height": 47.99479293823242,
+    "line": "22px",
+    "size": "14px",
+    "weight": "500",
+    "width": 358.00347900390625
+  },
+  "total": {
+    "font": "dashboardFont",
+    "height": 47.99479293823242,
+    "line": "24px",
+    "size": "16px",
+    "weight": "400",
+    "width": 100.00000762939452
+  },
+  "viewport": {
+    "dpr": 0.8999999761581421,
+    "height": 844,
+    "width": 390
+  }
+}

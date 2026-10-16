@@ -66,6 +66,30 @@
   --color-brand-blue-hover: #021070;
   --color-brand-green: #70d20b;
 
+  /* Community surfaces (approved 2026-10-16 mockup palette) */
+  --color-community-blue: #2056d6;
+  --color-community-blue-dark: #1948b8;
+  --color-community-ink: #252b33;
+  --color-community-muted: #63676d;
+  --color-community-faint: #4d5259;
+  --color-community-canvas: #f6f7f8;
+  --color-community-edge: #e7e9ec;
+  --color-community-edge-strong: #d7dade;
+  --color-community-sky-soft: #e4ebfd;
+  --color-community-sky-ink: #2331ae;
+  --color-community-violet-soft: #e9dffa;
+  --color-community-violet-ink: #6d28d9;
+  --color-community-plum-soft: #dec8fa;
+  --color-community-plum-ink: #56209c;
+  --color-community-amber-soft: #fff1cc;
+  --color-community-amber-ink: #7a5310;
+  --color-community-green-soft: #e7f5dc;
+  --color-community-green-ink: #2c6a22;
+  --color-community-mint-soft: #d8f7bd;
+  --color-community-mint-ink: #205e20;
+  --color-community-red-soft: #fff0f0;
+  --color-community-red-ink: #a33131;
+
   /* Neutrals */
   --color-cream-50: #fcfbf8;
   --color-cream-100: #f8f6f2;

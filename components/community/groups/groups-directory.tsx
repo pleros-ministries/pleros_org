@@ -18,7 +18,7 @@ import { CreateGroupDialog } from "./create-group-dialog";
 import { GroupJoinButton } from "./group-join-button";
 
 const card =
-  "rounded-2xl border border-(--color-line-strong) bg-white shadow-(--shadow-sm)";
+  "rounded-2xl border border-[var(--color-community-edge)] bg-white ";
 
 export type LocationGroupLink = {
   id: number;
@@ -39,7 +39,7 @@ function joinDecisionFor(group: GroupSummary): GroupJoinDecision {
 function PrivacyBadge({ privacy }: { privacy: GroupSummary["privacy"] }) {
   const Icon = privacy === "public" ? GlobeIcon : LockIcon;
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-zinc-100 px-2 py-0.5 text-[0.7rem] font-medium text-zinc-600">
+    <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-community-canvas)] px-2 py-0.5 text-[0.7rem] font-medium text-[var(--color-community-ink)]">
       <Icon className="size-3" strokeWidth={2} />
       {privacy === "public" ? "Public" : "Private"}
     </span>
@@ -62,22 +62,22 @@ function GroupRow({ group }: { group: GroupSummary }) {
         <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
           <Link
             href={`/dashboard/community/groups/${group.id}`}
-            className="text-sm font-semibold text-zinc-900 hover:underline"
+            className="text-sm font-semibold text-[var(--color-community-ink)] hover:underline"
           >
             {group.name}
           </Link>
           <PrivacyBadge privacy={group.privacy} />
           {roleLabel ? (
-            <span className="rounded-full bg-(--muted) px-2 py-0.5 text-[0.7rem] font-medium text-(--color-brand-blue)">
+            <span className="rounded-full bg-[var(--color-community-sky-soft)] px-2 py-0.5 text-[0.7rem] font-medium text-[var(--color-community-blue)]">
               {roleLabel}
             </span>
           ) : null}
         </p>
-        <p className="text-xs text-zinc-500">
+        <p className="text-xs text-[var(--color-community-muted)]">
           {group.memberCount} member{group.memberCount === 1 ? "" : "s"}
         </p>
         {group.description ? (
-          <p className="line-clamp-2 text-[13px] text-zinc-600">
+          <p className="line-clamp-2 text-[13px] text-[var(--color-community-ink)]">
             {group.description}
           </p>
         ) : null}
@@ -119,10 +119,10 @@ export function GroupsDirectory({
     <div className="grid gap-4">
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div className="grid gap-1">
-          <h1 className="ppc-heading text-lg font-semibold text-zinc-900">
+          <h1 className="text-lg font-semibold text-[var(--color-community-ink)]">
             Groups
           </h1>
-          <p className="max-w-md text-sm text-zinc-500">
+          <p className="max-w-md text-sm text-[var(--color-community-muted)]">
             Join a group around something you care about, or start your own.
           </p>
         </div>
@@ -130,7 +130,7 @@ export function GroupsDirectory({
           <button
             type="button"
             onClick={() => setCreating(true)}
-            className="inline-flex h-9 items-center gap-1.5 rounded-full bg-(--color-brand-blue) px-3.5 text-[13px] font-semibold text-white"
+            className="inline-flex h-9 items-center gap-1.5 rounded-full bg-[var(--color-community-blue)] px-3.5 text-[13px] font-semibold text-white"
           >
             <PlusIcon className="size-4" strokeWidth={2} />
             Create group
@@ -139,10 +139,10 @@ export function GroupsDirectory({
       </header>
 
       <section className={`${card} overflow-hidden`}>
-        <h2 className="ppc-heading border-b border-zinc-100 px-4 py-3 text-sm font-semibold text-zinc-900">
+        <h2 className="border-b border-[var(--color-community-edge)] px-4 py-3 text-sm font-semibold text-[var(--color-community-ink)]">
           Your groups
         </h2>
-        <ul className="divide-y divide-zinc-100">
+        <ul className="divide-y divide-[var(--color-community-edge)]">
           {locationGroups.map((group) => (
             <li key={`unit-${group.id}`} className="px-4 py-3">
               <Link
@@ -154,10 +154,10 @@ export function GroupsDirectory({
                   strokeWidth={2}
                 />
                 <span className="grid min-w-0">
-                  <span className="truncate text-sm font-semibold text-zinc-900">
+                  <span className="truncate text-sm font-semibold text-[var(--color-community-ink)]">
                     {group.name}
                   </span>
-                  <span className="text-xs text-zinc-500">
+                  <span className="text-xs text-[var(--color-community-muted)]">
                     {group.relation === "manager"
                       ? "Location group · you look after this group"
                       : "Your location group"}
@@ -177,10 +177,10 @@ export function GroupsDirectory({
                   strokeWidth={2}
                 />
                 <span className="grid min-w-0">
-                  <span className="text-sm font-semibold text-zinc-900">
+                  <span className="text-sm font-semibold text-[var(--color-community-ink)]">
                     Discipleship
                   </span>
-                  <span className="text-xs text-zinc-500">
+                  <span className="text-xs text-[var(--color-community-muted)]">
                     Your discipler and the people you disciple
                   </span>
                 </span>
@@ -192,41 +192,41 @@ export function GroupsDirectory({
           ))}
         </ul>
         {mine.length === 0 ? (
-          <p className="border-t border-zinc-100 px-4 py-3 text-sm text-zinc-500">
+          <p className="border-t border-[var(--color-community-edge)] px-4 py-3 text-sm text-[var(--color-community-muted)]">
             You have not joined any other groups yet.
           </p>
         ) : null}
       </section>
 
       <section className={`${card} overflow-hidden`}>
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-100 px-4 py-3">
-          <h2 className="ppc-heading text-sm font-semibold text-zinc-900">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--color-community-edge)] px-4 py-3">
+          <h2 className="text-sm font-semibold text-[var(--color-community-ink)]">
             Discover groups
           </h2>
           {hasOthers ? (
             <label className="relative block w-full sm:w-56">
               <span className="sr-only">Search groups</span>
               <SearchIcon
-                className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-400"
+                className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--color-community-muted)]"
                 strokeWidth={2}
               />
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder="Search groups"
-                className="h-9 w-full rounded-full border border-zinc-200 pl-9 pr-3 text-base outline-none focus:border-zinc-300 sm:text-sm"
+                className="h-9 w-full rounded-full border border-[var(--color-community-edge)] pl-9 pr-3 text-base outline-none focus:border-[var(--color-community-edge-strong)] sm:text-sm"
               />
             </label>
           ) : null}
         </div>
         {discover.length > 0 ? (
-          <ul className="divide-y divide-zinc-100">
+          <ul className="divide-y divide-[var(--color-community-edge)]">
             {discover.map((group) => (
               <GroupRow key={group.id} group={group} />
             ))}
           </ul>
         ) : (
-          <p className="px-4 py-4 text-sm text-zinc-500">
+          <p className="px-4 py-4 text-sm text-[var(--color-community-muted)]">
             {hasOthers
               ? "No groups match that search."
               : "There are no other groups yet. Be the first to start one."}

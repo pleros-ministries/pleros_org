@@ -21,7 +21,7 @@ import { Avatar } from "./avatar";
 const MAX_IMAGES = 4;
 
 const fieldClass =
-  "w-full rounded-xl border border-zinc-200 px-3 text-base outline-none focus:border-zinc-300 sm:text-[15px]";
+  "w-full rounded-xl border border-[var(--color-community-edge)] px-3 text-base outline-none focus:border-[var(--color-community-edge-strong)] sm:text-[15px]";
 
 /**
  * Where the viewer may publish an announcement: nowhere (members), inside
@@ -125,7 +125,7 @@ export function FeedComposer({
 
   if (postingBlocked) {
     return (
-      <p className="rounded-2xl border border-(--color-line-strong) bg-white p-4 text-sm text-zinc-600 shadow-(--shadow-sm)">
+      <p className="rounded-2xl border border-[var(--color-community-edge)] bg-white p-4 text-sm text-[var(--color-community-ink)] ">
         {POSTING_PAUSED_COPY} You can still read and like posts.
       </p>
     );
@@ -133,12 +133,12 @@ export function FeedComposer({
 
   if (!open) {
     return (
-      <div className="flex items-center gap-3 rounded-2xl border border-(--color-line-strong) bg-white p-3 shadow-(--shadow-sm)">
+      <div className="flex items-center gap-3 rounded-2xl border border-[var(--color-community-edge)] bg-white p-3 ">
         <Avatar name={viewerName} size={40} />
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="h-10 flex-1 rounded-full bg-zinc-100 px-4 text-left text-xs text-zinc-500 transition-colors hover:bg-zinc-200/70"
+          className="h-10 flex-1 rounded-full bg-[var(--color-community-canvas)] px-4 text-left text-xs text-[var(--color-community-muted)] transition-colors hover:bg-[var(--color-community-edge)]"
         >
           {officialReach === "all"
             ? "Share an update or start a discussion…"
@@ -150,7 +150,7 @@ export function FeedComposer({
 
   return (
     <form
-      className="grid gap-3 rounded-2xl border border-(--color-line-strong) bg-white p-4 shadow-(--shadow-sm)"
+      className="grid gap-3 rounded-2xl border border-[var(--color-community-edge)] bg-white p-4 "
       action={() => {
         setError(null);
         postMutation.mutate();
@@ -163,7 +163,7 @@ export function FeedComposer({
             <div
               role="group"
               aria-label="Post type"
-              className="flex w-fit items-center gap-0.5 rounded-full border border-zinc-200 p-0.5"
+              className="flex w-fit items-center gap-0.5 rounded-full border border-[var(--color-community-edge)] p-0.5"
             >
               {(
                 [
@@ -185,10 +185,10 @@ export function FeedComposer({
                         : undefined
                     }
                     onClick={() => setKind(value)}
-                    className={`h-7 rounded-full px-3 text-[13px] font-medium transition-colors disabled:opacity-40 ${
+                    className={`inline-flex min-h-[28px] items-center rounded-full px-3 text-[13px] font-medium transition-colors disabled:opacity-40 ${
                       active
-                        ? "bg-(--muted) text-(--color-brand-blue)"
-                        : "text-zinc-500 hover:text-zinc-800"
+                        ? "bg-[var(--color-community-blue)] text-white"
+                        : "text-[var(--color-community-muted)] hover:text-[var(--color-community-ink)]"
                     }`}
                   >
                     {label}
@@ -243,7 +243,7 @@ export function FeedComposer({
                 onClick={() =>
                   setImages((c) => c.filter((x) => x.key !== img.key))
                 }
-                className="absolute -right-1.5 -top-1.5 inline-flex size-5 items-center justify-center rounded-full bg-zinc-900 text-white"
+                className="absolute -right-1.5 -top-1.5 inline-flex size-5 items-center justify-center rounded-full bg-[var(--color-community-ink)] text-white"
                 aria-label="Remove image"
               >
                 <XIcon className="size-3" strokeWidth={2.5} />
@@ -275,7 +275,7 @@ export function FeedComposer({
           type="button"
           disabled={isUploading || images.length >= MAX_IMAGES}
           onClick={() => fileRef.current?.click()}
-          className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-zinc-200 px-3 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-50 disabled:opacity-50"
+          className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[var(--color-community-edge)] px-3 text-sm font-medium text-[var(--color-community-ink)] transition-colors hover:bg-[var(--color-community-canvas)] disabled:opacity-50"
         >
           <ImagePlusIcon className="size-4" strokeWidth={2} />
           {isUploading ? "Uploading…" : "Photo"}
@@ -286,8 +286,8 @@ export function FeedComposer({
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
             aria-label="Topic"
-            className={`h-9 rounded-lg border border-zinc-200 px-2 text-sm ${
-              topic ? "text-zinc-900" : "text-zinc-500"
+            className={`h-9 rounded-lg border border-[var(--color-community-edge)] px-2 text-sm ${
+              topic ? "text-[var(--color-community-ink)]" : "text-[var(--color-community-muted)]"
             }`}
           >
             <option value="">Topic (optional)</option>
@@ -304,7 +304,7 @@ export function FeedComposer({
             value={scope}
             onChange={(e) => setScope(e.target.value as PostScope)}
             aria-label="Where to post"
-            className="h-9 max-w-44 rounded-lg border border-zinc-200 px-2 text-sm"
+            className="h-9 max-w-44 rounded-lg border border-[var(--color-community-edge)] px-2 text-sm"
           >
             <option value="global">Whole community</option>
             <option value="unit">{unitName}</option>
@@ -315,14 +315,14 @@ export function FeedComposer({
           <button
             type="button"
             onClick={reset}
-            className="text-sm text-zinc-500 hover:underline"
+            className="text-sm text-[var(--color-community-muted)] hover:underline"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={pending || isUploading}
-            className="inline-flex h-9 items-center rounded-lg bg-[var(--color-brand-blue)] px-4 text-sm font-semibold text-white disabled:opacity-50"
+            className="inline-flex h-9 items-center rounded-lg bg-[var(--color-community-blue)] px-4 text-sm font-semibold text-white disabled:opacity-50"
           >
             {pending ? "Posting…" : "Post"}
           </button>

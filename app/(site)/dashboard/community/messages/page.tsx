@@ -15,16 +15,16 @@ export default async function CommunityMessagesRoute() {
 
   // The inbox itself lives in the layout; this fills the desktop thread pane.
   return (
-    <section className="grid min-h-[26rem] place-items-center rounded-2xl border border-(--color-line-strong) bg-white p-6 text-center shadow-(--shadow-sm)">
+    <section className="grid min-h-[26rem] place-items-center rounded-2xl border border-[var(--color-community-edge)] bg-white p-6 text-center">
       <div className="grid justify-items-center gap-2">
         <MessagesSquareIcon
-          className="size-8 text-zinc-300"
+          className="size-8 text-[var(--color-community-muted)]"
           strokeWidth={1.5}
         />
-        <p className="text-sm font-medium text-zinc-700">
+        <p className="text-sm font-medium text-[var(--color-community-ink)]">
           Select a conversation
         </p>
-        <p className="max-w-xs text-[13px] text-zinc-500">
+        <p className="max-w-xs text-[13px] text-[var(--color-community-muted)]">
           Private messages are only visible to you and the person you are
           talking to.
         </p>

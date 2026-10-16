@@ -122,7 +122,7 @@ export function CommunityNav({
   return (
     <nav
       aria-label="Community navigation"
-      className={`grid gap-0.5 rounded-2xl border border-(--color-line-strong) bg-white p-2 shadow-(--shadow-sm) ${className}`}
+      className={`grid gap-0.5 rounded-2xl border border-[var(--color-community-edge)] bg-white p-2  ${className}`}
     >
       {items.map((item) => {
         const active = isActive(pathname, item.href);
@@ -135,13 +135,13 @@ export function CommunityNav({
             aria-current={active ? "page" : undefined}
             className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
               active
-                ? "bg-(--muted) font-semibold text-(--color-brand-blue)"
-                : "text-zinc-600 hover:bg-zinc-50"
+                ? "bg-[var(--color-community-sky-soft)] font-semibold text-[var(--color-community-blue)]"
+                : "text-[var(--color-community-ink)] hover:bg-[var(--color-community-canvas)]"
             }`}
           >
             <Icon
               className={`size-4 shrink-0 ${
-                active ? "text-(--color-brand-blue)" : "text-zinc-400"
+                active ? "text-[var(--color-community-blue)]" : "text-[var(--color-community-muted)]"
               }`}
               strokeWidth={2}
             />
@@ -149,7 +149,7 @@ export function CommunityNav({
             {item.key === "messages" && unreadMessages > 0 ? (
               <span
                 aria-label={`${unreadMessages} unread`}
-                className="ml-auto inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-(--color-brand-blue) px-1.5 text-[0.7rem] font-semibold text-white"
+                className="ml-auto inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--color-community-blue)] px-1.5 text-[0.7rem] font-semibold text-white"
               >
                 {unreadMessages > 99 ? "99+" : unreadMessages}
               </span>
@@ -157,7 +157,7 @@ export function CommunityNav({
             {item.key === "ask" && unreadQuestions > 0 ? (
               <span
                 aria-label="Pleros has replied"
-                className="ml-auto size-2 rounded-full bg-(--color-brand-blue)"
+                className="ml-auto size-2 rounded-full bg-[var(--color-community-blue)]"
               />
             ) : null}
           </Link>

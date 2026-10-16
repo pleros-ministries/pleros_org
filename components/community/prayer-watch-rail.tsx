@@ -27,7 +27,7 @@ export function PrayerWatchRail() {
   }, []);
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-(--color-line-strong) bg-[var(--color-brand-blue)] text-white shadow-(--shadow-sm)">
+    <section className="overflow-hidden rounded-2xl border border-[var(--color-community-edge)] bg-[var(--color-community-blue)] text-white ">
       <div className="px-4 pt-4">
         <p className="text-[0.7rem] font-semibold uppercase tracking-[0.12em] text-white/70">
           Prayer Watch · today
@@ -42,7 +42,7 @@ export function PrayerWatchRail() {
               <div
                 className={`flex items-center gap-2.5 rounded-lg px-2 py-2 text-sm ${
                   isNext
-                    ? "bg-[var(--color-brand-lime)] text-[var(--color-brand-blue)]"
+                    ? "bg-[var(--color-brand-lime)] text-[var(--color-community-blue)]"
                     : "text-white/85"
                 }`}
               >

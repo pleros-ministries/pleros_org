@@ -1,0 +1,19 @@
+{
+  "baselineCommit": "939482b",
+  "workingTree": "uncommitted",
+  "hashes": {
+    "components/dashboard/v3/baseline.tsx": "859e1b420e932a93eddc6bd38ff7a77ef829bdfc9f0403f5c79df920666a97ec",
+    "components/dashboard/v3/primitives.tsx": "8ad6a95a5613888e6251b90977b90ab18439ed807033dd4e07a690d9eb800963",
+    "components/dashboard/v3/dashboard.module.css": "462917ccdaac83a8701b3dabc24dc3254e6f7219436886fe9b9ff3a9809aa943",
+    "components/dashboard/v3/lucide-icons.json": "f777e5856eca917b30d45950bc9de35400a63468f32776de7110c592ae9fc9c3",
+    "app/preview/dashboard-v3/page.tsx": "d2e7289a4498429a7e0fc4c920667368114534d3356a4a0a707125e339183460",
+    "app/preview/dashboard-v3/loading.tsx": "7c9abbf700175ffcbc85bb3802f1f2d3ba893a95135a255b7c36b0c08e2c282c",
+    "app/preview/dashboard-v3/error.tsx": "edf0ad4bbc54dea42dcbd3e6ad61df76c2f601eaa30c11e54c3cf4a6f3717ac8",
+    "components/root-integrations.tsx": "e6ce9000638a0c3871592dfdef085b39646a64e6c8893d6ec9e8e4ff76e37e7f",
+    "next.config.ts": "800314eccb922d730be76a83389ff2a31acd195a35577e7646c41a773bc0791c",
+    "app/fonts/be-vietnam-pro/BeVietnamPro-Regular.ttf": "cd1ef6e9d7db28ad5cdb88a65ccbe693870e60d340b791f349d248342b4fe4c3",
+    "app/fonts/be-vietnam-pro/BeVietnamPro-Medium.ttf": "b60832bfa0fcd015158112c64d7e3fdad3b0c6287d1823f85a3103636e845268",
+    "app/fonts/be-vietnam-pro/BeVietnamPro-SemiBold.ttf": "bd8e27eb02720b9d91e59e4f10a90878643219f25ce6a8d9a4f06a8a88d3bb71",
+    "app/fonts/be-vietnam-pro/BeVietnamPro-Bold.ttf": "7f738fe5c43c8872807b20e2d30d42163618de8a4daf7f48a939adac32c16847"
+  }
+}

@@ -80,11 +80,11 @@ export function LeaderReportView({
   }
 
   const stat = (label: string, value: string | number) => (
-    <div className="grid gap-0.5 rounded-sm border border-zinc-200 bg-white p-3">
-      <span className="text-[0.6rem] font-semibold uppercase tracking-[0.08em] text-zinc-400">
+    <div className="grid gap-0.5 rounded-sm border border-[var(--color-community-edge)] bg-white p-3">
+      <span className="text-[0.6rem] font-semibold uppercase tracking-[0.08em] text-[var(--color-community-muted)]">
         {label}
       </span>
-      <span className="ppc-heading text-base font-semibold text-zinc-900">
+      <span className="text-base font-semibold text-[var(--color-community-ink)]">
         {value}
       </span>
     </div>
@@ -93,7 +93,7 @@ export function LeaderReportView({
   return (
     <div className="grid gap-4">
       <header className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="ppc-heading text-lg font-semibold text-zinc-900">
+        <h1 className="text-lg font-semibold text-[var(--color-community-ink)]">
           {report.unitName}
         </h1>
         {unitOptions.length > 1 ? (
@@ -104,7 +104,7 @@ export function LeaderReportView({
                 `/dashboard/community/leader?unitId=${event.target.value}`,
               )
             }
-            className="h-8 rounded-sm border border-zinc-200 px-2 text-xs"
+            className="h-8 rounded-sm border border-[var(--color-community-edge)] px-2 text-xs"
           >
             {unitOptions.map((option) => (
               <option key={option.id} value={option.id}>
@@ -126,16 +126,16 @@ export function LeaderReportView({
       </div>
 
       {ministry ? (
-        <section className="grid gap-2 rounded-sm border border-zinc-200 bg-white p-4">
+        <section className="grid gap-2 rounded-sm border border-[var(--color-community-edge)] bg-white p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <h2 className="ppc-heading text-sm font-semibold text-zinc-900">
+            <h2 className="text-sm font-semibold text-[var(--color-community-ink)]">
               Ministry reports · {dateKeyLabel(ministry.dateKey)}
             </h2>
             <div className="flex items-center gap-3 text-xs">
               <Link
                 href={`/dashboard/community/leader?unitId=${report.unitId}&date=${shiftDate(ministry.dateKey, -1)}`}
                 scroll={false}
-                className="text-[var(--color-brand-blue)] underline underline-offset-2"
+                className="text-[var(--color-community-blue)] underline underline-offset-2"
               >
                 Previous day
               </Link>
@@ -143,14 +143,14 @@ export function LeaderReportView({
                 <Link
                   href={`/dashboard/community/leader?unitId=${report.unitId}&date=${shiftDate(ministry.dateKey, 1)}`}
                   scroll={false}
-                  className="text-[var(--color-brand-blue)] underline underline-offset-2"
+                  className="text-[var(--color-community-blue)] underline underline-offset-2"
                 >
                   Next day
                 </Link>
               ) : null}
             </div>
           </div>
-          <p className="text-xs text-zinc-500">
+          <p className="text-xs text-[var(--color-community-muted)]">
             {ministry.rows.length} of {ministry.memberCount} members sent a
             report. Numbers are as each person entered them; open a row for
             each activity and its note.
@@ -158,7 +158,7 @@ export function LeaderReportView({
           {ministry.rows.length > 0 ? (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
-                <thead className="bg-zinc-50 text-zinc-500">
+                <thead className="bg-[var(--color-community-canvas)] text-[var(--color-community-muted)]">
                   <tr>
                     <th className="px-2 py-2 font-medium">Member</th>
                     <th className="px-2 py-2 text-right font-medium">Activities</th>
@@ -169,29 +169,29 @@ export function LeaderReportView({
                     <th className="px-2 py-2" />
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-zinc-100">
+                <tbody className="divide-y divide-[var(--color-community-edge)]">
                   {ministry.rows.map((row) => {
                     const open = expandedMember === row.userId;
                     const detailId = `leader-ministry-${row.userId}`;
                     return (
                       <Fragment key={row.userId}>
                         <tr>
-                          <td className="whitespace-nowrap px-2 py-2 font-medium text-zinc-900">
+                          <td className="whitespace-nowrap px-2 py-2 font-medium text-[var(--color-community-ink)]">
                             {row.name}
                           </td>
-                          <td className="px-2 py-2 text-right tabular-nums text-zinc-700">
+                          <td className="px-2 py-2 text-right tabular-nums text-[var(--color-community-ink)]">
                             {row.activities.length}
                           </td>
-                          <td className="px-2 py-2 text-right tabular-nums text-zinc-700">
+                          <td className="px-2 py-2 text-right tabular-nums text-[var(--color-community-ink)]">
                             {totalReached(row.totals)}
                           </td>
-                          <td className="px-2 py-2 text-right tabular-nums text-zinc-700">
+                          <td className="px-2 py-2 text-right tabular-nums text-[var(--color-community-ink)]">
                             {row.totals.attendance}
                           </td>
-                          <td className="px-2 py-2 text-right tabular-nums text-zinc-700">
+                          <td className="px-2 py-2 text-right tabular-nums text-[var(--color-community-ink)]">
                             {row.totals.saved}
                           </td>
-                          <td className="px-2 py-2 text-right tabular-nums text-zinc-700">
+                          <td className="px-2 py-2 text-right tabular-nums text-[var(--color-community-ink)]">
                             {row.totals.followUps}
                           </td>
                           <td className="px-2 py-1 text-right">
@@ -206,7 +206,7 @@ export function LeaderReportView({
                           </td>
                         </tr>
                         {open ? (
-                          <tr id={detailId} className="bg-zinc-50/60">
+                          <tr id={detailId} className="bg-[var(--color-community-canvas)]/60">
                             <td colSpan={7} className="px-3 py-2.5">
                               <MemberActivityList activities={row.activities} />
                             </td>
@@ -223,12 +223,12 @@ export function LeaderReportView({
       ) : null}
 
       {outreach ? (
-        <section className="overflow-hidden rounded-sm border border-zinc-200 bg-white">
-          <div className="grid gap-0.5 border-b border-zinc-100 px-4 py-3">
-            <h2 className="ppc-heading text-sm font-semibold text-zinc-900">
+        <section className="overflow-hidden rounded-sm border border-[var(--color-community-edge)] bg-white">
+          <div className="grid gap-0.5 border-b border-[var(--color-community-edge)] px-4 py-3">
+            <h2 className="text-sm font-semibold text-[var(--color-community-ink)]">
               People met in ministry
             </h2>
-            <p className="text-xs text-zinc-500">
+            <p className="text-xs text-[var(--color-community-muted)]">
               Recorded by this group&apos;s members in the last 90 days. Open a
               person for their history, log a follow-up or update their status.
             </p>
@@ -244,27 +244,27 @@ export function LeaderReportView({
         </section>
       ) : null}
 
-      <section className="grid gap-2 rounded-sm border border-zinc-200 bg-white p-4">
-        <h2 className="ppc-heading text-sm font-semibold text-zinc-900">
+      <section className="grid gap-2 rounded-sm border border-[var(--color-community-edge)] bg-white p-4">
+        <h2 className="text-sm font-semibold text-[var(--color-community-ink)]">
           Reported in your group ({flags.length})
         </h2>
         {flags.length === 0 ? (
-          <p className="text-xs text-zinc-500">
+          <p className="text-xs text-[var(--color-community-muted)]">
             Nothing has been reported. Reports from members appear here.
           </p>
         ) : (
-          <ul className="divide-y divide-zinc-100">
+          <ul className="divide-y divide-[var(--color-community-edge)]">
             {flags.map((flag) => (
               <li key={flag.id} className="grid gap-1 py-2.5 text-xs">
-                <p className="text-zinc-500">
+                <p className="text-[var(--color-community-muted)]">
                   {flag.targetType === "post" ? "Post" : "Comment"}
                   {flag.authorName ? ` by ${flag.authorName}` : ""} · reported
                   by {flag.reporterName}
                 </p>
                 {flag.preview ? (
-                  <p className="text-sm text-zinc-800">“{flag.preview}”</p>
+                  <p className="text-sm text-[var(--color-community-ink)]">“{flag.preview}”</p>
                 ) : null}
-                <p className="text-zinc-600">Reason: {flag.reason}</p>
+                <p className="text-[var(--color-community-ink)]">Reason: {flag.reason}</p>
                 <div className="flex items-center gap-4 pt-0.5">
                   <button
                     type="button"
@@ -278,7 +278,7 @@ export function LeaderReportView({
                     type="button"
                     disabled={pending}
                     onClick={() => resolveFlag(flag.id, "dismiss")}
-                    className="text-zinc-500 underline underline-offset-2 disabled:opacity-50"
+                    className="text-[var(--color-community-muted)] underline underline-offset-2 disabled:opacity-50"
                   >
                     Dismiss
                   </button>
@@ -288,30 +288,30 @@ export function LeaderReportView({
           </ul>
         )}
         {flagNote ? (
-          <p role="status" className="text-xs text-zinc-600">
+          <p role="status" className="text-xs text-[var(--color-community-ink)]">
             {flagNote}
           </p>
         ) : null}
       </section>
 
-      <section className="grid gap-2 rounded-sm border border-zinc-200 bg-white p-4">
-        <h2 className="ppc-heading text-sm font-semibold text-zinc-900">
+      <section className="grid gap-2 rounded-sm border border-[var(--color-community-edge)] bg-white p-4">
+        <h2 className="text-sm font-semibold text-[var(--color-community-ink)]">
           At risk ({report.atRisk.length})
         </h2>
         {report.atRisk.length === 0 ? (
-          <p className="text-xs text-zinc-500">
+          <p className="text-xs text-[var(--color-community-muted)]">
             Everyone has started preparation or Prayer Watch.
           </p>
         ) : (
           <>
-            <p className="text-xs text-zinc-500">
+            <p className="text-xs text-[var(--color-community-muted)]">
               {report.atRisk.map((m) => m.firstName).join(", ")}
             </p>
             <textarea
               value={message}
               onChange={(event) => setMessage(event.target.value)}
               rows={2}
-              className="rounded-sm border border-zinc-200 p-2 text-xs"
+              className="rounded-sm border border-[var(--color-community-edge)] p-2 text-xs"
             />
             <button
               type="button"
@@ -330,23 +330,23 @@ export function LeaderReportView({
                   }
                 })
               }
-              className="inline-flex h-8 w-fit items-center rounded-sm bg-[var(--color-brand-blue)] px-3 text-xs font-semibold text-white disabled:opacity-50"
+              className="inline-flex h-8 w-fit items-center rounded-sm bg-[var(--color-community-blue)] px-3 text-xs font-semibold text-white disabled:opacity-50"
             >
               {pending ? "Sending…" : "Nudge at-risk members"}
             </button>
-            {note ? <p className="text-xs text-zinc-600">{note}</p> : null}
+            {note ? <p className="text-xs text-[var(--color-community-ink)]">{note}</p> : null}
           </>
         )}
       </section>
 
-      <section className="grid gap-2 rounded-sm border border-zinc-200 bg-white p-4">
-        <h2 className="ppc-heading text-sm font-semibold text-zinc-900">
+      <section className="grid gap-2 rounded-sm border border-[var(--color-community-edge)] bg-white p-4">
+        <h2 className="text-sm font-semibold text-[var(--color-community-ink)]">
           Recent joiners
         </h2>
         {report.recentJoiners.length === 0 ? (
-          <p className="text-xs text-zinc-500">No members yet.</p>
+          <p className="text-xs text-[var(--color-community-muted)]">No members yet.</p>
         ) : (
-          <ul className="text-xs text-zinc-600">
+          <ul className="text-xs text-[var(--color-community-ink)]">
             {report.recentJoiners.map((joiner, index) => (
               <li key={index}>
                 {joiner.firstName} · joined {joiner.joinedMonth}

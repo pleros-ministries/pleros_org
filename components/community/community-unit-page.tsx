@@ -22,7 +22,7 @@ type AdminMember = {
 type TabKey = "discussions" | "members" | "about";
 
 const card =
-  "rounded-2xl border border-(--color-line-strong) bg-white shadow-(--shadow-sm)";
+  "rounded-2xl border border-[var(--color-community-edge)] bg-white";
 
 export function CommunityUnitPage({
   detail,
@@ -60,10 +60,10 @@ export function CommunityUnitPage({
       <header className={`${card} grid gap-3 p-4 sm:p-5`}>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="grid min-w-0 gap-1">
-            <h1 className="ppc-heading text-lg font-semibold text-zinc-900">
+            <h1 className="text-[18px] font-medium leading-[26px] text-[var(--color-community-ink)]">
               {detail.name}
             </h1>
-            <p className="text-sm text-zinc-500">
+            <p className="text-[13px] leading-[20px] text-[var(--color-community-muted)]">
               {detail.memberCount} member{detail.memberCount === 1 ? "" : "s"}
               {detail.pastor ? ` · Pastor ${detail.pastor.firstName}` : ""}
               {detail.leader ? ` · led by ${detail.leader.firstName}` : ""}
@@ -87,7 +87,7 @@ export function CommunityUnitPage({
         <div
           role="tablist"
           aria-label="Group sections"
-          className="-mb-4 flex gap-5 border-t border-zinc-100 pt-1 sm:-mb-5"
+          className="-mb-4 flex gap-5 border-t border-[var(--color-community-edge)] pt-1 sm:-mb-5"
         >
           {tabs.map((item) => {
             const active = tab === item.key;
@@ -98,15 +98,15 @@ export function CommunityUnitPage({
                 role="tab"
                 aria-selected={active}
                 onClick={() => setTab(item.key)}
-                className={`-mb-px inline-flex items-center gap-1.5 border-b-2 py-2.5 text-sm font-medium transition-colors ${
+                className={`-mb-px inline-flex min-h-[44px] items-center gap-1.5 border-b-2 py-2.5 text-sm font-medium transition-colors ${
                   active
-                    ? "border-(--color-brand-blue) text-(--color-brand-blue)"
-                    : "border-transparent text-zinc-500 hover:text-zinc-800"
+                    ? "border-[var(--color-community-blue)] text-[var(--color-community-blue)]"
+                    : "border-transparent text-[var(--color-community-muted)]"
                 }`}
               >
                 {item.label}
                 {item.count != null ? (
-                  <span className="rounded-full bg-zinc-100 px-1.5 py-0.5 text-[0.7rem] text-zinc-600">
+                  <span className="rounded-full bg-[var(--color-community-sky-soft)] px-1.5 py-0.5 text-[11px] font-medium text-[var(--color-community-sky-ink)]">
                     {item.count}
                   </span>
                 ) : null}
@@ -142,7 +142,7 @@ export function CommunityUnitPage({
 
       {tab === "members" ? (
         <section className={`${card} overflow-hidden`}>
-          <ul className="divide-y divide-zinc-100">
+          <ul className="divide-y divide-[var(--color-community-edge)]">
             {detail.members.map((member, index) => (
               <li
                 key={`${member.firstName}-${index}`}
@@ -151,15 +151,15 @@ export function CommunityUnitPage({
                 <span className="flex min-w-0 items-center gap-2.5">
                   <Avatar name={member.firstName} size={32} />
                   <span className="grid min-w-0">
-                    <span className="flex items-center gap-1.5 font-medium text-zinc-900">
+                    <span className="flex items-center gap-1.5 font-medium text-[var(--color-community-ink)]">
                       <span className="truncate">{member.firstName}</span>
                       {member.isLeader ? (
-                        <span className="rounded-full bg-(--muted) px-2 py-0.5 text-[0.7rem] font-medium text-(--color-brand-blue)">
+                        <span className="rounded-full bg-[var(--color-community-sky-soft)] px-2 py-0.5 text-[0.7rem] font-medium text-[var(--color-community-blue)]">
                           Leader
                         </span>
                       ) : null}
                     </span>
-                    <span className="text-xs text-zinc-500">
+                    <span className="text-xs text-[var(--color-community-muted)]">
                       {member.stageLabel} · joined {member.joinedMonth}
                     </span>
                   </span>
@@ -174,7 +174,7 @@ export function CommunityUnitPage({
       ) : null}
 
       {tab === "about" ? (
-        <section className={`${card} grid gap-3 p-4 text-sm text-zinc-700 sm:p-5`}>
+        <section className={`${card} grid gap-3 p-4 text-sm text-[var(--color-community-ink)] sm:p-5`}>
           <p>
             This is a location group. Location groups are formed automatically
             from the country or state each learner gave when they enrolled, and
@@ -184,22 +184,22 @@ export function CommunityUnitPage({
             Raise a discussion, ask a question or share a testimony. Keep it
             kind, and use Report on anything that should not be here.
           </p>
-          <dl className="grid gap-2 border-t border-zinc-100 pt-3 text-[13px]">
+          <dl className="grid gap-2 border-t border-[var(--color-community-edge)] pt-3 text-[13px]">
             <div className="flex justify-between gap-3">
-              <dt className="text-zinc-500">Pastor</dt>
-              <dd className="font-medium text-zinc-900">
+              <dt className="text-[var(--color-community-muted)]">Pastor</dt>
+              <dd className="font-medium text-[var(--color-community-ink)]">
                 {detail.pastor?.firstName ?? "Not assigned yet"}
               </dd>
             </div>
             <div className="flex justify-between gap-3">
-              <dt className="text-zinc-500">Leader</dt>
-              <dd className="font-medium text-zinc-900">
+              <dt className="text-[var(--color-community-muted)]">Leader</dt>
+              <dd className="font-medium text-[var(--color-community-ink)]">
                 {detail.leader?.firstName ?? "Not appointed yet"}
               </dd>
             </div>
             <div className="flex justify-between gap-3">
-              <dt className="text-zinc-500">Members</dt>
-              <dd className="font-medium text-zinc-900">{detail.memberCount}</dd>
+              <dt className="text-[var(--color-community-muted)]">Members</dt>
+              <dd className="font-medium text-[var(--color-community-ink)]">{detail.memberCount}</dd>
             </div>
           </dl>
           {detail.telegramUrl ? (
@@ -207,7 +207,7 @@ export function CommunityUnitPage({
               href={detail.telegramUrl}
               target="_blank"
               rel="noreferrer"
-              className="w-fit font-medium text-[var(--color-brand-blue)] underline underline-offset-4"
+              className="w-fit font-medium text-[var(--color-community-blue)] underline underline-offset-4"
             >
               Open this group&apos;s Telegram
             </a>
@@ -237,15 +237,15 @@ function AdminLeaderControl({
   );
 
   return (
-    <section className="grid gap-2 rounded-sm border border-dashed border-zinc-300 bg-white p-4">
-      <h2 className="ppc-heading text-xs font-semibold uppercase tracking-[0.08em] text-zinc-500">
+    <section className="grid gap-2 rounded-sm border border-dashed border-[var(--color-community-edge-strong)] bg-white p-4">
+      <h2 className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--color-community-muted)]">
         Admin · group leader
       </h2>
       <div className="flex flex-wrap items-center gap-2">
         <select
           value={selected}
           onChange={(event) => setSelected(event.target.value)}
-          className="h-8 rounded-sm border border-zinc-200 px-2 text-xs"
+          className="h-8 rounded-sm border border-[var(--color-community-edge)] px-2 text-xs"
         >
           <option value="">No leader</option>
           {members.map((member) => (
@@ -266,7 +266,7 @@ function AdminLeaderControl({
               router.refresh();
             })
           }
-          className="inline-flex h-8 items-center rounded-sm bg-[var(--color-brand-blue)] px-3 text-xs font-semibold text-white disabled:opacity-50"
+          className="inline-flex h-8 items-center rounded-sm bg-[var(--color-community-blue)] px-3 text-xs font-semibold text-white disabled:opacity-50"
         >
           {pending ? "Saving…" : "Save leader"}
         </button>

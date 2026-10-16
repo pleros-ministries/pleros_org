@@ -244,22 +244,22 @@ export function MessageThread({
     // Fills the viewport below the shell's phone bar (`--dashboard-topbar-offset`),
     // the 50px community bar and the page's 1rem top and 2.5rem bottom padding,
     // so the composer stays on screen; dvh shrinks with the on-screen keyboard.
-    <section className="flex h-[calc(100dvh-var(--dashboard-topbar-offset,0px)-6.5rem-2px)] min-h-[20rem] flex-col overflow-hidden rounded-2xl border border-(--color-line-strong) bg-white shadow-(--shadow-sm)">
-      <header className="flex items-center gap-3 border-b border-zinc-100 px-3 py-2.5 sm:px-4">
+    <section className="flex h-[calc(100dvh-var(--dashboard-topbar-offset,0px)-6.5rem-2px)] min-h-[20rem] flex-col overflow-hidden rounded-2xl border border-[var(--color-community-edge)] bg-white ">
+      <header className="flex items-center gap-3 border-b border-[var(--color-community-edge)] px-3 py-2.5 sm:px-4">
         <Link
           href="/dashboard/community/messages"
           aria-label="Back to messages"
-          className="-ml-1 inline-flex size-9 items-center justify-center rounded-full text-zinc-500 transition-colors hover:bg-zinc-100 lg:hidden"
+          className="-ml-1 inline-flex size-9 items-center justify-center rounded-full text-[var(--color-community-muted)] transition-colors hover:bg-[var(--color-community-canvas)] lg:hidden"
         >
           <ArrowLeftIcon className="size-5" strokeWidth={2} />
         </Link>
         <Avatar name={conversation.other.name} size={36} />
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-zinc-900">
+          <p className="truncate text-sm font-medium text-[var(--color-community-ink)]">
             {conversation.other.name}
           </p>
           {conversation.other.unitName ? (
-            <p className="truncate text-xs text-zinc-500">
+            <p className="truncate text-xs text-[var(--color-community-muted)]">
               {conversation.other.unitName}
             </p>
           ) : null}
@@ -269,7 +269,7 @@ export function MessageThread({
 
       <div
         ref={scrollRef}
-        className="flex-1 overflow-y-auto bg-zinc-50/60 px-3 py-4 sm:px-4"
+        className="flex-1 overflow-y-auto bg-white px-3 py-4 sm:px-4"
       >
         {hasEarlier ? (
           <div className="mb-3 flex justify-center">
@@ -277,7 +277,7 @@ export function MessageThread({
               type="button"
               onClick={loadEarlier}
               disabled={loadingEarlier}
-              className="rounded-full border border-(--color-line-strong) bg-white px-3.5 py-1.5 text-xs font-medium text-zinc-600 disabled:opacity-60"
+              className="rounded-full border border-[var(--color-community-edge)] bg-white px-3.5 py-1.5 text-xs font-medium text-[var(--color-community-ink)] disabled:opacity-60"
             >
               {loadingEarlier ? "Loading…" : "Load earlier messages"}
             </button>
@@ -285,7 +285,7 @@ export function MessageThread({
         ) : null}
 
         {messages.length === 0 ? (
-          <p className="mx-auto max-w-xs py-8 text-center text-[13px] text-zinc-500">
+          <p className="mx-auto max-w-xs py-8 text-center text-[13px] text-[var(--color-community-muted)]">
             This is the start of your conversation with{" "}
             {conversation.other.name}. Be kind. You can block or report at any
             time.
@@ -300,7 +300,7 @@ export function MessageThread({
               return (
                 <Fragment key={message.id}>
                   {newDay ? (
-                    <li className="my-2 text-center text-xs font-medium text-zinc-400">
+                    <li className="my-2 text-center text-xs font-medium text-[var(--color-community-muted)]">
                       {dayLabel(message.createdAt)}
                     </li>
                   ) : null}
@@ -310,27 +310,27 @@ export function MessageThread({
                     }`}
                   >
                     {message.body == null ? (
-                      <p className="max-w-[80%] rounded-2xl bg-zinc-100 px-3 py-2 text-sm italic text-zinc-400">
+                      <p className="max-w-[80%] rounded-2xl bg-[var(--color-community-canvas)] px-3 py-2 text-sm italic text-[var(--color-community-muted)]">
                         This message was removed.
                       </p>
                     ) : (
                       <p
                         className={`max-w-[80%] whitespace-pre-line break-words rounded-2xl px-3 py-2 text-sm leading-relaxed ${
                           message.mine
-                            ? "bg-(--color-brand-blue) text-white"
-                            : "border border-zinc-200 bg-white text-zinc-800"
+                            ? "bg-[var(--color-community-blue)] text-white"
+                            : "border border-[var(--color-community-edge)] bg-white text-[var(--color-community-ink)]"
                         } ${sending ? "opacity-70" : ""}`}
                       >
                         {message.body}
                       </p>
                     )}
-                    <p className="mt-0.5 flex items-center gap-2 px-1 text-[0.7rem] text-zinc-400">
+                    <p className="mt-0.5 flex items-center gap-2 px-1 text-[0.7rem] text-[var(--color-community-muted)]">
                       {sending ? "Sending…" : clockTime(message.createdAt)}
                       {!message.mine && message.body != null ? (
                         <button
                           type="button"
                           onClick={() => setReportId(message.id)}
-                          className="hover:text-zinc-600 hover:underline"
+                          className="hover:text-[var(--color-community-ink)] hover:underline"
                         >
                           Report
                         </button>
@@ -344,7 +344,7 @@ export function MessageThread({
         )}
       </div>
 
-      <footer className="border-t border-zinc-100 p-3">
+      <footer className="border-t border-[var(--color-community-edge)] p-3">
         {error ? (
           <p role="alert" className="mb-2 text-[13px] text-red-700">
             {error}
@@ -352,19 +352,19 @@ export function MessageThread({
         ) : null}
 
         {conversation.blockedByMe ? (
-          <p className="flex flex-wrap items-center justify-between gap-2 text-[13px] text-zinc-600">
+          <p className="flex flex-wrap items-center justify-between gap-2 text-[13px] text-[var(--color-community-ink)]">
             You blocked {conversation.other.name}.
             <button
               type="button"
               disabled={blockPending}
               onClick={() => setBlocked(false)}
-              className="font-medium text-(--color-brand-blue) underline underline-offset-2 disabled:opacity-60"
+              className="font-medium text-[var(--color-community-blue)] underline underline-offset-2 disabled:opacity-60"
             >
               Unblock
             </button>
           </p>
         ) : conversation.sendBlockedReason ? (
-          <p className="text-[13px] text-zinc-600">
+          <p className="text-[13px] text-[var(--color-community-ink)]">
             {conversation.sendBlockedReason}
           </p>
         ) : (
@@ -397,14 +397,14 @@ export function MessageThread({
                 placeholder="Write a message…"
                 rows={1}
                 maxLength={DM_BODY_MAX}
-                className="max-h-32 min-h-11 w-full resize-none rounded-2xl border border-zinc-200 bg-white px-3.5 py-2.5 text-base outline-none focus:border-zinc-300"
+                className="max-h-32 min-h-11 w-full resize-none rounded-2xl border border-[var(--color-community-edge)] bg-white px-3.5 py-2.5 text-base outline-none focus:border-[var(--color-community-edge-strong)]"
               />
             </label>
             <button
               type="submit"
               disabled={!draft.trim() || sendMutation.isPending}
               aria-label="Send message"
-              className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-(--color-brand-blue) text-white disabled:opacity-40"
+              className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-[var(--color-community-blue)] text-white disabled:opacity-40"
             >
               <SendIcon className="size-[18px]" strokeWidth={2} />
             </button>
@@ -412,7 +412,7 @@ export function MessageThread({
         )}
 
         {nearLimit ? (
-          <p className="mt-1 text-right text-xs text-zinc-400">
+          <p className="mt-1 text-right text-xs text-[var(--color-community-muted)]">
             {draft.length}/{DM_BODY_MAX}
           </p>
         ) : null}

@@ -18,7 +18,7 @@ import {
 import { QUESTION_STATUS_LABEL } from "./ask-pleros-view";
 
 const card =
-  "rounded-2xl border border-(--color-line-strong) bg-white shadow-(--shadow-sm)";
+  "rounded-2xl border border-[var(--color-community-edge)] bg-white ";
 
 async function fetchQuestion(questionId: number): Promise<AskerQuestion> {
   const res = await fetch(`/api/community/ask/${questionId}`, {
@@ -93,28 +93,28 @@ export function QuestionThread({ initial }: { initial: AskerQuestion }) {
     <div className="grid gap-4">
       <Link
         href="/dashboard/community/ask"
-        className="inline-flex w-fit items-center gap-1.5 text-xs font-medium text-zinc-500 transition-colors hover:text-(--color-brand-blue)"
+        className="inline-flex w-fit items-center gap-1.5 text-xs font-medium text-[var(--color-community-muted)] transition-colors hover:text-[var(--color-community-blue)]"
       >
         <ArrowLeftIcon className="size-3.5" strokeWidth={2} /> All your questions
       </Link>
 
       <header className={`${card} grid gap-2 p-4 sm:p-5`}>
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <h1 className="ppc-heading text-lg font-semibold text-zinc-900">
+          <h1 className="text-lg font-semibold text-[var(--color-community-ink)]">
             Your question to Pleros
           </h1>
           <span
             className={`rounded-full px-2 py-0.5 text-[0.7rem] font-medium ${
               question.status === "answered"
-                ? "bg-(--muted) text-(--color-brand-blue)"
-                : "bg-zinc-100 text-zinc-600"
+                ? "bg-[var(--color-community-sky-soft)] text-[var(--color-community-blue)]"
+                : "bg-[var(--color-community-canvas)] text-[var(--color-community-ink)]"
             }`}
           >
             {QUESTION_STATUS_LABEL[question.status]}
           </span>
         </div>
         {question.isAnonymous ? (
-          <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-zinc-600">
+          <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] text-[var(--color-community-ink)]">
             You asked this anonymously. Pleros cannot see who you are.
             <button
               type="button"
@@ -128,13 +128,13 @@ export function QuestionThread({ initial }: { initial: AskerQuestion }) {
                   act(() => revealQuestionIdentity(question.id));
                 }
               }}
-              className="font-medium text-(--color-brand-blue) underline underline-offset-2 disabled:opacity-60"
+              className="font-medium text-[var(--color-community-blue)] underline underline-offset-2 disabled:opacity-60"
             >
               Share my name with Pleros
             </button>
           </p>
         ) : (
-          <p className="text-[13px] text-zinc-600">
+          <p className="text-[13px] text-[var(--color-community-ink)]">
             Pleros can see your name on this conversation.
           </p>
         )}
@@ -149,7 +149,7 @@ export function QuestionThread({ initial }: { initial: AskerQuestion }) {
             return (
               <Fragment key={message.id}>
                 {newDay ? (
-                  <li className="my-2 text-center text-xs font-medium text-zinc-400">
+                  <li className="my-2 text-center text-xs font-medium text-[var(--color-community-muted)]">
                     {dayLabel(message.createdAt)}
                   </li>
                 ) : null}
@@ -159,20 +159,20 @@ export function QuestionThread({ initial }: { initial: AskerQuestion }) {
                   }`}
                 >
                   {message.fromStaff ? (
-                    <p className="mb-0.5 px-1 text-[0.7rem] font-semibold text-(--color-brand-blue)">
+                    <p className="mb-0.5 px-1 text-[0.7rem] font-semibold text-[var(--color-community-blue)]">
                       Pleros
                     </p>
                   ) : null}
                   <p
                     className={`max-w-[85%] whitespace-pre-line break-words rounded-2xl px-3 py-2 text-sm leading-relaxed ${
                       message.fromStaff
-                        ? "border border-zinc-200 bg-zinc-50 text-zinc-800"
-                        : "bg-(--color-brand-blue) text-white"
+                        ? "border border-[var(--color-community-edge)] bg-[var(--color-community-canvas)] text-[var(--color-community-ink)]"
+                        : "bg-[var(--color-community-blue)] text-white"
                     }`}
                   >
                     {message.body}
                   </p>
-                  <p className="mt-0.5 px-1 text-[0.7rem] text-zinc-400">
+                  <p className="mt-0.5 px-1 text-[0.7rem] text-[var(--color-community-muted)]">
                     {clockTime(message.createdAt)}
                   </p>
                 </li>
@@ -189,11 +189,11 @@ export function QuestionThread({ initial }: { initial: AskerQuestion }) {
       ) : null}
 
       {closed ? (
-        <p className={`${card} p-4 text-sm text-zinc-600`}>
+        <p className={`${card} p-4 text-sm text-[var(--color-community-ink)]`}>
           This conversation is closed.{" "}
           <Link
             href="/dashboard/community/ask"
-            className="font-medium text-(--color-brand-blue) underline underline-offset-2"
+            className="font-medium text-[var(--color-community-blue)] underline underline-offset-2"
           >
             Ask a new question
           </Link>{" "}
@@ -212,20 +212,20 @@ export function QuestionThread({ initial }: { initial: AskerQuestion }) {
             );
           }}
         >
-          <label className="grid gap-1 text-[13px] font-medium text-zinc-700">
+          <label className="grid gap-1 text-[13px] font-medium text-[var(--color-community-ink)]">
             Add to your question
             <textarea
               value={draft}
               onChange={(event) => setDraft(event.target.value)}
               rows={3}
               maxLength={QUESTION_BODY_MAX}
-              className="w-full resize-none rounded-xl border border-zinc-200 px-3 py-2.5 text-base font-normal leading-relaxed outline-none focus:border-zinc-300"
+              className="w-full resize-none rounded-xl border border-[var(--color-community-edge)] px-3 py-2.5 text-base font-normal leading-relaxed outline-none focus:border-[var(--color-community-edge-strong)]"
             />
           </label>
           <button
             type="submit"
             disabled={pending || !draft.trim()}
-            className="inline-flex h-9 w-fit items-center rounded-full bg-(--color-brand-blue) px-4 text-[13px] font-semibold text-white disabled:opacity-50"
+            className="inline-flex h-9 w-fit items-center rounded-full bg-[var(--color-community-blue)] px-4 text-[13px] font-semibold text-white disabled:opacity-50"
           >
             {pending ? "Sending…" : "Send"}
           </button>
