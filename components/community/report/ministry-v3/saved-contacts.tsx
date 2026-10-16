@@ -21,14 +21,13 @@ export function SavedContacts({ contacts, readOnly }: { contacts: MinistryContac
   const rows = needle ? contacts.filter(row => `${row.name} ${row.phone ?? ""} ${row.email ?? ""}`.toLowerCase().includes(needle)) : contacts;
   return <section className={styles.page}>
     <div className={styles.heading}><span className={styles.eyebrow}>Saved contacts</span><h1>People, kept close</h1><p>{contacts.length} {contacts.length === 1 ? "contact" : "contacts"} · private to you</p></div>
+    {readOnly ? null : <Link className={styles.primary} href="/dashboard/community/report/people/new">Add contact<DashboardIcon name="plus" /></Link>}
     <label className={styles.searchBox}><DashboardIcon name="search" size={20} /><span className="sr-only">Search contacts</span><input type="search" placeholder="Search contacts" value={query} onChange={event => setQuery(event.target.value)} /></label>
     {rows.length ? <ul className={styles.list}>{rows.map(row => <li key={row.key}><Link className={styles.row} href={contactHref(row.key)}>
       <span className={styles.avatar}>{initials(row.name)}</span>
       <div><strong>{row.name}</strong><span className={styles.meta}>{row.phone ?? "Phone not recorded"}</span><StatusPill tone="neutral">Unlinked contact</StatusPill></div>
       <DashboardIcon name="right" size={16} />
     </Link></li>)}</ul> : <p className={styles.muted}>{query ? "No contacts match your search." : "No saved contacts yet. Add the people you meet in ministry."}</p>}
-    <div className={styles.info}><DashboardIcon name="shield" size={16} /><p>Inviting a contact is a separate step.</p></div>
-    {readOnly ? null : <footer className={styles.footer}><Link className={styles.primary} href="/dashboard/community/report/people/new">Add contact<DashboardIcon name="plus" /></Link></footer>}
   </section>;
 }
 

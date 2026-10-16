@@ -1,6 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { MinistryFormV3, PrivateContactFields } from "@/components/community/report/ministry-v3/ministry-form";
+import { SavedContacts } from "@/components/community/report/ministry-v3/saved-contacts";
 
 describe("unified ministry form", () => {
   it("permits a count-only report and exposes named-contact capture", () => {
@@ -26,5 +27,11 @@ describe("unified ministry form", () => {
     expect(html).toContain("Email · optional");
     expect(html).toContain('aria-invalid="true"');
     expect(html).toContain('aria-describedby="private-contact-phone-error"');
+  });
+  it("puts Add contact at the top of the Saved contacts screen", () => {
+    const html = renderToStaticMarkup(<SavedContacts contacts={[]} readOnly={false} />);
+    expect(html).toContain('href="/dashboard/community/report/people/new"');
+    expect(html.indexOf("Add contact")).toBeLessThan(html.indexOf("Search contacts"));
+    expect(html).not.toContain("Inviting a contact is a separate step.");
   });
 });
