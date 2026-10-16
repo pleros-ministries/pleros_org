@@ -8,10 +8,9 @@ import {
 } from "@/lib/community/context";
 
 export default async function CommunityMessagesRoute() {
-  const session = await getAppSession();
+  // Session and context load together instead of one roundtrip after the other.
+  const [session, ctx] = await Promise.all([getAppSession(), getCommunityContext()]);
   if (!session) redirect("/login?returnTo=/dashboard/community/messages");
-
-  const ctx = await getCommunityContext();
   if (!ctx || !canAccessCommunity(ctx)) redirect("/sogp/enrol");
 
   // The inbox itself lives in the layout; this fills the desktop thread pane.

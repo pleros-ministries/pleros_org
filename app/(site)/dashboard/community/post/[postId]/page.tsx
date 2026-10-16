@@ -15,12 +15,11 @@ export default async function CommunityPostRoute({
   const id = Number(postId);
   if (!Number.isInteger(id) || id <= 0) notFound();
 
-  const session = await getAppSession();
+  // Session and context load together instead of one roundtrip after the other.
+  const [session, ctx] = await Promise.all([getAppSession(), getCommunityContext()]);
   if (!session) {
     redirect(`/login?returnTo=/dashboard/community/post/${id}`);
   }
-
-  const ctx = await getCommunityContext();
   if (!ctx || !canAccessCommunity(ctx)) redirect("/sogp/enrol");
 
   const post = await getPost(ctx, id);

@@ -8,9 +8,9 @@ import { COMMUNITY_FEED_PAGE_SIZE, getCommunityFeed, getCommunitySidebar } from 
 
 /** Retained feed behaviour, separate from the Paper Community home. */
 export default async function CommunityFeedRoute() {
-  const session = await getAppSession();
+  // Session and context load together instead of one roundtrip after the other.
+  const [session, ctx] = await Promise.all([getAppSession(), getCommunityContext()]);
   if (!session) redirect("/login?returnTo=/dashboard/community/feed");
-  const ctx = await getCommunityContext();
   if (!ctx || !canAccessCommunity(ctx)) redirect("/sogp/enrol");
   const [feed, sidebar] = await Promise.all([getCommunityFeed(ctx), getCommunitySidebar(ctx)]);
   return <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-start">

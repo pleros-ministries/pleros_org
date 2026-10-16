@@ -26,10 +26,9 @@ export default async function NewActivityRoute({
 }: {
   searchParams: Promise<{ day?: string; category?: string }>;
 }) {
-  const session = await getAppSession();
+  // Session and context load together instead of one roundtrip after the other.
+  const [session, ctx] = await Promise.all([getAppSession(), getCommunityContext()]);
   if (!session) redirect("/login?returnTo=/dashboard/community/report/new");
-
-  const ctx = await getCommunityContext();
   if (!ctx || !(await canAccessReporting(ctx))) redirect("/sogp/enrol");
 
   const today = lagosToday();

@@ -40,10 +40,9 @@ export default async function EditActivityRoute({
   const activityId = Number(raw);
   if (!Number.isInteger(activityId) || activityId <= 0) notFound();
 
-  const session = await getAppSession();
+  // Session and context load together instead of one roundtrip after the other.
+  const [session, ctx] = await Promise.all([getAppSession(), getCommunityContext()]);
   if (!session) redirect(`/login?returnTo=/dashboard/community/report/${activityId}`);
-
-  const ctx = await getCommunityContext();
   if (!ctx || !(await canAccessReporting(ctx))) redirect("/sogp/enrol");
 
   const activity = await getActivityForEdit(ctx.userId, activityId);

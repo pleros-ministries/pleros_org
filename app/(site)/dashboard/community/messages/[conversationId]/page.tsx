@@ -21,12 +21,11 @@ export default async function CommunityConversationRoute({
   const id = Number(conversationId);
   if (!Number.isInteger(id) || id <= 0) notFound();
 
-  const session = await getAppSession();
+  // Session and context load together instead of one roundtrip after the other.
+  const [session, ctx] = await Promise.all([getAppSession(), getCommunityContext()]);
   if (!session) {
     redirect(`/login?returnTo=/dashboard/community/messages/${id}`);
   }
-
-  const ctx = await getCommunityContext();
   if (!ctx || !canAccessCommunity(ctx)) redirect("/sogp/enrol");
 
   // Only the two participants can open a conversation.

@@ -24,10 +24,9 @@ import { enumerateDateKeys } from "@/lib/sogp/daily-participation";
 const HISTORY_DAYS = 14;
 
 export default async function ReportHistoryRoute() {
-  const session = await getAppSession();
+  // Session and context load together instead of one roundtrip after the other.
+  const [session, ctx] = await Promise.all([getAppSession(), getCommunityContext()]);
   if (!session) redirect("/login?returnTo=/dashboard/community/report/history");
-
-  const ctx = await getCommunityContext();
   if (!ctx || !(await canAccessReporting(ctx))) redirect("/sogp/enrol");
 
   const today = lagosToday();

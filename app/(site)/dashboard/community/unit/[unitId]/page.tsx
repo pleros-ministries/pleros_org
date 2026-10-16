@@ -22,12 +22,11 @@ export default async function CommunityUnitRoute({
   const id = Number(unitId);
   if (!Number.isInteger(id) || id <= 0) notFound();
 
-  const session = await getAppSession();
+  // Session and context load together instead of one roundtrip after the other.
+  const [session, ctx] = await Promise.all([getAppSession(), getCommunityContext()]);
   if (!session) {
     redirect(`/login?returnTo=/dashboard/community/unit/${id}`);
   }
-
-  const ctx = await getCommunityContext();
   if (!ctx || !canAccessCommunity(ctx)) redirect("/sogp/enrol");
 
   // A location group is open to its members, the pastor assigned to it, its

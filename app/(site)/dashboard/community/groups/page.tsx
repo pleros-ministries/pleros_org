@@ -13,10 +13,9 @@ import { listGroupDirectory } from "@/lib/db/queries/community-groups";
 import { listUnitNames } from "@/lib/db/queries/community-units";
 
 export default async function CommunityGroupsRoute() {
-  const session = await getAppSession();
+  // Session and context load together instead of one roundtrip after the other.
+  const [session, ctx] = await Promise.all([getAppSession(), getCommunityContext()]);
   if (!session) redirect("/login?returnTo=/dashboard/community/groups");
-
-  const ctx = await getCommunityContext();
   if (!ctx || !canAccessCommunity(ctx)) redirect("/sogp/enrol");
 
   // Location groups the viewer belongs to or looks after as assigned pastor.

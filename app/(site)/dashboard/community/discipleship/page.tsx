@@ -13,10 +13,9 @@ import {
 } from "@/lib/db/queries/community-posts";
 
 export default async function CommunityDiscipleshipRoute({ searchParams }: { searchParams: Promise<{ group?: string }> }) {
-  const session = await getAppSession();
+  // Session and context load together instead of one roundtrip after the other.
+  const [session, ctx] = await Promise.all([getAppSession(), getCommunityContext()]);
   if (!session) redirect("/login?returnTo=/dashboard/community/discipleship");
-
-  const ctx = await getCommunityContext();
   if (!ctx || !canAccessCommunity(ctx)) redirect("/sogp/enrol");
 
   const data = await getCommunityDiscipleship(ctx);

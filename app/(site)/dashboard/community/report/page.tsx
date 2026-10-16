@@ -20,10 +20,9 @@ export default async function MinistryReportRoute({
 }: {
   searchParams: Promise<{ day?: string; saved?: string; removed?: string }>;
 }) {
-  const session = await getAppSession();
+  const [session, ctx] = await Promise.all([getAppSession(), getCommunityContext()]);
   if (!session) redirect("/login?returnTo=/dashboard/community/report");
 
-  const ctx = await getCommunityContext();
   if (!ctx || !(await canAccessReporting(ctx))) redirect("/sogp/enrol");
 
   const today = lagosToday();

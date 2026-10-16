@@ -19,13 +19,15 @@ export default async function WelcomeDashboardPage() {
 
   const appSession = viewer.session;
   const welcomeEmail = appSession.user.email;
-  const lead = await getWelcomePackLeadByEmail(welcomeEmail);
+  const [lead, data] = await Promise.all([
+    getWelcomePackLeadByEmail(welcomeEmail),
+    getDashboardHomeData(viewer),
+  ]);
   const displayName = resolveWelcomeDisplayName({
     email: welcomeEmail,
     leadName: lead?.name,
     sessionName: appSession.user.name,
   });
-  const data = await getDashboardHomeData(viewer);
 
   return (
     <>

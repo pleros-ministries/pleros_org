@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { after } from "next/server";
 
 import { CommunityQueryProvider } from "@/components/community/community-query-provider";
 import { DashboardShell } from "@/components/dashboard/shell/dashboard-shell";
@@ -23,10 +24,13 @@ export default async function DashboardLayout({
     redirect(`/login?returnTo=${encodeURIComponent(returnTo)}`);
   }
 
-  await recordDashboardVisit({
-    visitorKey: viewer.session.user.id,
-    visitorType: "user",
-  });
+  // Analytics must never slow navigation: the visit is recorded after the response.
+  after(() =>
+    recordDashboardVisit({
+      visitorKey: viewer.session.user.id,
+      visitorType: "user",
+    }).catch(() => undefined),
+  );
 
   // One query client for the shell's unread badges and the community pages,
   // so a read message clears both. SOGP routes nest their own provider.

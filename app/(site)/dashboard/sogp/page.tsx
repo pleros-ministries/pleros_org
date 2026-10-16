@@ -18,12 +18,15 @@ export default async function SogpDashboardPage({ searchParams }: { searchParams
   const dated = traditionalDateHref((await searchParams).date);
   if (dated) redirect(dated);
 
-  const rows = await getSogpEnrollmentsWithCohortByUserId(session.user.id);
+  // Independent reads run together; guard order below preserves redirect priority.
+  const [rows, openCohort, learning] = await Promise.all([
+    getSogpEnrollmentsWithCohortByUserId(session.user.id),
+    getOpenSogpCohort(),
+    getOwnLearningView(session.user.id),
+  ]);
   if (rows.length === 0) redirect("/sogp/enrol");
 
-  const openCohort = await getOpenSogpCohort();
   const canJoinAnotherCohort = canOfferJoinAnotherCohort(rows, openCohort?.id ?? null);
-  const learning = await getOwnLearningView(session.user.id);
   if (!learning) redirect("/sogp/enrol");
 
   return (
