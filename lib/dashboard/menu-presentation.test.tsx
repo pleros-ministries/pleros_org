@@ -4,6 +4,7 @@ import path from "node:path";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { expect,test,vi } from "vitest";
 import { DashboardMenuNavigation } from "@/components/dashboard/shell/dashboard-menu-navigation";
+import { buildCommunitySwitcherItems } from "@/components/community/community-tabs";
 import { buildDashboardNavigation } from "./navigation";
 vi.mock("next/navigation",()=>({ usePathname: () => "/dashboard" }));
 test("the default drawer renders only approved roots/workspace, not the legacy destination inventory",()=>{
@@ -47,4 +48,23 @@ test("the Community home keeps the section switcher available",()=>{
   const source = fs.readFileSync(path.join(process.cwd(), "components/community/community-shell.tsx"), "utf8");
   expect(source).toContain("<CommunityTopBar unitName={unitName} navigation={navigation} />");
   expect(source).not.toContain("!home ?");
+});
+test("the Community switcher leads with role and location context",()=>{
+  const items = buildCommunitySwitcherItems([
+    { key:"feed",label:"Feed",href:"/dashboard/community/feed" },
+    { key:"location-group",label:"Your location group",href:"/dashboard/community/unit/5" },
+    { key:"groups",label:"Groups",href:"/dashboard/community/groups" },
+    { key:"messages",label:"Messages",href:"/dashboard/community/messages" },
+    { key:"disciples",label:"My disciples",href:"/dashboard/sogp/discipleship" },
+    { key:"enrollees",label:"My enrollees",href:"/dashboard/sogp/enrollees" },
+  ]);
+  expect(items.map(item=>item.label)).toEqual([
+    "My disciples",
+    "My enrollees",
+    "Your location group",
+    "Community home",
+    "Feed",
+    "Groups",
+    "Messages",
+  ]);
 });
