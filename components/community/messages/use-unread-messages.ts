@@ -13,12 +13,15 @@ async function fetchUnreadTotal(): Promise<number> {
   return data.unreadTotal;
 }
 
-/** Unread private messages for the nav badge; polls every 30 seconds. */
+/** Unread private messages for the nav badge; navigation never forces a refetch. */
 export function useUnreadMessages(): number {
   const { data } = useQuery({
     queryKey: communityKeys.unreadMessages(),
     queryFn: fetchUnreadTotal,
-    refetchInterval: 30_000,
+    staleTime: 60_000,
+    refetchInterval: 120_000,
+    refetchIntervalInBackground: false,
+    refetchOnWindowFocus: false,
   });
   return data ?? 0;
 }

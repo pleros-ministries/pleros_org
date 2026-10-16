@@ -504,6 +504,28 @@ export async function countUnreadMessages(userId: string): Promise<number> {
   return row?.n ?? 0;
 }
 
+/** Unread conversation count for the Community home; avoids loading inbox previews. */
+export async function countUnreadConversations(userId: string): Promise<number> {
+  const [row] = await db
+    .select({ n: sql<number>`count(distinct ${schema.dmMessages.conversationId})::int` })
+    .from(schema.dmMessages)
+    .innerJoin(
+      schema.dmParticipants,
+      and(
+        eq(schema.dmParticipants.conversationId, schema.dmMessages.conversationId),
+        eq(schema.dmParticipants.userId, userId),
+      ),
+    )
+    .where(
+      and(
+        gt(schema.dmMessages.id, schema.dmParticipants.lastReadMessageId),
+        ne(schema.dmMessages.senderId, userId),
+        eq(schema.dmMessages.status, "visible"),
+      ),
+    );
+  return row?.n ?? 0;
+}
+
 // ─── Messages ──────────────────────────────────────────────────────────────
 
 export type DirectMessage = {

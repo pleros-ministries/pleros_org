@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { getAppSession } from "@/lib/app-session";
 import {
   canAccessCommunity,
   getCommunityContext,
@@ -11,6 +12,12 @@ import {
 
 /** The viewer's inbox. `?summary=1` returns only the unread total (nav badge). */
 export async function GET(request: Request) {
+  const summary = new URL(request.url).searchParams.get("summary");
+  if (summary) {
+    const session = await getAppSession();
+    if (!session) return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
+    return NextResponse.json({ unreadTotal: await countUnreadMessages(session.user.id) });
+  }
   const ctx = await getCommunityContext();
   if (!ctx) {
     return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
@@ -20,12 +27,6 @@ export async function GET(request: Request) {
       { error: "SOGP enrolment not found", enrolUrl: "/sogp/enrol" },
       { status: 403 },
     );
-  }
-
-  if (new URL(request.url).searchParams.get("summary")) {
-    return NextResponse.json({
-      unreadTotal: await countUnreadMessages(ctx.userId),
-    });
   }
 
   const conversations = await listConversations(ctx.userId);

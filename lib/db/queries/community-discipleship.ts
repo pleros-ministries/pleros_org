@@ -233,6 +233,45 @@ export async function getCommunityDiscipleship(
   };
 }
 
+export type CommunityHomeDiscipleship = {
+  joined: { groupId: number; groupName: string } | null;
+  leading: Array<{ groupId: number; groupName: string; paused: boolean; discipleCount: number }>;
+  discipleCount: number;
+};
+
+/**
+ * Compact home projection. The Community landing page needs group labels and
+ * a total only, so it must not load every disciple and fellow-disciple row.
+ */
+export async function getCommunityHomeDiscipleship(userId: string): Promise<CommunityHomeDiscipleship> {
+  const [joinedRow, ledRows, countedRows] = await Promise.all([
+    findJoinedGroup(userId),
+    listLedGroups(userId),
+    db
+      .select({ groupId: schema.discipleshipGroups.id, n: count() })
+      .from(schema.discipleshipMemberships)
+      .innerJoin(schema.discipleshipGroups, eq(schema.discipleshipGroups.id, schema.discipleshipMemberships.groupId))
+      .innerJoin(schema.sogpEnrollments, eq(schema.sogpEnrollments.id, schema.discipleshipGroups.leaderEnrollmentId))
+      .where(and(
+        eq(schema.sogpEnrollments.userId, userId),
+        eq(schema.discipleshipMemberships.status, "active"),
+        eq(schema.discipleshipGroups.status, "active"),
+      ))
+      .groupBy(schema.discipleshipGroups.id),
+  ]);
+  const countByGroup = new Map(countedRows.map(row => [row.groupId, row.n]));
+  return {
+    joined: joinedRow ? { groupId: joinedRow.groupId, groupName: joinedRow.groupName } : null,
+    leading: ledRows.map(row => ({
+      groupId: row.id,
+      groupName: row.name,
+      paused: row.status === "archived",
+      discipleCount: countByGroup.get(row.id) ?? 0,
+    })),
+    discipleCount: countedRows.reduce((total, row) => total + row.n, 0),
+  };
+}
+
 /** Small read-only home projection; never creates a group or exposes contact details. */
 export async function getOwnDisciplerSummary(viewer: CommunityContext): Promise<{ firstName: string; canMessage: boolean } | null> {
   const row = await findJoinedGroup(viewer.userId);

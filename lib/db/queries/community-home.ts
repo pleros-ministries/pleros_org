@@ -7,9 +7,9 @@ import * as schema from "@/lib/db/schema";
 import { canAccessCommunity, getCommunityContext } from "@/lib/community/context";
 import { firstNameOf } from "@/lib/community/visibility";
 import { getDashboardViewer } from "@/lib/dashboard/viewer";
-import { getCommunityDiscipleship } from "./community-discipleship";
-import { listConversations } from "./community-messages";
-import { listGroupDirectory } from "./community-groups";
+import { getCommunityHomeDiscipleship } from "./community-discipleship";
+import { countUnreadConversations } from "./community-messages";
+import { listOwnActiveCommunityGroups } from "./community-groups";
 import { listOwnPendingInvitations } from "./sogp-group-invitations";
 
 /** Read-only, session-owned home. Never creates a group or loads answer text. */
@@ -17,10 +17,10 @@ export async function getCommunityHome() {
   const ctx = await getCommunityContext();
   if (!ctx || !canAccessCommunity(ctx)) return null;
   const leader = alias(schema.sogpEnrollments, "home_leader");
-  const [conversations, discipleship, groups, viewer, responses, invitations, [owned]] = await Promise.all([
-    listConversations(ctx.userId),
-    getCommunityDiscipleship(ctx),
-    listGroupDirectory(ctx.userId),
+  const [unreadConversations, discipleship, groups, viewer, responses, invitations, [owned]] = await Promise.all([
+    countUnreadConversations(ctx.userId),
+    getCommunityHomeDiscipleship(ctx.userId),
+    listOwnActiveCommunityGroups(ctx.userId),
     getDashboardViewer(),
     db.select({
       id: schema.discipleshipPromptResponses.id,
@@ -50,7 +50,7 @@ export async function getCommunityHome() {
   ]);
 
   return {
-    unreadConversations: conversations.filter(item => item.unreadCount > 0).length,
+    unreadConversations,
     responses: responses.map(item => ({
       id: item.id,
       firstName: firstNameOf(item.firstName || item.name),
@@ -59,12 +59,12 @@ export async function getCommunityHome() {
     invitations: invitations.map(item => ({ id: item.id, leaderFirstName: firstNameOf(item.leaderName), groupName: item.groupName })),
     enrolleeCount: owned?.n ?? 0,
     disciplesEnabled: ctx.enrollmentId !== null,
-    discipleCount: discipleship.leading.filter(group => !group.paused).reduce((total, group) => total + group.disciples.length, 0),
+    discipleCount: discipleship.discipleCount,
     church: viewer?.navigation.find(section => section.key === "oversight")?.items.find(item => item.key === "church") ?? null,
     locationGroup: ctx.unit,
     joinedGroup: discipleship.joined,
     ledGroups: discipleship.leading.filter(group => !group.paused),
-    memberGroups: groups.filter(group => group.viewerStatus === "active"),
+    memberGroups: groups,
   };
 }
 

@@ -136,6 +136,30 @@ export async function listGroupDirectory(
   return rows;
 }
 
+export type CommunityHomeGroup = Pick<GroupSummary, "id" | "name" | "privacy"> & {
+  viewerRole: GroupRole;
+};
+
+/** The member-created groups this viewer actively belongs to; home-card fields only. */
+export async function listOwnActiveCommunityGroups(userId: string): Promise<CommunityHomeGroup[]> {
+  return db
+    .select({
+      id: groups.id,
+      name: groups.name,
+      privacy: groups.privacy,
+      viewerRole: members.role,
+    })
+    .from(members)
+    .innerJoin(groups, eq(groups.id, members.groupId))
+    .where(and(
+      eq(members.userId, userId),
+      eq(members.status, "active"),
+      eq(groups.status, "active"),
+    ))
+    .orderBy(asc(groups.name))
+    .limit(100) as Promise<CommunityHomeGroup[]>;
+}
+
 export type AdminGroupRow = {
   id: number;
   name: string;

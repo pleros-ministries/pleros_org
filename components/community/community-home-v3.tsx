@@ -20,7 +20,7 @@ export function CommunityHomeV3({ data }: { data: CommunityHomeData }) {
   return <div className={styles.home} data-community-home-v3>
     <header className={styles.heading}>
       <h1>Growing together.</h1>
-      <p>Your people. Your shared journey.</p>
+      <p>Your shared journey in purpose.</p>
     </header>
 
     <Link href="/dashboard/community/messages" className={styles.messages}>
@@ -62,7 +62,7 @@ export function CommunityHomeV3({ data }: { data: CommunityHomeData }) {
       <div className={styles.groupList}>
         {data.locationGroup ? <HomeRow href={`/dashboard/community/unit/${data.locationGroup.id}`} title={data.locationGroup.name} description="Location community · Member" icon="people" /> : null}
         {data.joinedGroup ? <HomeRow href={`/dashboard/community/discipleship?group=${data.joinedGroup.groupId}`} title={data.joinedGroup.groupName} description="Discipleship group · Member" icon="leaf" /> : null}
-        {data.ledGroups.map(group => <HomeRow key={`led-${group.groupId}`} href={group.disciples.length ? `/dashboard/community/discipleship?group=${group.groupId}` : `/dashboard/sogp/discipleship?group=${group.groupId}`} prefetch={false} title={group.groupName} description="Discipleship group · You lead" icon="leaf" />)}
+        {data.ledGroups.map(group => <HomeRow key={`led-${group.groupId}`} href={group.discipleCount ? `/dashboard/community/discipleship?group=${group.groupId}` : `/dashboard/sogp/discipleship?group=${group.groupId}`} prefetch={false} title={group.groupName} description="Discipleship group · You lead" icon="leaf" />)}
         {data.memberGroups.map(group => <HomeRow key={`member-${group.id}`} href={`/dashboard/community/groups/${group.id}`} title={group.name} description={`${group.privacy === "private" ? "Private" : "Public"} group · ${group.viewerRole === "owner" ? "You lead" : group.viewerRole === "moderator" ? "Moderator" : "Member"}`} icon="people" />)}
         {!hasGroups ? <p className={styles.empty}>You’re not in a group yet.</p> : null}
       </div>

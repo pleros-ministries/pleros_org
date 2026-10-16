@@ -29,6 +29,15 @@ async function fetchNotifications(): Promise<{
   return res.json();
 }
 
+async function fetchNotificationSummary(): Promise<number> {
+  const res = await fetch("/api/community/notifications?summary=1", {
+    credentials: "same-origin",
+  });
+  if (!res.ok) throw new Error("Failed to load notification count");
+  const data = (await res.json()) as { unread: number };
+  return data.unread;
+}
+
 function summarise(n: Notification): string {
   switch (n.kind) {
     case "official_post":
@@ -103,17 +112,28 @@ export function NotificationBell({
     return () => { document.removeEventListener("pointerdown", outside); document.removeEventListener("keydown", escape); };
   }, [open]);
 
+  const summary = useQuery({
+    queryKey: communityKeys.notificationSummary(),
+    queryFn: fetchNotificationSummary,
+    staleTime: 60_000,
+    refetchInterval: 120_000,
+    refetchIntervalInBackground: false,
+    refetchOnWindowFocus: false,
+  });
   const { data, error, refetch } = useQuery({
     queryKey: communityKeys.notifications(),
     queryFn: fetchNotifications,
-    refetchInterval: 30_000,
+    enabled: open,
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
   });
   const items = data?.notifications ?? [];
-  const unread = data?.unread ?? 0;
+  const unread = summary.data ?? data?.unread ?? 0;
 
   const markReadMutation = useMutation({
     mutationFn: () => markCommunityNotificationsRead(),
     onMutate: () => {
+      queryClient.setQueryData<number>(communityKeys.notificationSummary(), 0);
       queryClient.setQueryData<{
         notifications: Notification[];
         unread: number;
@@ -121,10 +141,10 @@ export function NotificationBell({
         old ? { ...old, unread: 0 } : old,
       );
     },
-    onSettled: () =>
-      queryClient.invalidateQueries({
-        queryKey: communityKeys.notifications(),
-      }),
+    onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey: communityKeys.notificationSummary() });
+      void queryClient.invalidateQueries({ queryKey: communityKeys.notifications() });
+    },
   });
 
   function toggle() {

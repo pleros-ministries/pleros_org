@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, desc, eq, inArray } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 
 import { db } from "@/lib/db";
@@ -115,16 +115,9 @@ function sent(row: InvitationRow): SentInvitation {
   };
 }
 
-async function ownEnrollmentIds(userId: string) {
-  const rows = await db.select({ id: schema.sogpEnrollments.id }).from(schema.sogpEnrollments).where(eq(schema.sogpEnrollments.userId, userId));
-  return rows.map(row => row.id);
-}
-
 export async function listOwnPendingInvitations(userId: string): Promise<ReceivedInvitation[]> {
-  const ids = await ownEnrollmentIds(userId);
-  if (!ids.length) return [];
   const rows = await invitationQuery()
-    .where(and(inArray(schema.discipleshipGroupInvitations.recipientEnrollmentId, ids), eq(schema.discipleshipGroupInvitations.status, "pending")))
+    .where(and(eq(recipientEnrollment.userId, userId), eq(schema.discipleshipGroupInvitations.status, "pending")))
     .orderBy(desc(schema.discipleshipGroupInvitations.createdAt))
     .limit(20);
   return rows.map(received);

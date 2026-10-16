@@ -11,6 +11,7 @@ export const communityKeys = {
   comments: (postId: number) =>
     [...communityKeys.all, "comments", postId] as const,
   notifications: () => [...communityKeys.all, "notifications"] as const,
+  notificationSummary: () => [...communityKeys.all, "notification-summary"] as const,
   conversations: () => [...communityKeys.all, "conversations"] as const,
   unreadMessages: () => [...communityKeys.all, "unread-messages"] as const,
   question: (questionId: number) =>

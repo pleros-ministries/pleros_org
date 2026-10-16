@@ -25,7 +25,7 @@ export function useTabSwipe(area: DashboardArea, onSelect: (next: DashboardArea)
   const settle = (next: DashboardArea, animated = true) => {
     const target = next === "you" ? 0 : -width.current;
     if (reduce || !animated) x.jump(target);
-    else animate(x, target, { type: "spring", duration: 0.5, bounce: 0.2 });
+    else animate(x, target, { type: "spring", duration: 0.28, bounce: 0.12 });
   };
   useLayoutEffect(() => {
     const viewport = viewportRef.current;
@@ -47,7 +47,7 @@ export function useTabSwipe(area: DashboardArea, onSelect: (next: DashboardArea)
     active.current = area;
     const target = area === "you" ? 0 : -width.current;
     if (reduce || !animateSelection.current) x.jump(target);
-    else animate(x, target, { type: "spring", duration: 0.5, bounce: 0.2 });
+    else animate(x, target, { type: "spring", duration: 0.28, bounce: 0.12 });
     animateSelection.current = true;
     return () => x.stop();
   }, [area, reduce, x]);
