@@ -4,7 +4,7 @@ import path from "node:path";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { expect,test,vi } from "vitest";
 import { DashboardMenuNavigation } from "@/components/dashboard/shell/dashboard-menu-navigation";
-import { buildCommunitySwitcherItems } from "@/components/community/community-tabs";
+import { buildCommunitySwitcherItems, communityTitleForPath } from "@/components/community/community-tabs";
 import { buildDashboardNavigation } from "./navigation";
 vi.mock("next/navigation",()=>({ usePathname: () => "/dashboard" }));
 test("the default drawer renders only approved roots/workspace, not the legacy destination inventory",()=>{
@@ -67,4 +67,9 @@ test("the Community switcher leads with role and location context",()=>{
     "Groups",
     "Messages",
   ]);
+});
+test("saved contacts has its own Community context instead of daily report",()=>{
+  expect(communityTitleForPath("/dashboard/community/report/people", null)).toBe("Saved contacts");
+  expect(communityTitleForPath("/dashboard/community/report/people/new", null)).toBe("Saved contacts");
+  expect(communityTitleForPath("/dashboard/community/report/new", null)).toBe("Daily report");
 });

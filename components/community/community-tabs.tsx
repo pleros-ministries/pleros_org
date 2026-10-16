@@ -24,8 +24,7 @@ function isSwitcherItemActive(pathname: string, item: DashboardNavItem): boolean
   return pathname === item.href || (!item.exact && pathname.startsWith(`${item.href}/`));
 }
 
-function useTitle(unitName: string | null): string {
-  const pathname = usePathname() ?? "";
+export function communityTitleForPath(pathname: string, unitName: string | null): string {
   if (pathname === "/dashboard/community/feed") return "Community feed";
   if (pathname.includes("/dashboard/community/leader")) return "Leader";
   if (pathname.includes("/dashboard/community/messages")) return "Messages";
@@ -34,6 +33,7 @@ function useTitle(unitName: string | null): string {
   }
   if (pathname.includes("/dashboard/community/groups")) return "Groups";
   if (pathname.includes("/dashboard/community/ask")) return "Ask Pleros";
+  if (pathname.includes("/dashboard/community/report/people")) return "Saved contacts";
   if (pathname.includes("/dashboard/community/report")) return "Daily report";
   if (pathname.includes("/dashboard/community/unit/")) {
     return unitName ?? "Your group";
@@ -49,7 +49,7 @@ function useTitle(unitName: string | null): string {
  */
 export function CommunityTopBar({ unitName,navigation = [] }: { unitName: string | null;navigation?: DashboardNavItem[] }) {
   const pathname = usePathname() ?? "";
-  const title = useTitle(unitName);
+  const title = communityTitleForPath(pathname, unitName);
   const unreadMessages = useUnreadMessages();
   const destinations = buildCommunitySwitcherItems(navigation);
 
