@@ -22,9 +22,9 @@ export function HomeArt({ name, className }: { name: HomeArtName; className?: st
       </svg>;
     case "invite":
       return <svg {...common} width="92" height="84" viewBox="0 0 92 84">
-        <path d="M6 70c18-4 24-16 38-18" fill="none" stroke="#79b52a" strokeWidth="2" strokeDasharray="3 5" strokeLinecap="round" />
+        <path d="M6 70c18-4 24-16 38-18" fill="none" stroke="#d47a98" strokeWidth="2" strokeDasharray="3 5" strokeLinecap="round" />
         <g transform="translate(40 18)">
-          <path d="M0 34 46 8 22 46z" fill="#c4ef7a" /><path d="M0 34 46 8 18 36z" fill="#e4fbb6" /><path d="M18 36 46 8 22 46z" fill="#9dd34a" /><path d="m18 36 4 10 2-7z" fill="#6f9e2a" />
+          <path d="M0 34 46 8 22 46z" fill="#f2a9be" /><path d="M0 34 46 8 18 36z" fill="#fbd5e0" /><path d="M18 36 46 8 22 46z" fill="#e17f9e" /><path d="m18 36 4 10 2-7z" fill="#b8506f" />
         </g>
       </svg>;
     case "group":

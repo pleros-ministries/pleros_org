@@ -322,7 +322,7 @@
 .homeTile[data-tone="teal"] { background: #0f3d3e; color: white; }
 .homeTile[data-tone="teal"] p { color: #c9e4dc; opacity: 1; }
 .homeTile[data-tone="teal"] .homeTileAction { color: #ffd479; }
-.homeTile[data-tone="lime"] { background: #eaf7d4; color: #23400a; }
+.homeTile[data-tone="rose"] { background: #fbe4ea; color: #6e1d38; }
 .homeTile[data-tone="lilac"] { background: #ece3fb; color: #3e1876; }
 .homeTile[data-tone="sand"] { background: #f6ecd9; color: #5a3d0c; }
 .homeTile:focus-visible, .homeRailTile:focus-visible { outline: 2px solid var(--color-brand-blue); outline-offset: 3px; }

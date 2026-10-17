@@ -278,7 +278,7 @@ function GrowTogether({ sogp }: { sogp: HomeSogp }) {
       <Tile href="/dashboard/sogp/leaderboard" art="leaderboard" tone="teal" title="Leaderboard" action="View">
         {sogp.leaderboard ? <><span className={styles.homeRank}>#{sogp.leaderboard.rank}</span><p>{sogp.leaderboard.points} points this cohort</p></> : <p>See how your cohort is growing</p>}
       </Tile>
-      <Tile href="/dashboard/sogp/referrals" art="invite" tone="lime" title="Invite friends" action="Share link">
+      <Tile href="/dashboard/sogp/referrals" art="invite" tone="rose" title="Invite friends" action="Share link">
         <p>Share your link and walk with them</p>
       </Tile>
       {group.kind === "member"
