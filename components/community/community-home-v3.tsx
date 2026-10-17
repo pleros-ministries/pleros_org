@@ -10,16 +10,15 @@ type GroupArt = "location" | "discipleship" | "leading" | "public" | "private";
    for wider tiles and a compact square cut for phones, each at 1x and 2x. */
 const groupTag: Record<GroupArt, string> = { location: "Location", discipleship: "Discipleship", leading: "You lead", public: "Public", private: "Private" };
 
-/** One third of the counts strip, in the Oversight row language: tinted icon, then the number over a quiet label. */
-function CountItem({ href, count, label, description, icon, tone, capped }: { href: string | null; count: number; label: string; description: string; icon: IconName; tone: string; capped?: boolean }) {
+function CountCard({ href, count, label, description, icon, tone, capped }: { href: string | null; count: number; label: string; description: string; icon: IconName; tone: "blue" | "amber" | "green"; capped?: boolean }) {
+  // One column of the divided strip: a quiet icon + label, the number beneath.
   const body = <>
-    <span className={styles.oversightIcon} data-tone={tone}><DashboardIcon name={icon} size={16} strokeWidth={2} /></span>
-    <span className={styles.countCopy}><b>{count}{capped ? "+" : ""}</b><span>{label}</span></span>
+    <span className={styles.countHead}><DashboardIcon name={icon} size={16} strokeWidth={1.8} /><span>{label}</span></span>
+    <b>{count}{capped ? "+" : ""}</b>
   </>;
-  const aria = `${count}${capped ? " or more" : ""} ${description}`;
   return href && count > 0
-    ? <Link href={href} prefetch={false} className={styles.count} data-active aria-label={aria}>{body}</Link>
-    : <div className={styles.count} aria-label={aria}>{body}</div>;
+    ? <Link href={href} prefetch={false} className={styles.count} data-tone={tone} data-active aria-label={`${count}${capped ? " or more" : ""} ${description}`}>{body}</Link>
+    : <div className={styles.count} data-tone={tone} aria-label={`${count} ${description}`}>{body}</div>;
 }
 
 /** Groups you lead share one illustration in two colourways, alternated oldest-first so neighbours differ. No light green (user preference). */
@@ -51,9 +50,9 @@ export function CommunityHomeV3({ data }: { data: CommunityHomeData }) {
     </header>
 
     <div className={styles.counts} aria-label="Waiting for you">
-      <CountItem href="/dashboard/community/messages" count={data.unreadConversations} label="Messages" description={data.unreadConversations === 1 ? "unread message" : "unread messages"} icon="chat" tone="blue" />
-      <CountItem href={firstResponse ? (data.responses.length > 1 ? "/dashboard/sogp/discipleship#check-ins" : firstResponse.href) : null} count={data.responses.length} capped={data.responses.length >= 3} label="Check-ins" description={data.responses.length === 1 ? "check-in to answer" : "check-ins to answer"} icon="clipboardcheck" tone="amber" />
-      <CountItem href={firstInvitation ? `/dashboard/sogp/invitations/${firstInvitation.id}` : null} count={data.invitations.length} label="Invitations" description={data.invitations.length === 1 ? "group invitation" : "group invitations"} icon="mail" tone="lilac" />
+      <CountCard href="/dashboard/community/messages" count={data.unreadConversations} label="Messages" description={data.unreadConversations === 1 ? "unread message" : "unread messages"} icon="chat" tone="blue" />
+      <CountCard href={firstResponse ? (data.responses.length > 1 ? "/dashboard/sogp/discipleship#check-ins" : firstResponse.href) : null} count={data.responses.length} capped={data.responses.length >= 3} label="Check-ins" description={data.responses.length === 1 ? "check-in to answer" : "check-ins to answer"} icon="clipboardcheck" tone="amber" />
+      <CountCard href={firstInvitation ? `/dashboard/sogp/invitations/${firstInvitation.id}` : null} count={data.invitations.length} label="Invitations" description={data.invitations.length === 1 ? "group invitation" : "group invitations"} icon="mail" tone="green" />
     </div>
 
     <section className={styles.block} aria-labelledby="community-groups">
