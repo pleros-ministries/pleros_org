@@ -2487,6 +2487,37 @@ export const privateMinistryContacts = pgTable("private_ministry_contacts", {
   check("private_ministry_contacts_required_check", sql`length(trim(${t.name})) between 2 and 80 and length(trim(${t.phone})) between 7 and 30`),
 ]);
 
+/**
+ * One follow-up by a member with a person they look after: an enrollee they
+ * own (`pastor_assignments`) or one of their private contacts. Exactly one
+ * subject per row; owner-only (migration 0064).
+ */
+export const peopleFollowUpLogs = pgTable("people_follow_up_logs", {
+  id: serial("id").primaryKey(),
+  ownerUserId: text("owner_user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  enrollmentId: integer("enrollment_id").references(() => sogpEnrollments.id, { onDelete: "cascade" }),
+  privateContactId: integer("private_contact_id").references(() => privateMinistryContacts.id, { onDelete: "cascade" }),
+  kind: text("kind").$type<"whatsapp" | "call" | "visit" | "message" | "note">().notNull(),
+  note: text("note"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  index("people_follow_up_logs_enrollment_idx").on(t.enrollmentId, t.createdAt),
+  index("people_follow_up_logs_contact_idx").on(t.privateContactId, t.createdAt),
+  index("people_follow_up_logs_owner_idx").on(t.ownerUserId),
+  check("people_follow_up_logs_subject_check", sql`(${t.enrollmentId} IS NULL) <> (${t.privateContactId} IS NULL)`),
+  check("people_follow_up_logs_kind_check", sql`${t.kind} in ('whatsapp','call','visit','message','note')`),
+  check("people_follow_up_logs_note_check", sql`${t.note} IS NULL OR length(${t.note}) <= 500`),
+]);
+
+/** A WhatsApp group invite a member shared with one of their private contacts (migration 0064). */
+export const privateContactInvites = pgTable("private_contact_invites", {
+  id: serial("id").primaryKey(),
+  ownerUserId: text("owner_user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  privateContactId: integer("private_contact_id").notNull().references(() => privateMinistryContacts.id, { onDelete: "cascade" }),
+  groupId: integer("group_id").notNull().references(() => discipleshipGroups.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [index("private_contact_invites_contact_idx").on(t.privateContactId, t.createdAt)]);
+
 /** Canonical numerical projections remain in ministry_activities. */
 export const ministryReportEntries = pgTable("ministry_report_entries", {
   activityId: integer("activity_id").primaryKey().references(() => ministryActivities.id, { onDelete: "cascade" }),

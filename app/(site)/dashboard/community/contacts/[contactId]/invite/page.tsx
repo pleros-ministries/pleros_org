@@ -1,11 +1,14 @@
 import { notFound, redirect } from "next/navigation";
+
+import { InvitePerson } from "@/components/community/people/person-screens";
+import { CrumbLabel } from "@/components/dashboard/shell/breadcrumbs";
 import { getAppSession } from "@/lib/app-session";
 import { CommunityError } from "@/lib/community/errors";
-import { listLedGroupInvites } from "@/lib/db/queries/led-discipleship-invites";
+import { listInviteGroups } from "@/lib/db/queries/invite-groups";
 import { getPrivateMinistryContact } from "@/lib/db/queries/private-ministry-contacts";
 import { buildWhatsAppUrl } from "@/lib/sogp/discipleship";
-import { WhatsAppGroupInvite } from "@/components/community/report/ministry-v3/whatsapp-invite";
 
+/** Share one of the viewer's group invite links with a private contact on WhatsApp. */
 export default async function WhatsAppInvitePage({ params, searchParams }: { params: Promise<{ contactId: string }>; searchParams: Promise<{ group?: string }> }) {
   const [{ contactId }, { group }] = await Promise.all([params, searchParams]);
   const session = await getAppSession();
@@ -15,9 +18,12 @@ export default async function WhatsAppInvitePage({ params, searchParams }: { par
   // Owner-only: the contact must be the viewer's own private contact.
   const detail = await getPrivateMinistryContact(session.user.id, id).catch(error => { if (error instanceof CommunityError) return null; throw error; });
   if (!detail) notFound();
-  const groups = await listLedGroupInvites(session.user.id);
+  const groups = await listInviteGroups(session.user.id);
   const preselect = Number(group);
-  return <WhatsAppGroupInvite contact={{ name: detail.contact.name, phone: detail.contact.phone }} leaderName={session.user.name}
-    groups={groups} initialGroupId={groups.some(item => item.id === preselect) ? preselect : undefined}
-    whatsappBase={buildWhatsAppUrl(detail.contact.phone)} />;
+  return <>
+    <CrumbLabel href={`/dashboard/community/contacts/${id}`} label={detail.contact.name} />
+    <InvitePerson person={{ kind: "contact", privateContactId: id, name: detail.contact.name, whatsappBase: buildWhatsAppUrl(detail.contact.phone) }}
+      groups={groups} initialGroupId={groups.some(item => item.id === preselect) ? preselect : undefined}
+      leaderFirstName={(session.user.name ?? "").split(/\s+/)[0] || "Your discipler"} />
+  </>;
 }

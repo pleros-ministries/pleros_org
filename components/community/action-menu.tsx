@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { EllipsisIcon, type LucideIcon } from "lucide-react";
 import { Popover } from "@base-ui/react/popover";
 
@@ -17,10 +17,13 @@ export function ActionMenu({
   label,
   actions,
   className = "",
+  trigger,
 }: {
   label: string;
   actions: MenuAction[];
   className?: string;
+  /** A visible button label (e.g. "Follow up") instead of the "…" icon. */
+  trigger?: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
   if (actions.length === 0) return null;
@@ -29,9 +32,11 @@ export function ActionMenu({
     <Popover.Root open={open} onOpenChange={setOpen}>
       <Popover.Trigger
         aria-label={label}
-        className={`inline-flex size-8 shrink-0 items-center justify-center rounded-full text-[var(--color-community-muted)] transition-colors hover:bg-[var(--color-community-canvas)] hover:text-[var(--color-community-ink)] ${className}`}
+        className={trigger
+          ? `inline-flex h-7 shrink-0 items-center gap-1 rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white px-2.5 text-[12px] font-medium text-[var(--color-community-ink)] transition-colors hover:border-[var(--color-community-edge-strong)] ${className}`
+          : `inline-flex size-8 shrink-0 items-center justify-center rounded-full text-[var(--color-community-muted)] transition-colors hover:bg-[var(--color-community-canvas)] hover:text-[var(--color-community-ink)] ${className}`}
       >
-        <EllipsisIcon className="size-[18px]" strokeWidth={2} />
+        {trigger ?? <EllipsisIcon className="size-[18px]" strokeWidth={2} />}
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner sideOffset={6} align="end">

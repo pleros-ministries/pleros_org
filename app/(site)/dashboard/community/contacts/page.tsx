@@ -12,6 +12,7 @@ import { lagosToday } from "@/lib/sogp/daily-date";
 import { reportingV3Enabled, reportingV3SchemaReady } from "@/lib/db/queries/reporting-v3-gate";
 import { listPrivateMinistryContacts } from "@/lib/db/queries/private-ministry-contacts";
 import { SavedContactsList } from "@/components/community/people/people-lists";
+import { listContactInviteStatus } from "@/lib/db/queries/people-follow-ups";
 
 /** Most people one member's list will load; older ones drop off the end. */
 const LIST_LIMIT = 1000;
@@ -25,9 +26,9 @@ export default async function PeopleMetRoute() {
   const contacts = await listContactsForMember(ctx.userId, LIST_LIMIT);
 
   if (reportingV3SchemaReady()) {
-    const privateContacts = await listPrivateMinistryContacts(ctx.userId);
+    const [privateContacts, invites] = await Promise.all([listPrivateMinistryContacts(ctx.userId), listContactInviteStatus(ctx.userId)]);
     return <div className="grid gap-8">
-      <SavedContactsList contacts={privateContacts} readOnly={!reportingV3Enabled()} />
+      <SavedContactsList contacts={privateContacts} invites={Object.fromEntries(invites)} readOnly={!reportingV3Enabled()} />
       {contacts.length ? <details className="mx-auto w-full max-w-140 rounded-xl border border-(--color-line) bg-white">
         <summary className="flex min-h-10 cursor-pointer items-center px-4 text-[14px] font-medium">People met in earlier reports ({contacts.length})</summary>
         <div className="border-t border-(--color-line)"><OutreachContactBrowser contacts={contacts} today={lagosToday()} viewer={{ userId: ctx.userId, isAdmin: ctx.isAdmin }} canDelete emptyText="" /></div>

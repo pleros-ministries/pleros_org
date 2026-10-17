@@ -32,8 +32,8 @@ const ITEMS: BarItem[] = [
     label: "Groups",
     href: `${BASE}/groups`,
     icon: UsersRoundIcon,
-    // Location and discipleship groups are reached from the groups page.
-    also: [`${BASE}/unit`, `${BASE}/discipleship`],
+    // Location and discipleship groups, Saved contacts and My enrollees are reached from the groups page.
+    also: [`${BASE}/unit`, `${BASE}/discipleship`, `${BASE}/contacts`, `${BASE}/enrollees`, `${BASE}/invitations`],
   },
   { key: "feed", label: "Feed", href: `${BASE}/feed`, icon: ListIcon, also: [`${BASE}/post`] },
   // One Inbox for both private conversations: Messages and Ask Pleros keep
