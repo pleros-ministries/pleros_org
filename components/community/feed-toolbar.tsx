@@ -65,7 +65,7 @@ export function FeedToolbar({
       <div
         role="group"
         aria-label="Filter posts"
-        className="ml-px flex items-center gap-1.5"
+        className="ml-0.5 flex items-center gap-1.5"
       >
         {FEED_FILTERS.map((filter) => {
           const active = view.filter === filter;

@@ -21,6 +21,7 @@ import {
   Repeat2Icon,
   SendIcon,
   Share2Icon,
+  ChevronUpIcon,
   HeartIcon,
   Trash2Icon,
 } from "lucide-react";
@@ -544,6 +545,16 @@ export function PostCard({
             isAdmin={isAdmin}
             canComment={post.canComment}
           />
+          {startExpanded ? null : (
+            <button
+              type="button"
+              onClick={() => setShowComments(false)}
+              className="mt-3 inline-flex h-8 w-full items-center justify-center gap-1 rounded-[10px] text-[12.5px] font-medium text-[var(--color-community-muted)] transition-colors hover:bg-[var(--color-community-canvas)]"
+            >
+              <ChevronUpIcon className="size-3.5" strokeWidth={2.2} />
+              Hide comments
+            </button>
+          )}
         </div>
       ) : null}
 
