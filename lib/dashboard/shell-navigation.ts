@@ -35,3 +35,26 @@ export function dashboardWorkspace(sections: DashboardNavSection[]): DashboardWo
   if (staff) workspace.push({ ...staff, icon: staff.key === "pastor-workspace" ? "people" : "building" });
   return workspace;
 }
+
+export type DashboardParent = { href: string; label: string };
+
+/** Each deep screen's true parent, most specific first. Unknown paths step up one segment. */
+const DASHBOARD_PARENTS: Array<[RegExp, (match: RegExpMatchArray) => DashboardParent]> = [
+  [/^\/dashboard\/sogp\/course\/day\/(\d+)\/(quiz|response)$/, match => ({ href: `/dashboard/sogp/course/day/${match[1]}`, label: "Back to lesson" })],
+  [/^\/dashboard\/sogp\/reviews\/[^/]+(\/.*)?$/, () => ({ href: "/dashboard/sogp/reviews", label: "Back to group reviews" })],
+  [/^\/dashboard\/sogp\/.+$/, () => ({ href: "/dashboard/sogp", label: "Back to My SOGP" })],
+  [/^\/dashboard\/sogp$/, () => ({ href: "/dashboard", label: "Back to You" })],
+  [/^\/dashboard\/community\/report\/people\/.+$/, () => ({ href: "/dashboard/community/report/people", label: "Back to saved contacts" })],
+  [/^\/dashboard\/community\/report\/.+$/, () => ({ href: "/dashboard/community/report", label: "Back to my reports" })],
+  [/^\/dashboard\/community\/report$/, () => ({ href: "/dashboard", label: "Back to You" })],
+];
+
+export function dashboardParentForPath(href: string): DashboardParent {
+  const path = href.split(/[?#]/)[0].replace(/\/+$/, "");
+  for (const [pattern, parent] of DASHBOARD_PARENTS) {
+    const match = path.match(pattern);
+    if (match) return parent(match);
+  }
+  const area = dashboardAreaForPath(path);
+  return area === "community" ? { href: "/dashboard/community", label: "Back to Community" } : { href: "/dashboard", label: "Back to You" };
+}
