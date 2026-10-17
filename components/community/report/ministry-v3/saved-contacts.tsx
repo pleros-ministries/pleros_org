@@ -5,9 +5,8 @@ import { startTransition, useRef, useState } from "react";
 import { DashboardIcon, StatusPill } from "@/components/dashboard/v3/primitives";
 import { normalisePrivateContact, type MinistryContact } from "@/lib/community/reporting-v3";
 import { PrivateContactFields, type PersistContact } from "./ministry-form";
-import { ChipSelect } from "@/components/community/chip-select";
-import { UsersRoundIcon } from "lucide-react";
 import styles from "@/components/sogp/follow-up-invitations.module.css";
+import people from "@/components/community/discipleship/discipleship-group.module.css";
 
 const initials = (name: string) => name.trim().split(/\s+/).slice(0, 2).map(part => part[0]?.toUpperCase() ?? "").join("");
 const contactHref = (key: string) => `/dashboard/community/contacts/${key.split(":")[1]}`;
@@ -61,21 +60,32 @@ export function AddSavedContact({ onPersist, inviteGroups = [], initialInviteGro
       finally { setBusy(false); }
     });
   }
-  return <section className={styles.page}>
-    <div className={styles.heading}><h1>Save a private contact</h1><p>No Pleros account needed.</p></div>
-    <fieldset disabled={busy} className={styles.section} style={{ border: 0, padding: 0, margin: 0 }}><legend className="sr-only">Contact details</legend>
+  // Same frame as the people screens under Groups (user request: the redesign reaches every state).
+  return <div className={people.page}>
+    <div className={people.heading}><div><h1>Add a contact</h1><p className={people.sub}>Private to you · no Pleros account needed</p></div></div>
+    <fieldset disabled={busy} className={`${people.panel} ${people.form}`} style={{ margin: 0 }}><legend className="sr-only">Contact details</legend>
       <PrivateContactFields value={value} update={patch => setValue(current => ({ ...current, ...patch }))} error={error} />
     </fieldset>
-    {inviteGroups.length ? <div className={styles.section}>
-      <h2>Invite to a group</h2>
-      <ChipSelect size="md" label="Invite to" icon={UsersRoundIcon} value={inviteTo} placeholder="Don’t invite" menuTitle="Invite to"
-        options={[{ value: "", label: "Don’t invite" }, ...inviteGroups.map(group => ({ value: String(group.id), label: group.name }))]} onChange={setInviteTo} />
-      <p className={styles.meta}>After saving, you’ll share the group’s invite link on WhatsApp. They join only after enrolling and accepting.</p>
-    </div> : null}
-    <div className={styles.info}><DashboardIcon name="shield" size={16} /><p>This contact is private to you. Saving won’t create an account or add them to a group.</p></div>
-    {serverError ? <p role="alert" className={styles.error}>{serverError}</p> : null}
-    <footer className={styles.footer}><button type="button" className={styles.primary} disabled={busy} onClick={save}>{busy ? "Saving…" : inviteTo ? "Save and invite" : "Save contact"}<DashboardIcon name="check" /></button></footer>
-  </section>;
+    {inviteGroups.length ? <>
+      <div className={people.sectionTitle}><h2>Invite to a group</h2><span className={people.rowMeta}>Optional</span></div>
+      <div className={people.panel} role="radiogroup" aria-label="Invite to a group">
+        <ul className={people.list}>
+          {[{ id: 0, name: "Don’t invite yet" }, ...inviteGroups].map((group, index) => <li key={group.id}>
+            <label className={people.row} style={{ cursor: "pointer" }}>
+              <input type="radio" name="invite-group" checked={inviteTo === (group.id ? String(group.id) : "")} onChange={() => setInviteTo(group.id ? String(group.id) : "")} className="size-[18px] shrink-0 accent-[var(--color-community-blue)]" />
+              {group.id
+                ? <span className="size-10 shrink-0 rounded-[10px] bg-[length:260%] bg-right-bottom bg-no-repeat" aria-hidden="true" style={{ backgroundColor: index % 2 === 0 ? "#e6ecfc" : "#e3d8f8", backgroundImage: `url(/assets/dashboard/community-groups/${index % 2 === 0 ? "leading-slate" : "leading"}-compact-320.webp)` }} />
+                : <span className="grid size-10 shrink-0 place-items-center rounded-[10px] bg-[#f1f2f5] text-[var(--color-community-muted)]" aria-hidden="true"><DashboardIcon name="close" size={16} /></span>}
+              <span className={people.rowCopy}><span className={people.rowTitle}>{group.name}</span><span className={people.rowMeta}>{group.id ? "Share its invite on WhatsApp after saving" : "Just save them for now"}</span></span>
+            </label>
+          </li>)}
+        </ul>
+      </div>
+    </> : null}
+    {serverError ? <p role="alert" className={people.error}>{serverError}</p> : null}
+    <button type="button" className={people.share} style={{ border: 0 }} disabled={busy} onClick={save}>{busy ? "Saving…" : inviteTo ? "Save and invite" : "Save contact"}</button>
+    <p className={people.note}>🔒 Private to you. Saving won’t create an account or add them to a group; they join only after enrolling and accepting.</p>
+  </div>;
 }
 
 export type SavedContactDetail = {

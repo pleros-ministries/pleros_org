@@ -12,6 +12,7 @@ import { lagosToday } from "@/lib/sogp/daily-date";
 import { reportingV3Enabled, reportingV3SchemaReady } from "@/lib/db/queries/reporting-v3-gate";
 import { listPrivateMinistryContacts } from "@/lib/db/queries/private-ministry-contacts";
 import { SavedContactsList } from "@/components/community/people/people-lists";
+import people from "@/components/community/discipleship/discipleship-group.module.css";
 import { listContactInviteStatus } from "@/lib/db/queries/people-follow-ups";
 
 /** Most people one member's list will load; older ones drop off the end. */
@@ -27,12 +28,20 @@ export default async function PeopleMetRoute() {
 
   if (reportingV3SchemaReady()) {
     const [privateContacts, invites] = await Promise.all([listPrivateMinistryContacts(ctx.userId), listContactInviteStatus(ctx.userId)]);
-    return <div className="grid gap-8">
+    return <div className="grid gap-6">
       <SavedContactsList contacts={privateContacts} invites={Object.fromEntries(invites)} readOnly={!reportingV3Enabled()} />
-      {contacts.length ? <details className="mx-auto w-full max-w-140 rounded-xl border border-(--color-line) bg-white">
-        <summary className="flex min-h-10 cursor-pointer items-center px-4 text-[14px] font-medium">People met in earlier reports ({contacts.length})</summary>
-        <div className="border-t border-(--color-line)"><OutreachContactBrowser contacts={contacts} today={lagosToday()} viewer={{ userId: ctx.userId, isAdmin: ctx.isAdmin }} canDelete emptyText="" /></div>
-      </details> : null}
+      {/* People recorded before saved contacts existed. They live in the shared outreach
+          records (your pastor can see them too), so they keep their own list. */}
+      {contacts.length ? <section className={people.page} aria-labelledby="earlier-people">
+        <div className={people.sectionTitle}><h2 id="earlier-people">People met in earlier reports</h2><span className={people.rowMeta}>{contacts.length}</span></div>
+        <details className={people.panel}>
+          <summary className={people.row} style={{ cursor: "pointer", listStyle: "none" }}>
+            <span className="grid size-9 shrink-0 place-items-center rounded-[10px] bg-[#f1f2f5] text-[var(--color-community-muted)]" aria-hidden="true">◎</span>
+            <span className={people.rowCopy}><span className={people.rowTitle} style={{ fontWeight: 500 }}>Show {contacts.length} {contacts.length === 1 ? "person" : "people"}</span><span className={people.rowMeta} style={{ whiteSpace: "normal" }}>Added in evangelism reports before saved contacts. Your pastor can see these.</span></span>
+          </summary>
+          <div className="border-t border-(--color-line)"><OutreachContactBrowser contacts={contacts} today={lagosToday()} viewer={{ userId: ctx.userId, isAdmin: ctx.isAdmin }} canDelete emptyText="" /></div>
+        </details>
+      </section> : null}
     </div>;
   }
 
