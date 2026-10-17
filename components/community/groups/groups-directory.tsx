@@ -118,7 +118,7 @@ export function GroupsDirectory({
                 meta={group.relation === "manager" ? "Location group" : "Your location group"} />
             ))}
             {discipleship?.leading.map((group, index) => (
-              <GroupCard key={`led-${group.groupId}`} href={`/dashboard/community/discipleship?group=${group.groupId}`} prefetch={false} art="leading"
+              <GroupCard key={`led-${group.groupId}`} href={group.discipleCount ? `/dashboard/community/discipleship?group=${group.groupId}` : `/dashboard/sogp/discipleship?group=${group.groupId}`} prefetch={false} art="leading"
                 colourway={leadColourways[index % leadColourways.length]} title={group.groupName}
                 meta={group.discipleCount ? `${group.discipleCount} ${group.discipleCount === 1 ? "disciple" : "disciples"}` : "Invite your first disciple"} />
             ))}

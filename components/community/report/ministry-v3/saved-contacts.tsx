@@ -5,6 +5,8 @@ import { startTransition, useRef, useState } from "react";
 import { DashboardIcon, StatusPill } from "@/components/dashboard/v3/primitives";
 import { normalisePrivateContact, type MinistryContact } from "@/lib/community/reporting-v3";
 import { PrivateContactFields, type PersistContact } from "./ministry-form";
+import { ChipSelect } from "@/components/community/chip-select";
+import { UsersRoundIcon } from "lucide-react";
 import styles from "@/components/sogp/follow-up-invitations.module.css";
 
 const initials = (name: string) => name.trim().split(/\s+/).slice(0, 2).map(part => part[0]?.toUpperCase() ?? "").join("");
@@ -32,8 +34,14 @@ export function SavedContacts({ contacts, readOnly }: { contacts: MinistryContac
 }
 
 /** Paper: add_contact (standalone). Name and phone required; saving never creates an account, invitation or membership. */
-export function AddSavedContact({ onPersist }: { onPersist: PersistContact }) {
+export function AddSavedContact({ onPersist, inviteGroups = [], initialInviteGroupId = null }: {
+  onPersist: PersistContact;
+  /** Discipleship groups the viewer leads; picking one opens the WhatsApp invite after saving. */
+  inviteGroups?: Array<{ id: number; name: string }>;
+  initialInviteGroupId?: number | null;
+}) {
   const router = useRouter();
+  const [inviteTo, setInviteTo] = useState<string>(initialInviteGroupId ? String(initialInviteGroupId) : "");
   const [value, setValue] = useState({ name: "", phone: "", email: "", note: "" });
   const [error, setError] = useState<{ field: "name" | "phone" | "email" | "note"; message: string }>();
   const [serverError, setServerError] = useState<string | null>(null);
@@ -48,7 +56,7 @@ export function AddSavedContact({ onPersist }: { onPersist: PersistContact }) {
     startTransition(async () => {
       try {
         const result = await onPersist({ ...parsed.value, requestKey: requestKey.current! });
-        if (result.ok) router.push(contactHref(result.value.key)); else setServerError(result.error);
+        if (result.ok) router.push(inviteTo ? `${contactHref(result.value.key)}/invite?group=${inviteTo}` : contactHref(result.value.key)); else setServerError(result.error);
       } catch { setServerError("Your contact could not be saved. Your entries are still here. Try again."); }
       finally { setBusy(false); }
     });
@@ -58,9 +66,15 @@ export function AddSavedContact({ onPersist }: { onPersist: PersistContact }) {
     <fieldset disabled={busy} className={styles.section} style={{ border: 0, padding: 0, margin: 0 }}><legend className="sr-only">Contact details</legend>
       <PrivateContactFields value={value} update={patch => setValue(current => ({ ...current, ...patch }))} error={error} />
     </fieldset>
-    <div className={styles.info}><DashboardIcon name="shield" size={16} /><p>This contact is private to you. Saving won’t create an account, send an invite or join a group.</p></div>
+    {inviteGroups.length ? <div className={styles.section}>
+      <h2>Invite to a group</h2>
+      <ChipSelect label="Invite to" icon={UsersRoundIcon} value={inviteTo} placeholder="Don’t invite" menuTitle="Invite to"
+        options={[{ value: "", label: "Don’t invite" }, ...inviteGroups.map(group => ({ value: String(group.id), label: group.name }))]} onChange={setInviteTo} />
+      <p className={styles.meta}>After saving, you’ll share the group’s invite link on WhatsApp. They join only after enrolling and accepting.</p>
+    </div> : null}
+    <div className={styles.info}><DashboardIcon name="shield" size={16} /><p>This contact is private to you. Saving won’t create an account or add them to a group.</p></div>
     {serverError ? <p role="alert" className={styles.error}>{serverError}</p> : null}
-    <footer className={styles.footer}><button type="button" className={styles.primary} disabled={busy} onClick={save}>{busy ? "Saving…" : "Save contact"}<DashboardIcon name="check" /></button></footer>
+    <footer className={styles.footer}><button type="button" className={styles.primary} disabled={busy} onClick={save}>{busy ? "Saving…" : inviteTo ? "Save and invite" : "Save contact"}<DashboardIcon name="check" /></button></footer>
   </section>;
 }
 

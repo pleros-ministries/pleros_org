@@ -1,13 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import {
   ArchiveIcon,
   ArchiveRestoreIcon,
-  ArrowLeftIcon,
-  GlobeIcon,
-  LockIcon,
   SettingsIcon,
   ShieldIcon,
   UserMinusIcon,
@@ -35,13 +31,14 @@ import { FeedComposer } from "../feed-composer";
 import { MessageButton } from "../messages/message-button";
 import { PostFeed } from "../post-feed";
 import { GroupFormFields, type GroupFormValues } from "./group-form";
+import { AddContactAction, GroupHero, GroupTabs } from "./group-hero";
 import { GroupJoinButton } from "./group-join-button";
 import { useGroupAction } from "./use-group-action";
 
 type TabKey = "discussions" | "members" | "requests" | "about";
 
 const card =
-  "rounded-2xl border border-[var(--color-community-edge)] bg-white ";
+  "rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white ";
 
 const ROLE_LABEL = { owner: "Owner", moderator: "Moderator", member: null } as const;
 
@@ -72,7 +69,6 @@ export function CommunityGroupPage({
 
   const archived = detail.status === "archived";
   const canEdit = viewer.isOwner || isAdmin;
-  const PrivacyIcon = detail.privacy === "public" ? GlobeIcon : LockIcon;
 
   const tabs: Array<{ key: TabKey; label: string; count?: number }> = [
     { key: "discussions", label: "Discussions" },
@@ -185,95 +181,41 @@ export function CommunityGroupPage({
 
   return (
     <div className="grid gap-4">
-      <Link
-        href="/dashboard/community/groups"
-        className="inline-flex w-fit items-center gap-1.5 text-xs font-medium text-[var(--color-community-muted)] transition-colors hover:text-[var(--color-community-blue)]"
-      >
-        <ArrowLeftIcon className="size-3.5" strokeWidth={2} /> All groups
-      </Link>
-
-      <header className={`${card} grid gap-3 p-4 sm:p-5`}>
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="grid min-w-0 gap-1.5">
-            <h1 className="text-lg font-semibold text-[var(--color-community-ink)]">
-              {detail.name}
-            </h1>
-            <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-[var(--color-community-muted)]">
-              <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-community-canvas)] px-2 py-0.5 text-[0.7rem] font-medium text-[var(--color-community-ink)]">
-                <PrivacyIcon className="size-3" strokeWidth={2} />
-                {detail.privacy === "public" ? "Public group" : "Private group"}
-              </span>
-              {archived ? (
-                <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[0.7rem] font-medium text-amber-700">
-                  Closed
-                </span>
-              ) : null}
-              {detail.memberCount} member{detail.memberCount === 1 ? "" : "s"}
-            </p>
-            {detail.description ? (
-              <p className="max-w-prose whitespace-pre-line text-sm text-[var(--color-community-ink)]">
-                {detail.description}
-              </p>
-            ) : null}
-          </div>
-
-          <div className="flex items-center gap-1">
-            <GroupJoinButton groupId={detail.id} join={viewer.join} />
-            {viewer.isMember && !viewer.isOwner ? (
-              <button
-                type="button"
-                disabled={pending}
-                onClick={() => {
-                  if (window.confirm("Leave this group?")) {
-                    run(() => leaveCommunityGroup(detail.id));
-                  }
-                }}
-                className="inline-flex h-9 items-center rounded-full border border-[var(--color-community-edge)] bg-white px-4 text-[13px] font-medium text-[var(--color-community-ink)] disabled:opacity-60"
-              >
-                Leave group
-              </button>
-            ) : null}
-            <ActionMenu label="Group options" actions={groupActions} />
-          </div>
-        </div>
-
-        {error ? (
-          <p role="alert" className="text-[13px] text-red-700">
-            {error}
-          </p>
-        ) : null}
-
-        <div
-          role="tablist"
-          aria-label="Group sections"
-          className="-mb-4 flex gap-5 overflow-x-auto border-t border-[var(--color-community-edge)] pt-1 sm:-mb-5"
-        >
-          {tabs.map((item) => {
-            const selected = tab === item.key;
-            return (
-              <button
-                key={item.key}
-                type="button"
-                role="tab"
-                aria-selected={selected}
-                onClick={() => setTab(item.key)}
-                className={`-mb-px inline-flex shrink-0 items-center gap-1.5 border-b-2 py-2.5 text-sm font-medium transition-colors ${
-                  selected
-                    ? "border-[var(--color-community-blue)] text-[var(--color-community-blue)]"
-                    : "border-transparent text-[var(--color-community-muted)] hover:text-[var(--color-community-ink)]"
-                }`}
-              >
-                {item.label}
-                {item.count != null ? (
-                  <span className="rounded-full bg-[var(--color-community-canvas)] px-1.5 py-0.5 text-[0.7rem] text-[var(--color-community-ink)]">
-                    {item.count}
-                  </span>
-                ) : null}
-              </button>
-            );
-          })}
-        </div>
-      </header>
+      <GroupHero
+        art={detail.privacy === "private" ? "private" : "public"}
+        tag={viewer.isOwner ? "You own this" : detail.privacy === "public" ? "Public" : "Private"}
+        title={detail.name}
+        meta={<>
+          {detail.memberCount} member{detail.memberCount === 1 ? "" : "s"}
+          {archived ? " · Closed" : ""}
+          {detail.description ? ` · ${detail.description}` : ""}
+        </>}
+        actions={<>
+          <GroupJoinButton groupId={detail.id} join={viewer.join} />
+          {viewer.isMember ? <AddContactAction /> : null}
+          {viewer.isMember && !viewer.isOwner ? (
+            <button
+              type="button"
+              disabled={pending}
+              onClick={() => {
+                if (window.confirm("Leave this group?")) {
+                  run(() => leaveCommunityGroup(detail.id));
+                }
+              }}
+              className="inline-flex h-8 items-center rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white px-3 text-[12.5px] font-medium text-[var(--color-community-ink)] disabled:opacity-60"
+            >
+              Leave
+            </button>
+          ) : null}
+          <span className="ml-auto"><ActionMenu label="Group options" actions={groupActions} /></span>
+        </>}
+      />
+      {error ? (
+        <p role="alert" className="m-0 text-[13px] text-red-700">
+          {error}
+        </p>
+      ) : null}
+      <GroupTabs tabs={tabs} value={tab} onChange={setTab} />
 
       {tab === "discussions" ? (
         !viewer.canView ? (

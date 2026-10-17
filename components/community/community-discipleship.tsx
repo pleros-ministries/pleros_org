@@ -11,12 +11,13 @@ import type {
 import type { FeedPost } from "@/lib/db/queries/community-posts";
 
 import { Avatar } from "./avatar";
+import { AddContactAction, GroupHero, GroupTabs } from "./groups/group-hero";
 import { FeedComposer } from "./feed-composer";
 import { MessageButton } from "./messages/message-button";
 import { PostFeed } from "./post-feed";
 
 const card =
-  "rounded-2xl border border-[var(--color-community-edge)] bg-white ";
+  "rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white ";
 
 const TOOLS_HREF = "/dashboard/sogp/discipleship";
 
@@ -196,24 +197,6 @@ export function CommunityDiscipleshipView({
 
   return (
     <div className="grid gap-4">
-      <header className="flex flex-wrap items-start justify-between gap-3">
-        <div className="grid gap-1">
-          <h1 className="text-lg font-semibold text-[var(--color-community-ink)]">
-            Discipleship
-          </h1>
-          <p className="max-w-md text-sm text-[var(--color-community-muted)]">
-            A private space for you and the people you walk with through SOGP.
-            Only your group can see what is shared here.
-          </p>
-        </div>
-        <Link
-          href={TOOLS_HREF}
-          className="inline-flex h-9 items-center gap-1.5 rounded-full border border-[var(--color-community-edge)] bg-white px-3.5 text-[13px] font-medium text-[var(--color-community-blue)]"
-        >
-          Discipleship tools
-          <ArrowRightIcon className="size-4" strokeWidth={2} />
-        </Link>
-      </header>
 
       {spaces.length > 1 ? (
         <div
@@ -238,45 +221,21 @@ export function CommunityDiscipleshipView({
 
       {active ? (
         <>
-          <section className={`${card} grid gap-3 p-4 sm:p-5`}>
-            <div className="grid gap-1">
-              <h2 className="text-base font-semibold text-[var(--color-community-ink)]">
-                {active.groupName}
-              </h2>
-              <p className="text-sm text-[var(--color-community-muted)]">{active.summary}</p>
-            </div>
-
-            <div
-              role="tablist"
-              aria-label="Group sections"
-              className="-mb-4 flex gap-5 border-t border-[var(--color-community-edge)] pt-1 sm:-mb-5"
-            >
-              {tabs.map((item) => {
-                const selected = tab === item.key;
-                return (
-                  <button
-                    key={item.key}
-                    type="button"
-                    role="tab"
-                    aria-selected={selected}
-                    onClick={() => setTab(item.key)}
-                    className={`-mb-px inline-flex items-center gap-1.5 border-b-2 py-2.5 text-sm font-medium transition-colors ${
-                      selected
-                        ? "border-[var(--color-community-blue)] text-[var(--color-community-blue)]"
-                        : "border-transparent text-[var(--color-community-muted)] hover:text-[var(--color-community-ink)]"
-                    }`}
-                  >
-                    {item.label}
-                    {item.count != null ? (
-                      <span className="rounded-full bg-[var(--color-community-canvas)] px-1.5 py-0.5 text-[0.7rem] text-[var(--color-community-ink)]">
-                        {item.count}
-                      </span>
-                    ) : null}
-                  </button>
-                );
-              })}
-            </div>
-          </section>
+          <GroupHero
+            art={active.kind === "leading" ? "leading" : "discipleship"}
+            colourway={active.kind === "leading" && ledSpaces.findIndex((space) => space.groupId === active.groupId) % 2 === 1 ? "slate" : undefined}
+            tag={active.kind === "leading" ? "You lead" : "Discipleship"}
+            title={active.groupName}
+            meta={active.summary}
+            actions={active.kind === "leading" ? <>
+              <Link href={`${TOOLS_HREF}?group=${active.groupId}`} prefetch={false} className="inline-flex h-8 items-center gap-1.5 rounded-[10px] bg-[var(--color-community-blue)] px-3 text-[12.5px] font-semibold text-white">
+                Progress & check-ins
+                <ArrowRightIcon className="size-3.5" strokeWidth={2.2} />
+              </Link>
+              <AddContactAction inviteGroupId={active.groupId} />
+            </> : null}
+          />
+          <GroupTabs tabs={tabs} value={tab} onChange={setTab} />
 
           {tab === "discussions" ? (
             <>

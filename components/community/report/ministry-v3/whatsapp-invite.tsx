@@ -10,10 +10,12 @@ export type WhatsAppInviteGroup = { id: number; name: string; inviteUrl: string 
  * invite link for a private saved contact. Nothing is stored or sent by Pleros;
  * the recipient still creates an account and accepts the invitation to join.
  */
-export function WhatsAppGroupInvite({ contact, groups, leaderName, whatsappBase }: {
+export function WhatsAppGroupInvite({ contact, groups, leaderName, whatsappBase, initialGroupId }: {
   contact: { name: string; phone: string }; groups: WhatsAppInviteGroup[]; leaderName: string; whatsappBase: string | null;
+  /** Preselected when the leader started from a group page. */
+  initialGroupId?: number;
 }) {
-  const [groupId, setGroupId] = useState(groups[0]?.id ?? 0);
+  const [groupId, setGroupId] = useState(initialGroupId ?? groups[0]?.id ?? 0);
   const group = groups.find(item => item.id === groupId);
   const first = contact.name.trim().split(/\s+/)[0] || contact.name;
   const message = group ? `Hi ${first}, join ${group.name} on Pleros. Create an account, then accept the group invitation when you’re ready. ${group.inviteUrl}` : "";

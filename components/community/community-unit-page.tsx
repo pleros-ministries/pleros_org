@@ -9,6 +9,7 @@ import { setCommunityUnitLeader } from "@/app/admin/_actions/community-actions";
 
 import { Avatar } from "./avatar";
 import { FeedComposer, type OfficialReach } from "./feed-composer";
+import { AddContactAction, GroupHero, GroupTabs } from "./groups/group-hero";
 import { MessageButton } from "./messages/message-button";
 import { PostFeed } from "./post-feed";
 
@@ -22,7 +23,7 @@ type AdminMember = {
 type TabKey = "discussions" | "members" | "about";
 
 const card =
-  "rounded-2xl border border-[var(--color-community-edge)] bg-white";
+  "rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white";
 
 export function CommunityUnitPage({
   detail,
@@ -57,64 +58,27 @@ export function CommunityUnitPage({
 
   return (
     <div className="grid gap-4">
-      <header className={`${card} grid gap-3 p-4 sm:p-5`}>
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="grid min-w-0 gap-1">
-            <h1 className="text-[18px] font-medium leading-[26px] text-[var(--color-community-ink)]">
-              {detail.name}
-            </h1>
-            <p className="text-[13px] leading-[20px] text-[var(--color-community-muted)]">
-              {detail.memberCount} member{detail.memberCount === 1 ? "" : "s"}
-              {detail.pastor ? ` · Pastor ${detail.pastor.firstName}` : ""}
-              {detail.leader ? ` · led by ${detail.leader.firstName}` : ""}
-              {!detail.pastor && !detail.leader ? " · no pastor assigned yet" : ""}
-              {detail.status === "archived" ? " · archived" : ""}
-            </p>
-          </div>
+      <GroupHero
+        art="location"
+        tag={canPost ? "Location" : "You look after"}
+        title={detail.name}
+        meta={<>
+          {detail.memberCount} member{detail.memberCount === 1 ? "" : "s"}
+          {detail.pastor ? ` · Pastor ${detail.pastor.firstName}` : ""}
+          {detail.leader ? ` · led by ${detail.leader.firstName}` : ""}
+          {!detail.pastor && !detail.leader ? " · no pastor assigned yet" : ""}
+          {detail.status === "archived" ? " · archived" : ""}
+        </>}
+        actions={<>
           {detail.pastor?.messageUserId ? (
-            <MessageButton
-              userId={detail.pastor.messageUserId}
-              label="Message pastor"
-            />
+            <MessageButton userId={detail.pastor.messageUserId} label="Message pastor" />
           ) : detail.leader?.messageUserId ? (
-            <MessageButton
-              userId={detail.leader.messageUserId}
-              label="Message leader"
-            />
+            <MessageButton userId={detail.leader.messageUserId} label="Message leader" />
           ) : null}
-        </div>
-
-        <div
-          role="tablist"
-          aria-label="Group sections"
-          className="-mb-4 flex gap-5 border-t border-[var(--color-community-edge)] pt-1 sm:-mb-5"
-        >
-          {tabs.map((item) => {
-            const active = tab === item.key;
-            return (
-              <button
-                key={item.key}
-                type="button"
-                role="tab"
-                aria-selected={active}
-                onClick={() => setTab(item.key)}
-                className={`-mb-px inline-flex min-h-9 items-center gap-1.5 border-b-2 py-2.5 text-sm font-medium transition-colors ${
-                  active
-                    ? "border-[var(--color-community-blue)] text-[var(--color-community-blue)]"
-                    : "border-transparent text-[var(--color-community-muted)]"
-                }`}
-              >
-                {item.label}
-                {item.count != null ? (
-                  <span className="rounded-full bg-[var(--color-community-sky-soft)] px-1.5 py-0.5 text-[11px] font-medium text-[var(--color-community-sky-ink)]">
-                    {item.count}
-                  </span>
-                ) : null}
-              </button>
-            );
-          })}
-        </div>
-      </header>
+          <AddContactAction />
+        </>}
+      />
+      <GroupTabs tabs={tabs} value={tab} onChange={setTab} />
 
       {tab === "discussions" ? (
         <>
