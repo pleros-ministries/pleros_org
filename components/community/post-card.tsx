@@ -455,7 +455,7 @@ export function PostCard({
                 </span>
               ) : null}
               <span className="truncate">
-                {[scopeLabel, roleLabel, post.kind === "official" ? null : topic, relativeTime(post.lastActivityAt)].filter(Boolean).join(" · ")}
+                {[scopeLabel, roleLabel, post.kind === "official" ? null : topic].filter(Boolean).join(" · ")}
               </span>
             </p>
           </div>
@@ -500,6 +500,11 @@ export function PostCard({
         <ImageGrid images={post.images} onOpen={setLightbox} />
 
         {post.sharedFrom ? <QuotedPost post={post.sharedFrom} /> : null}
+
+        {/* Date sits at the foot of the post, above the actions (Twitter-style). */}
+        <time dateTime={post.lastActivityAt} className="-mb-1 block text-[11.5px] leading-[15px] text-[var(--color-community-muted)]">
+          {relativeTime(post.lastActivityAt)}
+        </time>
 
       </div>
 
