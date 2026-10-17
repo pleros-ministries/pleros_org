@@ -156,7 +156,7 @@ export function GroupsDirectory({
             </ul>
           ) : (
             <p className="m-0 px-4 py-3.5 text-[13px] text-[var(--color-community-muted)]">
-              {hasOthers ? "No groups match that search." : "There are no other groups yet. Be the first to start one."}
+              {hasOthers ? "No groups match that search." : "No other groups to join yet."}
             </p>
           )}
         </div>
