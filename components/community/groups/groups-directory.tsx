@@ -48,7 +48,8 @@ function DiscoverRow({ group }: { group: GroupSummary }) {
       <Link href={`/dashboard/community/groups/${group.id}`} className="flex min-w-0 flex-1 items-center gap-3">
         <span
           aria-hidden
-          className="size-11 shrink-0 rounded-[10px] bg-cover bg-right-bottom"
+          // Zoomed onto the corner object so it fills the thumbnail, not the empty field.
+          className="size-11 shrink-0 rounded-[10px] bg-[length:260%] bg-right-bottom bg-no-repeat"
           style={{
             backgroundColor: art === "private" ? "#f6d9de" : "#f9caa7",
             backgroundImage: `url("/assets/dashboard/community-groups/${art}-compact-320.webp")`,
