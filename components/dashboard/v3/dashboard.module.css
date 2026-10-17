@@ -122,8 +122,10 @@
   text-overflow: ellipsis;
 }
 /* Wider desktop cards would outgrow the scaled art; plain cover keeps the blue field whole. */
-/* Wide desktop cards use the 3:1 cut so the art stays a small corner object; copy keeps to the left. */
-@media (min-width: 64rem) {
+/* Any wide card (by its own width, not the window's) uses the 3:1 cut so the
+   art stays a small corner object and always fills the card; copy keeps left. */
+.homeMain { container-type: inline-size; }
+@container (min-width: 400px) {
   .homeLearningCard { background-image: var(--learning-art-wide, var(--learning-art)); background-size: cover; background-position: right bottom; }
   .homeLearningProgressRow { max-width: 420px; }
   .homeLearningTitle { max-width: 74%; }

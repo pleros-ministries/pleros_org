@@ -21,8 +21,8 @@ function CountCard({ href, count, label, description, icon, tone, capped }: { hr
     : <div className={styles.count} data-tone={tone} aria-label={`${count} ${description}`}>{body}</div>;
 }
 
-/** Groups you lead share one illustration in three colourways, cycled oldest-first so neighbours differ. */
-const leadColourways = ["lilac", "teal", "coral"] as const;
+/** Groups you lead share one illustration in two colourways, alternated oldest-first so neighbours differ. No light green (user preference). */
+const leadColourways = ["lilac", "coral"] as const;
 
 function GroupCard({ href, art, title, meta, prefetch, colourway }: { href: string; art: GroupArt; title: string; meta: string; prefetch?: false; colourway?: string }) {
   return <Link href={href} prefetch={prefetch} className={styles.groupCard} data-art={art} data-colourway={colourway} title={title}>
