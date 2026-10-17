@@ -447,7 +447,7 @@ export function PostCard({
             </p>
             <p className="m-0 mt-px flex items-center gap-1 truncate text-[11.5px] leading-[15px] text-[var(--color-community-muted)]">
               {post.kind === "official" ? (
-                <span className="inline-flex shrink-0 items-center gap-0.5 font-semibold text-[var(--color-community-sky-ink,#2331ae)]">
+                <span className="inline-flex shrink-0 items-center gap-0.5 font-semibold text-[var(--color-community-blue)]">
                   <MegaphoneIcon className="size-3" strokeWidth={2.2} />
                   {staysInGroup ? "Announcement" : "Official"}
                   <span aria-hidden className="ml-0.5 font-normal text-[#b3b8bf]">·</span>

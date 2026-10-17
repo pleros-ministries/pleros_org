@@ -25,7 +25,7 @@ export function CommunityHub({
   postingBlocked: boolean;
 }) {
   return (
-    <div className="grid gap-3.5">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-3.5">
       <h1 className="m-0 font-[family-name:var(--font-dashboard-heading)] text-[21px] font-medium leading-[28px] tracking-[-0.02em] text-[var(--color-community-ink)]">
         Feed
       </h1>
