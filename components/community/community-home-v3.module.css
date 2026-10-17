@@ -1,7 +1,8 @@
 /* Pleros-community source: 16px gutter, 72px message tile, 12px panels.
    Device clock/home indicator are intentionally not application content. */
 .home { width: 100%; max-width: 560px; min-height: calc(100dvh - 104px); margin-inline: auto; padding: 28px 16px max(32px, env(safe-area-inset-bottom)); background: var(--color-community-canvas); color: var(--color-text-strong); }
-.heading h1 { margin: 0; font-size: 24px; line-height: 32px; font-weight: 500; letter-spacing: var(--dashboard-tracking-heading, -0.02em); }
+/* Matches the You home greeting: both are the top heading of a tab. */
+.home .heading h1 { margin: 0; font-size: 21px; line-height: 28px; font-weight: 500; letter-spacing: var(--dashboard-tracking-heading, -0.02em); }
 .heading p { margin: 4px 0 0; font-size: 14px; line-height: 22px; color: var(--color-text-muted); }
 .messages { display: flex; align-items: center; gap: 20px; min-height: 72px; padding: 14px 16px; margin-top: 24px; border-radius: var(--dashboard-card-radius); background: white; box-shadow: var(--shadow-sm); text-decoration: none; color: inherit; }
 .icon { display: flex; flex-shrink: 0; color: var(--color-text-muted); }
