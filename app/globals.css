@@ -953,7 +953,7 @@
 
   .pleros-input:focus {
     border-color: var(--color-brand-blue);
-    box-shadow: 0 0 0 4px var(--color-focus);
+    box-shadow: 0 0 0 2px var(--color-focus);
   }
 
   /* Chips / badges */
@@ -1405,7 +1405,7 @@
 
 .sogp-field-control:focus-within {
   border-color: var(--color-brand-blue);
-  box-shadow: 0 0 0 4px var(--color-focus);
+  box-shadow: 0 0 0 2px var(--color-focus);
 }
 
 .sogp-field-control[data-invalid] {
@@ -1686,4 +1686,12 @@ select:dir(rtl):not([multiple]):not([size]):not(.sogp-field-select):not(.sogp-ph
     animation: none !important;
     transition: none !important;
   }
+}
+
+/* One focus edge for every text field: a slim blue line over the field's own
+   border, no gap. Unlayered and specific enough to beat module and utility
+   rings; it only resizes an outline a rule already draws. */
+:root :is(input:not([type="checkbox"], [type="radio"], [type="range"], [type="file"], [type="color"], [type="button"], [type="submit"], [type="reset"], [type="image"]), textarea, select):focus-visible {
+  outline-width: 1.5px;
+  outline-offset: -1px;
 }

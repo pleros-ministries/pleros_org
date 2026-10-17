@@ -131,7 +131,7 @@ function ReferralSourceFields({
           required
           aria-invalid={Boolean(sourceError)}
           aria-describedby={sourceError ? "referral-source-error" : undefined}
-          className={`h-11 w-full appearance-none rounded-[var(--radius-sm)] border border-[var(--color-line-strong)] bg-white px-4 pr-11 [font-size:0.875rem] outline-none transition aria-invalid:border-[var(--destructive)] aria-invalid:ring-4 aria-invalid:ring-red-100 focus-visible:border-[var(--color-brand-blue)] focus-visible:ring-4 focus-visible:ring-[var(--color-focus)] ${source ? "text-[var(--color-text-strong)]" : "text-[var(--color-text-muted)]"}`}
+          className={`h-11 w-full appearance-none rounded-[var(--radius-sm)] border border-[var(--color-line-strong)] bg-white px-4 pr-11 [font-size:0.875rem] outline-none transition aria-invalid:border-[var(--destructive)] aria-invalid:ring-4 aria-invalid:ring-red-100 focus-visible:border-[var(--color-brand-blue)] focus-visible:ring-2 focus-visible:ring-[var(--color-focus)] ${source ? "text-[var(--color-text-strong)]" : "text-[var(--color-text-muted)]"}`}
         >
           <option value="">Select an option</option>
           {SOGP_REFERRAL_OPTIONS.map((option) => (
@@ -374,7 +374,7 @@ export function SogpEnrollmentForm({
                 required
                 aria-invalid={Boolean(regionError)}
                 aria-describedby={regionError ? "region-error" : undefined}
-                className={`h-11 w-full appearance-none rounded-[var(--radius-sm)] border border-[var(--color-line-strong)] bg-white px-4 pr-11 [font-size:0.875rem] outline-none transition aria-invalid:border-[var(--destructive)] aria-invalid:ring-4 aria-invalid:ring-red-100 focus-visible:border-[var(--color-brand-blue)] focus-visible:ring-4 focus-visible:ring-[var(--color-focus)] ${values.region ? "text-[var(--color-text-strong)]" : "text-[var(--color-text-muted)]"}`}
+                className={`h-11 w-full appearance-none rounded-[var(--radius-sm)] border border-[var(--color-line-strong)] bg-white px-4 pr-11 [font-size:0.875rem] outline-none transition aria-invalid:border-[var(--destructive)] aria-invalid:ring-4 aria-invalid:ring-red-100 focus-visible:border-[var(--color-brand-blue)] focus-visible:ring-2 focus-visible:ring-[var(--color-focus)] ${values.region ? "text-[var(--color-text-strong)]" : "text-[var(--color-text-muted)]"}`}
               >
                 <option value="">Select state</option>
                 {NIGERIA_STATE_LABELS.map((state) => (
@@ -410,7 +410,7 @@ export function SogpEnrollmentForm({
               required
               aria-invalid={Boolean(birthYearError)}
               aria-describedby={birthYearError ? "birth-year-error" : undefined}
-              className={`h-11 w-full appearance-none rounded-[var(--radius-sm)] border border-[var(--color-line-strong)] bg-white px-4 pr-11 [font-size:0.875rem] outline-none transition aria-invalid:border-[var(--destructive)] aria-invalid:ring-4 aria-invalid:ring-red-100 focus-visible:border-[var(--color-brand-blue)] focus-visible:ring-4 focus-visible:ring-[var(--color-focus)] ${values.birthYear ? "text-[var(--color-text-strong)]" : "text-[var(--color-text-muted)]"}`}
+              className={`h-11 w-full appearance-none rounded-[var(--radius-sm)] border border-[var(--color-line-strong)] bg-white px-4 pr-11 [font-size:0.875rem] outline-none transition aria-invalid:border-[var(--destructive)] aria-invalid:ring-4 aria-invalid:ring-red-100 focus-visible:border-[var(--color-brand-blue)] focus-visible:ring-2 focus-visible:ring-[var(--color-focus)] ${values.birthYear ? "text-[var(--color-text-strong)]" : "text-[var(--color-text-muted)]"}`}
             >
               <option value="">Select year</option>
               {BIRTH_YEAR_OPTIONS.map((year) => (
