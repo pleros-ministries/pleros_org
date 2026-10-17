@@ -70,7 +70,8 @@ const DASHBOARD_FOCUS: Array<[RegExp, (match: RegExpMatchArray) => DashboardFocu
   // Reports and contacts (You)
   [/^\/dashboard\/community\/report\/people\/private\/(\d+)\/invite$/, m => ({ title: "Share group invitation", back: { href: `/dashboard/community/report/people/private/${m[1]}`, label: "Back to contact" } })],
   [/^\/dashboard\/community\/report\/people\/(new|private\/\d+)$/, m => ({ title: m[1] === "new" ? "Add contact" : "Contact details", back: { href: "/dashboard/community/report/people", label: "Back to saved contacts" } })],
-  [/^\/dashboard\/community\/report\/people$/, () => ({ title: "Saved contacts", back: { href: "/dashboard/community/report", label: "Back to my reports" } })],
+  // Saved contacts is its own Workspace destination, not part of My reports.
+  [/^\/dashboard\/community\/report\/people$/, () => ({ title: "Saved contacts", back: YOU })],
   [/^\/dashboard\/community\/report\/(history|new|\d+)$/, m => ({ title: m[1] === "history" ? "Report history" : m[1] === "new" ? "New report" : "Edit activity", back: { href: "/dashboard/community/report", label: "Back to my reports" } })],
   [/^\/dashboard\/community\/report\/.+$/, () => ({ title: "My reports", back: { href: "/dashboard/community/report", label: "Back to my reports" } })],
   [/^\/dashboard\/community\/report$/, () => ({ title: "My reports", back: YOU })],

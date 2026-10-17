@@ -3,10 +3,7 @@
 import { useState } from "react";
 import { CheckIcon, CopyIcon } from "lucide-react";
 
-import {
-  regenerateInviteLinkAction,
-  type DiscipleshipActionResult,
-} from "@/app/(site)/dashboard/sogp/discipleship/_actions";
+import type { DiscipleshipActionResult } from "@/app/(site)/dashboard/sogp/discipleship/_actions";
 import { useDiscipleshipAction } from "@/components/sogp/discipleship-check-ins";
 import type { DiscipleSummary } from "@/lib/db/queries/sogp-discipleship";
 import { buildDiscipleshipShareMessage } from "@/lib/sogp/discipleship";
@@ -93,7 +90,6 @@ export function InvitePanel({ group, leaderFirstName, empty }: {
   empty: boolean;
 }) {
   const [copied, setCopied] = useState(false);
-  const regenerate = useDiscipleshipAction(false);
   const message = buildDiscipleshipShareMessage(leaderFirstName);
   const whatsapp = buildPreSogpShareIntentUrl({ platform: "whatsapp", postUrl: group.inviteUrl, message });
   const shortUrl = group.inviteUrl.replace(/^https?:\/\/(www\.)?/, "");
@@ -114,13 +110,6 @@ export function InvitePanel({ group, leaderFirstName, empty }: {
           </button>
         </div>
         <a className={styles.share} href={whatsapp} target="_blank" rel="noopener noreferrer">Share on WhatsApp</a>
-        <p className={styles.note} style={{ margin: 0 }}>Your disciples can reach you on WhatsApp once they join.</p>
-        <button type="button" className={styles.quiet} disabled={regenerate.pending} onClick={() => {
-          if (window.confirm("Create a new link for this group? Its old link will stop working.")) {
-            regenerate.run(() => regenerateInviteLinkAction({ groupId: group.id }));
-          }
-        }}>Create a new link</button>
-        {regenerate.error ? <p role="alert" className={styles.error}>{regenerate.error}</p> : null}
       </div>
     </div>
     {empty ? <>

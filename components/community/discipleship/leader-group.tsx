@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { CalendarCheckIcon, ChevronRightIcon, PencilIcon, PlusIcon, UserPlusIcon, XCircleIcon } from "lucide-react";
+import { CalendarCheckIcon, ChevronRightIcon, LinkIcon, PencilIcon, PlusIcon, UserPlusIcon, XCircleIcon } from "lucide-react";
 
 import {
   closeDiscipleshipGroupAction,
   createDiscipleshipGroupAction,
+  regenerateInviteLinkAction,
   renameDiscipleshipGroupAction,
 } from "@/app/(site)/dashboard/sogp/discipleship/_actions";
 import { LeaderPromptList, PromptComposer, useDiscipleshipAction } from "@/components/sogp/discipleship-check-ins";
@@ -71,13 +72,17 @@ export function LeaderGroupView({ data, episodeQuestions, colourway, initialTab,
   ];
   const [tab, setTab] = useState<LeaderTab>(tabs.some(item => item.key === initialTab) ? initialTab : "disciples");
   const close = useDiscipleshipAction(false);
+  const regenerate = useDiscipleshipAction(false);
   const canClose = evaluateCloseDiscipleshipGroup({ status: group.status, openGroupCount: data.ledGroups.length }).ok;
 
   const menu: MenuAction[] = paused ? [] : [
     { key: "rename", label: "Rename group", icon: PencilIcon, onSelect: () => setPanel("rename") },
     ...(hasDisciples ? [{ key: "contact", label: "Add a contact", icon: UserPlusIcon, onSelect: () => router.push(`/dashboard/community/report/people/new?invite=${group.id}`) }] : []),
+    { key: "link", label: "New invite link", icon: LinkIcon, onSelect: () => {
+      if (window.confirm("Create a new invite link for this group? Its old link will stop working.")) regenerate.run(() => regenerateInviteLinkAction({ groupId: group.id }));
+    } },
     { key: "reviews", label: "Weekly group reviews", icon: CalendarCheckIcon, onSelect: () => router.push(`/dashboard/sogp/reviews?group=${group.id}`) },
-    ...(data.createGroupBlock ? [] : [{ key: "create", label: "New discipleship group", icon: PlusIcon, onSelect: () => setPanel("create") }]),
+    ...(data.createGroupBlock ? [] : [{ key: "create", label: "New group", icon: PlusIcon, onSelect: () => setPanel("create") }]),
     ...(canClose ? [{ key: "close", label: "Close group", icon: XCircleIcon, danger: true, onSelect: () => {
       const released = hasDisciples ? ` and its ${disciples.length} disciple${disciples.length === 1 ? "" : "s"} will be released` : "";
       if (window.confirm(`Close ${group.name}? Its invite link will stop working${released}. This can't be undone.`)) {
@@ -104,7 +109,7 @@ export function LeaderGroupView({ data, episodeQuestions, colourway, initialTab,
         <ActionMenu label="Group options" actions={menu} className="!size-8 !rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white" />
       </>}
     />
-    {close.error ? <p role="alert" className={styles.error}>{close.error}</p> : null}
+    {close.error || regenerate.error ? <p role="alert" className={styles.error}>{close.error ?? regenerate.error}</p> : null}
 
     {paused ? <p className={`${styles.panel} ${styles.empty}`}>This group has been paused by the Pleros team. Contact support if you think this is a mistake.</p> : null}
     {panel === "invite" ? <InvitePanel group={group} leaderFirstName={data.viewer.firstName} empty={false} /> : null}
