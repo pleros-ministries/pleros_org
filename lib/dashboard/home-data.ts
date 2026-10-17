@@ -57,7 +57,7 @@ export async function getDashboardHomeData(viewer: NonNullable<Awaited<ReturnTyp
     card = { kind: "podcast", pace: state.plan!.episodesPerDay, href: `/dashboard/sogp/listen?day=${waiting.dayNumber}`, series: parsed[0]?.series ?? "Your podcast plan", dayNumber: waiting.dayNumber,
       episodes: parsed.map(({ part, duration, durationSeconds, positionSeconds, listened }) => ({ part, duration, durationSeconds, positionSeconds, listened })) };
   } else if (!podcast && lesson) {
-    card = { kind: "traditional", title: lesson.lesson.title, href: `/dashboard/sogp/course/day/${lesson.dayNumber}`, completed: course.tracks.filter(track => track.completed).length, total: course.tracks.length };
+    card = { kind: "traditional", title: lesson.lesson.title, level: lesson.curriculumLevel, href: `/dashboard/sogp/course/day/${lesson.dayNumber}`, completed: course.tracks.filter(track => track.completed).length, total: course.tracks.length };
   }
   const sogp: HomeSogp | null = journey ? {
     cohortTitle: journey.cohort.title,

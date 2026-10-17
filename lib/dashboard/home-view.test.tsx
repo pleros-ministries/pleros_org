@@ -99,3 +99,11 @@ test("the SOGP sections bring the old dashboard's day, checklist, progress and t
   expect(html).toContain("Tolu&#x27;s group");
   expect(html).toContain('href="/partner"');
 });
+
+test("the learning card uses the current track's level art and falls back to the staircase", () => {
+  const level3 = renderToStaticMarkup(<DashboardHomeView greeting="Hello" data={{ ...data, card: { kind: "traditional", title: "The Walk of Faith", href: "#", completed: 15, total: 24, level: 3 } }} />);
+  const podcast = renderToStaticMarkup(<DashboardHomeView greeting="Hello" data={data} />);
+
+  expect(level3).toContain("my-learning-level-3.webp");
+  expect(podcast).toContain("my-learning-background-v5.webp");
+});

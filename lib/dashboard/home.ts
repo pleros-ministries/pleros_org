@@ -20,7 +20,7 @@ export function homeReportRows(input: { devotionalCount: number; ministryCount: 
 /** Paper adaptive home cards: start (blue), traditional, podcast (white, per-episode). */
 export type HomeLearningCard =
   | { kind: "start"; href: string }
-  | { kind: "traditional"; title: string; href: string; completed: number; total: number }
+  | { kind: "traditional"; title: string; href: string; completed: number; total: number; level?: number }
   | { kind: "podcast"; pace: 1 | 2; href: string; series: string; episodes: { part: string; duration: string; durationSeconds: number; positionSeconds: number; listened: boolean }[]; dayNumber: number };
 
 export type HomeWeekDay = { dateKey: string; weekday: string; dayOfMonth: number; state: "complete" | "missed" | "current" | "future" | "outside"; isToday: boolean; hasReview: boolean };

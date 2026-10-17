@@ -89,6 +89,14 @@ function reportDate(day: string) {
   }).format(new Date(`${day}T12:00:00Z`));
 }
 
+/** One illustrated card per SOGP level; level 1, podcast paths and unknown levels use the staircase. */
+const learningArt: Record<number, { image: string; field: string; accent: string; ink: string }> = {
+  1: { image: "my-learning-background-v5.webp", field: "#2056d6", accent: "#d8ff65", ink: "#2056d6" },
+  2: { image: "my-learning-level-2.webp", field: "#24704d", accent: "#ffd479", ink: "#1d5e40" },
+  3: { image: "my-learning-level-3.webp", field: "#b84f35", accent: "#ffe0a3", ink: "#a8432c" },
+  4: { image: "my-learning-level-4.webp", field: "#56298a", accent: "#ffd479", ink: "#4a2275" },
+};
+
 function LearningDestination({ card, fallback, hubHref }: {
   card: HomeLearningCard | undefined;
   fallback: DashboardHomeData["learning"];
@@ -96,11 +104,18 @@ function LearningDestination({ card, fallback, hubHref }: {
 }) {
   const door = learningDoor(card, fallback);
   const percent = door.total > 0 ? Math.min(100, door.value / door.total * 100) : 0;
+  const art = learningArt[card?.kind === "traditional" ? card.level ?? 1 : 1] ?? learningArt[1];
 
   return <section
     className={styles.homeLearningCard}
     aria-label="My learning"
-    style={{ backgroundImage: 'url("/assets/dashboard/learning-card/my-learning-background-v5.webp")' }}
+    data-learning-art={art.image}
+    style={{
+      backgroundImage: `url("/assets/dashboard/learning-card/${art.image}")`,
+      backgroundColor: art.field,
+      ["--learning-accent" as string]: art.accent,
+      ["--learning-ink" as string]: art.ink,
+    }}
   >
     <div className={styles.homeLearningTopline}>
       <Link href={hubHref} className={styles.homeLearningLabel} aria-label="Open My learning">

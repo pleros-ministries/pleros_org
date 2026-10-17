@@ -12,7 +12,10 @@ const reports: DashboardHomeData["reports"] = [
 ];
 const cards: Record<string, DashboardHomeData["card"]> = {
   start: { kind: "start", href: "/dashboard/sogp/path" },
-  traditional: { kind: "traditional", title: "Track 03", href: "#", completed: 2, total: 28 },
+  traditional: { kind: "traditional", title: "Track 03", href: "#", completed: 2, total: 28, level: 1 },
+  "level-2": { kind: "traditional", title: "The Godhead", href: "#", completed: 8, total: 24, level: 2 },
+  "level-3": { kind: "traditional", title: "The Walk of Faith", href: "#", completed: 15, total: 24, level: 3 },
+  "level-4": { kind: "traditional", title: "Natural Assignment", href: "#", completed: 21, total: 24, level: 4 },
   "podcast-two": { kind: "podcast", pace: 2, href: "#", series: "The Reality of God’s Purpose", dayNumber: 1, episodes: [{ part: "Part 1", duration: "15:33", durationSeconds: 933, positionSeconds: 0, listened: true }, { part: "Part 2", duration: "14:13", durationSeconds: 853, positionSeconds: 285, listened: false }] },
   "podcast-one": { kind: "podcast", pace: 1, href: "#", series: "The Reality of God’s Purpose", dayNumber: 3, episodes: [{ part: "Part 3", duration: "13:34", durationSeconds: 814, positionSeconds: 480, listened: false }] },
 };

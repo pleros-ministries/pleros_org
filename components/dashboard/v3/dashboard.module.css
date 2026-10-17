@@ -83,7 +83,7 @@
   display: inline-flex;
   align-items: center;
   margin-block: -9px;
-  color: #d8ff65;
+  color: var(--learning-accent, #d8ff65);
   font-size: clamp(11px, 3.9cqi, 13px);
   line-height: 20px;
   font-weight: 500;
@@ -125,7 +125,7 @@
 .homeLearningSummary { margin: 5px 0 0; overflow: hidden; color: #eef4ff; font-size: clamp(13px, 4.2cqi, 14px); line-height: 22px; white-space: nowrap; text-overflow: ellipsis; }
 .homeLearningProgressRow { display: flex; align-items: center; gap: 12px; width: 72%; margin-top: 16px; color: white; font-size: 13px; line-height: 20px; font-weight: 500; }
 .homeLearningProgress { flex: 1; height: 4px; overflow: hidden; border-radius: 999px; background: rgb(255 255 255 / 24%); }
-.homeLearningProgress span { display: block; height: 100%; border-radius: inherit; background: #d8ff65; }
+.homeLearningProgress span { display: block; height: 100%; border-radius: inherit; background: var(--learning-accent, #d8ff65); }
 .homeLearningAction {
   position: relative;
   z-index: 1;
@@ -139,7 +139,7 @@
   padding: 0 14px;
   border-radius: var(--dashboard-control-radius);
   background: white;
-  color: var(--color-brand-blue);
+  color: var(--learning-ink, var(--color-brand-blue));
   font-size: 14px;
   line-height: 22px;
   font-weight: 500;
