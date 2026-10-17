@@ -35,7 +35,7 @@ export function ActionMenu({
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner sideOffset={6} align="end">
-          <Popover.Popup className="site-font-theme z-50 w-52 rounded-xl border border-[var(--color-community-edge)] bg-white p-1.5 text-sm shadow-lg outline-none">
+          <Popover.Popup className="site-font-theme z-50 w-48 rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white p-1 text-[13px] shadow-[0_8px_24px_rgb(37_43_51/12%)] outline-none">
             <div className="grid gap-0.5">
               {actions.map((action) => {
                 const Icon = action.icon;
@@ -47,7 +47,7 @@ export function ActionMenu({
                       setOpen(false);
                       action.onSelect();
                     }}
-                    className={`flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors hover:bg-[var(--color-community-canvas)] ${
+                    className={`flex h-9 items-center gap-2.5 rounded-[7px] px-2.5 text-left transition-colors hover:bg-[var(--color-community-canvas)] ${
                       action.danger ? "text-red-700" : "text-[var(--color-community-ink)]"
                     }`}
                   >

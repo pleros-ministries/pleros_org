@@ -37,6 +37,11 @@
   font-size: 14px; line-height: 22px; font-synthesis: none;
   letter-spacing: var(--dashboard-tracking-body);
 }
+/* The public site theme (.site-font-theme, on the same element) inflates
+   Tailwind's text-sm to 16px for marketing pages. Inside the dashboard,
+   text-sm and text-xs land on the dashboard pixel scale instead. text-base
+   stays 16px so fields never trigger phone zoom. */
+.root.root { --text-sm: 13px; --text-sm--line-height: 1.5; --text-xs: 12px; --text-xs--line-height: 1.4; }
 .root :is(h1, h2, h3) { font-family: var(--font-dashboard-heading), "Sen", sans-serif; letter-spacing: var(--dashboard-tracking-heading); }
 .root :is(small, time) { letter-spacing: var(--dashboard-tracking-small); }
 /* Fields keep 16px text so phones never zoom; their placeholder hints are one

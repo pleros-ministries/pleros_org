@@ -111,11 +111,11 @@ export function PostFeed({
       <FeedToolbar view={view} onChange={setView} />
 
       {isPending ? (
-        <p className="rounded-2xl border border-[var(--color-community-edge)] bg-white p-5 text-sm text-[var(--color-community-muted)] ">
+        <p className="rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white px-4 py-3.5 text-[13px] text-[var(--color-community-muted)] ">
           Loading posts…
         </p>
       ) : isError && posts.length === 0 ? (
-        <p className="rounded-2xl border border-[var(--color-community-edge)] bg-white p-5 text-sm text-[var(--color-community-muted)] ">
+        <p className="rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white px-4 py-3.5 text-[13px] text-[var(--color-community-muted)] ">
           Couldn&apos;t load posts.{" "}
           <button
             type="button"

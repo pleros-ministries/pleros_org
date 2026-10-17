@@ -93,6 +93,10 @@
 .root :global(h2:not([data-dashboard-public] *):not([data-dashboard-shell-title]):not([data-dashboard-learning-title])), .root :global(h3:not([data-dashboard-public] *)) { font-size: 15px; font-weight: 500; }
 
 /* Portaled dialogs share the same scale while an authenticated frame is mounted. */
+/* While the dashboard is open, text-sm/xs use the dashboard pixel scale
+   everywhere, including portaled menus, popovers and dialogs that carry
+   .site-font-theme outside the shell. text-base stays 16px for fields. */
+:global(html[data-pleros-dashboard="true"] .site-font-theme) { --text-sm: 13px; --text-sm--line-height: 1.5; --text-xs: 12px; --text-xs--line-height: 1.4; }
 /* One page-title size across the dashboard. */
 :global(html[data-pleros-dashboard="true"] h1) { font-size: 21px; line-height: 28px; font-weight: 500; }
 :global(html[data-pleros-dashboard="true"] h2:not([data-dashboard-public] *):not([data-dashboard-shell-title]):not([data-dashboard-learning-title])), :global(html[data-pleros-dashboard="true"] h3:not([data-dashboard-public] *)) { font-size: 15px; font-weight: 500; }

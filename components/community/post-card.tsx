@@ -644,7 +644,7 @@ function ShareMenu({
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner sideOffset={8} align="end">
-          <Popover.Popup className="z-50 w-64 rounded-xl border border-[var(--color-community-edge)] bg-white p-1.5 text-[13px] shadow-lg outline-none">
+          <Popover.Popup className="z-50 w-64 rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white p-1 text-[13px] shadow-[0_8px_24px_rgb(37_43_51/12%)] outline-none">
             {mode === "menu" ? (
               <div className="grid gap-0.5">
                 {canRepost ? (
