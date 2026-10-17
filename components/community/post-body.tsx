@@ -25,7 +25,7 @@ export function PostBody({
     <div className="grid gap-1">
       <p
         ref={ref}
-        className={`whitespace-pre-line text-[14px] leading-[21px] text-[#3a4049] ${
+        className={`whitespace-pre-line text-[13.5px] leading-[20px] text-[#3a4049] ${
           clamp ? "line-clamp-4" : ""
         }`}
       >
