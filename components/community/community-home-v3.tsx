@@ -13,7 +13,7 @@ const groupTag: Record<GroupArt, string> = { location: "Location", discipleship:
 function CountCard({ href, count, label, description, icon, tone, capped }: { href: string | null; count: number; label: string; description: string; icon: IconName; tone: "blue" | "amber" | "green"; capped?: boolean }) {
   // One column of the divided strip: a quiet icon + label, the number beneath.
   const body = <>
-    <span className={styles.countHead}><DashboardIcon name={icon} size={16} strokeWidth={1.8} /><span>{label}</span></span>
+    <span className={styles.countHead}><DashboardIcon name={icon} size={16} strokeWidth={1.9} /><span>{label}</span></span>
     <b>{count}{capped ? "+" : ""}</b>
   </>;
   return href && count > 0
@@ -22,7 +22,7 @@ function CountCard({ href, count, label, description, icon, tone, capped }: { hr
 }
 
 /** Groups you lead share one illustration in two colourways, alternated oldest-first so neighbours differ. No light green (user preference). */
-const leadColourways = ["lilac", "coral"] as const;
+const leadColourways = ["lilac", "slate"] as const;
 
 function GroupCard({ href, art, title, meta, prefetch, colourway }: { href: string; art: GroupArt; title: string; meta: string; prefetch?: false; colourway?: string }) {
   return <Link href={href} prefetch={prefetch} className={styles.groupCard} data-art={art} data-colourway={colourway} title={title}>
