@@ -138,7 +138,7 @@ export function SogpDayView({ dayNumber }: { dayNumber: number }) {
       </div>
       <details className={lesson.curriculum}><summary>All {tracks.length} tracks</summary><Curriculum data={data} compact /></details>
       <footer className={lesson.footer}>
-        {data.nextDay?<Link className={lesson.primary} href={`/dashboard/sogp/course/day/${data.nextDay.dayNumber}`}>Continue after this lesson<ArrowRight className="size-4"/></Link>:<Link className={lesson.primary} href="/dashboard/sogp">Back to My SOGP<ArrowRight className="size-4"/></Link>}
+        {data.nextDay?<Link className={lesson.primary} href={`/dashboard/sogp/course/day/${data.nextDay.dayNumber}`}>Continue after this lesson<ArrowRight className="size-4"/></Link>:<Link className={lesson.primary} href="/dashboard/sogp">Back to My learning<ArrowRight className="size-4"/></Link>}
         {data.previousDay?<Link className={lesson.textLink} href={`/dashboard/sogp/course/day/${data.previousDay.dayNumber}`}><ArrowLeft className="size-4"/> Previous track</Link>:null}
       </footer>
     </section>

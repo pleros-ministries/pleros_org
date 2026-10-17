@@ -44,7 +44,7 @@ export type DashboardFocus = { title: string; back: DashboardParent };
 const YOU: DashboardParent = { href: "/dashboard", label: "Back to You" };
 const COMMUNITY: DashboardParent = { href: "/dashboard/community", label: "Back to Community" };
 const GROUPS: DashboardParent = { href: "/dashboard/community/groups", label: "Back to Groups" };
-const MY_SOGP: DashboardParent = { href: "/dashboard/sogp", label: "Back to My SOGP" };
+const MY_SOGP: DashboardParent = { href: "/dashboard/sogp", label: "Back to My learning" };
 
 /**
  * The dashboard's hierarchy in one place, most specific first. Tab roots
@@ -53,7 +53,7 @@ const MY_SOGP: DashboardParent = { href: "/dashboard/sogp", label: "Back to My S
  */
 const DASHBOARD_FOCUS: Array<[RegExp, (match: RegExpMatchArray) => DashboardFocus]> = [
   // My SOGP and learning
-  [/^\/dashboard\/sogp$/, () => ({ title: "My SOGP", back: YOU })],
+  [/^\/dashboard\/sogp$/, () => ({ title: "My learning", back: YOU })],
   [/^\/dashboard\/sogp\/course\/day\/(\d+)\/(quiz|response)$/, m => ({ title: m[2] === "quiz" ? "Quiz" : "Written response", back: { href: `/dashboard/sogp/course/day/${m[1]}`, label: "Back to lesson" } })],
   [/^\/dashboard\/sogp\/course\/day\/\d+$/, () => ({ title: "Lesson", back: MY_SOGP })],
   [/^\/dashboard\/sogp\/reviews\/schedule$/, () => ({ title: "Schedule group review", back: { href: "/dashboard/sogp/reviews", label: "Back to group reviews" } })],
@@ -69,7 +69,7 @@ const DASHBOARD_FOCUS: Array<[RegExp, (match: RegExpMatchArray) => DashboardFocu
     title: ({ path: "Your learning path", plan: "Edit full plan", listen: "Today’s listening", "follow-up": "Your follow-up person", readiness: "Certification", referrals: "Your SOGP referral", leaderboard: "Leaderboard", certificate: "Certificate", traditional: "Calendar and assessments" } as Record<string, string>)[m[1]],
     back: MY_SOGP,
   })],
-  [/^\/dashboard\/sogp\/.+$/, () => ({ title: "My SOGP", back: MY_SOGP })],
+  [/^\/dashboard\/sogp\/.+$/, () => ({ title: "My learning", back: MY_SOGP })],
   // Reports and contacts (You)
   // Saved contacts sits under Groups (people on their way into a group).
   [/^\/dashboard\/community\/contacts\/(\d+)\/invite$/, m => ({ title: "Share group invitation", back: { href: `/dashboard/community/contacts/${m[1]}`, label: "Back to contact" } })],
@@ -109,7 +109,7 @@ export function dashboardFocusForPath(href: string): DashboardFocus | null {
   return null;
 }
 
-/** Area roots never appear in a trail: the You/Community tabs already name them. */
+/** Area roots end the walk up the trail. */
 const AREA_ROOTS = new Set(["/dashboard", "/dashboard/community"]);
 
 /** "Back to saved contacts" → "Saved contacts". */
@@ -130,6 +130,10 @@ export function dashboardTrailForPath(href: string): DashboardParent[] {
     trail.unshift({ href: focus.back.href, label: crumbLabel(focus.back) });
     focus = dashboardFocusForPath(focus.back.href);
   }
+  // A trail that climbs to You or Community starts with it, so every page under
+  // You (which has no bottom bar) shows where it sits, e.g. You › My learning.
+  // Community trails usually stop at a bottom-bar tab (Groups, Feed) instead.
+  if (focus && AREA_ROOTS.has(focus.back.href)) trail.unshift({ href: focus.back.href, label: focus.back.href === "/dashboard" ? "You" : "Community" });
   return trail;
 }
 

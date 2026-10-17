@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { buildDashboardNavigation, type DashboardCapabilities } from "./navigation";
-import { dashboardAreaForPath, dashboardAreaHref, dashboardParentForPath, dashboardWorkspace } from "./shell-navigation";
+import { dashboardAreaForPath, dashboardAreaHref, dashboardParentForPath, dashboardTrailForPath, dashboardWorkspace } from "./shell-navigation";
 
 const member: DashboardCapabilities = { sogpEnrolled: true, community: true, communityUnitId: 9, discipleshipDiscussions: true, managesLocationGroups: false, staffConsole: false };
 
@@ -77,7 +77,11 @@ describe("connected dashboard navigation", () => {
   });
   test("deep dashboard screens return to their actual parent instead of a generic root", () => {
     expect(dashboardParentForPath("/dashboard/sogp")).toEqual({ href: "/dashboard", label: "Back to You" });
-    expect(dashboardParentForPath("/dashboard/sogp/plan")).toEqual({ href: "/dashboard/sogp", label: "Back to My SOGP" });
+    expect(dashboardParentForPath("/dashboard/sogp/plan")).toEqual({ href: "/dashboard/sogp", label: "Back to My learning" });
+    // Trails under You start at You; Community trails stop at their bottom-bar tab.
+    expect(dashboardTrailForPath("/dashboard/sogp").map(crumb => crumb.label)).toEqual(["You"]);
+    expect(dashboardTrailForPath("/dashboard/sogp/course/day/4/quiz").map(crumb => crumb.label)).toEqual(["You", "My learning", "Lesson"]);
+    expect(dashboardTrailForPath("/dashboard/community/enrollees/7").map(crumb => crumb.label)).toEqual(["Groups", "My enrollees"]);
     expect(dashboardParentForPath("/dashboard/sogp/reviews/42/attendance")).toEqual({ href: "/dashboard/sogp/reviews", label: "Back to group reviews" });
     expect(dashboardParentForPath("/dashboard/sogp/course/day/4/quiz")).toEqual({ href: "/dashboard/sogp/course/day/4", label: "Back to lesson" });
     expect(dashboardParentForPath("/dashboard/community/contacts/new")).toEqual({ href: "/dashboard/community/contacts", label: "Back to saved contacts" });
