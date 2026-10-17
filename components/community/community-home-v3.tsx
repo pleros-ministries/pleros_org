@@ -11,13 +11,13 @@ type GroupArt = "location" | "discipleship" | "leading" | "public" | "private";
 const groupTag: Record<GroupArt, string> = { location: "Location", discipleship: "Discipleship", leading: "You lead", public: "Public", private: "Private" };
 
 function CountCard({ href, count, label, description, icon, tone, capped }: { href: string | null; count: number; label: string; description: string; icon: IconName; tone: "blue" | "amber" | "green"; capped?: boolean }) {
-  // KPI order: a quiet label row, then the number as the hero.
+  // One column of the divided strip: a quiet icon + label, the number beneath.
   const body = <>
-    <span className={styles.countHead}><span>{label}</span><DashboardIcon name={icon} size={16} strokeWidth={1.8} /></span>
+    <span className={styles.countHead}><DashboardIcon name={icon} size={16} strokeWidth={1.8} /><span>{label}</span></span>
     <b>{count}{capped ? "+" : ""}</b>
   </>;
   return href && count > 0
-    ? <Link href={href} prefetch={false} className={styles.count} data-tone={tone} aria-label={`${count}${capped ? " or more" : ""} ${description}`}>{body}</Link>
+    ? <Link href={href} prefetch={false} className={styles.count} data-tone={tone} data-active aria-label={`${count}${capped ? " or more" : ""} ${description}`}>{body}</Link>
     : <div className={styles.count} data-tone={tone} aria-label={`${count} ${description}`}>{body}</div>;
 }
 

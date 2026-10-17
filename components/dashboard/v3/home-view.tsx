@@ -111,7 +111,9 @@ function LearningDestination({ card, fallback, hubHref }: {
     aria-label="My learning"
     data-learning-art={art.image}
     style={{
-      backgroundImage: `url("/assets/dashboard/learning-card/${art.image}")`,
+      // Phones use the 3:2 art; wide desktop cards switch to the 3:1 cut (CSS).
+      ["--learning-art" as string]: `url("/assets/dashboard/learning-card/${art.image}")`,
+      ["--learning-art-wide" as string]: `url("/assets/dashboard/learning-card/${art.image.replace(".webp", "-wide.webp")}")`,
       backgroundColor: art.field,
       ["--learning-accent" as string]: art.accent,
       ["--learning-ink" as string]: art.ink,
