@@ -2,6 +2,8 @@ import Link from "next/link";
 import { DashboardIcon } from "@/components/dashboard/v3/primitives";
 import type { CommunityHomeData } from "@/lib/db/queries/community-home";
 import styles from "./community-home-v3.module.css";
+import discipleStyles from "./discipleship/discipleship-group.module.css";
+import { Initials } from "./discipleship/shared";
 
 type IconName = Parameters<typeof DashboardIcon>[0]["name"];
 export type GroupArt = "location" | "discipleship" | "leading" | "public" | "private";
@@ -51,16 +53,34 @@ export function CommunityHomeV3({ data }: { data: CommunityHomeData }) {
 
     <div className={styles.counts} aria-label="Waiting for you">
       <CountCard href="/dashboard/community/messages" count={data.unreadConversations} label="Messages" description={data.unreadConversations === 1 ? "unread message" : "unread messages"} icon="chat" tone="blue" />
-      <CountCard href={firstResponse ? (data.responses.length > 1 ? "/dashboard/sogp/discipleship#check-ins" : firstResponse.href) : null} count={data.responses.length} capped={data.responses.length >= 3} label="Check-ins" description={data.responses.length === 1 ? "check-in to answer" : "check-ins to answer"} icon="clipboardcheck" tone="amber" />
+      <CountCard href={firstResponse ? (data.responses.length > 1 ? "/dashboard/community/discipleship" : firstResponse.href) : null} count={data.responses.length} capped={data.responses.length >= 3} label="Check-ins" description={data.responses.length === 1 ? "check-in to answer" : "check-ins to answer"} icon="clipboardcheck" tone="amber" />
       <CountCard href={firstInvitation ? `/dashboard/sogp/invitations/${firstInvitation.id}` : null} count={data.invitations.length} label="Invitations" description={data.invitations.length === 1 ? "group invitation" : "group invitations"} icon="mail" tone="green" />
     </div>
+
+    {data.needsYou.length ? <section className={styles.block} aria-labelledby="community-needs-you">
+      <div className={styles.blockHeading}><h2 id="community-needs-you">Needs you</h2></div>
+      <div className={discipleStyles.panel}>
+        <ul className={discipleStyles.list}>
+          {data.needsYou.slice(0, 5).map(item => <li key={item.key}>
+            <Link href={item.href} prefetch={false} className={discipleStyles.row}>
+              <Initials name={item.name} status={item.tone === "off" ? "unresponsive" : item.tone === "risk" ? "at_risk" : undefined} />
+              <span className={discipleStyles.rowCopy}>
+                <span className={discipleStyles.rowTitle} style={{ fontWeight: 500 }}>{item.firstName}</span>
+                <span className={discipleStyles.rowMeta}>{item.detail}{data.showGroupNames && item.groupName ? ` · ${item.groupName}` : ""}</span>
+              </span>
+              <span className={`${discipleStyles.btn} ${discipleStyles.mini}`} data-primary={item.tone === "off" ? "" : undefined}>{item.action}</span>
+            </Link>
+          </li>)}
+        </ul>
+      </div>
+    </section> : null}
 
     <section className={styles.block} aria-labelledby="community-groups">
       <div className={styles.blockHeading}><h2 id="community-groups">Your groups</h2><Link href="/dashboard/community/groups">See all</Link></div>
       <div className={styles.groupGrid}>
         {data.locationGroup ? <GroupCard href={`/dashboard/community/unit/${data.locationGroup.id}`} art="location" title={data.locationGroup.name} meta="Your location group" /> : null}
-        {data.joinedGroup ? <GroupCard href={`/dashboard/community/discipleship?group=${data.joinedGroup.groupId}`} art="discipleship" title={data.joinedGroup.groupName} meta="You're a member" /> : null}
-        {data.ledGroups.map((group, index) => <GroupCard key={`led-${group.groupId}`} href={group.discipleCount ? `/dashboard/community/discipleship?group=${group.groupId}` : `/dashboard/sogp/discipleship?group=${group.groupId}`} prefetch={false} art="leading" colourway={leadColourways[index % leadColourways.length]} title={group.groupName} meta={group.discipleCount ? `${group.discipleCount} ${group.discipleCount === 1 ? "disciple" : "disciples"}` : "Invite your first disciple"} />)}
+        {data.joinedGroup ? <GroupCard href={`/dashboard/community/discipleship/${data.joinedGroup.groupId}`} prefetch={false} art="discipleship" title={data.joinedGroup.groupName} meta="You're a member" /> : null}
+        {data.ledGroups.map((group, index) => <GroupCard key={`led-${group.groupId}`} href={`/dashboard/community/discipleship/${group.groupId}`} prefetch={false} art="leading" colourway={leadColourways[index % leadColourways.length]} title={group.groupName} meta={group.discipleCount ? `${group.discipleCount} ${group.discipleCount === 1 ? "disciple" : "disciples"}` : "Invite your first disciple"} />)}
         {data.memberGroups.map(group => <GroupCard key={`member-${group.id}`} href={`/dashboard/community/groups/${group.id}`} art={group.privacy === "private" ? "private" : "public"} title={group.name} meta={group.viewerRole === "owner" ? "You own this group" : group.viewerRole === "moderator" ? "You moderate" : "Member"} />)}
         <Link href="/dashboard/community/groups?create=1" className={styles.newGroup}>
           <span className={styles.newGroupIcon}><DashboardIcon name="plus" size={16} /></span>
@@ -72,7 +92,6 @@ export function CommunityHomeV3({ data }: { data: CommunityHomeData }) {
     {data.disciplesEnabled || data.church ? <section className={styles.block} aria-labelledby="community-oversight">
       <div className={styles.blockHeading}><h2 id="community-oversight">Oversight</h2></div>
       <div className={styles.oversightPanel}>
-        {data.disciplesEnabled ? <OversightRow href="/dashboard/sogp/discipleship" prefetch={false} title="My disciples" description={`${people(data.discipleCount)} · you lead`} icon="leaf" tone="green" /> : null}
         {data.disciplesEnabled ? <OversightRow href="/dashboard/sogp/enrollees" title="My enrollees" description={data.enrolleeCount ? `${people(data.enrolleeCount)} · you follow up` : "People you follow up"} icon="people" tone="blue" /> : null}
         {data.church ? <OversightRow href={data.church.href} title="Church oversight" description="Your branch and workers" icon="network" tone="lilac" /> : null}
       </div>

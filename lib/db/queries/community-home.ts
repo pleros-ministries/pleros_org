@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, count, desc, eq, isNull } from "drizzle-orm";
+import { and, count, desc, eq, inArray, isNull } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
@@ -17,7 +17,7 @@ export async function getCommunityHome() {
   const ctx = await getCommunityContext();
   if (!ctx || !canAccessCommunity(ctx)) return null;
   const leader = alias(schema.sogpEnrollments, "home_leader");
-  const [unreadConversations, discipleship, groups, viewer, responses, invitations, [owned]] = await Promise.all([
+  const [unreadConversations, discipleship, groups, viewer, responses, invitations, [owned], wavering, prayers] = await Promise.all([
     countUnreadConversations(ctx.userId),
     getCommunityHomeDiscipleship(ctx.userId),
     listOwnActiveCommunityGroups(ctx.userId),
@@ -25,6 +25,7 @@ export async function getCommunityHome() {
     db.select({
       id: schema.discipleshipPromptResponses.id,
       groupId: schema.discipleshipGroups.id,
+      groupName: schema.discipleshipGroups.name,
       name: schema.sogpEnrollments.name,
       firstName: schema.sogpEnrollments.firstName,
     })
@@ -47,14 +48,86 @@ export async function getCommunityHome() {
     // Optional section: the home still renders on a database without 0059.
     listOwnPendingInvitations(ctx.userId).catch(() => []),
     db.select({ n: count() }).from(schema.pastorAssignments).where(eq(schema.pastorAssignments.pastorUserId, ctx.userId)),
+    // Disciples whose last daily status (kept by the discipleship cron) needs the leader.
+    db.select({
+      membershipId: schema.discipleshipMemberships.id,
+      groupId: schema.discipleshipGroups.id,
+      groupName: schema.discipleshipGroups.name,
+      status: schema.discipleshipMemberships.lastKnownStatus,
+      name: schema.sogpEnrollments.name,
+      firstName: schema.sogpEnrollments.firstName,
+    })
+      .from(schema.discipleshipMemberships)
+      .innerJoin(schema.discipleshipGroups, and(eq(schema.discipleshipGroups.id, schema.discipleshipMemberships.groupId), eq(schema.discipleshipGroups.status, "active")))
+      .innerJoin(leader, and(eq(leader.id, schema.discipleshipGroups.leaderEnrollmentId), eq(leader.userId, ctx.userId)))
+      .innerJoin(schema.sogpEnrollments, eq(schema.sogpEnrollments.id, schema.discipleshipMemberships.discipleEnrollmentId))
+      .where(and(eq(schema.discipleshipMemberships.status, "active"), inArray(schema.discipleshipMemberships.lastKnownStatus, ["unresponsive", "at_risk"])))
+      .limit(5),
+    // Open prayer requests the leader hasn't marked as prayed. Text stays out.
+    db.select({
+      id: schema.discipleshipPrayerRequests.id,
+      groupId: schema.discipleshipGroups.id,
+      groupName: schema.discipleshipGroups.name,
+      name: schema.sogpEnrollments.name,
+      firstName: schema.sogpEnrollments.firstName,
+    })
+      .from(schema.discipleshipPrayerRequests)
+      .innerJoin(schema.discipleshipGroups, and(eq(schema.discipleshipGroups.id, schema.discipleshipPrayerRequests.groupId), eq(schema.discipleshipGroups.status, "active")))
+      .innerJoin(leader, and(eq(leader.id, schema.discipleshipGroups.leaderEnrollmentId), eq(leader.userId, ctx.userId)))
+      .innerJoin(schema.discipleshipMemberships, and(
+        eq(schema.discipleshipMemberships.groupId, schema.discipleshipGroups.id),
+        eq(schema.discipleshipMemberships.discipleEnrollmentId, schema.discipleshipPrayerRequests.discipleEnrollmentId),
+        eq(schema.discipleshipMemberships.status, "active"),
+      ))
+      .innerJoin(schema.sogpEnrollments, eq(schema.sogpEnrollments.id, schema.discipleshipPrayerRequests.discipleEnrollmentId))
+      .where(and(eq(schema.discipleshipPrayerRequests.status, "open"), isNull(schema.discipleshipPrayerRequests.prayedAt)))
+      .orderBy(desc(schema.discipleshipPrayerRequests.createdAt))
+      .limit(3),
   ]);
+  const led = discipleship.leading.filter(group => !group.paused);
+  const groupBase = (groupId: number) => `/dashboard/community/discipleship/${groupId}`;
+  // Across every group the viewer leads: who needs them, most urgent first.
+  const needsYou: NeedsYouItem[] = [
+    ...wavering.sort((a, b) => (a.status === "unresponsive" ? 0 : 1) - (b.status === "unresponsive" ? 0 : 1)).map(row => ({
+      key: `status-${row.membershipId}`,
+      name: row.firstName || row.name,
+      firstName: firstNameOf(row.firstName || row.name),
+      tone: row.status === "unresponsive" ? "off" as const : "risk" as const,
+      detail: row.status === "unresponsive" ? "Not active lately" : "At risk this week",
+      groupName: row.groupName,
+      href: `${groupBase(row.groupId)}/disciples/${row.membershipId}`,
+      action: "Encourage",
+    })),
+    ...responses.map(item => ({
+      key: `checkin-${item.id}`,
+      name: item.firstName || item.name,
+      firstName: firstNameOf(item.firstName || item.name),
+      tone: null,
+      detail: "Answered your check-in",
+      groupName: item.groupName,
+      href: `${groupBase(item.groupId)}?tab=checkins`,
+      action: "Read",
+    })),
+    ...prayers.map(item => ({
+      key: `prayer-${item.id}`,
+      name: item.firstName || item.name,
+      firstName: firstNameOf(item.firstName || item.name),
+      tone: null,
+      detail: "Shared a prayer request",
+      groupName: item.groupName,
+      href: `${groupBase(item.groupId)}?tab=prayer`,
+      action: "Pray",
+    })),
+  ];
 
   return {
     unreadConversations,
+    needsYou,
+    showGroupNames: led.length > 1,
     responses: responses.map(item => ({
       id: item.id,
       firstName: firstNameOf(item.firstName || item.name),
-      href: `/dashboard/sogp/discipleship?group=${item.groupId}#check-ins`,
+      href: `/dashboard/community/discipleship/${item.groupId}?tab=checkins`,
     })),
     invitations: invitations.map(item => ({ id: item.id, leaderFirstName: firstNameOf(item.leaderName), groupName: item.groupName })),
     enrolleeCount: owned?.n ?? 0,
@@ -67,5 +140,18 @@ export async function getCommunityHome() {
     memberGroups: groups,
   };
 }
+
+export type NeedsYouItem = {
+  key: string;
+  /** For the initials. */
+  name: string;
+  firstName: string;
+  tone: "off" | "risk" | null;
+  detail: string;
+  /** Shown only to the leader, and only when they lead more than one group. */
+  groupName: string | null;
+  href: string;
+  action: string;
+};
 
 export type CommunityHomeData = NonNullable<Awaited<ReturnType<typeof getCommunityHome>>>;

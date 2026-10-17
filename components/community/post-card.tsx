@@ -323,7 +323,7 @@ export function PostCard({
       if (startExpanded) {
         router.push(
           post.scope === "discipleship"
-            ? "/dashboard/community/discipleship"
+            ? post.discipleshipGroupId != null ? `/dashboard/community/discipleship/${post.discipleshipGroupId}?tab=discussion` : "/dashboard/community/discipleship"
             : post.scope === "group" && post.groupId != null
               ? `/dashboard/community/groups/${post.groupId}`
               : "/dashboard/community",

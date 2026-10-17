@@ -282,9 +282,9 @@ function GrowTogether({ sogp }: { sogp: HomeSogp }) {
         <p>Share your link and walk with them</p>
       </Tile>
       {group.kind === "member"
-        ? <Tile href="/dashboard/community/discipleship" art="group" tone="lilac" title="My group" action="Open group"><p>{group.leaderFirstName}&apos;s group</p></Tile>
+        ? <Tile href="/dashboard/community/discipleship" prefetch={false} art="group" tone="lilac" title="My group" action="Open group"><p>{group.leaderFirstName}&apos;s group</p></Tile>
         : group.kind === "leader"
-          ? <Tile href="/dashboard/sogp/discipleship" prefetch={false} art="group" tone="lilac" title="My disciples" action="Open"><p>{group.disciples} {group.disciples === 1 ? "disciple" : "disciples"}{group.groups > 1 ? ` in ${group.groups} groups` : ""}</p></Tile>
+          ? <Tile href={group.groups > 1 ? "/dashboard/community/groups" : "/dashboard/community/discipleship"} prefetch={false} art="group" tone="lilac" title={group.groups > 1 ? "Your groups" : "Your group"} action="Open"><p>{group.disciples} {group.disciples === 1 ? "disciple" : "disciples"}{group.groups > 1 ? ` in ${group.groups} groups` : ""}</p></Tile>
           : <Tile href="/dashboard/sogp/discipleship" prefetch={false} art="group" tone="lilac" title="Start your group" action="Invite"><p>Walk through SOGP with the people you invite</p></Tile>}
       <Tile art="share" tone="sand" title="Share what you learnt" action="Create card" onClick={() => setSharing(true)}>
         <p>Turn today into a card</p>

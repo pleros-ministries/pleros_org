@@ -1,39 +1,24 @@
-import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-import { DiscipleshipPage } from "@/components/sogp/discipleship-page";
-import { SogpQueryProvider } from "@/components/sogp/sogp-query-provider";
 import { getAppSession } from "@/lib/app-session";
 import { getDiscipleshipDashboard } from "@/lib/db/queries/sogp-discipleship";
-import { getLeaderEpisodeQuestions, getOwnEpisodeQuestions } from "@/lib/db/queries/sogp-episode-questions";
 
-export const metadata: Metadata = {
-  title: "My disciples",
-};
-
-export default async function SogpDiscipleshipPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ group?: string }>;
-}) {
+/**
+ * My disciples is retired: each discipleship group's page in Community now
+ * hosts its disciples, check-ins and prayer. Old links (notifications,
+ * emails, bookmarks) land on the right group. Loading the dashboard still
+ * creates the learner's first group lazily, as before.
+ */
+export default async function SogpDiscipleshipPage({ searchParams }: { searchParams: Promise<{ group?: string; view?: string }> }) {
   const session = await getAppSession();
   if (!session) redirect("/login?returnTo=/dashboard/sogp/discipleship");
 
-  // `?group=` picks which of the learner's own groups to show; the query
-  // ignores an id that isn't theirs and falls back to their first group.
   const { group } = await searchParams;
   const requestedGroupId = group && /^\d{1,9}$/.test(group) ? Number(group) : null;
-
   const data = await getDiscipleshipDashboard(session.user.id, requestedGroupId);
   if (!data) redirect("/sogp/enrol");
-  const [episodeQuestions, ownEpisodeQuestions] = await Promise.all([
-    getLeaderEpisodeQuestions(session.user.id, data.selectedGroup.id).catch(() => []),
-    getOwnEpisodeQuestions(session.user.id).catch(() => []),
-  ]);
 
-  return (
-    <SogpQueryProvider>
-      <DiscipleshipPage data={data} episodeQuestions={episodeQuestions} ownEpisodeQuestions={ownEpisodeQuestions} />
-    </SogpQueryProvider>
-  );
+  // A learner with a discipler and no disciples of their own starts on the group they are in.
+  const memberFirst = requestedGroupId === null && data.myDiscipler && data.ledGroups.every(led => led.discipleCount === 0);
+  redirect(memberFirst ? "/dashboard/community/discipleship" : `/dashboard/community/discipleship/${data.selectedGroup.id}`);
 }

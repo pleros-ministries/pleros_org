@@ -61,7 +61,6 @@ const DASHBOARD_FOCUS: Array<[RegExp, (match: RegExpMatchArray) => DashboardFocu
   [/^\/dashboard\/sogp\/follow-up\/(request|welcome)$/, m => ({ title: m[1] === "request" ? "Follow-up request" : "Welcome to SOGP", back: { href: "/dashboard/sogp/follow-up", label: "Back to your follow-up person" } })],
   [/^\/dashboard\/sogp\/enrollees\/\d+\/invite$/, () => ({ title: "Invite to a group", back: { href: "/dashboard/sogp/enrollees", label: "Back to My enrollees" } })],
   [/^\/dashboard\/sogp\/enrollees$/, () => ({ title: "My enrollees", back: COMMUNITY })],
-  [/^\/dashboard\/sogp\/discipleship$/, () => ({ title: "My disciples", back: GROUPS })],
   [/^\/dashboard\/sogp\/invitations\/\d+(\/sent)?$/, () => ({ title: "Group invitation", back: COMMUNITY })],
   [/^\/dashboard\/sogp\/(path|plan|listen|follow-up|readiness|referrals|leaderboard|certificate|traditional)$/, m => ({
     title: ({ path: "Your learning path", plan: "Edit full plan", listen: "Today’s listening", "follow-up": "Your follow-up person", readiness: "Certification", referrals: "Your SOGP referral", leaderboard: "Leaderboard", certificate: "Certificate", traditional: "Calendar and assessments" } as Record<string, string>)[m[1]],
@@ -76,7 +75,8 @@ const DASHBOARD_FOCUS: Array<[RegExp, (match: RegExpMatchArray) => DashboardFocu
   [/^\/dashboard\/community\/report\/.+$/, () => ({ title: "My reports", back: { href: "/dashboard/community/report", label: "Back to my reports" } })],
   [/^\/dashboard\/community\/report$/, () => ({ title: "My reports", back: YOU })],
   // Community deep screens
-  [/^\/dashboard\/community\/(unit\/\d+|groups\/\d+|discipleship)$/, () => ({ title: "Group", back: GROUPS })],
+  [/^\/dashboard\/community\/discipleship\/(\d+)\/disciples\/\d+$/, m => ({ title: "Disciple", back: { href: `/dashboard/community/discipleship/${m[1]}`, label: "Back to group" } })],
+  [/^\/dashboard\/community\/(unit\/\d+|groups\/\d+|discipleship\/\d+|discipleship)$/, () => ({ title: "Group", back: GROUPS })],
   [/^\/dashboard\/community\/post\/\d+$/, () => ({ title: "Post", back: { href: "/dashboard/community/feed", label: "Back to Feed" } })],
   [/^\/dashboard\/community\/messages\/\d+$/, () => ({ title: "Conversation", back: { href: "/dashboard/community/messages", label: "Back to Inbox" } })],
   [/^\/dashboard\/community\/ask\/\d+$/, () => ({ title: "Your question", back: { href: "/dashboard/community/ask", label: "Back to Ask Pleros" } })],

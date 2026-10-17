@@ -717,6 +717,7 @@ type ContactKind = (typeof schema.discipleshipContactKindEnum.enumValues)[number
 
 export type DiscipleshipPrayerRequest = {
   id: number;
+  discipleEnrollmentId: number;
   discipleFirstName: string;
   body: string;
   status: "open" | "answered";
@@ -1579,6 +1580,7 @@ async function listPrayerRequests(input: {
       prayedAt: schema.discipleshipPrayerRequests.prayedAt,
       answeredAt: schema.discipleshipPrayerRequests.answeredAt,
       createdAt: schema.discipleshipPrayerRequests.createdAt,
+      discipleEnrollmentId: schema.discipleshipPrayerRequests.discipleEnrollmentId,
       name: schema.sogpEnrollments.name,
       firstName: schema.sogpEnrollments.firstName,
     })
@@ -1615,6 +1617,7 @@ async function listPrayerRequests(input: {
 
   return rows.map((row) => ({
     id: row.id,
+    discipleEnrollmentId: row.discipleEnrollmentId,
     discipleFirstName: firstNameOf(row.firstName || row.name),
     body: row.body,
     status: row.status,

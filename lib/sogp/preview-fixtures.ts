@@ -336,6 +336,7 @@ export const discipleshipPreviewData: DiscipleshipDashboardData = {
     prayerRequests: [
       {
         id: 1,
+        discipleEnrollmentId: 0,
         discipleFirstName: "Grace",
         body: "Please pray for wisdom as I settle into my new role at work.",
         status: "open",
@@ -372,6 +373,7 @@ export const discipleshipPreviewData: DiscipleshipDashboardData = {
     prayerRequests: [
       {
         id: 20,
+        discipleEnrollmentId: 0,
         discipleFirstName: "Tola",
         body: "Pray for my family's health this month.",
         status: "open",

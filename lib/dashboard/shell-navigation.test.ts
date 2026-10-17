@@ -9,14 +9,17 @@ describe("connected dashboard navigation", () => {
     for (const path of ["/dashboard", "/dashboard/community/report", "/dashboard/community/report/people", "/dashboard/community/report/history?day=2026-10-13", "/dashboard/church", "/dashboard/community-other", "/dashboard/sogp/discipleship-other"]) expect(dashboardAreaForPath(path)).toBe("you");
     for (const path of ["/dashboard/community", "/dashboard/community/messages/4", "/dashboard/community/ask", "/dashboard/community/leader"]) expect(dashboardAreaForPath(path)).toBe("community");
   });
-  test("discipleship belongs to Community without changing its canonical route", () => {
+  test("discipleship belongs to Community and lives on each group's page", () => {
     const sections = buildDashboardNavigation(member);
-    for (const path of ["/dashboard/sogp/discipleship", "/dashboard/sogp/discipleship?group=42", "/dashboard/sogp/discipleship/42"]) {
+    for (const path of ["/dashboard/sogp/discipleship", "/dashboard/sogp/discipleship?group=42", "/dashboard/community/discipleship/42", "/dashboard/community/discipleship/42/disciples/7"]) {
       expect(dashboardAreaForPath(path)).toBe("community");
       expect(dashboardAreaHref("community", sections, path)).toBe(path);
       expect(dashboardAreaHref("you", sections, path)).toBe("/dashboard");
     }
-    expect(sections.find(section => section.key === "community")?.items.some(item => item.key === "disciples")).toBe(true);
+    // My disciples is retired: Groups lists every discipleship group.
+    expect(sections.find(section => section.key === "community")?.items.some(item => item.key === "disciples")).toBe(false);
+    expect(dashboardParentForPath("/dashboard/community/discipleship/42")).toEqual({ href: "/dashboard/community/groups", label: "Back to Groups" });
+    expect(dashboardParentForPath("/dashboard/community/discipleship/42/disciples/7")).toEqual({ href: "/dashboard/community/discipleship/42", label: "Back to group" });
     expect(sections.find(section => section.key === "oversight")?.items.some(item => item.key === "disciples") ?? false).toBe(false);
   });
   test("workspace links are derived from authorised navigation, not role labels", () => {

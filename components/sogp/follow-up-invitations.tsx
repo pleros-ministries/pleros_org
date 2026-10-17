@@ -113,7 +113,7 @@ export function InvitationResponse({ invitation }: { invitation: ReceivedInvitat
     setError(null);
     const result = await answerGroupInvitation({ invitationId: invitation.id, accept, sharesPhone });
     if (!result.ok) { setError(result.error); return; }
-    router.push(result.status === "accepted" ? "/dashboard/sogp/discipleship" : "/dashboard/community");
+    router.push(result.status === "accepted" ? "/dashboard/community/discipleship" : "/dashboard/community");
   });
   const open = invitation.status === "pending" && invitation.groupAvailable;
   return <section className={styles.page}>
@@ -178,7 +178,7 @@ export function SentInvitationView({ invitation }: { invitation: SentInvitation 
     {invitation.status === "pending" ? <div className={styles.section}><h2>Not a member yet</h2><p>{name} can accept or decline the invitation. They’ll join the group only after accepting.</p></div> : null}
     {error ? <p role="alert" className={styles.error}>{error}</p> : null}
     <footer className={styles.footer}>
-      <Link className={styles.primary} href={`/dashboard/sogp/discipleship?group=${invitation.groupId}`}>View your group<DashboardIcon name="arrow" /></Link>
+      <Link className={styles.primary} href={`/dashboard/community/discipleship/${invitation.groupId}`}>View your group<DashboardIcon name="arrow" /></Link>
       {invitation.status === "pending" ? <button type="button" className={styles.quiet} disabled={pending} onClick={() => start(async () => { const result = await withdrawGroupInvitation(invitation.id); if (result.ok) router.refresh(); else setError(result.error); })}>Withdraw invitation</button> : null}
     </footer>
   </section>;

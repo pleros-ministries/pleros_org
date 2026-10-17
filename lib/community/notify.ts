@@ -211,7 +211,8 @@ export async function notifyLeaderNudge(input: {
   });
 }
 
-const DISCIPLESHIP_URL = "/dashboard/sogp/discipleship";
+// Opens the right group page (the one joined, else the first one led).
+const DISCIPLESHIP_URL = "/dashboard/community/discipleship";
 
 /**
  * Discipleship notifications. Payloads carry first names and preset copy only —

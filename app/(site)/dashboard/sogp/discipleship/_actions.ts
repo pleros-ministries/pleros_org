@@ -88,6 +88,8 @@ async function run(action: () => Promise<void>): Promise<DiscipleshipActionResul
     await action();
     revalidatePath("/dashboard");
     revalidatePath(PAGE_PATH);
+    // Each group's page (and its disciples' pages) now hosts these tools.
+    revalidatePath("/dashboard/community/discipleship", "layout");
     return { ok: true };
   } catch (error) {
     if (error instanceof DiscipleshipError || error instanceof RateLimitError) {

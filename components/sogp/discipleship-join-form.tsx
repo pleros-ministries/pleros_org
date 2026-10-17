@@ -28,7 +28,7 @@ export function DiscipleshipJoinForm({
         setError(result.error);
         return;
       }
-      router.push("/dashboard/sogp/discipleship");
+      router.push("/dashboard/community/discipleship");
     });
   }
 

@@ -1,51 +1,29 @@
 import { redirect } from "next/navigation";
 
-import { CommunityDiscipleshipView } from "@/components/community/community-discipleship";
 import { getAppSession } from "@/lib/app-session";
-import {
-  canAccessCommunity,
-  getCommunityContext,
-} from "@/lib/community/context";
+import { canAccessCommunity, getCommunityContext } from "@/lib/community/context";
 import { getCommunityDiscipleship } from "@/lib/db/queries/community-discipleship";
-import {
-  COMMUNITY_FEED_PAGE_SIZE,
-  getDiscipleshipPosts,
-} from "@/lib/db/queries/community-posts";
 
+/**
+ * Old entry point for the discipleship spaces. Each group now has its own
+ * page, so this opens the right one: `?group=` when it is the viewer's,
+ * otherwise the group they joined, then the first group they lead.
+ */
 export default async function CommunityDiscipleshipRoute({ searchParams }: { searchParams: Promise<{ group?: string }> }) {
-  // Session and context load together instead of one roundtrip after the other.
   const [session, ctx] = await Promise.all([getAppSession(), getCommunityContext()]);
   if (!session) redirect("/login?returnTo=/dashboard/community/discipleship");
   if (!ctx || !canAccessCommunity(ctx)) redirect("/sogp/enrol");
 
   const data = await getCommunityDiscipleship(ctx);
-
-  // Load the first page for the group shown first: the one the learner
-  // joined, otherwise the first group they lead that has disciples.
-  const ledGroup =
-    data.leading.find((group) => !group.paused && group.disciples.length > 0) ??
-    null;
   const { group } = await searchParams;
-  const requestedId = group && /^\d{1,9}$/.test(group) ? Number(group) : null;
-  const allowedRequested = requestedId !== null && (
-    data.joined?.groupId === requestedId || data.leading.some(item => item.groupId === requestedId && !item.paused && item.disciples.length > 0)
-  );
-  const initialGroupId = allowedRequested ? requestedId : data.joined?.groupId ?? ledGroup?.groupId ?? null;
-  const initialPosts =
-    initialGroupId != null ? await getDiscipleshipPosts(initialGroupId, ctx) : [];
-
-  return (
-    <CommunityDiscipleshipView
-      data={data}
-      viewerName={session.user.name ?? "You"}
-      initialGroupId={initialGroupId}
-      initialPosts={initialPosts}
-      initialNextOffset={
-        initialPosts.length === COMMUNITY_FEED_PAGE_SIZE
-          ? initialPosts.length
-          : null
-      }
-      postingBlocked={ctx.postingBlocked}
-    />
-  );
+  const requested = group && /^\d{1,9}$/.test(group) ? Number(group) : null;
+  const ids = [data.joined?.groupId, ...data.leading.map(item => item.groupId)].filter((id): id is number => id != null);
+  const target = (requested !== null && ids.includes(requested) ? requested : null)
+    ?? data.joined?.groupId
+    ?? data.leading.find(item => !item.paused && item.disciples.length > 0)?.groupId
+    ?? data.leading[0]?.groupId;
+  if (target != null) redirect(`/dashboard/community/discipleship/${target}`);
+  // No group yet: the SOGP route creates the learner's first one, then comes back.
+  if (ctx.enrollmentId != null) redirect("/dashboard/sogp/discipleship");
+  redirect("/dashboard/community/groups");
 }

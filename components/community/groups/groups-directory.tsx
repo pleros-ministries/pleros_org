@@ -118,12 +118,12 @@ export function GroupsDirectory({
                 meta={group.relation === "manager" ? "Location group" : "Your location group"} />
             ))}
             {discipleship?.leading.map((group, index) => (
-              <GroupCard key={`led-${group.groupId}`} href={group.discipleCount ? `/dashboard/community/discipleship?group=${group.groupId}` : `/dashboard/sogp/discipleship?group=${group.groupId}`} prefetch={false} art="leading"
+              <GroupCard key={`led-${group.groupId}`} href={`/dashboard/community/discipleship/${group.groupId}`} prefetch={false} art="leading"
                 colourway={leadColourways[index % leadColourways.length]} title={group.groupName}
                 meta={group.discipleCount ? `${group.discipleCount} ${group.discipleCount === 1 ? "disciple" : "disciples"}` : "Invite your first disciple"} />
             ))}
             {discipleship?.joined ? (
-              <GroupCard href={`/dashboard/community/discipleship?group=${discipleship.joined.groupId}`} art="discipleship" title={discipleship.joined.groupName} meta="You're a member" />
+              <GroupCard href={`/dashboard/community/discipleship/${discipleship.joined.groupId}`} prefetch={false} art="discipleship" title={discipleship.joined.groupName} meta="You're a member" />
             ) : null}
             {mine.map((group) => (
               <GroupCard key={group.id} href={`/dashboard/community/groups/${group.id}`} art={group.privacy === "private" ? "private" : "public"} title={group.name}

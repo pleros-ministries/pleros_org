@@ -138,11 +138,7 @@ export function buildDashboardNavigation(
   }
 
   if (caps.sogpEnrolled) {
-    community.push({
-      key: "disciples",
-      label: "My disciples",
-      href: "/dashboard/sogp/discipleship",
-    });
+    // My disciples is retired: each discipleship group's page (under Groups) hosts its disciples.
     community.push({
       key: "enrollees",
       label: "My enrollees",
