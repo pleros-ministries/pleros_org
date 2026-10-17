@@ -60,8 +60,8 @@ const DASHBOARD_FOCUS: Array<[RegExp, (match: RegExpMatchArray) => DashboardFocu
   [/^\/dashboard\/sogp\/reviews\/\d+\/(attendance|make-up-offer|make-up)$/, m => ({ title: m[1] === "attendance" ? "Confirm attendance" : m[1] === "make-up-offer" ? "Offer a make-up" : "Make up a review", back: { href: "/dashboard/sogp/reviews", label: "Back to group reviews" } })],
   [/^\/dashboard\/sogp\/reviews$/, () => ({ title: "Group reviews", back: MY_SOGP })],
   [/^\/dashboard\/sogp\/follow-up\/(request|welcome)$/, m => ({ title: m[1] === "request" ? "Follow-up request" : "Welcome to SOGP", back: { href: "/dashboard/sogp/follow-up", label: "Back to your follow-up person" } })],
-  [/^\/dashboard\/sogp\/enrollees\/\d+\/invite$/, () => ({ title: "Invite to a group", back: { href: "/dashboard/sogp/enrollees", label: "Back to My enrollees" } })],
-  [/^\/dashboard\/sogp\/enrollees$/, () => ({ title: "My enrollees", back: GROUPS })],
+  [/^\/dashboard\/sogp\/enrollees\/\d+\/invite$/, () => ({ title: "Invite to a group", back: { href: "/dashboard/community/enrollees", label: "Back to My enrollees" } })],
+  [/^\/dashboard\/(community|sogp)\/enrollees$/, () => ({ title: "My enrollees", back: GROUPS })],
   [/^\/dashboard\/sogp\/invitations\/\d+(\/sent)?$/, () => ({ title: "Group invitation", back: COMMUNITY })],
   [/^\/dashboard\/sogp\/(path|plan|listen|follow-up|readiness|referrals|leaderboard|certificate|traditional)$/, m => ({
     title: ({ path: "Your learning path", plan: "Edit full plan", listen: "Today’s listening", "follow-up": "Your follow-up person", readiness: "Certification", referrals: "Your SOGP referral", leaderboard: "Leaderboard", certificate: "Certificate", traditional: "Calendar and assessments" } as Record<string, string>)[m[1]],

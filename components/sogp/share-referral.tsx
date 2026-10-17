@@ -26,7 +26,7 @@ export function ShareReferral({ code, url, referredCount }: { code: string; url:
       <div className={styles.card}><strong>Your personal invitation link</strong><button type="button" className={styles.copyRow} onClick={() => copy("link")}>{copied === "link" ? "Link copied" : "Copy link"}<DashboardIcon name="right" size={16} /></button></div>
       <p>Link joins are assigned to you, then asked to accept you or request someone else.</p></div>
     <div className={styles.info}><DashboardIcon name="people" size={16} /><p>Following up and group membership are separate. Group invitations need the person’s acceptance.</p></div>
-    <Link className={styles.textLink} href="/dashboard/sogp/enrollees">{referredCount ? `${referredCount} ${referredCount === 1 ? "person has" : "people have"} joined with your referral` : "See the people you follow up"}</Link>
+    <Link className={styles.textLink} href="/dashboard/community/enrollees">{referredCount ? `${referredCount} ${referredCount === 1 ? "person has" : "people have"} joined with your referral` : "See the people you follow up"}</Link>
     <footer className={styles.footer}><p className={`${styles.meta}`} style={{ textAlign: "center" }}>Available to every SOGP enrollee.</p><button type="button" className={styles.primary} onClick={share}>Share referral link<DashboardIcon name="arrow" /></button></footer>
   </section>;
 }

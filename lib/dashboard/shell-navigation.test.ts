@@ -82,7 +82,7 @@ describe("connected dashboard navigation", () => {
     expect(dashboardParentForPath("/dashboard/sogp/course/day/4/quiz")).toEqual({ href: "/dashboard/sogp/course/day/4", label: "Back to lesson" });
     expect(dashboardParentForPath("/dashboard/community/contacts/new")).toEqual({ href: "/dashboard/community/contacts", label: "Back to saved contacts" });
     expect(dashboardParentForPath("/dashboard/community/contacts")).toEqual({ href: "/dashboard/community/groups", label: "Back to Groups" });
-    expect(dashboardParentForPath("/dashboard/sogp/enrollees")).toEqual({ href: "/dashboard/community/groups", label: "Back to Groups" });
+    expect(dashboardParentForPath("/dashboard/community/enrollees")).toEqual({ href: "/dashboard/community/groups", label: "Back to Groups" });
     expect(dashboardParentForPath("/dashboard/community/report/history")).toEqual({ href: "/dashboard/community/report", label: "Back to my reports" });
   });
 });

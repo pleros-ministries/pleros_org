@@ -154,7 +154,7 @@ export function GroupsDirectory({
               <span className={peopleStyles.rowCopy}><span className={peopleStyles.rowTitle} style={{ fontWeight: 500 }}>Saved contacts</span><span className={peopleStyles.rowMeta}>{people.contacts ? `${people.contacts} ${people.contacts === 1 ? "person" : "people"} you’ve met · invite them to a group` : "People you meet in ministry"}</span></span>
               <ChevronRightIcon className={`${peopleStyles.chev} size-4`} strokeWidth={2} />
             </Link></li> : null}
-            {people.enrollees !== null ? <li><Link href="/dashboard/sogp/enrollees" className={peopleStyles.row}>
+            {people.enrollees !== null ? <li><Link href="/dashboard/community/enrollees" className={peopleStyles.row}>
               <span className="grid size-9 shrink-0 place-items-center rounded-[10px] bg-[#fde3cf] text-[#7a3a10]"><GraduationCapIcon className="size-4" strokeWidth={2} /></span>
               <span className={peopleStyles.rowCopy}><span className={peopleStyles.rowTitle} style={{ fontWeight: 500 }}>My enrollees</span><span className={peopleStyles.rowMeta}>{people.enrollees.total ? `Signed up with your link · ${people.enrollees.free} not in a group` : "People who sign up with your link"}</span></span>
               {people.enrollees.free ? <span className="inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-[var(--color-community-blue)] px-1.5 text-[11px] leading-none font-semibold tabular-nums text-white">{people.enrollees.free}</span> : null}

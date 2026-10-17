@@ -145,7 +145,7 @@ export function buildDashboardNavigation(
     community.push({
       key: "enrollees",
       label: "My enrollees",
-      href: "/dashboard/sogp/enrollees",
+      href: "/dashboard/community/enrollees",
     });
   }
   const oversight: DashboardNavItem[] = [];

@@ -54,15 +54,30 @@ export function SavedContactsList({ contacts, readOnly }: { contacts: MinistryCo
 
 type EnrolleeTab = "free" | "all";
 
+const SOURCE: Record<OwnEnrolleeRow["source"], string> = {
+  code: "Your referral code",
+  link: "Your referral link",
+  geography: "Your area",
+  reassigned: "Reassigned to you",
+  assigned: "Assigned to you",
+};
+const WEEK_MS = 7 * 86_400_000;
+
 /**
  * My enrollees, under Groups: people who signed up with the member's link or
- * code (or were assigned to them), with the ones not yet in a group first.
+ * code (or were assigned to them), with the ones not yet in a group first,
+ * newest first, split into this week and earlier.
  */
 export function EnrolleesList({ rows, referralUrl }: { rows: OwnEnrolleeRow[]; referralUrl: string | null }) {
   const free = rows.filter(row => !row.group);
   const [tab, setTab] = useState<EnrolleeTab>(free.length ? "free" : "all");
+  const [query, setQuery] = useState("");
   const [copied, setCopied] = useState(false);
-  const visible = tab === "free" ? free : rows;
+  const [now] = useState(() => Date.now());
+  const needle = query.trim().toLowerCase();
+  const visible = (tab === "free" ? free : rows).filter(row => !needle || row.name.toLowerCase().includes(needle));
+  const recent = visible.filter(row => now - new Date(row.assignedAt).getTime() < WEEK_MS);
+  const earlier = visible.filter(row => now - new Date(row.assignedAt).getTime() >= WEEK_MS);
   async function share() {
     if (!referralUrl) return;
     try {
@@ -70,30 +85,41 @@ export function EnrolleesList({ rows, referralUrl }: { rows: OwnEnrolleeRow[]; r
       else { await navigator.clipboard.writeText(referralUrl); setCopied(true); }
     } catch { /* The share sheet was dismissed. */ }
   }
-  const meta = (row: OwnEnrolleeRow) => row.lastContactedAt
-    ? `Last contact ${day.format(new Date(row.lastContactedAt))}`
-    : `${row.source === "code" || row.source === "link" ? "Signed up" : "Assigned"} ${day.format(new Date(row.assignedAt))}${row.invited ? " · invite sent" : ""}`;
   const end = (row: OwnEnrolleeRow) => row.group
     ? <span className={styles.pill} data-tone="ok" title={row.group.name ?? undefined}>{row.group.yours ? "In your group" : "In a group"}</span>
     : row.invited
       ? <span className={styles.pill}>Invited</span>
-      : <Link href={`/dashboard/sogp/enrollees/${row.enrollmentId}/invite`} className={`${styles.btn} ${styles.mini}`} data-primary>Invite</Link>;
+      : <Link href={`/dashboard/sogp/enrollees/${row.enrollmentId}/invite`} className={`${styles.btn} ${styles.mini}`}>Invite</Link>;
+  const list = (title: string, items: OwnEnrolleeRow[]) => items.length ? <>
+    <div className={styles.sectionTitle}><h2>{title}</h2><span className={styles.rowMeta}>{items.length}</span></div>
+    <div className={styles.panel}>
+      <ul className={styles.list}>
+        {items.map(row => <li key={row.enrollmentId} className={styles.row}>
+          <Initials name={row.name} />
+          <span className={styles.rowCopy}>
+            <span className={styles.rowTitle}>{row.name}</span>
+            <span className={styles.rowMeta}>{SOURCE[row.source]} · {day.format(new Date(row.assignedAt))}</span>
+            {row.lastContactedAt
+              ? <span className={styles.rowMeta}>Last contact {day.format(new Date(row.lastContactedAt))}</span>
+              : <span className={styles.rowMeta} style={{ color: "#92400e" }}>Not contacted yet</span>}
+          </span>
+          {end(row)}
+        </li>)}
+      </ul>
+    </div>
+  </> : null;
 
   return <div className={styles.page}>
     <div className={styles.heading}>
       <div><h1>My enrollees</h1><p className={styles.sub}>{rows.length} {rows.length === 1 ? "person" : "people"} you follow up</p></div>
       {referralUrl ? <button type="button" className={styles.btn} onClick={share}><Share2Icon className="size-3.5" strokeWidth={2} />{copied ? "Link copied" : "Share link"}</button> : null}
     </div>
-    {rows.length ? <GroupTabs tabs={[{ key: "free", label: "Not in a group", count: free.length }, { key: "all", label: "All", count: rows.length }]} value={tab} onChange={setTab} /> : null}
-    {visible.length ? <div className={styles.panel}>
-      <ul className={styles.list}>
-        {visible.map(row => <li key={row.enrollmentId} className={styles.row}>
-          <Initials name={row.name} />
-          <span className={styles.rowCopy}><span className={styles.rowTitle}>{row.name}</span><span className={styles.rowMeta}>{meta(row)}</span></span>
-          {end(row)}
-        </li>)}
-      </ul>
-    </div> : <p className={`${styles.panel} ${styles.empty}`}>{rows.length ? "Everyone you follow up is in a group." : "When someone joins with your code or link, they’ll appear here."}</p>}
+    {rows.length ? <>
+      <GroupTabs tabs={[{ key: "free", label: "Not in a group", count: free.length }, { key: "all", label: "All", count: rows.length }]} value={tab} onChange={setTab} />
+      <SearchBox label="Search enrollees" value={query} onChange={setQuery} />
+    </> : null}
+    {visible.length ? <>{list("This week", recent)}{list("Earlier", earlier)}</>
+      : <p className={`${styles.panel} ${styles.empty}`}>{needle ? "No one matches your search." : rows.length ? "Everyone you follow up is in a group." : "When someone joins with your code or link, they’ll appear here."}</p>}
     <p className={styles.note}>Invite picks one of your discipleship groups. They join after accepting in Pleros.</p>
   </div>;
 }
