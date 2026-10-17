@@ -1,9 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { ArrowLeft, CheckCircle2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 
 type ResponsePayload = {
   dayNumber: number;
@@ -42,7 +41,6 @@ export function SogpWrittenResponse({ dayNumber }: { dayNumber: number }) {
 
   return (
     <section className="site-shell-page sogp-shell-page py-10">
-      <Link href={`/dashboard/sogp/course/day/${dayNumber}`} className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--color-text-muted)]"><ArrowLeft className="size-3.5"/> Back to lesson</Link>
       <div className="mx-auto mt-8 grid max-w-3xl gap-6">
         <header className="grid gap-2"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-brand-blue)]">Day {dayNumber} written response</p><h1 className="font-[var(--font-sen)] text-2xl font-semibold tracking-[-0.02em] text-[var(--color-text-strong)]">{data.lessonTitle}</h1></header>
         <section className="rounded-[var(--radius-md)] bg-[var(--color-brand-sky)] p-5 md:p-6">

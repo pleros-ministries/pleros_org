@@ -3,7 +3,6 @@
 import { Fragment, useEffect, useState, useTransition } from "react";
 import Link from "next/link";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeftIcon } from "lucide-react";
 
 import { QUESTION_BODY_MAX } from "@/lib/community/ask-pleros";
 import { communityKeys } from "@/lib/community/query-keys";
@@ -91,12 +90,6 @@ export function QuestionThread({ initial }: { initial: AskerQuestion }) {
 
   return (
     <div className="grid gap-4">
-      <Link
-        href="/dashboard/community/ask"
-        className="inline-flex w-fit items-center gap-1.5 text-xs font-medium text-[var(--color-community-muted)] transition-colors hover:text-[var(--color-community-blue)]"
-      >
-        <ArrowLeftIcon className="size-3.5" strokeWidth={2} /> All your questions
-      </Link>
 
       <header className={`${card} grid gap-2 p-4 sm:p-5`}>
         <div className="flex flex-wrap items-center justify-between gap-2">

@@ -1,5 +1,4 @@
-import { ArrowLeftIcon, InfoIcon, TrophyIcon } from "lucide-react";
-import Link from "next/link";
+import { InfoIcon, TrophyIcon } from "lucide-react";
 
 import { Avatar } from "@/components/community/avatar";
 import { StreakBadge } from "@/components/sogp/leaderboard-page";
@@ -44,12 +43,6 @@ export function PodcastLeaderboardPage({ data }: { data: PodcastLeaderboardData 
         className="sticky top-0 z-30 border-b border-(--color-brand-blue) bg-(--color-brand-blue) shadow-sm"
       >
         <div className="site-shell-page sogp-shell-page flex min-h-12 items-center justify-between gap-4">
-          <Link
-            href="/dashboard/podcast"
-            className="inline-flex min-h-9 items-center gap-1.5 rounded-sm px-1 text-xs font-medium text-white/85 transition-colors duration-150 hover:text-white focus-visible:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white active:scale-[0.98]"
-          >
-            <ArrowLeftIcon className="size-3.5" strokeWidth={2} /> Podcast
-          </Link>
           <span className="text-[0.7rem] font-medium uppercase tracking-[0.14em] text-(--color-brand-lime)">
             Podcast
           </span>

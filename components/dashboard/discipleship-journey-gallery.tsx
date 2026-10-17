@@ -1,8 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
-import { ChevronLeftIcon, XIcon } from "lucide-react";
+import { XIcon } from "lucide-react";
 import { useState } from "react";
 
 import {
@@ -89,15 +88,6 @@ export function DiscipleshipJourneyGallery({
   return (
     <>
       <div className="grid gap-8 md:gap-10">
-        {backHref ? (
-          <Link
-            href={backHref}
-            className="inline-flex w-fit items-center gap-1 font-[var(--font-be-vietnam-pro)] text-[0.8125rem] font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-brand-blue)]"
-          >
-            <ChevronLeftIcon className="size-4" />
-            Back to series
-          </Link>
-        ) : null}
 
         {sections.map((section) => (
           <div key={section.id} className="grid gap-6">

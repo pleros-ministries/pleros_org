@@ -1,10 +1,9 @@
 "use client";
 
 import { Fragment, useEffect, useRef, useState, useTransition } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeftIcon, BanIcon, SendIcon } from "lucide-react";
+import { BanIcon, SendIcon } from "lucide-react";
 
 import type {
   ConversationDetail,
@@ -246,13 +245,6 @@ export function MessageThread({
     // so the composer stays on screen; dvh shrinks with the on-screen keyboard.
     <section className="flex h-[calc(100dvh-var(--dashboard-topbar-offset,0px)-6.5rem-2px)] min-h-[20rem] flex-col overflow-hidden rounded-2xl border border-[var(--color-community-edge)] bg-white ">
       <header className="flex items-center gap-3 border-b border-[var(--color-community-edge)] px-3 py-2.5 sm:px-4">
-        <Link
-          href="/dashboard/community/messages"
-          aria-label="Back to messages"
-          className="-ml-1 inline-flex size-9 items-center justify-center rounded-full text-[var(--color-community-muted)] transition-colors hover:bg-[var(--color-community-canvas)] lg:hidden"
-        >
-          <ArrowLeftIcon className="size-5" strokeWidth={2} />
-        </Link>
         <Avatar name={conversation.other.name} size={36} />
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-medium text-[var(--color-community-ink)]">

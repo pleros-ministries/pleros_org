@@ -18,6 +18,7 @@ export function ChipSelect({
   placeholder,
   menuTitle,
   align = "start",
+  size = "sm",
 }: {
   /** Accessible name, e.g. "Topic". */
   label: string;
@@ -29,7 +30,10 @@ export function ChipSelect({
   placeholder?: string;
   menuTitle?: string;
   align?: "start" | "end";
+  /** `md` is the 32px compact control, for forms rather than toolbars. */
+  size?: "sm" | "md";
 }) {
+  const md = size === "md";
   const current = options.find((option) => option.value === value);
   const text = current?.label ?? placeholder ?? label;
   return (
@@ -37,13 +41,13 @@ export function ChipSelect({
       <Popover.Trigger
         type="button"
         aria-label={`${label}: ${text}`}
-        className={`inline-flex h-6 max-w-[9.5rem] shrink-0 items-center gap-1 rounded-full border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white pr-1.5 pl-2 text-[12px] font-medium transition-colors hover:border-[var(--color-community-edge-strong)] data-[popup-open]:border-[var(--color-community-blue)] ${
+        className={`inline-flex shrink-0 items-center rounded-full border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white font-medium ${md ? "h-8 max-w-full gap-1.5 pr-2.5 pl-3 text-[13px]" : "h-6 max-w-[9.5rem] gap-1 pr-1.5 pl-2 text-[12px]"} transition-colors hover:border-[var(--color-community-edge-strong)] data-[popup-open]:border-[var(--color-community-blue)] ${
           current ? "text-[var(--color-community-ink)]" : "text-[var(--color-community-muted)]"
         }`}
       >
-        {Icon ? <Icon className="size-3 shrink-0 text-[var(--color-community-muted)]" strokeWidth={2} /> : null}
+        {Icon ? <Icon className={`${md ? "size-3.5" : "size-3"} shrink-0 text-[var(--color-community-muted)]`} strokeWidth={2} /> : null}
         <span className="truncate">{text}</span>
-        <ChevronDownIcon className="size-3 shrink-0 text-[var(--color-community-muted)]" strokeWidth={2.2} />
+        <ChevronDownIcon className={`${md ? "size-3.5" : "size-3"} shrink-0 text-[var(--color-community-muted)]`} strokeWidth={2.2} />
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner sideOffset={6} align={align}>

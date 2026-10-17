@@ -68,7 +68,7 @@ export function AddSavedContact({ onPersist, inviteGroups = [], initialInviteGro
     </fieldset>
     {inviteGroups.length ? <div className={styles.section}>
       <h2>Invite to a group</h2>
-      <ChipSelect label="Invite to" icon={UsersRoundIcon} value={inviteTo} placeholder="Don’t invite" menuTitle="Invite to"
+      <ChipSelect size="md" label="Invite to" icon={UsersRoundIcon} value={inviteTo} placeholder="Don’t invite" menuTitle="Invite to"
         options={[{ value: "", label: "Don’t invite" }, ...inviteGroups.map(group => ({ value: String(group.id), label: group.name }))]} onChange={setInviteTo} />
       <p className={styles.meta}>After saving, you’ll share the group’s invite link on WhatsApp. They join only after enrolling and accepting.</p>
     </div> : null}

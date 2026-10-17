@@ -2,8 +2,6 @@
 
 import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
-import Link from "next/link";
-import { ChevronLeftIcon } from "lucide-react";
 
 import {
   saveBibleReadingLogAction,
@@ -182,13 +180,6 @@ export function PrayerWatchPage({
   return (
     <section>
       <DashboardPageFrame className="grid max-w-[36rem] gap-6">
-        <Link
-          href="/dashboard"
-          className="inline-flex w-fit items-center gap-1 text-[12.5px] font-medium text-(--color-text-muted) transition-colors hover:text-(--color-brand-blue)"
-        >
-          <ChevronLeftIcon className="size-3.5" aria-hidden />
-          Back to dashboard
-        </Link>
 
         <DashboardPageHeader title="Prayer Watch" />
 

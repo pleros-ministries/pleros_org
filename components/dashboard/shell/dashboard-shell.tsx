@@ -16,7 +16,7 @@ import { dashboardFont, dashboardHeadingFont } from "@/components/dashboard/v3/f
 import { useTabSwipe } from "@/components/dashboard/v3/use-tab-swipe";
 import v3 from "@/components/dashboard/v3/dashboard.module.css";
 import type { DashboardNavSection } from "@/lib/dashboard/navigation";
-import { dashboardAreaForPath, dashboardAreaHref } from "@/lib/dashboard/shell-navigation";
+import { dashboardAreaForPath, dashboardFocusForPath, dashboardAreaHref } from "@/lib/dashboard/shell-navigation";
 import type { DashboardArea } from "@/lib/dashboard/swipe-tabs";
 import { cn } from "@/lib/utils";
 
@@ -118,7 +118,9 @@ export function DashboardShell({ viewer, sections, children, notificationControl
   const pathname = usePathname() ?? "/dashboard";
   const router = useRouter();
   const routedArea = dashboardAreaForPath(pathname);
-  const focusedLearning = ({ "/dashboard/sogp":"My SOGP", "/dashboard/sogp/path":"Start SOGP", "/dashboard/sogp/plan":"Edit full plan", "/dashboard/sogp/listen":"Today’s listening", "/dashboard/sogp/follow-up":"Your follow-up person", "/dashboard/sogp/follow-up/request":"Follow-up request", "/dashboard/sogp/reviews":"Group reviews", "/dashboard/sogp/reviews/schedule":"Schedule group review", "/dashboard/sogp/readiness":"Certification", "/dashboard/sogp/follow-up/welcome":"Welcome to SOGP", "/dashboard/sogp/enrollees":"My enrollees", "/dashboard/sogp/referrals":"Your SOGP referral", "/dashboard/church/branches/new":"Church setup", "/dashboard/church/reports":"Church oversight", "/dashboard/community/report":"My reports", "/dashboard/community/report/history":"Report history", "/dashboard/community/report/new":"New report", "/dashboard/community/report/people":"Saved contacts", "/dashboard/community/report/people/new":"Add contact" } as Record<string,string>)[pathname] ?? (/^\/dashboard\/sogp\/course\/day\/\d+$/.test(pathname) ? "SOGP" : /^\/dashboard\/sogp\/reviews\/\d+\/attendance$/.test(pathname) ? "Confirm attendance" : /^\/dashboard\/sogp\/reviews\/\d+\/make-up-offer$/.test(pathname)?"Offer a make-up":/^\/dashboard\/sogp\/reviews\/\d+\/make-up$/.test(pathname)?"Make up a review":/^\/dashboard\/sogp\/enrollees\/\d+\/invite$/.test(pathname)?"Invite to a group":/^\/dashboard\/sogp\/invitations\/\d+(\/sent)?$/.test(pathname)?"Group invitation":/^\/dashboard\/community\/report\/people\/private\/\d+$/.test(pathname)?"Contact details":/^\/dashboard\/community\/report\/people\/private\/\d+\/invite$/.test(pathname)?"Share group invitation":/^\/dashboard\/church\/branches\/\d+\/pastor$/.test(pathname)?"Church setup":/^\/dashboard\/church\/branches\/\d+\/units\/new$/.test(pathname)?"Add a unit":/^\/dashboard\/church\/units\/\d+\/leader$/.test(pathname)?"Unit appointment":/^\/dashboard\/church\/units\/\d+\/workers$/.test(pathname)?"Assign workers":undefined);
+  // Deep screens get "← Title" pointing at their true parent (one map in lib/dashboard/shell-navigation.ts).
+  const focus = dashboardFocusForPath(pathname);
+  const focusedLearning = focus?.title;
   const [menu, setMenu] = useState<{ open: boolean; pathname: string | null }>({ open: false, pathname: null });
   const [target, setTarget] = useState<{ from: string; area: DashboardArea } | null>(null);
   // Transition state coordinates motion only. Next's existing Suspense/loading
@@ -180,7 +182,7 @@ export function DashboardShell({ viewer, sections, children, notificationControl
     </aside>
     <div className={frame.liveFrame}>
       {focusedLearning ? <header className={cn(v3.header,frame.liveHeader)}>
-        <Link href={pathname === "/dashboard/sogp" ? "/dashboard" : "/dashboard/sogp"} onClick={event => { if (!window.dispatchEvent(new Event("pleros:learning-navigation",{cancelable:true}))) event.preventDefault(); }} className={v3.iconButton} aria-label={pathname === "/dashboard/sogp" ? "Back to You" : "Back to My SOGP"}><DashboardIcon name="left" /></Link>
+        <Link href={focus!.back.href} onClick={event => { if (!window.dispatchEvent(new Event("pleros:learning-navigation",{cancelable:true}))) event.preventDefault(); }} className={v3.iconButton} aria-label={focus!.back.label}><DashboardIcon name="left" /></Link>
         <span className={frame.featureTitle}>{focusedLearning}</span>
         <button type="button" className={v3.iconButton} aria-label="More options" aria-haspopup="dialog" aria-controls={drawerId} onClick={() => setMenu({ open:true,pathname })}><DashboardIcon name="more" /></button>
       </header> : <RootHeader active={area} communityAvailable={dashboardAreaHref("community", sections) !== null} className={frame.liveHeader}

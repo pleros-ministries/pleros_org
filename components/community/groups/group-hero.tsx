@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { ArrowLeftIcon, UserPlusIcon } from "lucide-react";
+import { UserPlusIcon } from "lucide-react";
 
 import type { GroupArt } from "../community-home-v3";
 
@@ -13,8 +13,8 @@ const fields: Record<GroupArt, { color: string; ink: string }> = {
 };
 
 /**
- * Top of every group page: a back link, the group's illustrated card as a
- * hero, and its actions. Shares the art and colours of the Groups cards.
+ * Top of every group page (the shell header carries "← Group"): the
+ * group's illustrated card as a hero, and its actions. Shares the art and colours of the Groups cards.
  */
 export function GroupHero({
   art,
@@ -23,7 +23,6 @@ export function GroupHero({
   title,
   meta,
   actions,
-  backHref = "/dashboard/community/groups",
 }: {
   art: GroupArt;
   /** Second "You lead" colourway. */
@@ -32,16 +31,12 @@ export function GroupHero({
   title: string;
   meta: ReactNode;
   actions?: ReactNode;
-  backHref?: string;
 }) {
   const slate = art === "leading" && colourway === "slate";
   const field = slate ? { color: "#e6ecfc", ink: "#1f3260" } : fields[art];
   const file = slate ? "leading-slate" : art;
   return (
     <div className="grid gap-3">
-      <Link href={backHref} className="inline-flex w-fit items-center gap-1 text-[13px] font-medium text-[var(--color-community-blue)]">
-        <ArrowLeftIcon className="size-3.5" strokeWidth={2.2} /> Groups
-      </Link>
       <header
         className="grid min-h-[132px] content-between gap-3 rounded-[16px] bg-cover bg-right-bottom bg-no-repeat p-3.5"
         style={{

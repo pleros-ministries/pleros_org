@@ -1,6 +1,5 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronLeftIcon } from "lucide-react";
 
 import { DiscipleshipJourneyGallery } from "@/components/dashboard/discipleship-journey-gallery";
 import {
@@ -59,13 +58,6 @@ export function DiscipleshipJourneyPage({
   return (
     <section className="site-font-theme bg-[var(--color-surface)] pb-16 pt-5 sm:pb-20 sm:pt-6">
       <div className="container-pleros grid max-w-[49rem] gap-8">
-        <Link
-          href="/dashboard"
-          className="inline-flex w-fit items-center gap-1 font-[var(--font-be-vietnam-pro)] text-[0.8125rem] font-medium text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-brand-blue)]"
-        >
-          <ChevronLeftIcon className="size-4" />
-          Back to dashboard
-        </Link>
 
         <div className="grid gap-2">
           <h1 className="site-hero-heading max-w-[16ch] text-[clamp(2.4rem,6.2vw,3.45rem)] text-[var(--color-brand-blue)]">
