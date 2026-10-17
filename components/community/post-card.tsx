@@ -97,6 +97,14 @@ function ImageGrid({
   );
 }
 
+/** "10:42 am · 10 Sept 2026", in Lagos time so server and browser agree. */
+const timeFormat = new Intl.DateTimeFormat("en-GB", { hour: "numeric", minute: "2-digit", hour12: true, timeZone: "Africa/Lagos" });
+const dateFormat = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "Africa/Lagos" });
+function postTimestamp(iso: string) {
+  const at = new Date(iso);
+  return `${timeFormat.format(at).replace(/\s/g, " ").toLowerCase()} · ${dateFormat.format(at)}`;
+}
+
 function QuotedPost({ post }: { post: NonNullable<FeedPost["sharedFrom"]> }) {
   return (
     <Link
@@ -502,14 +510,15 @@ export function PostCard({
         {post.sharedFrom ? <QuotedPost post={post.sharedFrom} /> : null}
 
         {/* Date sits at the foot of the post, above the actions (Twitter-style). */}
-        <time dateTime={post.lastActivityAt} className="-mb-1 block text-[11.5px] leading-[15px] text-[var(--color-community-muted)]">
-          {relativeTime(post.lastActivityAt)}
+        <time dateTime={post.lastActivityAt} className="block pb-2.5 text-[11.5px] leading-[15px] text-[var(--color-community-muted)]">
+          {postTimestamp(post.lastActivityAt)}
         </time>
 
       </div>
 
-      {/* One slim action row: counts sit on their own buttons. */}
-      <div className="flex items-center gap-0.5 px-1.5 pt-1 pb-1.5">
+      {/* One slim action row under a hairline: counts sit on their own buttons. */}
+      <div className="mx-3.5 border-t border-[var(--color-line,#e7e9ec)]" />
+      <div className="flex items-center gap-0.5 px-1.5 py-1">
         <button
           type="button"
           disabled={pending}
