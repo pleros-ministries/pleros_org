@@ -43,7 +43,10 @@ test("traditional resume uses its own saved lesson, not podcast marks", () => {
 });
 test("all three path choices remain available with a read-only explanation during activation rollback", () => {
   const html = renderToStaticMarkup(<QueryClientProvider client={new QueryClient()}><PathChooser data={{ ...data,canWrite: false }} /></QueryClientProvider>);
-  expect((html.match(/type="radio"/g) ?? []).length).toBe(3);
+  // Traditional, then Podcast at 30 or 15 minutes a day: three choices.
+  expect(html).toContain("Traditional · 1 hr/day");
+  expect(html).toContain("30 min/day · 2 episodes");
+  expect(html).toContain("15 min/day · 1 episode");
   expect(html).toContain("Your existing learning remains available");
   expect(html).toContain("Both paths keep their own history");
 });

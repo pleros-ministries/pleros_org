@@ -26,7 +26,7 @@ describe("Community home performance contract", () => {
       "utf8",
     );
     expect(shell).toContain('router.prefetch("/dashboard")');
-    expect(shell).toContain("router.prefetch(communityHref)");
+    expect(shell).toContain("router.prefetch(communityPrefetchHref)");
     expect(swipe).toContain("duration: 0.28");
   });
 

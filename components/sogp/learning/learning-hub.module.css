@@ -1,0 +1,65 @@
+/* My learning: one card to resume, an optional catch-up, the week, what's
+   next, and the learning tools. Sits on the white You canvas. */
+
+.page { display: grid; gap: 14px; max-width: 640px; margin-inline: auto; padding: 16px 16px max(28px, env(safe-area-inset-bottom)); color: var(--color-text-strong); }
+
+.card { position: relative; display: grid; align-content: space-between; gap: 14px; min-height: 220px; padding: 18px; overflow: hidden; border-radius: 18px; background-color: var(--hub-field, #2056d6); background-image: var(--hub-art); background-position: right -22px bottom -30px; background-repeat: no-repeat; background-size: auto 114%; color: white; box-shadow: 0 12px 28px rgb(32 86 214 / 18%); }
+.cardTop { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 12px; line-height: 16px; opacity: .92; }
+.pace { height: 22px; padding: 0 9px; border-radius: 99px; background: rgb(255 255 255 / 18%); font-size: 11.5px; line-height: 22px; white-space: nowrap; }
+.card h2 { max-width: 72%; margin: 0 0 4px; font-family: var(--font-dashboard-heading); font-size: 21px; line-height: 27px; font-weight: 500; letter-spacing: -0.02em; overflow-wrap: anywhere; }
+.cardMeta { font-size: 12.5px; line-height: 18px; opacity: .9; }
+.meter { width: 62%; height: 5px; margin-top: 8px; overflow: hidden; border-radius: 99px; background: rgb(255 255 255 / 25%); }
+.meter > i { display: block; height: 100%; border-radius: inherit; background: white; }
+.resume { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: min(62%, 260px); min-width: 180px; height: 38px; padding: 0 14px; border-radius: 11px; background: white; color: var(--hub-ink, #2056d6); font-size: 14px; font-weight: 500; text-decoration: none; }
+
+.catch { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid #f3dcb8; border-radius: 10px; background: #fff8ed; }
+.catchIcon { display: grid; flex: none; place-items: center; width: 36px; height: 36px; border-radius: 10px; background: #f7e4cd; color: #92400e; }
+
+.notice { margin: 0; padding: 12px 14px; border-radius: 10px; background: var(--color-surface-muted, #f4f5f7); font-size: 13px; line-height: 20px; color: var(--color-text-muted); }
+
+.sectionTitle { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 10px 1px -4px; }
+.sectionTitle h2 { margin: 0; font-family: var(--font-dashboard-heading); font-size: 15px; line-height: 22px; font-weight: 500; }
+.sectionTitle a, .sectionTitle span { font-size: 12.5px; font-weight: 500; color: var(--color-brand-blue); text-decoration: none; }
+.sectionTitle span { color: var(--color-text-muted); font-weight: 400; }
+
+.week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.day { display: grid; justify-items: center; gap: 4px; font-size: 11px; color: var(--color-text-muted); }
+.day > i { display: grid; place-items: center; width: 100%; max-width: 38px; aspect-ratio: 1; border-radius: 10px; background: #f1f2f5; color: #a6abb2; font-style: normal; font-size: 12px; }
+.day > i[data-state="complete"] { background: var(--color-brand-blue); color: white; }
+.day > i[data-state="missed"] { background: #f7e4cd; color: #92400e; }
+.day > i[data-state="current"] { background: white; box-shadow: inset 0 0 0 1.5px var(--color-brand-blue); color: var(--color-brand-blue); }
+.day > i[data-state="outside"] { background: transparent; box-shadow: inset 0 0 0 1px #eceef2; }
+
+.panel { overflow: hidden; border: 1px solid var(--dashboard-panel-edge, #e2e5ea); border-radius: 10px; background: white; }
+.list { margin: 0; padding: 0; list-style: none; }
+.row { position: relative; display: flex; align-items: center; gap: 12px; min-width: 0; padding: 11px 14px; color: inherit; text-decoration: none; }
+.list > li + li .row::before { content: ""; position: absolute; top: 0; left: 14px; right: 14px; height: 1px; background: var(--color-line, #e7e9ec); }
+a.row:hover { background: #f8f9fb; }
+.num { display: grid; flex: none; place-items: center; width: 28px; height: 28px; border-radius: 8px; background: #f1f2f5; color: var(--color-text-muted); font-size: 12px; font-weight: 600; }
+.num[data-current] { background: var(--color-brand-blue); color: white; }
+.num[data-rank="1"] { background: #fff1c2; color: #8a5a00; }
+.rowCopy { display: grid; flex: 1; min-width: 0; }
+.rowTitle { overflow: hidden; font-size: 13.5px; line-height: 18px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
+.rowMeta { overflow: hidden; font-size: 12px; line-height: 16px; color: var(--color-text-muted); text-overflow: ellipsis; white-space: nowrap; }
+.points { flex: none; font-size: 12px; font-weight: 500; color: var(--color-text-muted); }
+.me { background: #f4f7fe; }
+
+.tools { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.tool { display: grid; align-content: start; gap: 6px; min-width: 0; padding: 12px; border: 1px solid var(--dashboard-panel-edge, #e2e5ea); border-radius: 12px; background: white; color: inherit; text-decoration: none; }
+.tool:hover { border-color: #cfd4dc; }
+.toolIcon { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 9px; }
+.tool b { font-size: 13px; line-height: 18px; font-weight: 500; }
+.tool span:last-child { font-size: 11.5px; line-height: 15px; color: var(--color-text-muted); }
+
+.btn { display: inline-flex; flex: none; align-items: center; justify-content: center; gap: 6px; height: 30px; padding: 0 11px; border: 1px solid var(--color-brand-blue); border-radius: 10px; background: var(--color-brand-blue); color: white; font-size: 12.5px; font-weight: 500; text-decoration: none; white-space: nowrap; }
+.btn[data-quiet] { border-color: var(--dashboard-panel-edge, #e2e5ea); background: white; color: var(--color-text-strong); }
+
+.avatar { display: grid; flex: none; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: #e4ebfd; color: #2331ae; font-size: 12px; font-weight: 600; }
+
+.column { display: grid; align-content: start; gap: 14px; min-width: 0; }
+
+/* Desktop: resume and catch-up on the left; the week, what's next and tools on the right. */
+@media (min-width: 64rem) {
+  .page { max-width: 1040px; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); align-items: start; column-gap: 24px; padding-top: 24px; }
+  .card { min-height: 260px; }
+}

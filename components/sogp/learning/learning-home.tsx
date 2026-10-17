@@ -65,13 +65,28 @@ export function PathChooser({ data }: { data: LearningViewData }) {
     const props = { data, target: path, saving, error, onConfirm: submit, onCancel: () => { setConfirming(false); setPath(current); setError(null); } };
     return current !== "traditional" && path !== "traditional" && plan ? <PaceSwitchConfirm {...props} /> : <PathSwitchConfirm {...props} />;
   }
+  const podcastPick = path === "podcast_one" || path === "podcast_two";
+  const choiceStyle = (on: boolean) => ({ display: "grid", gap: 8, padding: 14, borderRadius: 14, background: "white", border: `1.5px solid ${on ? "var(--color-brand-blue)" : "var(--dashboard-panel-edge, #e2e5ea)"}`, boxShadow: on ? "0 0 0 3px rgb(32 86 214 / 10%)" : "none", cursor: "pointer", textAlign: "left" as const });
+  const chip = (on: boolean) => ({ height: 30, padding: "0 11px", borderRadius: 10, border: `1px solid ${on ? "var(--color-brand-blue)" : "var(--dashboard-panel-edge, #e2e5ea)"}`, background: on ? "#eef3fe" : "white", color: on ? "var(--color-brand-blue)" : "var(--color-text-strong)", fontSize: 12.5, fontWeight: 500 });
+  const tag = <span style={{ height: 20, padding: "0 7px", borderRadius: 99, background: "#e4ebfd", color: "#2331ae", fontSize: 11, lineHeight: "20px", fontWeight: 500 }}>Current</span>;
+  // Two paths side by side, the current one marked, Podcast's pace inline (mockup B).
   return <section className={`${styles.page} ${styles.choicePage}`}>
-    <header className={styles.header}><p className={styles.eyebrow}>Your daily commitment</p><h1>Make room to grow</h1><p className={styles.muted}>How much time will you set aside each day?</p></header>
-    <fieldset className={styles.choices}><legend>Choose one option</legend>
-      {([{ key: "traditional",title: "1 hr/day",description: "Traditional one-hour tracks" },{ key: "podcast_two",title: "30 min/day",description: "2 podcast episodes/day" },{ key: "podcast_one",title: "15 min/day",description: "1 podcast episode/day" }] as const).map(option => <label className={styles.choice} key={option.key}><span><strong>{option.title}</strong><span className={styles.meta}>{option.description}</span></span><input type="radio" name="path" value={option.key} checked={path === option.key} onChange={() => { setPath(option.key);setError(null); }} /></label>)}
-    </fieldset>
-    {data.state?.revision ? <div className={styles.notice}><p>Both paths keep their own history, completions and playback positions.</p><p className={styles.meta}>Switching doesn’t transfer completion. Your podcast plan is kept when you choose Traditional.</p>{preview ? <p>{preview.episodeGuids.length} queued episodes · {Math.ceil(preview.episodeGuids.length / preview.episodesPerDay)} learning days after this choice. No remaining episodes are dropped.</p> : null}</div> : <p className={styles.muted}>Choose the time you can commit to.</p>}
+    <header className={styles.header}><h1>How you learn SOGP</h1><p className={styles.muted}>{current ? "You keep everything you’ve done. Switching only changes what comes next." : "Choose the time you can set aside each day."}</p></header>
+    <div role="radiogroup" aria-label="Learning path" style={{ display: "grid", gap: 10 }}>
+      <button type="button" role="radio" aria-checked={path === "traditional"} onClick={() => { setPath("traditional"); setError(null); }} style={choiceStyle(path === "traditional")}>
+        <span style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}><strong style={{ fontSize: 15 }}>Traditional · 1 hr/day</strong>{current === "traditional" ? tag : null}</span>
+        <span className={styles.meta}>A teaching a day with a quiz and a written response. Counts toward your certificate, with a weekly group review.</span>
+      </button>
+      <div role="radio" aria-checked={podcastPick} tabIndex={0} onClick={() => { if (!podcastPick) { setPath(current === "podcast_one" ? "podcast_one" : "podcast_two"); setError(null); } }} onKeyDown={event => { if ((event.key === "Enter" || event.key === " ") && !podcastPick) { event.preventDefault(); setPath("podcast_two"); } }} style={choiceStyle(podcastPick)}>
+        <span style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}><strong style={{ fontSize: 15 }}>Podcast</strong>{current && current !== "traditional" ? tag : null}</span>
+        <span className={styles.meta}>Listen to episodes at your own pace and reorder what’s left. Weekly group review.</span>
+        <span style={{ display: "flex", gap: 6 }}>
+          {([["podcast_two", "30 min/day · 2 episodes"], ["podcast_one", "15 min/day · 1 episode"]] as const).map(([key, label]) => <button key={key} type="button" aria-pressed={path === key} onClick={event => { event.stopPropagation(); setPath(key); setError(null); }} style={chip(path === key)}>{label}</button>)}
+        </span>
+      </div>
+    </div>
+    {data.state?.revision ? <div className={styles.notice}><p>Both paths keep their own history, completions and playback positions.</p><p className={styles.meta}>Switching doesn’t transfer completion. Your podcast plan is kept when you choose Traditional.</p>{preview ? <p>{preview.episodeGuids.length} queued episodes · {Math.ceil(preview.episodeGuids.length / preview.episodesPerDay)} learning days after this choice. No remaining episodes are dropped.</p> : null}</div> : null}
     {!data.canWrite ? <p className={styles.muted}>{learningWriteNotice(data)}</p> : null}
-    <div className={styles.footer}>{!path ? <p className={styles.meta}>Select one option to continue</p> : null}{error ? <p role="alert" className={styles.error}>{error}</p> : null}<button className={styles.primary} type="button" disabled={saving || !data.canWrite || !path} onClick={submit}>{saving ? "Saving…" : current && path && path !== current ? "Preview this change" : current ? "Keep this path" : "Continue"}<DashboardIcon name="right" size={16} /></button></div>
+    <div className={styles.footer}>{error ? <p role="alert" className={styles.error}>{error}</p> : null}<button className={styles.primary} type="button" disabled={saving || !data.canWrite || !path} onClick={submit}>{saving ? "Saving…" : current && path && path !== current ? "Preview this change" : current ? `Keep ${current === "traditional" ? "Traditional" : "this pace"}` : "Continue"}<DashboardIcon name="right" size={16} /></button></div>
   </section>;
 }

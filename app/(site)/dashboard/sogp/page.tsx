@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 
 import { DiscipleshipInviteBanner } from "@/components/sogp/discipleship-invite-banner";
 import { LearningBoundary } from "@/components/sogp/learning/learning-boundary";
+import { LearningHub } from "@/components/sogp/learning/learning-hub";
+import { getLearningHubData } from "@/lib/dashboard/learning-hub";
 import { getOwnLearningView } from "@/lib/db/queries/sogp-learning-view";
 import { SogpJoinCohortBanner } from "@/components/sogp/sogp-join-cohort-banner";
 import { getAppSession } from "@/lib/app-session";
@@ -28,6 +30,8 @@ export default async function SogpDashboardPage({ searchParams }: { searchParams
 
   const canJoinAnotherCohort = canOfferJoinAnotherCohort(rows, openCohort?.id ?? null);
   if (!learning) redirect("/sogp/enrol");
+  // The hub reuses the learning state above, and falls back to the previous view if a read fails.
+  const hub = await getLearningHubData(session.user.id, learning.state).catch(() => null);
 
   return (
     <>
@@ -41,7 +45,7 @@ export default async function SogpDashboardPage({ searchParams }: { searchParams
         />
       ) : null}
       <DiscipleshipInviteBanner enrollmentId={rows[0]!.enrollment.id} />
-      <LearningBoundary initialData={learning} />
+      {hub ? <LearningHub hub={hub} learning={learning} /> : <LearningBoundary initialData={learning} />}
     </>
   );
 }

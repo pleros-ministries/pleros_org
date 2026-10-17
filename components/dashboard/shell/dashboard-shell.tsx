@@ -156,11 +156,13 @@ export function DashboardShell({ viewer, sections, children, notificationControl
     selectTab(next, animated);
   };
   useEffect(scopeDocumentTypography, []);
+  // Keyed on the address, not the sections object: a refresh hands the shell a
+  // new (equal) sections array, which re-ran this and prefetched in a loop.
+  const communityPrefetchHref = dashboardAreaHref("community", sections);
   useEffect(() => {
     router.prefetch("/dashboard");
-    const communityHref = dashboardAreaHref("community", sections);
-    if (communityHref) router.prefetch(communityHref);
-  }, [router, sections]);
+    if (communityPrefetchHref) router.prefetch(communityPrefetchHref);
+  }, [router, communityPrefetchHref]);
   // Back/forward keeps the browser's own scroll position.
   const historyNavigation = useRef(false);
   const lastPathname = useRef(pathname);
