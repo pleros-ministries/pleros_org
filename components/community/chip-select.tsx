@@ -41,7 +41,7 @@ export function ChipSelect({
       <Popover.Trigger
         type="button"
         aria-label={`${label}: ${text}`}
-        className={`inline-flex shrink-0 items-center border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white font-medium ${md ? "h-10 w-full gap-2 rounded-[10px] px-3 text-[14px]" : "h-6 max-w-[9.5rem] gap-1 rounded-full pr-1.5 pl-2 text-[12px]"} transition-colors hover:border-[var(--color-community-edge-strong)] data-[popup-open]:border-[var(--color-community-blue)] ${
+        className={`inline-flex shrink-0 items-center border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white font-medium ${md ? "h-10 w-full min-w-0 gap-2 rounded-[10px] px-3 text-[14px]" : "h-6 max-w-[9.5rem] gap-1 rounded-full pr-1.5 pl-2 text-[12px]"} transition-colors hover:border-[var(--color-community-edge-strong)] data-[popup-open]:border-[var(--color-community-blue)] ${
           current ? "text-[var(--color-community-ink)]" : "text-[var(--color-community-muted)]"
         }`}
       >
