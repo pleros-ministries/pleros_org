@@ -158,8 +158,12 @@ export function FeedComposer({
       <div className="flex items-center gap-2.5 px-3.5 pt-3">
         <Avatar name={viewerName} size={30} />
         <span className="min-w-0 flex-1 truncate text-[13.5px] font-semibold text-[var(--color-community-ink)]">{viewerName}</span>
-        {officialReach !== "none" ? (
-          <div role="group" aria-label="Post type" className="flex items-center rounded-lg bg-[#eceef2] p-[2px]">
+      </div>
+
+      {/* Post type sits on its own row under the name. */}
+      {officialReach !== "none" ? (
+        <div className="px-3.5 pt-2.5">
+          <div role="group" aria-label="Post type" className="inline-flex items-center rounded-lg bg-[#eceef2] p-[2px]">
             {(
               [
                 ["discussion", "Discussion"],
@@ -187,8 +191,8 @@ export function FeedComposer({
               );
             })}
           </div>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
 
       {/* Borderless fields; 16px so phones never zoom. */}
       <div className="grid px-3.5 pt-2">

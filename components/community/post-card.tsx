@@ -510,7 +510,7 @@ export function PostCard({
         {post.sharedFrom ? <QuotedPost post={post.sharedFrom} /> : null}
 
         {/* Date sits at the foot of the post, above the actions (Twitter-style). */}
-        <time dateTime={post.lastActivityAt} className="block pb-2.5 text-[11.5px] leading-[15px] text-[var(--color-community-muted)]">
+        <time dateTime={post.lastActivityAt} className="mt-1 block pb-2.5 text-[11.5px] leading-[15px] text-[var(--color-community-muted)]">
           {postTimestamp(post.lastActivityAt)}
         </time>
 
