@@ -33,6 +33,8 @@ export function LearningHub({ hub, learning }: { hub: LearningHubData; learning:
   const art = LEVEL_ART[hub.card.level] ?? LEVEL_ART[1]!;
   const share = hub.card.total ? Math.min(100, Math.round((hub.card.done / hub.card.total) * 100)) : 0;
   const podcast = hub.path === "podcast_one" || hub.path === "podcast_two";
+  // Every published track done: the card celebrates instead of resuming.
+  const finished = hub.card.total > 0 && hub.doneCount >= hub.card.total && !podcast;
   const outsideTop = hub.leaderboard?.me && !hub.leaderboard.top.some(row => row.isMe) ? hub.leaderboard.me : null;
 
   const resume = hub.state === "start"
@@ -40,6 +42,11 @@ export function LearningHub({ hub, learning }: { hub: LearningHubData; learning:
       <div className={styles.cardTop}><span>{hub.cohortTitle ?? "SOGP"}</span></div>
       <div><h2>Choose how you’ll learn</h2><span className={styles.cardMeta}>A lesson a day, or podcasts at your own pace</span></div>
       <Link href="/dashboard/sogp/path" className={styles.resume}>Get started <ChevronRightIcon className="size-4" strokeWidth={2.2} /></Link>
+    </section>
+    : finished ? <section className={styles.card} aria-label="SOGP finished" style={{ "--hub-art": `url("/assets/dashboard/learning-card/${LEVEL_ART[2]!.image}")`, "--hub-field": LEVEL_ART[2]!.field, "--hub-ink": LEVEL_ART[2]!.ink } as CSSProperties}>
+      <div className={styles.cardTop}><span>{hub.cohortTitle ?? "SOGP"} · Completed</span></div>
+      <div><h2>You’ve finished SOGP</h2><span className={styles.cardMeta}>{hub.doneCount} tracks complete</span></div>
+      <Link href={hub.certificate.available ? "/dashboard/sogp/certificate" : "/dashboard/sogp/readiness"} className={styles.resume}>{hub.certificate.available ? "View your certificate" : "Check your certificate"} <ChevronRightIcon className="size-4" strokeWidth={2.2} /></Link>
     </section>
     : <section className={styles.card} aria-label="Resume learning" style={{ "--hub-art": `url("/assets/dashboard/learning-card/${art.image}")`, "--hub-field": art.field, "--hub-ink": art.ink } as CSSProperties}>
       <div className={styles.cardTop}><span>{hub.card.eyebrow}</span><span className={styles.pace}>{hub.paceLabel}</span></div>
@@ -58,7 +65,11 @@ export function LearningHub({ hub, learning }: { hub: LearningHubData; learning:
       {resume}
 
       {hub.state === "preparing" ? <p className={styles.notice}>Your cohort hasn’t started yet. Pre-SOGP is open now, and your first teachings unlock on the start date.</p> : null}
-      {hub.state === "completed" ? <p className={styles.notice}>{hub.certificate.available ? "You’ve completed SOGP. Your certificate is ready." : "Your cohort has ended. Your history and any remaining lessons stay open here."}</p> : null}
+      {hub.state === "completed" ? <p className={styles.notice}>{finished ? "You’ve finished every track. Keep growing below." : "Your cohort has ended. Your history and any remaining lessons stay open here."}</p> : null}
+      {hub.state === "completed" ? <div className={styles.panel} style={{ padding: 14, background: "#f6f3ff", borderColor: "#e3d8f8", display: "grid", gap: 6 }}>
+        <b style={{ fontFamily: "var(--font-dashboard-heading)", fontSize: 15, fontWeight: 500, color: "#3e1876" }}>Advanced SOGP is coming</b>
+        <span style={{ fontSize: 12.5, lineHeight: "18px", color: "#56209c" }}>Deeper formation for those who’ve finished SOGP. We’ll announce it in Pleros updates the moment it opens.</span>
+      </div> : null}
 
       {hub.catchUp && hub.state === "active" ? <div className={styles.catch}>
         <span className={styles.catchIcon} aria-hidden="true"><RefreshCcwIcon className="size-4" strokeWidth={2.2} /></span>

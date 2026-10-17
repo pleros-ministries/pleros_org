@@ -42,7 +42,8 @@ export default async function NewActivityRoute({
       const units = await listMeetingUnits(ctx.userId);
       return <LiveMeetingFlow dateKey={dateKey} today={today} units={units} contacts={savedContacts} initialMeetings={units.length ? await listSharedChurchMeetings(ctx.userId, units[0].id, dateKey) : []} />;
     }
-    return <><nav className="px-4 pt-4 text-[13px]"><Link className="text-(--color-brand-blue) underline" href={`/dashboard/community/report/new?category=meetings&day=${dateKey}`}>Record meeting attendance</Link></nav><LiveMinistryForm dateKey={dateKey} today={today} contacts={savedContacts} /></>;
+    // Ministry only (evangelism, discipleship); meetings have their own flow from "Log a meeting".
+    return <LiveMinistryForm dateKey={dateKey} today={today} contacts={savedContacts} />;
   }
 
   if (reportingV3SchemaReady()) return <div role="status" className="grid gap-3 p-4"><h1>Reporting is temporarily view only</h1><p>Your saved contacts and existing reports are still available.</p><Link className="text-(--color-brand-blue) underline" href="/dashboard/community/report/history">View report history</Link></div>;

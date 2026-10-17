@@ -14,6 +14,7 @@ import {
 } from "@/lib/db/queries/ministry-activities";
 import { lagosToday } from "@/lib/sogp/daily-date";
 import { getOwnSharedMeetingDetails } from "@/lib/db/queries/shared-church-meetings";
+import { getOwnReportWeek } from "@/lib/db/queries/own-report-week";
 
 export default async function MinistryReportRoute({
   searchParams,
@@ -30,12 +31,13 @@ export default async function MinistryReportRoute({
   const { day, saved, removed } = await searchParams;
   const selected = isDateKey(day) && day <= today ? day : today;
 
-  const [activities, pleros, declarations, meetingDetails, sharedDetails] = await Promise.all([
+  const [activities, pleros, declarations, meetingDetails, sharedDetails, week] = await Promise.all([
     listActivitiesForDay(ctx.userId, selected),
     getDayActivity(ctx.userId, selected),
     getOwnDailyDeclarations(ctx.userId, selected),
     getOwnMeetingDetails(ctx.userId, selected),
     getOwnSharedMeetingDetails(ctx.userId, selected),
+    getOwnReportWeek(ctx.userId, days.slice(0, 7)).catch(() => null),
   ]);
 
   return (
@@ -49,6 +51,7 @@ export default async function MinistryReportRoute({
       enabled={dailyReportingEnabled()}
       pleros={activityLines(pleros)}
       flash={saved ? "saved" : removed ? "removed" : null}
+      week={week}
     />
   );
 }
