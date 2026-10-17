@@ -85,8 +85,9 @@ const DASHBOARD_FOCUS: Array<[RegExp, (match: RegExpMatchArray) => DashboardFocu
   [/^\/dashboard\/community\/messages\/\d+$/, () => ({ title: "Conversation", back: { href: "/dashboard/community/messages", label: "Back to Inbox" } })],
   [/^\/dashboard\/community\/ask\/\d+$/, () => ({ title: "Your question", back: { href: "/dashboard/community/ask", label: "Back to Ask Pleros" } })],
   [/^\/dashboard\/community\/leader$/, () => ({ title: "Leader tools", back: COMMUNITY })],
-  // Church oversight
-  [/^\/dashboard\/church$/, () => ({ title: "Church oversight", back: COMMUNITY })],
+  // Oversight (Pastor, Branch Pastor) inside Community; church structure and setup stay under /dashboard/church.
+  [/^\/dashboard\/community\/oversight\/(branches\/\d+|questions)$/, m => ({ title: m[1] === "questions" ? "Questions waiting" : "Branch", back: { href: "/dashboard/community/oversight", label: "Back to Oversight" } })],
+  [/^\/dashboard\/church$/, () => ({ title: "Church structure", back: COMMUNITY })],
   [/^\/dashboard\/church\/(?!branches|units|reports)[^/]+$/, () => ({ title: "Report details", back: { href: "/dashboard/church/reports", label: "Back to Church oversight" } })],
   [/^\/dashboard\/church\/.+$/, m => ({ title: /branches\/new|\/pastor$/.test(m[0]) ? "Church setup" : /units\/new/.test(m[0]) ? "Add a unit" : /\/leader$/.test(m[0]) ? "Unit appointment" : /\/workers$/.test(m[0]) ? "Assign workers" : "Church oversight", back: { href: "/dashboard/church", label: "Back to Church oversight" } })],
   // More from Pleros (You)

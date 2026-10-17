@@ -150,7 +150,9 @@ export function buildDashboardNavigation(
   }
   const oversight: DashboardNavItem[] = [];
   if (caps.churchOversight || caps.churchAssignments || caps.churchMember) {
-    oversight.push({ key: "church", label: caps.churchAssignments ? "Church structure" : caps.churchOversight ? "Church oversight" : "My church placement", href: "/dashboard/church" });
+    // Pastors and Branch Pastors with Community land on Oversight inside it (bottom
+    // bar kept); everyone else keeps their church page.
+    oversight.push({ key: "church", label: caps.churchAssignments && caps.community ? "Oversight" : caps.churchAssignments ? "Church structure" : caps.churchOversight ? "Church oversight" : "My church placement", href: caps.churchAssignments && caps.community ? "/dashboard/community/oversight" : "/dashboard/church" });
   }
   if (caps.community && caps.managesLocationGroups) {
     oversight.push({
