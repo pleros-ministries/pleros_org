@@ -133,7 +133,7 @@ export function AskPlerosView({
   return (
     <div className="grid gap-4">
       <header className="grid gap-1">
-        <h1 className="m-0 font-[family-name:var(--font-dashboard-heading)] text-[21px] font-medium leading-[28px] tracking-[-0.02em] text-[var(--color-community-ink)]">
+        <h1 data-dashboard-page-title className="m-0 font-[family-name:var(--font-dashboard-heading)] text-[21px] font-medium leading-[28px] tracking-[-0.02em] text-[var(--color-community-ink)]">
           Ask Pleros
         </h1>
         <p className="m-0 max-w-md text-[13px] leading-[20px] text-[var(--color-community-muted)]">

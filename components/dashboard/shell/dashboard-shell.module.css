@@ -94,5 +94,6 @@
 
 /* Portaled dialogs share the same scale while an authenticated frame is mounted. */
 :global(html[data-pleros-dashboard="true"] h1) { font-size: 24px; font-weight: 500; }
-:global(html[data-pleros-dashboard="true"] h1[data-dashboard-greeting]) { font-size: 21px; }
+/* Tab-level page titles (You greeting, Community home and its pages) share one size. */
+:global(html[data-pleros-dashboard="true"] h1:is([data-dashboard-greeting], [data-dashboard-page-title])) { font-size: 21px; line-height: 28px; }
 :global(html[data-pleros-dashboard="true"] h2:not([data-dashboard-public] *):not([data-dashboard-shell-title]):not([data-dashboard-learning-title])), :global(html[data-pleros-dashboard="true"] h3:not([data-dashboard-public] *)) { font-size: 15px; font-weight: 500; }

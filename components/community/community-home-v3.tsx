@@ -46,7 +46,7 @@ export function CommunityHomeV3({ data }: { data: CommunityHomeData }) {
   const firstResponse = data.responses[0];
   return <div className={styles.home} data-community-home-v3>
     <header className={styles.heading}>
-      <h1>Your Pleros Community</h1>
+      <h1 data-dashboard-page-title>Your Pleros Community</h1>
     </header>
 
     <div className={styles.counts} aria-label="Waiting for you">
