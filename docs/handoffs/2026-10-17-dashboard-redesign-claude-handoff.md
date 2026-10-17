@@ -11,6 +11,7 @@ Use this handoff to continue the authenticated Pleros learner-dashboard work wit
 - Primary checkout: `/Users/letroot/code/fcc/pleros_org`
 - Branch: `main`
 - Base HEAD before this checkpoint: `61170ed0f3dc55f7c3de969305b59f8e824ff1dc`
+- Dashboard implementation checkpoint: `14617824e0320c1595587fe00b5294bff3a92a32` (`feat: refresh learner dashboard home`)
 - Work directly in this checkout unless Daniel requests a different worktree.
 - A separate Claude worktree exists at `.claude/worktrees/sogp-enrol-form-issue-6df5e6`; it is unrelated to this dashboard slice.
 - This checkpoint includes several mixed-ownership files that were already dirty before the homepage slice. Inspect file history and overlap before editing them again.
@@ -149,4 +150,4 @@ After My learning is approved and implemented:
 
 ## Post-checkpoint status
 
-Immediately after the requested commit and push, `main` was expected to match `origin/main` and `git status --short` was expected to be clean. Re-run both `git status --short --branch` and `git log -1 --oneline --decorate` before acting because Daniel or another agent may have changed the checkout after this handoff was finalised.
+The implementation checkpoint `1461782` was pushed to `origin/main`, after which `main` matched `origin/main` and `git status --short` was clean. This handoff finalisation is a later documentation-only follow-up. Re-run both `git status --short --branch` and `git log -2 --oneline --decorate` before acting because Daniel or another agent may have changed the checkout after this handoff was finalised.
