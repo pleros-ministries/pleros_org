@@ -41,17 +41,17 @@ export function ChipSelect({
       <Popover.Trigger
         type="button"
         aria-label={`${label}: ${text}`}
-        className={`inline-flex shrink-0 items-center rounded-full border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white font-medium ${md ? "h-8 max-w-full gap-1.5 pr-2.5 pl-3 text-[13px]" : "h-6 max-w-[9.5rem] gap-1 pr-1.5 pl-2 text-[12px]"} transition-colors hover:border-[var(--color-community-edge-strong)] data-[popup-open]:border-[var(--color-community-blue)] ${
+        className={`inline-flex shrink-0 items-center border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white font-medium ${md ? "h-10 w-full gap-2 rounded-[10px] px-3 text-[14px]" : "h-6 max-w-[9.5rem] gap-1 rounded-full pr-1.5 pl-2 text-[12px]"} transition-colors hover:border-[var(--color-community-edge-strong)] data-[popup-open]:border-[var(--color-community-blue)] ${
           current ? "text-[var(--color-community-ink)]" : "text-[var(--color-community-muted)]"
         }`}
       >
-        {Icon ? <Icon className={`${md ? "size-3.5" : "size-3"} shrink-0 text-[var(--color-community-muted)]`} strokeWidth={2} /> : null}
-        <span className="truncate">{text}</span>
-        <ChevronDownIcon className={`${md ? "size-3.5" : "size-3"} shrink-0 text-[var(--color-community-muted)]`} strokeWidth={2.2} />
+        {Icon ? <Icon className={`${md ? "size-4" : "size-3"} shrink-0 text-[var(--color-community-muted)]`} strokeWidth={2} /> : null}
+        <span className={md ? "min-w-0 flex-1 truncate text-left" : "truncate"}>{text}</span>
+        <ChevronDownIcon className={`${md ? "size-4" : "size-3"} shrink-0 text-[var(--color-community-muted)]`} strokeWidth={2.2} />
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner sideOffset={6} align={align}>
-          <Popover.Popup className="z-50 max-h-72 w-48 overflow-auto rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white p-1 shadow-[0_8px_24px_rgb(37_43_51/12%)] outline-none">
+          <Popover.Popup className={`z-50 max-h-72 ${md ? "w-[var(--anchor-width)]" : "w-48"} overflow-auto rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white p-1 shadow-[0_8px_24px_rgb(37_43_51/12%)] outline-none`}>
             {menuTitle ? (
               <p className="m-0 px-2.5 pt-1.5 pb-1 text-[11px] font-medium tracking-[0.04em] text-[var(--color-community-muted)] uppercase">{menuTitle}</p>
             ) : null}
