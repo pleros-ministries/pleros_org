@@ -56,6 +56,11 @@ export function GroupHero({
   );
 }
 
+/** A group's square icon cut (Codex, drawn for 40–44px) at 1x and 2x; use with `bg-cover bg-center`. */
+export function groupIcon(file: "leading" | "leading-slate" | "discipleship" | "public" | "private" | "location") {
+  return { backgroundImage: `image-set(url("/assets/dashboard/community-groups/${file}-icon-96.webp") 1x, url("/assets/dashboard/community-groups/${file}-icon-192.webp") 2x)` };
+}
+
 /** "Add contact" from inside a group: save a private contact, then (optionally) send them a group invite. */
 export function AddContactAction({ inviteGroupId }: { inviteGroupId?: number }) {
   return (

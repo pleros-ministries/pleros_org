@@ -7,6 +7,7 @@ import { normalisePrivateContact, type MinistryContact } from "@/lib/community/r
 import { PrivateContactFields, type PersistContact } from "./ministry-form";
 import styles from "@/components/sogp/follow-up-invitations.module.css";
 import people from "@/components/community/discipleship/discipleship-group.module.css";
+import { groupIcon } from "@/components/community/groups/group-hero";
 
 const initials = (name: string) => name.trim().split(/\s+/).slice(0, 2).map(part => part[0]?.toUpperCase() ?? "").join("");
 const contactHref = (key: string) => `/dashboard/community/contacts/${key.split(":")[1]}`;
@@ -74,7 +75,7 @@ export function AddSavedContact({ onPersist, inviteGroups = [], initialInviteGro
             <label className={people.row} style={{ cursor: "pointer" }}>
               <input type="radio" name="invite-group" checked={inviteTo === (group.id ? String(group.id) : "")} onChange={() => setInviteTo(group.id ? String(group.id) : "")} className="size-[18px] shrink-0 accent-[var(--color-community-blue)]" />
               {group.id
-                ? <span className="size-10 shrink-0 rounded-[10px] bg-[length:260%] bg-right-bottom bg-no-repeat" aria-hidden="true" style={{ backgroundColor: index % 2 === 0 ? "#e6ecfc" : "#e3d8f8", backgroundImage: `url(/assets/dashboard/community-groups/${index % 2 === 0 ? "leading-slate" : "leading"}-compact-320.webp)` }} />
+                ? <span className="size-10 shrink-0 rounded-[10px] bg-cover bg-center" aria-hidden="true" style={{ backgroundColor: index % 2 === 0 ? "#e6ecfc" : "#e3d8f8", ...groupIcon(index % 2 === 0 ? "leading-slate" : "leading") }} />
                 : <span className="grid size-10 shrink-0 place-items-center rounded-[10px] bg-[#f1f2f5] text-[var(--color-community-muted)]" aria-hidden="true"><DashboardIcon name="close" size={16} /></span>}
               <span className={people.rowCopy}><span className={people.rowTitle}>{group.name}</span><span className={people.rowMeta}>{group.id ? "Share its invite on WhatsApp after saving" : "Just save them for now"}</span></span>
             </label>

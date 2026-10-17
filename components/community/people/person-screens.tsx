@@ -12,6 +12,7 @@ import type { SentInvitation } from "@/lib/db/queries/sogp-group-invitations";
 
 import styles from "../discipleship/discipleship-group.module.css";
 import { Initials } from "../discipleship/shared";
+import { groupIcon } from "../groups/group-hero";
 
 const day = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", timeZone: "Africa/Lagos" });
 const longDay = new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "Africa/Lagos" });
@@ -167,7 +168,7 @@ export function InvitePerson({ person, groups, leaderFirstName, initialGroupId }
         {groups.map(item => <li key={item.id}>
           <label className={styles.row} style={{ cursor: "pointer" }}>
             <input type="radio" name="invite-group" checked={groupId === item.id} onChange={() => setGroupId(item.id)} className="size-[18px] shrink-0 accent-[var(--color-community-blue)]" />
-            <span className="size-10 shrink-0 rounded-[10px] bg-[length:260%] bg-right-bottom bg-no-repeat" aria-hidden="true" style={{ backgroundColor: item.colourway === "slate" ? "#e6ecfc" : "#e3d8f8", backgroundImage: `url(/assets/dashboard/community-groups/${item.colourway === "slate" ? "leading-slate" : "leading"}-compact-320.webp)` }} />
+            <span className="size-10 shrink-0 rounded-[10px] bg-cover bg-center" aria-hidden="true" style={{ backgroundColor: item.colourway === "slate" ? "#e6ecfc" : "#e3d8f8", ...groupIcon(item.colourway === "slate" ? "leading-slate" : "leading") }} />
             <span className={styles.rowCopy}><span className={styles.rowTitle}>{item.name}</span><span className={styles.rowMeta}>{item.discipleCount ? `${item.discipleCount} ${item.discipleCount === 1 ? "disciple" : "disciples"}` : "No disciples yet"}</span></span>
           </label>
         </li>)}

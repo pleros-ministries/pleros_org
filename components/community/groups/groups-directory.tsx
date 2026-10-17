@@ -11,6 +11,7 @@ import { GroupCard, leadColourways } from "../community-home-v3";
 import homeStyles from "../community-home-v3.module.css";
 import peopleStyles from "../discipleship/discipleship-group.module.css";
 import { CreateGroupDialog } from "./create-group-dialog";
+import { groupIcon } from "./group-hero";
 import { GroupJoinButton } from "./group-join-button";
 
 export type DirectoryDiscipleship = {
@@ -48,12 +49,8 @@ function DiscoverRow({ group }: { group: GroupSummary }) {
       <Link href={`/dashboard/community/groups/${group.id}`} className="flex min-w-0 flex-1 items-center gap-3">
         <span
           aria-hidden
-          // Zoomed onto the corner object so it fills the thumbnail, not the empty field.
-          className="size-11 shrink-0 rounded-[10px] bg-[length:260%] bg-right-bottom bg-no-repeat"
-          style={{
-            backgroundColor: art === "private" ? "#f6d9de" : "#f9caa7",
-            backgroundImage: `url("/assets/dashboard/community-groups/${art}-compact-320.webp")`,
-          }}
+          className="size-11 shrink-0 rounded-[10px] bg-cover bg-center"
+          style={{ backgroundColor: art === "private" ? "#f6d9de" : "#f9caa7", ...groupIcon(art) }}
         />
         <span className="grid min-w-0">
           <span className="truncate text-[13.5px] font-semibold leading-[18px] text-[var(--color-community-ink)]">{group.name}</span>
