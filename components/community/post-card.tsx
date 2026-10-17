@@ -874,7 +874,7 @@ export function CommentThread({
   }
 
   return (
-    <div className="grid gap-3">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-3">
       {canComment ? null : (
         <p className="text-[12px] text-[var(--color-community-muted)]">Join this group to comment.</p>
       )}
@@ -882,7 +882,7 @@ export function CommentThread({
         className={canComment ? "flex items-start gap-2" : "hidden"}
         action={() => submit()}
       >
-        <Avatar name={viewerName} size={32} className="mt-0.5" />
+        <Avatar name={viewerName} size={28} className="mt-0.5" />
         <div className="min-w-0 flex-1">
           {replyTo != null ? (
             <p className="mb-1 text-[12px] text-[var(--color-community-muted)]">
@@ -896,13 +896,13 @@ export function CommentThread({
               </button>
             </p>
           ) : null}
-          <div className="flex items-end gap-2">
+          <div className="flex min-w-0 items-end gap-2">
             <textarea
               value={body}
               onChange={(e) => setBody(e.target.value)}
               placeholder="Write a comment…"
               rows={1}
-              className="min-h-9 flex-1 resize-none rounded-2xl border border-[var(--color-community-edge)] bg-white px-3 py-2 text-[16px] outline-none"
+              className="min-h-9 min-w-0 flex-1 resize-none rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white px-3 py-[7px] text-[16px] leading-[20px] outline-none"
             />
             <button
               type="submit"
@@ -936,9 +936,9 @@ export function CommentThread({
       ) : comments.length === 0 ? (
         <p className="text-[12px] text-[var(--color-community-muted)]">No comments yet. Be the first.</p>
       ) : (
-        <ul className="grid gap-3">
+        <ul className="grid grid-cols-[minmax(0,1fr)] gap-3">
           {topLevel.map((comment) => (
-            <li key={comment.id} className="grid gap-3">
+            <li key={comment.id} className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-3">
               <CommentRow
                 comment={comment}
                 isAdmin={isAdmin}
@@ -952,7 +952,7 @@ export function CommentThread({
                 onMessage={chat.open}
               />
               {(repliesByParent.get(comment.id) ?? []).map((reply) => (
-                <div key={reply.id} className="ml-10">
+                <div key={reply.id} className="ml-9 min-w-0">
                   <CommentRow
                     comment={reply}
                     isAdmin={isAdmin}
@@ -1010,24 +1010,24 @@ function CommentRow({
 }) {
   const canModerate = comment.canModerate || isAdmin;
   return (
-    <div className="flex items-start gap-2">
-      <Avatar name={comment.authorName} size={32} />
+    <div className="flex min-w-0 items-start gap-2">
+      <Avatar name={comment.authorName} size={28} />
       <div className="min-w-0 flex-1">
         {comment.body == null ? (
-          <p className="rounded-2xl bg-[var(--color-community-canvas)] px-3 py-2 text-[13.5px] italic text-[var(--color-community-muted)]">
+          <p className="rounded-[10px] bg-[var(--color-community-canvas)] px-3 py-2 text-[13.5px] italic text-[var(--color-community-muted)]">
             This comment was hidden.
           </p>
         ) : (
-          <div className="inline-block max-w-full rounded-2xl bg-[var(--color-community-canvas)] px-3 py-2">
-            <p className="text-[13px] font-medium text-[var(--color-community-ink)]">
+          <div className="inline-block max-w-full rounded-[10px] bg-[#f6f7f9] px-3 py-2">
+            <p className="text-[12.5px] font-semibold text-[var(--color-community-ink)]">
               {comment.authorName}
             </p>
-            <p className="whitespace-pre-line break-words text-[13.5px] leading-relaxed text-[var(--color-community-ink)]">
+            <p className="whitespace-pre-line break-words text-[12.5px] leading-[18px] text-[var(--color-community-ink)]">
               {comment.body}
             </p>
           </div>
         )}
-        <div className="mt-1 flex flex-wrap items-center gap-3 pl-3 text-[12px] text-[var(--color-community-muted)]">
+        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 pl-3 text-[11.5px] text-[var(--color-community-muted)]">
           <button
             type="button"
             disabled={pending}
