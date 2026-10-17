@@ -123,7 +123,7 @@ export function FeedComposer({
 
   if (postingBlocked) {
     return (
-      <p className="rounded-2xl border border-[var(--color-community-edge)] bg-white p-4 text-sm text-[var(--color-community-ink)] ">
+      <p className="rounded-2xl border border-[var(--color-community-edge)] bg-white p-4 text-[13.5px] text-[var(--color-community-ink)] ">
         {POSTING_PAUSED_COPY} You can still read and like posts.
       </p>
     );

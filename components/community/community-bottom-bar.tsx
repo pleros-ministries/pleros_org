@@ -142,7 +142,7 @@ export function InboxSwitch() {
 
   const tab = "inline-flex h-8 items-center justify-center gap-1.5 rounded-[7px] text-[13px] font-medium transition-colors";
   return (
-    <nav aria-label="Inbox" className="site-shell-page sogp-shell-page pt-4">
+    <nav aria-label="Inbox" className="site-shell-page sogp-shell-page pt-4 pb-2">
       <div className="mx-auto grid w-full max-w-[48rem] grid-cols-2 rounded-[10px] bg-[#eceef2] p-[3px]">
         <Link href={`${BASE}/messages`} aria-current={onMessages ? "page" : undefined} className={`${tab} ${onMessages ? "bg-white text-[var(--color-community-ink)] shadow-[0_1px_2px_rgb(0_0_0/8%)]" : "text-[var(--color-community-muted)]"}`}>
           Messages

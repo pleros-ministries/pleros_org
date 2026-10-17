@@ -100,17 +100,17 @@ function QuotedPost({ post }: { post: NonNullable<FeedPost["sharedFrom"]> }) {
   return (
     <Link
       href={`/dashboard/community/post/${post.id}`}
-      className="mt-1 block rounded-xl border border-[var(--color-community-edge)] bg-[var(--color-community-canvas)] p-3 transition-colors hover:bg-[var(--color-community-edge)]"
+      className="block rounded-[8px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-[var(--color-community-canvas)] px-3 py-2.5 transition-colors hover:border-[var(--color-community-edge-strong)]"
     >
       <div className="flex items-center gap-2">
-        <Avatar name={post.authorName} size={24} />
-        <p className="text-xs font-semibold text-[var(--color-community-ink)]">{post.authorName}</p>
+        <Avatar name={post.authorName} size={20} />
+        <p className="m-0 text-[12.5px] font-semibold text-[var(--color-community-ink)]">{post.authorName}</p>
       </div>
-      <p className="mt-1.5 line-clamp-4 whitespace-pre-line text-sm leading-relaxed text-[var(--color-community-ink)]">
+      <p className="m-0 mt-1.5 line-clamp-3 whitespace-pre-line text-[13px] leading-[19px] text-[#3a4049]">
         {post.body}
       </p>
       {post.images.length > 0 ? (
-        <p className="mt-1 text-xs text-[var(--color-community-muted)]">
+        <p className="m-0 mt-1 text-[11.5px] text-[var(--color-community-muted)]">
           {post.images.length} photo{post.images.length === 1 ? "" : "s"}
         </p>
       ) : null}
@@ -173,7 +173,7 @@ function PostEditForm({
   });
 
   const fieldClass =
-    "w-full rounded-xl border border-[var(--color-community-edge)] px-3 text-base outline-none focus:border-[var(--color-community-edge-strong)] sm:text-[15px]";
+    "w-full rounded-xl border border-[var(--color-community-edge)] px-3 text-[16px] outline-none focus:border-[var(--color-community-edge-strong)] sm:text-[15px]";
 
   return (
     <form
@@ -211,7 +211,7 @@ function PostEditForm({
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
             aria-label="Topic"
-            className="h-9 rounded-lg border border-[var(--color-community-edge)] px-2 text-sm"
+            className="h-9 rounded-lg border border-[var(--color-community-edge)] px-2 text-[16px]"
           >
             <option value="">No topic</option>
             {COMMUNITY_TOPICS.map((option) => (
@@ -225,7 +225,7 @@ function PostEditForm({
           <button
             type="button"
             onClick={onDone}
-            className="text-sm text-[var(--color-community-muted)] hover:underline"
+            className="text-[13px] text-[var(--color-community-muted)] hover:underline"
           >
             Cancel
           </button>
@@ -630,7 +630,7 @@ function ShareMenu({
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner sideOffset={8} align="end">
-          <Popover.Popup className="z-50 w-64 rounded-xl border border-[var(--color-community-edge)] bg-white p-1.5 text-sm shadow-lg outline-none">
+          <Popover.Popup className="z-50 w-64 rounded-xl border border-[var(--color-community-edge)] bg-white p-1.5 text-[13px] shadow-lg outline-none">
             {mode === "menu" ? (
               <div className="grid gap-0.5">
                 {canRepost ? (
@@ -679,7 +679,7 @@ function ShareMenu({
                   onChange={(e) => setNote(e.target.value)}
                   placeholder="Say something about this…"
                   rows={3}
-                  className="rounded-lg border border-[var(--color-community-edge)] p-2 text-sm"
+                  className="rounded-lg border border-[var(--color-community-edge)] p-2 text-[16px]"
                 />
                 {viewerUnitName ? (
                   <select
@@ -687,7 +687,7 @@ function ShareMenu({
                     onChange={(e) =>
                       setScope(e.target.value as "global" | "unit")
                     }
-                    className="h-9 rounded-lg border border-[var(--color-community-edge)] px-2 text-sm"
+                    className="h-9 rounded-lg border border-[var(--color-community-edge)] px-2 text-[16px]"
                   >
                     <option value="global">To the community</option>
                     <option value="unit">To {viewerUnitName}</option>
@@ -873,7 +873,7 @@ export function CommentThread({
   return (
     <div className="grid gap-3">
       {canComment ? null : (
-        <p className="text-xs text-[var(--color-community-muted)]">Join this group to comment.</p>
+        <p className="text-[12px] text-[var(--color-community-muted)]">Join this group to comment.</p>
       )}
       <form
         className={canComment ? "flex items-start gap-2" : "hidden"}
@@ -882,7 +882,7 @@ export function CommentThread({
         <Avatar name={viewerName} size={32} className="mt-0.5" />
         <div className="min-w-0 flex-1">
           {replyTo != null ? (
-            <p className="mb-1 text-xs text-[var(--color-community-muted)]">
+            <p className="mb-1 text-[12px] text-[var(--color-community-muted)]">
               Replying ·{" "}
               <button
                 type="button"
@@ -899,7 +899,7 @@ export function CommentThread({
               onChange={(e) => setBody(e.target.value)}
               placeholder="Write a comment…"
               rows={1}
-              className="min-h-9 flex-1 resize-none rounded-2xl border border-[var(--color-community-edge)] bg-white px-3 py-2 text-sm outline-none"
+              className="min-h-9 flex-1 resize-none rounded-2xl border border-[var(--color-community-edge)] bg-white px-3 py-2 text-[16px] outline-none"
             />
             <button
               type="submit"
@@ -910,7 +910,7 @@ export function CommentThread({
             </button>
           </div>
           {error ?? chat.error ? (
-            <p role="alert" className="mt-1 text-xs text-red-700">
+            <p role="alert" className="mt-1 text-[12px] text-red-700">
               {error ?? chat.error}
             </p>
           ) : null}
@@ -918,9 +918,9 @@ export function CommentThread({
       </form>
 
       {isLoading ? (
-        <p className="text-xs text-[var(--color-community-muted)]">Loading comments…</p>
+        <p className="text-[12px] text-[var(--color-community-muted)]">Loading comments…</p>
       ) : isError ? (
-        <p className="text-xs text-[var(--color-community-muted)]">
+        <p className="text-[12px] text-[var(--color-community-muted)]">
           Couldn&apos;t load comments.{" "}
           <button
             type="button"
@@ -931,7 +931,7 @@ export function CommentThread({
           </button>
         </p>
       ) : comments.length === 0 ? (
-        <p className="text-xs text-[var(--color-community-muted)]">No comments yet. Be the first.</p>
+        <p className="text-[12px] text-[var(--color-community-muted)]">No comments yet. Be the first.</p>
       ) : (
         <ul className="grid gap-3">
           {topLevel.map((comment) => (
@@ -1011,7 +1011,7 @@ function CommentRow({
       <Avatar name={comment.authorName} size={32} />
       <div className="min-w-0 flex-1">
         {comment.body == null ? (
-          <p className="rounded-2xl bg-[var(--color-community-canvas)] px-3 py-2 text-sm italic text-[var(--color-community-muted)]">
+          <p className="rounded-2xl bg-[var(--color-community-canvas)] px-3 py-2 text-[13.5px] italic text-[var(--color-community-muted)]">
             This comment was hidden.
           </p>
         ) : (
@@ -1019,12 +1019,12 @@ function CommentRow({
             <p className="text-[13px] font-medium text-[var(--color-community-ink)]">
               {comment.authorName}
             </p>
-            <p className="whitespace-pre-line break-words text-sm leading-relaxed text-[var(--color-community-ink)]">
+            <p className="whitespace-pre-line break-words text-[13.5px] leading-relaxed text-[var(--color-community-ink)]">
               {comment.body}
             </p>
           </div>
         )}
-        <div className="mt-1 flex flex-wrap items-center gap-3 pl-3 text-xs text-[var(--color-community-muted)]">
+        <div className="mt-1 flex flex-wrap items-center gap-3 pl-3 text-[12px] text-[var(--color-community-muted)]">
           <button
             type="button"
             disabled={pending}
