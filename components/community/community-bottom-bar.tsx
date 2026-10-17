@@ -60,8 +60,8 @@ const idleClass = "text-(--color-text-muted) hover:text-[var(--color-community-b
 const topItemClass =
   "relative inline-flex min-h-9 items-center gap-2 rounded-[10px] px-3 text-[13px] leading-5 font-medium transition-colors";
 const topActiveClass = "bg-(--status-blue-bg,#e4ebfd) text-[var(--color-community-blue)]";
-// Instagram-style: the active destination's icon fills in ink, no colour rule.
-const activeClass = "text-[var(--color-community-ink)] font-semibold";
+const activeClass =
+  "text-[var(--color-community-blue)] before:absolute before:-top-1.5 before:left-1/4 before:right-1/4 before:h-0.5 before:rounded-full before:bg-[var(--color-community-blue)]";
 
 /**
  * Community's main destinations: Home, Groups, Feed and Inbox, plus Oversight
@@ -90,7 +90,7 @@ export function CommunityBottomBar({
       aria-label="Community"
       className={placement === "top"
         ? "sticky top-12 z-20 hidden border-b border-(--color-line) bg-white lg:flex lg:justify-center lg:gap-2 lg:px-6 lg:py-1"
-        : `sticky bottom-0 z-30 grid ${items.length === 5 ? "grid-cols-5" : "grid-cols-4"} border-t border-(--color-line) bg-[var(--color-community-canvas)] px-1 pt-1.5 pb-[calc(0.25rem_+_env(safe-area-inset-bottom))] lg:hidden`}
+        : `sticky bottom-0 z-30 grid ${items.length === 5 ? "grid-cols-5" : "grid-cols-4"} border-t border-(--color-line) bg-white px-1 pt-1.5 pb-[calc(0.25rem_+_env(safe-area-inset-bottom))] lg:hidden`}
     >
       {items.map((item) => {
         const Icon = item.icon;
@@ -107,11 +107,7 @@ export function CommunityBottomBar({
               : `${itemClass} ${active ? activeClass : idleClass}`}
           >
             <span className="relative">
-              <Icon
-                className={placement === "top" ? "size-4" : "size-5"}
-                strokeWidth={active && placement === "bottom" ? (item.key === "feed" ? 2.6 : 2) : 1.8}
-                fill={active && placement === "bottom" && item.key !== "feed" ? "currentColor" : "none"}
-              />
+              <Icon className={placement === "top" ? "size-4" : "size-5"} strokeWidth={1.8} />
               {inboxCount > 0 ? (
                 <span
                   aria-label={`${inboxCount} unread`}
