@@ -7,9 +7,9 @@
 .trail a:hover { color: var(--color-text-strong); text-decoration: underline; text-underline-offset: 3px; }
 .trail a:focus-visible { outline: 2px solid var(--color-brand-blue); outline-offset: -2px; border-radius: 4px; }
 .sep { flex: none; padding: 0 7px; color: #a6abb2; }
-.more { flex: none; color: #a6abb2; }
+.more { display: flex; flex: none; align-items: center; color: #a6abb2; }
 
-/* The trail always ends with the current page; phones fold deep ancestors into "…". */
+/* The trail always ends with the current page; phones fold the middle into "…". */
 .sep:not([data-phone]), .trail li[data-collapsed] { display: none; }
 .trail li.current { display: flex; flex: 0 1 auto; min-width: 0; color: var(--color-text-strong); font-weight: 500; }
 .current > span:last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; }

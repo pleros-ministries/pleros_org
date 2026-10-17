@@ -161,11 +161,27 @@ export function DashboardShell({ viewer, sections, children, notificationControl
     const communityHref = dashboardAreaHref("community", sections);
     if (communityHref) router.prefetch(communityHref);
   }, [router, sections]);
+  // Back/forward keeps the browser's own scroll position.
+  const historyNavigation = useRef(false);
+  const lastPathname = useRef(pathname);
+  useEffect(() => {
+    const onPop = () => { historyNavigation.current = true; };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
   useEffect(() => {
     const href = window.location.pathname + window.location.search;
     if (restoreScroll.current === href) {
       document.scrollingElement?.scrollTo({ top: scrollPositions.current.get(href) ?? 0, behavior: "instant" });
       restoreScroll.current = null;
+      lastPathname.current = pathname;
+      return;
+    }
+    // Every other new page opens at the top (user report: some opened mid-scroll).
+    if (pathname !== lastPathname.current && !navigating) {
+      if (!historyNavigation.current) document.scrollingElement?.scrollTo({ top: 0, behavior: "instant" });
+      historyNavigation.current = false;
+      lastPathname.current = pathname;
     }
   }, [pathname, navigating]);
   useEffect(() => {

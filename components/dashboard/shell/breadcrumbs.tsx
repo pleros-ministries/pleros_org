@@ -46,15 +46,16 @@ export function Breadcrumbs({ pathname, title }: { pathname: string; title: stri
   const labels = useContext(CrumbLabels)?.labels ?? {};
   const trail = dashboardTrailForPath(pathname).map(crumb => ({ ...crumb, label: labels[crumb.href] ?? crumb.label }));
   if (!trail.length) return null;
-  // Phones: "…" for anything above the nearest two ancestors. From lg: all of it, then the page.
-  const hidden = Math.max(0, trail.length - 2);
+  // Phones keep the first ancestor and the nearest one, folding the middle into "…"
+  // (user preference: the ends of a long trail stay visible). From lg: all of it.
+  const folded = (index: number) => trail.length > 2 && index > 0 && index < trail.length - 1;
   const sep = (phone: boolean, desktop: boolean) => <span className={styles.sep} data-phone={phone || undefined} data-desktop={desktop || undefined} aria-hidden="true">›</span>;
   return <nav aria-label="Breadcrumb" className={styles.trail}>
     <ol>
-      {hidden ? <li className={styles.more} aria-hidden="true">…</li> : null}
-      {trail.map((crumb, index) => <li key={crumb.href} data-collapsed={index < hidden || undefined}>
-        {sep(index > hidden || (index === hidden && hidden > 0), index > 0)}
+      {trail.map((crumb, index) => <li key={crumb.href} data-collapsed={folded(index) || undefined}>
+        {sep(index > 0 && !folded(index), index > 0)}
         <Link href={crumb.href} title={crumb.label}>{crumb.label}</Link>
+        {index === 0 && trail.length > 2 ? <span className={styles.more} aria-hidden="true">{sep(true, false)}…</span> : null}
       </li>)}
       <li className={styles.current} aria-current="page">{sep(true, true)}<span>{labels[pathname] ?? title}</span></li>
     </ol>

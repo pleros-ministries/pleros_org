@@ -32,8 +32,8 @@ function Tag({ tone, children }: { tone?: "ok" | "risk"; children: React.ReactNo
 function ContactButtons({ subject, whatsappUrl, callHref, firstName }: { subject: Subject; whatsappUrl: string | null; callHref: string | null; firstName: string }) {
   const log = (kind: FollowUpKind) => { void logFollowUpAction({ ...subject, kind }); };
   return <>
-    {whatsappUrl ? <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className={styles.btn} onClick={() => log("whatsapp")} aria-label={`WhatsApp ${firstName}`}><MessageCircleIcon className="size-3.5" strokeWidth={2} />WhatsApp</a> : null}
-    {callHref ? <a href={callHref} className={styles.btn} style={{ width: 32, padding: 0 }} onClick={() => log("call")} aria-label={`Call ${firstName}`} title="Call"><PhoneIcon className="size-3.5" strokeWidth={2} /></a> : null}
+    {whatsappUrl ? <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className={styles.btn} onClick={() => log("whatsapp")} aria-label={`WhatsApp ${firstName}`}><MessageCircleIcon className="size-3.5 text-[#128c4a]" strokeWidth={2.2} />WhatsApp</a> : null}
+    {callHref ? <a href={callHref} className={styles.btn} style={{ width: 32, padding: 0 }} onClick={() => log("call")} aria-label={`Call ${firstName}`} title="Call"><PhoneIcon className="size-3.5 text-[var(--color-community-blue)]" strokeWidth={2.2} /></a> : null}
   </>;
 }
 
@@ -109,7 +109,7 @@ export function EnrolleeDetail({ enrollee, followUps }: { enrollee: OwnEnrollee;
       <Initials name={enrollee.name} size="lg" />
       <div className="grid min-w-0 gap-1">
         <h1>{enrollee.name}</h1>
-        <span className={styles.profileMeta}>{[enrollee.cohortName, enrollee.region].filter(Boolean).join(" · ")}</span>
+        <span className={styles.profileMeta}>{enrollee.cohortName}</span>
         <span className="flex flex-wrap gap-1.5"><Tag>{SOURCE[enrollee.source]}</Tag>{status}</span>
       </div>
     </div>
@@ -120,6 +120,7 @@ export function EnrolleeDetail({ enrollee, followUps }: { enrollee: OwnEnrollee;
 
     <div className={styles.panel}>
       <div className={styles.kv}><span>Phone</span><b>{enrollee.phone || "Not recorded"}</b></div>
+      {enrollee.region ? <div className={styles.kv}><span>Location</span><b>{enrollee.region}</b></div> : null}
       <div className={styles.kv}><span>Assigned to you</span><b>{day.format(new Date(enrollee.assignedAt))}</b></div>
       <div className={styles.kv}><span>Last contact</span><b>{enrollee.lastContactedAt ? `${day.format(new Date(enrollee.lastContactedAt))} · ${enrollee.contactCount} time${enrollee.contactCount === 1 ? "" : "s"}` : "Not yet"}</b></div>
       {enrollee.invitation ? <div className={styles.kv}><span>Invited to</span><b>{enrollee.invitation.groupName}</b></div> : null}

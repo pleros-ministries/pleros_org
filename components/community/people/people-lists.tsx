@@ -13,7 +13,6 @@ import type { OwnEnrolleeRow } from "@/lib/db/queries/sogp-follow-up-routes";
 import styles from "../discipleship/discipleship-group.module.css";
 import { Initials } from "../discipleship/shared";
 import { ActionMenu, type MenuAction } from "../action-menu";
-import { GroupTabs } from "../groups/group-hero";
 
 export const CONTACTS_PATH = "/dashboard/community/contacts";
 const contactId = (key: string) => key.split(":")[1];
@@ -73,8 +72,6 @@ export function SavedContactsList({ contacts, readOnly, invites = {} }: {
   </div>;
 }
 
-type EnrolleeTab = "free" | "all";
-
 const SOURCE: Record<OwnEnrolleeRow["source"], string> = {
   code: "Your referral code",
   link: "Your referral link",
@@ -96,13 +93,15 @@ export function EnrolleesList({ rows, referralUrl, contacts = {} }: {
   contacts?: Record<number, { whatsappUrl: string | null; callHref: string | null }>;
 }) {
   const router = useRouter();
+  // Someone already in a discipleship group is no longer on this list
+  // (user decision, 17 October): in yours they're a disciple, in another
+  // they're that leader's. The follow-up assignment itself is untouched.
   const free = rows.filter(row => !row.group);
-  const [tab, setTab] = useState<EnrolleeTab>(free.length ? "free" : "all");
   const [query, setQuery] = useState("");
   const [copied, setCopied] = useState(false);
   const [now] = useState(() => Date.now());
   const needle = query.trim().toLowerCase();
-  const visible = (tab === "free" ? free : rows).filter(row => !needle || row.name.toLowerCase().includes(needle));
+  const visible = free.filter(row => !needle || row.name.toLowerCase().includes(needle));
   const recent = visible.filter(row => now - new Date(row.assignedAt).getTime() < WEEK_MS);
   const earlier = visible.filter(row => now - new Date(row.assignedAt).getTime() >= WEEK_MS);
   async function share() {
@@ -122,9 +121,7 @@ export function EnrolleesList({ rows, referralUrl, contacts = {} }: {
       ...(!row.group && !row.invited ? [{ key: "invite", label: "Invite to a group", icon: UserPlusIcon, onSelect: () => router.push(`/dashboard/community/enrollees/${row.enrollmentId}/invite`) }] : []),
     ];
   };
-  const end = (row: OwnEnrolleeRow) => row.group
-    ? <span className={styles.pill} data-tone="ok" title={row.group.name ?? undefined}>{row.group.yours ? "In your group" : "In a group"}</span>
-    : row.invited
+  const end = (row: OwnEnrolleeRow) => row.invited
       ? <span className={styles.pill}>Invited</span>
       : null;
   const list = (title: string, items: OwnEnrolleeRow[]) => items.length ? <>
@@ -151,15 +148,12 @@ export function EnrolleesList({ rows, referralUrl, contacts = {} }: {
 
   return <div className={styles.page}>
     <div className={styles.heading}>
-      <div><h1>My enrollees</h1><p className={styles.sub}>{rows.length} {rows.length === 1 ? "person" : "people"} you follow up</p></div>
+      <div><h1>My enrollees</h1><p className={styles.sub}>{free.length} {free.length === 1 ? "person" : "people"} to bring into a group</p></div>
       {referralUrl ? <button type="button" className={styles.btn} data-primary onClick={share}><Share2Icon className="size-3.5" strokeWidth={2} />{copied ? "Link copied" : "Share link"}</button> : null}
     </div>
-    {rows.length ? <>
-      <GroupTabs tabs={[{ key: "free", label: "Not in a group", count: free.length }, { key: "all", label: "All", count: rows.length }]} value={tab} onChange={setTab} />
-      <SearchBox label="Search enrollees" value={query} onChange={setQuery} />
-    </> : null}
+    {free.length ? <SearchBox label="Search enrollees" value={query} onChange={setQuery} /> : null}
     {visible.length ? <>{list("This week", recent)}{list("Earlier", earlier)}</>
-      : <p className={`${styles.panel} ${styles.empty}`}>{needle ? "No one matches your search." : rows.length ? "Everyone you follow up is in a group." : "When someone joins with your code or link, they’ll appear here."}</p>}
+      : <p className={`${styles.panel} ${styles.empty}`}>{needle ? "No one matches your search." : rows.length ? "Everyone you follow up is in a group. Find them under their group." : "When someone joins with your code or link, they’ll appear here."}</p>}
     <p className={styles.note}>Invite picks one of your discipleship groups. They join after accepting in Pleros.</p>
   </div>;
 }

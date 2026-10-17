@@ -156,7 +156,7 @@ export function GroupsDirectory({
             </Link></li> : null}
             {people.enrollees !== null ? <li><Link href="/dashboard/community/enrollees" className={peopleStyles.row}>
               <span className="grid size-9 shrink-0 place-items-center rounded-[10px] bg-[#fde3cf] text-[#7a3a10]"><GraduationCapIcon className="size-4" strokeWidth={2} /></span>
-              <span className={peopleStyles.rowCopy}><span className={peopleStyles.rowTitle} style={{ fontWeight: 500 }}>My enrollees</span><span className={peopleStyles.rowMeta}>{people.enrollees.total ? `Signed up with your link · ${people.enrollees.free} not in a group` : "People who sign up with your link"}</span></span>
+              <span className={peopleStyles.rowCopy}><span className={peopleStyles.rowTitle} style={{ fontWeight: 500 }}>My enrollees</span><span className={peopleStyles.rowMeta}>{people.enrollees.free ? `${people.enrollees.free} signed up with your link, not in a group yet` : "People who sign up with your link"}</span></span>
               {people.enrollees.free ? <span className="inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-[var(--color-community-blue)] px-1.5 text-[11px] leading-none font-semibold tabular-nums text-white">{people.enrollees.free}</span> : null}
               <ChevronRightIcon className={`${peopleStyles.chev} size-4`} strokeWidth={2} />
             </Link></li> : null}
