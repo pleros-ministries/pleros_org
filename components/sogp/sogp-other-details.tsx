@@ -75,7 +75,7 @@ function PrayerWatchReminderCard() {
             type="button"
             onClick={subscribe}
             disabled={isPending}
-            className="inline-flex h-9 w-fit cursor-pointer items-center rounded-full bg-[var(--color-brand-blue)] px-4 text-xs font-semibold text-white disabled:cursor-not-allowed disabled:opacity-55"
+            className="inline-flex h-8 w-fit cursor-pointer items-center rounded-[10px] bg-[var(--color-brand-blue)] px-3.5 text-[13px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-55"
           >
             {isPending ? "Enabling…" : "Enable Prayer Watch reminders"}
           </button>

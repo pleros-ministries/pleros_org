@@ -41,7 +41,7 @@ export function ConversationList({ activeId }: { activeId: number | null }) {
         <button
           type="button"
           onClick={() => setComposing(true)}
-          className="inline-flex h-9 items-center gap-1.5 rounded-[11px] bg-[var(--color-community-blue)] px-3 text-[13px] font-semibold text-white"
+          className="inline-flex h-8 items-center gap-1.5 rounded-[10px] bg-[var(--color-community-blue)] px-3 text-[13px] font-semibold text-white"
         >
           <PenSquareIcon className="size-4" strokeWidth={1.9} />
           New message

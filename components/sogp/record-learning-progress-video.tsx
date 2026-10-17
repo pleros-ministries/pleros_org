@@ -316,7 +316,7 @@ export function RecordLearningProgressVideo({
               type="button"
               disabled={status !== "ready"}
               onClick={startRecording}
-              className="inline-flex min-h-9 items-center gap-2 rounded-full bg-[var(--color-brand-blue)] px-5 text-sm font-semibold text-white disabled:opacity-50"
+              className="inline-flex h-8 items-center gap-2 rounded-[10px] bg-[var(--color-brand-blue)] px-3.5 text-[13px] font-semibold text-white disabled:opacity-50"
             >
               <Camera className="size-4" /> Start recording
             </button>

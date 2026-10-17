@@ -91,7 +91,7 @@ function PodcastLeaderboardWidget({
         {previewMode ? null : (
           <Link
             href="/dashboard/podcast/leaderboard"
-            className="inline-flex h-9 w-fit items-center rounded-full bg-(--color-brand-blue) px-4 text-xs font-semibold text-white"
+            className="inline-flex h-8 w-fit items-center rounded-[10px] bg-(--color-brand-blue) px-3.5 text-[13px] font-semibold text-white"
           >
             View leaderboard
           </Link>

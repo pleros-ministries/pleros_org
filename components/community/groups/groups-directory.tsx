@@ -133,7 +133,7 @@ export function GroupsDirectory({
           <button
             type="button"
             onClick={() => setCreating(true)}
-            className="inline-flex h-9 items-center gap-1.5 rounded-full bg-[var(--color-community-blue)] px-3.5 text-[13px] font-semibold text-white"
+            className="inline-flex h-8 items-center gap-1.5 rounded-[10px] bg-[var(--color-community-blue)] px-3.5 text-[13px] font-semibold text-white"
           >
             <PlusIcon className="size-4" strokeWidth={2} />
             Create group

@@ -225,7 +225,7 @@ export function QuestionThread({ initial }: { initial: AskerQuestion }) {
           <button
             type="submit"
             disabled={pending || !draft.trim()}
-            className="inline-flex h-9 w-fit items-center rounded-full bg-[var(--color-community-blue)] px-4 text-[13px] font-semibold text-white disabled:opacity-50"
+            className="inline-flex h-8 w-fit items-center rounded-[10px] bg-[var(--color-community-blue)] px-3.5 text-[13px] font-semibold text-white disabled:opacity-50"
           >
             {pending ? "Sending…" : "Send"}
           </button>

@@ -282,7 +282,7 @@ export function LeaderboardPage({
               <button
                 type="submit"
                 disabled={alias.isPending}
-                className="inline-flex h-9 shrink-0 items-center rounded-full bg-[var(--color-brand-blue)] px-4 text-xs font-medium text-white disabled:opacity-55"
+                className="inline-flex h-8 shrink-0 items-center rounded-[10px] bg-[var(--color-brand-blue)] px-3.5 text-[13px] font-medium text-white disabled:opacity-55"
               >
                 Save
               </button>

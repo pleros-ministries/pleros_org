@@ -294,14 +294,14 @@ export function FeedComposer({
           <button
             type="button"
             onClick={reset}
-            className="h-9 rounded-lg px-3 text-[13px] font-medium text-[var(--color-community-muted)] hover:bg-[var(--color-community-canvas)]"
+            className="h-8 rounded-[10px] px-3 text-[13px] font-medium text-[var(--color-community-muted)] hover:bg-[var(--color-community-canvas)]"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={pending || isUploading}
-            className="inline-flex h-9 items-center rounded-[11px] bg-[var(--color-community-blue)] px-4 text-[13.5px] font-semibold text-white disabled:opacity-50"
+            className="inline-flex h-8 items-center rounded-[10px] bg-[var(--color-community-blue)] px-3.5 text-[13px] font-semibold text-white disabled:opacity-50"
           >
             {pending ? "Posting…" : "Post"}
           </button>

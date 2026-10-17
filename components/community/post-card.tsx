@@ -232,7 +232,7 @@ function PostEditForm({
           <button
             type="submit"
             disabled={saveMutation.isPending}
-            className="inline-flex h-9 items-center rounded-lg bg-[var(--color-community-blue)] px-4 text-sm font-semibold text-white disabled:opacity-50"
+            className="inline-flex h-8 items-center rounded-[10px] bg-[var(--color-community-blue)] px-3.5 text-[13px] font-semibold text-white disabled:opacity-50"
           >
             {saveMutation.isPending ? "Saving…" : "Save"}
           </button>
@@ -696,7 +696,7 @@ function ShareMenu({
                 <button
                   type="submit"
                   disabled={pending}
-                  className="inline-flex h-9 items-center justify-center rounded-lg bg-[var(--color-community-blue)] px-3 text-sm font-semibold text-white disabled:opacity-50"
+                  className="inline-flex h-8 items-center justify-center rounded-[10px] bg-[var(--color-community-blue)] px-3 text-[13px] font-semibold text-white disabled:opacity-50"
                 >
                   {pending ? "Sharing…" : "Share"}
                 </button>
@@ -904,7 +904,7 @@ export function CommentThread({
             <button
               type="submit"
               disabled={pending}
-              className="inline-flex h-9 shrink-0 items-center rounded-full bg-[var(--color-community-blue)] px-4 text-sm font-medium text-white disabled:opacity-50"
+              className="inline-flex h-8 shrink-0 items-center rounded-[10px] bg-[var(--color-community-blue)] px-3.5 text-[13px] font-medium text-white disabled:opacity-50"
             >
               Post
             </button>

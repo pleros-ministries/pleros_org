@@ -517,7 +517,7 @@ function GroupEditForm({
         <button
           type="submit"
           disabled={pending}
-          className="inline-flex h-9 items-center rounded-full bg-[var(--color-community-blue)] px-4 text-[13px] font-semibold text-white disabled:opacity-60"
+          className="inline-flex h-8 items-center rounded-[10px] bg-[var(--color-community-blue)] px-3.5 text-[13px] font-semibold text-white disabled:opacity-60"
         >
           {pending ? "Saving…" : "Save changes"}
         </button>
