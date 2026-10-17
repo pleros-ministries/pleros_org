@@ -239,7 +239,7 @@ export function FeedComposer({
       ) : null}
 
       {/* Toolbar: attach and audience on the left, Cancel and Post on the right. */}
-      <div className="flex items-center gap-1.5 border-t border-[var(--color-line,#e7e9ec)] px-2 py-1.5">
+      <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 border-t border-[var(--color-line,#e7e9ec)] px-2 py-1.5">
         <input
           ref={fileRef}
           type="file"
