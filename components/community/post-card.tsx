@@ -100,7 +100,7 @@ function QuotedPost({ post }: { post: NonNullable<FeedPost["sharedFrom"]> }) {
   return (
     <Link
       href={`/dashboard/community/post/${post.id}`}
-      className="block rounded-[8px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-[var(--color-community-canvas)] px-3 py-2.5 transition-colors hover:border-[var(--color-community-edge-strong)]"
+      className="block rounded-[8px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-[#f6f7f9] px-3 py-2.5 transition-colors hover:border-[var(--color-community-edge-strong)]"
     >
       <div className="flex items-center gap-2">
         <Avatar name={post.authorName} size={20} />
@@ -442,17 +442,20 @@ export function PostCard({
         <div className="flex items-center gap-2.5">
           <Avatar name={post.authorName} size={32} />
           <div className="min-w-0 flex-1">
-            <p className="flex flex-wrap items-center gap-1.5 text-[13.5px] font-semibold leading-[18px] text-[var(--color-community-ink)]">
+            <p className="m-0 truncate text-[13.5px] font-semibold leading-[18px] text-[var(--color-community-ink)]">
               {post.authorName}
+            </p>
+            <p className="m-0 mt-px flex items-center gap-1 truncate text-[11.5px] leading-[15px] text-[var(--color-community-muted)]">
               {post.kind === "official" ? (
-                <span className="inline-flex h-[18px] items-center gap-1 rounded-full bg-[var(--color-community-sky-soft)] px-1.5 text-[11px] font-medium text-[var(--color-community-sky-ink)]">
-                  <MegaphoneIcon className="size-3" strokeWidth={2} />
+                <span className="inline-flex shrink-0 items-center gap-0.5 font-semibold text-[var(--color-community-blue)]">
+                  <MegaphoneIcon className="size-3" strokeWidth={2.2} />
                   {staysInGroup ? "Announcement" : "Official"}
+                  <span aria-hidden className="ml-0.5 font-normal text-[#b3b8bf]">·</span>
                 </span>
               ) : null}
-            </p>
-            <p className="truncate text-[11.5px] leading-[15px] text-[var(--color-community-muted)]">
-              {[scopeLabel, roleLabel, post.kind === "official" ? null : topic, relativeTime(post.lastActivityAt)].filter(Boolean).join(" · ")}
+              <span className="truncate">
+                {[scopeLabel, roleLabel, post.kind === "official" ? null : topic, relativeTime(post.lastActivityAt)].filter(Boolean).join(" · ")}
+              </span>
             </p>
           </div>
           <ActionMenu

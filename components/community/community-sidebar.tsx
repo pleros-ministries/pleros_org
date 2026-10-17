@@ -45,7 +45,7 @@ export function CommunitySidebar({
   className?: string;
 }) {
   return (
-    <aside className={`hidden lg:block ${className}`}>
+    <aside className={`hidden w-full min-w-0 lg:block ${className}`}>
       <div className="grid gap-3 lg:sticky lg:top-28">
         <section className={panel}>
           <PanelHeader icon={ClockIcon} title="Latest posts" count={data.latest.length} tone="blue" />

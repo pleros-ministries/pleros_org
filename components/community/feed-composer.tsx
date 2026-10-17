@@ -138,7 +138,7 @@ export function FeedComposer({
         className="flex w-full items-center gap-2.5 rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white py-2 pr-2 pl-2.5 text-left transition-colors hover:border-[var(--color-community-edge-strong)]"
       >
         <Avatar name={viewerName} size={30} />
-        <span className="flex-1 text-[13.5px] text-[#8a9099]">
+        <span className="min-w-0 flex-1 truncate text-[13.5px] leading-[20px] text-[#8a9099]">
           {officialReach === "all" ? "Share something with the community…" : "Start a discussion…"}
         </span>
         <span className="grid size-8 place-items-center text-[var(--color-community-muted)]" aria-hidden><ImagePlusIcon className="size-[18px]" strokeWidth={1.8} /></span>
