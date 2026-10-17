@@ -51,7 +51,7 @@ export function GroupHero({
           <p className="m-0 text-[12px] leading-[16px] opacity-85">{meta}</p>
         </div>
       </header>
-      {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
+      {actions ? <div className="flex flex-wrap items-center justify-end gap-2">{actions}</div> : null}
     </div>
   );
 }
