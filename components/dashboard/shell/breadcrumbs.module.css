@@ -3,14 +3,16 @@
 .trail { border-bottom: 1px solid var(--color-line); background: white; }
 .trail ol { display: flex; align-items: center; min-width: 0; height: 32px; margin: 0; padding: 0 12px; list-style: none; overflow: hidden; font-size: 12.5px; line-height: 16px; white-space: nowrap; }
 .trail li { display: flex; align-items: center; min-width: 0; flex: 0 1 auto; }
-.trail a { display: block; min-width: 0; max-width: 46vw; padding: 8px 0; overflow: hidden; text-overflow: ellipsis; color: var(--color-text-muted); text-decoration: none; }
+.trail a { display: block; min-width: 0; max-width: 32vw; padding: 8px 0; overflow: hidden; text-overflow: ellipsis; color: var(--color-text-muted); text-decoration: none; }
 .trail a:hover { color: var(--color-text-strong); text-decoration: underline; text-underline-offset: 3px; }
 .trail a:focus-visible { outline: 2px solid var(--color-brand-blue); outline-offset: -2px; border-radius: 4px; }
 .sep { flex: none; padding: 0 7px; color: #a6abb2; }
 .more { flex: none; color: #a6abb2; }
 
-/* Phones: the header names the current page, so the trail stops at its parent. */
-.sep:not([data-phone]), .trail li[data-collapsed], .trail li.current { display: none; }
+/* The trail always ends with the current page; phones fold deep ancestors into "…". */
+.sep:not([data-phone]), .trail li[data-collapsed] { display: none; }
+.trail li.current { display: flex; flex: 0 1 auto; min-width: 0; color: var(--color-text-strong); font-weight: 500; }
+.current > span:last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 
 @media (min-width: 64rem) {
   .trail ol { height: 40px; padding: 0 24px; font-size: 13px; }
@@ -18,7 +20,5 @@
   .sep[data-phone]:not([data-desktop]) { display: none; }
   .trail li[data-collapsed] { display: flex; }
   .more { display: none; }
-  .trail li.current { display: flex; min-width: 0; color: var(--color-text-strong); font-weight: 500; }
-  .current > span:last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
   .trail a { max-width: 240px; }
 }

@@ -38,8 +38,9 @@ export function CrumbLabel({ href, label }: { href: string; label: string }) {
 
 /**
  * Where a deep screen sits, under the header (NN/g, GOV.UK): one line of
- * ancestor links, never wrapping, each truncated. Phones show the nearest
- * two ancestors only; from `lg` the full trail ends with the current page.
+ * ancestor links, never wrapping, each truncated, ending with the current
+ * page (user preference). Phones show the nearest two ancestors; from `lg`
+ * the full trail.
  */
 export function Breadcrumbs({ pathname, title }: { pathname: string; title: string }) {
   const labels = useContext(CrumbLabels)?.labels ?? {};
@@ -55,7 +56,7 @@ export function Breadcrumbs({ pathname, title }: { pathname: string; title: stri
         {sep(index > hidden || (index === hidden && hidden > 0), index > 0)}
         <Link href={crumb.href} title={crumb.label}>{crumb.label}</Link>
       </li>)}
-      <li className={styles.current} aria-current="page">{sep(false, true)}<span>{labels[pathname] ?? title}</span></li>
+      <li className={styles.current} aria-current="page">{sep(true, true)}<span>{labels[pathname] ?? title}</span></li>
     </ol>
   </nav>;
 }

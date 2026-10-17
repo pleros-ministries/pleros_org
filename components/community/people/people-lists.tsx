@@ -152,7 +152,7 @@ export function EnrolleesList({ rows, referralUrl, contacts = {} }: {
   return <div className={styles.page}>
     <div className={styles.heading}>
       <div><h1>My enrollees</h1><p className={styles.sub}>{rows.length} {rows.length === 1 ? "person" : "people"} you follow up</p></div>
-      {referralUrl ? <button type="button" className={styles.btn} onClick={share}><Share2Icon className="size-3.5" strokeWidth={2} />{copied ? "Link copied" : "Share link"}</button> : null}
+      {referralUrl ? <button type="button" className={styles.btn} data-primary onClick={share}><Share2Icon className="size-3.5" strokeWidth={2} />{copied ? "Link copied" : "Share link"}</button> : null}
     </div>
     {rows.length ? <>
       <GroupTabs tabs={[{ key: "free", label: "Not in a group", count: free.length }, { key: "all", label: "All", count: rows.length }]} value={tab} onChange={setTab} />
