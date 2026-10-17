@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ChevronRightIcon, ContactRoundIcon, PlusIcon, SearchIcon, SparklesIcon } from "lucide-react";
+import { ChevronRightIcon, ContactRoundIcon, PlusIcon, SearchIcon, GraduationCapIcon } from "lucide-react";
 
 import type { GroupJoinDecision } from "@/lib/community/groups";
 import type { GroupSummary } from "@/lib/db/queries/community-groups";
@@ -155,14 +155,14 @@ export function GroupsDirectory({
               <ChevronRightIcon className={`${peopleStyles.chev} size-4`} strokeWidth={2} />
             </Link></li> : null}
             {people.enrollees !== null ? <li><Link href="/dashboard/sogp/enrollees" className={peopleStyles.row}>
-              <span className="grid size-9 shrink-0 place-items-center rounded-[10px] bg-[#fde3cf] text-[#7a3a10]"><SparklesIcon className="size-4" strokeWidth={2} /></span>
+              <span className="grid size-9 shrink-0 place-items-center rounded-[10px] bg-[#fde3cf] text-[#7a3a10]"><GraduationCapIcon className="size-4" strokeWidth={2} /></span>
               <span className={peopleStyles.rowCopy}><span className={peopleStyles.rowTitle} style={{ fontWeight: 500 }}>My enrollees</span><span className={peopleStyles.rowMeta}>{people.enrollees.total ? `Signed up with your link · ${people.enrollees.free} not in a group` : "People who sign up with your link"}</span></span>
-              {people.enrollees.free ? <span className="grid h-5 min-w-5 place-items-center rounded-full bg-[var(--color-community-blue)] px-1.5 text-[11px] font-semibold text-white">{people.enrollees.free}</span> : null}
+              {people.enrollees.free ? <span className="inline-flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-[var(--color-community-blue)] px-1.5 text-[11px] leading-none font-semibold tabular-nums text-white">{people.enrollees.free}</span> : null}
               <ChevronRightIcon className={`${peopleStyles.chev} size-4`} strokeWidth={2} />
             </Link></li> : null}
           </ul>
         </div>
-        <p className={`${peopleStyles.note} mt-2`}>Contacts are people you’ve met; enrollees signed up with your link. Invite either into a group you lead.</p>
+        <p className={peopleStyles.note} style={{ marginTop: 10 }}>Contacts are people you’ve met; enrollees signed up with your link. Invite either into a group you lead.</p>
       </section> : null}
 
       <section className={homeStyles.block} aria-labelledby="groups-discover">
