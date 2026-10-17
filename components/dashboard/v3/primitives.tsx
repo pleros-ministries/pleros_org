@@ -2,8 +2,8 @@ import type { ReactNode } from "react";
 import icons from "./lucide-icons.json";
 import styles from "./dashboard.module.css";
 
-export function DashboardIcon({ name, size = 20 }: { name: keyof typeof icons; size?: 16 | 20 | 24 }) {
-  return <svg aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75 * 24 / size} strokeLinecap="round" strokeLinejoin="round" dangerouslySetInnerHTML={{ __html: icons[name] }} />;
+export function DashboardIcon({ name, size = 20, strokeWidth }: { name: keyof typeof icons; size?: 16 | 20 | 24; strokeWidth?: number }) {
+  return <svg aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={strokeWidth ?? 1.75 * 24 / size} strokeLinecap="round" strokeLinejoin="round" dangerouslySetInnerHTML={{ __html: icons[name] }} />;
 }
 
 export type StatusTone = "amber" | "green" | "blue" | "neutral" | "lilac";

@@ -93,13 +93,16 @@ export function GroupsDirectory({
   locationGroups,
   showDiscipleship,
   canCreate,
+  startCreating = false,
 }: {
   groups: GroupSummary[];
   locationGroups: LocationGroupLink[];
   showDiscipleship: boolean;
   canCreate: boolean;
+  /** `?create=1` from the Community home's "New group" card. */
+  startCreating?: boolean;
 }) {
-  const [creating, setCreating] = useState(false);
+  const [creating, setCreating] = useState(startCreating);
   const [query, setQuery] = useState("");
 
   const mine = groups.filter(

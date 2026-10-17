@@ -31,3 +31,62 @@
 .contextLinks a { display: inline-flex; align-items: center; min-height: 36px; color: var(--color-brand-blue); font-size: 13px; font-weight: 500; text-decoration: none; }
 .home a:focus-visible { outline: 2px solid var(--color-brand-blue); outline-offset: 3px; }
 @media (min-width: 64rem) { .home { padding-top: 40px; } }
+
+/* Community home (Pastor review, 17 October): count cards, illustrated group
+   cards and Oversight rows. Group art is anchored deep in the bottom-right
+   corner; copy keeps to the left so it never runs over the illustration. */
+.home { max-width: 1040px; padding-bottom: max(24px, env(safe-area-inset-bottom)); }
+.counts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 20px; }
+.count { display: grid; grid-template-rows: auto 1fr; gap: 10px; min-height: 96px; padding: 12px 12px 10px; border-radius: var(--dashboard-panel-radius, 10px); color: inherit; text-decoration: none; }
+.countHead { display: flex; align-items: flex-start; justify-content: space-between; gap: 6px; font-size: 12px; line-height: 16px; font-weight: 500; }
+.countHead > svg { flex: none; margin-top: 0; opacity: .8; }
+.countHead > span { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.count b { align-self: end; font-family: var(--font-dashboard-heading), "Sen", sans-serif; font-size: 28px; line-height: 32px; font-weight: 600; letter-spacing: -0.03em; }
+.count[data-tone="blue"] { background: #e4ebfd; color: #1c2f86; }
+.count[data-tone="blue"] b { color: #1b2c9e; }
+.count[data-tone="amber"] { background: #fff1cc; color: #6b4708; }
+.count[data-tone="amber"] b { color: #5a3a04; }
+.count[data-tone="green"] { background: #e7f5dc; color: #2c5a1e; }
+.count[data-tone="green"] b { color: #1f4a14; }
+.block { margin-top: var(--dashboard-section-gap, 32px); }
+.blockHeading { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 22px; margin-bottom: 12px; padding-inline: 1px; }
+.blockHeading h2 { margin: 0; font-size: 15px; line-height: 22px; font-weight: 500; }
+.blockHeading a { color: var(--color-brand-blue); font-size: 13px; line-height: 20px; font-weight: 500; text-decoration: none; }
+.groupGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.groupCard { position: relative; display: grid; align-content: space-between; gap: 10px; min-height: 132px; padding: 12px 14px 12px; border-radius: var(--dashboard-card-radius, 16px); color: inherit; text-decoration: none; background-repeat: no-repeat; background-position: right bottom; background-size: cover; }
+.groupTag { justify-self: start; display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 999px; background: rgb(255 255 255 / 60%); font-size: 11.5px; line-height: 16px; font-weight: 500; }
+/* Title under the tag uses the card's full width (up to two lines); the meta line sits bottom-left beside the art. */
+.groupTop { display: grid; gap: 8px; min-width: 0; }
+.groupTop h3 { margin: 0; font-size: 14px; line-height: 19px; font-weight: 500; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow-wrap: anywhere; }
+.groupMeta { max-width: 58%; font-size: 12px; line-height: 16px; opacity: .82; }
+.groupCard[data-art="location"] { background-color: #cfe6fb; color: #0e3f73; background-image: image-set(url("/assets/dashboard/community-groups/location-compact-320.webp") 1x, url("/assets/dashboard/community-groups/location-compact-640.webp") 2x); }
+.groupCard[data-art="discipleship"] { background-color: #e1f2c6; color: #23400a; background-image: image-set(url("/assets/dashboard/community-groups/discipleship-compact-320.webp") 1x, url("/assets/dashboard/community-groups/discipleship-compact-640.webp") 2x); }
+.groupCard[data-art="leading"] { background-color: #e3d8f8; color: #3e1876; background-image: image-set(url("/assets/dashboard/community-groups/leading-compact-320.webp") 1x, url("/assets/dashboard/community-groups/leading-compact-640.webp") 2x); }
+.groupCard[data-art="public"] { background-color: #f6e7cc; color: #5a3d0c; background-image: image-set(url("/assets/dashboard/community-groups/public-compact-320.webp") 1x, url("/assets/dashboard/community-groups/public-compact-640.webp") 2x); }
+.groupCard[data-art="private"] { background-color: #f6d9de; color: #5e2236; background-image: image-set(url("/assets/dashboard/community-groups/private-compact-320.webp") 1x, url("/assets/dashboard/community-groups/private-compact-640.webp") 2x); }
+.newGroup { display: grid; place-content: center; justify-items: center; gap: 8px; min-height: 132px; border: 1.5px dashed #c9ced6; border-radius: var(--dashboard-card-radius, 16px); color: var(--color-brand-blue); font-size: 13px; line-height: 20px; font-weight: 500; text-decoration: none; }
+.newGroupIcon { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: #e4ebfd; }
+.oversightPanel { padding: 4px 16px; border: 1px solid var(--dashboard-panel-edge, #e2e5ea); border-radius: var(--dashboard-panel-radius, 10px); background: white; }
+.oversightRow { position: relative; display: flex; align-items: center; gap: 12px; padding: 14px 0; color: inherit; text-decoration: none; }
+.oversightRow .copy { gap: 0; }
+.oversightRow .meta { font-size: 12.5px; line-height: 17px; }
+.oversightRow + .oversightRow::before { content: ""; position: absolute; left: 48px; right: 0; top: 0; height: 1px; background: var(--color-line); }
+.oversightRow > svg { color: var(--color-text-muted); flex: none; }
+.oversightTitle { font-size: 13.5px; line-height: 18px; font-weight: 500; }
+.oversightIcon { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; flex: none; }
+.oversightIcon[data-tone="green"] { background: var(--status-green-bg, #d8f7bd); color: var(--status-green-text, #205e20); }
+.oversightIcon[data-tone="blue"] { background: var(--status-blue-bg, #e4ebfd); color: var(--status-blue-text, #2331ae); }
+.oversightIcon[data-tone="lilac"] { background: #efe7fb; color: #56209c; }
+.groupCard:focus-visible, .newGroup:focus-visible, .count:focus-visible { outline: 2px solid var(--color-brand-blue); outline-offset: 3px; }
+@media (max-width: 359px) { .groupTop h3 { font-size: 13px; } .count { padding-inline: 10px; } .count b { font-size: 24px; line-height: 28px; } }
+/* Wider tiles switch to the 3:2 cut. */
+@media (min-width: 640px) {
+  .groupGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .groupCard, .newGroup { min-height: 150px; }
+  .groupMeta { max-width: 56%; }
+  .groupCard[data-art="location"] { background-image: image-set(url("/assets/dashboard/community-groups/location-wide-480.webp") 1x, url("/assets/dashboard/community-groups/location-wide-960.webp") 2x); }
+  .groupCard[data-art="discipleship"] { background-image: image-set(url("/assets/dashboard/community-groups/discipleship-wide-480.webp") 1x, url("/assets/dashboard/community-groups/discipleship-wide-960.webp") 2x); }
+  .groupCard[data-art="leading"] { background-image: image-set(url("/assets/dashboard/community-groups/leading-wide-480.webp") 1x, url("/assets/dashboard/community-groups/leading-wide-960.webp") 2x); }
+  .groupCard[data-art="public"] { background-image: image-set(url("/assets/dashboard/community-groups/public-wide-480.webp") 1x, url("/assets/dashboard/community-groups/public-wide-960.webp") 2x); }
+  .groupCard[data-art="private"] { background-image: image-set(url("/assets/dashboard/community-groups/private-wide-480.webp") 1x, url("/assets/dashboard/community-groups/private-wide-960.webp") 2x); }
+}

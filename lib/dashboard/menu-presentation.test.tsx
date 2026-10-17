@@ -62,12 +62,15 @@ test("the dashboard canvas and card edges remain visible on low-contrast phone d
 });
 test("authenticated dashboard headings use Sen while body and controls retain Inter",()=>{
   const styles = fs.readFileSync(path.join(process.cwd(), "components/dashboard/v3/dashboard.module.css"), "utf8");
-  expect(styles).toMatch(/\.root :is\(h1, h2, h3\) \{[^}]*font-family: var\(--font-sen\), "Sen", sans-serif/);
+  // Its own variable: the shell remaps --font-sen to the body face.
+  expect(styles).toMatch(/\.root :is\(h1, h2, h3\) \{[^}]*font-family: var\(--font-dashboard-heading\), "Sen", sans-serif/);
   expect(styles).toMatch(/\.root \{[^}]*font-size: 14px/);
 });
 test("the Community home keeps the section switcher available",()=>{
   const source = fs.readFileSync(path.join(process.cwd(), "components/community/community-shell.tsx"), "utf8");
-  expect(source).toContain("<CommunityTopBar unitName={unitName} navigation={navigation} />");
+  // The title bar and switcher are retired; the five destinations stay in the bar.
+  expect(source).toContain("<CommunityBottomBar placement=\"top\" />");
+  expect(source).toContain("<CommunityBottomBar />");
   expect(source).not.toContain("!home ?");
 });
 test("the Community switcher leads with role and location context",()=>{

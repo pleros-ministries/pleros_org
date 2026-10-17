@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  HouseIcon,
   ListIcon,
-  MenuIcon,
   MessageCircleIcon,
   MessageCircleQuestionIcon,
   UsersRoundIcon,
@@ -17,7 +17,7 @@ import { useUnreadMessages } from "./messages/use-unread-messages";
 const BASE = "/dashboard/community";
 
 type BarItem = {
-  key: "feed" | "groups" | "messages" | "ask";
+  key: "home" | "feed" | "groups" | "messages" | "ask";
   label: string;
   href: string;
   icon: LucideIcon;
@@ -26,7 +26,7 @@ type BarItem = {
 };
 
 const ITEMS: BarItem[] = [
-  { key: "feed", label: "Feed", href: BASE, icon: ListIcon, also: [`${BASE}/post`] },
+  { key: "home", label: "Home", href: BASE, icon: HouseIcon },
   {
     key: "groups",
     label: "Groups",
@@ -35,6 +35,7 @@ const ITEMS: BarItem[] = [
     // Location and discipleship groups are reached from the groups page.
     also: [`${BASE}/unit`, `${BASE}/discipleship`],
   },
+  { key: "feed", label: "Feed", href: `${BASE}/feed`, icon: ListIcon, also: [`${BASE}/post`] },
   {
     key: "messages",
     label: "Messages",
@@ -60,30 +61,37 @@ function isActive(pathname: string, item: BarItem): boolean {
 /** An open conversation needs the bottom of the screen for its message box. */
 const IN_CONVERSATION = /^\/dashboard\/community\/messages\/\d+/;
 
+// Grounded, not floating (Pastor review, 17 October): flush to the bottom edge,
+// a hairline above, the active item marked by colour and a short top rule.
 const itemClass =
-  "relative grid min-h-12 content-center justify-items-center gap-1 rounded-[0.45rem] text-[0.62rem] font-semibold transition-colors";
-const idleClass =
-  "text-(--color-text-muted) hover:bg-(--color-brand-sky) hover:text-[var(--color-community-blue)]";
-const activeClass = "bg-(--color-brand-sky) text-[var(--color-community-blue)]";
+  "relative grid min-h-10 content-center justify-items-center gap-0.5 text-[11px] leading-[14px] font-medium transition-colors";
+const idleClass = "text-(--color-text-muted) hover:text-[var(--color-community-blue)]";
+const topItemClass =
+  "relative inline-flex min-h-9 items-center gap-2 rounded-[10px] px-3 text-[13px] leading-5 font-medium transition-colors";
+const topActiveClass = "bg-(--status-blue-bg,#e4ebfd) text-[var(--color-community-blue)]";
+const activeClass =
+  "text-[var(--color-community-blue)] before:absolute before:-top-1.5 before:left-1/4 before:right-1/4 before:h-0.5 before:rounded-full before:bg-[var(--color-community-blue)]";
 
 /**
- * The community's bottom bar on phones and small tablets: the four main
- * destinations plus "More", which opens the full menu. It is docked flush to the
+ * The community's bottom bar on phones and small tablets: its five main
+ * destinations; the full menu stays in the top bar. It is docked flush to the
  * bottom edge of the screen while the community is in view and rests above the
  * site footer instead of covering it. Larger screens use the top bar and side
  * rail.
  */
-export function CommunityBottomBar({ onOpenMenu }: { onOpenMenu: () => void }) {
+export function CommunityBottomBar({ placement = "bottom" }: { placement?: "bottom" | "top" }) {
   const pathname = usePathname() ?? "";
   const unreadMessages = useUnreadMessages();
   const unreadQuestions = useUnreadQuestions();
 
-  if (IN_CONVERSATION.test(pathname)) return null;
+  if (placement === "bottom" && IN_CONVERSATION.test(pathname)) return null;
 
   return (
     <nav
       aria-label="Community"
-      className="sticky bottom-0 z-30 grid grid-cols-5 border-t border-(--color-line) bg-white px-1.5 pt-1.5 pb-[calc(0.375rem_+_env(safe-area-inset-bottom))] lg:hidden"
+      className={placement === "top"
+        ? "sticky top-12 z-20 hidden border-b border-(--color-line) bg-white lg:flex lg:justify-center lg:gap-2 lg:px-6 lg:py-1"
+        : "sticky bottom-0 z-30 grid grid-cols-5 border-t border-(--color-line) bg-white px-1 pt-1.5 pb-[calc(0.25rem_+_env(safe-area-inset-bottom))] lg:hidden"}
     >
       {ITEMS.map((item) => {
         const Icon = item.icon;
@@ -93,10 +101,12 @@ export function CommunityBottomBar({ onOpenMenu }: { onOpenMenu: () => void }) {
             key={item.key}
             href={item.href}
             aria-current={active ? "page" : undefined}
-            className={`${itemClass} ${active ? activeClass : idleClass}`}
+            className={placement === "top"
+              ? `${topItemClass} ${active ? topActiveClass : idleClass}`
+              : `${itemClass} ${active ? activeClass : idleClass}`}
           >
             <span className="relative">
-              <Icon className="size-4" strokeWidth={2} />
+              <Icon className={placement === "top" ? "size-4" : "size-5"} strokeWidth={1.8} />
               {item.key === "messages" && unreadMessages > 0 ? (
                 <span
                   aria-label={`${unreadMessages} unread`}
@@ -116,15 +126,6 @@ export function CommunityBottomBar({ onOpenMenu }: { onOpenMenu: () => void }) {
           </Link>
         );
       })}
-      <button
-        type="button"
-        onClick={onOpenMenu}
-        aria-label="More community pages"
-        className={`${itemClass} ${idleClass}`}
-      >
-        <MenuIcon className="size-4" strokeWidth={2} />
-        More
-      </button>
     </nav>
   );
 }

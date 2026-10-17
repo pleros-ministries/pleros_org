@@ -12,7 +12,8 @@ import {
 import { listGroupDirectory } from "@/lib/db/queries/community-groups";
 import { listUnitNames } from "@/lib/db/queries/community-units";
 
-export default async function CommunityGroupsRoute() {
+export default async function CommunityGroupsRoute({ searchParams }: { searchParams: Promise<{ create?: string }> }) {
+  const { create } = await searchParams;
   // Session and context load together instead of one roundtrip after the other.
   const [session, ctx] = await Promise.all([getAppSession(), getCommunityContext()]);
   if (!session) redirect("/login?returnTo=/dashboard/community/groups");
@@ -37,6 +38,7 @@ export default async function CommunityGroupsRoute() {
       locationGroups={locationGroups}
       showDiscipleship={ctx.enrollmentId != null}
       canCreate={!ctx.postingBlocked}
+      startCreating={create === "1" && !ctx.postingBlocked}
     />
   );
 }
