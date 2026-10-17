@@ -51,7 +51,7 @@ describe("Community home performance contract", () => {
       path.join(process.cwd(), "components/community/community-home-v3.tsx"),
       "utf8",
     );
-    expect(source).toContain("Your shared journey in purpose.");
+    expect(source).toContain("<h1>Your Pleros Community</h1>");
     expect(source).not.toContain("Your people.");
   });
 });

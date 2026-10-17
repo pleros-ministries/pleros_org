@@ -43,8 +43,7 @@ export function CommunityHomeV3({ data }: { data: CommunityHomeData }) {
   const firstResponse = data.responses[0];
   return <div className={styles.home} data-community-home-v3>
     <header className={styles.heading}>
-      <h1>Growing together</h1>
-      <p>Your shared journey in purpose.</p>
+      <h1>Your Pleros Community</h1>
     </header>
 
     <div className={styles.counts} aria-label="Waiting for you">
@@ -72,7 +71,7 @@ export function CommunityHomeV3({ data }: { data: CommunityHomeData }) {
       <div className={styles.oversightPanel}>
         {data.disciplesEnabled ? <OversightRow href="/dashboard/sogp/discipleship" prefetch={false} title="My disciples" description={`${people(data.discipleCount)} · you lead`} icon="leaf" tone="green" /> : null}
         {data.disciplesEnabled ? <OversightRow href="/dashboard/sogp/enrollees" title="My enrollees" description={data.enrolleeCount ? `${people(data.enrolleeCount)} · you follow up` : "People you follow up"} icon="people" tone="blue" /> : null}
-        {data.church ? <OversightRow href={data.church.href} title="Oversight structure" description="Your branch and workers" icon="network" tone="lilac" /> : null}
+        {data.church ? <OversightRow href={data.church.href} title="Church oversight" description="Your branch and workers" icon="network" tone="lilac" /> : null}
       </div>
     </section> : null}
   </div>;
