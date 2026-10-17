@@ -34,7 +34,7 @@
   font-size: 14px; line-height: 22px; font-synthesis: none;
   letter-spacing: var(--dashboard-tracking-body);
 }
-.root :is(h1, h2, h3) { letter-spacing: var(--dashboard-tracking-heading); }
+.root :is(h1, h2, h3) { font-family: var(--font-sen), "Sen", sans-serif; letter-spacing: var(--dashboard-tracking-heading); }
 .root :is(small, time) { letter-spacing: var(--dashboard-tracking-small); }
 .root *, .root *::before, .root *::after { box-sizing: border-box; }
 .header button, .dialog button, .iconButton, .lessonAction, .textAction, .planRow, .reportRow { font-family: inherit; cursor: pointer; }
@@ -55,6 +55,105 @@
 .swipePage[data-area="community"] { left: 100%; }
 .swipePage[data-active="true"] { position: relative; }
 .greeting { font-size: 21px; line-height: 28px; font-weight: 500; letter-spacing: var(--dashboard-tracking-heading, -0.02em); margin: 0; }
+.homeLearningCard {
+  position: relative;
+  display: grid;
+  align-content: start;
+  min-height: 252px;
+  margin-top: 24px;
+  padding: 20px;
+  overflow: hidden;
+  border-radius: var(--dashboard-card-radius);
+  background-color: var(--color-brand-blue);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  color: white;
+  box-shadow: 0 12px 28px rgb(32 86 214 / 18%);
+}
+.homeLearningTopline { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.homeLearningLabel {
+  min-height: var(--dashboard-hit-size);
+  display: inline-flex;
+  align-items: center;
+  margin-block: -9px;
+  color: #d8ff65;
+  font-size: 13px;
+  line-height: 20px;
+  font-weight: 500;
+  letter-spacing: .06em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+.homeLearningPace {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 12%);
+  color: #eef4ff;
+  font-size: 12px;
+  line-height: 18px;
+  white-space: nowrap;
+}
+.homeLearningTitle {
+  max-width: 88%;
+  margin: 19px 0 0;
+  color: white;
+  font-size: 24px;
+  line-height: 32px;
+  font-weight: 500;
+}
+.homeLearningSummary { margin: 5px 0 0; color: #eef4ff; font-size: 14px; line-height: 22px; }
+.homeLearningProgressRow { display: flex; align-items: center; gap: 12px; width: 72%; margin-top: 16px; color: white; font-size: 13px; line-height: 20px; font-weight: 500; }
+.homeLearningProgress { flex: 1; height: 4px; overflow: hidden; border-radius: 999px; background: rgb(255 255 255 / 24%); }
+.homeLearningProgress span { display: block; height: 100%; border-radius: inherit; background: #d8ff65; }
+.homeLearningAction {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  justify-self: start;
+  min-width: 190px;
+  min-height: var(--dashboard-control-height);
+  margin-top: 18px;
+  padding: 0 16px;
+  border-radius: var(--dashboard-control-radius);
+  background: white;
+  color: var(--color-brand-blue);
+  font-size: 14px;
+  line-height: 22px;
+  font-weight: 500;
+  text-decoration: none;
+}
+.homeReportsCard {
+  display: block;
+  margin-top: 20px;
+  padding: 20px;
+  border: 1px solid var(--color-community-edge, var(--color-line));
+  border-radius: var(--dashboard-card-radius);
+  background: white;
+  color: var(--color-text);
+  box-shadow: var(--shadow-sm);
+  text-decoration: none;
+}
+.homeReportsHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.homeReportsHeader > span { display: grid; gap: 1px; }
+.homeReportsHeader h2 { margin: 0; font-size: 24px; line-height: 32px; font-weight: 500; letter-spacing: var(--dashboard-tracking-heading); }
+.homeReportsHeader span span { color: var(--color-text-muted); font-size: 13px; line-height: 20px; }
+.homeReportsHeader > svg { margin-top: 6px; color: var(--color-text-muted); flex-shrink: 0; }
+.homeReportsSummary { display: block; margin-top: 3px; color: var(--color-text-muted); font-size: 14px; line-height: 22px; }
+.homeReportList { display: block; margin-top: 18px; }
+.homeReportRow { position: relative; display: flex; align-items: center; gap: 12px; min-height: 72px; padding: 10px 0; }
+.homeReportRow:not(:last-child)::after { content: ""; position: absolute; left: 48px; right: 0; bottom: 0; height: 1px; background: var(--color-line); }
+.homeReportIcon { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; flex: 0 0 auto; color: var(--status-neutral-text); background: var(--status-neutral-bg); }
+.homeReportIcon[data-tone="amber"] { color: var(--status-amber-text); background: var(--status-amber-bg); }
+.homeReportIcon[data-tone="green"] { color: var(--status-green-text); background: var(--status-green-bg); }
+.homeReportIcon[data-tone="lilac"] { color: var(--status-lilac-text); background: var(--status-lilac-bg); }
+.homeReportIcon[data-tone="blue"] { color: var(--status-blue-text); background: var(--status-blue-bg); }
 .learning, .reports, .support { padding: 16px; border-radius: var(--dashboard-card-radius); background: white; box-shadow: var(--shadow-sm); }
 .learning { margin-top: 24px; }
 .sectionHeader { display: flex; align-items: center; justify-content: space-between; min-height: 22px; gap: 12px; }
@@ -118,6 +217,13 @@
 .workspace a span { flex: 1; }
 .previewNote { margin: 32px 0 0; font-size: 12px; color: var(--color-text-muted); }
 @media (max-width: 359px) {
+  .homeLearningTopline { align-items: flex-start; flex-direction: column; gap: 7px; }
+  .homeLearningLabel { margin-bottom: -5px; }
+  .homeLearningPace { align-self: flex-start; }
+  .homeLearningTitle { max-width: 100%; margin-top: 14px; }
+  .homeLearningProgressRow { width: 80%; }
+  .homeReportRow { align-items: flex-start; flex-wrap: wrap; }
+  .homeReportRow .pill { margin-left: 48px; }
   .reportRow { gap: 10px; flex-wrap: wrap; }
   .reportRow .pill { margin-left: 30px; }
   .person { flex-wrap: wrap; }

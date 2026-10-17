@@ -20,7 +20,7 @@ const cards: Record<string, DashboardHomeData["card"]> = {
 /** Labelled sample data only. */
 export default async function HomePreview({ searchParams }: { searchParams: Promise<{ card?: string }> }) {
   const { card = "start" } = await searchParams;
-  const data: DashboardHomeData = { day: "2026-10-13", community: true, reports, support: { firstName: "Efe", canMessage: true }, card: cards[card] ?? cards.start,
+  const data: DashboardHomeData = { day: "2026-10-16", reports, card: cards[card] ?? cards.start,
     learning: { title: "", href: "#", action: "", completed: 0, total: 0, enrolled: card !== "start" } };
   return <div className={`${dashboardFont.className} ${styles.root}`} data-dashboard-v3><p className="px-4 py-2 text-xs text-(--color-text-muted)">Visual preview · sample data · nothing saved</p><DashboardHomeView name="Tolu" greeting="Good morning" data={data} /></div>;
 }

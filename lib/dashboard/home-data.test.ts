@@ -43,6 +43,8 @@ test("home reads are self-scoped, use the existing access rules, and expose a na
   expect(reads.course).toHaveBeenCalledWith("own-user");
   expect(reads.activities).toHaveBeenCalledWith("own-user", "2026-10-13");
   expect(reads.declarations).toHaveBeenCalledWith("own-user", "2026-10-13");
+  expect(reads.context).not.toHaveBeenCalled();
+  expect(reads.support).not.toHaveBeenCalled();
   expect(data.learning).toMatchObject({ title: "Next lesson", href: "/dashboard/sogp/course/day/3", completed: 1, total: 3 });
   expect(JSON.stringify(data)).not.toContain("PRIVATE_");
 });

@@ -14,6 +14,10 @@ test("resume exposes the incomplete podcast day and retains traditional tools", 
   expect(html).toContain("1 of 2 episodes marked listened");
   expect(html).toContain('href="/dashboard/sogp/traditional"');
   expect(html).toContain('href="/dashboard/sogp/referrals"');
+  expect(html).toContain('aria-label="Learning tools"');
+  expect(html).toContain('data-learning-icon="book"');
+  expect(html).toContain('data-learning-icon="headphones"');
+  expect(html).toContain('data-learning-icon="people"');
 });
 test("editor locks completed slots and exposes full-plan replacement and accessible reorder controls", () => {
   const html = renderToStaticMarkup(<QueryClientProvider client={new QueryClient()}><PlanEditor data={{ ...data,episodes: [{ guid: "a",title: "First episode",duration: "15:33",audioUrl: "" },{ guid: "b",title: "Second episode",duration: "14:13",audioUrl: "" }] }} /></QueryClientProvider>);

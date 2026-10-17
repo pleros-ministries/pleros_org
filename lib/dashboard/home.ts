@@ -28,6 +28,4 @@ export type DashboardHomeData = {
   card?: HomeLearningCard;
   learning: { title: string; href: string; action: string; completed: number; total: number; enrolled: boolean; unit?: "tracks" | "episodes"; pathLabel?: string };
   reports: HomeReport[] | null;
-  support: { firstName: string; canMessage: boolean } | null;
-  community: boolean;
 };

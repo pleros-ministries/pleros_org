@@ -1,6 +1,5 @@
 import "server-only";
 import type { getDashboardViewer } from "./viewer";
-import { getCommunityContext } from "@/lib/community/context";
 import { activityLines } from "@/lib/community/ministry-report";
 import { getOwnDailyDeclarations } from "@/lib/db/queries/daily-report-declarations";
 import { getDayActivity, listActivitiesForDay } from "@/lib/db/queries/ministry-activities";
@@ -8,7 +7,6 @@ import { getSogpDashboardData } from "@/lib/db/queries/sogp";
 import { getOwnSogpLearning } from "@/lib/db/queries/sogp-learning";
 import { learningResume } from "@/lib/sogp/learning-view";
 import { fetchAnchorEpisodes } from "@/lib/anchor-rss";
-import { getOwnDisciplerSummary } from "@/lib/db/queries/community-discipleship";
 import { lagosToday } from "@/lib/sogp/daily-date";
 import { homeReportRows, type DashboardHomeData } from "./home";
 
@@ -16,8 +14,7 @@ import { homeReportRows, type DashboardHomeData } from "./home";
 export async function getDashboardHomeData(viewer: NonNullable<Awaited<ReturnType<typeof getDashboardViewer>>>): Promise<DashboardHomeData> {
   const userId = viewer.session.user.id;
   const day = lagosToday();
-  const ctx = await getCommunityContext();
-  const [course, reports, support, state] = await Promise.all([
+  const [course, reports, state] = await Promise.all([
     viewer.capabilities.sogpEnrolled ? getSogpDashboardData(userId) : Promise.resolve(null),
     viewer.capabilities.reporting ? Promise.all([listActivitiesForDay(userId, day), getDayActivity(userId, day), getOwnDailyDeclarations(userId, day)]).then(([activities, devotional, declarations]) => homeReportRows({
       devotionalCount: activityLines(devotional).filter(line => line.detail !== null).length,
@@ -25,7 +22,6 @@ export async function getDashboardHomeData(viewer: NonNullable<Awaited<ReturnTyp
       meetingCount: activities.filter(activity => activity.kind !== "outreach" && activity.kind !== "follow_up").length,
       declarations,
     })) : Promise.resolve(null),
-    viewer.capabilities.community && ctx ? getOwnDisciplerSummary(ctx) : Promise.resolve(null),
     viewer.capabilities.sogpEnrolled ? getOwnSogpLearning(userId) : Promise.resolve(null),
   ]);
   const next = course?.tracks.find(track => track.accessible && track.lesson.status === "published" && !track.completed);
@@ -54,7 +50,7 @@ export async function getDashboardHomeData(viewer: NonNullable<Awaited<ReturnTyp
     card = { kind: "traditional", title: lesson.lesson.title, href: `/dashboard/sogp/course/day/${lesson.dayNumber}`, completed: course.tracks.filter(track => track.completed).length, total: course.tracks.length };
   }
   return {
-    day, community: viewer.capabilities.community, reports, support, card,
+    day, reports, card,
     learning: podcast ? {
       title: waiting ? `Day ${waiting.dayNumber} is waiting for you` : "Your current plan is complete",
       href: waiting ? `/dashboard/sogp/listen?day=${waiting.dayNumber}` : "/dashboard/sogp/plan",

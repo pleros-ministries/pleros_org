@@ -52,6 +52,19 @@ test("the You and Community homes use the raised-card canvas treatment",()=>{
   expect(community).toMatch(/\.home \{[^}]*background: var\(--color-community-canvas\)/);
   expect(community).toMatch(/\.section \{[^}]*background: white;[^}]*box-shadow: var\(--shadow-sm\)/);
 });
+test("the dashboard canvas and card edges remain visible on low-contrast phone displays",()=>{
+  const global = fs.readFileSync(path.join(process.cwd(), "app/globals.css"), "utf8");
+  const learning = fs.readFileSync(path.join(process.cwd(), "components/sogp/learning/learning.module.css"), "utf8");
+  expect(global).toContain("--color-community-canvas: #f8f6f2");
+  expect(global).toContain("--color-community-edge: #d9dde3");
+  expect(learning).toMatch(/\.homePage \{[^}]*background: var\(--color-community-canvas\)/);
+  expect(learning).toMatch(/\.learningGroup \{[^}]*background: white;[^}]*border: 1px solid var\(--color-community-edge\)/);
+});
+test("authenticated dashboard headings use Sen while body and controls retain Inter",()=>{
+  const styles = fs.readFileSync(path.join(process.cwd(), "components/dashboard/v3/dashboard.module.css"), "utf8");
+  expect(styles).toMatch(/\.root :is\(h1, h2, h3\) \{[^}]*font-family: var\(--font-sen\), "Sen", sans-serif/);
+  expect(styles).toMatch(/\.root \{[^}]*font-size: 14px/);
+});
 test("the Community home keeps the section switcher available",()=>{
   const source = fs.readFileSync(path.join(process.cwd(), "components/community/community-shell.tsx"), "utf8");
   expect(source).toContain("<CommunityTopBar unitName={unitName} navigation={navigation} />");

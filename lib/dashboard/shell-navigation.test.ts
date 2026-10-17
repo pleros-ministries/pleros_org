@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { buildDashboardNavigation, type DashboardCapabilities } from "./navigation";
-import { dashboardAreaForPath, dashboardAreaHref, dashboardWorkspace } from "./shell-navigation";
+import { dashboardAreaForPath, dashboardAreaHref, dashboardParentForPath, dashboardWorkspace } from "./shell-navigation";
 
 const member: DashboardCapabilities = { sogpEnrolled: true, community: true, communityUnitId: 9, discipleshipDiscussions: true, managesLocationGroups: false, staffConsole: false };
 
@@ -71,5 +71,13 @@ describe("connected dashboard navigation", () => {
     for (const href of ["/dashboard/community/report/history", "/dashboard/podcast", "/dashboard/sogp/certificate", "/dashboard/community/messages", "/dashboard/community/ask", "/dashboard/welcomepack/setup", "/admin"]) {
       expect(hrefs).toContain(href);
     }
+  });
+  test("deep dashboard screens return to their actual parent instead of a generic root", () => {
+    expect(dashboardParentForPath("/dashboard/sogp")).toEqual({ href: "/dashboard", label: "Back to You" });
+    expect(dashboardParentForPath("/dashboard/sogp/plan")).toEqual({ href: "/dashboard/sogp", label: "Back to My SOGP" });
+    expect(dashboardParentForPath("/dashboard/sogp/reviews/42/attendance")).toEqual({ href: "/dashboard/sogp/reviews", label: "Back to group reviews" });
+    expect(dashboardParentForPath("/dashboard/sogp/course/day/4/quiz")).toEqual({ href: "/dashboard/sogp/course/day/4", label: "Back to lesson" });
+    expect(dashboardParentForPath("/dashboard/community/report/people/new")).toEqual({ href: "/dashboard/community/report/people", label: "Back to saved contacts" });
+    expect(dashboardParentForPath("/dashboard/community/report/history")).toEqual({ href: "/dashboard/community/report", label: "Back to my reports" });
   });
 });
