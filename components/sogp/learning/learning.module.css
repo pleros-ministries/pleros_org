@@ -72,7 +72,7 @@
 /* Paper onboarding steps: preview, suggested tracklist, ready. */
 .centre { text-align: center; }
 .accent { color: var(--color-brand-blue); font-size: 13px; font-weight: 500; }
-.summaryCard { display: grid; gap: 4px; padding: 16px; border: 1px solid var(--color-line); border-radius: 16px; }
+.summaryCard { display: grid; gap: 4px; padding: 16px; border: 1px solid var(--color-line); border-radius: var(--dashboard-panel-radius, 10px); }
 .summaryCard strong { font-size: 24px; line-height: 32px; font-weight: 500; letter-spacing: var(--dashboard-tracking-heading, -0.02em); }
 .split { display: grid; grid-template-columns: 1fr 1fr; }
 .split strong + strong { padding-left: 16px; border-left: 1px solid var(--color-line); }
@@ -83,7 +83,7 @@
 .trackList li > span:nth-child(2), .seriesCard li > span:nth-child(2) { display: grid; gap: 4px; }
 .trackList strong, .seriesCard strong { font-weight: 500; }
 .trackNumber { color: var(--color-text-muted); font-size: 13px; line-height: 22px; }
-.seriesCard { padding: 4px 16px; border: 1px solid var(--color-line); border-radius: 16px; }
+.seriesCard { padding: 4px 16px; border: 1px solid var(--color-line); border-radius: var(--dashboard-panel-radius, 10px); }
 .seriesCard li:last-child { border-bottom: 0; }
 .seriesCard .meta { display: inline-flex; align-items: center; gap: 6px; }
 .plainList li { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--color-line); }
@@ -103,18 +103,18 @@ a.rowButton { text-decoration: none; color: var(--color-text-strong); }
 .filterPills { display: flex; flex-wrap: wrap; gap: 8px; }
 .filterPills button { min-height: 32px; padding: 0 12px; border: 0; border-radius: 6px; background: var(--color-surface-muted); color: var(--color-text-strong); font: inherit; font-size: 13px; cursor: pointer; }
 .filterPills button[aria-pressed=true] { background: var(--status-blue-bg); color: var(--color-brand-blue); font-weight: 500; }
-.suggestionCard { display: grid; gap: 4px; padding: 16px; border: 1px solid var(--color-line); border-radius: 16px; }
+.suggestionCard { display: grid; gap: 4px; padding: 16px; border: 1px solid var(--color-line); border-radius: var(--dashboard-panel-radius, 10px); }
 .suggestionCard .rowButton { margin-top: 12px; }
 .libraryList { list-style: none; margin: 0; padding: 0; }
 .libraryList li { padding: 12px 0; border-bottom: 1px solid var(--color-line); }
 .libraryRow { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.compare { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; padding: 16px; border: 1px solid var(--color-line); border-radius: 16px; }
+.compare { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; padding: 16px; border: 1px solid var(--color-line); border-radius: var(--dashboard-panel-radius, 10px); }
 .compare > div { display: grid; gap: 2px; }
 .compare strong { font-size: 18px; line-height: 26px; font-weight: 500; }
 .checkList { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .checkList li { display: flex; gap: 12px; align-items: flex-start; }
 .checkList svg { flex-shrink: 0; margin-top: 3px; color: var(--status-green-text); }
-.pathCard { display: grid; gap: 4px; padding: 16px; border: 1px solid var(--color-line); border-radius: 16px; }
+.pathCard { display: grid; gap: 4px; padding: 16px; border: 1px solid var(--color-line); border-radius: var(--dashboard-panel-radius, 10px); }
 .pathCard[data-target=true] { border-color: var(--status-blue-bg); background: var(--status-blue-bg); }
 .pathCard h2 { display: inline-flex; align-items: center; gap: 12px; }
 .factPanel { padding: 16px; border-radius: 12px; background: var(--status-blue-bg); }

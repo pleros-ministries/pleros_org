@@ -10,8 +10,8 @@
 .eyebrow { font-size: 12px; line-height: 18px; font-weight: 500; text-transform: uppercase; letter-spacing: .04em; color: var(--color-text-muted); }
 .centred { display: grid; justify-items: center; gap: 8px; text-align: center; }
 .check { width: 64px; height: 64px; display: grid; place-items: center; border-radius: 50%; background: var(--status-green-bg); color: var(--status-green-text); margin-bottom: 8px; }
-.panel { display: grid; gap: 16px; padding: 16px; border-radius: 16px; background: var(--color-surface-muted); }
-.ownerPanel { display: grid; justify-items: center; gap: 8px; padding: 24px 16px; border-radius: 16px; background: var(--color-surface-muted); text-align: center; }
+.panel { display: grid; gap: 16px; padding: 16px; border-radius: var(--dashboard-panel-radius, 10px); background: var(--color-surface-muted); }
+.ownerPanel { display: grid; justify-items: center; gap: 8px; padding: 24px 16px; border-radius: var(--dashboard-panel-radius, 10px); background: var(--color-surface-muted); text-align: center; }
 .ownerPanel strong { font-size: 24px; line-height: 32px; font-weight: 500; letter-spacing: var(--dashboard-tracking-heading, -0.02em); }
 .person { display: flex; align-items: center; gap: 12px; }
 .person strong { display: block; font-size: 14px; line-height: 22px; font-weight: 500; }
@@ -33,7 +33,7 @@
 .primary:disabled, .secondary:disabled, .quiet:disabled { opacity: .6; cursor: default; }
 .textLink { display: inline-flex; align-items: center; justify-content: center; min-height: 36px; color: var(--color-brand-blue); text-decoration: none; font-weight: 500; }
 .later { display: grid; justify-items: center; gap: 0; text-align: center; }
-.referralPanel { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 8px 12px; padding: 16px; border-radius: 16px; background: var(--color-surface-muted); }
+.referralPanel { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 8px 12px; padding: 16px; border-radius: var(--dashboard-panel-radius, 10px); background: var(--color-surface-muted); }
 .referralPanel .code { font-size: 24px; line-height: 32px; font-weight: 600; color: var(--color-brand-blue); letter-spacing: var(--dashboard-tracking-heading, -0.02em); }
 .referralPanel .note { grid-column: 1 / -1; font-size: 13px; line-height: 20px; color: var(--color-text-muted); }
 .share { display: inline-flex; align-items: center; gap: 8px; min-height: 38px; padding: 0 16px; border: 0; border-radius: 11px; background: white; color: var(--color-brand-blue); font: inherit; font-weight: 500; text-decoration: none; cursor: pointer; }
@@ -50,7 +50,7 @@
 .searchBox { min-width: 0; display: flex; align-items: center; gap: 12px; min-height: 36px; padding: 0 16px; border-radius: 11px; background: var(--color-surface-muted); color: var(--color-text-muted); }
 .searchBox input { flex: 1; min-width: 0; height: 36px; border: 0; background: transparent; font: inherit; font-size: 16px; color: var(--color-text-strong); outline: none; }
 .copyRow { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 36px; padding: 0; border: 0; background: none; color: var(--color-brand-blue); font: inherit; font-weight: 500; cursor: pointer; }
-.statRow { display: grid; grid-template-columns: repeat(3, 1fr); padding: 16px; border-radius: 16px; background: var(--color-surface-muted); }
+.statRow { display: grid; grid-template-columns: repeat(3, 1fr); padding: 16px; border-radius: var(--dashboard-panel-radius, 10px); background: var(--color-surface-muted); }
 .statRow > div { display: grid; gap: 2px; padding-inline: 12px; border-left: 1px solid var(--color-line); }
 .statRow > div:first-child { border-left: 0; padding-left: 0; }
 .statRow strong { font-size: 24px; line-height: 32px; font-weight: 500; }

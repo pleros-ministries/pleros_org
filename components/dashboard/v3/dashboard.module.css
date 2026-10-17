@@ -14,6 +14,9 @@
   --color-surface-muted: #f6f7f8;
   --dashboard-gutter: 20px;
   --dashboard-card-radius: 16px;
+  /* Data and list panels: crisper than illustrated cards (user decision 17 October). */
+  --dashboard-panel-radius: 10px;
+  --dashboard-panel-edge: #e2e5ea;
   --dashboard-control-radius: 11px;
   --dashboard-control-height: 38px;
   --dashboard-hit-size: 36px;
@@ -147,7 +150,7 @@
 .homeReportIcon[data-tone="green"] { color: var(--status-green-text); background: var(--status-green-bg); }
 .homeReportIcon[data-tone="lilac"] { color: var(--status-lilac-text); background: var(--status-lilac-bg); }
 .homeReportIcon[data-tone="blue"] { color: var(--status-blue-text); background: var(--status-blue-bg); }
-.learning, .reports, .support { padding: 16px; border-radius: var(--dashboard-card-radius); background: white; box-shadow: var(--shadow-sm); }
+.learning, .reports, .support { padding: 16px; border-radius: var(--dashboard-panel-radius, 10px); background: white; box-shadow: var(--shadow-sm); }
 .learning { margin-top: 24px; }
 .sectionHeader { display: flex; align-items: center; justify-content: space-between; min-height: 22px; gap: 12px; }
 .sectionHeader h2, .support h2 { font-size: 15px; font-weight: 500; line-height: 22px; margin: 0; }
@@ -229,7 +232,7 @@
 }
 /* Retained for non-current white learning surfaces. The signed-in dashboard's
    current/Now Playing card uses the blue learning-card treatment above. */
-.whiteCard { margin-top: 19px; padding: 20px; border: 1px solid var(--color-line); border-radius: var(--dashboard-card-radius); background: white; display: grid; gap: 8px; }
+.whiteCard { margin-top: 19px; padding: 20px; border: 1px solid var(--color-line); border-radius: var(--dashboard-panel-radius, 10px); background: white; display: grid; gap: 8px; }
 .whiteTitle { margin: 0; font-size: 24px; line-height: 32px; font-weight: 500; letter-spacing: var(--dashboard-tracking-heading, -0.02em); color: var(--color-text-strong); }
 .whiteProgress { height: 4px; margin-top: 12px; border-radius: 2px; background: var(--color-line); overflow: hidden; }
 .whiteProgress span { display: block; height: 100%; background: var(--color-brand-blue); }
@@ -261,9 +264,10 @@
 .homeGreeting .metadata { margin: 0; }
 .homeMain > .homeLearningCard { margin-top: 20px; }
 .homeSection { margin-top: var(--dashboard-section-gap); }
-.homeSectionHeader { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 22px; margin-bottom: 12px; }
+/* A 1px inset tucks headings just inside the panels' border line. */
+.homeSectionHeader { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 22px; margin-bottom: 12px; padding-inline: 1px; }
 .homeSectionHeader h2 { margin: 0; font-size: 15px; line-height: 22px; font-weight: 500; }
-.homePanel { padding: 4px 16px; border: 1px solid var(--color-community-edge, var(--color-line)); border-radius: var(--dashboard-card-radius); background: white; box-shadow: var(--shadow-sm); }
+.homePanel { padding: 4px 16px; border: 1px solid var(--dashboard-panel-edge); border-radius: var(--dashboard-panel-radius, 10px); background: white; box-shadow: var(--shadow-sm); }
 .homeTodayHead { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding-top: 12px; }
 .homeWeek { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; margin: 10px 0 0; padding: 0 0 12px; list-style: none; border-bottom: 1px solid var(--color-line); }
 .homeWeek li { display: grid; justify-items: center; gap: 4px; min-width: 0; padding: 6px 0; border-radius: 12px; color: var(--color-text-muted); font-size: 12px; line-height: 18px; letter-spacing: var(--dashboard-tracking-small); }
@@ -283,7 +287,7 @@
 .homeTick > span { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--color-community-edge, var(--color-line)); color: var(--status-green-text); }
 .homeTick[data-complete="true"] > span { border-color: var(--status-green-bg); background: var(--status-green-bg); }
 .homeTick:disabled { cursor: progress; opacity: .7; }
-.homeProgressRow, .homeProgressLink { position: relative; display: flex; align-items: center; gap: 12px; min-height: 36px; }
+.homeProgressRow, .homeProgressLink { position: relative; display: flex; align-items: center; gap: 12px; min-height: 40px; font-size: 13px; line-height: 20px; }
 .homeProgressRow > span:first-child { width: 112px; flex: none; }
 .homeProgressRow b { min-width: 58px; text-align: right; font-size: 13px; line-height: 20px; font-weight: 500; }
 .homeProgressRow::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: var(--color-line); }
@@ -292,12 +296,12 @@
 .homeMeter[data-tone="amber"] > span { background: #e0a03a; }
 .homeMeter[data-tone="lilac"] > span { background: #7a4ad6; }
 .homeProgressLink { min-height: 46px; color: var(--color-text); text-decoration: none; }
-.homeProgressLink > span:first-child { flex: 1; }
+.homeProgressLink > span:first-child { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .homeProgressLink > svg { margin-right: -4px; color: var(--color-text-muted); flex: none; }
 
 /* Illustrated tiles with paper grain; copy and actions sit above the art. */
 .homeTiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-.homeTile, .homeRailTile { position: relative; isolation: isolate; overflow: hidden; display: grid; align-content: space-between; gap: 12px; min-height: 168px; padding: 14px 14px 12px; border: 0; border-radius: var(--dashboard-card-radius); text-align: left; text-decoration: none; font: inherit; cursor: pointer; }
+.homeTile, .homeRailTile { position: relative; isolation: isolate; overflow: hidden; display: grid; align-content: space-between; gap: 12px; min-height: 168px; padding: 14px 16px 12px; border: 0; border-radius: var(--dashboard-card-radius); text-align: left; text-decoration: none; font: inherit; cursor: pointer; }
 .homeTile::after, .homeRailTile::after { content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: .22; mix-blend-mode: soft-light;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
 .homeTileCopy, .homeTileAction { position: relative; z-index: 2; }
@@ -314,12 +318,12 @@
 .homeTile[data-tone="lilac"] { background: #ece3fb; color: #3e1876; }
 .homeTile[data-tone="sand"] { background: #f6ecd9; color: #5a3d0c; }
 .homeTile:focus-visible, .homeRailTile:focus-visible { outline: 2px solid var(--color-brand-blue); outline-offset: 3px; }
-.homeReportsCompact { display: flex; align-items: center; gap: 12px; padding: 14px 12px 14px 16px; border: 1px solid var(--color-community-edge, var(--color-line)); border-radius: var(--dashboard-card-radius); background: white; box-shadow: var(--shadow-sm); color: var(--color-text); text-decoration: none; }
+.homeReportsCompact { display: flex; align-items: center; gap: 12px; padding: 14px 12px 14px 16px; border: 1px solid var(--dashboard-panel-edge); border-radius: var(--dashboard-panel-radius, 10px); background: white; box-shadow: var(--shadow-sm); color: var(--color-text); text-decoration: none; }
 .homeReportsCompact > svg { color: var(--color-text-muted); flex: none; }
 .homePillRow { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
 .homeRail { display: flex; gap: 10px; margin: 0 calc(-1 * var(--dashboard-gutter)); padding: 0 var(--dashboard-gutter) 4px; list-style: none; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: var(--dashboard-gutter); scrollbar-width: none; }
 .homeRail li { flex: 0 0 148px; scroll-snap-align: start; }
-.homeRailTile { min-height: 156px; align-content: start; padding: 12px; border-radius: 14px; }
+.homeRailTile { min-height: 156px; align-content: start; padding: 12px 16px; border-radius: 14px; }
 .homeRailTile h3 { font-size: 14px; line-height: 20px; }
 .homeRailTile p { font-size: 12px; line-height: 16px; }
 .homeRailTile[data-tone="butter"] { background: #fff3c9; color: #5a4508; }

@@ -233,7 +233,7 @@ function ProgressSection({ progress }: { progress: NonNullable<HomeSogp["progres
       <ProgressRow label="Prayer Watch" value={progress.prayerPercent} total={100} text={`${progress.prayerPercent}%`} tone="amber" />
       {progress.reviewsOwed > 0 ? <ProgressRow label="Group reviews" value={progress.reviewsSatisfied} total={progress.reviewsOwed} text={`${progress.reviewsSatisfied} of ${progress.reviewsOwed}`} tone="lilac" /> : null}
       <Link href="/dashboard/sogp/readiness" className={styles.homeProgressLink}>
-        <span>Certificate readiness</span>
+        <span>Certificate</span>
         <StatusPill tone={progress.checksPassed === 3 ? "green" : "amber"}>{progress.checksPassed} of 3 checks</StatusPill>
         <DashboardIcon name="right" />
       </Link>

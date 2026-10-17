@@ -16,7 +16,7 @@
 .primary:disabled { opacity: .6; cursor: default; }
 .page :is(button,input,select,a):focus-visible { outline: 2px solid var(--color-brand-blue); outline-offset: 3px; }
 .error { color: var(--destructive); font-size: 13px; line-height: 20px; }
-.reviewCard { display: grid; justify-items: start; gap: 12px; padding: 16px; border: 1px solid var(--color-line); border-radius: 16px; }
+.reviewCard { display: grid; justify-items: start; gap: 12px; padding: 16px; border: 1px solid var(--color-line); border-radius: var(--dashboard-panel-radius, 10px); }
 .reviewCard h3 { font-size: 15px; line-height: 22px; font-weight: 500; margin: 0; }
 /* Named source variants: next-review title 18px; attendance-sheet title 17px. */
 .reviewCard .reviewTitle { font-size: 18px; line-height: 26px; font-weight: 500; margin: 0; }

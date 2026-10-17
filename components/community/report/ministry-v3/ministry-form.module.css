@@ -76,7 +76,7 @@
 .check input { width: 20px; height: 20px; margin: 0; accent-color: var(--color-brand-blue); }
 .existingHead { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .eyebrow { font-size: 12px; line-height: 18px; font-weight: 500; letter-spacing: .04em; text-transform: uppercase; color: var(--color-text-muted); }
-.lockedPanel { display: grid; gap: 8px; padding: 16px; border-radius: 16px; background: var(--color-surface-muted); }
+.lockedPanel { display: grid; gap: 8px; padding: 16px; border-radius: var(--dashboard-panel-radius, 10px); background: var(--color-surface-muted); }
 .lockedTop { display: flex; align-items: center; justify-content: space-between; color: var(--color-text-muted); }
 .reportHead { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .segmented { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -91,7 +91,7 @@
 .chosenName { flex: 1; min-width: 0; display: grid; font-weight: 500; overflow-wrap: anywhere; }
 .clear { display: grid; place-items: center; width: 36px; height: 36px; margin-right: -12px; border: 0; background: none; color: var(--color-text-muted); cursor: pointer; }
 .meetingList { list-style: none; margin: 0; padding: 0; display: grid; gap: 16px; }
-.meetingCard { display: grid; justify-items: start; gap: 8px; width: 100%; padding: 16px; border: 1px solid var(--color-line); border-radius: 16px; background: white; color: inherit; text-align: left; font: inherit; cursor: pointer; }
+.meetingCard { display: grid; justify-items: start; gap: 8px; width: 100%; padding: 16px; border: 1px solid var(--color-line); border-radius: var(--dashboard-panel-radius, 10px); background: white; color: inherit; text-align: left; font: inherit; cursor: pointer; }
 .meetingTitle { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; font-size: 20px; line-height: 28px; font-weight: 500; letter-spacing: var(--dashboard-tracking-heading, -0.02em); }
 .meetingMeta { display: flex; align-items: center; gap: 12px; color: var(--color-text-muted); }
 .meetingCreator { width: 100%; padding-top: 12px; border-top: 1px solid var(--color-line); }
