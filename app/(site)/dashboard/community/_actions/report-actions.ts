@@ -62,6 +62,7 @@ function revalidateReports() {
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/community/report");
   revalidatePath("/dashboard/community/report/people");
+  revalidatePath("/dashboard/community/contacts", "layout");
   revalidatePath("/dashboard/community/report/history");
   revalidatePath("/dashboard/community/leader");
   revalidatePath("/dashboard/church");

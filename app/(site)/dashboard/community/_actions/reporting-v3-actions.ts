@@ -18,7 +18,7 @@ async function run<T>(fn: (userId: string) => Promise<T>) {
   catch (error) { if (error instanceof CommunityError) return { ok: false as const, error: error.message }; throw error; }
 }
 function refreshReporting() {
-  for (const path of ["/dashboard", "/dashboard/community/report", "/dashboard/community/report/people", "/dashboard/community/report/history", "/dashboard/church", "/admin/ministry"]) revalidatePath(path);
+  for (const path of ["/dashboard", "/dashboard/community/report", "/dashboard/community/report/people", "/dashboard/community/contacts", "/dashboard/community/report/history", "/dashboard/church", "/admin/ministry"]) revalidatePath(path);
 }
 export async function createPrivateContactAction(input: unknown) {
   return run(async userId => { const contact = await createPrivateMinistryContact(userId, input); refreshReporting(); return contact; });

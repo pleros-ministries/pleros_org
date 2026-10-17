@@ -60,7 +60,7 @@ export function GroupHero({
 export function AddContactAction({ inviteGroupId }: { inviteGroupId?: number }) {
   return (
     <Link
-      href={`/dashboard/community/report/people/new${inviteGroupId ? `?invite=${inviteGroupId}` : ""}`}
+      href={`/dashboard/community/contacts/new${inviteGroupId ? `?invite=${inviteGroupId}` : ""}`}
       className="inline-flex h-8 items-center gap-1.5 rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white px-3 text-[12.5px] font-medium text-[var(--color-community-ink)]"
     >
       <UserPlusIcon className="size-3.5" strokeWidth={2} /> Add contact

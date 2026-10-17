@@ -30,7 +30,7 @@ describe("unified ministry form", () => {
   });
   it("puts Add contact at the top of the Saved contacts screen", () => {
     const html = renderToStaticMarkup(<SavedContacts contacts={[]} readOnly={false} />);
-    expect(html).toContain('href="/dashboard/community/report/people/new"');
+    expect(html).toContain('href="/dashboard/community/contacts/new"');
     expect(html.indexOf("Add contact")).toBeLessThan(html.indexOf("Search contacts"));
     expect(html).not.toContain("Inviting a contact is a separate step.");
   });

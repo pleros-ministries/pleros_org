@@ -1,5 +1,5 @@
 import "server-only";
-import { and, desc, eq, isNull } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 
 import { db } from "@/lib/db";
@@ -90,6 +90,10 @@ export type OwnEnrolleeRow = {
   source: FollowUpRouteSource | "reassigned" | "assigned";
   assignedAt: string;
   lastContactedAt: string | null;
+  /** Their current discipleship group. A group's name is shown only to its own leader. */
+  group: { yours: boolean; name: string | null } | null;
+  /** A pending invitation into one of the viewer's groups. */
+  invited: boolean;
 };
 
 /** Enrollees whose follow-up the viewer owns, across every source. */
@@ -103,11 +107,33 @@ export async function listOwnEnrollees(userId: string): Promise<OwnEnrolleeRow[]
     .leftJoin(s.sogpFollowUpRoutes, eq(s.sogpFollowUpRoutes.enrollmentId, s.pastorAssignments.enrollmentId))
     .where(eq(s.pastorAssignments.pastorUserId, userId))
     .orderBy(desc(s.pastorAssignments.assignedAt)).limit(200);
-  return rows.map(row => ({
-    enrollmentId: row.enrollmentId,
-    name: row.name,
-    source: row.routeSource && row.routeOwner === userId ? row.routeSource : row.assignedBy ? "reassigned" : "assigned",
-    assignedAt: new Date(row.assignedAt).toISOString(),
-    lastContactedAt: row.lastContactedAt ? new Date(row.lastContactedAt).toISOString() : null,
-  }));
+  const ids = rows.map(row => row.enrollmentId);
+  const leader = alias(s.sogpEnrollments, "enrollee_group_leader");
+  const [memberships, invitations] = ids.length ? await Promise.all([
+    db.select({ enrollmentId: s.discipleshipMemberships.discipleEnrollmentId, name: s.discipleshipGroups.name, leaderUserId: leader.userId })
+      .from(s.discipleshipMemberships)
+      .innerJoin(s.discipleshipGroups, eq(s.discipleshipGroups.id, s.discipleshipMemberships.groupId))
+      .innerJoin(leader, eq(leader.id, s.discipleshipGroups.leaderEnrollmentId))
+      .where(and(inArray(s.discipleshipMemberships.discipleEnrollmentId, ids), eq(s.discipleshipMemberships.status, "active"))),
+    db.select({ enrollmentId: s.discipleshipGroupInvitations.recipientEnrollmentId })
+      .from(s.discipleshipGroupInvitations)
+      .innerJoin(s.discipleshipGroups, eq(s.discipleshipGroups.id, s.discipleshipGroupInvitations.groupId))
+      .innerJoin(leader, and(eq(leader.id, s.discipleshipGroups.leaderEnrollmentId), eq(leader.userId, userId)))
+      .where(and(inArray(s.discipleshipGroupInvitations.recipientEnrollmentId, ids), eq(s.discipleshipGroupInvitations.status, "pending"))),
+  ]) : [[], []];
+  const groupOf = new Map(memberships.map(row => [row.enrollmentId, row]));
+  const invited = new Set(invitations.map(row => row.enrollmentId));
+  return rows.map(row => {
+    const membership = groupOf.get(row.enrollmentId);
+    const yours = membership?.leaderUserId === userId;
+    return {
+      enrollmentId: row.enrollmentId,
+      name: row.name,
+      source: row.routeSource && row.routeOwner === userId ? row.routeSource : row.assignedBy ? "reassigned" : "assigned",
+      assignedAt: new Date(row.assignedAt).toISOString(),
+      lastContactedAt: row.lastContactedAt ? new Date(row.lastContactedAt).toISOString() : null,
+      group: membership ? { yours, name: yours ? membership.name : null } : null,
+      invited: !membership && invited.has(row.enrollmentId),
+    };
+  });
 }

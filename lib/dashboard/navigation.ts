@@ -69,8 +69,9 @@ export function buildDashboardNavigation(
         label: "Report history",
         href: "/dashboard/community/report/history",
       },
-      { key: "contacts", label: "Saved contacts", href: "/dashboard/community/report/people" },
     );
+    // Without Community (church-only reporting) Saved contacts stays in the You workspace.
+    if (!caps.community) personal.push({ key: "contacts", label: "Saved contacts", href: "/dashboard/community/contacts" });
   }
 
   const devotion: DashboardNavItem[] = [
@@ -115,6 +116,8 @@ export function buildDashboardNavigation(
     }
     community.push(
       { key: "groups", label: "Groups", href: "/dashboard/community/groups" },
+      // Saved contacts sits under Groups: people on their way into a group.
+      { key: "contacts", label: "Saved contacts", href: "/dashboard/community/contacts" },
       {
         key: "messages",
         label: "Messages",

@@ -12,7 +12,8 @@ test("the default drawer renders only approved roots/workspace, not the legacy d
   const html = renderToStaticMarkup(<QueryClientProvider client={new QueryClient()}><DashboardMenuNavigation sections={sections} area="you" onArea={()=>{}} /></QueryClientProvider>);
   expect(html).toContain('href="/dashboard/sogp"');
   expect(html).toContain('href="/dashboard/community"');
-  expect(html).toContain('href="/dashboard/community/report/people"');
+  // Saved contacts moved under Groups (Community), out of the You workspace.
+  expect(html).not.toContain('href="/dashboard/community/contacts"');
   expect(html).not.toContain('href="/dashboard/sogp/certificate"');
   expect(html).not.toContain('href="/dashboard/welcomepack/orientation"');
   expect(html).not.toContain("More destinations");

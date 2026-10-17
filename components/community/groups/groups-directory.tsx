@@ -2,19 +2,26 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { PlusIcon, SearchIcon } from "lucide-react";
+import { ChevronRightIcon, ContactRoundIcon, PlusIcon, SearchIcon, SparklesIcon } from "lucide-react";
 
 import type { GroupJoinDecision } from "@/lib/community/groups";
 import type { GroupSummary } from "@/lib/db/queries/community-groups";
 
 import { GroupCard, leadColourways } from "../community-home-v3";
 import homeStyles from "../community-home-v3.module.css";
+import peopleStyles from "../discipleship/discipleship-group.module.css";
 import { CreateGroupDialog } from "./create-group-dialog";
 import { GroupJoinButton } from "./group-join-button";
 
 export type DirectoryDiscipleship = {
   joined: { groupId: number; groupName: string } | null;
   leading: Array<{ groupId: number; groupName: string; discipleCount: number }>;
+};
+
+/** Counts for the "People to bring in" rows; a null row is hidden. */
+export type PeopleToBringIn = {
+  contacts: number | null;
+  enrollees: { total: number; free: number } | null;
 };
 
 export type LocationGroupLink = {
@@ -67,6 +74,7 @@ export function GroupsDirectory({
   discipleship,
   canCreate,
   startCreating = false,
+  people = null,
 }: {
   groups: GroupSummary[];
   locationGroups: LocationGroupLink[];
@@ -74,6 +82,8 @@ export function GroupsDirectory({
   canCreate: boolean;
   /** `?create=1` from the Community home's "New group" button. */
   startCreating?: boolean;
+  /** People on their way into the viewer's groups; null rows are hidden. */
+  people?: PeopleToBringIn | null;
 }) {
   const [creating, setCreating] = useState(startCreating);
   const [query, setQuery] = useState("");
@@ -134,6 +144,26 @@ export function GroupsDirectory({
           <p className="m-0 rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white px-4 py-3.5 text-[13px] text-[var(--color-community-muted)]">You’re not in a group yet.</p>
         )}
       </section>
+
+      {people && (people.contacts !== null || people.enrollees !== null) ? <section className={homeStyles.block} aria-labelledby="groups-people">
+        <div className={homeStyles.blockHeading}><h2 id="groups-people">People to bring in</h2></div>
+        <div className={peopleStyles.panel}>
+          <ul className={peopleStyles.list}>
+            {people.contacts !== null ? <li><Link href="/dashboard/community/contacts" className={peopleStyles.row}>
+              <span className="grid size-9 shrink-0 place-items-center rounded-[10px] bg-[#e4ebfd] text-[#2331ae]"><ContactRoundIcon className="size-4" strokeWidth={2} /></span>
+              <span className={peopleStyles.rowCopy}><span className={peopleStyles.rowTitle} style={{ fontWeight: 500 }}>Saved contacts</span><span className={peopleStyles.rowMeta}>{people.contacts ? `${people.contacts} ${people.contacts === 1 ? "person" : "people"} you’ve met · invite them to a group` : "People you meet in ministry"}</span></span>
+              <ChevronRightIcon className={`${peopleStyles.chev} size-4`} strokeWidth={2} />
+            </Link></li> : null}
+            {people.enrollees !== null ? <li><Link href="/dashboard/sogp/enrollees" className={peopleStyles.row}>
+              <span className="grid size-9 shrink-0 place-items-center rounded-[10px] bg-[#fde3cf] text-[#7a3a10]"><SparklesIcon className="size-4" strokeWidth={2} /></span>
+              <span className={peopleStyles.rowCopy}><span className={peopleStyles.rowTitle} style={{ fontWeight: 500 }}>My enrollees</span><span className={peopleStyles.rowMeta}>{people.enrollees.total ? `Signed up with your link · ${people.enrollees.free} not in a group` : "People who sign up with your link"}</span></span>
+              {people.enrollees.free ? <span className="grid h-5 min-w-5 place-items-center rounded-full bg-[var(--color-community-blue)] px-1.5 text-[11px] font-semibold text-white">{people.enrollees.free}</span> : null}
+              <ChevronRightIcon className={`${peopleStyles.chev} size-4`} strokeWidth={2} />
+            </Link></li> : null}
+          </ul>
+        </div>
+        <p className={`${peopleStyles.note} mt-2`}>Contacts are people you’ve met; enrollees signed up with your link. Invite either into a group you lead.</p>
+      </section> : null}
 
       <section className={homeStyles.block} aria-labelledby="groups-discover">
         <div className={homeStyles.blockHeading}><h2 id="groups-discover">Discover</h2></div>

@@ -5,7 +5,7 @@ import { ensureSogpReferralCode } from "@/lib/db/queries/sogp-referrals";
 import { listOwnEnrollees } from "@/lib/db/queries/sogp-follow-up-routes";
 import { buildReferralUrl } from "@/lib/sogp/referral";
 import { resolvePublicSiteUrl } from "@/lib/welcome-campaign";
-import { MyEnrollees } from "@/components/sogp/follow-up-invitations";
+import { EnrolleesList } from "@/components/community/people/people-lists";
 
 export default async function MyEnrolleesPage() {
   const session = await getAppSession();
@@ -13,5 +13,5 @@ export default async function MyEnrolleesPage() {
   const enrollment = await getSogpEnrollmentByUserId(session.user.id);
   if (!enrollment) redirect("/sogp/enrol");
   const [rows, code] = await Promise.all([listOwnEnrollees(session.user.id), ensureSogpReferralCode(enrollment.id).catch(() => null)]);
-  return <MyEnrollees rows={rows} referralCode={code} referralUrl={code ? buildReferralUrl(resolvePublicSiteUrl(process.env), code) : null} />;
+  return <EnrolleesList rows={rows} referralUrl={code ? buildReferralUrl(resolvePublicSiteUrl(process.env), code) : null} />;
 }

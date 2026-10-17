@@ -24,7 +24,7 @@ describe("connected dashboard navigation", () => {
   });
   test("workspace links are derived from authorised navigation, not role labels", () => {
     const ordinary = dashboardWorkspace(buildDashboardNavigation(member));
-    expect(ordinary.map(item => item.label)).toEqual(["My learning", "Saved contacts"]);
+    expect(ordinary.map(item => item.label)).toEqual(["My learning"]);
     expect(ordinary.some(item => item.href === "/dashboard/church")).toBe(false);
     expect(dashboardWorkspace(buildDashboardNavigation({ ...member, churchOversight: true })).some(item => item.label === "Church oversight")).toBe(true);
   });
@@ -80,7 +80,9 @@ describe("connected dashboard navigation", () => {
     expect(dashboardParentForPath("/dashboard/sogp/plan")).toEqual({ href: "/dashboard/sogp", label: "Back to My SOGP" });
     expect(dashboardParentForPath("/dashboard/sogp/reviews/42/attendance")).toEqual({ href: "/dashboard/sogp/reviews", label: "Back to group reviews" });
     expect(dashboardParentForPath("/dashboard/sogp/course/day/4/quiz")).toEqual({ href: "/dashboard/sogp/course/day/4", label: "Back to lesson" });
-    expect(dashboardParentForPath("/dashboard/community/report/people/new")).toEqual({ href: "/dashboard/community/report/people", label: "Back to saved contacts" });
+    expect(dashboardParentForPath("/dashboard/community/contacts/new")).toEqual({ href: "/dashboard/community/contacts", label: "Back to saved contacts" });
+    expect(dashboardParentForPath("/dashboard/community/contacts")).toEqual({ href: "/dashboard/community/groups", label: "Back to Groups" });
+    expect(dashboardParentForPath("/dashboard/sogp/enrollees")).toEqual({ href: "/dashboard/community/groups", label: "Back to Groups" });
     expect(dashboardParentForPath("/dashboard/community/report/history")).toEqual({ href: "/dashboard/community/report", label: "Back to my reports" });
   });
 });

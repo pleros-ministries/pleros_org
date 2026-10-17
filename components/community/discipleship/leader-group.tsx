@@ -77,7 +77,7 @@ export function LeaderGroupView({ data, episodeQuestions, colourway, initialTab,
 
   const menu: MenuAction[] = paused ? [] : [
     { key: "rename", label: "Rename group", icon: PencilIcon, onSelect: () => setPanel("rename") },
-    ...(hasDisciples ? [{ key: "contact", label: "Add a contact", icon: UserPlusIcon, onSelect: () => router.push(`/dashboard/community/report/people/new?invite=${group.id}`) }] : []),
+    ...(hasDisciples ? [{ key: "contact", label: "Add a contact", icon: UserPlusIcon, onSelect: () => router.push(`/dashboard/community/contacts/new?invite=${group.id}`) }] : []),
     { key: "link", label: "New invite link", icon: LinkIcon, onSelect: () => {
       if (window.confirm("Create a new invite link for this group? Its old link will stop working.")) regenerate.run(() => regenerateInviteLinkAction({ groupId: group.id }));
     } },
@@ -105,7 +105,7 @@ export function LeaderGroupView({ data, episodeQuestions, colourway, initialTab,
         {hasDisciples ? <>
           <button type="button" className={styles.btn} data-primary onClick={() => setPanel(panel === "invite" ? null : "invite")} aria-expanded={panel === "invite"}>Invite</button>
           <button type="button" className={styles.btn} onClick={() => setTab("checkins")}>Ask a check-in</button>
-        </> : <Link href={`/dashboard/community/report/people/new?invite=${group.id}`} className={styles.btn} data-primary><UserPlusIcon className="size-3.5" strokeWidth={2} />Add a contact</Link>}
+        </> : <Link href={`/dashboard/community/contacts/new?invite=${group.id}`} className={styles.btn} data-primary><UserPlusIcon className="size-3.5" strokeWidth={2} />Add a contact</Link>}
         <ActionMenu label="Group options" actions={menu} className="!size-8 !rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white" />
       </>}
     />

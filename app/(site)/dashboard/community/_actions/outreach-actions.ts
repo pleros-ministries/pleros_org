@@ -50,6 +50,7 @@ async function run<T extends object>(
 function revalidateContacts() {
   revalidatePath("/dashboard/community/report");
   revalidatePath("/dashboard/community/report/people");
+  revalidatePath("/dashboard/community/contacts", "layout");
   revalidatePath("/dashboard/community/leader");
   revalidatePath("/admin/ministry");
 }

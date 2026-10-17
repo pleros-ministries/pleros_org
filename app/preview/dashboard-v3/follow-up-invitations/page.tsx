@@ -16,9 +16,9 @@ export default async function Preview({ searchParams }: { searchParams: Promise<
     ? <FollowUpWelcome data={{ learnerFirstName: "Dayo", source: "link", ownerName: "Efe Daniels", ownerCode: null, choice: null, ownerCurrent: true }} />
     : screen === "enrollees"
       ? <MyEnrollees referralCode="NNEKA26" referralUrl="https://example.com/sogp?ref=NNEKA26" rows={[
-        { enrollmentId: 1, name: "Dayo Eze", source: "code", assignedAt: now, lastContactedAt: null },
-        { enrollmentId: 2, name: "Miriam Ibe", source: "reassigned", assignedAt: now, lastContactedAt: null },
-        { enrollmentId: 3, name: "Tosin Ade", source: "link", assignedAt: daysAgo(9), lastContactedAt: daysAgo(3) },
+        { enrollmentId: 1, name: "Dayo Eze", source: "code", assignedAt: now, lastContactedAt: null, group: null, invited: false },
+        { enrollmentId: 2, name: "Miriam Ibe", source: "reassigned", assignedAt: now, lastContactedAt: null, group: null, invited: false },
+        { enrollmentId: 3, name: "Tosin Ade", source: "link", assignedAt: daysAgo(9), lastContactedAt: daysAgo(3), group: null, invited: false },
       ]} />
       : screen === "accept"
         ? <InvitationResponse invitation={{ id: 1, status: "pending", origin: "in_app", createdAt: now, groupName: "Tolu’s discipleship group", leaderName: "Tolu Adeyemi", groupAvailable: true }} />

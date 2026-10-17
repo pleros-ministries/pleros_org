@@ -41,7 +41,6 @@ function OversightRow({ href, title, description, icon, tone, prefetch }: { href
   </Link>;
 }
 
-const people = (n: number) => `${n} ${n === 1 ? "person" : "people"}`;
 
 export function CommunityHomeV3({ data }: { data: CommunityHomeData }) {
   const firstInvitation = data.invitations[0];
@@ -89,10 +88,9 @@ export function CommunityHomeV3({ data }: { data: CommunityHomeData }) {
       </div>
     </section>
 
-    {data.disciplesEnabled || data.church ? <section className={styles.block} aria-labelledby="community-oversight">
+    {data.church ? <section className={styles.block} aria-labelledby="community-oversight">
       <div className={styles.blockHeading}><h2 id="community-oversight">Oversight</h2></div>
       <div className={styles.oversightPanel}>
-        {data.disciplesEnabled ? <OversightRow href="/dashboard/sogp/enrollees" title="My enrollees" description={data.enrolleeCount ? `${people(data.enrolleeCount)} · you follow up` : "People you follow up"} icon="people" tone="blue" /> : null}
         {data.church ? <OversightRow href={data.church.href} title="Church oversight" description="Your branch and workers" icon="network" tone="lilac" /> : null}
       </div>
     </section> : null}

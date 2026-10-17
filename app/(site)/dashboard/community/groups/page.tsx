@@ -12,6 +12,9 @@ import {
 import { listGroupDirectory } from "@/lib/db/queries/community-groups";
 import { getCommunityHomeDiscipleship } from "@/lib/db/queries/community-discipleship";
 import { listUnitNames } from "@/lib/db/queries/community-units";
+import { listPrivateMinistryContacts } from "@/lib/db/queries/private-ministry-contacts";
+import { reportingV3SchemaReady } from "@/lib/db/queries/reporting-v3-gate";
+import { listOwnEnrollees } from "@/lib/db/queries/sogp-follow-up-routes";
 
 export default async function CommunityGroupsRoute({ searchParams }: { searchParams: Promise<{ create?: string }> }) {
   const { create } = await searchParams;
@@ -22,10 +25,13 @@ export default async function CommunityGroupsRoute({ searchParams }: { searchPar
 
   // Location groups the viewer belongs to or looks after as assigned pastor.
   const managedIds = ctx.managedUnitIds.filter((id) => id !== ctx.unit?.id);
-  const [groups, managedUnits, discipleship] = await Promise.all([
+  const [groups, managedUnits, discipleship, contacts, enrollees] = await Promise.all([
     listGroupDirectory(ctx.userId),
     listUnitNames(managedIds),
     ctx.enrollmentId != null ? getCommunityHomeDiscipleship(ctx.userId).catch(() => null) : Promise.resolve(null),
+    // People on their way into the viewer's groups (optional rows).
+    reportingV3SchemaReady() ? listPrivateMinistryContacts(ctx.userId).then(rows => rows.length).catch(() => null) : Promise.resolve(null),
+    ctx.enrollmentId != null ? listOwnEnrollees(ctx.userId).catch(() => null) : Promise.resolve(null),
   ]);
   const locationGroups: LocationGroupLink[] = [
     ...(ctx.unit
@@ -41,6 +47,7 @@ export default async function CommunityGroupsRoute({ searchParams }: { searchPar
       discipleship={discipleship ? { joined: discipleship.joined, leading: discipleship.leading.filter((group) => !group.paused) } : null}
       canCreate={!ctx.postingBlocked}
       startCreating={create === "1" && !ctx.postingBlocked}
+      people={{ contacts, enrollees: enrollees ? { total: enrollees.length, free: enrollees.filter(row => !row.group).length } : null }}
     />
   );
 }

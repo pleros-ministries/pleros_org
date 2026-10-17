@@ -10,7 +10,7 @@ import { UsersRoundIcon } from "lucide-react";
 import styles from "@/components/sogp/follow-up-invitations.module.css";
 
 const initials = (name: string) => name.trim().split(/\s+/).slice(0, 2).map(part => part[0]?.toUpperCase() ?? "").join("");
-const contactHref = (key: string) => `/dashboard/community/report/people/private/${key.split(":")[1]}`;
+const contactHref = (key: string) => `/dashboard/community/contacts/${key.split(":")[1]}`;
 
 /**
  * Paper: saved_contacts. Private contacts only. Contact collections, account
@@ -23,7 +23,7 @@ export function SavedContacts({ contacts, readOnly }: { contacts: MinistryContac
   const rows = needle ? contacts.filter(row => `${row.name} ${row.phone ?? ""} ${row.email ?? ""}`.toLowerCase().includes(needle)) : contacts;
   return <section className={styles.page}>
     <div className={styles.heading}><span className={styles.eyebrow}>Saved contacts</span><h1>People, kept close</h1><p>{contacts.length} {contacts.length === 1 ? "contact" : "contacts"} · private to you</p></div>
-    {readOnly ? null : <Link className={styles.primary} href="/dashboard/community/report/people/new">Add contact<DashboardIcon name="plus" /></Link>}
+    {readOnly ? null : <Link className={styles.primary} href="/dashboard/community/contacts/new">Add contact<DashboardIcon name="plus" /></Link>}
     <label className={styles.searchBox}><DashboardIcon name="search" size={20} /><span className="sr-only">Search contacts</span><input type="search" placeholder="Search contacts" value={query} onChange={event => setQuery(event.target.value)} /></label>
     {rows.length ? <ul className={styles.list}>{rows.map(row => <li key={row.key}><Link className={styles.row} href={contactHref(row.key)}>
       <span className={styles.avatar}>{initials(row.name)}</span>
@@ -108,8 +108,8 @@ export function SavedContactDetailView({ contact }: { contact: SavedContactDetai
         <li className={styles.row}><span className={styles.avatar}><DashboardIcon name="plus" size={16} /></span><div><strong>Contact saved</strong><span className={styles.meta}>{day.format(saved)} · {time.format(saved)} · Added by you</span></div></li>
       </ul>
     </div>
-    <Link className={styles.secondary} href={`/dashboard/community/report/people/private/${contact.id}/invite`}>Invite to a group on WhatsApp</Link>
+    <Link className={styles.secondary} href={`/dashboard/community/contacts/${contact.id}/invite`}>Invite to a group on WhatsApp</Link>
     <div className={styles.info}><DashboardIcon name="lock" size={16} /><p>Only you can see this contact. No account, invitation or membership has been created.</p></div>
-    <Link className={styles.textLink} href="/dashboard/community/report/people">Back to saved contacts</Link>
+    <Link className={styles.textLink} href="/dashboard/community/contacts">Back to saved contacts</Link>
   </section>;
 }

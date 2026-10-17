@@ -27,7 +27,8 @@ export function dashboardWorkspace(sections: DashboardNavSection[]): DashboardWo
   const workspace: DashboardWorkspaceItem[] = [];
   const learning = find("sogp") ?? find("sogp-enrol");
   if (learning) workspace.push({ ...learning, label: "My learning", icon: "book" });
-  const contacts = find("contacts");
+  // Saved contacts lives under Groups; only viewers without Community keep it here.
+  const contacts = find("feed") ? undefined : find("contacts");
   if (contacts) workspace.push({ ...contacts, label: "Saved contacts", icon: "people" });
   const church = find("church");
   if (church) workspace.push({ ...church, icon: "building" });
@@ -60,7 +61,7 @@ const DASHBOARD_FOCUS: Array<[RegExp, (match: RegExpMatchArray) => DashboardFocu
   [/^\/dashboard\/sogp\/reviews$/, () => ({ title: "Group reviews", back: MY_SOGP })],
   [/^\/dashboard\/sogp\/follow-up\/(request|welcome)$/, m => ({ title: m[1] === "request" ? "Follow-up request" : "Welcome to SOGP", back: { href: "/dashboard/sogp/follow-up", label: "Back to your follow-up person" } })],
   [/^\/dashboard\/sogp\/enrollees\/\d+\/invite$/, () => ({ title: "Invite to a group", back: { href: "/dashboard/sogp/enrollees", label: "Back to My enrollees" } })],
-  [/^\/dashboard\/sogp\/enrollees$/, () => ({ title: "My enrollees", back: COMMUNITY })],
+  [/^\/dashboard\/sogp\/enrollees$/, () => ({ title: "My enrollees", back: GROUPS })],
   [/^\/dashboard\/sogp\/invitations\/\d+(\/sent)?$/, () => ({ title: "Group invitation", back: COMMUNITY })],
   [/^\/dashboard\/sogp\/(path|plan|listen|follow-up|readiness|referrals|leaderboard|certificate|traditional)$/, m => ({
     title: ({ path: "Your learning path", plan: "Edit full plan", listen: "Today’s listening", "follow-up": "Your follow-up person", readiness: "Certification", referrals: "Your SOGP referral", leaderboard: "Leaderboard", certificate: "Certificate", traditional: "Calendar and assessments" } as Record<string, string>)[m[1]],
@@ -68,10 +69,10 @@ const DASHBOARD_FOCUS: Array<[RegExp, (match: RegExpMatchArray) => DashboardFocu
   })],
   [/^\/dashboard\/sogp\/.+$/, () => ({ title: "My SOGP", back: MY_SOGP })],
   // Reports and contacts (You)
-  [/^\/dashboard\/community\/report\/people\/private\/(\d+)\/invite$/, m => ({ title: "Share group invitation", back: { href: `/dashboard/community/report/people/private/${m[1]}`, label: "Back to contact" } })],
-  [/^\/dashboard\/community\/report\/people\/(new|private\/\d+)$/, m => ({ title: m[1] === "new" ? "Add contact" : "Contact details", back: { href: "/dashboard/community/report/people", label: "Back to saved contacts" } })],
-  // Saved contacts is its own Workspace destination, not part of My reports.
-  [/^\/dashboard\/community\/report\/people$/, () => ({ title: "Saved contacts", back: YOU })],
+  // Saved contacts sits under Groups (people on their way into a group).
+  [/^\/dashboard\/community\/contacts\/(\d+)\/invite$/, m => ({ title: "Share group invitation", back: { href: `/dashboard/community/contacts/${m[1]}`, label: "Back to contact" } })],
+  [/^\/dashboard\/community\/contacts\/(new|\d+)$/, m => ({ title: m[1] === "new" ? "Add contact" : "Contact details", back: { href: "/dashboard/community/contacts", label: "Back to saved contacts" } })],
+  [/^\/dashboard\/community\/contacts$/, () => ({ title: "Saved contacts", back: GROUPS })],
   [/^\/dashboard\/community\/report\/(history|new|\d+)$/, m => ({ title: m[1] === "history" ? "Report history" : m[1] === "new" ? "New report" : "Edit activity", back: { href: "/dashboard/community/report", label: "Back to my reports" } })],
   [/^\/dashboard\/community\/report\/.+$/, () => ({ title: "My reports", back: { href: "/dashboard/community/report", label: "Back to my reports" } })],
   [/^\/dashboard\/community\/report$/, () => ({ title: "My reports", back: YOU })],
