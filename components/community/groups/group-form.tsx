@@ -49,7 +49,7 @@ export function GroupFormFields({
           onChange={(event) => onChange({ ...values, name: event.target.value })}
           maxLength={GROUP_NAME_MAX}
           required
-          className={`${fieldClass} h-11`}
+          className={`${fieldClass} h-[38px]`}
         />
       </label>
 

@@ -16,7 +16,7 @@
 .info { display: flex; align-items: flex-start; gap: 12px; padding: 16px; border-radius: 12px; background: var(--color-surface-muted); color: var(--color-text-muted); font-size: 13px; line-height: 20px; }
 .info svg { flex-shrink: 0; margin-top: 1px; }
 .footer { margin-top: auto; display: grid; gap: 8px; padding-top: 16px; border-top: 1px solid var(--color-line); }
-.primary { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px; padding: 12px 16px; width: 100%; border: 0; border-radius: 11px; background: var(--color-brand-blue); color: white; text-decoration: none; font-size: 14px; line-height: 22px; font-weight: 500; cursor: pointer; }
+.primary { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 38px; padding: 8px 16px; width: 100%; border: 0; border-radius: 11px; background: var(--color-brand-blue); color: white; text-decoration: none; font-size: 14px; line-height: 22px; font-weight: 500; cursor: pointer; }
 .primary:disabled { opacity: .6; cursor: default; }
 .page :is(button,textarea,a):focus-visible { outline: 2px solid var(--color-brand-blue); outline-offset: 3px; }
 .error { color: var(--destructive); font-size: 13px; line-height: 20px; }
@@ -30,4 +30,4 @@
 .steps ol { list-style: none; padding: 0; margin: 0; display: grid; gap: 24px; }
 .steps li { display: flex; gap: 16px; align-items: flex-start; }
 .steps li span { display: grid; place-items: center; width: 20px; height: 20px; margin-top: 1px; flex-shrink: 0; border-radius: 50%; background: var(--status-blue-bg); color: var(--color-brand-blue); font-size: 12px; }
-.refresh { min-height: 44px; border: 0; background: transparent; color: var(--color-brand-blue); font-size: 13px; cursor: pointer; }
+.refresh { min-height: 36px; border: 0; background: transparent; color: var(--color-brand-blue); font-size: 13px; cursor: pointer; }

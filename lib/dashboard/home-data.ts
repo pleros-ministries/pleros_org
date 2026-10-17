@@ -8,13 +8,18 @@ import { getOwnSogpLearning } from "@/lib/db/queries/sogp-learning";
 import { learningResume } from "@/lib/sogp/learning-view";
 import { fetchAnchorEpisodes } from "@/lib/anchor-rss";
 import { lagosToday } from "@/lib/sogp/daily-date";
-import { homeReportRows, type DashboardHomeData } from "./home";
+import { getOwnCertificationFacts } from "@/lib/db/queries/sogp-certification-facts";
+import { getHomeDiscipleshipSummary } from "@/lib/db/queries/sogp-discipleship";
+import { getActiveSogpJourney } from "@/lib/db/queries/sogp-journey";
+import { getSogpLeaderboard } from "@/lib/db/queries/sogp-leaderboard";
+import { cohortWeekLabel, homeReportRows, homeSogpToday, type DashboardHomeData, type HomeSogp } from "./home";
 
 /** Authenticated, read-only projection. No fixture identity or invented playback position. */
 export async function getDashboardHomeData(viewer: NonNullable<Awaited<ReturnType<typeof getDashboardViewer>>>): Promise<DashboardHomeData> {
   const userId = viewer.session.user.id;
   const day = lagosToday();
-  const [course, reports, state] = await Promise.all([
+  const enrolled = viewer.capabilities.sogpEnrolled;
+  const [course, reports, state, journey, facts, leaderboard, group] = await Promise.all([
     viewer.capabilities.sogpEnrolled ? getSogpDashboardData(userId) : Promise.resolve(null),
     viewer.capabilities.reporting ? Promise.all([listActivitiesForDay(userId, day), getDayActivity(userId, day), getOwnDailyDeclarations(userId, day)]).then(([activities, devotional, declarations]) => homeReportRows({
       devotionalCount: activityLines(devotional).filter(line => line.detail !== null).length,
@@ -23,6 +28,11 @@ export async function getDashboardHomeData(viewer: NonNullable<Awaited<ReturnTyp
       declarations,
     })) : Promise.resolve(null),
     viewer.capabilities.sogpEnrolled ? getOwnSogpLearning(userId) : Promise.resolve(null),
+    // SOGP is the home's centre. Each read degrades to "not shown" on its own.
+    enrolled ? getActiveSogpJourney(userId).catch(() => null) : Promise.resolve(null),
+    enrolled ? getOwnCertificationFacts(userId).catch(() => null) : Promise.resolve(null),
+    enrolled ? getSogpLeaderboard(userId).catch(() => null) : Promise.resolve(null),
+    enrolled ? getHomeDiscipleshipSummary(userId).catch(() => ({ kind: "none" as const })) : Promise.resolve({ kind: "none" as const }),
   ]);
   const next = course?.tracks.find(track => track.accessible && track.lesson.status === "published" && !track.completed);
   const last = course?.tracks.filter(track => track.accessible && track.lesson.status === "published").at(-1);
@@ -49,8 +59,26 @@ export async function getDashboardHomeData(viewer: NonNullable<Awaited<ReturnTyp
   } else if (!podcast && lesson) {
     card = { kind: "traditional", title: lesson.lesson.title, href: `/dashboard/sogp/course/day/${lesson.dayNumber}`, completed: course.tracks.filter(track => track.completed).length, total: course.tracks.length };
   }
+  const sogp: HomeSogp | null = journey ? {
+    cohortTitle: journey.cohort.title,
+    weekLabel: cohortWeekLabel(journey.cohort.startsAt, journey.cohort.endsAt, day),
+    today: homeSogpToday(journey.days, day, !podcast),
+    progress: facts ? {
+      learningLabel: facts.podcast ? "Episodes" : "Teachings",
+      learningDone: facts.learningDone,
+      learningTotal: facts.learningTotal,
+      prayerPercent: facts.prayer.percent,
+      prayerRequired: facts.prayer.required,
+      reviewsSatisfied: facts.reviews.attended + facts.reviews.madeUp,
+      reviewsOwed: facts.reviews.owed,
+      checksPassed: [facts.learningPass, facts.prayer.pass, facts.reviews.reviewPass].filter(Boolean).length,
+    } : null,
+    leaderboard: leaderboard?.me ? { rank: leaderboard.me.rank, points: leaderboard.me.points } : null,
+    group,
+    shareDayNumber: journey.days.find(row => row.dateKey === day)?.track?.dayNumber ?? lesson?.dayNumber ?? null,
+  } : null;
   return {
-    day, reports, card,
+    day, reports, card, sogp,
     learning: podcast ? {
       title: waiting ? `Day ${waiting.dayNumber} is waiting for you` : "Your current plan is complete",
       href: waiting ? `/dashboard/sogp/listen?day=${waiting.dayNumber}` : "/dashboard/sogp/plan",

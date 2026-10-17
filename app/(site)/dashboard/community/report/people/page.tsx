@@ -29,7 +29,7 @@ export default async function PeopleMetRoute() {
     return <div className="grid gap-8">
       <SavedContacts contacts={privateContacts} readOnly={!reportingV3Enabled()} />
       {contacts.length ? <details className="mx-auto w-full max-w-140 rounded-xl border border-(--color-line) bg-white">
-        <summary className="flex min-h-12 cursor-pointer items-center px-4 text-[14px] font-medium">People met in earlier reports ({contacts.length})</summary>
+        <summary className="flex min-h-10 cursor-pointer items-center px-4 text-[14px] font-medium">People met in earlier reports ({contacts.length})</summary>
         <div className="border-t border-(--color-line)"><OutreachContactBrowser contacts={contacts} today={lagosToday()} viewer={{ userId: ctx.userId, isAdmin: ctx.isAdmin }} canDelete emptyText="" /></div>
       </details> : null}
     </div>;

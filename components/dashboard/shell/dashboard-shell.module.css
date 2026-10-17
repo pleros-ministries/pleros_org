@@ -21,8 +21,8 @@
 .liveDrawer { padding-bottom: max(24px, env(safe-area-inset-bottom)); }
 .drawerAccount { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--color-line); }
 .accountActions { display: flex; gap: 8px; }
-.accountActions button, .accountActions a { min-height: 44px; border-radius: 11px; }
-.unavailableArea { display: flex; align-items: center; gap: 12px; min-height: 48px; padding: 0 12px; color: var(--color-text-muted); opacity: .55; }
+.accountActions button, .accountActions a { min-height: 36px; border-radius: 11px; }
+.unavailableArea { display: flex; align-items: center; gap: 12px; min-height: 38px; padding: 0 12px; color: var(--color-text-muted); opacity: .55; }
 .skipLink { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 .skipLink:focus { position: fixed; top: 8px; left: 8px; z-index: 60; width: auto; height: auto; clip-path: none; padding: 12px; background: white; }
 @media (min-width: 64rem) {

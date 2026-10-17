@@ -8,5 +8,5 @@ export default async function TraditionalSogpPage() {
   if (!session) redirect("/login?returnTo=/dashboard/sogp/traditional");
   const rows = await getSogpEnrollmentsWithCohortByUserId(session.user.id);
   if (!rows.length) redirect("/sogp/enrol");
-  return <><div className="site-shell-page sogp-shell-page py-3"><Link className="inline-flex min-h-11 items-center text-sm text-(--color-brand-blue)" href="/dashboard/sogp">← Back to My SOGP</Link></div><SogpDashboardBoundary /></>;
+  return <><div className="site-shell-page sogp-shell-page py-3"><Link className="inline-flex min-h-9 items-center text-sm text-(--color-brand-blue)" href="/dashboard/sogp">← Back to My SOGP</Link></div><SogpDashboardBoundary /></>;
 }

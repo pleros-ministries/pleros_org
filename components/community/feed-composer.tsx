@@ -210,7 +210,7 @@ export function FeedComposer({
             maxLength={POST_TITLE_MAX}
             required={isDiscussion}
             autoFocus
-            className={`${fieldClass} h-11 font-medium`}
+            className={`${fieldClass} h-[38px] font-medium`}
           />
           <textarea
             value={body}

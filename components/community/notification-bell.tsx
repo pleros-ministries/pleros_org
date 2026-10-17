@@ -184,7 +184,7 @@ export function NotificationBell({
       </button>
       {open ? (
         <div id={panelId} role="dialog" aria-label="Notifications" className={appearance === "dashboard" ? dashboardStyles.notificationPanel : `absolute z-40 w-72 rounded-sm border border-[var(--color-community-edge)] bg-white p-2 shadow-lg ${placement === "sidebar" ? "bottom-10 left-0" : "right-0 top-9"}`}>
-          {error ? <div role="alert" className="p-2 text-sm"><p>Notifications couldn’t be loaded.</p><button className="mt-2 min-h-11 text-[var(--color-community-blue)]" onClick={() => void refetch()}>Try again</button></div> : !data ? <p role="status" className="p-2 text-sm text-(--color-text-muted)">Loading notifications…</p> : items.length === 0 ? (
+          {error ? <div role="alert" className="p-2 text-sm"><p>Notifications couldn’t be loaded.</p><button className="mt-2 min-h-9 text-[var(--color-community-blue)]" onClick={() => void refetch()}>Try again</button></div> : !data ? <p role="status" className="p-2 text-sm text-(--color-text-muted)">Loading notifications…</p> : items.length === 0 ? (
             <p className="p-2 text-xs text-[var(--color-community-muted)]">Nothing yet.</p>
           ) : (
             <ul className="grid max-h-[min(20rem,calc(100dvh-8rem))] gap-1 overflow-y-auto">

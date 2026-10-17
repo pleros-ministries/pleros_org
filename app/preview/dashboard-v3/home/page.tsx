@@ -1,4 +1,4 @@
-import { dashboardFont } from "@/components/dashboard/v3/font";
+import { dashboardFont, dashboardHeadingFont } from "@/components/dashboard/v3/font";
 import styles from "@/components/dashboard/v3/dashboard.module.css";
 import { DashboardHomeView } from "@/components/dashboard/v3/home-view";
 import type { DashboardHomeData } from "@/lib/dashboard/home";
@@ -17,10 +17,26 @@ const cards: Record<string, DashboardHomeData["card"]> = {
   "podcast-one": { kind: "podcast", pace: 1, href: "#", series: "The Reality of God’s Purpose", dayNumber: 3, episodes: [{ part: "Part 3", duration: "13:34", durationSeconds: 814, positionSeconds: 480, listened: false }] },
 };
 
+const sogp: DashboardHomeData["sogp"] = {
+  cohortTitle: "SOGP October 2026",
+  weekLabel: "Week 2 of 4",
+  today: {
+    dateKey: "2026-10-16", dateLabel: "Friday 16 October", done: 1, total: 2,
+    week: ([["2026-10-12", "Mon", "complete"], ["2026-10-13", "Tue", "complete"], ["2026-10-14", "Wed", "missed"], ["2026-10-15", "Thu", "complete"], ["2026-10-16", "Fri", "current"], ["2026-10-17", "Sat", "future"], ["2026-10-18", "Sun", "future"]] as const)
+      .map(([dateKey, weekday, state]) => ({ dateKey, weekday, dayOfMonth: Number(dateKey.slice(8)), state, isToday: state === "current", hasReview: weekday === "Sun" })),
+    prayerWatch: { complete: true },
+    review: { title: "Level 2 group review", when: "Sunday 18 October", href: null, complete: false },
+  },
+  progress: { learningLabel: "Teachings", learningDone: 10, learningTotal: 24, prayerPercent: 83, prayerRequired: 80, reviewsSatisfied: 1, reviewsOwed: 4, checksPassed: 2 },
+  leaderboard: { rank: 7, points: 240 },
+  group: { kind: "member", groupName: "SOGP Discipleship Group", leaderFirstName: "Ada" },
+  shareDayNumber: null,
+};
+
 /** Labelled sample data only. */
 export default async function HomePreview({ searchParams }: { searchParams: Promise<{ card?: string }> }) {
   const { card = "start" } = await searchParams;
-  const data: DashboardHomeData = { day: "2026-10-16", reports, card: cards[card] ?? cards.start,
+  const data: DashboardHomeData = { day: "2026-10-16", reports, card: cards[card] ?? cards.start, sogp: card === "start" ? null : sogp,
     learning: { title: "", href: "#", action: "", completed: 0, total: 0, enrolled: card !== "start" } };
-  return <div className={`${dashboardFont.className} ${styles.root}`} data-dashboard-v3><p className="px-4 py-2 text-xs text-(--color-text-muted)">Visual preview · sample data · nothing saved</p><DashboardHomeView name="Tolu" greeting="Good morning" data={data} /></div>;
+  return <div className={`${dashboardFont.className} ${dashboardHeadingFont.variable} ${styles.root}`} data-dashboard-v3><p className="px-4 py-2 text-xs text-(--color-text-muted)">Visual preview · sample data · nothing saved</p><DashboardHomeView name="Tolu" greeting="Good morning" data={data} /></div>;
 }

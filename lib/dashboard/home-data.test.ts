@@ -1,6 +1,6 @@
 import { beforeEach, expect, test, vi } from "vitest";
 
-const reads = vi.hoisted(() => ({ course: vi.fn(), learning: vi.fn(), activities: vi.fn(), devotional: vi.fn(), declarations: vi.fn(), support: vi.fn(), context: vi.fn() }));
+const reads = vi.hoisted(() => ({ course: vi.fn(), learning: vi.fn(), activities: vi.fn(), devotional: vi.fn(), declarations: vi.fn(), support: vi.fn(), context: vi.fn(), journey: vi.fn(), facts: vi.fn(), leaderboard: vi.fn(), group: vi.fn() }));
 vi.mock("server-only", () => ({}));
 vi.mock("@/lib/community/context", () => ({ getCommunityContext: reads.context }));
 vi.mock("@/lib/db/queries/sogp", () => ({ getSogpDashboardData: reads.course }));
@@ -8,6 +8,10 @@ vi.mock("@/lib/db/queries/sogp-learning", () => ({ getOwnSogpLearning: reads.lea
 vi.mock("@/lib/db/queries/ministry-activities", () => ({ listActivitiesForDay: reads.activities, getDayActivity: reads.devotional }));
 vi.mock("@/lib/db/queries/daily-report-declarations", () => ({ getOwnDailyDeclarations: reads.declarations }));
 vi.mock("@/lib/db/queries/community-discipleship", () => ({ getOwnDisciplerSummary: reads.support }));
+vi.mock("@/lib/db/queries/sogp-journey", () => ({ getActiveSogpJourney: reads.journey }));
+vi.mock("@/lib/db/queries/sogp-certification-facts", () => ({ getOwnCertificationFacts: reads.facts }));
+vi.mock("@/lib/db/queries/sogp-leaderboard", () => ({ getSogpLeaderboard: reads.leaderboard }));
+vi.mock("@/lib/db/queries/sogp-discipleship", () => ({ getHomeDiscipleshipSummary: reads.group }));
 vi.mock("@/lib/sogp/daily-date", () => ({ lagosToday: () => "2026-10-13" }));
 import { getDashboardHomeData } from "./home-data";
 import type { getDashboardViewer } from "./viewer";
@@ -31,6 +35,10 @@ beforeEach(() => {
   reads.devotional.mockResolvedValue({ bible: null, prayerWatch: ["morning"], podcastEpisodes: 0, sogp: null });
   reads.declarations.mockResolvedValue([]);
   reads.support.mockResolvedValue(null);
+  reads.journey.mockResolvedValue(null);
+  reads.facts.mockResolvedValue(null);
+  reads.leaderboard.mockResolvedValue(null);
+  reads.group.mockResolvedValue({ kind: "none" });
 });
 test("the You home resumes the selected podcast path without awarding traditional credit",async () => {
   reads.learning.mockResolvedValue({ path: "podcast_two",revision: 2,plan: { episodesPerDay: 2,episodeGuids: ["a","b","c","d"],historyEpisodeGuids: ["older"] },progress: { listenedEpisodeGuids: ["a","older"],playbackPositions: [] } });
@@ -60,4 +68,10 @@ test("missing capabilities skip course/report/support reads rather than granting
 test("read failures propagate to the error boundary instead of manufacturing zero counts", async () => {
   reads.activities.mockRejectedValue(new Error("read failed"));
   await expect(getDashboardHomeData(viewer())).rejects.toThrow("read failed");
+});
+
+test("the SOGP projection degrades to hidden when the journey cannot load", async () => {
+  reads.journey.mockRejectedValue(new Error("journey failed"));
+  const data = await getDashboardHomeData(viewer(true));
+  expect(data.sogp).toBeNull();
 });

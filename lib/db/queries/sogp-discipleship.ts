@@ -2009,3 +2009,55 @@ export async function runDiscipleshipCron(now = new Date()) {
 
   return { alerts, digests };
 }
+
+export type HomeDiscipleshipSummary =
+  | { kind: "member"; groupName: string; leaderFirstName: string }
+  | { kind: "leader"; groups: number; disciples: number }
+  | { kind: "none" };
+
+/**
+ * The You home's group tile. Read-only on purpose: unlike
+ * `getDiscipleshipDashboard` it never creates the default group, and it
+ * returns names and counts only.
+ */
+export async function getHomeDiscipleshipSummary(userId: string): Promise<HomeDiscipleshipSummary> {
+  const [enrollment] = await db
+    .select({ id: schema.sogpEnrollments.id })
+    .from(schema.sogpEnrollments)
+    .where(eq(schema.sogpEnrollments.userId, userId))
+    .orderBy(desc(schema.sogpEnrollments.createdAt))
+    .limit(1);
+  if (!enrollment) return { kind: "none" };
+
+  const [[membership], led] = await Promise.all([
+    db
+      .select({
+        groupName: schema.discipleshipGroups.name,
+        leaderName: schema.sogpEnrollments.name,
+        leaderFirstName: schema.sogpEnrollments.firstName,
+      })
+      .from(schema.discipleshipMemberships)
+      .innerJoin(schema.discipleshipGroups, eq(schema.discipleshipGroups.id, schema.discipleshipMemberships.groupId))
+      .innerJoin(schema.sogpEnrollments, eq(schema.sogpEnrollments.id, schema.discipleshipGroups.leaderEnrollmentId))
+      .where(
+        and(
+          eq(schema.discipleshipMemberships.discipleEnrollmentId, enrollment.id),
+          eq(schema.discipleshipMemberships.status, "active"),
+          eq(schema.discipleshipGroups.status, "active"),
+        ),
+      )
+      .limit(1),
+    listLedGroups(enrollment.id),
+  ]);
+  if (membership) {
+    return {
+      kind: "member",
+      groupName: membership.groupName,
+      leaderFirstName: firstNameOf(membership.leaderFirstName || membership.leaderName),
+    };
+  }
+  if (!led.length) return { kind: "none" };
+  const counts = await countActiveMembersByGroup(led.map((group) => group.id));
+  const disciples = [...counts.values()].reduce((total, n) => total + n, 0);
+  return disciples > 0 ? { kind: "leader", groups: led.length, disciples } : { kind: "none" };
+}

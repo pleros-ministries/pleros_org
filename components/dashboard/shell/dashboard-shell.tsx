@@ -12,7 +12,7 @@ import { signOutDashboardAction } from "@/app/_actions/auth-actions";
 import DashboardLoading from "@/app/(site)/dashboard/loading";
 import { NotificationBell } from "@/components/community/notification-bell";
 import { DashboardIcon, RootHeader } from "@/components/dashboard/v3/primitives";
-import { dashboardFont } from "@/components/dashboard/v3/font";
+import { dashboardFont, dashboardHeadingFont } from "@/components/dashboard/v3/font";
 import { useTabSwipe } from "@/components/dashboard/v3/use-tab-swipe";
 import v3 from "@/components/dashboard/v3/dashboard.module.css";
 import type { DashboardNavSection } from "@/lib/dashboard/navigation";
@@ -172,7 +172,7 @@ export function DashboardShell({ viewer, sections, children, notificationControl
     return () => wide.removeEventListener("change", onChange);
   }, []);
 
-  return <div className={cn("pleros-select-scope site-font-theme min-h-dvh bg-white font-[family-name:var(--font-be-vietnam-pro)]", dashboardFont.variable, dashboardFont.className, v3.root, frame.root)}>
+  return <div className={cn("pleros-select-scope site-font-theme min-h-dvh bg-white font-[family-name:var(--font-be-vietnam-pro)]", dashboardFont.variable, dashboardHeadingFont.variable, dashboardFont.className, v3.root, frame.root)}>
     <a href="#dashboard-main" className={cn(frame.skipLink, focusRing)}>Skip to content</a>
     <aside className={frame.liveSidebar}>
       <div className={frame.sidebarScroll}><Profile viewer={viewer} /><ShellNavigation sections={sections} area={area} onArea={selectTab} /></div>

@@ -397,7 +397,7 @@ export function MessageThread({
                 placeholder="Write a message…"
                 rows={1}
                 maxLength={DM_BODY_MAX}
-                className="max-h-32 min-h-11 w-full resize-none rounded-2xl border border-[var(--color-community-edge)] bg-white px-3.5 py-2.5 text-base outline-none focus:border-[var(--color-community-edge-strong)]"
+                className="max-h-32 min-h-9 w-full resize-none rounded-2xl border border-[var(--color-community-edge)] bg-white px-3.5 py-2.5 text-base outline-none focus:border-[var(--color-community-edge-strong)]"
               />
             </label>
             <button

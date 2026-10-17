@@ -159,7 +159,7 @@ function EpisodeRow({
         <form ref={formRef} action={formAction}>
           <input type="hidden" name="episodeGuid" value={episode.guid} />
           <input type="hidden" name="listened" value={listened ? "true" : "false"} />
-          <label className="flex min-h-11 min-w-11 items-start justify-center pt-0.5">
+          <label className="flex min-h-9 min-w-9 items-start justify-center pt-0.5">
             <span className="sr-only">Mark {episode.title} as listened</span>
             <EpisodeProgressCheckbox
               episode={episode}

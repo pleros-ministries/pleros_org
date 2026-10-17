@@ -88,7 +88,7 @@ export function NewMessageDialog({
               placeholder="First name"
               autoFocus
               maxLength={40}
-              className="h-11 w-full rounded-xl border border-[var(--color-community-edge)] pl-9 pr-3 text-base outline-none focus:border-[var(--color-community-edge-strong)]"
+              className="h-[38px] w-full rounded-xl border border-[var(--color-community-edge)] pl-9 pr-3 text-base outline-none focus:border-[var(--color-community-edge-strong)]"
             />
           </label>
         ) : null}

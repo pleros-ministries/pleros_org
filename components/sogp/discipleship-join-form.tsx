@@ -57,7 +57,7 @@ export function DiscipleshipJoinForm({
         type="submit"
         size="lg"
         disabled={pending}
-        className="min-h-12 w-full rounded-full bg-[var(--color-brand-blue)] [font-size:0.875rem] text-white"
+        className="min-h-[38px] w-full rounded-full bg-[var(--color-brand-blue)] [font-size:0.875rem] text-white"
       >
         {pending ? <LoaderCircle className="size-4 animate-spin" aria-hidden="true" /> : null}
         Join {leaderFirstName}&apos;s group

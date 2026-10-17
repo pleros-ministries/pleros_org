@@ -410,7 +410,7 @@ export function ShareLearningProgressDialog({
                         kind: "image",
                       });
                     }}
-                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[var(--color-brand-blue)] px-5 text-sm font-semibold text-white disabled:opacity-50"
+                    className="inline-flex min-h-9 items-center justify-center gap-2 rounded-full bg-[var(--color-brand-blue)] px-5 text-sm font-semibold text-white disabled:opacity-50"
                   >
                     {imageMutation.isPending ? (
                       <>

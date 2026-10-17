@@ -93,7 +93,7 @@ describe("dashboard devotion tracking", () => {
 
     expect(podcastPage).toContain("grid-cols-[auto_minmax(0,1fr)]");
     expect(podcastPage).toContain('className="grid gap-1.5"');
-    expect(podcastPage).toContain("min-h-11 min-w-11");
+    expect(podcastPage).toContain("min-h-9 min-w-9");
     expect(podcastPage).toContain("size-5");
     expect(podcastPage).toContain("px-4 py-5");
     expect(podcastPage).toContain("h-10 pl-9");

@@ -98,7 +98,7 @@ export function CommunityUnitPage({
                 role="tab"
                 aria-selected={active}
                 onClick={() => setTab(item.key)}
-                className={`-mb-px inline-flex min-h-[44px] items-center gap-1.5 border-b-2 py-2.5 text-sm font-medium transition-colors ${
+                className={`-mb-px inline-flex min-h-9 items-center gap-1.5 border-b-2 py-2.5 text-sm font-medium transition-colors ${
                   active
                     ? "border-[var(--color-community-blue)] text-[var(--color-community-blue)]"
                     : "border-transparent text-[var(--color-community-muted)]"

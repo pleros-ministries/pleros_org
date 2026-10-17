@@ -23,7 +23,7 @@ const cardClass =
 const titleClass = "text-[15px] font-medium text-(--color-text-strong)";
 const noteClass = "text-[13px] leading-[1.5] text-(--color-text-muted)";
 const buttonClass =
-  "inline-flex min-h-12 w-full items-center justify-between gap-3 rounded-[11px] bg-(--color-brand-sky) px-4 text-sm font-medium text-(--color-brand-blue) disabled:opacity-60";
+  "inline-flex min-h-[38px] w-full items-center justify-between gap-3 rounded-[11px] bg-(--color-brand-sky) px-4 text-sm font-medium text-(--color-brand-blue) disabled:opacity-60";
 
 /**
  * In-app push-subscribe prompt. Button-initiated only, never auto-fired, so

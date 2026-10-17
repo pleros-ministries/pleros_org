@@ -8,11 +8,11 @@
 .groupPanel strong { font-size: 15px; font-weight: 500; }
 .meta { font-size: 13px; line-height: 20px; color: var(--color-text-muted); }
 .field { display: grid; gap: 8px; font-size: 13px; line-height: 20px; font-weight: 500; min-width: 0; }
-.field input, .field select, .groupPanel select { width: 100%; min-width: 0; min-height: 44px; padding: 8px 12px; border: 1px solid var(--color-line); border-radius: 11px; background: white; color: var(--color-text-strong); font-family: inherit; font-size: 16px; line-height: 24px; font-weight: 400; }
+.field input, .field select, .groupPanel select { width: 100%; min-width: 0; min-height: 38px; padding: 8px 12px; border: 1px solid var(--color-line); border-radius: 11px; background: white; color: var(--color-text-strong); font-family: inherit; font-size: 16px; line-height: 24px; font-weight: 400; }
 .times { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px; }
 .info { padding: 16px; border-radius: 12px; background: var(--color-surface-muted); color: var(--color-text-muted); font-size: 13px; line-height: 20px; }
 .footer { padding-top: 16px; border-top: 1px solid var(--color-line); }
-.primary { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 48px; padding: 12px 16px; width: 100%; border: 0; border-radius: 11px; background: var(--color-brand-blue); color: white; font-family: inherit; font-size: 14px; line-height: 22px; font-weight: 500; cursor: pointer; }
+.primary { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 38px; padding: 8px 16px; width: 100%; border: 0; border-radius: 11px; background: var(--color-brand-blue); color: white; font-family: inherit; font-size: 14px; line-height: 22px; font-weight: 500; cursor: pointer; }
 .primary:disabled { opacity: .6; cursor: default; }
 .page :is(button,input,select,a):focus-visible { outline: 2px solid var(--color-brand-blue); outline-offset: 3px; }
 .error { color: var(--destructive); font-size: 13px; line-height: 20px; }
@@ -21,10 +21,10 @@
 /* Named source variants: next-review title 18px; attendance-sheet title 17px. */
 .reviewCard .reviewTitle { font-size: 18px; line-height: 26px; font-weight: 500; margin: 0; }
 .reviewCard .attendanceTitle { font-size: 17px; line-height: 24px; font-weight: 500; margin: 0; }
-.rowLink { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 44px; width: 100%; color: var(--color-brand-blue); font-size: 14px; line-height: 22px; font-weight: 500; text-decoration: none; }
+.rowLink { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 36px; width: 100%; color: var(--color-brand-blue); font-size: 14px; line-height: 22px; font-weight: 500; text-decoration: none; }
 .empty { display: grid; gap: 8px; padding: 16px; border: 1px solid var(--color-line); border-radius: 12px; }
 .groupLinks { display: flex; flex-wrap: wrap; gap: 12px; }
-.groupLinks a { display: flex; align-items: center; min-height: 44px; padding: 8px 12px; border: 1px solid var(--color-line); border-radius: 11px; color: var(--color-brand-blue); font-size: 13px; }
+.groupLinks a { display: flex; align-items: center; min-height: 36px; padding: 8px 12px; border: 1px solid var(--color-line); border-radius: 11px; color: var(--color-brand-blue); font-size: 13px; }
 .groupLinks a[aria-current] { background: var(--status-blue-bg); }
 .attendee { display: grid; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--color-line); }
 .person { display: flex; align-items: center; gap: 12px; }
@@ -32,7 +32,7 @@
 .person strong { font-weight: 500; }
 .avatar { width: 36px; height: 36px; flex-shrink: 0; display: grid; place-items: center; border-radius: 50%; background: var(--status-neutral-bg); color: var(--status-neutral-text); font-size: 12px; font-weight: 500; }
 .attendanceChoices { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
-.attendanceChoices button { min-height: 44px; border: 1px solid var(--color-line); border-radius: 11px; background: white; color: var(--color-text-strong); font: inherit; font-weight: 500; }
+.attendanceChoices button { min-height: 36px; border: 1px solid var(--color-line); border-radius: 11px; background: white; color: var(--color-text-strong); font: inherit; font-weight: 500; }
 .attendanceChoices button[aria-pressed=true] { border-color: var(--color-brand-blue); background: var(--color-brand-blue); color: white; }
 .attendanceChoices button:disabled { cursor: default; }
 .offerChoices { display: grid; gap: 16px; margin: 0; padding: 0; border: 0; min-width: 0; }

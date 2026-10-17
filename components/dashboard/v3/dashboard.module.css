@@ -15,8 +15,8 @@
   --dashboard-gutter: 20px;
   --dashboard-card-radius: 16px;
   --dashboard-control-radius: 11px;
-  --dashboard-control-height: 48px;
-  --dashboard-hit-size: 44px;
+  --dashboard-control-height: 38px;
+  --dashboard-hit-size: 36px;
   --dashboard-status-height: 26px;
   --dashboard-status-radius: 999px;
   --dashboard-section-gap: 32px;
@@ -34,7 +34,7 @@
   font-size: 14px; line-height: 22px; font-synthesis: none;
   letter-spacing: var(--dashboard-tracking-body);
 }
-.root :is(h1, h2, h3) { font-family: var(--font-sen), "Sen", sans-serif; letter-spacing: var(--dashboard-tracking-heading); }
+.root :is(h1, h2, h3) { font-family: var(--font-dashboard-heading), "Sen", sans-serif; letter-spacing: var(--dashboard-tracking-heading); }
 .root :is(small, time) { letter-spacing: var(--dashboard-tracking-small); }
 .root *, .root *::before, .root *::after { box-sizing: border-box; }
 .header button, .dialog button, .iconButton, .lessonAction, .textAction, .planRow, .reportRow { font-family: inherit; cursor: pointer; }
@@ -42,7 +42,7 @@
 .header { position: sticky; top: 0; z-index: 10; height: 48px; padding: 2px 8px 2px 4px; display: flex; align-items: center; justify-content: space-between; background: white; }
 .iconButton { position: relative; display: grid; place-items: center; width: var(--dashboard-hit-size); height: var(--dashboard-hit-size); border: 0; background: transparent; color: var(--color-text); flex-shrink: 0; }
 .tabs { display: flex; align-items: center; gap: 8px; transform: translateX(2px); }
-.tabs button { position: relative; height: 44px; min-width: 44px; padding: 0 8px; border: 0; background: transparent; color: var(--color-text-muted); font-size: 14px; font-weight: 400; }
+.tabs button { position: relative; height: 36px; min-width: 36px; padding: 0 8px; border: 0; background: transparent; color: var(--color-text-muted); font-size: 14px; font-weight: 400; }
 .tabs button[aria-current] { font-weight: 600; color: var(--color-text); }
 .tabs button:disabled { opacity: .55; cursor: default; }
 .tabs button[aria-current]::after { content: ""; position: absolute; bottom: 3px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; border-radius: 50%; background: var(--color-brand-blue); }
@@ -65,48 +65,61 @@
   overflow: hidden;
   border-radius: var(--dashboard-card-radius);
   background-color: var(--color-brand-blue);
-  background-position: center;
+  /* Anchored to the staircase corner, so the art never shifts as the card's
+     width changes; copy scales with the card instead of wrapping. */
+  background-position: right -22px bottom -30px;
   background-repeat: no-repeat;
-  background-size: cover;
+  background-size: auto 114%;
   color: white;
   box-shadow: 0 12px 28px rgb(32 86 214 / 18%);
+  container-type: inline-size;
 }
-.homeLearningTopline { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.homeLearningTopline { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-width: 0; }
 .homeLearningLabel {
   min-height: var(--dashboard-hit-size);
   display: inline-flex;
   align-items: center;
   margin-block: -9px;
   color: #d8ff65;
-  font-size: 13px;
+  font-size: clamp(11px, 3.9cqi, 13px);
   line-height: 20px;
   font-weight: 500;
   letter-spacing: .06em;
   text-decoration: none;
   text-transform: uppercase;
+  white-space: nowrap;
+  flex: none;
 }
 .homeLearningPace {
-  display: inline-flex;
-  align-items: center;
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 32px !important;
   min-height: 34px;
-  padding: 0 12px;
+  min-width: 0;
+  padding: 0 clamp(8px, 3.4cqi, 12px);
   border: 1px solid rgb(255 255 255 / 12%);
   border-radius: 999px;
   background: rgb(255 255 255 / 12%);
   color: #eef4ff;
-  font-size: 12px;
+  font-size: clamp(10px, 3.5cqi, 12px);
   line-height: 18px;
   white-space: nowrap;
 }
 .homeLearningTitle {
-  max-width: 88%;
+  max-width: 100%;
   margin: 19px 0 0;
+  overflow: hidden;
   color: white;
-  font-size: 24px;
-  line-height: 32px;
+  font-size: clamp(18px, 7cqi, 24px);
+  line-height: 1.34;
   font-weight: 500;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
-.homeLearningSummary { margin: 5px 0 0; color: #eef4ff; font-size: 14px; line-height: 22px; }
+/* Wider desktop cards would outgrow the scaled art; plain cover keeps the blue field whole. */
+@media (min-width: 64rem) { .homeLearningCard { background-size: cover; background-position: right bottom; } }
+.homeLearningSummary { margin: 5px 0 0; overflow: hidden; color: #eef4ff; font-size: clamp(13px, 4.2cqi, 14px); line-height: 22px; white-space: nowrap; text-overflow: ellipsis; }
 .homeLearningProgressRow { display: flex; align-items: center; gap: 12px; width: 72%; margin-top: 16px; color: white; font-size: 13px; line-height: 20px; font-weight: 500; }
 .homeLearningProgress { flex: 1; height: 4px; overflow: hidden; border-radius: 999px; background: rgb(255 255 255 / 24%); }
 .homeLearningProgress span { display: block; height: 100%; border-radius: inherit; background: #d8ff65; }
@@ -117,10 +130,10 @@
   align-items: center;
   justify-content: space-between;
   justify-self: start;
-  min-width: 190px;
+  min-width: 176px;
   min-height: var(--dashboard-control-height);
   margin-top: 18px;
-  padding: 0 16px;
+  padding: 0 14px;
   border-radius: var(--dashboard-control-radius);
   background: white;
   color: var(--color-brand-blue);
@@ -129,26 +142,6 @@
   font-weight: 500;
   text-decoration: none;
 }
-.homeReportsCard {
-  display: block;
-  margin-top: 20px;
-  padding: 20px;
-  border: 1px solid var(--color-community-edge, var(--color-line));
-  border-radius: var(--dashboard-card-radius);
-  background: white;
-  color: var(--color-text);
-  box-shadow: var(--shadow-sm);
-  text-decoration: none;
-}
-.homeReportsHeader { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
-.homeReportsHeader > span { display: grid; gap: 1px; }
-.homeReportsHeader h2 { margin: 0; font-size: 24px; line-height: 32px; font-weight: 500; letter-spacing: var(--dashboard-tracking-heading); }
-.homeReportsHeader span span { color: var(--color-text-muted); font-size: 13px; line-height: 20px; }
-.homeReportsHeader > svg { margin-top: 6px; color: var(--color-text-muted); flex-shrink: 0; }
-.homeReportsSummary { display: block; margin-top: 3px; color: var(--color-text-muted); font-size: 14px; line-height: 22px; }
-.homeReportList { display: block; margin-top: 18px; }
-.homeReportRow { position: relative; display: flex; align-items: center; gap: 12px; min-height: 72px; padding: 10px 0; }
-.homeReportRow:not(:last-child)::after { content: ""; position: absolute; left: 48px; right: 0; bottom: 0; height: 1px; background: var(--color-line); }
 .homeReportIcon { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; flex: 0 0 auto; color: var(--status-neutral-text); background: var(--status-neutral-bg); }
 .homeReportIcon[data-tone="amber"] { color: var(--status-amber-text); background: var(--status-amber-bg); }
 .homeReportIcon[data-tone="green"] { color: var(--status-green-text); background: var(--status-green-bg); }
@@ -158,7 +151,7 @@
 .learning { margin-top: 24px; }
 .sectionHeader { display: flex; align-items: center; justify-content: space-between; min-height: 22px; gap: 12px; }
 .sectionHeader h2, .support h2 { font-size: 15px; font-weight: 500; line-height: 22px; margin: 0; }
-.textAction { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; background: transparent; border: 0; color: var(--color-brand-blue); font-size: 13px !important; font-weight: 500 !important; min-height: 44px; padding: 0; margin-block: -11px; }
+.textAction { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; background: transparent; border: 0; color: var(--color-brand-blue); font-size: 13px !important; font-weight: 500 !important; min-height: 36px; padding: 0; margin-block: -7px; }
 /* Pleros-you source has 20px side/top inset and 12px below its 48px
    action. This conflicts with the contract's blanket 20px padding: flag
    this named source variation in the baseline discrepancy list. */
@@ -197,7 +190,7 @@
 .dialog h2 { font-size: 24px; line-height: 32px; font-weight: 500; }
 .dialog p { margin: 12px 0; }
 .dialog a { color: var(--color-brand-blue); display: block; padding: 11px 0; }
-.dialog button { min-height: 44px; }
+.dialog button { min-height: 36px; }
 .drawer { margin: 0 auto 0 0; border-radius: 0; height: 100dvh; max-height: 100dvh; width: min(330px, 88vw); padding: 10px 20px 24px; }
 .drawer .dialogHeading button { margin-right: -4px; }
 .dialogHeading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
@@ -208,22 +201,16 @@
 .profileName { font-size: 15px; line-height: 22px; font-weight: 500; color: var(--color-text); overflow-wrap: anywhere; }
 .profileAction { font-size: 14px; line-height: 22px; color: var(--color-brand-blue); }
 .drawerRoots { display: grid; gap: 12px; padding-block: 22px 24px; margin-top: 12px; border-block: 1px solid var(--color-line); }
-.drawerRoots a { display: flex !important; align-items: center; gap: 12px; min-height: 48px; padding: 0 12px !important; color: var(--color-text); border-radius: 10px; text-decoration: none; }
+.drawerRoots a { display: flex !important; align-items: center; gap: 12px; min-height: 38px; padding: 0 12px !important; color: var(--color-text); border-radius: 10px; text-decoration: none; }
 .drawerRoots a[aria-current] { background: var(--status-blue-bg); color: var(--color-brand-blue); font-weight: 500; }
 .workspace { margin-top: 24px; }
 .workspace p { font-size: 13px; line-height: 20px; font-weight: 500; color: var(--color-text-muted); margin: 0 0 12px; }
-.workspace a { display: flex !important; align-items: center; gap: 12px; min-height: 48px; margin-bottom: 8px; padding: 0 4px 0 12px !important; border-radius: 10px; text-decoration: none; color: var(--color-text); }
+.workspace a { display: flex !important; align-items: center; gap: 12px; min-height: 38px; margin-bottom: 8px; padding: 0 4px 0 12px !important; border-radius: 10px; text-decoration: none; color: var(--color-text); }
 .workspace a svg { color: var(--color-text-muted); flex-shrink: 0; }
 .workspace a span { flex: 1; }
 .previewNote { margin: 32px 0 0; font-size: 12px; color: var(--color-text-muted); }
 @media (max-width: 359px) {
-  .homeLearningTopline { align-items: flex-start; flex-direction: column; gap: 7px; }
-  .homeLearningLabel { margin-bottom: -5px; }
-  .homeLearningPace { align-self: flex-start; }
-  .homeLearningTitle { max-width: 100%; margin-top: 14px; }
   .homeLearningProgressRow { width: 80%; }
-  .homeReportRow { align-items: flex-start; flex-wrap: wrap; }
-  .homeReportRow .pill { margin-left: 48px; }
   .reportRow { gap: 10px; flex-wrap: wrap; }
   .reportRow .pill { margin-left: 30px; }
   .person { flex-wrap: wrap; }
@@ -266,3 +253,93 @@
 .episodeLine { display: flex; justify-content: space-between; gap: 12px; font-weight: 500; }
 .episodeLine > span:first-child { display: inline-flex; align-items: center; gap: 8px; }
 .doneText { font-size: 13px; line-height: 20px; color: var(--status-green-text); font-weight: 400; }
+
+/* SOGP-centric You home (17 October): the original learning card leads, then
+   the old SOGP dashboard's day, checklist and progress in v3 rows, then
+   illustrated tiles. Tiles use complementary palettes, never a second blue hero. */
+.homeGreeting { display: grid; gap: 2px; }
+.homeGreeting .metadata { margin: 0; }
+.homeMain > .homeLearningCard { margin-top: 20px; }
+.homeSection { margin-top: var(--dashboard-section-gap); }
+.homeSectionHeader { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 22px; margin-bottom: 12px; }
+.homeSectionHeader h2 { margin: 0; font-size: 15px; line-height: 22px; font-weight: 500; }
+.homePanel { padding: 4px 16px; border: 1px solid var(--color-community-edge, var(--color-line)); border-radius: var(--dashboard-card-radius); background: white; box-shadow: var(--shadow-sm); }
+.homeTodayHead { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding-top: 12px; }
+.homeWeek { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; margin: 10px 0 0; padding: 0 0 12px; list-style: none; border-bottom: 1px solid var(--color-line); }
+.homeWeek li { display: grid; justify-items: center; gap: 4px; min-width: 0; padding: 6px 0; border-radius: 12px; color: var(--color-text-muted); font-size: 12px; line-height: 18px; letter-spacing: var(--dashboard-tracking-small); }
+.homeWeek b { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; font-size: 13px; line-height: 20px; font-weight: 500; color: var(--color-text); background: var(--color-surface-muted); }
+.homeWeek i { width: 4px; height: 4px; border-radius: 50%; }
+.homeWeek i[data-review] { background: var(--color-brand-blue); }
+.homeWeek li[data-state="complete"] b { background: var(--status-green-bg); color: var(--status-green-text); }
+.homeWeek li[data-state="missed"] b { background: var(--color-community-red-soft, #fff0f0); color: var(--color-community-red-ink, #a33131); }
+.homeWeek li[data-state="future"] b, .homeWeek li[data-state="outside"] b { color: var(--color-text-muted); }
+.homeWeek li[data-today] { background: var(--status-blue-bg); color: var(--status-blue-text); font-weight: 500; }
+.homeWeek li[data-today] b { background: white; color: var(--color-brand-blue); box-shadow: inset 0 0 0 2px var(--color-brand-blue); }
+.homeTaskRow { position: relative; display: flex; align-items: center; gap: 12px; min-height: 72px; padding: 10px 0; }
+.homeTaskRow:not(:last-child)::after { content: ""; position: absolute; left: 48px; right: 0; bottom: 0; height: 1px; background: var(--color-line); }
+.homeInlineLink { color: var(--color-brand-blue); font-weight: 500; text-decoration: none; }
+.homeError { color: var(--color-community-red-ink, #a33131); font-size: 13px; line-height: 20px; }
+.homeTick { display: grid; place-items: center; width: var(--dashboard-hit-size); height: var(--dashboard-hit-size); margin-right: -8px; border: 0; background: transparent; cursor: pointer; flex: none; }
+.homeTick > span { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid var(--color-community-edge, var(--color-line)); color: var(--status-green-text); }
+.homeTick[data-complete="true"] > span { border-color: var(--status-green-bg); background: var(--status-green-bg); }
+.homeTick:disabled { cursor: progress; opacity: .7; }
+.homeProgressRow, .homeProgressLink { position: relative; display: flex; align-items: center; gap: 12px; min-height: 36px; }
+.homeProgressRow > span:first-child { width: 112px; flex: none; }
+.homeProgressRow b { min-width: 58px; text-align: right; font-size: 13px; line-height: 20px; font-weight: 500; }
+.homeProgressRow::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: var(--color-line); }
+.homeMeter { flex: 1; height: 4px; overflow: hidden; border-radius: 999px; background: var(--status-neutral-bg); }
+.homeMeter > span { display: block; height: 100%; border-radius: inherit; background: var(--color-brand-blue); }
+.homeMeter[data-tone="amber"] > span { background: #e0a03a; }
+.homeMeter[data-tone="lilac"] > span { background: #7a4ad6; }
+.homeProgressLink { min-height: 46px; color: var(--color-text); text-decoration: none; }
+.homeProgressLink > span:first-child { flex: 1; }
+.homeProgressLink > svg { margin-right: -4px; color: var(--color-text-muted); flex: none; }
+
+/* Illustrated tiles with paper grain; copy and actions sit above the art. */
+.homeTiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.homeTile, .homeRailTile { position: relative; isolation: isolate; overflow: hidden; display: grid; align-content: space-between; gap: 12px; min-height: 168px; padding: 14px 14px 12px; border: 0; border-radius: var(--dashboard-card-radius); text-align: left; text-decoration: none; font: inherit; cursor: pointer; }
+.homeTile::after, .homeRailTile::after { content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: .22; mix-blend-mode: soft-light;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.homeTileCopy, .homeTileAction { position: relative; z-index: 2; }
+.homeTileCopy { display: grid; gap: 2px; }
+.homeTileCopy h3 { margin: 0; font-size: 15px; line-height: 22px; font-weight: 500; }
+.homeTileCopy p { margin: 0; font-size: 12.5px; line-height: 18px; opacity: .85; }
+.homeTileAction { display: inline-flex; align-items: center; gap: 4px; min-height: 22px; font-size: 13px; line-height: 20px; font-weight: 500; }
+.homeTileArt { position: absolute; right: 0; bottom: 0; z-index: 1; pointer-events: none; transform: scale(.82); transform-origin: right bottom; }
+.homeRank { font-family: var(--font-dashboard-heading), "Sen", sans-serif; font-size: 30px; line-height: 36px; font-weight: 500; letter-spacing: -0.03em; }
+.homeTile[data-tone="teal"] { background: #0f3d3e; color: white; }
+.homeTile[data-tone="teal"] p { color: #c9e4dc; opacity: 1; }
+.homeTile[data-tone="teal"] .homeTileAction { color: #ffd479; }
+.homeTile[data-tone="lime"] { background: #eaf7d4; color: #23400a; }
+.homeTile[data-tone="lilac"] { background: #ece3fb; color: #3e1876; }
+.homeTile[data-tone="sand"] { background: #f6ecd9; color: #5a3d0c; }
+.homeTile:focus-visible, .homeRailTile:focus-visible { outline: 2px solid var(--color-brand-blue); outline-offset: 3px; }
+.homeReportsCompact { display: flex; align-items: center; gap: 12px; padding: 14px 12px 14px 16px; border: 1px solid var(--color-community-edge, var(--color-line)); border-radius: var(--dashboard-card-radius); background: white; box-shadow: var(--shadow-sm); color: var(--color-text); text-decoration: none; }
+.homeReportsCompact > svg { color: var(--color-text-muted); flex: none; }
+.homePillRow { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.homeRail { display: flex; gap: 10px; margin: 0 calc(-1 * var(--dashboard-gutter)); padding: 0 var(--dashboard-gutter) 4px; list-style: none; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: var(--dashboard-gutter); scrollbar-width: none; }
+.homeRail li { flex: 0 0 148px; scroll-snap-align: start; }
+.homeRailTile { min-height: 156px; align-content: start; padding: 12px; border-radius: 14px; }
+.homeRailTile h3 { font-size: 14px; line-height: 20px; }
+.homeRailTile p { font-size: 12px; line-height: 16px; }
+.homeRailTile[data-tone="butter"] { background: #fff3c9; color: #5a4508; }
+.homeRailTile[data-tone="sky"] { background: #dcefff; color: #0e3f73; }
+.homeRailTile[data-tone="periwinkle"] { background: #e4ebfd; color: #1c2f86; }
+.homeRailTile[data-tone="peach"] { background: #fde6dc; color: #7a2e12; }
+@media (max-width: 359px) {
+  .homeProgressRow > span:first-child { width: 92px; }
+  .homeWeek b { width: 28px; height: 28px; }
+}
+/* Desktop: learning and today on the left, tiles and reports beside them. */
+@media (min-width: 64rem) {
+  .content.homeContent { max-width: 1080px; padding-inline: 40px; display: grid; grid-template-columns: minmax(0, 1fr) 340px; column-gap: 28px; align-items: start; }
+  .homeGreeting, .homeWide { grid-column: 1 / -1; }
+  .homeSide > .homeSection:first-child { margin-top: 20px; }
+  .homeRail { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 0; padding: 0; overflow: visible; }
+  .homeRail li { flex: none; }
+  .homeTileArt { transform: none; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .homeTile, .homeRailTile { transition: transform 160ms cubic-bezier(.2, 0, 0, 1); }
+  .homeTile:active, .homeRailTile:active { transform: scale(.98); }
+}

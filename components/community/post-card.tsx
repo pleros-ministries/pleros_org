@@ -190,7 +190,7 @@ function PostEditForm({
         aria-label="Title"
         maxLength={POST_TITLE_MAX}
         required={isDiscussion}
-        className={`${fieldClass} h-11 font-medium`}
+        className={`${fieldClass} h-[38px] font-medium`}
       />
       <textarea
         value={body}
@@ -541,7 +541,7 @@ export function PostCard({
       </div>
 
       <div className="mx-3 flex items-center gap-1 border-t border-[var(--color-community-edge)] py-1">
-        <span className="grid min-h-[44px] min-w-[44px] flex-1 place-items-center"><button
+        <span className="grid min-h-9 min-w-9 flex-1 place-items-center"><button
           type="button"
           disabled={pending}
           onClick={like}
@@ -559,7 +559,7 @@ export function PostCard({
           />
           Like
         </button></span>
-        <span className="grid min-h-[44px] min-w-[44px] flex-1 place-items-center"><button
+        <span className="grid min-h-9 min-w-9 flex-1 place-items-center"><button
           type="button"
           onClick={() => setShowComments((v) => !v)}
           className={`${actionButton} w-full text-[var(--color-community-ink)]`}
@@ -569,7 +569,7 @@ export function PostCard({
         </button></span>
         {/* A post in a discipleship or member group has no Share. */}
         {staysInGroup ? null : (
-          <span className="grid min-h-[44px] min-w-[44px] flex-1 place-items-center"><ShareMenu
+          <span className="grid min-h-9 min-w-9 flex-1 place-items-center"><ShareMenu
             post={post}
             viewerUnitName={viewerUnitName}
             canRepost={canRepost}

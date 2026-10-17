@@ -61,7 +61,7 @@ export function FeedToolbar({
         onChange={(event) =>
           onChange(parseFeedView({ sort: event.target.value, filter: view.filter }))
         }
-        className="inline-flex min-h-[44px] max-w-[145px] items-center rounded-md border border-[var(--color-community-edge)] bg-white pl-2.5 text-[12px] font-medium text-[var(--color-community-ink)]"
+        className="inline-flex min-h-9 max-w-[145px] items-center rounded-md border border-[var(--color-community-edge)] bg-white pl-2.5 text-[12px] font-medium text-[var(--color-community-ink)]"
       >
         {FEED_SORTS.map((sort) => (
           <option key={sort} value={sort}>{FEED_SORT_LABELS[sort]}</option>

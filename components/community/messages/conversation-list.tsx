@@ -39,7 +39,7 @@ export function ConversationList({ activeId }: { activeId: number | null }) {
         <h1 className="text-[18px] font-medium leading-[26px] text-[var(--color-community-ink)]">
           Messages
         </h1>
-        <span className="grid min-h-[44px] min-w-[44px] place-items-center"><button
+        <span className="grid min-h-9 min-w-9 place-items-center"><button
           type="button"
           onClick={() => setComposing(true)}
           className="inline-flex min-h-[28px] items-center gap-1.5 rounded-full bg-[var(--color-community-blue)] px-2.5 text-[14px] font-medium text-white"

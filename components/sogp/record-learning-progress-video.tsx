@@ -303,7 +303,7 @@ export function RecordLearningProgressVideo({
             <button
               type="button"
               onClick={stopRecording}
-              className="inline-flex min-h-11 items-center gap-2 rounded-full bg-red-600 px-5 text-sm font-semibold text-white"
+              className="inline-flex min-h-9 items-center gap-2 rounded-full bg-red-600 px-5 text-sm font-semibold text-white"
             >
               <Square className="size-3.5 fill-current" /> Stop recording
             </button>
@@ -316,7 +316,7 @@ export function RecordLearningProgressVideo({
               type="button"
               disabled={status !== "ready"}
               onClick={startRecording}
-              className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--color-brand-blue)] px-5 text-sm font-semibold text-white disabled:opacity-50"
+              className="inline-flex min-h-9 items-center gap-2 rounded-full bg-[var(--color-brand-blue)] px-5 text-sm font-semibold text-white disabled:opacity-50"
             >
               <Camera className="size-4" /> Start recording
             </button>

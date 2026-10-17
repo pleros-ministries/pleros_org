@@ -43,7 +43,7 @@ export function SogpLessonMedia({
       href={media.src}
       target="_blank"
       rel="noreferrer"
-      className="inline-flex min-h-11 w-fit items-center gap-2 rounded-full border border-[var(--color-brand-blue)] px-5 text-sm font-semibold text-[var(--color-brand-blue)]"
+      className="inline-flex min-h-9 w-fit items-center gap-2 rounded-full border border-[var(--color-brand-blue)] px-5 text-sm font-semibold text-[var(--color-brand-blue)]"
     >
       Open teaching video
       <ExternalLinkIcon className="size-4" aria-hidden="true" />

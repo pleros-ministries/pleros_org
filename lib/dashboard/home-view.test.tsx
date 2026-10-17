@@ -1,5 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server";
-import { expect, test } from "vitest";
+import { expect, test, vi } from "vitest";
+
+vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 
 import { DashboardHomeView } from "@/components/dashboard/v3/home-view";
 import type { DashboardHomeData } from "./home";
@@ -34,11 +36,12 @@ const data: DashboardHomeData = {
   },
 };
 
-test("the You home renders only My learning and My reports as primary destinations", () => {
+test("the You home leads with My learning and keeps reports as a compact summary", () => {
   const html = renderToStaticMarkup(<DashboardHomeView name="Ada" greeting="Good evening" data={data} />);
 
   expect(html).toContain("My learning");
-  expect(html).toContain("<h2>My reports</h2>");
+  expect(html).toContain(">My reports</h2>");
+  expect(html).toContain("More from Pleros");
   expect(html).not.toContain("My support");
   expect(html).not.toContain("Today’s two episodes");
 });
@@ -60,8 +63,39 @@ test("the reports destination is date-pinned and keeps the approved category sum
 
   expect(html).toContain('href="/dashboard/community/report?day=2026-10-16"');
   expect(html).toContain("Friday 16 October");
-  expect(html).toContain("1 of 3 categories reported");
+  expect(html).toContain("1 of 3 reported");
   expect(html).toContain("Not confirmed");
   expect(html).toContain("Not reported");
   expect(html).toContain("Nil declared");
+});
+
+const sogp: NonNullable<DashboardHomeData["sogp"]> = {
+  cohortTitle: "SOGP October 2026",
+  weekLabel: "Week 2 of 4",
+  today: {
+    dateKey: "2026-10-16", dateLabel: "Friday 16 October", done: 1, total: 2,
+    week: [{ dateKey: "2026-10-15", weekday: "Thu", dayOfMonth: 15, state: "missed", isToday: false, hasReview: false }, { dateKey: "2026-10-16", weekday: "Fri", dayOfMonth: 16, state: "current", isToday: true, hasReview: false }],
+    prayerWatch: { complete: true },
+    review: { title: "Level 2 group review", when: "Sunday 18 October", href: null, complete: false },
+  },
+  progress: { learningLabel: "Episodes", learningDone: 7, learningTotal: 30, prayerPercent: 83, prayerRequired: 80, reviewsSatisfied: 1, reviewsOwed: 4, checksPassed: 1 },
+  leaderboard: { rank: 7, points: 240 },
+  group: { kind: "member", groupName: "SOGP Discipleship Group", leaderFirstName: "Tolu" },
+  shareDayNumber: 4,
+};
+
+test("the SOGP sections bring the old dashboard's day, checklist, progress and tiles onto the home", () => {
+  const html = renderToStaticMarkup(<DashboardHomeView name="Ada" greeting="Good evening" data={{ ...data, sogp }} />);
+
+  expect(html).toContain("SOGP October 2026 · Week 2 of 4");
+  expect(html).toContain("Friday 16 October");
+  expect(html).toContain("1 of 2 done");
+  expect(html).toContain("5:30 am Prayer Watch");
+  expect(html).toContain('aria-pressed="true"');
+  expect(html).toContain("7 of 30");
+  expect(html).toContain("1 of 3 checks");
+  expect(html).toContain('href="/dashboard/sogp/leaderboard"');
+  expect(html).toContain("#7");
+  expect(html).toContain("Tolu&#x27;s group");
+  expect(html).toContain('href="/partner"');
 });
