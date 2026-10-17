@@ -21,8 +21,11 @@ function CountCard({ href, count, label, description, icon, tone, capped }: { hr
     : <div className={styles.count} data-tone={tone} aria-label={`${count} ${description}`}>{body}</div>;
 }
 
-function GroupCard({ href, art, title, meta, prefetch }: { href: string; art: GroupArt; title: string; meta: string; prefetch?: false }) {
-  return <Link href={href} prefetch={prefetch} className={styles.groupCard} data-art={art} title={title}>
+/** Groups you lead share one illustration in three colourways, cycled oldest-first so neighbours differ. */
+const leadColourways = ["lilac", "teal", "coral"] as const;
+
+function GroupCard({ href, art, title, meta, prefetch, colourway }: { href: string; art: GroupArt; title: string; meta: string; prefetch?: false; colourway?: string }) {
+  return <Link href={href} prefetch={prefetch} className={styles.groupCard} data-art={art} data-colourway={colourway} title={title}>
     <span className={styles.groupTop}><span className={styles.groupTag}>{groupTag[art]}</span><h3>{title}</h3></span>
     <span className={styles.groupMeta}>{meta}</span>
   </Link>;
@@ -57,7 +60,7 @@ export function CommunityHomeV3({ data }: { data: CommunityHomeData }) {
       <div className={styles.groupGrid}>
         {data.locationGroup ? <GroupCard href={`/dashboard/community/unit/${data.locationGroup.id}`} art="location" title={data.locationGroup.name} meta="Your location group" /> : null}
         {data.joinedGroup ? <GroupCard href={`/dashboard/community/discipleship?group=${data.joinedGroup.groupId}`} art="discipleship" title={data.joinedGroup.groupName} meta="You're a member" /> : null}
-        {data.ledGroups.map(group => <GroupCard key={`led-${group.groupId}`} href={group.discipleCount ? `/dashboard/community/discipleship?group=${group.groupId}` : `/dashboard/sogp/discipleship?group=${group.groupId}`} prefetch={false} art="leading" title={group.groupName} meta={group.discipleCount ? `${group.discipleCount} ${group.discipleCount === 1 ? "disciple" : "disciples"}` : "Invite your first disciple"} />)}
+        {data.ledGroups.map((group, index) => <GroupCard key={`led-${group.groupId}`} href={group.discipleCount ? `/dashboard/community/discipleship?group=${group.groupId}` : `/dashboard/sogp/discipleship?group=${group.groupId}`} prefetch={false} art="leading" colourway={leadColourways[index % leadColourways.length]} title={group.groupName} meta={group.discipleCount ? `${group.discipleCount} ${group.discipleCount === 1 ? "disciple" : "disciples"}` : "Invite your first disciple"} />)}
         {data.memberGroups.map(group => <GroupCard key={`member-${group.id}`} href={`/dashboard/community/groups/${group.id}`} art={group.privacy === "private" ? "private" : "public"} title={group.name} meta={group.viewerRole === "owner" ? "You own this group" : group.viewerRole === "moderator" ? "You moderate" : "Member"} />)}
         <Link href="/dashboard/community/groups?create=1" className={styles.newGroup}>
           <span className={styles.newGroupIcon}><DashboardIcon name="plus" size={16} /></span>
