@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ImagePlusIcon, XIcon } from "lucide-react";
+import { ImagePlusIcon, XIcon, TagIcon, GlobeIcon } from "lucide-react";
 
 import type { PostImage, PostScope } from "@/lib/db/queries/community-posts";
 import { POSTING_PAUSED_COPY } from "@/lib/community/errors";
@@ -17,6 +17,7 @@ import { createPost } from "@/app/(site)/dashboard/community/_actions/feed-actio
 import { useUploadThing } from "@/lib/upload/uploadthing-client";
 
 import { Avatar } from "./avatar";
+import { ChipSelect } from "./chip-select";
 
 const MAX_IMAGES = 4;
 
@@ -238,7 +239,7 @@ export function FeedComposer({
       ) : null}
 
       {/* Toolbar: attach and audience on the left, Cancel and Post on the right. */}
-      <div className="flex items-center gap-1 border-t border-[var(--color-line,#e7e9ec)] px-2 py-1.5">
+      <div className="flex items-center gap-1.5 border-t border-[var(--color-line,#e7e9ec)] px-2 py-1.5">
         <input
           ref={fileRef}
           type="file"
@@ -261,36 +262,29 @@ export function FeedComposer({
         </button>
 
         {isDiscussion ? (
-          <select
+          <ChipSelect
+            label="Topic"
+            icon={TagIcon}
             value={topic}
-            onChange={(e) => setTopic(e.target.value)}
-            aria-label="Topic"
-            className={`h-8 max-w-[8.5rem] rounded-lg border-0 bg-transparent pl-1.5 text-[12.5px] font-medium ${
-              topic ? "text-[var(--color-community-ink)]" : "text-[var(--color-community-muted)]"
-            }`}
-          >
-            <option value="">Topic</option>
-            {COMMUNITY_TOPICS.map((option) => (
-              <option key={option.key} value={option.key}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+            placeholder="Topic"
+            menuTitle="Topic"
+            options={[{ value: "", label: "No topic" }, ...COMMUNITY_TOPICS.map((option) => ({ value: option.key, label: option.label }))]}
+            onChange={setTopic}
+          />
         ) : null}
 
         {unitName && !lockScope ? (
-          <select
+          <ChipSelect
+            label="Where to post"
+            icon={GlobeIcon}
             value={scope}
-            onChange={(e) => setScope(e.target.value as PostScope)}
-            aria-label="Where to post"
-            className="h-8 max-w-[9rem] rounded-lg border-0 bg-transparent pl-1.5 text-[12.5px] font-medium text-[var(--color-community-ink)]"
-          >
-            <option value="global">Everyone</option>
-            <option value="unit">{unitName}</option>
-          </select>
+            menuTitle="Post to"
+            options={[{ value: "global", label: "Everyone" }, { value: "unit", label: unitName }]}
+            onChange={(next) => setScope(next as PostScope)}
+          />
         ) : null}
 
-        <div className="ml-auto flex items-center gap-1">
+        <div className="ml-auto flex shrink-0 items-center gap-1">
           <button
             type="button"
             onClick={reset}
