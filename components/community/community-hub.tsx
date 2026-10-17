@@ -26,7 +26,7 @@ export function CommunityHub({
 }) {
   return (
     <div className="grid gap-3.5">
-      <h1 data-dashboard-page-title className="m-0 font-[family-name:var(--font-dashboard-heading)] text-[21px] font-medium leading-[28px] tracking-[-0.02em] text-[var(--color-community-ink)]">
+      <h1 className="m-0 font-[family-name:var(--font-dashboard-heading)] text-[21px] font-medium leading-[28px] tracking-[-0.02em] text-[var(--color-community-ink)]">
         Feed
       </h1>
 
