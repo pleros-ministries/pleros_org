@@ -1,11 +1,10 @@
-import { Inter, Sen } from "next/font/google";
+import { Be_Vietnam_Pro, Sen } from "next/font/google";
 
-/** Authenticated dashboard face. The variable optical-size axis tightens
- *  display sizes; tracking tokens live on `.root` in dashboard.module.css. */
-export const dashboardFont = Inter({
+/** Authenticated dashboard face (user decision, 17 October: Be Vietnam Pro
+ *  replaces Inter). Tracking tokens live on `.root` in dashboard.module.css. */
+export const dashboardFont = Be_Vietnam_Pro({
   subsets: ["latin"],
-  weight: "variable",
-  axes: ["opsz"],
+  weight: ["400", "500", "600", "700"],
   variable: "--font-dashboard",
   display: "swap",
 });

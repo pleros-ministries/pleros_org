@@ -9,7 +9,7 @@
   --status-blue-text: #2331ae;
   background: var(--color-surface-muted);
   color: var(--color-text);
-  font-family: var(--font-dashboard), Inter, ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-dashboard), "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
   font-size: 14px;
   line-height: 22px;
   letter-spacing: -0.006em;

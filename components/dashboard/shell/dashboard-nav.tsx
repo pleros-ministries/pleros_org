@@ -60,7 +60,7 @@ function QuestionsBadge() {
   );
 }
 
-function NavBadge({ kind }: { kind: DashboardNavBadge }) {
+export function NavBadge({ kind }: { kind: DashboardNavBadge }) {
   return kind === "messages" ? <MessagesBadge /> : <QuestionsBadge />;
 }
 

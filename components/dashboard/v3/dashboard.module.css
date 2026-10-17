@@ -29,7 +29,7 @@
   --status-neutral-bg: #e9edf5; --status-neutral-text: #4a5273;
   --status-lilac-bg: #dec8fa; --status-lilac-text: #56209c;
   background: white; color: var(--color-text); min-height: 100dvh;
-  /* Inter treatment: headings track −2%, body slightly tight, small text and
+  /* Be Vietnam Pro treatment: headings track −2%, body slightly tight, small text and
      uppercase eyebrows stay open for legibility. */
   --dashboard-tracking-heading: -0.02em;
   --dashboard-tracking-body: -0.006em;
@@ -46,7 +46,7 @@
 .root :is(small, time) { letter-spacing: var(--dashboard-tracking-small); }
 /* Fields keep 16px text so phones never zoom; their placeholder hints are one
    quieter standard across the dashboard (placeholder size does not affect zoom). */
-.root :is(input, textarea)::placeholder { font-family: var(--font-dashboard), Inter, sans-serif; font-size: 14px; font-weight: 400; letter-spacing: var(--dashboard-tracking-body); color: #9aa0a8; opacity: 1; }
+.root :is(input, textarea)::placeholder { font-family: var(--font-dashboard), "Be Vietnam Pro", sans-serif; font-size: 14px; font-weight: 400; letter-spacing: var(--dashboard-tracking-body); color: #9aa0a8; opacity: 1; }
 .root *, .root *::before, .root *::after { box-sizing: border-box; }
 .header button, .dialog button, .iconButton, .lessonAction, .textAction, .planRow, .reportRow { font-family: inherit; cursor: pointer; }
 .root button:focus-visible, .root a:focus-visible { outline: 2px solid var(--color-brand-blue); outline-offset: 3px; }
