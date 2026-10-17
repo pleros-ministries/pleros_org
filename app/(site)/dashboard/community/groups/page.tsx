@@ -10,6 +10,7 @@ import {
   getCommunityContext,
 } from "@/lib/community/context";
 import { listGroupDirectory } from "@/lib/db/queries/community-groups";
+import { getCommunityHomeDiscipleship } from "@/lib/db/queries/community-discipleship";
 import { listUnitNames } from "@/lib/db/queries/community-units";
 
 export default async function CommunityGroupsRoute({ searchParams }: { searchParams: Promise<{ create?: string }> }) {
@@ -21,9 +22,10 @@ export default async function CommunityGroupsRoute({ searchParams }: { searchPar
 
   // Location groups the viewer belongs to or looks after as assigned pastor.
   const managedIds = ctx.managedUnitIds.filter((id) => id !== ctx.unit?.id);
-  const [groups, managedUnits] = await Promise.all([
+  const [groups, managedUnits, discipleship] = await Promise.all([
     listGroupDirectory(ctx.userId),
     listUnitNames(managedIds),
+    ctx.enrollmentId != null ? getCommunityHomeDiscipleship(ctx.userId).catch(() => null) : Promise.resolve(null),
   ]);
   const locationGroups: LocationGroupLink[] = [
     ...(ctx.unit
@@ -36,7 +38,7 @@ export default async function CommunityGroupsRoute({ searchParams }: { searchPar
     <GroupsDirectory
       groups={groups}
       locationGroups={locationGroups}
-      showDiscipleship={ctx.enrollmentId != null}
+      discipleship={discipleship ? { joined: discipleship.joined, leading: discipleship.leading.filter((group) => !group.paused) } : null}
       canCreate={!ctx.postingBlocked}
       startCreating={create === "1" && !ctx.postingBlocked}
     />

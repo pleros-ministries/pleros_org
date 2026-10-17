@@ -4,7 +4,7 @@ import type { CommunityHomeData } from "@/lib/db/queries/community-home";
 import styles from "./community-home-v3.module.css";
 
 type IconName = Parameters<typeof DashboardIcon>[0]["name"];
-type GroupArt = "location" | "discipleship" | "leading" | "public" | "private";
+export type GroupArt = "location" | "discipleship" | "leading" | "public" | "private";
 
 /* Background art lives in public/assets/dashboard/community-groups/: a 3:2 cut
    for wider tiles and a compact square cut for phones, each at 1x and 2x. */
@@ -22,11 +22,11 @@ function CountCard({ href, count, label, description, icon, tone, capped }: { hr
 }
 
 /** Groups you lead share one illustration in two colourways, alternated oldest-first so neighbours differ. No light green (user preference). */
-const leadColourways = ["lilac", "slate"] as const;
+export const leadColourways = ["lilac", "slate"] as const;
 
-function GroupCard({ href, art, title, meta, prefetch, colourway }: { href: string; art: GroupArt; title: string; meta: string; prefetch?: false; colourway?: string }) {
+export function GroupCard({ href, art, title, meta, prefetch, colourway, tag }: { href: string; art: GroupArt; title: string; meta: string; prefetch?: false; colourway?: string; tag?: string }) {
   return <Link href={href} prefetch={prefetch} className={styles.groupCard} data-art={art} data-colourway={colourway} title={title}>
-    <span className={styles.groupTop}><span className={styles.groupTag}>{groupTag[art]}</span><h3>{title}</h3></span>
+    <span className={styles.groupTop}><span className={styles.groupTag}>{tag ?? groupTag[art]}</span><h3>{title}</h3></span>
     <span className={styles.groupMeta}>{meta}</span>
   </Link>;
 }

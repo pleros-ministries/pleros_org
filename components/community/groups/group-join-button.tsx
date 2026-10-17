@@ -9,9 +9,9 @@ import {
 import { useGroupAction } from "./use-group-action";
 
 const primary =
-  "inline-flex h-9 items-center rounded-full bg-[var(--color-community-blue)] px-4 text-[13px] font-semibold text-white disabled:opacity-60";
+  "inline-flex h-8 shrink-0 items-center rounded-[10px] bg-[var(--color-community-blue)] px-3 text-[12.5px] font-semibold text-white disabled:opacity-60";
 const quiet =
-  "inline-flex h-9 items-center rounded-full border border-[var(--color-community-edge)] bg-white px-4 text-[13px] font-medium text-[var(--color-community-ink)] disabled:opacity-60";
+  "inline-flex h-8 shrink-0 items-center rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white px-3 text-[12.5px] font-medium text-[var(--color-community-ink)] disabled:opacity-60";
 
 /**
  * Join a public group, ask to join a private one, or withdraw a pending
@@ -38,8 +38,8 @@ export function GroupJoinButton({
         {pending
           ? "Joining…"
           : join.action === "join"
-            ? "Join group"
-            : "Request to join"}
+            ? "Join"
+            : "Request"}
       </button>
     );
   } else if (join.reason === "pending") {
