@@ -22,10 +22,10 @@ export function PostBody({
   const clamp = !forceExpanded && !expanded;
 
   return (
-    <div className="grid gap-1">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-1">
       <p
         ref={ref}
-        className={`whitespace-pre-line text-[13.5px] leading-[20px] text-[#3a4049] ${
+        className={`whitespace-pre-line break-words text-[12px] leading-[18px] text-[#3a4049] ${
           clamp ? "line-clamp-4" : ""
         }`}
       >

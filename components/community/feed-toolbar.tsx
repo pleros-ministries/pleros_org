@@ -61,7 +61,7 @@ export function FeedToolbar({
   onChange: (view: FeedView) => void;
 }) {
   return (
-    <div className="flex items-center justify-between gap-3">
+    <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
       <div
         role="group"
         aria-label="Filter posts"

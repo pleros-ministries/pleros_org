@@ -432,7 +432,7 @@ export function PostCard({
     <article
       className="rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white"
     >
-      <div className="grid gap-2.5 px-3.5 pt-3.5">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-2.5 px-3.5 pt-3.5">
         {post.pinned ? (
           <p className="-mb-1 flex items-center gap-1.5 text-[11.5px] font-medium text-[var(--color-community-muted)]">
             <PinIcon className="size-3" strokeWidth={2} /> Pinned
