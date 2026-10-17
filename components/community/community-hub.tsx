@@ -25,9 +25,9 @@ export function CommunityHub({
   postingBlocked: boolean;
 }) {
   return (
-    <div className="grid gap-4">
-      <h1 className="text-lg font-semibold text-[var(--color-community-ink)]">
-        Community
+    <div className="grid gap-3.5">
+      <h1 className="m-0 font-[family-name:var(--font-dashboard-heading)] text-[21px] font-medium leading-[28px] tracking-[-0.02em] text-[var(--color-community-ink)]">
+        Feed
       </h1>
 
       <FeedComposer

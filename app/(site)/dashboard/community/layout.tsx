@@ -26,9 +26,10 @@ export default async function CommunityLayout({
   // dashboard layout; this keeps only the community's title bar.
   const viewer = await getDashboardViewer();
   const navigation = viewer?.navigation.find(section=>section.key === "community")?.items ?? [];
+  const oversightHref = viewer?.navigation.find(section => section.key === "oversight")?.items.find(item => item.key === "church")?.href ?? null;
   return (
-    <section className="flex min-h-[calc(100dvh-var(--dashboard-topbar-offset,0px))] flex-col bg-white text-(--color-text-strong)">
-      <CommunityShell unitName={ctx.unit?.name ?? null} navigation={navigation}>
+    <section className="flex min-h-[calc(100dvh-var(--dashboard-topbar-offset,0px))] flex-col bg-[var(--color-community-canvas)] text-(--color-text-strong)">
+      <CommunityShell unitName={ctx.unit?.name ?? null} navigation={navigation} oversightHref={oversightHref}>
         <CommunityGrid>{children}</CommunityGrid>
       </CommunityShell>
     </section>

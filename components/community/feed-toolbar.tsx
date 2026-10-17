@@ -18,7 +18,7 @@ export function FeedToolbar({
   onChange: (view: FeedView) => void;
 }) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 rounded-2xl border border-[var(--color-community-edge)] bg-white p-3">
+    <div className="flex items-center justify-between gap-3">
       <div
         role="group"
         aria-label="Filter posts"
@@ -43,10 +43,10 @@ export function FeedToolbar({
                   }),
                 )
               }
-              className={`inline-flex min-h-[28px] items-center rounded-full px-2.5 text-[14px] font-medium transition-colors ${
+              className={`inline-flex h-6 items-center rounded-full px-2.5 text-[12px] font-medium transition-colors ${
                 active
                   ? "bg-[var(--color-community-blue)] text-white"
-                  : "text-[var(--color-community-ink)]"
+                  : "bg-[var(--color-community-sky-soft)] text-[var(--color-community-sky-ink)] hover:bg-[#d6e1fb]"
               }`}
             >
               {FEED_FILTER_LABELS[filter]}
@@ -61,7 +61,7 @@ export function FeedToolbar({
         onChange={(event) =>
           onChange(parseFeedView({ sort: event.target.value, filter: view.filter }))
         }
-        className="inline-flex min-h-9 max-w-[145px] items-center rounded-md border border-[var(--color-community-edge)] bg-white pl-2.5 text-[12px] font-medium text-[var(--color-community-ink)]"
+        className="inline-flex h-7 max-w-[130px] items-center rounded-md border-0 bg-transparent pl-1 text-[12.5px] font-medium text-[var(--color-community-muted)]"
       >
         {FEED_SORTS.map((sort) => (
           <option key={sort} value={sort}>{FEED_SORT_LABELS[sort]}</option>

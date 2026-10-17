@@ -20,8 +20,6 @@ import { Avatar } from "./avatar";
 
 const MAX_IMAGES = 4;
 
-const fieldClass =
-  "w-full rounded-xl border border-[var(--color-community-edge)] px-3 text-base outline-none focus:border-[var(--color-community-edge-strong)] sm:text-[15px]";
 
 /**
  * Where the viewer may publish an announcement: nowhere (members), inside
@@ -133,116 +131,96 @@ export function FeedComposer({
 
   if (!open) {
     return (
-      <div className="flex items-center gap-3 rounded-2xl border border-[var(--color-community-edge)] bg-white p-3 ">
-        <Avatar name={viewerName} size={40} />
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          className="h-10 flex-1 rounded-full bg-[var(--color-community-canvas)] px-4 text-left text-xs text-[var(--color-community-muted)] transition-colors hover:bg-[var(--color-community-edge)]"
-        >
-          {officialReach === "all"
-            ? "Share an update or start a discussion…"
-            : "Start a discussion…"}
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="flex w-full items-center gap-2.5 rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white py-2 pr-2 pl-2.5 text-left transition-colors hover:border-[var(--color-community-edge-strong)]"
+      >
+        <Avatar name={viewerName} size={30} />
+        <span className="flex-1 text-[13.5px] text-[#8a9099]">
+          {officialReach === "all" ? "Share something with the community…" : "Start a discussion…"}
+        </span>
+        <span className="grid size-8 place-items-center text-[var(--color-community-muted)]" aria-hidden><ImagePlusIcon className="size-[18px]" strokeWidth={1.8} /></span>
+      </button>
     );
   }
 
   return (
     <form
-      className="grid gap-3 rounded-2xl border border-[var(--color-community-edge)] bg-white p-4 "
+      className="overflow-hidden rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white"
       action={() => {
         setError(null);
         postMutation.mutate();
       }}
     >
-      <div className="flex items-start gap-3">
-        <Avatar name={viewerName} size={40} />
-        <div className="grid min-w-0 flex-1 gap-2">
-          {officialReach !== "none" ? (
-            <div
-              role="group"
-              aria-label="Post type"
-              className="flex w-fit items-center gap-0.5 rounded-full border border-[var(--color-community-edge)] p-0.5"
-            >
-              {(
-                [
-                  ["discussion", "Discussion"],
-                  ["official", "Announcement"],
-                ] as const
-              ).map(([value, label]) => {
-                const active = postKind === value;
-                const unavailable = value === "official" && !officialAllowed;
-                return (
-                  <button
-                    key={value}
-                    type="button"
-                    aria-pressed={active}
-                    disabled={unavailable}
-                    title={
-                      unavailable
-                        ? "Announcements go to your own group"
-                        : undefined
-                    }
-                    onClick={() => setKind(value)}
-                    className={`inline-flex min-h-[28px] items-center rounded-full px-3 text-[13px] font-medium transition-colors disabled:opacity-40 ${
-                      active
-                        ? "bg-[var(--color-community-blue)] text-white"
-                        : "text-[var(--color-community-muted)] hover:text-[var(--color-community-ink)]"
-                    }`}
-                  >
-                    {label}
-                  </button>
-                );
-              })}
-            </div>
-          ) : null}
+      {/* Header: who is posting, and the post type as a small rail. */}
+      <div className="flex items-center gap-2.5 px-3.5 pt-3">
+        <Avatar name={viewerName} size={30} />
+        <span className="min-w-0 flex-1 truncate text-[13.5px] font-semibold text-[var(--color-community-ink)]">{viewerName}</span>
+        {officialReach !== "none" ? (
+          <div role="group" aria-label="Post type" className="flex items-center rounded-lg bg-[#eceef2] p-[2px]">
+            {(
+              [
+                ["discussion", "Discussion"],
+                ["official", "Announcement"],
+              ] as const
+            ).map(([value, label]) => {
+              const active = postKind === value;
+              const unavailable = value === "official" && !officialAllowed;
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  aria-pressed={active}
+                  disabled={unavailable}
+                  title={unavailable ? "Announcements go to your own group" : undefined}
+                  onClick={() => setKind(value)}
+                  className={`inline-flex h-6 items-center rounded-md px-2 text-[12px] font-medium transition-colors disabled:opacity-40 ${
+                    active
+                      ? "bg-white text-[var(--color-community-ink)] shadow-[0_1px_2px_rgb(0_0_0/8%)]"
+                      : "text-[var(--color-community-muted)] hover:text-[var(--color-community-ink)]"
+                  }`}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
+      </div>
 
-          <input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder={
-              isDiscussion
-                ? "Title: what would you like to discuss?"
-                : "Title (optional)"
-            }
-            aria-label="Title"
-            maxLength={POST_TITLE_MAX}
-            required={isDiscussion}
-            autoFocus
-            className={`${fieldClass} h-[38px] font-medium`}
-          />
-          <textarea
-            value={body}
-            onChange={(e) => setBody(e.target.value)}
-            placeholder={
-              isDiscussion
-                ? "Add more detail (optional)"
-                : "What would you like to share?"
-            }
-            aria-label="Post"
-            rows={4}
-            maxLength={POST_BODY_MAX}
-            className={`${fieldClass} resize-none py-3 leading-relaxed`}
-          />
-        </div>
+      {/* Borderless fields; 16px so phones never zoom. */}
+      <div className="grid px-3.5 pt-2">
+        <input
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder={isDiscussion ? "What would you like to discuss?" : "Title (optional)"}
+          aria-label="Title"
+          maxLength={POST_TITLE_MAX}
+          required={isDiscussion}
+          autoFocus
+          className="h-9 w-full bg-transparent font-[family-name:var(--font-dashboard-heading)] text-[16px] font-medium text-[var(--color-community-ink)] outline-none placeholder:text-[#9aa0a8]"
+        />
+        <textarea
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
+          placeholder={isDiscussion ? "Add more detail (optional)" : "What would you like to share?"}
+          aria-label="Post"
+          rows={3}
+          maxLength={POST_BODY_MAX}
+          className="w-full resize-none bg-transparent py-1 text-[16px] leading-[24px] text-[var(--color-community-ink)] outline-none placeholder:text-[#9aa0a8]"
+        />
       </div>
 
       {images.length > 0 ? (
-        <div className="grid grid-cols-4 gap-2 pl-13">
+        <div className="grid grid-cols-4 gap-2 px-3.5 pb-2">
           {images.map((img) => (
             <div key={img.key} className="relative">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={img.url}
-                alt=""
-                className="h-16 w-full rounded-lg object-cover"
-              />
+              <img src={img.url} alt="" className="h-16 w-full rounded-lg object-cover" />
               <button
                 type="button"
-                onClick={() =>
-                  setImages((c) => c.filter((x) => x.key !== img.key))
-                }
+                onClick={() => setImages((c) => c.filter((x) => x.key !== img.key))}
                 className="absolute -right-1.5 -top-1.5 inline-flex size-5 items-center justify-center rounded-full bg-[var(--color-community-ink)] text-white"
                 aria-label="Remove image"
               >
@@ -254,12 +232,13 @@ export function FeedComposer({
       ) : null}
 
       {error ? (
-        <p role="alert" className="pl-13 text-[13px] text-red-700">
+        <p role="alert" className="px-3.5 pb-2 text-[13px] text-red-700">
           {error}
         </p>
       ) : null}
 
-      <div className="flex flex-wrap items-center gap-2 pl-13">
+      {/* Toolbar: attach and audience on the left, Cancel and Post on the right. */}
+      <div className="flex items-center gap-1 border-t border-[var(--color-line,#e7e9ec)] px-2 py-1.5">
         <input
           ref={fileRef}
           type="file"
@@ -275,10 +254,10 @@ export function FeedComposer({
           type="button"
           disabled={isUploading || images.length >= MAX_IMAGES}
           onClick={() => fileRef.current?.click()}
-          className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-[var(--color-community-edge)] px-3 text-sm font-medium text-[var(--color-community-ink)] transition-colors hover:bg-[var(--color-community-canvas)] disabled:opacity-50"
+          aria-label={isUploading ? "Uploading photo" : "Add photo"}
+          className="grid size-9 place-items-center rounded-lg text-[var(--color-community-muted)] transition-colors hover:bg-[var(--color-community-canvas)] disabled:opacity-50"
         >
-          <ImagePlusIcon className="size-4" strokeWidth={2} />
-          {isUploading ? "Uploading…" : "Photo"}
+          <ImagePlusIcon className="size-[18px]" strokeWidth={1.8} />
         </button>
 
         {isDiscussion ? (
@@ -286,11 +265,11 @@ export function FeedComposer({
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
             aria-label="Topic"
-            className={`h-9 rounded-lg border border-[var(--color-community-edge)] px-2 text-sm ${
+            className={`h-8 max-w-[8.5rem] rounded-lg border-0 bg-transparent pl-1.5 text-[12.5px] font-medium ${
               topic ? "text-[var(--color-community-ink)]" : "text-[var(--color-community-muted)]"
             }`}
           >
-            <option value="">Topic (optional)</option>
+            <option value="">Topic</option>
             {COMMUNITY_TOPICS.map((option) => (
               <option key={option.key} value={option.key}>
                 {option.label}
@@ -304,25 +283,25 @@ export function FeedComposer({
             value={scope}
             onChange={(e) => setScope(e.target.value as PostScope)}
             aria-label="Where to post"
-            className="h-9 max-w-44 rounded-lg border border-[var(--color-community-edge)] px-2 text-sm"
+            className="h-8 max-w-[9rem] rounded-lg border-0 bg-transparent pl-1.5 text-[12.5px] font-medium text-[var(--color-community-ink)]"
           >
-            <option value="global">Whole community</option>
+            <option value="global">Everyone</option>
             <option value="unit">{unitName}</option>
           </select>
         ) : null}
 
-        <div className="ml-auto flex items-center gap-3">
+        <div className="ml-auto flex items-center gap-1">
           <button
             type="button"
             onClick={reset}
-            className="text-sm text-[var(--color-community-muted)] hover:underline"
+            className="h-9 rounded-lg px-3 text-[13px] font-medium text-[var(--color-community-muted)] hover:bg-[var(--color-community-canvas)]"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={pending || isUploading}
-            className="inline-flex h-9 items-center rounded-lg bg-[var(--color-community-blue)] px-4 text-sm font-semibold text-white disabled:opacity-50"
+            className="inline-flex h-9 items-center rounded-[11px] bg-[var(--color-community-blue)] px-4 text-[13.5px] font-semibold text-white disabled:opacity-50"
           >
             {pending ? "Posting…" : "Post"}
           </button>

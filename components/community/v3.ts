@@ -64,7 +64,7 @@ export const textAction =
 const AVATAR_TONES = [
   ["var(--color-community-sky-soft)", "var(--color-community-sky-ink)"],
   ["var(--color-community-violet-soft)", "var(--color-community-violet-ink)"],
-  ["var(--color-community-mint-soft)", "var(--color-community-mint-ink)"],
+  ["#fde3cf", "#7a3a10"],
   ["var(--color-community-amber-soft)", "var(--color-community-amber-ink)"],
 ] as const;
 

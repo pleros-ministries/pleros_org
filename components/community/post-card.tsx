@@ -21,7 +21,7 @@ import {
   Repeat2Icon,
   SendIcon,
   Share2Icon,
-  ThumbsUpIcon,
+  HeartIcon,
   Trash2Icon,
 } from "lucide-react";
 import { Popover } from "@base-ui/react/popover";
@@ -348,9 +348,6 @@ export function PostCard({
       : isUnit
         ? (post.unitName ?? "Group")
         : "Community";
-  const pillClass = staysInGroup
-    ? "bg-[var(--color-community-violet-soft)] text-[var(--color-community-violet-ink)]"
-    : "bg-[var(--color-community-sky-soft)] text-[var(--color-community-sky-ink)]";
   const roleLabel = isDiscipleship
     ? post.authorKind === "leader"
       ? "Discipler"
@@ -428,44 +425,34 @@ export function PostCard({
   }
 
   const actionButton =
-    "inline-flex min-h-[28px] items-center justify-center gap-2 rounded-full px-2.5 text-sm font-medium transition-colors";
+    "inline-flex h-[34px] items-center gap-1.5 rounded-lg px-2 text-[13px] font-medium text-[var(--color-community-muted)] transition-colors hover:bg-[var(--color-community-canvas)]";
   const alertText = notice ?? chat.error;
 
   return (
     <article
-      className="rounded-2xl border border-[var(--color-community-edge)] bg-white"
+      className="rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white"
     >
-      <div className="grid gap-3 p-4 sm:p-5">
-        <div className="flex items-start gap-3">
-          <Avatar name={post.authorName} size={40} />
+      <div className="grid gap-2.5 px-3.5 pt-3.5">
+        {post.pinned ? (
+          <p className="-mb-1 flex items-center gap-1.5 text-[11.5px] font-medium text-[var(--color-community-muted)]">
+            <PinIcon className="size-3" strokeWidth={2} /> Pinned
+          </p>
+        ) : null}
+        {/* One quiet line under the name: where it was posted, role, topic, time. */}
+        <div className="flex items-center gap-2.5">
+          <Avatar name={post.authorName} size={32} />
           <div className="min-w-0 flex-1">
-            <p className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[13px] font-medium leading-[20px] text-[var(--color-community-ink)]">
+            <p className="flex flex-wrap items-center gap-1.5 text-[13.5px] font-semibold leading-[18px] text-[var(--color-community-ink)]">
               {post.authorName}
-              <span
-                className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium leading-[16px] ${pillClass}`}
-              >
-                {scopeLabel}
-              </span>
-            </p>
-            <p className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[13px] leading-[20px] text-[var(--color-community-muted)]">
-              {post.pinned ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-community-violet-soft)] px-2 py-0.5 text-[11px] font-medium leading-[16px] text-[var(--color-community-violet-ink)]">
-                  <PinIcon className="size-3" strokeWidth={2} />
-                  Pinned
-                </span>
-              ) : null}
               {post.kind === "official" ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-community-sky-soft)] px-2 py-0.5 text-[11px] font-medium leading-[16px] text-[var(--color-community-sky-ink)]">
+                <span className="inline-flex h-[18px] items-center gap-1 rounded-full bg-[var(--color-community-sky-soft)] px-1.5 text-[11px] font-medium text-[var(--color-community-sky-ink)]">
                   <MegaphoneIcon className="size-3" strokeWidth={2} />
                   {staysInGroup ? "Announcement" : "Official"}
                 </span>
-              ) : topic ? (
-                <span className="inline-flex items-center rounded-full bg-[var(--color-community-canvas)] px-2 py-0.5 text-[11px] font-medium leading-[16px] text-[var(--color-community-muted)]">
-                  {topic}
-                </span>
               ) : null}
-              {roleLabel ? <span>{roleLabel} ·</span> : null}
-              {relativeTime(post.lastActivityAt)}
+            </p>
+            <p className="truncate text-[11.5px] leading-[15px] text-[var(--color-community-muted)]">
+              {[scopeLabel, roleLabel, post.kind === "official" ? null : topic, relativeTime(post.lastActivityAt)].filter(Boolean).join(" · ")}
             </p>
           </div>
           <ActionMenu
@@ -486,7 +473,7 @@ export function PostCard({
         ) : (
           <>
             {post.title ? (
-              <h2 className="text-[15px] font-medium leading-[22px] tracking-[-0.02em] text-[var(--color-community-ink)]">
+              <h2 className="-mb-1 font-[family-name:var(--font-dashboard-heading)] text-[16px] font-medium leading-[22px] tracking-[-0.01em] text-[var(--color-community-ink)]">
                 {startExpanded ? (
                   post.title
                 ) : (
@@ -510,77 +497,44 @@ export function PostCard({
 
         {post.sharedFrom ? <QuotedPost post={post.sharedFrom} /> : null}
 
-        {reactionCount > 0 || post.commentCount > 0 || post.shareCount > 0 ? (
-          <div className="flex items-center justify-between text-[13px] text-[var(--color-community-muted)]">
-            <span className="flex items-center gap-1.5">
-              {reactionCount > 0 ? (
-                <span className="font-medium text-[var(--color-community-blue)]">
-                  {reactionCount} like{reactionCount === 1 ? "" : "s"}
-                </span>
-              ) : null}
-            </span>
-            <span className="flex gap-3">
-              {post.commentCount > 0 ? (
-                <button
-                  type="button"
-                  onClick={() => setShowComments(true)}
-                  className="hover:underline"
-                >
-                  {post.commentCount} comment
-                  {post.commentCount === 1 ? "" : "s"}
-                </button>
-              ) : null}
-              {post.shareCount > 0 ? (
-                <span>
-                  {post.shareCount} share{post.shareCount === 1 ? "" : "s"}
-                </span>
-              ) : null}
-            </span>
-          </div>
-        ) : null}
       </div>
 
-      <div className="mx-3 flex items-center gap-1 border-t border-[var(--color-community-edge)] py-1">
-        <span className="grid min-h-9 min-w-9 flex-1 place-items-center"><button
+      {/* One slim action row: counts sit on their own buttons. */}
+      <div className="flex items-center gap-0.5 px-1.5 pt-1 pb-1.5">
+        <button
           type="button"
           disabled={pending}
           onClick={like}
           aria-pressed={reacted}
-          className={`${actionButton} w-full ${
-            reacted
-              ? "bg-[var(--color-community-blue)] text-white"
-              : "text-[var(--color-community-ink)]"
-          }`}
+          aria-label={reacted ? "Unlike" : "Like"}
+          className={`${actionButton} ${reacted ? "!text-[var(--color-community-blue)]" : ""}`}
         >
-          <ThumbsUpIcon
-            className="size-[18px]"
-            strokeWidth={reacted ? 2.5 : 2}
-            fill={reacted ? "currentColor" : "none"}
-          />
-          Like
-        </button></span>
-        <span className="grid min-h-9 min-w-9 flex-1 place-items-center"><button
+          <HeartIcon className="size-[17px]" strokeWidth={1.9} fill={reacted ? "currentColor" : "none"} />
+          {reactionCount > 0 ? reactionCount : "Like"}
+        </button>
+        <button
           type="button"
           onClick={() => setShowComments((v) => !v)}
-          className={`${actionButton} w-full text-[var(--color-community-ink)]`}
+          aria-label={`Comments${post.commentCount ? `, ${post.commentCount}` : ""}`}
+          className={actionButton}
         >
-          <MessageCircleIcon className="size-[18px]" strokeWidth={2} />
-          Comment
-        </button></span>
+          <MessageCircleIcon className="size-[17px]" strokeWidth={1.9} />
+          {post.commentCount > 0 ? post.commentCount : "Reply"}
+        </button>
         {/* A post in a discipleship or member group has no Share. */}
         {staysInGroup ? null : (
-          <span className="grid min-h-9 min-w-9 flex-1 place-items-center"><ShareMenu
+          <span className="ml-auto"><ShareMenu
             post={post}
             viewerUnitName={viewerUnitName}
             canRepost={canRepost}
             onShared={invalidateFeed}
-            className={`${actionButton} w-full text-[var(--color-community-ink)]`}
+            className={actionButton}
           /></span>
         )}
       </div>
 
       {showComments ? (
-        <div className="border-t border-[var(--color-community-edge)] bg-white px-4 py-4 sm:px-5">
+        <div className="border-t border-[var(--color-community-edge)] bg-white px-3.5 py-3.5">
           <CommentThread
             postId={post.id}
             viewerName={viewerName}
@@ -672,7 +626,7 @@ function ShareMenu({
       }}
     >
       <Popover.Trigger className={className}>
-        <Share2Icon className="size-[18px]" strokeWidth={2} /> Share
+        <Share2Icon className="size-4" strokeWidth={1.9} /> Share{post.shareCount > 0 ? ` · ${post.shareCount}` : ""}
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner sideOffset={8} align="end">

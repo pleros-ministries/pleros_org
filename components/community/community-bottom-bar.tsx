@@ -4,9 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   HouseIcon,
+  InboxIcon,
   ListIcon,
-  MessageCircleIcon,
-  MessageCircleQuestionIcon,
+  NetworkIcon,
   UsersRoundIcon,
   type LucideIcon,
 } from "lucide-react";
@@ -17,7 +17,7 @@ import { useUnreadMessages } from "./messages/use-unread-messages";
 const BASE = "/dashboard/community";
 
 type BarItem = {
-  key: "home" | "feed" | "groups" | "messages" | "ask";
+  key: "home" | "groups" | "feed" | "inbox" | "oversight";
   label: string;
   href: string;
   icon: LucideIcon;
@@ -36,23 +36,14 @@ const ITEMS: BarItem[] = [
     also: [`${BASE}/unit`, `${BASE}/discipleship`],
   },
   { key: "feed", label: "Feed", href: `${BASE}/feed`, icon: ListIcon, also: [`${BASE}/post`] },
-  {
-    key: "messages",
-    label: "Messages",
-    href: `${BASE}/messages`,
-    icon: MessageCircleIcon,
-  },
-  {
-    key: "ask",
-    label: "Ask Pleros",
-    href: `${BASE}/ask`,
-    icon: MessageCircleQuestionIcon,
-  },
+  // One Inbox for both private conversations: Messages and Ask Pleros keep
+  // their own routes, data and anonymity rules; only the navigation is shared.
+  { key: "inbox", label: "Inbox", href: `${BASE}/messages`, icon: InboxIcon, also: [`${BASE}/ask`] },
 ];
 
 function isActive(pathname: string, item: BarItem): boolean {
-  if (item.href === BASE && pathname === BASE) return true;
-  const prefixes = [...(item.href === BASE ? [] : [item.href]), ...(item.also ?? [])];
+  if (item.href === BASE) return pathname === BASE;
+  const prefixes = [item.href, ...(item.also ?? [])];
   return prefixes.some(
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
   );
@@ -73,29 +64,39 @@ const activeClass =
   "text-[var(--color-community-blue)] before:absolute before:-top-1.5 before:left-1/4 before:right-1/4 before:h-0.5 before:rounded-full before:bg-[var(--color-community-blue)]";
 
 /**
- * The community's bottom bar on phones and small tablets: its five main
- * destinations; the full menu stays in the top bar. It is docked flush to the
- * bottom edge of the screen while the community is in view and rests above the
- * site footer instead of covering it. Larger screens use the top bar and side
- * rail.
+ * Community's main destinations: Home, Groups, Feed and Inbox, plus Oversight
+ * for people with church responsibilities (`oversightHref`). A grounded bottom
+ * bar on phones and tablets; a slim top strip from `lg`.
  */
-export function CommunityBottomBar({ placement = "bottom" }: { placement?: "bottom" | "top" }) {
+export function CommunityBottomBar({
+  placement = "bottom",
+  oversightHref = null,
+}: {
+  placement?: "bottom" | "top";
+  oversightHref?: string | null;
+}) {
   const pathname = usePathname() ?? "";
   const unreadMessages = useUnreadMessages();
   const unreadQuestions = useUnreadQuestions();
 
   if (placement === "bottom" && IN_CONVERSATION.test(pathname)) return null;
 
+  const items: BarItem[] = oversightHref
+    ? [...ITEMS, { key: "oversight", label: "Oversight", href: oversightHref, icon: NetworkIcon }]
+    : ITEMS;
+
   return (
     <nav
       aria-label="Community"
       className={placement === "top"
         ? "sticky top-12 z-20 hidden border-b border-(--color-line) bg-white lg:flex lg:justify-center lg:gap-2 lg:px-6 lg:py-1"
-        : "sticky bottom-0 z-30 grid grid-cols-5 border-t border-(--color-line) bg-white px-1 pt-1.5 pb-[calc(0.25rem_+_env(safe-area-inset-bottom))] lg:hidden"}
+        : `sticky bottom-0 z-30 grid ${items.length === 5 ? "grid-cols-5" : "grid-cols-4"} border-t border-(--color-line) bg-white px-1 pt-1.5 pb-[calc(0.25rem_+_env(safe-area-inset-bottom))] lg:hidden`}
     >
-      {ITEMS.map((item) => {
+      {items.map((item) => {
         const Icon = item.icon;
         const active = isActive(pathname, item);
+        const inboxCount = item.key === "inbox" ? unreadMessages : 0;
+        const inboxDot = item.key === "inbox" && unreadMessages === 0 && unreadQuestions > 0;
         return (
           <Link
             key={item.key}
@@ -107,15 +108,15 @@ export function CommunityBottomBar({ placement = "bottom" }: { placement?: "bott
           >
             <span className="relative">
               <Icon className={placement === "top" ? "size-4" : "size-5"} strokeWidth={1.8} />
-              {item.key === "messages" && unreadMessages > 0 ? (
+              {inboxCount > 0 ? (
                 <span
-                  aria-label={`${unreadMessages} unread`}
+                  aria-label={`${inboxCount} unread`}
                   className="absolute -right-2.5 -top-1.5 grid min-w-4 place-items-center rounded-full bg-[var(--color-community-blue)] px-1 text-[0.6rem] font-bold leading-4 text-white"
                 >
-                  {unreadMessages > 9 ? "9+" : unreadMessages}
+                  {inboxCount > 9 ? "9+" : inboxCount}
                 </span>
               ) : null}
-              {item.key === "ask" && unreadQuestions > 0 ? (
+              {inboxDot ? (
                 <span
                   aria-label="Pleros has replied"
                   className="absolute -right-1 -top-0.5 size-2 rounded-full bg-[var(--color-community-blue)]"
@@ -126,6 +127,32 @@ export function CommunityBottomBar({ placement = "bottom" }: { placement?: "bott
           </Link>
         );
       })}
+    </nav>
+  );
+}
+
+/** The Messages · Ask Pleros switch at the top of the two Inbox list pages. */
+export function InboxSwitch() {
+  const pathname = usePathname() ?? "";
+  const unreadMessages = useUnreadMessages();
+  const unreadQuestions = useUnreadQuestions();
+  const onMessages = pathname === `${BASE}/messages`;
+  const onAsk = pathname === `${BASE}/ask`;
+  if (!onMessages && !onAsk) return null;
+
+  const tab = "inline-flex h-8 items-center justify-center gap-1.5 rounded-[7px] text-[13px] font-medium transition-colors";
+  return (
+    <nav aria-label="Inbox" className="site-shell-page sogp-shell-page pt-4">
+      <div className="mx-auto grid w-full max-w-[48rem] grid-cols-2 rounded-[10px] bg-[#eceef2] p-[3px]">
+        <Link href={`${BASE}/messages`} aria-current={onMessages ? "page" : undefined} className={`${tab} ${onMessages ? "bg-white text-[var(--color-community-ink)] shadow-[0_1px_2px_rgb(0_0_0/8%)]" : "text-[var(--color-community-muted)]"}`}>
+          Messages
+          {unreadMessages > 0 ? <span className="grid h-[18px] min-w-[18px] place-items-center rounded-full bg-[var(--color-community-blue)] px-1 text-[11px] font-semibold text-white">{unreadMessages > 9 ? "9+" : unreadMessages}</span> : null}
+        </Link>
+        <Link href={`${BASE}/ask`} aria-current={onAsk ? "page" : undefined} className={`${tab} ${onAsk ? "bg-white text-[var(--color-community-ink)] shadow-[0_1px_2px_rgb(0_0_0/8%)]" : "text-[var(--color-community-muted)]"}`}>
+          Ask Pleros
+          {unreadQuestions > 0 ? <span aria-label="Pleros has replied" className="size-2 rounded-full bg-[var(--color-community-blue)]" /> : null}
+        </Link>
+      </div>
     </nav>
   );
 }

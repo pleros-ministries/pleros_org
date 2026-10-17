@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import { CommunityBottomBar } from "./community-bottom-bar";
+import { CommunityBottomBar, InboxSwitch } from "./community-bottom-bar";
 import type { DashboardNavItem } from "@/lib/dashboard/navigation";
 
 /**
@@ -12,17 +12,21 @@ import type { DashboardNavItem } from "@/lib/dashboard/navigation";
  */
 export function CommunityShell({
   children,
+  oversightHref = null,
 }: {
   /** Kept for callers; the retired title bar used them. */
   unitName?: string | null;
   children: ReactNode;
   navigation?: DashboardNavItem[];
+  /** Church oversight, for people with church responsibilities. */
+  oversightHref?: string | null;
 }) {
   return (
     <>
-      <CommunityBottomBar placement="top" />
+      <CommunityBottomBar placement="top" oversightHref={oversightHref} />
+      <InboxSwitch />
       <div className="flex-1">{children}</div>
-      <CommunityBottomBar />
+      <CommunityBottomBar oversightHref={oversightHref} />
     </>
   );
 }

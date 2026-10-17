@@ -10,7 +10,7 @@ import type { AskerQuestionSummary } from "@/lib/db/queries/ask-pleros";
 import { askPleros } from "@/app/(site)/dashboard/community/_actions/ask-actions";
 
 const card =
-  "rounded-2xl border border-[var(--color-community-edge)] bg-white ";
+  "rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white ";
 
 const VISIBILITY_OPTIONS = [
   {
@@ -61,7 +61,7 @@ function AskForm({ episode }: { episode?: { guid: string; title: string } }) {
 
   return (
     <form
-      className={`${card} grid gap-4 p-4 sm:p-5`}
+      className={`${card} grid gap-3.5 p-4`}
       onSubmit={(event) => {
         event.preventDefault();
         submit();
@@ -77,7 +77,7 @@ function AskForm({ episode }: { episode?: { guid: string; title: string } }) {
           maxLength={QUESTION_BODY_MAX}
           required
           placeholder="Ask anything. Only the Pleros team will read it."
-          className="w-full resize-none rounded-xl border border-[var(--color-community-edge)] px-3 py-2.5 text-base font-normal leading-relaxed outline-none focus:border-[var(--color-community-edge-strong)]"
+          className="w-full resize-none rounded-[11px] border border-[var(--dashboard-panel-edge,#e2e5ea)] px-3 py-2.5 text-[16px] font-normal leading-[24px] outline-none focus:border-[var(--color-community-edge-strong)]"
         />
       </label>
 
@@ -96,10 +96,10 @@ function AskForm({ episode }: { episode?: { guid: string; title: string } }) {
               className="mt-1 size-4 accent-[var(--color-brand-blue)]"
             />
             <span className="grid">
-              <span className="text-sm font-medium text-[var(--color-community-ink)]">
+              <span className="text-[14px] font-medium leading-[20px] text-[var(--color-community-ink)]">
                 {option.label}
               </span>
-              <span className="text-xs text-[var(--color-community-muted)]">{option.help}</span>
+              <span className="text-[12px] leading-[17px] text-[var(--color-community-muted)]">{option.help}</span>
             </span>
           </label>
         ))}
@@ -114,7 +114,7 @@ function AskForm({ episode }: { episode?: { guid: string; title: string } }) {
       <button
         type="submit"
         disabled={pending}
-        className="inline-flex h-10 w-fit items-center rounded-full bg-[var(--color-community-blue)] px-5 text-sm font-semibold text-white disabled:opacity-60"
+        className="inline-flex h-[38px] w-fit items-center rounded-[11px] bg-[var(--color-community-blue)] px-4 text-[14px] font-semibold text-white disabled:opacity-60"
       >
         {pending ? "Sending…" : "Send to Pleros"}
       </button>
@@ -133,10 +133,10 @@ export function AskPlerosView({
   return (
     <div className="grid gap-4">
       <header className="grid gap-1">
-        <h1 className="text-lg font-semibold text-[var(--color-community-ink)]">
+        <h1 className="m-0 font-[family-name:var(--font-dashboard-heading)] text-[21px] font-medium leading-[28px] tracking-[-0.02em] text-[var(--color-community-ink)]">
           Ask Pleros
         </h1>
-        <p className="max-w-md text-sm text-[var(--color-community-muted)]">
+        <p className="m-0 max-w-md text-[13px] leading-[20px] text-[var(--color-community-muted)]">
           Ask the Pleros team a question in private. No one else in the
           community sees it, and you choose whether we see your name.
         </p>
@@ -145,15 +145,15 @@ export function AskPlerosView({
       <AskForm episode={episode} />
 
       <section className={`${card} overflow-hidden`}>
-        <h2 className="border-b border-[var(--color-community-edge)] px-4 py-3 text-sm font-semibold text-[var(--color-community-ink)]">
+        <h2 className="m-0 border-b border-[var(--color-line,#e7e9ec)] px-4 py-3 font-[family-name:var(--font-dashboard-heading)] text-[15px] font-medium leading-[22px] text-[var(--color-community-ink)]">
           Your questions
         </h2>
         {questions.length === 0 ? (
-          <p className="px-4 py-4 text-sm text-[var(--color-community-muted)]">
+          <p className="m-0 px-4 py-4 text-[13px] leading-[20px] text-[var(--color-community-muted)]">
             You have not asked anything yet.
           </p>
         ) : (
-          <ul className="divide-y divide-[var(--color-community-edge)]">
+          <ul className="divide-y divide-[var(--color-line,#e7e9ec)]">
             {questions.map((question) => (
               <li key={question.id}>
                 <Link
@@ -161,13 +161,13 @@ export function AskPlerosView({
                   className="grid gap-1 px-4 py-3 transition-colors hover:bg-[var(--color-community-canvas)]"
                 >
                   <span
-                    className={`line-clamp-2 text-sm text-[var(--color-community-ink)] ${
+                    className={`line-clamp-2 text-[14px] leading-[20px] text-[var(--color-community-ink)] ${
                       question.unread ? "font-semibold" : ""
                     }`}
                   >
                     {question.preview}
                   </span>
-                  <span className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[var(--color-community-muted)]">
+                  <span className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] leading-[16px] text-[var(--color-community-muted)]">
                     <span
                       className={`rounded-full px-2 py-0.5 text-[0.7rem] font-medium ${
                         question.status === "answered"

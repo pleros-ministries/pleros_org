@@ -33,26 +33,26 @@ export function ConversationList({ activeId }: { activeId: number | null }) {
   const conversations = data?.conversations ?? [];
 
   return (
-    <div className="grid gap-4">
-    <section className="overflow-hidden rounded-2xl border border-[var(--color-community-edge)] bg-white">
-      <div className="flex items-center justify-between gap-3 px-4 py-3">
-        <h1 className="text-[18px] font-medium leading-[26px] text-[var(--color-community-ink)]">
+    <div className="grid gap-3">
+      <div className="flex items-center justify-between gap-3">
+        <h1 className="m-0 font-[family-name:var(--font-dashboard-heading)] text-[21px] font-medium leading-[28px] tracking-[-0.02em] text-[var(--color-community-ink)]">
           Messages
         </h1>
-        <span className="grid min-h-9 min-w-9 place-items-center"><button
+        <button
           type="button"
           onClick={() => setComposing(true)}
-          className="inline-flex min-h-[28px] items-center gap-1.5 rounded-full bg-[var(--color-community-blue)] px-2.5 text-[14px] font-medium text-white"
+          className="inline-flex h-9 items-center gap-1.5 rounded-[11px] bg-[var(--color-community-blue)] px-3 text-[13px] font-semibold text-white"
         >
-          <PenSquareIcon className="size-4" strokeWidth={2} />
+          <PenSquareIcon className="size-4" strokeWidth={1.9} />
           New message
-        </button></span>
+        </button>
       </div>
+    <section className="overflow-hidden rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white">
 
       {isPending ? (
-        <p className="p-4 text-sm text-[var(--color-community-muted)]">Loading messages…</p>
+        <p className="m-0 p-4 text-[13px] leading-[20px] text-[var(--color-community-muted)]">Loading messages…</p>
       ) : isError ? (
-        <p className="p-4 text-sm text-[var(--color-community-muted)]">
+        <p className="m-0 p-4 text-[13px] leading-[20px] text-[var(--color-community-muted)]">
           Couldn&apos;t load messages.{" "}
           <button
             type="button"
@@ -63,11 +63,11 @@ export function ConversationList({ activeId }: { activeId: number | null }) {
           </button>
         </p>
       ) : conversations.length === 0 ? (
-        <p className="p-4 text-sm text-[var(--color-community-muted)]">
+        <p className="m-0 p-4 text-[13px] leading-[20px] text-[var(--color-community-muted)]">
           No messages yet. Start a conversation with someone in the community.
         </p>
       ) : (
-        <ul className="divide-y divide-[var(--color-community-edge)]">
+        <ul className="divide-y divide-[var(--color-line,#e7e9ec)]">
           {conversations.map((conversation) => {
             const active = conversation.id === activeId;
             const unread = conversation.unreadCount > 0;
@@ -80,10 +80,10 @@ export function ConversationList({ activeId }: { activeId: number | null }) {
                     active ? "bg-[var(--color-community-sky-soft)]" : ""
                   }`}
                 >
-                  <Avatar name={conversation.otherName} size={40} />
+                  <Avatar name={conversation.otherName} size={36} />
                   <span className="grid min-w-0 flex-1 gap-0.5">
                     <span className="flex items-baseline justify-between gap-2">
-                      <span className="truncate text-[13px] font-medium leading-[20px] text-[var(--color-community-ink)]">
+                      <span className="truncate text-[13.5px] font-semibold leading-[18px] text-[var(--color-community-ink)]">
                         {conversation.otherName}
                         {conversation.otherUnitName ? (
                           <span className="font-normal text-[var(--color-community-muted)]">
@@ -92,13 +92,13 @@ export function ConversationList({ activeId }: { activeId: number | null }) {
                           </span>
                         ) : null}
                       </span>
-                      <span className="shrink-0 text-[13px] text-[var(--color-community-muted)]">
+                      <span className="shrink-0 text-[11.5px] text-[var(--color-community-muted)]">
                         {relativeTime(conversation.lastMessageAt)}
                       </span>
                     </span>
                     <span className="flex items-center justify-between gap-2">
                       <span
-                        className={`truncate text-[13px] ${
+                        className={`truncate text-[12.5px] leading-[17px] ${
                           unread ? "font-medium text-[var(--color-community-ink)]" : "text-[var(--color-community-muted)]"
                         }`}
                       >
@@ -126,15 +126,10 @@ export function ConversationList({ activeId }: { activeId: number | null }) {
 
       <NewMessageDialog open={composing} onOpenChange={setComposing} />
     </section>
-    <section className="flex items-start gap-3 rounded-2xl border border-[var(--color-community-edge)] bg-white p-4">
-      <span className="grid size-11 shrink-0 place-items-center rounded-full bg-[var(--color-community-canvas)] text-[var(--color-community-muted)]">
-        <LockIcon className="size-5" strokeWidth={2} />
-      </span>
-      <span className="grid gap-0.5">
-        <span className="text-[12px] font-medium text-[var(--color-community-ink)]">Private by design</span>
-        <span className="text-[13px] leading-[20px] text-[var(--color-community-muted)]">Only eligible community contacts can be found or messaged.</span>
-      </span>
-    </section>
+    <p className="m-0 flex items-center gap-1.5 px-1 text-[12px] leading-[16px] text-[var(--color-community-muted)]">
+      <LockIcon className="size-3.5" strokeWidth={1.9} />
+      Private by design: only eligible community contacts can be found or messaged.
+    </p>
     </div>
   );
 }

@@ -69,8 +69,9 @@ test("authenticated dashboard headings use Sen while body and controls retain In
 test("the Community home keeps the section switcher available",()=>{
   const source = fs.readFileSync(path.join(process.cwd(), "components/community/community-shell.tsx"), "utf8");
   // The title bar and switcher are retired; the five destinations stay in the bar.
-  expect(source).toContain("<CommunityBottomBar placement=\"top\" />");
-  expect(source).toContain("<CommunityBottomBar />");
+  expect(source).toContain("<CommunityBottomBar placement=\"top\" oversightHref={oversightHref} />");
+  expect(source).toContain("<CommunityBottomBar oversightHref={oversightHref} />");
+  expect(source).toContain("<InboxSwitch />");
   expect(source).not.toContain("!home ?");
 });
 test("the Community switcher leads with role and location context",()=>{
