@@ -1339,9 +1339,9 @@ async function getDisciplerView(discipleEnrollmentId: number): Promise<Discipler
     groupName: row.groupName,
     leaderFirstName,
     leaderName: row.leaderName,
-    whatsappUrl: row.leaderSharesPhone
-      ? buildWhatsAppUrl(row.leaderPhone, row.leaderCountryCode, `Hi ${leaderFirstName}, `)
-      : null,
+    // Every discipler is reachable by their disciples (user decision, 17 October):
+    // the leader-side consent no longer gates this link.
+    whatsappUrl: buildWhatsAppUrl(row.leaderPhone, row.leaderCountryCode, `Hi ${leaderFirstName}, `),
     sharesPhone: row.sharesPhone,
     joinedAt: row.joinedAt.toISOString(),
     prompts: prompts.map((prompt) => ({

@@ -5,6 +5,7 @@ import { DiscipleDetail, type DiscipleWeekDay } from "@/components/community/dis
 import { SogpQueryProvider } from "@/components/sogp/sogp-query-provider";
 import { getAppSession } from "@/lib/app-session";
 import { getDiscipleDailyParticipation, getDiscipleshipDashboard } from "@/lib/db/queries/sogp-discipleship";
+import { getDiscipleWork } from "@/lib/db/queries/discipleship-work";
 import { getLeaderEpisodeQuestions } from "@/lib/db/queries/sogp-episode-questions";
 import { lagosToday, shiftDate } from "@/lib/sogp/daily-date";
 
@@ -34,12 +35,14 @@ export default async function DiscipleRoute({ params }: { params: Promise<{ grou
   const today = lagosToday();
   const start = data.participationRange?.start ?? today;
   const dates = Array.from({ length: 7 }, (_, index) => shiftDate(today, index - 6));
-  const [days, episodeQuestions] = await Promise.all([
+  const [days, episodeQuestions, work] = await Promise.all([
     Promise.all(dates.map(date => date < start
       ? Promise.resolve(null)
       : getDiscipleDailyParticipation(data.viewer.enrollmentId, groupId, date).then(rows => rows.find(row => row.membershipId === membershipId) ?? null).catch(() => null))),
     getLeaderEpisodeQuestions(session.user.id, groupId).catch(() => []),
+    getDiscipleWork(session.user.id, groupId, membershipId),
   ]);
+  if (!work) notFound();
   const week: DiscipleWeekDay[] = dates.map((date, index) => {
     const day = days[index];
     const label = weekday.format(new Date(`${date}T12:00:00Z`));
@@ -51,8 +54,10 @@ export default async function DiscipleRoute({ params }: { params: Promise<{ grou
   return <SogpQueryProvider>
     <DiscipleDetail
       groupId={groupId}
+      groupName={group.name}
       disciple={disciple}
       week={week}
+      work={work}
       prompts={group.prompts}
       prayerRequests={group.prayerRequests}
       episodeQuestions={episodeQuestions.filter(question => question.askerEnrollmentId === disciple.enrollmentId)}

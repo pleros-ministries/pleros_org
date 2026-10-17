@@ -23,6 +23,7 @@ import { cn } from "@/lib/utils";
 import { DashboardMenuNavigation } from "./dashboard-menu-navigation";
 import frame from "./dashboard-shell.module.css";
 import { compactButton, focusRing } from "./styles";
+import { Breadcrumbs, CrumbLabelProvider } from "./breadcrumbs";
 
 export type DashboardShellViewer = { name: string; roleLabel: string; image?: string | null };
 
@@ -174,7 +175,7 @@ export function DashboardShell({ viewer, sections, children, notificationControl
     return () => wide.removeEventListener("change", onChange);
   }, []);
 
-  return <div className={cn("pleros-select-scope site-font-theme min-h-dvh bg-white font-[family-name:var(--font-be-vietnam-pro)]", dashboardFont.variable, dashboardHeadingFont.variable, dashboardFont.className, v3.root, frame.root)}>
+  return <CrumbLabelProvider><div className={cn("pleros-select-scope site-font-theme min-h-dvh bg-white font-[family-name:var(--font-be-vietnam-pro)]", dashboardFont.variable, dashboardHeadingFont.variable, dashboardFont.className, v3.root, frame.root)}>
     <a href="#dashboard-main" className={cn(frame.skipLink, focusRing)}>Skip to content</a>
     <aside className={frame.liveSidebar}>
       <div className={frame.sidebarScroll}><Profile viewer={viewer} /><ShellNavigation sections={sections} area={area} onArea={selectTab} /></div>
@@ -189,6 +190,7 @@ export function DashboardShell({ viewer, sections, children, notificationControl
         onMenu={() => setMenu({ open: true, pathname })} onTab={selectRootTab}
         menuControl={<button className={cn(v3.iconButton, frame.mobileMenu)} onClick={() => setMenu({ open: true, pathname })} aria-label="Open dashboard navigation" aria-expanded={menuOpen} aria-controls={drawerId} aria-haspopup="dialog"><DashboardIcon name="menu" /></button>}
         notifications={notificationControl ?? <NotificationBell tone="light" appearance="dashboard" />} />}
+      {focusedLearning ? <Breadcrumbs pathname={pathname} title={focusedLearning} /> : null}
       <main id="dashboard-main" className={frame.routeMain} {...swipeHandlers}>
         <div ref={viewportRef} className={frame.routeViewport} data-route-origin={routedArea}>
           <motion.div className={v3.swipeTrack} style={trackStyle}>
@@ -201,5 +203,5 @@ export function DashboardShell({ viewer, sections, children, notificationControl
       </main>
     </div>
     <Drawer open={menuOpen} onClose={closeMenu} viewer={viewer} sections={sections} area={area} onArea={selectTab} id={drawerId} />
-  </div>;
+  </div></CrumbLabelProvider>;
 }

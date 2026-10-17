@@ -104,3 +104,17 @@ a.row:hover { background: var(--color-community-canvas); }
 .tools input:not([type="checkbox"]):not([type="radio"]), .tools textarea { font-size: 16px; border-radius: 10px; }
 .tools :global(.rounded-full)[class*="bg-[var(--color-brand-blue)]"] { border-radius: 10px; }
 .tools button:global(.rounded-full) { border-radius: 10px; }
+
+/* A disciple's work: one collapsible row per lesson. */
+.work + .work { border-top: 1px solid var(--color-line, #e7e9ec); }
+.work > summary { display: flex; align-items: center; gap: 12px; padding: 12px 14px; cursor: pointer; list-style: none; }
+.work > summary::-webkit-details-marker { display: none; }
+.work[open] > summary { padding-bottom: 6px; }
+.workPrompt { margin: 0; font-size: 12.5px; line-height: 18px; font-weight: 500; color: var(--color-community-muted); }
+.workBody { margin: 0; font-size: 13.5px; line-height: 21px; color: var(--color-community-ink); white-space: pre-wrap; overflow-wrap: anywhere; }
+.workBody[data-mark="right"]::before { content: "✓ "; color: var(--color-community-blue, #2056d6); }
+.workBody[data-mark="wrong"]::before { content: "✗ "; color: #b42318; }
+.work > .workPrompt, .work > .workBody { padding: 0 14px; }
+.work > .workBody { padding-bottom: 14px; margin-top: 6px; }
+.answers { display: grid; gap: 12px; margin: 0; padding: 0 14px 14px 32px; }
+.answers > li { display: grid; gap: 3px; }

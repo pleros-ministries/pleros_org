@@ -5,7 +5,6 @@ import { CheckIcon, CopyIcon } from "lucide-react";
 
 import {
   regenerateInviteLinkAction,
-  setLeaderSharesPhoneAction,
   type DiscipleshipActionResult,
 } from "@/app/(site)/dashboard/sogp/discipleship/_actions";
 import { useDiscipleshipAction } from "@/components/sogp/discipleship-check-ins";
@@ -88,7 +87,7 @@ export function StatusStrip({ disciples }: { disciples: DiscipleSummary[] }) {
 
 /** The group's own invite link: copy, share on WhatsApp, the leader's number consent and a fresh link. */
 export function InvitePanel({ group, leaderFirstName, empty }: {
-  group: { id: number; name: string; inviteUrl: string; leaderSharesPhone: boolean };
+  group: { id: number; name: string; inviteUrl: string };
   leaderFirstName: string;
   /** No disciples yet: also explain how joining works. */
   empty: boolean;
@@ -115,12 +114,7 @@ export function InvitePanel({ group, leaderFirstName, empty }: {
           </button>
         </div>
         <a className={styles.share} href={whatsapp} target="_blank" rel="noopener noreferrer">Share on WhatsApp</a>
-        <SharePhoneToggle
-          id={`leader-shares-phone-${group.id}`}
-          label="Let this group's disciples contact me on WhatsApp"
-          initial={group.leaderSharesPhone}
-          onChange={sharesPhone => setLeaderSharesPhoneAction({ groupId: group.id, sharesPhone })}
-        />
+        <p className={styles.note} style={{ margin: 0 }}>Your disciples can reach you on WhatsApp once they join.</p>
         <button type="button" className={styles.quiet} disabled={regenerate.pending} onClick={() => {
           if (window.confirm("Create a new link for this group? Its old link will stop working.")) {
             regenerate.run(() => regenerateInviteLinkAction({ groupId: group.id }));

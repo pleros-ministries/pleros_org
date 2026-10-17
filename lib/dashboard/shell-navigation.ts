@@ -105,6 +105,30 @@ export function dashboardFocusForPath(href: string): DashboardFocus | null {
   return null;
 }
 
+/** Area roots never appear in a trail: the You/Community tabs already name them. */
+const AREA_ROOTS = new Set(["/dashboard", "/dashboard/community"]);
+
+/** "Back to saved contacts" → "Saved contacts". */
+function crumbLabel(parent: DashboardParent) {
+  const label = parent.label.replace(/^Back to (your )?/i, "");
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
+/**
+ * The ancestors of a deep screen, outermost first, for the breadcrumb under
+ * the header: each parent's parent until an area root. Pages can rename a
+ * crumb (a group's real name) through the shell's crumb labels.
+ */
+export function dashboardTrailForPath(href: string): DashboardParent[] {
+  const trail: DashboardParent[] = [];
+  let focus = dashboardFocusForPath(href);
+  while (focus && !AREA_ROOTS.has(focus.back.href) && trail.length < 6) {
+    trail.unshift({ href: focus.back.href, label: crumbLabel(focus.back) });
+    focus = dashboardFocusForPath(focus.back.href);
+  }
+  return trail;
+}
+
 /** Each deep screen's true parent; tab roots step back to their area. */
 export function dashboardParentForPath(href: string): DashboardParent {
   const focus = dashboardFocusForPath(href);

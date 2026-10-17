@@ -13,6 +13,8 @@ import type { FeedPost } from "@/lib/db/queries/community-posts";
 import type { OwnEpisodeQuestion } from "@/lib/db/queries/sogp-episode-questions";
 import type { DisciplerView } from "@/lib/db/queries/sogp-discipleship";
 
+import { CrumbLabel } from "@/components/dashboard/shell/breadcrumbs";
+
 import { FeedComposer } from "../feed-composer";
 import { GroupHero, GroupTabs } from "../groups/group-hero";
 import { MessageButton } from "../messages/message-button";
@@ -47,6 +49,7 @@ export function MemberGroupView({ joined, discipler, ownEpisodeQuestions, discus
   const lead = discipler.leaderFirstName;
 
   return <div className={styles.page}>
+    <CrumbLabel href={`/dashboard/community/discipleship/${joined.groupId}`} label={joined.groupName} />
     <GroupHero art="discipleship" tag="Your group" title={joined.groupName} meta={`Led by ${lead} · you joined ${joined.joinedMonth}`} />
 
     <div className={styles.panel}>

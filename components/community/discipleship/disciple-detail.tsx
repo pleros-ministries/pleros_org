@@ -9,8 +9,11 @@ import { LeaderPromptList, formatDiscipleshipDate, useDiscipleshipAction } from 
 import { LeaderEpisodeQuestionList } from "@/components/sogp/discipleship-episode-questions";
 import { DiscipleFollowUp, LastContactLine } from "@/components/sogp/discipleship-nudge";
 import { LeaderPrayerList } from "@/components/sogp/discipleship-prayer";
+import type { DiscipleWork } from "@/lib/db/queries/discipleship-work";
 import type { LeaderEpisodeQuestion } from "@/lib/db/queries/sogp-episode-questions";
 import type { DiscipleSummary, LeaderPrompt, DiscipleshipPrayerRequest } from "@/lib/db/queries/sogp-discipleship";
+
+import { CrumbLabel } from "@/components/dashboard/shell/breadcrumbs";
 
 import { GroupTabs } from "../groups/group-hero";
 import styles from "./discipleship-group.module.css";
@@ -19,7 +22,7 @@ import { groupPath } from "./leader-group";
 
 export type DiscipleWeekDay = { date: string; label: string; state: "done" | "missed" | "today" | "none" };
 
-type Tab = "week" | "checkins" | "prayer" | "questions";
+type Tab = "week" | "work" | "checkins" | "prayer" | "questions";
 
 const percent = (value: number | null) => value === null ? "–" : `${value}%`;
 const ofTotal = (value: number | null, max: number | null) => value === null || !max ? "Not started" : `${value} of ${max}`;
@@ -27,12 +30,14 @@ const ofTotal = (value: number | null, max: number | null) => value === null || 
 /**
  * One disciple, opened from their group: this week's activity, their
  * check-in answers and prayer requests, and the leader's follow-up tools.
- * Progress and quiz averages only — never their answers or written work.
+ * Their discipler also sees their quiz answers and written work.
  */
-export function DiscipleDetail({ groupId, disciple, week, prompts, prayerRequests, episodeQuestions, paused }: {
+export function DiscipleDetail({ groupId, groupName, disciple, week, work, prompts, prayerRequests, episodeQuestions, paused }: {
   groupId: number;
+  groupName: string;
   disciple: DiscipleSummary;
   week: DiscipleWeekDay[];
+  work: DiscipleWork;
   prompts: LeaderPrompt[];
   prayerRequests: DiscipleshipPrayerRequest[];
   episodeQuestions: LeaderEpisodeQuestion[];
@@ -45,6 +50,7 @@ export function DiscipleDetail({ groupId, disciple, week, prompts, prayerRequest
   const ownPrayer = prayerRequests.filter(request => request.discipleEnrollmentId === disciple.enrollmentId);
   const tabs: Array<{ key: Tab; label: string; count?: number }> = [
     { key: "week", label: "This week" },
+    { key: "work", label: "Work", count: work.quizzes.length + work.written.length || undefined },
     ...(paused ? [] : [
       { key: "checkins" as const, label: "Check-ins" },
       { key: "prayer" as const, label: "Prayer", count: ownPrayer.filter(request => request.status === "open").length || undefined },
@@ -54,6 +60,8 @@ export function DiscipleDetail({ groupId, disciple, week, prompts, prayerRequest
   const [tab, setTab] = useState<Tab>("week");
 
   return <div className={styles.page}>
+    <CrumbLabel href={groupPath(groupId)} label={groupName} />
+    <CrumbLabel href={`${groupPath(groupId)}/disciples/${disciple.membershipId}`} label={disciple.firstName} />
     <div className={styles.profile}>
       <Initials name={disciple.name} size="lg" />
       <div className="grid min-w-0">
@@ -98,6 +106,8 @@ export function DiscipleDetail({ groupId, disciple, week, prompts, prayerRequest
       <div className={`${styles.panel} ${styles.tools}`}><LastContactLine disciple={disciple} /></div>
     </> : null}
 
+    {tab === "work" ? <DiscipleWorkView work={work} firstName={disciple.firstName} /> : null}
+
     {tab === "checkins" ? <div className={`${styles.panel} ${styles.tools}`}>
       <p className={styles.note} style={{ margin: 0 }}>Their check-in answers are private to you and {disciple.firstName}.</p>
       <LeaderPromptList prompts={ownPrompts} discipleCount={1} preview={false} />
@@ -107,7 +117,7 @@ export function DiscipleDetail({ groupId, disciple, week, prompts, prayerRequest
 
     {tab === "questions" ? <div className={`${styles.panel} ${styles.tools}`}><LeaderEpisodeQuestionList questions={episodeQuestions} preview={false} /></div> : null}
 
-    <p className={styles.note}>🔒 You see progress and quiz averages only — never their answers to quizzes or their written work.</p>
+    <p className={styles.note}>🔒 Only you, as {disciple.firstName}&apos;s discipler, see their work here. Other disciples never do.</p>
 
     {!paused ? <button type="button" className={styles.danger} disabled={remove.pending} onClick={() => {
       if (window.confirm(`Remove ${disciple.firstName} from your group?`)) {
@@ -116,4 +126,43 @@ export function DiscipleDetail({ groupId, disciple, week, prompts, prayerRequest
     }}>Remove from group</button> : null}
     {remove.error ? <p role="alert" className={styles.error}>{remove.error}</p> : null}
   </div>;
+}
+
+const SUBMISSION: Record<DiscipleWork["written"][number]["status"], string> = { submitted: "Submitted", approved: "Approved", needs_revision: "Needs revision" };
+
+/** Their latest quiz attempt per lesson (with each answer) and their submitted written responses. */
+function DiscipleWorkView({ work, firstName }: { work: DiscipleWork; firstName: string }) {
+  if (!work.quizzes.length && !work.written.length) {
+    return <p className={`${styles.panel} ${styles.empty}`}>{firstName} hasn&apos;t taken a quiz or sent a written response yet.</p>;
+  }
+  return <>
+    {work.written.length ? <>
+      <div className={styles.sectionTitle}><h2>Written responses</h2></div>
+      <div className={styles.panel}>
+        {work.written.map(item => <details key={item.lessonId} className={styles.work}>
+          <summary><span className={styles.rowCopy}><span className={styles.rowTitle}>{item.lessonTitle}</span><span className={styles.rowMeta}>{SUBMISSION[item.status]}{item.submittedAt ? ` · ${formatDiscipleshipDate(item.submittedAt)}` : ""}</span></span></summary>
+          {item.prompt ? <p className={styles.workPrompt}>{item.prompt}</p> : null}
+          <p className={styles.workBody}>{item.content}</p>
+        </details>)}
+      </div>
+    </> : null}
+    {work.quizzes.length ? <>
+      <div className={styles.sectionTitle}><h2>Quizzes</h2></div>
+      <div className={styles.panel}>
+        {work.quizzes.map(quiz => <details key={quiz.lessonId} className={styles.work}>
+          <summary>
+            <span className={styles.rowCopy}><span className={styles.rowTitle}>{quiz.lessonTitle}</span><span className={styles.rowMeta}>{formatDiscipleshipDate(quiz.takenAt)}{quiz.attemptNumber > 1 ? ` · attempt ${quiz.attemptNumber}` : ""}</span></span>
+            <span className={styles.pill} data-tone={quiz.score >= 70 ? "ok" : "risk"}>{quiz.score}%</span>
+          </summary>
+          <ol className={styles.answers}>
+            {quiz.answers.map((answer, index) => <li key={index}>
+              <p className={styles.workPrompt}>{answer.question}</p>
+              <p className={styles.workBody} data-mark={answer.correct === null ? undefined : answer.correct ? "right" : "wrong"}>{answer.answer || "No answer"}</p>
+              {answer.correct === false && answer.correctAnswer ? <p className={styles.rowMeta}>Correct answer: {answer.correctAnswer}</p> : null}
+            </li>)}
+          </ol>
+        </details>)}
+      </div>
+    </> : null}
+  </>;
 }

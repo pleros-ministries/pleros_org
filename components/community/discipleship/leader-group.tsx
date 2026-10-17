@@ -18,9 +18,11 @@ import type { LeaderEpisodeQuestion } from "@/lib/db/queries/sogp-episode-questi
 import type { DiscipleSummary, DiscipleshipDashboardData } from "@/lib/db/queries/sogp-discipleship";
 import { DISCIPLESHIP_GROUP_NAME_MAX, evaluateCloseDiscipleshipGroup } from "@/lib/sogp/discipleship";
 
+import { CrumbLabel } from "@/components/dashboard/shell/breadcrumbs";
+
 import { ActionMenu, type MenuAction } from "../action-menu";
 import { FeedComposer } from "../feed-composer";
-import { AddContactAction, GroupHero, GroupTabs } from "../groups/group-hero";
+import { GroupHero, GroupTabs } from "../groups/group-hero";
 import { PostFeed } from "../post-feed";
 import styles from "./discipleship-group.module.css";
 import { Initials, InvitePanel, Meter, StatusPill, StatusStrip, byNeed, statusOf } from "./shared";
@@ -73,7 +75,7 @@ export function LeaderGroupView({ data, episodeQuestions, colourway, initialTab,
 
   const menu: MenuAction[] = paused ? [] : [
     { key: "rename", label: "Rename group", icon: PencilIcon, onSelect: () => setPanel("rename") },
-    { key: "contact", label: "Add a contact", icon: UserPlusIcon, onSelect: () => router.push(`/dashboard/community/report/people/new?invite=${group.id}`) },
+    ...(hasDisciples ? [{ key: "contact", label: "Add a contact", icon: UserPlusIcon, onSelect: () => router.push(`/dashboard/community/report/people/new?invite=${group.id}`) }] : []),
     { key: "reviews", label: "Weekly group reviews", icon: CalendarCheckIcon, onSelect: () => router.push(`/dashboard/sogp/reviews?group=${group.id}`) },
     ...(data.createGroupBlock ? [] : [{ key: "create", label: "New discipleship group", icon: PlusIcon, onSelect: () => setPanel("create") }]),
     ...(canClose ? [{ key: "close", label: "Close group", icon: XCircleIcon, danger: true, onSelect: () => {
@@ -85,16 +87,20 @@ export function LeaderGroupView({ data, episodeQuestions, colourway, initialTab,
   ];
 
   return <div className={styles.page}>
+    <CrumbLabel href={groupPath(group.id)} label={group.name} />
     <GroupHero
       art="leading"
       colourway={colourway}
       tag={paused ? "Paused" : "You lead"}
       title={group.name}
       meta={hasDisciples ? `${disciples.length} ${disciples.length === 1 ? "disciple" : "disciples"}` : "No disciples yet"}
+      // The ··· menu always sits beside a primary action: Invite once people have
+      // joined, otherwise Add a contact (the invite link fills the page below).
       actions={paused ? null : <>
-        {hasDisciples ? <button type="button" className={styles.btn} data-primary onClick={() => setPanel(panel === "invite" ? null : "invite")} aria-expanded={panel === "invite"}>Invite</button> : null}
-        {hasDisciples ? <button type="button" className={styles.btn} onClick={() => setTab("checkins")}>Ask a check-in</button> : null}
-        {hasDisciples ? null : <AddContactAction inviteGroupId={group.id} />}
+        {hasDisciples ? <>
+          <button type="button" className={styles.btn} data-primary onClick={() => setPanel(panel === "invite" ? null : "invite")} aria-expanded={panel === "invite"}>Invite</button>
+          <button type="button" className={styles.btn} onClick={() => setTab("checkins")}>Ask a check-in</button>
+        </> : <Link href={`/dashboard/community/report/people/new?invite=${group.id}`} className={styles.btn} data-primary><UserPlusIcon className="size-3.5" strokeWidth={2} />Add a contact</Link>}
         <ActionMenu label="Group options" actions={menu} className="!size-8 !rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white" />
       </>}
     />
