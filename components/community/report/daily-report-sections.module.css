@@ -50,6 +50,13 @@
 .subBody label { font-size: 13px !important; line-height: 18px; }
 .subBody select { height: 38px; font-size: 14px !important; }
 .subBody :is(h2, h3) { font-size: 14px !important; }
+.subBody { font-size: 13.5px; line-height: 19px; }
+.subBody summary { gap: 10px; font-size: 13.5px !important; line-height: 19px; }
+.subBody details { padding: 12px !important; border-radius: 10px !important; }
+.subBody p, .subBody summary span:not(:first-of-type) { font-size: 12px !important; line-height: 17px !important; }
+.subBody input[type="search"]::placeholder { font-size: 13px; }
+.subBody button { font-size: 13px !important; }
+.subBody button[class*="primary"] { min-height: 38px !important; font-size: 14px !important; }
 .subBody > div > div > fieldset > :first-child:not([hidden]), .subBody fieldset > label:first-of-type { margin-top: 0 !important; }
 .subBody > div > section, .subBody > div > div { padding: 0 !important; margin: 0 !important; border: 0 !important; box-shadow: none !important; background: transparent !important; }
 
