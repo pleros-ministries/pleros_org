@@ -47,7 +47,6 @@ const COMMUNITY: DashboardParent = { href: "/dashboard/community", label: "Back 
 const GROUPS: DashboardParent = { href: "/dashboard/community/groups", label: "Back to Groups" };
 const MY_SOGP: DashboardParent = { href: "/dashboard/sogp", label: "Back to Learning" };
 const LIBRARY: DashboardParent = { href: "/dashboard/library", label: "Back to Library" };
-const OVERSIGHT: DashboardParent = { href: "/dashboard/community/oversight", label: "Back to Oversight" };
 const REPORTS: DashboardParent = { href: "/dashboard/community/report", label: "Back to My reports" };
 
 /**
@@ -95,13 +94,14 @@ const DASHBOARD_FOCUS: Array<[RegExp, (match: RegExpMatchArray) => DashboardFocu
   [/^\/dashboard\/community\/messages\/\d+$/, () => ({ title: "Conversation", back: { href: "/dashboard/community/messages", label: "Back to Inbox" } })],
   [/^\/dashboard\/community\/ask\/\d+$/, () => ({ title: "Your question", back: { href: "/dashboard/community/ask", label: "Back to Ask Pleros" } })],
   [/^\/dashboard\/community\/leader$/, () => ({ title: "Leader tools", back: COMMUNITY })],
-  // Oversight (Pastor, Branch Pastor) inside Community. Church structure and setup keep their
-  // /dashboard/church routes but sit under Oversight (user request, 18 October); anyone without
-  // Oversight is sent from there back to their church page.
+  // Oversight (Pastor, Branch Pastor) inside Community, with Overview · Reports · Structure tabs
+  // (tab roots, no crumb). Setup screens keep their /dashboard/church routes and step back to
+  // Structure; unit leaders and workers keep /dashboard/church and /dashboard/church/reports.
   [/^\/dashboard\/community\/oversight\/(branches\/\d+|questions)$/, m => ({ title: m[1] === "questions" ? "Questions waiting" : "Branch", back: { href: "/dashboard/community/oversight", label: "Back to Oversight" } })],
-  [/^\/dashboard\/church$/, () => ({ title: "Church structure", back: OVERSIGHT })],
-  [/^\/dashboard\/church\/(?!branches|units|reports)[^/]+$/, () => ({ title: "Report details", back: { href: "/dashboard/church/reports", label: "Back to Church reports" } })],
-  [/^\/dashboard\/church\/.+$/, m => ({ title: /branches\/new|\/pastor$/.test(m[0]) ? "Church setup" : /units\/new/.test(m[0]) ? "Add a unit" : /\/leader$/.test(m[0]) ? "Unit appointment" : /\/workers$/.test(m[0]) ? "Assign workers" : "Church reports", back: { href: "/dashboard/church", label: "Back to Church structure" } })],
+  [/^\/dashboard\/church$/, () => ({ title: "My church", back: COMMUNITY })],
+  [/^\/dashboard\/church\/reports$/, () => ({ title: "Church reports", back: COMMUNITY })],
+  [/^\/dashboard\/church\/(?!branches|units|reports)[^/]+$/, () => ({ title: "Report details", back: { href: "/dashboard/community/oversight/reports", label: "Back to Reports" } })],
+  [/^\/dashboard\/church\/.+$/, m => ({ title: /branches\/new|\/pastor$/.test(m[0]) ? "Church setup" : /units\/new/.test(m[0]) ? "Add a unit" : /\/leader$/.test(m[0]) ? "Unit appointment" : "Assign workers", back: { href: "/dashboard/community/oversight/structure", label: "Back to Structure" } })],
   // Library and the rest of You
   [/^\/dashboard\/library\/teachings$/, () => ({ title: "Teachings Library", back: LIBRARY })],
   [/^\/dashboard\/podcast$/, () => ({ title: "Podcast", back: LIBRARY })],

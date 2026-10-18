@@ -54,6 +54,7 @@ function scopeDocumentTypography() {
 }
 
 const COLLAPSED_KEY = "pleros-sidebar-collapsed";
+const REMEMBERED_KEY = "pleros-area-positions";
 
 /** The Pleros logomark on a brand-blue strip, level with the blue top bar. */
 function Brand({ collapsed = false, onToggle }: { collapsed?: boolean; onToggle?: () => void }) {
@@ -179,6 +180,34 @@ export function DashboardShell({ viewer, sections, children, notificationControl
     selectTab(next, animated);
   };
   useEffect(scopeDocumentTypography, []);
+  // Each area remembers where you were (user request, 18 October): swiping or tapping across
+  // returns you to that page, not the area's home. Kept for the browser session.
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(window.sessionStorage.getItem(REMEMBERED_KEY) ?? "{}") as Partial<Record<DashboardArea, string>>;
+      (["you", "community"] as const).forEach(key => {
+        const href = saved[key];
+        if (href && key !== routedArea && dashboardAreaHref(key, sections, href) === href) remembered.current[key] = href;
+      });
+    } catch { /* storage blocked: memory lasts until reload */ }
+    // Read once on mount; later visits are recorded below.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
+    const href = window.location.pathname + window.location.search;
+    remembered.current[routedArea] = href;
+    try { window.sessionStorage.setItem(REMEMBERED_KEY, JSON.stringify(remembered.current)); } catch { /* storage blocked */ }
+    // Warm the other area's remembered page once the browser is idle, so a swipe lands on it ready.
+    const other: DashboardArea = routedArea === "you" ? "community" : "you";
+    const target = dashboardAreaHref(other, sections, remembered.current[other]);
+    if (!target) return;
+    const idle = window.requestIdleCallback ?? ((callback: () => void) => window.setTimeout(callback, 600));
+    const cancel = window.cancelIdleCallback ?? window.clearTimeout;
+    const handle = idle(() => router.prefetch(target));
+    return () => cancel(handle);
+    // sections only changes identity on refresh; the remembered targets are what matter.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname, routedArea, router]);
   // Desktop sidebar can fold to an icon rail; remembered per browser.
   const [collapsed, setCollapsed] = useState(false);
   useEffect(() => {
@@ -235,15 +264,13 @@ export function DashboardShell({ viewer, sections, children, notificationControl
       <AccountActions compact={collapsed} />
     </aside>
     <div className={frame.liveFrame}>
-      {focusedLearning ? <header className={cn(v3.header,frame.liveHeader)}>
-        <Link href={focus!.back.href} onClick={event => { if (!window.dispatchEvent(new Event("pleros:learning-navigation",{cancelable:true}))) event.preventDefault(); }} className={v3.iconButton} aria-label={focus!.back.label}><DashboardIcon name="left" /></Link>
-        <span className={frame.featureTitle}>{focusedLearning}</span>
-        <button type="button" className={v3.iconButton} aria-label="More options" aria-haspopup="dialog" aria-controls={drawerId} onClick={() => setMenu({ open:true,pathname })}><DashboardIcon name="more" /></button>
-      </header> : <RootHeader active={area} communityAvailable={dashboardAreaHref("community", sections) !== null} className={frame.liveHeader}
+      {/* The You/Community switch stays on every page (user request, 18 October); deep pages
+          add the breadcrumb below it, which carries the way back. */}
+      <RootHeader active={area} communityAvailable={dashboardAreaHref("community", sections) !== null} className={frame.liveHeader}
         onMenu={() => setMenu({ open: true, pathname })} onTab={selectRootTab}
         menuControl={<button className={cn(v3.iconButton, frame.mobileMenu)} onClick={() => setMenu({ open: true, pathname })} aria-label="Open dashboard navigation" aria-expanded={menuOpen} aria-controls={drawerId} aria-haspopup="dialog"><DashboardIcon name="menu" /></button>}
-        notifications={notificationControl ?? <NotificationBell tone="light" appearance="dashboard" />} />}
-      {focusedLearning ? <Breadcrumbs pathname={pathname} title={focusedLearning} /> : null}
+        notifications={notificationControl ?? <NotificationBell tone="light" appearance="dashboard" />} />
+      {focusedLearning ? <Breadcrumbs pathname={pathname} title={focusedLearning} back={focus!.back} /> : null}
       <main id="dashboard-main" className={frame.routeMain} {...swipeHandlers}>
         <div ref={viewportRef} className={frame.routeViewport} data-route-origin={routedArea}>
           <motion.div className={v3.swipeTrack} style={trackStyle}>

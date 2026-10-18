@@ -1,7 +1,9 @@
 /* The breadcrumb under the focused header. One line, never wrapping; each
    crumb truncates on its own and keeps a tall enough tap area. */
-.trail { border-bottom: 1px solid var(--color-line); background: white; }
-.trail ol { display: flex; align-items: center; min-width: 0; height: 32px; margin: 0; padding: 0 12px; list-style: none; overflow: hidden; font-size: 12.5px; line-height: 16px; white-space: nowrap; }
+.trail { display: flex; align-items: center; border-bottom: 1px solid var(--color-line); background: white; }
+.trail .back { display: grid; flex: none; place-items: center; width: 36px; height: 36px; margin-left: 4px; max-width: none; padding: 0; border-radius: 9px; color: var(--color-text-strong); }
+.trail .back:hover { background: #f4f5f7; text-decoration: none; }
+.trail ol { display: flex; flex: 1; align-items: center; min-width: 0; height: 36px; margin: 0; padding: 0 12px 0 2px; list-style: none; overflow: hidden; font-size: 12.5px; line-height: 16px; white-space: nowrap; }
 .trail li { display: flex; align-items: center; min-width: 0; flex: 0 1 auto; }
 .trail a { display: block; min-width: 0; max-width: 32vw; padding: 8px 0; overflow: hidden; text-overflow: ellipsis; color: var(--color-text-muted); text-decoration: none; }
 .trail a:hover { color: var(--color-text-strong); text-decoration: underline; text-underline-offset: 3px; }
@@ -15,7 +17,8 @@
 .current > span:last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 
 @media (min-width: 64rem) {
-  .trail ol { height: 40px; padding: 0 24px; font-size: 13px; }
+  .trail ol { height: 40px; padding: 0 24px 0 4px; font-size: 13px; }
+  .trail .back { margin-left: 16px; }
   .sep[data-desktop] { display: inline; }
   .sep[data-phone]:not([data-desktop]) { display: none; }
   .trail li[data-collapsed] { display: flex; }

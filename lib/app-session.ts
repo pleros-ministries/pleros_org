@@ -64,7 +64,9 @@ export const getAppSession = cache(async (): Promise<AppSession | null> => {
       return null;
     }
 
-    const ppcUserId = await ensureAppUserRecord({
+    // The app user already matches (the usual case): skip the repeat read and write.
+    // ensureAppUserRecord still creates the record or syncs emailVerified when needed.
+    const ppcUserId = appUser && appUser.emailVerified === emailVerified ? appUser.id : await ensureAppUserRecord({
       id: appUser?.id ?? authUserId,
       name: authSession.user.name,
       email: authSession.user.email,

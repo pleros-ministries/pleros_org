@@ -2,13 +2,15 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { BellOffIcon, Building2Icon, ChevronRightIcon, MessageCircleQuestionIcon, PlusIcon, UsersRoundIcon } from "lucide-react";
+import { BellOffIcon, ChevronRightIcon, MessageCircleQuestionIcon, PlusIcon, UsersRoundIcon } from "lucide-react";
 
 import styles from "@/components/community/discipleship/discipleship-group.module.css";
 import { Initials } from "@/components/community/discipleship/shared";
 import { GroupTabs } from "@/components/community/groups/group-hero";
 import { MessageButton } from "@/components/community/messages/message-button";
 import type { OversightData, OversightDiscipler } from "@/lib/db/queries/oversight";
+
+import { OversightHeader } from "./oversight-nav";
 
 export const OVERSIGHT_PATH = "/dashboard/community/oversight";
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
@@ -44,41 +46,56 @@ export function OversightOverview({ data }: { data: OversightData }) {
   const waitingDisciplers = data.disciplers.filter(row => row.waiting > 0);
   const attention = [
     data.totals.waiting ? { key: "questions", href: `${OVERSIGHT_PATH}/questions`, tone: ["#fde3cf", "#7a3a10"], icon: <MessageCircleQuestionIcon className="size-4" strokeWidth={2.2} />, title: `${plural(data.totals.waiting, "question")} waiting over 3 days`, meta: `${plural(waitingDisciplers.length, "discipler")} · ${[...new Set(waitingDisciplers.map(row => row.branchName).filter(Boolean))].join(", ") || "your branches"}` } : null,
-    silent.length ? { key: "silent", href: "/dashboard/church/reports", tone: ["#f6dcdc", "#9b2c2c"], icon: <BellOffIcon className="size-4" strokeWidth={2.2} />, title: `${plural(silent.length, "worker")} haven’t reported in 3 days`, meta: `Across ${plural(new Set(silent.map(worker => worker.branchId)).size, "branch")}` } : null,
+    silent.length ? { key: "silent", href: `${OVERSIGHT_PATH}/reports`, tone: ["#f6dcdc", "#9b2c2c"], icon: <BellOffIcon className="size-4" strokeWidth={2.2} />, title: `${plural(silent.length, "worker")} haven’t reported in 3 days`, meta: `Across ${plural(new Set(silent.map(worker => worker.branchId)).size, "branch")}` } : null,
     leaderless.length ? { key: "leaderless", href: `${OVERSIGHT_PATH}/branches/${leaderless[0]!.branchId}`, tone: ["#efe7fb", "#56209c"], icon: <UsersRoundIcon className="size-4" strokeWidth={2.2} />, title: `${plural(leaderless.length, "unit")} without a leader`, meta: leaderless.slice(0, 3).map(unit => `${unit.branchName} · ${unit.name}`).join(", ") } : null,
   ].filter(Boolean) as Array<{ key: string; href: string; tone: string[]; icon: React.ReactNode; title: string; meta: string }>;
 
+  const pending = data.workers.filter(worker => !worker.reportedToday).sort((a, b) => b.silentDays - a.silentDays);
+  const share = data.totals.expected ? Math.round((data.totals.reportedToday / data.totals.expected) * 100) : 0;
+  const ready = data.totals.units - leaderless.length;
   return <div className={styles.page}>
-    <div className={styles.heading}>
-      <div><h1>Oversight</h1><p className={styles.sub}>{data.scopeLabel} · {plural(data.totals.branches, "branch")} · {plural(data.totals.workers, "worker")}</p></div>
-    </div>
-    <Strip items={[["Reported today", data.totals.expected ? `${data.totals.reportedToday}/${data.totals.expected}` : "–"], ["At risk", data.totals.atRisk, data.totals.atRisk > 0], ["Questions", data.totals.waiting, data.totals.waiting > 0]]} />
+    <OversightHeader sub={`${data.scopeLabel} · ${plural(data.totals.branches, "branch")} · ${plural(data.totals.workers, "worker")}`} />
+
+    {/* Today at a glance: the day's reports, then the people side. */}
+    <section className={`${styles.panel} grid gap-3 p-3.5`} aria-label="Today">
+      <div className="flex items-end justify-between gap-3">
+        <span className="grid gap-0.5">
+          <span className={styles.rowMeta}>Reports today</span>
+          <span className="font-[family-name:var(--font-dashboard-heading)] text-[22px] leading-7 font-medium">{data.totals.expected ? `${data.totals.reportedToday} of ${data.totals.expected}` : "No workers yet"}</span>
+        </span>
+        {data.totals.expected ? <span className={styles.pill} data-tone={pending.length ? "risk" : "ok"}>{pending.length ? `${pending.length} pending` : "All in"}</span> : null}
+      </div>
+      {data.totals.expected ? <span className="h-1.5 overflow-hidden rounded-full bg-[#eceef2]" aria-hidden="true"><i className="block h-full rounded-full bg-[var(--color-community-blue)]" style={{ width: `${share}%` }} /></span> : null}
+    </section>
+    <Strip items={[["At risk", data.totals.atRisk, data.totals.atRisk > 0], ["Questions", data.totals.waiting, data.totals.waiting > 0], ["Silent 3+ days", silent.length, silent.length > 0]]} />
 
     <div className={styles.sectionTitle}><h2>Needs attention</h2></div>
     {attention.length ? <div className={styles.panel}><ul className={styles.list}>
       {attention.map(item => <li key={item.key}><Link href={item.href} className={styles.row}>
         <span className="grid size-9 shrink-0 place-items-center rounded-[10px]" style={{ background: item.tone[0], color: item.tone[1] }} aria-hidden="true">{item.icon}</span>
-        <span className={styles.rowCopy}><span className={styles.rowTitle} style={{ fontWeight: 500 }}>{item.title}</span><span className={styles.rowMeta}>{item.meta}</span></span>
+        <span className={styles.rowCopy}><span className={styles.rowTitle}>{item.title}</span><span className={styles.rowMeta}>{item.meta}</span></span>
         <ChevronRightIcon className={`${styles.chev} size-4`} strokeWidth={2} />
       </Link></li>)}
     </ul></div> : <p className={`${styles.panel} ${styles.empty}`}>Nothing needs you right now.</p>}
 
-    <div className={styles.sectionTitle}><h2>{data.role === "pastor" ? "Branches" : "Your branches"}</h2>{data.role === "pastor" ? <Link href="/dashboard/church/branches/new" className={styles.quiet} style={{ display: "inline-flex", alignItems: "center", gap: 4 }}><PlusIcon className="size-3.5" strokeWidth={2.2} />New branch</Link> : null}</div>
+    <div className={styles.sectionTitle}><h2>Pending reports</h2><Link href={`${OVERSIGHT_PATH}/reports`} className={styles.quiet}>All reports</Link></div>
+    {pending.length ? <div className={styles.panel}><ul className={styles.list}>
+      {pending.slice(0, 4).map(worker => <li key={worker.userId}><Link href={`/dashboard/church/${worker.userId}`} className={styles.row}>
+        <Initials name={worker.name} />
+        <span className={styles.rowCopy}><span className={styles.rowTitle}>{worker.name}</span><span className={styles.rowMeta}>{[worker.role === "unit_leader" ? "Unit leader" : "Worker", data.branches.find(branch => branch.id === worker.branchId)?.name, worker.silentDays >= 3 ? `no report in ${worker.silentDays} days` : null].filter(Boolean).join(" · ")}</span></span>
+        <span className={styles.pill} data-tone={worker.silentDays >= 3 ? "off" : "risk"}>Not yet</span>
+      </Link></li>)}
+    </ul></div> : <p className={`${styles.panel} ${styles.empty}`}>{data.totals.expected ? "Everyone has reported today." : "Reports appear once workers are placed in units."}</p>}
+
+    <div className={styles.sectionTitle}><h2>Structure</h2><Link href={`${OVERSIGHT_PATH}/structure`} className={styles.quiet}>Manage</Link></div>
+    <Strip items={[["Branches", data.totals.branches], ["Units ready", data.totals.units ? `${ready}/${data.totals.units}` : "–", leaderless.length > 0], ["Workers", data.totals.workers]]} />
     {data.branches.length ? <div className={styles.panel}><ul className={styles.list}>
       {data.branches.map((branch, index) => <li key={branch.id}><Link href={`${OVERSIGHT_PATH}/branches/${branch.id}`} className={styles.row}>
         <Mark text={short(branch.name)} index={index} />
         <span className={styles.rowCopy}><span className={styles.rowTitle}>{branch.name}</span><span className={styles.rowMeta}>{[branch.pastors.map(pastor => pastor.name).join(", ") || "No branch pastor", plural(branch.units.length, "unit"), plural(branch.workerCount, "worker")].join(" · ")}</span></span>
         <Rate done={branch.reportedToday} total={branch.expected} />
       </Link></li>)}
-    </ul></div> : <p className={`${styles.panel} ${styles.empty}`}>No branches yet.</p>}
-    <div className={styles.sectionTitle}><h2>Manage</h2></div>
-    <div className={styles.panel}><ul className={styles.list}>
-      <li><Link href="/dashboard/church" className={styles.row}>
-        <span className="grid size-9 shrink-0 place-items-center rounded-[10px] bg-[#e6ecfc] text-[#1f3260]" aria-hidden="true"><Building2Icon className="size-4" strokeWidth={2.2} /></span>
-        <span className={styles.rowCopy}><span className={styles.rowTitle} style={{ fontWeight: 500 }}>Church structure</span><span className={styles.rowMeta}>Branches, units, leaders and member placement</span></span>
-        <ChevronRightIcon className={`${styles.chev} size-4`} strokeWidth={2} />
-      </Link></li>
-    </ul></div>
+    </ul></div> : <p className={`${styles.panel} ${styles.empty}`}>No branches yet. Add one from Structure.</p>}
   </div>;
 }
 

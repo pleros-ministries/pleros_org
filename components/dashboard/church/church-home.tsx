@@ -50,9 +50,11 @@ function Note({ children }: { children: ReactNode }) {
 }
 
 /** Church structure (Paper: Pleros-church-pastor / -branch / -unit / -worker), in the Oversight style. */
-export function ChurchHomeView({ data, canOversee }: { data: ChurchHome; canOversee: boolean }) {
+export function ChurchHomeView({ data, canOversee, header }: { data: ChurchHome; canOversee: boolean;
+  /** Inside Oversight: its shared header replaces this page's own heading. */
+  header?: ReactNode }) {
   const [branchId, setBranchId] = useState(data.kind === "structure" ? data.branches[0]?.id ?? null : null);
-  const reports = canOversee ? <ActionRow href="/dashboard/church/reports" icon={<ClipboardListIcon className="size-4" strokeWidth={2.2} />} tone={["#e4ebfd", "#2331ae"]} title="Daily reports" meta="For the people you lead" /> : null;
+  const reports = canOversee ? <ActionRow href={header ? "/dashboard/community/oversight/reports" : "/dashboard/church/reports"} icon={<ClipboardListIcon className="size-4" strokeWidth={2.2} />} tone={["#e4ebfd", "#2331ae"]} title="Daily reports" meta="For the people you lead" /> : null;
 
   if (data.kind === "none") return <Page>
     <Heading title="Church" sub="No church appointment yet" />
@@ -81,8 +83,8 @@ export function ChurchHomeView({ data, canOversee }: { data: ChurchHome; canOver
     <Note>Appointments and assignments are managed by your branch pastor.</Note>
   </Page>;
 
-  if (data.role === "pastor") return <Page>
-    <Heading title="Church structure" sub="Fullness of Christ Church · all branches" />
+  if (data.role === "pastor") return <Page bare={Boolean(header)}>
+    {header ?? <Heading title="Church structure" sub="Fullness of Christ Church · all branches" />}
     <Strip items={[["Branches", data.totals.branches], ["Units", data.totals.units], ["Workers", data.totals.workers]]} />
     <div className={styles.sectionTitle}><h2>Branches</h2><Link href="/dashboard/church/branches/new" className={`${styles.quiet} inline-flex items-center gap-1`}><PlusIcon className="size-3.5" strokeWidth={2.2} />Add branch</Link></div>
     {data.branches.length ? data.branches.map(branch => <section key={branch.id} className={styles.panel} aria-label={branch.name}>
@@ -105,8 +107,8 @@ export function ChurchHomeView({ data, canOversee }: { data: ChurchHome; canOver
 
   const branch = data.branches.find(row => row.id === branchId) ?? data.branches[0];
   const leaderless = branch?.units.find(unit => !unit.leader);
-  return <Page>
-    <Heading title="Church structure" sub={`Branch pastor · ${plural(data.branches.length, "branch", "branches")}`} />
+  return <Page bare={Boolean(header)}>
+    {header ?? <Heading title="Church structure" sub={`Branch pastor · ${plural(data.branches.length, "branch", "branches")}`} />}
     {data.branches.length > 1 ? <div className="flex flex-wrap gap-1.5" role="tablist" aria-label="Your branches">
       {data.branches.map(row => <button key={row.id} type="button" role="tab" aria-selected={row.id === branch?.id} onClick={() => setBranchId(row.id)}
         className={`${styles.btn} ${row.id === branch?.id ? "" : "opacity-80"}`} data-primary={row.id === branch?.id ? "" : undefined}>{row.name}</button>)}

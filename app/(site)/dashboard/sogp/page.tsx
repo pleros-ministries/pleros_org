@@ -21,17 +21,21 @@ export default async function SogpDashboardPage({ searchParams }: { searchParams
   if (dated) redirect(dated);
 
   // Independent reads run together; guard order below preserves redirect priority.
-  const [rows, openCohort, learning] = await Promise.all([
+  // The hub starts the moment the learning state arrives, alongside the enrolment reads,
+  // and reuses that state (a second state read would queue behind the same learner lock).
+  const learningRead = getOwnLearningView(session.user.id);
+  const hubRead = learningRead.then(view => view ? getLearningHubData(session.user.id, view.state).catch(() => null) : null);
+  const [rows, openCohort, learning, hub] = await Promise.all([
     getSogpEnrollmentsWithCohortByUserId(session.user.id),
     getOpenSogpCohort(),
-    getOwnLearningView(session.user.id),
+    learningRead,
+    hubRead,
   ]);
   if (rows.length === 0) redirect("/sogp/enrol");
 
   const canJoinAnotherCohort = canOfferJoinAnotherCohort(rows, openCohort?.id ?? null);
   if (!learning) redirect("/sogp/enrol");
-  // The hub reuses the learning state above, and falls back to the previous view if a read fails.
-  const hub = await getLearningHubData(session.user.id, learning.state).catch(() => null);
+  // A failed hub read falls back to the previous view.
 
   return (
     <>

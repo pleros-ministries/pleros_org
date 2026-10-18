@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { eq, inArray } from "drizzle-orm";
 import { db } from "@/lib/db";
 import * as s from "@/lib/db/schema";
@@ -25,7 +26,7 @@ async function names(ids: string[]) {
   return new Map(rows.map(row => [row.id, row.name]));
 }
 
-export async function getChurchHome(viewerId: string): Promise<ChurchHome> {
+async function readChurchHome(viewerId: string): Promise<ChurchHome> {
   if (!churchOrganisationEnabled()) return { kind: "none" };
   const viewer = await getChurchAssignment(viewerId);
   if (!viewer) return { kind: "none" };
@@ -108,3 +109,6 @@ export async function getChurchPlace(viewerId: string, input: { branchId?: numbe
   return { viewerRole: viewer.role as "pastor" | "branch_pastor", viewerId, branch, pastors, unit };
 }
 export type ChurchPlace = NonNullable<Awaited<ReturnType<typeof getChurchPlace>>>;
+
+/** Request-scoped: layouts, pages and loaders read this repeatedly in one render. */
+export const getChurchHome = cache(readChurchHome);

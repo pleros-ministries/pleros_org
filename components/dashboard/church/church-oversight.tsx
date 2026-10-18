@@ -23,13 +23,15 @@ function Remind({ subjectId, day }: { subjectId: string; day: string }) {
 }
 
 /** Church reports (Paper: Pleros-oversight), in the Oversight style. Status only: no notes, contacts or report text. */
-export function ChurchOversight({ rows, day, dayLabel, scope, remindersEnabled }: { rows: OversightRow[]; day: string; dayLabel: string; scope: string; remindersEnabled: boolean }) {
+export function ChurchOversight({ rows, day, dayLabel, scope, remindersEnabled, header }: { rows: OversightRow[]; day: string; dayLabel: string; scope: string; remindersEnabled: boolean;
+  /** Inside Oversight: its shared header replaces this page's own heading. */
+  header?: React.ReactNode }) {
   const needs = rows.filter(row => Object.values(row.statuses).includes("missing"));
   const [filter, setFilter] = useState<"needs" | "all">(needs.length ? "needs" : "all");
   const visible = filter === "needs" ? needs : rows;
   const tab = "inline-flex h-8 items-center justify-center rounded-[7px] text-[13px] font-medium transition-colors";
-  return <ChurchPage>
-    <ChurchHeading title="Church reports" sub={`${scope} · ${dayLabel}`} />
+  return <ChurchPage bare={Boolean(header)}>
+    {header ?? <ChurchHeading title="Church reports" sub={`${scope} · ${dayLabel}`} />}
     <Strip items={[["Reported", rows.length ? `${rows.length - needs.length}/${rows.length}` : "–"], ["Need a report", needs.length, needs.length > 0], ["People", rows.length]]} />
     <div className="grid grid-cols-2 rounded-[10px] bg-[#eceef2] p-[3px]" role="tablist" aria-label="Show">
       {([["needs", `Needs a report · ${needs.length}`], ["all", `Everyone · ${rows.length}`]] as const).map(([key, text]) => <button key={key} type="button" role="tab" aria-selected={filter === key} onClick={() => setFilter(key)}

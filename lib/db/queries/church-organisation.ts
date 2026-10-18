@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { and, eq, ilike, inArray, ne, or, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { transactionDb } from "@/lib/db/transaction";
@@ -11,7 +12,7 @@ import { canManageChurchAssignments, canReadChurchReport, churchBranchIds, valid
 export function churchOrganisationEnabled() { return process.env.DASHBOARD_CHURCH_V2 !== "0"; }
 export function churchMultiBranchEnabled() { return churchOrganisationEnabled() && process.env.DASHBOARD_CHURCH_MULTI_BRANCH_V2 !== "0"; }
 function requireEnabled() { if (!churchOrganisationEnabled()) throw new CommunityError("Church assignments are not enabled yet."); }
-export async function getChurchAssignment(userId: string): Promise<ChurchAssignment | null> {
+async function readChurchAssignment(userId: string): Promise<ChurchAssignment | null> {
   if (!churchOrganisationEnabled()) return null;
   const [row] = await db.select().from(s.churchAssignments).where(eq(s.churchAssignments.userId, userId)).limit(1);
   if (!row) return null;
@@ -187,7 +188,11 @@ export async function createChurchPlace(actorId: string, input: { name: string; 
   });
 }
 
-export async function hasChurchDirectReports(userId: string) {
+async function readHasChurchDirectReports(userId: string) {
   if (!churchOrganisationEnabled()) return false;
   return Boolean((await db.select({ id: s.churchAssignments.userId }).from(s.churchAssignments).where(eq(s.churchAssignments.supervisorId, userId)).limit(1))[0]);
 }
+
+/** Request-scoped: layouts, pages and loaders read this repeatedly in one render. */
+export const getChurchAssignment = cache(readChurchAssignment);
+export const hasChurchDirectReports = cache(readHasChurchDirectReports);

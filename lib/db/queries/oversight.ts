@@ -52,9 +52,9 @@ const reported = (statuses: Record<string, string>) => Object.values(statuses).s
  * text never leaves the discipler; this reads counts and dates only.
  */
 export async function getOversight(viewerId: string): Promise<OversightData | null> {
-  const viewer = await getChurchAssignment(viewerId);
+  // Both reads start together; getChurchHome reuses the request-cached assignment.
+  const [viewer, home] = await Promise.all([getChurchAssignment(viewerId), getChurchHome(viewerId)]);
   if (!canManageChurchAssignments(viewer)) return null;
-  const home = await getChurchHome(viewerId);
   if (home.kind !== "structure") return null;
   const limited = viewer!.role === "branch_pastor";
   const branchIds = limited ? churchBranchIds(viewer) : home.branches.map(branch => branch.id);

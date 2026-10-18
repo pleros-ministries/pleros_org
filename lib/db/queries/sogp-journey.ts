@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { and, asc, eq, gte, inArray, lte } from "drizzle-orm";
 
 import { db } from "@/lib/db";
@@ -70,7 +71,7 @@ async function getEnrollmentCohort(userId: string) {
   return row ?? null;
 }
 
-export async function getSogpDashboardAccess(userId: string) {
+async function readSogpDashboardAccess(userId: string) {
   const row = await getEnrollmentCohort(userId);
   return row
     ? {
@@ -718,3 +719,6 @@ export async function getActiveSogpJourney(
     },
   };
 }
+
+/** Request-scoped: layouts, pages and loaders read this repeatedly in one render. */
+export const getSogpDashboardAccess = cache(readSogpDashboardAccess);
