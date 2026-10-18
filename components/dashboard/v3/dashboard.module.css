@@ -364,3 +364,16 @@
   .homeTile, .homeRailTile { transition: transform 160ms cubic-bezier(.2, 0, 0, 1); }
   .homeTile:active, .homeRailTile:active { transform: scale(.98); }
 }
+
+/* Grow together and the Welcome Pack row: actionable rows with a button
+   (Pastor review, 18 October), replacing the illustrated tiles. */
+.homeActions { margin: 0; padding: 0 14px; list-style: none; border: 1px solid var(--dashboard-panel-edge); border-radius: var(--dashboard-panel-radius, 10px); background: white; box-shadow: var(--shadow-sm); }
+.homeActionRow { display: flex; align-items: center; gap: 12px; min-width: 0; padding: 12px 0; }
+.homeActionRow + .homeActionRow { border-top: 1px solid var(--color-line, #e7e9ec); }
+.homeActionIcon { display: grid; flex: none; place-items: center; width: 36px; height: 36px; border-radius: 10px; }
+.homeActionCopy { display: grid; flex: 1; min-width: 0; gap: 1px; }
+.homeActionCopy b { font-size: 13.5px; line-height: 20px; font-weight: 500; }
+.homeActionCopy span { font-size: 12px; line-height: 17px; color: var(--color-text-muted); }
+.homeActionCopy .homeRank { font-family: var(--font-dashboard-heading), "Sen", sans-serif; font-size: 14px; color: var(--color-text-strong); }
+.homeActionButton { flex: none; display: inline-flex; align-items: center; height: 32px; padding: 0 12px; border: 0; border-radius: 10px; background: var(--color-community-blue, #2056d6); color: white; font: inherit; font-size: 12.5px; font-weight: 500; text-decoration: none; white-space: nowrap; cursor: pointer; }
+.homeActionButton:hover { filter: brightness(1.06); }

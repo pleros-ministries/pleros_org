@@ -4,9 +4,9 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type ReactNode } from "react";
+import { GiftIcon, Share2Icon, TrophyIcon, UserPlusIcon, UsersRoundIcon } from "lucide-react";
 import type { DashboardHomeData, HomeLearningCard, HomeReport, HomeSogp, HomeToday } from "@/lib/dashboard/home";
 import { PRAYER_WATCH_YOUTUBE_URL } from "@/lib/prayer-watch";
-import { HomeArt, type HomeArtName } from "./home-art";
 import { DashboardIcon, StatusPill } from "./primitives";
 import styles from "./dashboard.module.css";
 
@@ -244,7 +244,7 @@ function ProgressRow({ label, value, total, text, tone }: { label: string; value
 
 function ProgressSection({ progress }: { progress: NonNullable<HomeSogp["progress"]> }) {
   return <section className={styles.homeSection} aria-labelledby="home-progress-heading">
-    <div className={styles.homeSectionHeader}><h2 id="home-progress-heading">Your progress</h2><Link href="/dashboard/sogp" className={styles.textAction}>My learning</Link></div>
+    <div className={styles.homeSectionHeader}><h2 id="home-progress-heading">Your progress</h2><Link href="/dashboard/sogp" className={styles.textAction}>Learning</Link></div>
     <div className={styles.homePanel}>
       <ProgressRow label={progress.learningLabel} value={progress.learningDone} total={progress.learningTotal} text={`${progress.learningDone} of ${progress.learningTotal}`} />
       <ProgressRow label="Prayer Watch" value={progress.prayerPercent} total={100} text={`${progress.prayerPercent}%`} tone="amber" />
@@ -258,61 +258,49 @@ function ProgressSection({ progress }: { progress: NonNullable<HomeSogp["progres
   </section>;
 }
 
-function Tile({ href, art, tone, title, children, action, prefetch, onClick }: { href?: string; art: HomeArtName; tone: string; title: string; children?: ReactNode; action: string; prefetch?: false; onClick?: () => void }) {
-  const body = <>
-    <span className={styles.homeTileCopy}><h3>{title}</h3>{children}</span>
-    <span className={styles.homeTileAction}>{action}</span>
-    <HomeArt name={art} className={styles.homeTileArt} />
-  </>;
-  return onClick
-    ? <button type="button" className={styles.homeTile} data-tone={tone} onClick={onClick}>{body}</button>
-    : <Link href={href!} prefetch={prefetch} className={styles.homeTile} data-tone={tone}>{body}</Link>;
+function ActionRow({ href, icon, tone, title, children, action, prefetch, onClick }: { href?: string; icon: ReactNode; tone: [string, string]; title: ReactNode; children?: ReactNode; action: string; prefetch?: false; onClick?: () => void }) {
+  return <li className={styles.homeActionRow}>
+    <span className={styles.homeActionIcon} style={{ background: tone[0], color: tone[1] }} aria-hidden="true">{icon}</span>
+    <span className={styles.homeActionCopy}><b>{title}</b>{children}</span>
+    {onClick
+      ? <button type="button" className={styles.homeActionButton} onClick={onClick}>{action}</button>
+      : <Link href={href!} prefetch={prefetch} className={styles.homeActionButton}>{action}</Link>}
+  </li>;
 }
 
+/** Grow together as actionable rows with buttons (Pastor review, 18 October), not illustrated tiles. */
 function GrowTogether({ sogp }: { sogp: HomeSogp }) {
   const [sharing, setSharing] = useState(false);
   const group = sogp.group;
   return <section className={styles.homeSection} aria-labelledby="home-grow-heading">
     <div className={styles.homeSectionHeader}><h2 id="home-grow-heading">Grow together</h2></div>
-    <div className={styles.homeTiles}>
-      <Tile href="/dashboard/sogp/leaderboard" art="leaderboard" tone="teal" title="Leaderboard" action="View">
-        {sogp.leaderboard ? <><span className={styles.homeRank}>#{sogp.leaderboard.rank}</span><p>{sogp.leaderboard.points} points this cohort</p></> : <p>See how your cohort is growing</p>}
-      </Tile>
-      <Tile href="/dashboard/sogp/referrals" art="invite" tone="rose" title="Invite friends" action="Share link">
-        <p>Share your link and walk with them</p>
-      </Tile>
+    <ul className={styles.homeActions}>
+      <ActionRow href="/dashboard/sogp/leaderboard" icon={<TrophyIcon className="size-4" strokeWidth={2} />} tone={["#fff1c2", "#8a5a00"]} title={sogp.leaderboard ? <>Leaderboard · <span className={styles.homeRank}>#{sogp.leaderboard.rank}</span></> : "Leaderboard"} action="View">
+        <span>{sogp.leaderboard ? `${sogp.leaderboard.points} points this cohort` : "See how your cohort is growing"}</span>
+      </ActionRow>
+      <ActionRow href="/dashboard/sogp/referrals" icon={<UserPlusIcon className="size-4" strokeWidth={2} />} tone={["#f6d9de", "#5e2236"]} title="Invite friends" action="Share link">
+        <span>Share your link and walk with them</span>
+      </ActionRow>
       {group.kind === "member"
-        ? <Tile href="/dashboard/community/discipleship" prefetch={false} art="group" tone="lilac" title="My group" action="Open group"><p>{group.leaderFirstName}&apos;s group</p></Tile>
+        ? <ActionRow href="/dashboard/community/discipleship" prefetch={false} icon={<UsersRoundIcon className="size-4" strokeWidth={2} />} tone={["#efe7fb", "#56209c"]} title="My group" action="Open"><span>{group.leaderFirstName}&apos;s group</span></ActionRow>
         : group.kind === "leader"
-          ? <Tile href={group.groups > 1 ? "/dashboard/community/groups" : "/dashboard/community/discipleship"} prefetch={false} art="group" tone="lilac" title={group.groups > 1 ? "Your groups" : "Your group"} action="Open"><p>{group.disciples} {group.disciples === 1 ? "disciple" : "disciples"}{group.groups > 1 ? ` in ${group.groups} groups` : ""}</p></Tile>
-          : <Tile href="/dashboard/sogp/discipleship" prefetch={false} art="group" tone="lilac" title="Start your group" action="Invite"><p>Walk through SOGP with the people you invite</p></Tile>}
-      <Tile art="share" tone="sand" title="Share what you learnt" action="Create card" onClick={() => setSharing(true)}>
-        <p>Turn today into a card</p>
-      </Tile>
-    </div>
+          ? <ActionRow href={group.groups > 1 ? "/dashboard/community/groups" : "/dashboard/community/discipleship"} prefetch={false} icon={<UsersRoundIcon className="size-4" strokeWidth={2} />} tone={["#efe7fb", "#56209c"]} title={group.groups > 1 ? "Your groups" : "Your group"} action="Open"><span>{group.disciples} {group.disciples === 1 ? "disciple" : "disciples"}{group.groups > 1 ? ` in ${group.groups} groups` : ""}</span></ActionRow>
+          : <ActionRow href="/dashboard/sogp/discipleship" prefetch={false} icon={<UsersRoundIcon className="size-4" strokeWidth={2} />} tone={["#efe7fb", "#56209c"]} title="Start your group" action="Invite"><span>Walk through SOGP with people you invite</span></ActionRow>}
+      <ActionRow icon={<Share2Icon className="size-4" strokeWidth={2} />} tone={["#f6ecd9", "#5a3d0c"]} title="Share what you learnt" action="Create card" onClick={() => setSharing(true)}>
+        <span>Turn today into a card</span>
+      </ActionRow>
+    </ul>
     {sharing ? <ShareLearningProgressDialog open={sharing} onOpenChange={setSharing} track="sogp" dayNumber={sogp.shareDayNumber ?? undefined} /> : null}
   </section>;
 }
 
-const morePleros: { href: string; art: HomeArtName; tone: string; title: string; summary: string }[] = [
-  { href: "/dashboard/podcast", art: "podcast", tone: "butter", title: "Podcast", summary: "Daily devotional episodes" },
-  { href: "/dashboard/welcomepack", art: "welcome", tone: "sky", title: "Welcome Pack", summary: "Your gifts and orientation" },
-  { href: "/dashboard/pre-sogp", art: "preSogp", tone: "periwinkle", title: "Pre-SOGP", summary: "Foundation videos" },
-  { href: "/partner", art: "partner", tone: "peach", title: "Partner with us", summary: "Give towards the Gospel" },
-];
-
-function MoreFromPleros() {
-  return <section className={styles.homeSection} aria-labelledby="home-more-heading">
-    <div className={styles.homeSectionHeader}><h2 id="home-more-heading">More from Pleros</h2></div>
-    <ul className={styles.homeRail}>
-      {morePleros.map(item => <li key={item.href}>
-        <Link href={item.href} className={styles.homeRailTile} data-tone={item.tone}>
-          <span className={styles.homeTileCopy}><h3>{item.title}</h3><p>{item.summary}</p></span>
-          <HomeArt name={item.art} className={styles.homeTileArt} />
-        </Link>
-      </li>)}
-    </ul>
-  </section>;
+/** Welcome Pack starts the learning path and stays on Home until its last step (reminders) is saved. */
+function WelcomePackRow() {
+  return <ul className={styles.homeActions} style={{ marginTop: 12 }} aria-label="Your Welcome Pack">
+    <ActionRow href="/dashboard/welcomepack" icon={<GiftIcon className="size-4" strokeWidth={2} />} tone={["#fde3cf", "#7a3a10"]} title="Your Welcome Pack" action="Continue">
+      <span>Gifts, orientation and reminders</span>
+    </ActionRow>
+  </ul>;
 }
 
 export function DashboardHomeView({ name, greeting, data }: { name?: string; greeting: string; data: DashboardHomeData }) {
@@ -327,6 +315,7 @@ export function DashboardHomeView({ name, greeting, data }: { name?: string; gre
     </div>
     <div className={styles.homeMain}>
       <LearningDestination card={data.card} fallback={data.learning} hubHref={learningHubHref} />
+      {data.welcomePack && !data.welcomePack.done ? <WelcomePackRow /> : null}
       {sogp?.today ? <TodaySection today={sogp.today} /> : null}
       {sogp?.progress ? <ProgressSection progress={sogp.progress} /> : null}
     </div>
@@ -334,6 +323,5 @@ export function DashboardHomeView({ name, greeting, data }: { name?: string; gre
       {sogp ? <GrowTogether sogp={sogp} /> : null}
       {data.reports ? <ReportsDestination day={data.day} rows={data.reports} /> : null}
     </div>
-    <div className={styles.homeWide}><MoreFromPleros /></div>
   </div>;
 }

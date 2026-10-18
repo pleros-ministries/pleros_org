@@ -41,7 +41,8 @@ test("the You home leads with My learning and keeps reports as a compact summary
 
   expect(html).toContain("My learning");
   expect(html).toContain(">My reports</h2>");
-  expect(html).toContain("More from Pleros");
+  // Podcast, Welcome Pack, Pre-SOGP and Partner each have a You tab now.
+  expect(html).not.toContain("More from Pleros");
   expect(html).not.toContain("My support");
   expect(html).not.toContain("Today’s two episodes");
 });
@@ -97,7 +98,9 @@ test("the SOGP sections bring the old dashboard's day, checklist, progress and t
   expect(html).toContain('href="/dashboard/sogp/leaderboard"');
   expect(html).toContain("#7");
   expect(html).toContain("Tolu&#x27;s group");
-  expect(html).toContain('href="/partner"');
+  // Partner moved to its own You tab; Grow together is rows with buttons.
+  expect(html).not.toContain('href="/partner"');
+  expect(html).toContain(">Share link<");
 });
 
 test("the learning card uses the current track's level art and falls back to the staircase", () => {

@@ -59,6 +59,8 @@ export type DashboardHomeData = {
   learning: { title: string; href: string; action: string; completed: number; total: number; enrolled: boolean; unit?: "tracks" | "episodes"; pathLabel?: string };
   reports: HomeReport[] | null;
   sogp?: HomeSogp | null;
+  /** Welcome Pack stays on Home until its last step (reminders) is saved. */
+  welcomePack?: { done: boolean } | null;
 };
 
 type JourneyDay = {
