@@ -31,7 +31,7 @@ export function sogpQuizQuery(dayNumber: number) {
 }
 
 /** `embedded` drops the page title so the quiz can sit in the lesson's Quiz tab. */
-export function SogpQuiz({ dayNumber, embedded = false }: { dayNumber: number; embedded?: boolean }) {
+export function SogpQuiz({ dayNumber, embedded = false, previewResult }: { dayNumber: number; embedded?: boolean; /** Visual previews only: show this result screen. */ previewResult?: { score: number; passed: boolean } }) {
   const queryClient = useQueryClient();
   const { data } = useSuspenseQuery(sogpQuizQuery(dayNumber));
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -56,7 +56,7 @@ export function SogpQuiz({ dayNumber, embedded = false }: { dayNumber: number; e
     },
   });
 
-  const result = mutation.data;
+  const result = mutation.data ?? previewResult;
   const showPassed = !result && !retaking && data.bestScore !== null && data.bestScore >= 70;
   return (
     <section className={embedded ? lesson.stack : lesson.page}>
@@ -75,7 +75,7 @@ export function SogpQuiz({ dayNumber, embedded = false }: { dayNumber: number; e
           <span className={lesson.chip} data-tint={result.passed ? undefined : "amber"}><CheckCircle2 className="size-5" aria-hidden /></span>
           <strong>{result.score}%</strong>
           <p>{result.passed ? "Quiz passed. Keep going." : "Review the teaching and try again."}</p>
-          <button type="button" className={lesson.secondary} onClick={() => { mutation.reset(); setAnswers({}); }}><RotateCcw className="size-3.5" aria-hidden /> Try again</button>
+          <button type="button" className={lesson.secondary} onClick={() => { mutation.reset(); setAnswers({}); }}><RotateCcw className="size-3.5" aria-hidden /> {result.passed ? "Retake" : "Try again"}</button>
         </div>
       ) : (
         <form className={lesson.stack} onSubmit={(event) => { event.preventDefault(); mutation.mutate(); }}>

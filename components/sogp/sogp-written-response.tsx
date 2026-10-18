@@ -65,7 +65,7 @@ export function SogpWrittenResponse({ dayNumber, embedded = false }: { dayNumber
       {data.submission?.status === "submitted" ? <div className={lesson.pending}><Clock3 className="size-5 shrink-0" aria-hidden /><span>Submitted · waiting for review</span></div> : null}
       {data.submission?.status === "draft" ? <p className={lesson.meta}>Draft saved. Submit it when you’re ready.</p> : null}
       {data.submission?.reviewerNote ? <div className={lesson.note}><b>Reviewer note</b><p>{data.submission.reviewerNote}</p></div> : null}
-      <textarea value={content} onChange={(event) => setContent(event.target.value)} disabled={locked} rows={12} maxLength={20000} aria-label="Your written response" className={`${lesson.textarea} ${embedded ? lesson.textareaShort : ""}`} placeholder="Write your response here…" />
+      {locked ? <div className={lesson.lockedResponse} aria-label="Your written response">{content}</div> : <textarea value={content} onChange={(event) => setContent(event.target.value)} disabled={locked} rows={embedded ? 5 : 12} maxLength={20000} aria-label="Your written response" className={`${lesson.textarea} ${embedded ? lesson.textareaShort : ""}`} placeholder="Write your response here…" />}
       {mutation.error ? <p role="alert" className={lesson.error}>{mutation.error.message}</p> : null}
       {!locked ? (
         <div className={lesson.actions}>

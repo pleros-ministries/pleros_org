@@ -8,22 +8,24 @@ import lesson from "./sogp-lesson.module.css";
 
 /** Ask about a lesson or podcast episode: to the active discipler (one private
     thread for both), else Ask Pleros with the item attached (user, 18 October). */
-export function DisciplerQuestion({ guid, title, kind, disabled = false }: { guid: string; title: string; kind: "lesson" | "episode"; disabled?: boolean }) {
-  const [route, setRoute] = useState<"discipler" | "ask" | null>(null);
+export function DisciplerQuestion({ guid, title, kind, disabled = false, previewRoute }: { guid: string; title: string; kind: "lesson" | "episode"; disabled?: boolean; /** Visual previews only: skip the server lookup and sending. */ previewRoute?: "discipler" | "ask" }) {
+  const [route, setRoute] = useState<"discipler" | "ask" | null>(previewRoute ?? null);
   const [open, setOpen] = useState(false);
   const [body, setBody] = useState("");
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saving, startSend] = useTransition();
   useEffect(() => {
+    if (previewRoute) return;
     let live = true;
     import("@/app/(site)/dashboard/sogp/discipleship/_actions")
       .then(({ getEpisodeQuestionRouteAction }) => getEpisodeQuestionRouteAction())
       .then(result => { if (live) setRoute(result.kind === "discipler" ? "discipler" : "ask"); }, () => { if (live) setRoute("ask"); });
     return () => { live = false; };
-  }, []);
+  }, [previewRoute]);
   function send() {
     if (!body.trim()) { setError("Write your question first."); return; }
+    if (previewRoute) { setBody(""); setOpen(false); setSent(true); return; }
     startSend(async () => {
       try {
         const { askEpisodeQuestionAction } = await import("@/app/(site)/dashboard/sogp/discipleship/_actions");
