@@ -1,7 +1,6 @@
 "use client";
 
-import { Suspense } from "react";
-
+import { BrowserSuspense } from "./browser-suspense";
 import { SogpDayView } from "./sogp-day-view";
 import { SogpErrorBoundary } from "./sogp-error-boundary";
 import { SogpLessonSkeleton } from "./sogp-lesson-skeleton";
@@ -9,9 +8,9 @@ import { SogpLessonSkeleton } from "./sogp-lesson-skeleton";
 export function SogpDayBoundary({ dayNumber }: { dayNumber: number }) {
   return (
     <SogpErrorBoundary>
-      <Suspense fallback={<SogpLessonSkeleton />}>
+      <BrowserSuspense fallback={<SogpLessonSkeleton />}>
         <SogpDayView dayNumber={dayNumber} />
-      </Suspense>
+      </BrowserSuspense>
     </SogpErrorBoundary>
   );
 }

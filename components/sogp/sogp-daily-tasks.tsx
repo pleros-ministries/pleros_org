@@ -330,9 +330,6 @@ export function SogpDailyTasks({
         </span>
       </div>
       <div className="overflow-hidden rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white">
-        <p className="mx-3.5 mt-3 text-[12.5px] leading-[18px] text-(--color-text-muted)">
-          Your {tasks.length} task{tasks.length === 1 ? "" : "s"} for {isToday ? "today" : weekdayDayLabel}
-        </p>
         <ol className="m-0 grid list-none p-0">{tasks.map((task) => task.node)}</ol>
       </div>
     </section>

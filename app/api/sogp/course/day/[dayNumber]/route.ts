@@ -30,8 +30,28 @@ export async function GET(
     getSubmission(session.user.id, data.track.lesson.id),
   ]);
 
+  // The lesson screen needs the other days only for navigation and the week
+  // strip; shipping every lesson's notes made this response ~850 KB.
+  const { cohort, tracks } = data.dashboard;
+  const dashboard = {
+    cohort: {
+      title: cohort.title,
+      telegramDiscussionUrl: cohort.telegramDiscussionUrl,
+      telegramChannelUrl: cohort.telegramChannelUrl,
+      telegramBotUsername: cohort.telegramBotUsername,
+    },
+    tracks: tracks.map((item) =>
+      item.dayNumber === dayNumber
+        ? item
+        : { ...item, lesson: { ...item.lesson, notesContent: null, responsePrompt: null } },
+    ),
+  };
+
   return NextResponse.json({
     ...data,
+    dashboard,
+    previousDay: data.previousDay && { ...data.previousDay, lesson: { ...data.previousDay.lesson, notesContent: null, responsePrompt: null } },
+    nextDay: data.nextDay && { ...data.nextDay, lesson: { ...data.nextDay.lesson, notesContent: null, responsePrompt: null } },
     bestQuizScore,
     submission: submission
       ? {

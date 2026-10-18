@@ -1,7 +1,6 @@
 "use client";
 
-import { Suspense } from "react";
-
+import { BrowserSuspense } from "./browser-suspense";
 import { SogpJourneyPage } from "./sogp-journey-page";
 import { SogpDashboardSkeleton } from "./sogp-dashboard-skeleton";
 import { SogpErrorBoundary } from "./sogp-error-boundary";
@@ -9,9 +8,9 @@ import { SogpErrorBoundary } from "./sogp-error-boundary";
 export function SogpDashboardBoundary() {
   return (
     <SogpErrorBoundary>
-      <Suspense fallback={<SogpDashboardSkeleton />}>
+      <BrowserSuspense fallback={<SogpDashboardSkeleton />}>
         <SogpJourneyPage />
-      </Suspense>
+      </BrowserSuspense>
     </SogpErrorBoundary>
   );
 }

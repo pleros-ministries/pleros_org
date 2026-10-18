@@ -38,7 +38,6 @@ test("renders a calendar-led four-level SOGP journey with required reviews", () 
   expect(tasksSource).toContain("Quiz");
   expect(tasksSource).toContain("Review");
   expect(tasksSource).toContain("Watch recording");
-  expect(tasksSource).toContain("Your {tasks.length} task");
   expect(tasksSource).toContain("Done");
   expect(source).not.toContain("Extras");
   expect(source).not.toContain("excluded from SOGP completion");
