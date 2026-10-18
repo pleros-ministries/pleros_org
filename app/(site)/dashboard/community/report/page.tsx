@@ -63,6 +63,7 @@ export default async function MinistryReportRoute({
       meetingDetails={[...meetingDetails, ...sharedDetails]}
       enabled={dailyReportingEnabled()}
       pleros={activityLines(pleros)}
+      devotion={{ prayerWatch: pleros.prayerWatch, bible: pleros.bible }}
       week={week}
     />
   );

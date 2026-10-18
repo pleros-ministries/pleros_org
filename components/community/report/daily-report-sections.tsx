@@ -17,6 +17,7 @@ import { dayHref } from "./day-picker";
 import { LiveMeetingFlow } from "./ministry-v3/live-meeting-flow";
 import { LiveMinistryForm } from "./ministry-v3/live-ministry-form";
 import { useReportAction } from "./use-report-action";
+import { BibleReadingInline, PrayerWatchInline } from "./devotion-inline";
 import styles from "./daily-report-sections.module.css";
 
 const devotionalRoutes: Record<ActivityLine["key"], string> = {
@@ -85,8 +86,10 @@ export type ReportMeetingUnits = { id: number; name: string; branchId: number }[
  * submit" shows the day's report; confirming records devotion and marks any
  * empty section as nothing today, in one step.
  */
-export function DailyReportSections({ today, days, selected, activities, pleros, declarations, meetingDetails, enabled, week = null, inline, contacts = [], units = [], initialMeetings }: {
+export function DailyReportSections({ today, days, selected, activities, pleros, devotion, declarations, meetingDetails, enabled, week = null, inline, contacts = [], units = [], initialMeetings }: {
   today: string; days: string[]; selected: string; activities: MemberActivity[]; pleros: ActivityLine[];
+  /** The day's raw Prayer Watch sessions and Bible reading, for filling them in place. */
+  devotion?: { prayerWatch: string[]; bible: { chapters: number; book: string; chapter: number } | null };
   declarations: { category: string; declaration: string }[];
   meetingDetails: { activityId: number; reportingRole: string; taught: string | null; shared?: boolean; attended?: boolean; peopleBrought?: number; totalAttendance?: number | null }[];
   enabled: boolean;
@@ -98,6 +101,7 @@ export function DailyReportSections({ today, days, selected, activities, pleros,
   initialMeetings?: Parameters<typeof LiveMeetingFlow>[0]["initialMeetings"];
 }) {
   const { run, pending, error } = useReportAction();
+  const [openLine, setOpenLine] = useState<"bible" | "prayerWatch" | null>(null);
   const writable = days.includes(selected);
   const ministry = activities.filter(activity => activity.kind === "outreach" || activity.kind === "follow_up");
   const meetings = activities.filter(activity => activity.kind !== "outreach" && activity.kind !== "follow_up");
@@ -185,12 +189,25 @@ export function DailyReportSections({ today, days, selected, activities, pleros,
     <Section id="report-devotion" icon={<BookOpenIcon className="size-4" strokeWidth={2} />} tone={["#e4ebfd", "#2331ae"]} title="Devotion"
       summary={`${recorded.length} of ${pleros.length} done ${dayWord}`} status={statusFor("devotional").label} statusTone={statusFor("devotional").tone}
       open={open === "devotional"} onToggle={() => toggle("devotional")}>
-      <ul className={styles.lines}>{pleros.map(line => <li key={line.key}><Link className={styles.line} href={`${devotionalRoutes[line.key]}?date=${encodeURIComponent(selected)}${line.key === "bible" ? "&tab=bible" : ""}`}>
-        <span className={styles.tick} data-on={line.detail ? "" : undefined} aria-hidden="true">{line.detail ? <CheckIcon className="size-3" strokeWidth={3} /> : null}</span>
-        <span className={styles.lineCopy}><span>{line.label}</span><span className={styles.meta}>{line.detail ?? "Not recorded"}</span></span>
-        <DashboardIcon name="right" size={16} />
-      </Link></li>)}</ul>
-      <p className={styles.hint}>These fill in automatically as you read, pray, learn and listen in the app. You confirm them when you submit.</p>
+      <ul className={styles.lines}>{pleros.map(line => {
+        const body = <>
+          <span className={styles.tick} data-on={line.detail ? "" : undefined} aria-hidden="true">{line.detail ? <CheckIcon className="size-3" strokeWidth={3} /> : null}</span>
+          <span className={styles.lineCopy}><span>{line.label}</span><span className={styles.meta}>{line.detail ?? "Not recorded"}</span></span>
+          <DashboardIcon name="right" size={16} />
+        </>;
+        // Prayer Watch and Bible reading fill in here; SOGP and the podcast record themselves as you learn.
+        if (devotion && writable && (line.key === "prayerWatch" || line.key === "bible")) {
+          const expanded = openLine === line.key;
+          return <li key={line.key}>
+            <button type="button" className={`${styles.line} ${styles.lineButton}`} aria-expanded={expanded} onClick={() => setOpenLine(expanded ? null : line.key as "bible" | "prayerWatch")}>{body}</button>
+            {expanded ? line.key === "prayerWatch"
+              ? <PrayerWatchInline date={selected} attended={devotion.prayerWatch} disabled={false} />
+              : <BibleReadingInline date={selected} initial={devotion.bible} disabled={false} onSaved={() => setOpenLine(null)} /> : null}
+          </li>;
+        }
+        return <li key={line.key}><Link className={styles.line} href={`${devotionalRoutes[line.key]}?date=${encodeURIComponent(selected)}${line.key === "bible" ? "&tab=bible" : ""}`}>{body}</Link></li>;
+      })}</ul>
+      <p className={styles.hint}>Tap Prayer Watch or Bible reading to fill them in here. SOGP and the podcast fill in as you learn and listen. You confirm them when you submit.</p>
       {writable && enabled && statuses.devotional !== "missing" ? <div className={styles.rowActions}><button type="button" className={styles.quiet} disabled={pending} onClick={() => undo("devotional")}>Undo confirmation</button><button type="button" className={styles.done} onClick={() => setOpen(null)}>Done</button></div>
         : <div className={styles.rowActions}><span /><button type="button" className={styles.done} onClick={() => setOpen(null)}>Done</button></div>}
     </Section>

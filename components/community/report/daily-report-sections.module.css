@@ -95,3 +95,16 @@
 
 @keyframes open { from { opacity: 0; transform: translateY(-4px); } }
 @media (prefers-reduced-motion: reduce) { .body, .chev { animation: none; transition: none; } }
+
+/* Devotion entries in place (18 October). */
+.lineButton { width: 100%; border: 0; background: none; text-align: left; font: inherit; cursor: pointer; }
+.lineButton[aria-expanded="true"] > :last-child { transform: rotate(90deg); }
+.inlineForm { display: grid; gap: 10px; margin: 0 0 12px 30px; padding: 12px; border: 1px solid var(--color-line); border-radius: 10px; background: #fcfcfd; }
+.sessionRow { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.sessionChip { display: grid; gap: 1px; justify-items: center; min-height: 48px; padding: 6px 4px; border: 1px solid var(--color-line); border-radius: 10px; background: white; color: var(--color-text-strong); font: inherit; font-size: 13px; font-weight: 500; cursor: pointer; }
+.sessionChip[aria-pressed="true"] { border-color: var(--color-community-blue, #2056d6); background: #e4ebfd; color: #2331ae; }
+.sessionChip[aria-pressed="true"] .meta { color: #2331ae; }
+.sessionChip:disabled { opacity: .6; cursor: default; }
+.fieldRow { display: flex; gap: 8px; min-width: 0; }
+.field { display: grid; flex: 1; gap: 5px; min-width: 0; font-size: 13px; font-weight: 500; }
+.field input, .field select { width: 100%; min-width: 0; height: 40px; padding: 0 10px; border: 1px solid var(--color-line); border-radius: 10px; background: white; color: var(--color-text-strong); font: inherit; font-size: 14px; font-weight: 400; }
