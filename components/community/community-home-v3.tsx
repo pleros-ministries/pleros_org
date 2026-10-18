@@ -4,6 +4,7 @@ import type { CommunityHomeData } from "@/lib/db/queries/community-home";
 import styles from "./community-home-v3.module.css";
 import discipleStyles from "./discipleship/discipleship-group.module.css";
 import { Initials } from "./discipleship/shared";
+import { PeopleToBringInPanel, type PeopleToBringIn } from "./people/people-to-bring-in";
 
 type IconName = Parameters<typeof DashboardIcon>[0]["name"];
 export type GroupArt = "location" | "discipleship" | "leading" | "public" | "private";
@@ -42,7 +43,7 @@ function OversightRow({ href, title, description, icon, tone, prefetch }: { href
 }
 
 
-export function CommunityHomeV3({ data }: { data: CommunityHomeData }) {
+export function CommunityHomeV3({ data, people = null }: { data: CommunityHomeData; people?: PeopleToBringIn | null }) {
   const firstInvitation = data.invitations[0];
   const firstResponse = data.responses[0];
   return <div className={styles.home} data-community-home-v3>
@@ -87,6 +88,8 @@ export function CommunityHomeV3({ data }: { data: CommunityHomeData }) {
         </Link>
       </div>
     </section>
+
+    {people ? <PeopleToBringInPanel people={people} id="community-people" /> : null}
 
     {data.church ? <section className={styles.block} aria-labelledby="community-oversight">
       <div className={styles.blockHeading}><h2 id="community-oversight">Oversight</h2></div>

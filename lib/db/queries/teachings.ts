@@ -1,4 +1,4 @@
-import { asc, desc, eq } from "drizzle-orm";
+import { asc, desc, eq, min, sql } from "drizzle-orm";
 
 import { db } from "../index";
 import { teachings } from "../schema";
@@ -8,6 +8,14 @@ export type NewTeaching = typeof teachings.$inferInsert;
 
 export async function getAllTeachings(): Promise<Teaching[]> {
   return db.select().from(teachings).orderBy(asc(teachings.sn));
+}
+
+/** Each series with its number of teachings, in library order, for the dashboard Library. */
+export async function getTeachingSeriesCounts(): Promise<Array<{ series: string; count: number }>> {
+  return db.select({ series: teachings.series, count: sql<number>`count(*)::int` })
+    .from(teachings)
+    .groupBy(teachings.series)
+    .orderBy(min(teachings.sn));
 }
 
 export async function getTeachingById(id: number): Promise<Teaching | undefined> {

@@ -24,6 +24,7 @@ import { DashboardMenuNavigation } from "./dashboard-menu-navigation";
 import frame from "./dashboard-shell.module.css";
 import { compactButton, focusRing } from "./styles";
 import { Breadcrumbs, CrumbLabelProvider } from "./breadcrumbs";
+import { YouBottomBar } from "./you-bottom-bar";
 
 export type DashboardShellViewer = { name: string; roleLabel: string; image?: string | null };
 
@@ -159,6 +160,8 @@ export function DashboardShell({ viewer, sections, children, notificationControl
   // Keyed on the address, not the sections object: a refresh hands the shell a
   // new (equal) sections array, which re-ran this and prefetched in a loop.
   const communityPrefetchHref = dashboardAreaHref("community", sections);
+  const shellItems = sections.flatMap(section => section.items);
+  const learningHref = (shellItems.find(item => item.key === "sogp") ?? shellItems.find(item => item.key === "sogp-enrol"))?.href ?? "/dashboard/sogp";
   useEffect(() => {
     router.prefetch("/dashboard");
     if (communityPrefetchHref) router.prefetch(communityPrefetchHref);
@@ -215,6 +218,7 @@ export function DashboardShell({ viewer, sections, children, notificationControl
             {(["you", "community"] as const).map(pageArea => <div key={pageArea} className={cn(v3.swipePage, frame.routePage)}
               data-area={pageArea} data-active={pageArea === area} inert={pageArea !== area} aria-hidden={pageArea !== area}>
               {pageArea === routedArea ? children : <DashboardLoading />}
+              {pageArea === "you" && routedArea === "you" ? <YouBottomBar learningHref={learningHref} /> : null}
             </div>)}
           </motion.div>
         </div>

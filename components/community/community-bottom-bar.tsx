@@ -3,11 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  ClipboardCheckIcon,
   HouseIcon,
   InboxIcon,
   ListIcon,
   NetworkIcon,
-  UsersRoundIcon,
   type LucideIcon,
 } from "lucide-react";
 
@@ -17,7 +17,7 @@ import { useUnreadMessages } from "./messages/use-unread-messages";
 const BASE = "/dashboard/community";
 
 type BarItem = {
-  key: "home" | "groups" | "feed" | "inbox" | "oversight";
+  key: "home" | "feed" | "inbox" | "reports" | "oversight";
   label: string;
   href: string;
   icon: LucideIcon;
@@ -26,24 +26,25 @@ type BarItem = {
 };
 
 const ITEMS: BarItem[] = [
-  { key: "home", label: "Home", href: BASE, icon: HouseIcon },
   {
-    key: "groups",
-    label: "Groups",
-    href: `${BASE}/groups`,
-    icon: UsersRoundIcon,
-    // Location and discipleship groups, Saved contacts and My enrollees are reached from the groups page.
-    also: [`${BASE}/unit`, `${BASE}/discipleship`, `${BASE}/contacts`, `${BASE}/enrollees`, `${BASE}/invitations`],
+    key: "home",
+    label: "Home",
+    href: BASE,
+    icon: HouseIcon,
+    // Groups left the bar (Pastor review, 18 October): Home lists your groups,
+    // Saved contacts and My enrollees, so every group page lights Home.
+    also: [`${BASE}/groups`, `${BASE}/unit`, `${BASE}/discipleship`, `${BASE}/contacts`, `${BASE}/enrollees`, `${BASE}/invitations`],
   },
   { key: "feed", label: "Feed", href: `${BASE}/feed`, icon: ListIcon, also: [`${BASE}/post`] },
   // One Inbox for both private conversations: Messages and Ask Pleros keep
   // their own routes, data and anonymity rules; only the navigation is shared.
   { key: "inbox", label: "Inbox", href: `${BASE}/messages`, icon: InboxIcon, also: [`${BASE}/ask`] },
+  { key: "reports", label: "Reports", href: `${BASE}/report`, icon: ClipboardCheckIcon },
 ];
 
 function isActive(pathname: string, item: BarItem): boolean {
-  if (item.href === BASE) return pathname === BASE;
-  const prefixes = [item.href, ...(item.also ?? [])];
+  const prefixes = [...(item.href === BASE ? [] : [item.href]), ...(item.also ?? [])];
+  if (item.href === BASE && pathname === BASE) return true;
   return prefixes.some(
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
   );
@@ -64,7 +65,7 @@ const activeClass =
   "text-[var(--color-community-blue)] before:absolute before:-top-1.5 before:left-1/4 before:right-1/4 before:h-0.5 before:rounded-full before:bg-[var(--color-community-blue)]";
 
 /**
- * Community's main destinations: Home, Groups, Feed and Inbox, plus Oversight
+ * Community's main destinations: Home, Feed, Inbox and Reports, plus Oversight
  * for people with church responsibilities (`oversightHref`). A grounded bottom
  * bar on phones and tablets; a slim top strip from `lg`.
  */
@@ -89,7 +90,7 @@ export function CommunityBottomBar({
     <nav
       aria-label="Community"
       className={placement === "top"
-        ? "sticky top-12 z-20 hidden border-b border-(--color-line) bg-white lg:flex lg:justify-center lg:gap-2 lg:px-6 lg:py-1"
+        ? "sticky top-[var(--dashboard-topbar-offset,2.75rem)] z-20 hidden border-b border-(--color-line) bg-white lg:flex lg:justify-center lg:gap-2 lg:px-6 lg:py-1"
         : `sticky bottom-0 z-30 grid ${items.length === 5 ? "grid-cols-5" : "grid-cols-4"} border-t border-(--color-line) bg-white px-1 pt-1.5 pb-[calc(0.25rem_+_env(safe-area-inset-bottom))] lg:hidden`}
     >
       {items.map((item) => {

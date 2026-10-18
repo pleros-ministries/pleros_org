@@ -1,11 +1,11 @@
 /* The shell root. Be Vietnam Pro throughout: the Sen and Suisse variables
    that feature pages and `.ppc-heading` read resolve to it inside the shell.
-   `--dashboard-topbar-offset` is the height of the phone/tablet top bar, so a
-   page's own sticky header can sit below it (0 from `lg`, with no top bar). */
+   `--dashboard-topbar-offset` is the height of the top bar, so a
+   page's own sticky header can sit below it. */
 .root {
   --font-sen: var(--font-be-vietnam-pro);
   --font-suisse-intl: var(--font-be-vietnam-pro);
-  --dashboard-topbar-offset: 3rem;
+  --dashboard-topbar-offset: 2.75rem;
 }
 
 .root { font-synthesis: none; }
@@ -100,3 +100,15 @@
 /* One page-title size across the dashboard. */
 :global(html[data-pleros-dashboard="true"] h1) { font-size: 21px; line-height: 28px; font-weight: 500; }
 :global(html[data-pleros-dashboard="true"] h2:not([data-dashboard-public] *):not([data-dashboard-shell-title]):not([data-dashboard-learning-title])), :global(html[data-pleros-dashboard="true"] h3:not([data-dashboard-public] *)) { font-size: 15px; font-weight: 500; }
+
+/* The slim blue top bar (Pastor review, 18 October): brand blue, white
+   controls, a lime mark under the current area. The back-titled header of a
+   deep page shares it. */
+.root .liveHeader { height: 44px; background: var(--color-community-blue, #2056d6); color: white; border-bottom: 0; }
+.root .liveHeader :is(a, button) { color: white; }
+.root .liveHeader nav button { color: rgb(255 255 255 / 72%); }
+.root .liveHeader nav button[aria-current] { color: white; }
+.root .liveHeader nav button[aria-current]::after { bottom: 0; width: 22px; height: 2px; border-radius: 2px; background: #d8ff65; }
+.root .liveHeader nav button:disabled { color: rgb(255 255 255 / 45%); }
+.root .liveHeader span[aria-hidden]:empty { background-color: #d8ff65; }
+.root .liveHeader .featureTitle { color: white; }

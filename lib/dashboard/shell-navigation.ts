@@ -4,9 +4,9 @@ import type { DashboardNavSection } from "./navigation";
 export function dashboardAreaForPath(href: string): DashboardArea {
   const path = href.split(/[?#]/)[0];
   const inCommunity = path === "/dashboard/community" || path.startsWith("/dashboard/community/");
-  const reporting = path === "/dashboard/community/report" || path.startsWith("/dashboard/community/report/");
+  // Reports is a Community tab (Pastor review, 18 October): you report to the people you're accountable to.
   const discipleship = ["/dashboard/sogp/discipleship", "/dashboard/sogp/enrollees", "/dashboard/sogp/invitations"].some(root => path === root || path.startsWith(`${root}/`));
-  return discipleship || inCommunity && !reporting ? "community" : "you";
+  return discipleship || inCommunity ? "community" : "you";
 }
 
 /** Presentation only. Every destination retains its own server guard. */
@@ -44,16 +44,24 @@ export type DashboardFocus = { title: string; back: DashboardParent };
 const YOU: DashboardParent = { href: "/dashboard", label: "Back to You" };
 const COMMUNITY: DashboardParent = { href: "/dashboard/community", label: "Back to Community" };
 const GROUPS: DashboardParent = { href: "/dashboard/community/groups", label: "Back to Groups" };
-const MY_SOGP: DashboardParent = { href: "/dashboard/sogp", label: "Back to My learning" };
+const MY_SOGP: DashboardParent = { href: "/dashboard/sogp", label: "Back to Learning" };
+const LIBRARY: DashboardParent = { href: "/dashboard/library", label: "Back to Library" };
+const REPORTS: DashboardParent = { href: "/dashboard/community/report", label: "Back to My reports" };
+
+/**
+ * The You bottom bar's tabs (Home, Learning, Library, Partner, Profile). They
+ * keep the You/Community header like Community's tabs, and trails under them
+ * start at You.
+ */
+export const YOU_TABS = ["/dashboard", "/dashboard/sogp", "/dashboard/library", "/dashboard/partner", "/dashboard/profile"] as const;
 
 /**
  * The dashboard's hierarchy in one place, most specific first. Tab roots
- * (You, Community home, Groups, Feed, Inbox) have no entry and keep the
+ * (the You tabs, Community home, Groups, Feed, Inbox, Reports) have no entry and keep the
  * You/Community tabs; everything else gets "← Title" pointing at its parent.
  */
 const DASHBOARD_FOCUS: Array<[RegExp, (match: RegExpMatchArray) => DashboardFocus]> = [
   // My SOGP and learning
-  [/^\/dashboard\/sogp$/, () => ({ title: "My learning", back: YOU })],
   [/^\/dashboard\/sogp\/course\/day\/(\d+)\/(quiz|response)$/, m => ({ title: m[2] === "quiz" ? "Quiz" : "Written response", back: { href: `/dashboard/sogp/course/day/${m[1]}`, label: "Back to lesson" } })],
   [/^\/dashboard\/sogp\/course\/day\/\d+$/, () => ({ title: "Lesson", back: MY_SOGP })],
   [/^\/dashboard\/sogp\/reviews\/schedule$/, () => ({ title: "Schedule group review", back: { href: "/dashboard/sogp/reviews", label: "Back to group reviews" } })],
@@ -65,19 +73,18 @@ const DASHBOARD_FOCUS: Array<[RegExp, (match: RegExpMatchArray) => DashboardFocu
   [/^\/dashboard\/(community|sogp)\/enrollees$/, () => ({ title: "My enrollees", back: GROUPS })],
   [/^\/dashboard\/community\/invitations\/\d+\/sent$/, () => ({ title: "Invitation", back: { href: "/dashboard/community/enrollees", label: "Back to My enrollees" } })],
   [/^\/dashboard\/sogp\/invitations\/\d+$/, () => ({ title: "Group invitation", back: COMMUNITY })],
-  [/^\/dashboard\/sogp\/(path|plan|listen|follow-up|readiness|referrals|leaderboard|certificate|traditional|history)$/, m => ({
-    title: ({ history: "Your history", path: "Change path or pace", plan: "Edit full plan", listen: "Today’s listening", "follow-up": "Your follow-up person", readiness: "Certification", referrals: "Your SOGP referral", leaderboard: "Leaderboard", certificate: "Certificate", traditional: "Calendar and assessments" } as Record<string, string>)[m[1]],
+  [/^\/dashboard\/sogp\/(days|path|plan|listen|follow-up|readiness|referrals|leaderboard|certificate|traditional|history)$/, m => ({
+    title: ({ days: "Your SOGP days", history: "Your history", path: "Change path or pace", plan: "Edit full plan", listen: "Today’s listening", "follow-up": "Your follow-up person", readiness: "Certification", referrals: "Your SOGP referral", leaderboard: "Leaderboard", certificate: "Certificate", traditional: "Calendar and assessments" } as Record<string, string>)[m[1]],
     back: MY_SOGP,
   })],
-  [/^\/dashboard\/sogp\/.+$/, () => ({ title: "My learning", back: MY_SOGP })],
-  // Reports and contacts (You)
+  [/^\/dashboard\/sogp\/.+$/, () => ({ title: "Learning", back: MY_SOGP })],
+  // Contacts
   // Saved contacts sits under Groups (people on their way into a group).
   [/^\/dashboard\/community\/contacts\/(\d+)\/invite$/, m => ({ title: "Share group invitation", back: { href: `/dashboard/community/contacts/${m[1]}`, label: "Back to contact" } })],
   [/^\/dashboard\/community\/contacts\/(new|\d+)$/, m => ({ title: m[1] === "new" ? "Add contact" : "Contact details", back: { href: "/dashboard/community/contacts", label: "Back to saved contacts" } })],
   [/^\/dashboard\/community\/contacts$/, () => ({ title: "Saved contacts", back: GROUPS })],
-  [/^\/dashboard\/community\/report\/(history|new|\d+)$/, m => ({ title: m[1] === "history" ? "Report history" : m[1] === "new" ? "New report" : "Edit activity", back: { href: "/dashboard/community/report", label: "Back to my reports" } })],
-  [/^\/dashboard\/community\/report\/.+$/, () => ({ title: "My reports", back: { href: "/dashboard/community/report", label: "Back to my reports" } })],
-  [/^\/dashboard\/community\/report$/, () => ({ title: "My reports", back: YOU })],
+  [/^\/dashboard\/community\/report\/(history|new|\d+)$/, m => ({ title: m[1] === "history" ? "Report history" : m[1] === "new" ? "New report" : "Edit activity", back: REPORTS })],
+  [/^\/dashboard\/community\/report\/.+$/, () => ({ title: "My reports", back: REPORTS })],
   // Community deep screens
   [/^\/dashboard\/community\/discipleship\/(\d+)\/disciples\/\d+$/, m => ({ title: "Disciple", back: { href: `/dashboard/community/discipleship/${m[1]}`, label: "Back to group" } })],
   [/^\/dashboard\/community\/(unit\/\d+|groups\/\d+|discipleship\/\d+|discipleship)$/, () => ({ title: "Group", back: GROUPS })],
@@ -90,12 +97,15 @@ const DASHBOARD_FOCUS: Array<[RegExp, (match: RegExpMatchArray) => DashboardFocu
   [/^\/dashboard\/church$/, () => ({ title: "Church structure", back: COMMUNITY })],
   [/^\/dashboard\/church\/(?!branches|units|reports)[^/]+$/, () => ({ title: "Report details", back: { href: "/dashboard/church/reports", label: "Back to Church oversight" } })],
   [/^\/dashboard\/church\/.+$/, m => ({ title: /branches\/new|\/pastor$/.test(m[0]) ? "Church setup" : /units\/new/.test(m[0]) ? "Add a unit" : /\/leader$/.test(m[0]) ? "Unit appointment" : /\/workers$/.test(m[0]) ? "Assign workers" : "Church oversight", back: { href: "/dashboard/church", label: "Back to Church oversight" } })],
-  // More from Pleros (You)
+  // Library and the rest of You
+  [/^\/dashboard\/library\/teachings$/, () => ({ title: "Teachings Library", back: LIBRARY })],
+  [/^\/dashboard\/podcast$/, () => ({ title: "Podcast", back: LIBRARY })],
+  [/^\/dashboard\/(prayer-watch|pre-sogp)(\/.*)?$/, m => ({ title: m[1] === "pre-sogp" ? "Pre-SOGP" : "Prayer Watch", back: MY_SOGP })],
   [/^\/dashboard\/podcast\/leaderboard$/, () => ({ title: "Podcast leaderboard", back: { href: "/dashboard/podcast", label: "Back to Podcast" } })],
   [/^\/dashboard\/discipleship-journey\/[^/]+$/, () => ({ title: "Discipleship journey", back: { href: "/dashboard/discipleship-journey", label: "Back to discipleship journey" } })],
   [/^\/dashboard\/welcomepack\/.+$/, () => ({ title: "Welcome Pack", back: { href: "/dashboard/welcomepack", label: "Back to Welcome Pack" } })],
-  [/^\/dashboard\/(podcast|prayer-watch|pre-sogp|welcomepack|profile|discipleship-journey)(\/.*)?$/, m => ({
-    title: ({ podcast: "Podcast", "prayer-watch": "Prayer Watch", "pre-sogp": "Pre-SOGP", welcomepack: "Welcome Pack", profile: "Profile and settings", "discipleship-journey": "Discipleship journey" } as Record<string, string>)[m[1]],
+  [/^\/dashboard\/(welcomepack|discipleship-journey)(\/.*)?$/, m => ({
+    title: m[1] === "welcomepack" ? "Welcome Pack" : "Discipleship journey",
     back: YOU,
   })],
 ];
@@ -127,14 +137,17 @@ function crumbLabel(parent: DashboardParent) {
 export function dashboardTrailForPath(href: string): DashboardParent[] {
   const trail: DashboardParent[] = [];
   let focus = dashboardFocusForPath(href);
+  let top: string | null = null;
   while (focus && !AREA_ROOTS.has(focus.back.href) && trail.length < 6) {
     trail.unshift({ href: focus.back.href, label: crumbLabel(focus.back) });
+    top = focus.back.href;
     focus = dashboardFocusForPath(focus.back.href);
   }
-  // A trail that climbs to You or Community starts with it, so every page under
-  // You (which has no bottom bar) shows where it sits, e.g. You › My learning.
-  // Community trails usually stop at a bottom-bar tab (Groups, Feed) instead.
+  // A trail that climbs to You or Community, or to one of the You tabs, starts
+  // with its area: You › Learning › Your SOGP days. Community trails usually
+  // stop at a bottom-bar tab (Groups, Feed, Reports) instead.
   if (focus && AREA_ROOTS.has(focus.back.href)) trail.unshift({ href: focus.back.href, label: focus.back.href === "/dashboard" ? "You" : "Community" });
+  else if (!focus && top && (YOU_TABS as readonly string[]).includes(top)) trail.unshift({ href: "/dashboard", label: "You" });
   return trail;
 }
 

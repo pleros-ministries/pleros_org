@@ -1,13 +1,13 @@
 import { describe, expect, test } from "vitest";
 import { buildDashboardNavigation, type DashboardCapabilities } from "./navigation";
-import { dashboardAreaForPath, dashboardAreaHref, dashboardParentForPath, dashboardTrailForPath, dashboardWorkspace } from "./shell-navigation";
+import { dashboardAreaForPath, dashboardAreaHref, dashboardFocusForPath, dashboardParentForPath, dashboardTrailForPath, dashboardWorkspace } from "./shell-navigation";
 
 const member: DashboardCapabilities = { sogpEnrolled: true, community: true, communityUnitId: 9, discipleshipDiscussions: true, managesLocationGroups: false, staffConsole: false };
 
 describe("connected dashboard navigation", () => {
-  test("personal reporting remains You despite the community route namespace", () => {
-    for (const path of ["/dashboard", "/dashboard/community/report", "/dashboard/community/report/people", "/dashboard/community/report/history?day=2026-10-13", "/dashboard/church", "/dashboard/community-other", "/dashboard/sogp/discipleship-other"]) expect(dashboardAreaForPath(path)).toBe("you");
-    for (const path of ["/dashboard/community", "/dashboard/community/messages/4", "/dashboard/community/ask", "/dashboard/community/leader"]) expect(dashboardAreaForPath(path)).toBe("community");
+  test("reports are a Community tab; the You tabs and similar-looking paths stay You", () => {
+    for (const path of ["/dashboard", "/dashboard/sogp", "/dashboard/library", "/dashboard/library/teachings", "/dashboard/partner", "/dashboard/profile", "/dashboard/church", "/dashboard/community-other", "/dashboard/sogp/discipleship-other"]) expect(dashboardAreaForPath(path)).toBe("you");
+    for (const path of ["/dashboard/community", "/dashboard/community/report", "/dashboard/community/report/history?day=2026-10-13", "/dashboard/community/messages/4", "/dashboard/community/ask", "/dashboard/community/leader"]) expect(dashboardAreaForPath(path)).toBe("community");
   });
   test("discipleship belongs to Community and lives on each group's page", () => {
     const sections = buildDashboardNavigation(member);
@@ -64,7 +64,8 @@ describe("connected dashboard navigation", () => {
   });
   test("restores internal destinations and query strings without accepting external URLs", () => {
     const sections = buildDashboardNavigation(member);
-    expect(dashboardAreaHref("you", sections, "/dashboard/community/report?day=2026-10-12")).toBe("/dashboard/community/report?day=2026-10-12");
+    expect(dashboardAreaHref("you", sections, "/dashboard/sogp/days?from=home")).toBe("/dashboard/sogp/days?from=home");
+    expect(dashboardAreaHref("community", sections, "/dashboard/community/report?day=2026-10-12")).toBe("/dashboard/community/report?day=2026-10-12");
     expect(dashboardAreaHref("community", sections, "/dashboard/community/messages/4")).toBe("/dashboard/community/messages/4");
     for (const unsafe of ["https://evil.test/dashboard/community", "//evil.test/dashboard/community", "javascript:alert(1)", "/admin", "/dashboard/communityish"]) expect(dashboardAreaHref("community", sections, unsafe)).toBe("/dashboard/community");
   });
@@ -76,17 +77,21 @@ describe("connected dashboard navigation", () => {
     }
   });
   test("deep dashboard screens return to their actual parent instead of a generic root", () => {
-    expect(dashboardParentForPath("/dashboard/sogp")).toEqual({ href: "/dashboard", label: "Back to You" });
-    expect(dashboardParentForPath("/dashboard/sogp/plan")).toEqual({ href: "/dashboard/sogp", label: "Back to My learning" });
+    // The You tabs are roots like Community's: no focused header.
+    for (const tab of ["/dashboard/sogp", "/dashboard/library", "/dashboard/partner", "/dashboard/profile", "/dashboard/community/report"]) expect(dashboardFocusForPath(tab)).toBeNull();
+    expect(dashboardParentForPath("/dashboard/sogp/plan")).toEqual({ href: "/dashboard/sogp", label: "Back to Learning" });
     // Trails under You start at You; Community trails stop at their bottom-bar tab.
-    expect(dashboardTrailForPath("/dashboard/sogp").map(crumb => crumb.label)).toEqual(["You"]);
-    expect(dashboardTrailForPath("/dashboard/sogp/course/day/4/quiz").map(crumb => crumb.label)).toEqual(["You", "My learning", "Lesson"]);
+    expect(dashboardTrailForPath("/dashboard/sogp/course/day/4/quiz").map(crumb => crumb.label)).toEqual(["You", "Learning", "Lesson"]);
+    expect(dashboardTrailForPath("/dashboard/sogp/days").map(crumb => crumb.label)).toEqual(["You", "Learning"]);
+    expect(dashboardTrailForPath("/dashboard/library/teachings").map(crumb => crumb.label)).toEqual(["You", "Library"]);
+    expect(dashboardParentForPath("/dashboard/podcast")).toEqual({ href: "/dashboard/library", label: "Back to Library" });
+    expect(dashboardParentForPath("/dashboard/prayer-watch")).toEqual({ href: "/dashboard/sogp", label: "Back to Learning" });
     expect(dashboardTrailForPath("/dashboard/community/enrollees/7").map(crumb => crumb.label)).toEqual(["Groups", "My enrollees"]);
     expect(dashboardParentForPath("/dashboard/sogp/reviews/42/attendance")).toEqual({ href: "/dashboard/sogp/reviews", label: "Back to group reviews" });
     expect(dashboardParentForPath("/dashboard/sogp/course/day/4/quiz")).toEqual({ href: "/dashboard/sogp/course/day/4", label: "Back to lesson" });
     expect(dashboardParentForPath("/dashboard/community/contacts/new")).toEqual({ href: "/dashboard/community/contacts", label: "Back to saved contacts" });
     expect(dashboardParentForPath("/dashboard/community/contacts")).toEqual({ href: "/dashboard/community/groups", label: "Back to Groups" });
     expect(dashboardParentForPath("/dashboard/community/enrollees")).toEqual({ href: "/dashboard/community/groups", label: "Back to Groups" });
-    expect(dashboardParentForPath("/dashboard/community/report/history")).toEqual({ href: "/dashboard/community/report", label: "Back to my reports" });
+    expect(dashboardParentForPath("/dashboard/community/report/history")).toEqual({ href: "/dashboard/community/report", label: "Back to My reports" });
   });
 });

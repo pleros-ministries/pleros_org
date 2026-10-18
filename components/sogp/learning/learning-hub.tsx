@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
-import { AwardIcon, CalendarCheckIcon, ChevronRightIcon, HistoryIcon, MessageCircleQuestionIcon, PlayIcon, RefreshCcwIcon, RepeatIcon, TrophyIcon } from "lucide-react";
+import { AwardIcon, CalendarCheckIcon, CalendarDaysIcon, ChevronRightIcon, GemIcon, GiftIcon, HistoryIcon, SunIcon, MessageCircleQuestionIcon, PlayIcon, RefreshCcwIcon, RepeatIcon, TrophyIcon } from "lucide-react";
 
 import type { LearningHubData } from "@/lib/dashboard/learning-hub";
 import type { LearningViewData } from "@/lib/sogp/learning-view";
@@ -25,8 +25,16 @@ function Tool({ href, icon, tone, title, meta }: { href: string; icon: React.Rea
   </Link>;
 }
 
+function Step({ href, icon, tone, title, meta, status }: { href: string; icon: React.ReactNode; tone: [string, string]; title: string; meta: string; status: "done" | "now" | "open" | null }) {
+  return <li><Link href={href} className={styles.row}>
+    <span className={styles.stepIcon} style={{ background: tone[0], color: tone[1] }} aria-hidden="true">{icon}</span>
+    <span className={styles.rowCopy}><span className={styles.rowTitle} style={{ fontWeight: 500 }}>{title}</span><span className={styles.rowMeta}>{meta}</span></span>
+    {status ? <span className={styles.stepTag} data-status={status}>{status === "done" ? "Done" : status === "now" ? "Now" : "Open"}</span> : <ChevronRightIcon className="size-4 shrink-0 text-[#a6abb2]" strokeWidth={2} />}
+  </Link></li>;
+}
+
 /**
- * My learning: resume, an optional catch-up (missed lessons never block
+ * Learning: resume, an optional catch-up (missed lessons never block
  * today's), this week, what's next, a leaderboard preview and the tools.
  */
 export function LearningHub({ hub, learning }: { hub: LearningHubData; learning: LearningViewData }) {
@@ -94,11 +102,25 @@ export function LearningHub({ hub, learning }: { hub: LearningHubData; learning:
         <span className={styles.num} aria-hidden="true"><CalendarCheckIcon className="size-3.5" strokeWidth={2.2} /></span>
         <span className={styles.rowCopy}><span className={styles.rowTitle} style={{ fontWeight: 500 }}>{hub.review.title}</span><span className={styles.rowMeta}>Group review · {hub.review.when}</span></span>
       </div></div> : null}
+
+      {/* The path from welcome to purpose (Pastor review, 18 October). */}
+      <div className={styles.sectionTitle}><h2>Your path</h2></div>
+      <div className={styles.panel}><ul className={styles.list}>
+        <Step href="/dashboard/welcomepack" icon={<GiftIcon className="size-4" strokeWidth={2} />} tone={["#fde3cf", "#7a3a10"]} title="Welcome Pack" meta={hub.journey.welcomePackDone ? "Gifts, orientation and reminders" : "Finish setting up your gifts and reminders"} status={hub.journey.welcomePackDone ? "done" : "open"} />
+        <Step href="/dashboard/pre-sogp" icon={<PlayIcon className="size-4" fill="currentColor" strokeWidth={0} />} tone={["#f6e4ac", "#5a4508"]} title="Pre-SOGP" meta={hub.journey.preSogp.total ? `Foundation videos · ${Math.min(hub.journey.preSogp.done, hub.journey.preSogp.total)} of ${hub.journey.preSogp.total}` : "Foundation videos"} status={hub.journey.preSogp.total && hub.journey.preSogp.done >= hub.journey.preSogp.total ? "done" : hub.state === "preparing" ? "now" : "open"} />
+        <Step href={hub.journey.days ? "/dashboard/sogp/days" : hub.card.href} icon={<GemIcon className="size-4" strokeWidth={2} />} tone={["#e4ebfd", "#2331ae"]} title="School of God’s Purpose" meta={hub.journey.days ? (hub.journey.days.current ? `Your ${hub.journey.days.total} days · day ${hub.journey.days.current}` : `Your ${hub.journey.days.total} days`) : hub.paceLabel} status={finished || hub.state === "completed" ? "done" : hub.state === "active" ? "now" : null} />
+      </ul></div>
+
+      <div className={styles.sectionTitle}><h2>Every day</h2></div>
+      <div className={styles.panel}><ul className={styles.list}>
+        <Step href="/dashboard/prayer-watch" icon={<SunIcon className="size-4" strokeWidth={2} />} tone={["#fff1c2", "#8a5a00"]} title="Prayer Watch" meta={hub.journey.prayerToday ? "Done today" : "Join the watch today"} status={null} />
+        {hub.journey.days ? <Step href="/dashboard/sogp/days" icon={<CalendarDaysIcon className="size-4" strokeWidth={2} />} tone={["#e6ecfc", "#1f3260"]} title={`Your ${hub.journey.days.total} days`} meta={`${hub.journey.days.teaching} teaching days and ${hub.journey.days.reviews} review ${hub.journey.days.reviews === 1 ? "day" : "days"}`} status={null} /> : null}
+      </ul></div>
     </div>
 
     <div className={styles.column}>
       {hub.upNext.length ? <>
-        <div className={styles.sectionTitle}><h2>Up next</h2><Link href="/dashboard/sogp/traditional">Full calendar</Link></div>
+        <div className={styles.sectionTitle}><h2>Up next</h2><Link href={hub.journey.days ? "/dashboard/sogp/days" : "/dashboard/sogp/traditional"}>{hub.journey.days ? `Your ${hub.journey.days.total} days` : "Full calendar"}</Link></div>
         <div className={styles.panel}><ul className={styles.list}>
           {hub.upNext.map(item => <li key={item.key}>{item.href
             ? <Link href={item.href} className={styles.row}><span className={styles.num} data-current={item.current || undefined}>{item.number}</span><span className={styles.rowCopy}><span className={styles.rowTitle}>{item.title}</span><span className={styles.rowMeta}>{item.meta}</span></span><ChevronRightIcon className="size-4 shrink-0 text-[#a6abb2]" strokeWidth={2} /></Link>
@@ -109,7 +131,7 @@ export function LearningHub({ hub, learning }: { hub: LearningHubData; learning:
       {hub.leaderboard && hub.leaderboard.top.length ? <>
         <div className={styles.sectionTitle}><h2>Leaderboard</h2><Link href="/dashboard/sogp/leaderboard">See all {hub.leaderboard.total}</Link></div>
         <div className={styles.panel}><ul className={styles.list}>
-          {hub.leaderboard.top.map(row => <li key={row.rank}><div className={`${styles.row} ${row.isMe ? styles.me : ""}`}>
+          {hub.leaderboard.top.map((row, index) => <li key={`${index}-${row.rank}`}><div className={`${styles.row} ${row.isMe ? styles.me : ""}`}>
             <span className={styles.num} data-rank={row.rank}>{row.rank}</span>
             <span className={styles.rowCopy}><span className={styles.rowTitle}>{row.isMe ? `${row.name} (you)` : row.name}</span></span>
             <span className={styles.points}>{row.points} pts</span>

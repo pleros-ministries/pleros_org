@@ -1,6 +1,11 @@
 import "server-only";
 
+import { and, count, eq } from "drizzle-orm";
+
 import { fetchAnchorEpisodes } from "@/lib/anchor-rss";
+import { db } from "@/lib/db";
+import * as s from "@/lib/db/schema";
+import { getReminderPreferences } from "@/lib/db/queries/notification-preferences";
 import { getSogpDashboardData } from "@/lib/db/queries/sogp";
 import { getHomeDiscipleshipSummary } from "@/lib/db/queries/sogp-discipleship";
 import { getActiveSogpJourney } from "@/lib/db/queries/sogp-journey";
@@ -8,6 +13,7 @@ import type { SogpLearningState } from "@/lib/db/queries/sogp-learning";
 import { getSogpLeaderboard } from "@/lib/db/queries/sogp-leaderboard";
 import { lagosToday } from "@/lib/sogp/daily-date";
 import { learningResume } from "@/lib/sogp/learning-view";
+import { buildSogpDays } from "@/lib/sogp/sogp-days";
 
 import { cohortWeekLabel, homeSogpToday, type HomeWeekDay } from "./home";
 
@@ -32,7 +38,27 @@ export type LearningHubData = {
   leaderboard: { top: Array<{ rank: number; name: string; points: number; isMe: boolean }>; me: { rank: number; points: number } | null; total: number } | null;
   discipler: { firstName: string } | null;
   doneCount: number;
+  /** The learning path, Welcome Pack → Pre-SOGP → SOGP (Pastor review, 18 October). */
+  journey: {
+    welcomePackDone: boolean;
+    preSogp: { done: number; total: number };
+    /** Numbered SOGP days: 24 teaching days plus the review days. */
+    days: { current: number | null; total: number; teaching: number; reviews: number } | null;
+    prayerToday: boolean | null;
+  };
 };
+
+/** Pre-SOGP days done and published for the learner's enrolment in this cohort. */
+async function preSogpCounts(userId: string, cohortId: number) {
+  const [enrollment] = await db.select({ id: s.sogpEnrollments.id }).from(s.sogpEnrollments)
+    .where(and(eq(s.sogpEnrollments.userId, userId), eq(s.sogpEnrollments.cohortId, cohortId))).limit(1);
+  if (!enrollment) return { done: 0, total: 0 };
+  const [[done], [total]] = await Promise.all([
+    db.select({ n: count() }).from(s.sogpPreparationCompletions).where(eq(s.sogpPreparationCompletions.enrollmentId, enrollment.id)),
+    db.select({ n: count() }).from(s.sogpPreparationDays).where(eq(s.sogpPreparationDays.cohortId, cohortId)),
+  ]);
+  return { done: done?.n ?? 0, total: total?.n ?? 0 };
+}
 
 /**
  * Read-only projection for My learning, built from the same reads as the You
@@ -49,6 +75,10 @@ export async function getLearningHubData(userId: string, state: SogpLearningStat
     getHomeDiscipleshipSummary(userId).catch(() => ({ kind: "none" as const })),
   ]);
   if (!course) return null;
+  const [welcomePackDone, preSogp] = await Promise.all([
+    getReminderPreferences(userId).then(prefs => prefs.remindersSavedAt !== null).catch(() => false),
+    preSogpCounts(userId, course.cohort.id).catch(() => ({ done: 0, total: 0 })),
+  ]);
 
   const podcast = Boolean(state?.path && state.path !== "traditional" && state.plan);
   const path = state?.revision ? state.path : course.tracks.some(track => track.completed) ? "traditional" : null;
@@ -121,5 +151,14 @@ export async function getLearningHubData(userId: string, state: SogpLearningStat
     } : null,
     discipler: group.kind === "member" ? { firstName: group.leaderFirstName } : null,
     doneCount,
+    journey: {
+      welcomePackDone,
+      preSogp,
+      days: journey && !podcast ? (() => {
+        const plan = buildSogpDays(journey.days, day);
+        return plan.days.length ? { current: plan.current?.number ?? null, total: plan.days.length, teaching: plan.teachingDays, reviews: plan.reviewDays } : null;
+      })() : null,
+      prayerToday: journey ? journey.days.find(row => row.dateKey === day)?.prayerWatchComplete ?? null : null,
+    },
   };
 }

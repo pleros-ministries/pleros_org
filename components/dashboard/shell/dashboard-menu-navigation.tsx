@@ -20,16 +20,21 @@ function areaChildren(sections: DashboardNavSection[]): Record<DashboardArea, Ch
     const item = find(key);
     return item ? [{ key, label, href: href ?? item.href, exact: item.exact, badge: item.badge }] : [];
   });
-  const learning = find("sogp") ? [{ key: "sogp", label: "My learning", href: "/dashboard/sogp" }] : find("sogp-enrol") ? [{ key: "sogp-enrol", label: "Enrol in SOGP", href: find("sogp-enrol")!.href }] : [];
+  const learning = find("sogp") ? [{ key: "sogp", label: "Learning", href: "/dashboard/sogp" }] : find("sogp-enrol") ? [{ key: "sogp-enrol", label: "Enrol in SOGP", href: find("sogp-enrol")!.href }] : [];
+  const community = Boolean(find("feed"));
+  // The same places as the You and Community bottom bars. Reports sits in
+  // Community; viewers without Community (church-only reporting) keep it under You.
   return {
     you: [
       { key: "overview", label: "Home", href: "/dashboard", exact: true },
       ...learning,
-      ...pick([["report", "My reports"], ["prayer-watch", "Prayer Watch"], ["podcast", "Podcast"], ["contacts", "Saved contacts"]]).filter(item => item.key !== "contacts" || !find("feed")),
+      { key: "library", label: "Library", href: "/dashboard/library" },
+      { key: "partner", label: "Partner", href: "/dashboard/partner" },
+      ...(community ? [] : pick([["report", "My reports"], ["contacts", "Saved contacts"]])),
     ],
-    community: find("feed") ? [
+    community: community ? [
       { key: "community-home", label: "Home", href: "/dashboard/community", exact: true },
-      ...pick([["groups", "Groups"], ["feed", "Feed"], ["messages", "Inbox"], ["contacts", "Saved contacts"], ["enrollees", "My enrollees"]]),
+      ...pick([["groups", "Groups"], ["feed", "Feed"], ["messages", "Inbox"], ["report", "My reports"], ["contacts", "Saved contacts"], ["enrollees", "My enrollees"]]),
     ] : [],
   };
 }

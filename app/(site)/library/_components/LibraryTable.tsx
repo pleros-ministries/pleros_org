@@ -13,6 +13,8 @@ type SortMode = "default" | "title" | "series";
 
 type Props = {
   teachings: Teaching[];
+  /** Opens on one series (the dashboard Library's topic chips). */
+  initialSeries?: string;
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -154,9 +156,9 @@ function TeachingRow({
 
 // ─── Main Table ───────────────────────────────────────────────────────────────
 
-export function LibraryTable({ teachings }: Props) {
+export function LibraryTable({ teachings, initialSeries }: Props) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeSeries, setActiveSeries] = useState("all");
+  const [activeSeries, setActiveSeries] = useState(() => initialSeries && teachings.some(t => t.series === initialSeries) ? initialSeries : "all");
   const [sortMode, setSortMode] = useState<SortMode>("default");
 
   const { currentTrack, isPlaying, playTeaching, setFlatList } = usePlayer();

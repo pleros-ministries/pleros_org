@@ -1,0 +1,25 @@
+/* Your SOGP days: numbered teaching and review days, a week to a row. */
+
+.page { display: grid; gap: 12px; max-width: 640px; margin-inline: auto; padding: 18px 16px max(28px, env(safe-area-inset-bottom)); color: var(--color-text-strong); }
+.page h1 { margin: 0; }
+.sub { margin: 2px 0 0; font-size: 12.5px; line-height: 18px; color: var(--color-text-muted); }
+.summary { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 12px; padding: 12px 14px; border-radius: 10px; background: #f6f7f9; font-size: 12.5px; color: var(--color-text-muted); }
+.summary b { margin-left: 4px; font-family: var(--font-dashboard-heading); font-size: 14px; font-weight: 500; color: var(--color-text-strong); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 2px 2px -4px; font-size: 11.5px; color: var(--color-text-muted); }
+.legend i { display: inline-block; width: 8px; height: 8px; margin-right: 5px; border-radius: 2px; vertical-align: 0; }
+.week { margin: 6px 2px 6px !important; font-family: var(--font-dashboard), sans-serif !important; font-size: 12px !important; line-height: 16px; font-weight: 500 !important; color: var(--color-text-muted); }
+.grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; }
+.cell { display: grid; justify-items: center; align-content: center; gap: 5px; min-height: 54px; padding: 6px 2px; border: 1px solid var(--dashboard-panel-edge, #e2e5ea); border-radius: 10px; background: white; color: var(--color-text-strong); text-decoration: none; }
+a.cell:hover { border-color: #c9cfd8; }
+.cell b { font-family: var(--font-dashboard-heading); font-size: 13.5px; font-weight: 500; line-height: 16px; }
+.cell small { font-size: 9.5px; line-height: 12px; color: inherit; opacity: .8; }
+.cell[data-state="today"] { border-color: var(--color-community-blue); box-shadow: 0 0 0 2px rgb(32 86 214 / 12%); }
+.cell[data-state="future"] { opacity: .55; }
+.cell[data-kind="review"] { border-color: #f3dcb8; background: #fff6ec; color: #92400e; }
+.cell[data-kind="review"][data-state="complete"] { background: #f7e4cd; }
+.trio { display: flex; gap: 2px; }
+.trio i { width: 6px; height: 6px; border-radius: 2px; background: #e2e5ea; }
+.trio i[data-on][data-part="p"], .legend i[data-part="p"] { background: #d98a1f; }
+.trio i[data-on][data-part="t"], .legend i[data-part="t"] { background: #2056d6; }
+.trio i[data-on][data-part="a"], .legend i[data-part="a"] { background: #56209c; }
+.hint { margin: 6px 2px 0; font-size: 12px; line-height: 17px; color: var(--color-text-muted); }
