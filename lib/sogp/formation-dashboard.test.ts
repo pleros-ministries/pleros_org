@@ -35,10 +35,10 @@ test("renders a calendar-led four-level SOGP journey with required reviews", () 
   const dailyContent = source.indexOf('data-sogp-section="daily-content"');
   expect(calendar).toBeGreaterThan(-1);
   expect(dailyContent).toBeGreaterThan(calendar);
-  expect(tasksSource).toContain("Quiz");
+  expect(tasksSource).toContain("Take quiz");
   expect(tasksSource).toContain("Review");
-  expect(tasksSource).toContain("Watch recording");
-  expect(tasksSource).toContain("Done");
+  expect(tasksSource).toContain("Watch the recording");
+  expect(tasksSource).toContain("Mark review done");
   expect(source).not.toContain("Extras");
   expect(source).not.toContain("excluded from SOGP completion");
   expect(source).not.toContain("Daily Pleros Podcast");

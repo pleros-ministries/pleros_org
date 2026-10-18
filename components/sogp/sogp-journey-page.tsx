@@ -49,10 +49,6 @@ async function saveDailyCompletion(input: {
   return input;
 }
 
-function firstName(name: string) {
-  return name.trim().split(/\s+/)[0] || "there";
-}
-
 export function SogpJourneyPage({
   initialData,
   preview = false,
@@ -147,7 +143,7 @@ export function SogpJourneyPage({
         ) : null}
         <h1>Calendar and assessments</h1>
         <p className={styles.sub}>
-          Welcome, {firstName(data.enrollment.name)} · SOGP · {data.cohort.title}
+          {data.cohort.title}
           {selectedDay.track
             ? ` · Level ${selectedDay.track.curriculumLevel}, track ${selectedDay.track.levelPosition} of 6`
             : ""}

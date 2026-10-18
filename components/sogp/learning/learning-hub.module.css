@@ -79,7 +79,7 @@ a.row:hover { background: #f8f9fb; }
 .boardAll { flex: none; font-size: 12.5px; font-weight: 500; color: var(--color-community-blue, #2056d6); text-decoration: none; }
 .boardList { margin: 0; padding: 0 6px 6px; list-style: none; }
 .boardRow { display: flex; align-items: center; gap: 10px; min-height: 36px; padding: 0 8px; border-radius: 8px; }
-.boardRow[data-me] { background: #eef3fe; }
+.boardRow[data-me] { --color-text-muted: var(--color-text-on-sky); background: #eef3fe; }
 .boardRow[data-me] .boardName { color: var(--color-community-blue, #2056d6); font-weight: 500; }
 .boardGap { position: relative; margin-top: 10px; }
 .boardGap::before { content: "···"; position: absolute; top: -12px; left: 0; right: 0; text-align: center; font-size: 10px; line-height: 10px; letter-spacing: 2px; color: #a6abb2; }

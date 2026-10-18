@@ -46,24 +46,6 @@ export function SogpAudioPlayer({
         }
       }} />
       {mutation.isError ? <div className="mt-3 flex flex-wrap items-center gap-2 text-xs"><p role="alert" className="text-(--destructive)">Listening progress could not be saved.</p><button type="button" disabled={mutation.isPending} onClick={() => mutation.mutate()} className="font-medium text-(--color-brand-blue) underline">Retry saving</button></div> : null}
-      {listened ? (
-        <p className="mt-3 text-xs leading-[1.45] text-[var(--color-text-muted)]">Listening completes automatically at 90%.</p>
-      ) : (
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-          <p className="text-xs leading-[1.45] text-[var(--color-text-muted)]">Listening completes at 90%. Listened offline?</p>
-          <button
-            type="button"
-            disabled={mutation.isPending}
-            onClick={() => {
-              notified.current = true;
-              mutation.mutate();
-            }}
-            className="inline-flex h-8 shrink-0 items-center rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white px-3 text-[12.5px] font-medium text-[var(--color-community-blue,#2056d6)] disabled:opacity-50"
-          >
-            {mutation.isPending ? "Marking…" : "I've listened to this"}
-          </button>
-        </div>
-      )}
       <ShareLearningProgressDialog
         open={shareOpen}
         onOpenChange={setShareOpen}

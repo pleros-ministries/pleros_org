@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import {
   CheckIcon,
+  ChevronRightIcon,
   ExternalLinkIcon,
   LockKeyholeIcon,
 } from "lucide-react";
@@ -27,28 +28,6 @@ function writtenResponseCopy(status: string | null) {
     default:
       return { button: "Write response", label: "Not started", complete: false };
   }
-}
-
-function TaskPill({
-  label,
-  state,
-}: {
-  label: string;
-  state: "complete" | "current" | "pending";
-}) {
-  return (
-    <span
-      className={cn(
-        "inline-flex h-5 items-center gap-1 rounded-full px-2 text-[11px] font-medium leading-5",
-        state === "complete" && "bg-[#e4ebfd] text-[#2331ae]",
-        state === "current" && "bg-[#f7e4cd] text-[#92400e]",
-        state === "pending" && "bg-[#eceef2] text-(--color-text-muted)",
-      )}
-    >
-      {state === "complete" ? <CheckIcon className="size-3" strokeWidth={2.5} /> : null}
-      {label}
-    </span>
-  );
 }
 
 export const SOGP_TASK_PRIMARY_BUTTON =
@@ -107,6 +86,73 @@ export function TaskCard({
   );
 }
 
+/** One task as one row (user request, 18 October: the day was cluttered). */
+function TaskRow({
+  title,
+  meta,
+  complete,
+  toggle,
+  href,
+  action,
+}: {
+  title: string;
+  meta: string;
+  complete: boolean;
+  /** Present when the learner marks the task done themselves. */
+  toggle?: { label: string; disabled: boolean; onClick: () => void };
+  href?: string;
+  action?: ReactNode;
+}) {
+  const mark = (
+    <span
+      className={cn(
+        "grid size-[22px] place-items-center rounded-full border transition-colors",
+        complete
+          ? "border-[var(--color-community-blue,#2056d6)] bg-[var(--color-community-blue,#2056d6)] text-white"
+          : "border-[#c9ced6] bg-white text-transparent",
+      )}
+    >
+      <CheckIcon className="size-3" strokeWidth={3} />
+    </span>
+  );
+  const copy = (
+    <span className="grid min-w-0 flex-1">
+      <span className="truncate text-[13px] font-medium leading-[18px] text-(--color-text-strong)">{title}</span>
+      <span className="truncate text-[11.5px] leading-4 text-(--color-text-muted)">{meta}</span>
+    </span>
+  );
+  return (
+    <li className="relative flex min-h-[58px] min-w-0 items-center gap-3 px-3.5 py-2.5 [&+&]:before:absolute [&+&]:before:inset-x-3.5 [&+&]:before:top-0 [&+&]:before:h-px [&+&]:before:bg-[var(--color-line,#e7e9ec)] [&+&]:before:content-['']">
+      {toggle ? (
+        <button
+          type="button"
+          aria-pressed={complete}
+          aria-label={toggle.label}
+          disabled={toggle.disabled}
+          onClick={toggle.onClick}
+          className="-m-2 grid shrink-0 cursor-pointer place-items-center p-2 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {mark}
+        </button>
+      ) : (
+        <span className="shrink-0">{mark}</span>
+      )}
+      {href ? (
+        <Link href={href} className="flex min-w-0 flex-1 items-center gap-2">
+          {copy}
+          {action ? null : <ChevronRightIcon className="size-4 shrink-0 text-[#a6abb2]" />}
+        </Link>
+      ) : (
+        copy
+      )}
+      {action}
+    </li>
+  );
+}
+
+const rowAction =
+  "inline-flex h-8 shrink-0 items-center gap-1 whitespace-nowrap rounded-[9px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white px-2.5 text-[12.5px] font-medium text-[var(--color-community-blue,#2056d6)] transition-colors hover:bg-[#f8f9fb] active:scale-[0.98]";
+
 export function SogpDailyTasks({
   data,
   selectedDay,
@@ -129,190 +175,117 @@ export function SogpDailyTasks({
   reviewPending: boolean;
 }) {
   const track = selectedDay.track;
-  const primaryButton = SOGP_TASK_PRIMARY_BUTTON;
-  const secondaryButton = SOGP_TASK_SECONDARY_BUTTON;
-
-  const teachingTasks: Array<{ key: string; complete: boolean; node: ReactNode }> = [];
+  const tasks: Array<{ key: string; complete: boolean; node: ReactNode }> = [];
 
   if (track) {
     const response = writtenResponseCopy(track.writtenResponseStatus);
-    // `accessible` only means the track is unlocked — it isn't evidence the
-    // lesson was ever opened, so the pill can't claim "complete" from that
-    // alone. Passing the quiz is the closest real signal of engagement.
+    // `accessible` only means the track is unlocked, not that it was opened;
+    // passing the quiz is the closest real signal of engagement.
     const teachingComplete = track.accessible && track.assessmentComplete;
-    const lessonState: "complete" | "current" | "pending" = track.quizPassed
-      ? "complete"
-      : track.accessible
-        ? "current"
-        : "pending";
-    const quizState: "complete" | "current" | "pending" = track.quizPassed
-      ? "complete"
-      : track.accessible
-        ? "current"
-        : "pending";
-    const responseState: "complete" | "current" | "pending" = response.complete
-      ? "complete"
-      : track.quizPassed
-        ? "current"
-        : "pending";
-
     const lessonHref = `/dashboard/sogp/course/day/${track.dayNumber}`;
-    const nextActionHref = !track.quizPassed
-      ? `/dashboard/sogp/course/day/${track.dayNumber}/quiz`
-      : `/dashboard/sogp/course/day/${track.dayNumber}/response`;
-    const nextActionLabel = !track.quizPassed ? "Take quiz" : response.button;
-
-    teachingTasks.push({
+    const nextHref = !track.quizPassed ? `${lessonHref}/quiz` : `${lessonHref}/response`;
+    const nextLabel = !track.quizPassed ? "Take quiz" : response.button;
+    const meta = !track.accessible
+      ? track.lockedReason ?? "Locked"
+      : teachingComplete
+        ? `${track.title} · done`
+        : !track.quizPassed
+          ? `${track.title} · quiz to do`
+          : `${track.title} · response ${response.label.toLowerCase()}`;
+    tasks.push({
       key: "teaching",
       complete: teachingComplete,
       node: (
-        <TaskCard
-          flat
+        <TaskRow
           key="teaching"
-          number={1}
           title="Teaching"
-          description={track.title}
+          meta={meta}
           complete={teachingComplete}
-          locked={!track.accessible}
-        >
-          <div className="flex flex-wrap gap-2">
-            <TaskPill label="Lesson" state={lessonState} />
-            <TaskPill label="Quiz" state={quizState} />
-            <TaskPill label="Response" state={responseState} />
-          </div>
-          {track.accessible ? (
-            <div className="flex flex-wrap gap-2">
-              <Link href={lessonHref} className={secondaryButton}>
-                {teachingComplete ? "Review lesson" : "Open lesson"}
+          href={track.accessible ? lessonHref : undefined}
+          action={
+            !track.accessible ? (
+              <LockKeyholeIcon className="size-4 shrink-0 text-[#a6abb2]" />
+            ) : !teachingComplete ? (
+              <Link href={nextHref} className={rowAction}>
+                {nextLabel}
               </Link>
-              {!teachingComplete ? (
-                <Link href={nextActionHref} className={primaryButton}>
-                  {nextActionLabel}
-                </Link>
-              ) : null}
-            </div>
-          ) : (
-            <p className="text-xs leading-4 text-(--color-text-muted)">{track.lockedReason}</p>
-          )}
-        </TaskCard>
+            ) : undefined
+          }
+        />
       ),
     });
   }
 
-  const prayerTask = {
+  tasks.push({
     key: "prayer",
     complete: selectedDay.prayerWatchComplete,
     node: (
-      <TaskCard
-        flat
+      <TaskRow
         key="prayer"
-        number={teachingTasks.length + 1}
         title="5:30 am Prayer Watch"
-        description="Join live or watch the replay, then mark it done."
+        meta="Join live or watch the replay"
         complete={selectedDay.prayerWatchComplete}
-      >
-        <div className="flex flex-wrap items-center gap-2">
-          <a
-            href={PRAYER_WATCH_YOUTUBE_URL}
-            target="_blank"
-            rel="noreferrer"
-            className={primaryButton}
-          >
-            Open Pleros Live <ExternalLinkIcon className="size-3.5" strokeWidth={2} />
+        toggle={{
+          label: selectedDay.prayerWatchComplete ? "Mark Prayer Watch not done" : "Mark Prayer Watch done",
+          disabled: isFuture || prayerPending,
+          onClick: onTogglePrayer,
+        }}
+        action={
+          <a href={PRAYER_WATCH_YOUTUBE_URL} target="_blank" rel="noreferrer" className={rowAction}>
+            Watch <ExternalLinkIcon className="size-3.5" strokeWidth={2} />
           </a>
-          <button
-            type="button"
-            disabled={isFuture || prayerPending}
-            onClick={onTogglePrayer}
-            aria-pressed={selectedDay.prayerWatchComplete}
-            className={secondaryButton}
-          >
-            {selectedDay.prayerWatchComplete ? (
-              <CheckIcon className="size-4 rounded-[4px] bg-[var(--color-community-blue,#2056d6)] p-0.5 text-white" strokeWidth={2.5} />
-            ) : (
-              <span className="grid size-4 place-items-center rounded-[4px] border border-zinc-300" />
-            )}
-            Done
-          </button>
-        </div>
-      </TaskCard>
+        }
+      />
     ),
-  };
+  });
 
   const nextReviewDay = data.days.find(
     (day) => day.review && !day.review.complete && day.dateKey >= data.todayKey,
   );
-  const nextReview = nextReviewDay?.review;
   // A day only carries a review requirement when `selectedDay.review` is set
-  // (see lib/db/queries/sogp-journey.ts). A day without one — including the
-  // pre-policy-change days grandfathered in as optional — has nothing to do
-  // for Review, regardless of whether a later day still has one outstanding.
-  const reviewComplete = selectedDay.review ? selectedDay.review.complete : true;
-
-  const reviewTask = {
+  // (see lib/db/queries/sogp-journey.ts); other days have nothing to do here.
+  const review = selectedDay.review;
+  const reviewComplete = review ? review.complete : true;
+  const reviewLink = review ? review.recordingUrl ?? review.liveUrl : null;
+  tasks.push({
     key: "review",
     complete: reviewComplete,
     node: (
-      <TaskCard
-        flat
+      <TaskRow
         key="review"
-        number={teachingTasks.length + 2}
-        title="Review"
-        description={
-          selectedDay.review
-            ? selectedDay.review.title
-            : nextReview
-              ? `Next up: ${nextReview.title}`
-              : "All scheduled reviews are complete."
+        title={review ? review.title : "Review"}
+        meta={
+          review
+            ? review.recordingUrl ? "Watch the recording, then mark it done" : "Join live, then mark it done"
+            : nextReviewDay?.review
+              ? `Next up: ${nextReviewDay.review.title}`
+              : "All scheduled reviews are complete"
         }
         complete={reviewComplete}
-      >
-        {selectedDay.review ? (
-          <div className="flex flex-wrap gap-2">
-            {(selectedDay.review.recordingUrl ?? selectedDay.review.liveUrl) ? (
-              <a
-                href={selectedDay.review.recordingUrl ?? selectedDay.review.liveUrl ?? "#"}
-                target="_blank"
-                rel="noreferrer"
-                className={primaryButton}
-              >
-                {selectedDay.review.recordingUrl ? "Watch recording" : "Join live review"}{" "}
-                <ExternalLinkIcon className="size-3.5" strokeWidth={2} />
-              </a>
-            ) : null}
-            <button
-              type="button"
-              disabled={
-                isFuture ||
-                reviewPending ||
-                (!selectedDay.review.liveUrl && !selectedDay.review.recordingUrl)
+        toggle={
+          review
+            ? {
+                label: review.complete ? "Mark review not done" : "Mark review done",
+                disabled: isFuture || reviewPending || !reviewLink,
+                onClick: onToggleReview,
               }
-              onClick={onToggleReview}
-              aria-pressed={selectedDay.review.complete}
-              className={secondaryButton}
-            >
-              {selectedDay.review.complete ? (
-                <CheckIcon className="size-4 rounded-[4px] bg-[var(--color-community-blue,#2056d6)] p-0.5 text-white" strokeWidth={2.5} />
-              ) : (
-                <span className="grid size-4 place-items-center rounded-[4px] border border-zinc-300" />
-              )}
-              Done
+            : undefined
+        }
+        action={
+          reviewLink ? (
+            <a href={reviewLink} target="_blank" rel="noreferrer" className={rowAction}>
+              {review?.recordingUrl ? "Watch" : "Join"} <ExternalLinkIcon className="size-3.5" strokeWidth={2} />
+            </a>
+          ) : !review && nextReviewDay ? (
+            <button type="button" onClick={() => onSelectDate(nextReviewDay.dateKey)} className={cn(rowAction, "cursor-pointer")}>
+              View
             </button>
-          </div>
-        ) : nextReviewDay ? (
-          <button
-            type="button"
-            onClick={() => onSelectDate(nextReviewDay.dateKey)}
-            className={cn(primaryButton, "w-fit")}
-          >
-            View review
-          </button>
-        ) : null}
-      </TaskCard>
+          ) : undefined
+        }
+      />
     ),
-  };
+  });
 
-  const tasks = [...teachingTasks, prayerTask, reviewTask];
   const doneCount = tasks.filter((task) => task.complete).length;
   const weekdayDayLabel = new Intl.DateTimeFormat("en-NG", {
     weekday: "long",

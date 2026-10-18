@@ -103,6 +103,8 @@
   --color-text: #142033;
   --color-text-strong: #0d1726;
   --color-text-muted: #58657a;
+  /* Muted copy on light-blue panels: neutral grey reads dirty on sky, so use a blue slate. */
+  --color-text-on-sky: #41557a;
   --color-text-on-dark: #f6f4ef;
   --color-text-on-dark-muted: rgba(246, 244, 239, 0.72);
 
@@ -1694,4 +1696,22 @@ select:dir(rtl):not([multiple]):not([size]):not(.sogp-field-select):not(.sogp-ph
 :root :is(input:not([type="checkbox"], [type="radio"], [type="range"], [type="file"], [type="color"], [type="button"], [type="submit"], [type="reset"], [type="image"]), textarea, select):focus-visible {
   outline-width: 1.5px;
   outline-offset: -1px;
+}
+
+/* Muted grey reads dirty on the light-blue panels (user, 18 October). Any
+   container painted sky or periwinkle retints the muted token for everything
+   inside it, so text-(--color-text-muted) becomes a blue slate there. The class
+   matches only a bare background utility, never a hover: or data-*: variant. */
+:is(
+  [class^="bg-(--color-brand-sky"], [class*=" bg-(--color-brand-sky"],
+  [class^="bg-[var(--color-brand-sky"], [class*=" bg-[var(--color-brand-sky"],
+  [class^="bg-[#e4ebfd]"], [class*=" bg-[#e4ebfd]"],
+  [class^="bg-[#eef3fe]"], [class*=" bg-[#eef3fe]"],
+  [class^="bg-[#cfe6fb]"], [class*=" bg-[#cfe6fb]"],
+  [class^="bg-[#dcefff]"], [class*=" bg-[#dcefff]"],
+  [class^="bg-[#f4f7fe]"], [class*=" bg-[#f4f7fe]"],
+  [class^="bg-[#e0f3ff]"], [class*=" bg-[#e0f3ff]"],
+  [data-on-sky]
+) {
+  --color-text-muted: var(--color-text-on-sky);
 }

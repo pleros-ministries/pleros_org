@@ -344,8 +344,8 @@
 .homeRailTile h3 { font-size: 14px; line-height: 20px; }
 .homeRailTile p { font-size: 12px; line-height: 16px; }
 .homeRailTile[data-tone="butter"] { background: #fff3c9; color: #5a4508; }
-.homeRailTile[data-tone="sky"] { background: #dcefff; color: #0e3f73; }
-.homeRailTile[data-tone="periwinkle"] { background: #e4ebfd; color: #1c2f86; }
+.homeRailTile[data-tone="sky"] { --color-text-muted: var(--color-text-on-sky); background: #dcefff; color: #0e3f73; }
+.homeRailTile[data-tone="periwinkle"] { --color-text-muted: var(--color-text-on-sky); background: #e4ebfd; color: #1c2f86; }
 .homeRailTile[data-tone="peach"] { background: #fde6dc; color: #7a2e12; }
 @media (max-width: 359px) {
   .homeProgressRow > span:first-child { width: 92px; }

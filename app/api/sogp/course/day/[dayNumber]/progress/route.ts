@@ -16,7 +16,7 @@ export async function POST(
   if (!session) return NextResponse.json({ error: "Unauthorised" }, { status: 401 });
   const { dayNumber: rawDayNumber } = await params;
   const dayNumber = Number(rawDayNumber);
-  const body = (await request.json().catch(() => null)) as { signal?: string } | null;
+  const body = (await request.json().catch(() => null)) as { signal?: string; done?: boolean } | null;
   if (!Number.isInteger(dayNumber) || !body || !["audio", "notes"].includes(body.signal ?? "")) {
     return NextResponse.json({ error: "Invalid progress signal" }, { status: 400 });
   }
@@ -26,10 +26,11 @@ export async function POST(
   } catch {
     return NextResponse.json({ error: "Day is locked" }, { status: 403 });
   }
+  const done = body.done !== false;
   if (body.signal === "audio") {
-    await markLessonAudioListened(session.user.id, data.track.lesson.id);
+    await markLessonAudioListened(session.user.id, data.track.lesson.id, done);
   } else {
-    await markLessonNotesRead(session.user.id, data.track.lesson.id);
+    await markLessonNotesRead(session.user.id, data.track.lesson.id, done);
   }
   revalidateReportingViews();
   return NextResponse.json({ success: true });

@@ -63,7 +63,6 @@ describe("SOGP dashboard previews", () => {
     expect(prePage).toContain('data-pre-sogp-section="coming-soon"');
     expect(sogpPage).toContain("initialData?: SogpJourneyData");
     expect(prePage).toContain("Preview mode");
-    expect(sogpOtherDetails).toContain("Preview mode");
     expect(sogpPage).toContain(
       'href="/preview/dashboard"',
     );
@@ -71,10 +70,6 @@ describe("SOGP dashboard previews", () => {
 
     // Header: the Learning hub's h1 with a short muted line (18 October retouch).
     expect(sogpPage).toContain("<h1>Calendar and assessments</h1>");
-    expect(sogpPage).toContain("Welcome, {firstName");
-    expect(sogpPage.indexOf("<h1>Calendar and assessments</h1>")).toBeLessThan(
-      sogpPage.indexOf("Welcome, {firstName"),
-    );
 
     // Tasks section: a single white, decluttered block driven by SogpDailyTasks.
     expect(sogpPage).toContain("<SogpDailyTasks");
@@ -88,6 +83,6 @@ describe("SOGP dashboard previews", () => {
     expect(sogpOtherDetails).toContain("Course progress");
     expect(sogpOtherDetails).toContain("Invite friends");
     expect(sogpOtherDetails).toContain("Share what you learnt today");
-    expect(sogpOtherDetails).toContain("Prayer Watch reminder");
+    expect(sogpOtherDetails).not.toContain("Prayer Watch reminder");
   });
 });

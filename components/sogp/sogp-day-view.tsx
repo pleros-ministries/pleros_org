@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 import lesson from "./sogp-lesson.module.css";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import {
@@ -9,10 +8,7 @@ import {
   ArrowRight,
   Check,
   ChevronDown,
-  Circle,
   ExternalLink,
-  FileText,
-  HelpCircle,
   LockKeyhole,
   MessageCircleMore,
   Play,
@@ -111,36 +107,72 @@ function sentence(value: string) {
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
+function StepMark({ done = false }: { done?: boolean }) {
+  return <span className={lesson.stepMark} data-done={done || undefined} aria-label={done ? "Done" : "To do"}><Check className="size-3" strokeWidth={3} aria-hidden /></span>;
+}
+
+/** A step the learner marks themselves: the whole row toggles it. */
+function ToggleStep({ title, done, pending, failed, doneMeta, todoMeta, onToggle }: { title: string; done: boolean; pending: boolean; failed: boolean; doneMeta: string; todoMeta: string; onToggle: () => void }) {
+  return <button type="button" role="checkbox" aria-checked={done} className={lesson.row} disabled={pending} onClick={onToggle}><StepMark done={done} /><span className={lesson.rowCopy}><span className={lesson.rowTitle}>{title}</span><span className={lesson.rowMeta}>{failed ? "Could not save. Tap to try again." : done ? doneMeta : todoMeta}</span></span></button>;
+}
+
 export function SogpDayView({ dayNumber }: { dayNumber: number }) {
   const queryClient = useQueryClient();
-  const [tab, setTab] = useState<"overview" | "progress">("overview");
   const { data } = useSuspenseQuery({
     queryKey: ["sogp", "day", dayNumber],
     queryFn: () => fetchDay(dayNumber),
   });
   const notesMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (done: boolean = true) => {
       const response = await fetch(`/api/sogp/course/day/${dayNumber}/progress`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ signal: "notes" }),
+        body: JSON.stringify({ signal: "notes", done }),
       });
       if (!response.ok) throw new Error("Notes progress could not be saved");
     },
-    async onSuccess() {
-      await Promise.all([
-        queryClient.invalidateQueries({ queryKey: ["sogp", "day", dayNumber] }),
-        queryClient.invalidateQueries({ queryKey: ["sogp", "dashboard"] }),
-      ]);
+    onMutate: async (done: boolean = true) => {
+      await queryClient.cancelQueries({ queryKey: ["sogp", "day", dayNumber] });
+      const previous = queryClient.getQueryData<DayPayload>(["sogp", "day", dayNumber]);
+      if (previous) queryClient.setQueryData<DayPayload>(["sogp", "day", dayNumber], { ...previous, track: { ...previous.track, progress: { ...previous.track.progress, notesRead: done } } });
+      return { previous };
+    },
+    onError: (_error, _done, context) => {
+      if (context?.previous) queryClient.setQueryData(["sogp", "day", dayNumber], context.previous);
+    },
+    onSuccess() {
+      // Refresh in the background so the toggle frees up at once.
+      void queryClient.invalidateQueries({ queryKey: ["sogp", "day", dayNumber] });
+      void queryClient.invalidateQueries({ queryKey: ["sogp", "dashboard"] });
     },
   });
+  const listenedMutation = useMutation({
+    mutationFn: async (done: boolean) => {
+      const response = await fetch(`/api/sogp/course/day/${dayNumber}/progress`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ signal: "audio", done }),
+      });
+      if (!response.ok) throw new Error("Listening progress could not be saved");
+    },
+    onMutate: async (done: boolean = true) => {
+      await queryClient.cancelQueries({ queryKey: ["sogp", "day", dayNumber] });
+      const previous = queryClient.getQueryData<DayPayload>(["sogp", "day", dayNumber]);
+      if (previous) queryClient.setQueryData<DayPayload>(["sogp", "day", dayNumber], { ...previous, track: { ...previous.track, progress: { ...previous.track.progress, audioListened: done } } });
+      return { previous };
+    },
+    onError: (_error, _done, context) => {
+      if (context?.previous) queryClient.setQueryData(["sogp", "day", dayNumber], context.previous);
+    },
+    onSuccess() {
+      // Refresh in the background so the toggle frees up at once.
+      void queryClient.invalidateQueries({ queryKey: ["sogp", "day", dayNumber] });
+      void queryClient.invalidateQueries({ queryKey: ["sogp", "dashboard"] });
+    },
+  });
+  const listened = data.track.progress.audioListened;
+  const doneSteps = [listened, data.track.progress.notesRead, data.track.progress.quizPassed, data.track.progress.writtenApproved].filter(Boolean).length;
   const telegramUrl = data.dashboard.cohort.telegramDiscussionUrl ?? data.dashboard.cohort.telegramChannelUrl ?? (data.dashboard.cohort.telegramBotUsername ? `https://t.me/${data.dashboard.cohort.telegramBotUsername.replace(/^@/, "")}` : null);
-  const signals = [
-    ["Teaching listened", data.track.progress.audioListened],
-    ["Notes read", data.track.progress.notesRead],
-    ["Quiz passed", data.track.progress.quizPassed],
-    ["Written response submitted", data.track.progress.writtenApproved],
-  ] as const;
 
   const tracks = data.dashboard.tracks.filter((item) => item.isRequired);
   const position = tracks.findIndex((item) => item.dayNumber === data.track.dayNumber) + 1;
@@ -152,24 +184,26 @@ export function SogpDayView({ dayNumber }: { dayNumber: number }) {
       </header>
       <article className={lesson.card} aria-label="Lesson audio">
         <div className={lesson.cardHead}>
-          <p className={lesson.meta}>1 hr/day · Audio teaching</p>
-          {data.track.progress.audioListened ? <span className={lesson.pill}><Check className="size-3" aria-hidden /> Listened</span> : null}
+          <p className={lesson.meta}>Traditional track · 1 hr/day</p>
         </div>
         {data.track.lesson.audioUrl ? <SogpAudioPlayer key={dayNumber} dayNumber={dayNumber} src={data.track.lesson.audioUrl} listened={data.track.progress.audioListened}/> : <p className={lesson.notice}>Teaching audio is being prepared.</p>}
       </article>
-      <div className={lesson.tabs} role="tablist" aria-label="Lesson sections">
-        {(["overview", "progress"] as const).map((key) => <button key={key} type="button" role="tab" aria-selected={tab === key} onClick={() => setTab(key)}>{key === "overview" ? "Overview" : "Completion"}</button>)}
-      </div>
-      {tab === "overview" ? (data.track.lesson.notesContent ? <article className={`${lesson.panel} ${lesson.notes}`}>
+      {/* One checklist: each step shows its state and its action in the same row
+          (user, 18 October: a separate Completion list duplicated the actions). */}
+      <section className={lesson.steps} aria-labelledby="lesson-steps">
+        <div className={lesson.stepsHead}><h2 id="lesson-steps">Your steps</h2><span>{doneSteps} of 4 done</span></div>
+        <ol className={`${lesson.panel} ${lesson.list}`}>
+          <li><ToggleStep title="Listen to the teaching" done={listened} pending={listenedMutation.isPending} failed={listenedMutation.isError} doneMeta="Listened · tap to unmark" todoMeta="Tap to mark as listened" onToggle={() => listenedMutation.mutate(!listened)} /></li>
+          <li><ToggleStep title="Read the notes" done={data.track.progress.notesRead} pending={notesMutation.isPending} failed={notesMutation.isError} doneMeta="Read · tap to unmark" todoMeta="Tap to mark as read" onToggle={() => notesMutation.mutate(!data.track.progress.notesRead)} /></li>
+          <li><Link className={lesson.row} href={`/dashboard/sogp/course/day/${dayNumber}/quiz`}><StepMark done={data.track.progress.quizPassed} /><span className={lesson.rowCopy}><span className={lesson.rowTitle}>Pass the quiz</span><span className={lesson.rowMeta}>{data.bestQuizScore===null?"Not attempted":`Best score ${data.bestQuizScore}%`}</span></span><ArrowRight className={`size-4 ${lesson.rowEnd}`} aria-hidden/></Link></li>
+          <li><Link className={lesson.row} href={`/dashboard/sogp/course/day/${dayNumber}/response`}><StepMark done={data.track.progress.writtenApproved} /><span className={lesson.rowCopy}><span className={lesson.rowTitle}>Write your response</span><span className={lesson.rowMeta}>{data.submission ? sentence(data.submission.status) : "Not started"}</span></span><ArrowRight className={`size-4 ${lesson.rowEnd}`} aria-hidden/></Link></li>
+        </ol>
+      </section>
+      {telegramUrl?<a className={`${lesson.panel} ${lesson.row}`} href={telegramUrl} target="_blank" rel="noreferrer"><span className={lesson.chip} data-tint="amber"><MessageCircleMore className="size-[18px]" aria-hidden/></span><span className={lesson.rowCopy}><span className={lesson.rowTitle}>Ask your question</span><span className={lesson.rowMeta}>Text or voice note in Telegram</span></span><ExternalLink className={`size-4 ${lesson.rowEnd}`} aria-hidden/></a>:null}
+      {data.track.lesson.notesContent ? <article className={`${lesson.panel} ${lesson.notes}`} aria-label="Lesson notes">
         <div className="prose prose-sm max-w-none leading-[1.7] text-[var(--color-text-strong)]" dangerouslySetInnerHTML={{__html:data.track.lesson.notesContent}}/>
-        <button type="button" className={lesson.secondary} disabled={data.track.progress.notesRead||notesMutation.isPending} onClick={()=>notesMutation.mutate()}>{data.track.progress.notesRead?"Notes marked as read":notesMutation.isPending?"Saving…":"Mark notes read"}<Check className="size-4" aria-hidden/></button>
-      </article> : <p className={lesson.empty}>Lesson notes are not available for this track.</p>)
-      : <ul className={`${lesson.panel} ${lesson.list}`}>{signals.map(([label,complete])=><li key={label} className={lesson.row}><span className={`${lesson.chip} ${lesson.chipSmall}`} data-tint={complete?undefined:"neutral"}>{complete?<Check className="size-3.5" aria-hidden/>:<Circle className="size-3.5" aria-hidden/>}</span><span className={lesson.rowCopy}><span className={lesson.rowTitle}>{label}</span></span><span className={lesson.pill} data-tone={complete?undefined:"neutral"}>{complete?"Done":"To do"}</span></li>)}</ul>}
-      <ul className={`${lesson.panel} ${lesson.list}`}>
-        <li><Link className={lesson.row} href={`/dashboard/sogp/course/day/${dayNumber}/quiz`}><span className={lesson.chip}><HelpCircle className="size-[18px]" aria-hidden/></span><span className={lesson.rowCopy}><span className={lesson.rowTitle}>Your response & quiz</span><span className={lesson.rowMeta}>{data.bestQuizScore===null?"Quiz not attempted":`Best quiz score ${data.bestQuizScore}%`}</span></span><ArrowRight className={`size-4 ${lesson.rowEnd}`} aria-hidden/></Link></li>
-        <li><Link className={lesson.row} href={`/dashboard/sogp/course/day/${dayNumber}/response`}><span className={lesson.chip} data-tint="sky"><FileText className="size-[18px]" aria-hidden/></span><span className={lesson.rowCopy}><span className={lesson.rowTitle}>Written response</span><span className={lesson.rowMeta}>{data.submission ? sentence(data.submission.status) : "Not started"}</span></span><ArrowRight className={`size-4 ${lesson.rowEnd}`} aria-hidden/></Link></li>
-        {telegramUrl?<li><a className={lesson.row} href={telegramUrl} target="_blank" rel="noreferrer"><span className={lesson.chip} data-tint="amber"><MessageCircleMore className="size-[18px]" aria-hidden/></span><span className={lesson.rowCopy}><span className={lesson.rowTitle}>Ask your question</span><span className={lesson.rowMeta}>Text or voice note in Telegram</span></span><ExternalLink className={`size-4 ${lesson.rowEnd}`} aria-hidden/></a></li>:null}
-      </ul>
+        <button type="button" className={lesson.secondary} disabled={data.track.progress.notesRead||notesMutation.isPending} onClick={()=>notesMutation.mutate(true)}>{data.track.progress.notesRead?"Notes marked as read":notesMutation.isPending?"Saving…":"Mark notes read"}<Check className="size-4" aria-hidden/></button>
+      </article> : null}
       <details className={lesson.curriculum}><summary>All {tracks.length} tracks<ChevronDown className="size-4" aria-hidden/></summary><Curriculum data={data} /></details>
       <footer className={lesson.footer}>
         {data.nextDay?<Link className={lesson.primary} href={`/dashboard/sogp/course/day/${data.nextDay.dayNumber}`}>Continue after this lesson<ArrowRight className="size-4" aria-hidden/></Link>:<Link className={lesson.primary} href="/dashboard/sogp">Back to Learning<ArrowRight className="size-4" aria-hidden/></Link>}

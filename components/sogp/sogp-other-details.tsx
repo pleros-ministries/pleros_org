@@ -1,11 +1,10 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { BellIcon, BellOffIcon, ChevronRightIcon, PenLineIcon, UserPlusIcon, UsersRoundIcon } from "lucide-react";
+import { ChevronRightIcon, PenLineIcon, UserPlusIcon, UsersRoundIcon } from "lucide-react";
 import Link from "next/link";
 
 import type { SogpJourneyData } from "@/lib/db/queries/sogp-journey";
-import { usePushSubscription } from "@/lib/push/use-push";
 
 import { LeaderboardWidget } from "./leaderboard-widget";
 import { ShareLearningProgressDialog } from "./share-learning-progress-dialog";
@@ -55,52 +54,6 @@ function DetailRow({
     <button type="button" onClick={onClick} className={`${className} cursor-pointer`}>
       {content}
     </button>
-  );
-}
-
-function PrayerWatchReminderCard() {
-  const { isSupported, isSubscribed, isPending, subscribe } = usePushSubscription();
-  const isConfigured = Boolean(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY);
-  // Which reminders arrive, and when, is the learner's own choice on the
-  // Welcome Pack setup page, so this card describes them in general terms.
-  const summary =
-    "A notification shortly before each Prayer Watch session you choose, and at your teaching time.";
-
-  return (
-    <div className="grid gap-2.5 rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white px-3.5 py-3">
-      <div className="flex items-center gap-3">
-        <span className="grid size-9 shrink-0 place-items-center rounded-[10px] bg-[#cfe6fb] text-[#0e3f73]" aria-hidden="true">
-          <BellIcon className="size-4" strokeWidth={2.2} />
-        </span>
-        <h3 className="m-0 text-[13.5px] font-medium leading-[18px] text-(--color-text-strong)">Prayer Watch reminder</h3>
-      </div>
-      {isSubscribed ? (
-        <p className="text-xs leading-[17px] text-(--color-text-muted)">{summary} Reminders are on.</p>
-      ) : !isConfigured || !isSupported ? (
-        <p className="inline-flex items-center gap-2 text-xs leading-[17px] text-(--color-text-muted)">
-          <BellOffIcon className="size-4 shrink-0" />
-          {summary} Reminders are being set up.
-        </p>
-      ) : (
-        <>
-          <p className="text-xs leading-[17px] text-(--color-text-muted)">{summary}</p>
-          <button
-            type="button"
-            onClick={subscribe}
-            disabled={isPending}
-            className="inline-flex h-[38px] w-fit max-w-full cursor-pointer items-center rounded-[11px] bg-[var(--color-community-blue,#2056d6)] px-3.5 text-[13.5px] font-medium text-white disabled:cursor-not-allowed disabled:opacity-55"
-          >
-            {isPending ? "Enabling…" : "Enable Prayer Watch reminders"}
-          </button>
-        </>
-      )}
-      <Link
-        href="/dashboard/welcomepack/setup"
-        className="w-fit text-[12.5px] font-medium text-[var(--color-community-blue,#2056d6)]"
-      >
-        Manage reminders
-      </Link>
-    </div>
   );
 }
 
@@ -188,13 +141,6 @@ export function SogpOtherDetails({
 
         {preview ? null : <LeaderboardWidget />}
 
-        {preview ? (
-          <p className="rounded-[10px] bg-[var(--color-surface-muted,#f4f5f7)] px-3.5 py-3 text-xs text-(--color-text-muted)">
-            Preview mode · Prayer Watch reminders are unavailable in this preview.
-          </p>
-        ) : (
-          <PrayerWatchReminderCard />
-        )}
       </div>
 
       <ShareLearningProgressDialog
