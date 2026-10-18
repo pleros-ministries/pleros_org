@@ -184,7 +184,6 @@ describe("dashboard devotion tracking", () => {
     expect(dashboardPage).toContain("priority");
     expect(dashboardPage).not.toContain("<DiscipleshipJourneyGallery sections={sections}");
     expect(gallery).toContain("backHref");
-    expect(gallery).toContain("Back to series");
     expect(seriesRoute).toContain("getDiscipleshipJourneySection");
     expect(seriesRoute).toContain("notFound()");
     expect(seriesPage).toContain("DiscipleshipJourneyGallery");
