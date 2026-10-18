@@ -2518,6 +2518,13 @@ export const privateContactInvites = pgTable("private_contact_invites", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [index("private_contact_invites_contact_idx").on(t.privateContactId, t.createdAt)]);
 
+/** A learner asked to hear when Advanced SOGP opens; one row per learner (migration 0065). */
+export const advancedSogpInterest = pgTable("advanced_sogp_interest", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [uniqueIndex("advanced_sogp_interest_user_idx").on(t.userId)]);
+
 /** Canonical numerical projections remain in ministry_activities. */
 export const ministryReportEntries = pgTable("ministry_report_entries", {
   activityId: integer("activity_id").primaryKey().references(() => ministryActivities.id, { onDelete: "cascade" }),
