@@ -92,7 +92,9 @@ async function placement(viewerId: string, viewer: ChurchAssignment): Promise<Ch
  */
 export async function getChurchPlace(viewerId: string, input: { branchId?: number; unitId?: number }) {
   const viewer = await getChurchAssignment(viewerId);
-  if (!viewer || !canManageChurchAssignments(viewer)) return null;
+  // A unit leader reaches only their own unit (to add workers); everyone else needs management rights.
+  const ownUnitLeader = viewer?.role === "unit_leader" && input.unitId !== undefined && viewer.unitId === input.unitId;
+  if (!viewer || (!canManageChurchAssignments(viewer) && !ownUnitLeader)) return null;
   const [unitRow] = input.unitId ? await db.select({ id: s.churchUnits.id, name: s.churchUnits.name, branchId: s.churchUnits.branchId }).from(s.churchUnits).where(eq(s.churchUnits.id, input.unitId)) : [];
   const branchId = unitRow?.branchId ?? input.branchId;
   if (!branchId || input.unitId && !unitRow) return null;
@@ -103,10 +105,11 @@ export async function getChurchPlace(viewerId: string, input: { branchId?: numbe
   const pastors = roster.filter(row => row.role === "branch_pastor" && churchBranchIds(row as ChurchAssignment).includes(branchId)).map(row => ({ userId: row.userId, name: row.name }));
   if (viewer.role === "branch_pastor" && !pastors.some(row => row.userId === viewerId)) pastors.unshift({ userId: viewerId, name: (await names([viewerId])).get(viewerId) ?? "You" });
   const unit = unitRow ? (() => {
-    const leader = roster.find(row => row.role === "unit_leader" && row.unitId === unitRow.id);
+    const leader = ownUnitLeader ? { userId: viewerId, name: "" } : roster.find(row => row.role === "unit_leader" && row.unitId === unitRow.id);
     return { ...unitRow, leader: leader ? { userId: leader.userId, name: leader.name } : null, workers: roster.filter(row => row.role === "worker" && row.unitId === unitRow.id).map(row => ({ userId: row.userId, name: row.name })) };
   })() : null;
-  return { viewerRole: viewer.role as "pastor" | "branch_pastor", viewerId, branch, pastors, unit };
+  if (ownUnitLeader && unit?.leader) unit.leader.name = (await names([viewerId])).get(viewerId) ?? "You";
+  return { viewerRole: viewer.role as "pastor" | "branch_pastor" | "unit_leader", viewerId, branch, pastors, unit };
 }
 export type ChurchPlace = NonNullable<Awaited<ReturnType<typeof getChurchPlace>>>;
 

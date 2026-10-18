@@ -17,6 +17,10 @@ export function canReadChurchReport(viewer: ChurchAssignment | null, subject: Ch
 export function canManageChurchAssignments(viewer: ChurchAssignment | null): boolean {
   return viewer?.role === "pastor" || viewer?.role === "branch_pastor";
 }
+/** Unit leaders add workers to their own unit (user decision, 18 October); Pastors and Branch Pastors to any unit they manage. */
+export function canAddUnitWorkers(viewer: ChurchAssignment | null, unitId: number): boolean {
+  return canManageChurchAssignments(viewer) || (viewer?.role === "unit_leader" && viewer.unitId === unitId);
+}
 export function validChurchParent(role: ChurchRole, parent: ChurchAssignment | null, branchId: number | null, unitId: number | null): boolean {
   if (role === "pastor") return !parent && branchId === null && unitId === null;
   if (!parent) return false;

@@ -66,7 +66,9 @@ export async function loadChurchAssignmentForTransaction(tx: Tx, userId: string)
 /** Appointment search deliberately returns names/IDs only, never contact information. */
 export async function searchChurchCandidates(viewerId: string, query: string, bootstrap = false) {
   requireEnabled();
-  if (!bootstrap && !canManageChurchAssignments(await getChurchAssignment(viewerId))) throw new CommunityError("You cannot appoint church workers.");
+  const searcher = bootstrap ? null : await getChurchAssignment(viewerId);
+  // Unit leaders search too, to add workers to their own unit; names and IDs only either way.
+  if (!bootstrap && !canManageChurchAssignments(searcher) && searcher?.role !== "unit_leader") throw new CommunityError("You cannot appoint church workers.");
   if (query.trim().length < 2) return [];
   const escaped = query.trim().slice(0, 80).replace(/[\\%_]/g, "\\$&");
   return db.select({ id: s.users.id, name: s.users.name }).from(s.users).where(ilike(s.users.name, `%${escaped}%`)).orderBy(s.users.name).limit(20);
@@ -93,6 +95,11 @@ export async function assignChurchMember(actorId: string, input: { userId: strin
       if (!bootstrap) throw new CommunityError("Only super-admin setup can appoint the Pastor.");
       const [root] = await tx.select().from(s.churchAssignments).where(eq(s.churchAssignments.role, "pastor"));
       if (root && root.userId !== input.userId) throw new CommunityError("A Pastor is already appointed.");
+    } else if (actor?.role === "unit_leader") {
+      // A unit leader adds workers to their own unit, reporting to them (user decision, 18 October).
+      // They never take someone who holds another role or serves in another unit.
+      if (input.role !== "worker" || input.unitId !== actor.unitId || input.branchId !== actor.branchId || input.supervisorId !== actorId) throw new CommunityError("Add workers to your own unit only.");
+      if (current && !(current.role === "worker" && current.unitId === actor.unitId)) throw new CommunityError("This person already has a church role. Ask your branch pastor to move them.");
     } else if (!actor || !canManageChurchAssignments(actor)) throw new CommunityError("You cannot manage church assignments.");
     // Authorise the existing appointment, not just its requested replacement.
     // Demotion must never turn a peer/senior appointment into an editable target.

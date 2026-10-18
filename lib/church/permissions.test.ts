@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { canManageChurchAssignments, canReadChurchReport, validChurchParent, type ChurchAssignment } from "./permissions";
+import { canAddUnitWorkers, canManageChurchAssignments, canReadChurchReport, validChurchParent, type ChurchAssignment } from "./permissions";
 const pastor: ChurchAssignment = { userId: "p", role: "pastor", branchId: null, unitId: null, supervisorId: null };
 const branch: ChurchAssignment = { userId: "b", role: "branch_pastor", branchId: 1, unitId: null, supervisorId: "p" };
 const leader: ChurchAssignment = { userId: "l", role: "unit_leader", branchId: 1, unitId: 2, supervisorId: "b" };
@@ -41,4 +41,15 @@ it("preserves multi-branch pastor scope without granting unassigned branches", (
   expect(validChurchParent("unit_leader", multi, 9, 20)).toBe(true);
   expect(validChurchParent("unit_leader", multi, 10, 20)).toBe(false);
   expect(canReadChurchReport({ ...branch, branchId: null, branchIds: [] }, worker)).toBe(false);
+});
+
+it("lets a unit leader add workers to their own unit only", () => {
+  expect(canAddUnitWorkers(leader, 2)).toBe(true);
+  expect(canAddUnitWorkers(leader, 3)).toBe(false);
+  expect(canAddUnitWorkers(worker, 2)).toBe(false);
+  expect(canAddUnitWorkers(branch, 2)).toBe(true);
+  expect(canAddUnitWorkers(null, 2)).toBe(false);
+  // Workers added by a leader report to that leader, in the same unit.
+  expect(validChurchParent("worker", leader, 1, 2)).toBe(true);
+  expect(validChurchParent("worker", leader, 1, 3)).toBe(false);
 });

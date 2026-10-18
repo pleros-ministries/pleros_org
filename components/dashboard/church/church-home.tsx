@@ -79,8 +79,11 @@ export function ChurchHomeView({ data, canOversee, header }: { data: ChurchHome;
       <span className={styles.rowCopy}><span className={styles.rowTitle}>{worker.name}</span><span className={styles.rowMeta}>Worker · {data.unit.name}</span></span>
       <ChevronRightIcon className={`${styles.chev} size-4`} strokeWidth={2} />
     </Link></li>)}</ul></div> : <p className={`${styles.panel} ${styles.empty}`}>No workers are assigned to you yet.</p>}
-    {reports ? <div className={styles.panel}><ul className={styles.list}>{reports}</ul></div> : null}
-    <Note>Appointments and assignments are managed by your branch pastor.</Note>
+    <div className={styles.panel}><ul className={styles.list}>
+      <ActionRow href={`/dashboard/church/units/${data.unit.id}/workers`} icon={<UserPlusIcon className="size-4" strokeWidth={2.2} />} tone={["#e4ebfd", "#2331ae"]} title="Add workers" meta={`People who serve in ${data.unit.name} with you`} />
+      {reports}
+    </ul></div>
+    <Note>You add workers to your unit. Your branch pastor manages leaders and moves people between units.</Note>
   </Page>;
 
   if (data.role === "pastor") return <Page bare={Boolean(header)}>
