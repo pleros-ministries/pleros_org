@@ -7,7 +7,8 @@ import { signOutDashboardAction } from "@/app/_actions/auth-actions";
 
 export function DashboardSignOutButton() {
   return (
-    <form action={signOutDashboardAction} className="contents">
+    // Full reload after sign-out so no preserved page state survives for the next person.
+    <form action={async () => { await signOutDashboardAction(); window.location.assign("/login"); }} className="contents">
       <SignOutSubmitButton />
     </form>
   );

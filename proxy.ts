@@ -1,3 +1,4 @@
+import { getSessionCookie } from "better-auth/cookies";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
@@ -30,6 +31,16 @@ export function proxy(request: NextRequest) {
   const rewritePath = getPpcRewritePath(host, request.nextUrl.pathname);
 
   if (!rewritePath) {
+    // Optimistic gate: a dashboard request with no session cookie goes straight to
+    // /login. Under Cache Components the layout streams, so its own redirect would
+    // arrive after the shell; the layout stays the real check for every request.
+    const { pathname, search } = request.nextUrl;
+    if ((pathname === "/dashboard" || pathname.startsWith("/dashboard/")) && !getSessionCookie(request)) {
+      const login = request.nextUrl.clone();
+      login.pathname = "/login";
+      login.search = `?returnTo=${encodeURIComponent(pathname + search)}`;
+      return retireLegacyWelcomeAccessCookie(NextResponse.redirect(login));
+    }
     return retireLegacyWelcomeAccessCookie(nextResponseWithPathname(request));
   }
 

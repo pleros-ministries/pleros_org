@@ -22,7 +22,8 @@ describe("contact page", () => {
     const contentSource = readFileSync(contentPath, "utf8");
 
     expect(routeSource).toContain("ContactPageView");
-    expect(routeSource).toContain('dynamic = "force-dynamic"');
+    // Cache Components: the page reads the request with connection() instead of force-dynamic.
+    expect(routeSource).toContain("await connection()");
     expect(contentSource).toContain("Contact Us");
     expect(contentSource).toContain("Reach out to us.");
     expect(contentSource).toContain("Full Name");

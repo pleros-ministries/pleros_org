@@ -8,7 +8,7 @@ import DashboardLoading from "@/app/(site)/dashboard/loading";
 export function DashboardFrameFallback() {
   return (
     <div className="min-h-dvh bg-[var(--color-surface)]">
-      <div aria-hidden className="h-11 w-full bg-[var(--color-community-blue,#2056d6)]" />
+      <div aria-hidden className="h-11 w-full bg-[#051480]" />
       <DashboardLoading />
     </div>
   );

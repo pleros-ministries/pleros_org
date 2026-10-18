@@ -1,5 +1,8 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
 
+// "use cache" functions call cacheLife(), which only runs inside Next with cacheComponents.
+vi.mock("next/cache", () => ({ cacheLife: () => {}, cacheTag: () => {} }));
+
 import {
   getLatestInstagramPosts,
   getLatestInstagramPostsWithDiagnostics,

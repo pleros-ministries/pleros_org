@@ -97,7 +97,8 @@ function SignOutSubmit({ compact = false }: { compact?: boolean }) {
 
 function AccountActions({ compact = false }: { compact?: boolean }) {
   return <div className={frame.accountActions}>
-    <form action={signOutDashboardAction} className="flex flex-1"><SignOutSubmit compact={compact} /></form>
+    {/* Full reload after sign-out so no preserved page state survives for the next person. */}
+    <form action={async () => { await signOutDashboardAction(); window.location.assign("/login"); }} className="flex flex-1"><SignOutSubmit compact={compact} /></form>
   </div>;
 }
 
