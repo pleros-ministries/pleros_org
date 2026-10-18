@@ -15,6 +15,8 @@ type Props = {
   teachings: Teaching[];
   /** Opens on one series (the dashboard Library's topic chips). */
   initialSeries?: string;
+  /** Dashboard scale: compact title, no intro, one scrolling row of series, no column headings, no bold. */
+  compact?: boolean;
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -156,7 +158,7 @@ function TeachingRow({
 
 // ─── Main Table ───────────────────────────────────────────────────────────────
 
-export function LibraryTable({ teachings, initialSeries }: Props) {
+export function LibraryTable({ teachings, initialSeries, compact = false }: Props) {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeSeries, setActiveSeries] = useState(() => initialSeries && teachings.some(t => t.series === initialSeries) ? initialSeries : "all");
   const [sortMode, setSortMode] = useState<SortMode>("default");
@@ -232,18 +234,24 @@ export function LibraryTable({ teachings, initialSeries }: Props) {
 
       <div className="min-w-0 flex-1 pb-32 font-[var(--font-be-vietnam-pro)]">
         {/* ── Page header ── */}
-        <div className="border-b border-[#e8e8ee] bg-white px-5 pb-5 pt-8 md:px-9 md:pt-9">
-          <h1 className="site-hero-heading text-[2rem] text-[var(--color-brand-indigo)] sm:text-[2.4rem] md:text-[2.8rem] xl:text-[3.2rem]">
-            The Pleros Library
-          </h1>
-          <p className="mt-3 max-w-[34rem] text-[1rem] leading-[1.45] tracking-[-0.02em] text-[var(--color-text-muted)] md:text-[1.0625rem]">
-            Teachings on Faith, Purpose, Redemption, and New Creation — click any
-            teaching to play it, or download for offline listening.
-          </p>
+        <div className={compact ? "border-b border-[#e8e8ee] bg-white px-4 pb-4 pt-4 md:px-9" : "border-b border-[#e8e8ee] bg-white px-5 pb-5 pt-8 md:px-9 md:pt-9"}>
+          {compact ? (
+            <h1 className="m-0 font-[var(--font-dashboard-heading,var(--font-sen))] text-[21px] font-medium leading-[28px] text-[var(--color-text-strong)]">Teachings Library</h1>
+          ) : (
+            <>
+              <h1 className="site-hero-heading text-[2rem] text-[var(--color-brand-indigo)] sm:text-[2.4rem] md:text-[2.8rem] xl:text-[3.2rem]">
+                The Pleros Library
+              </h1>
+              <p className="mt-3 max-w-[34rem] text-[1rem] leading-[1.45] tracking-[-0.02em] text-[var(--color-text-muted)] md:text-[1.0625rem]">
+                Teachings on Faith, Purpose, Redemption, and New Creation — click any
+                teaching to play it, or download for offline listening.
+              </p>
+            </>
+          )}
 
           {/* Search + tabs */}
-          <div className="mt-5 flex flex-col gap-3">
-            <p className="text-[12px] font-[600] text-[var(--color-text-muted)]">
+          <div className={compact ? "mt-3 flex flex-col gap-3" : "mt-5 flex flex-col gap-3"}>
+            <p className={compact ? "text-[12.5px] font-medium text-[var(--color-text-muted)]" : "text-[12px] font-[600] text-[var(--color-text-muted)]"}>
               {isFiltered
                 ? `${filteredCount} of ${totalCount} teachings`
                 : `${totalCount} teachings`}
@@ -276,7 +284,7 @@ export function LibraryTable({ teachings, initialSeries }: Props) {
             </div>
 
             {/* Tabs */}
-            <div className="flex flex-wrap gap-1.5">
+            <div className={compact ? "-mx-4 flex gap-1.5 overflow-x-auto px-4 [scrollbar-width:none] md:mx-0 md:flex-wrap md:px-0" : "flex flex-wrap gap-1.5"}>
               {["all", ...allSeries].map((s) => {
                 const active = activeSeries === s;
                 return (
@@ -284,7 +292,7 @@ export function LibraryTable({ teachings, initialSeries }: Props) {
                     key={s}
                     type="button"
                     onClick={() => setActiveSeries(s)}
-                    className={`h-9 rounded-full border-[1.5px] px-3.5 text-[12px] font-[600] transition-all ${active
+                    className={`${compact ? "h-8 shrink-0 whitespace-nowrap rounded-full border px-3 text-[12.5px] font-medium" : "h-9 rounded-full border-[1.5px] px-3.5 text-[12px] font-[600]"} transition-all ${active
                         ? "border-[var(--color-brand-blue)] bg-[var(--color-brand-blue)] text-white"
                         : "border-[#e8e8ee] bg-white text-[var(--color-text-muted)] hover:border-[var(--color-brand-blue)] hover:bg-[var(--color-brand-sky-soft)] hover:text-[var(--color-brand-blue)]"
                       }`}
@@ -298,10 +306,10 @@ export function LibraryTable({ teachings, initialSeries }: Props) {
         </div>
 
         {/* ── Table ── */}
-        <div className="px-5 md:px-9">
+        <div className={compact ? "px-4 md:px-9" : "px-5 md:px-9"}>
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
-            <thead>
+            <thead className={compact ? "sr-only" : undefined}>
               <tr className="border-b-2 border-[#d4d4de]">
                 {[
                   { label: "#", cls: "w-8 px-1.5 text-center md:w-12 md:px-3" },
@@ -333,7 +341,7 @@ export function LibraryTable({ teachings, initialSeries }: Props) {
                     <tr className="border-b border-[#e8e8ee] border-t-2 border-t-[#d4d4de]">
                       <td
                         colSpan={5}
-                        className="bg-[#f9f9fb] px-3 py-2.5 font-[var(--font-sen)] text-[10px] font-[800] uppercase tracking-[2px] text-[#0d1b5e]"
+                        className={compact ? "bg-[#f9f9fb] px-3 py-2.5 text-[12.5px] font-medium text-[var(--color-text-strong)]" : "bg-[#f9f9fb] px-3 py-2.5 font-[var(--font-sen)] text-[10px] font-[800] uppercase tracking-[2px] text-[#0d1b5e]"}
                       >
                         {getSeriesEmoji(series)} {series}
                         <span className="ml-2 rounded-full bg-[#e8e8ee] px-1.5 py-[1px] text-[10px] font-[600] normal-case tracking-normal text-[#8888a0]">

@@ -23,7 +23,7 @@ export default async function DashboardTeachingsPage({ searchParams }: { searchP
   const teachings = await getLibraryTeachings();
   return <PlayerProvider>
     <div className="site-font-theme flex min-h-[calc(100dvh-var(--dashboard-topbar-offset,0px))] w-full bg-[#f9f9fb]" data-dashboard-public>
-      <LibraryTable teachings={teachings} initialSeries={series} />
+      <LibraryTable teachings={teachings} initialSeries={series} compact />
     </div>
   </PlayerProvider>;
 }
