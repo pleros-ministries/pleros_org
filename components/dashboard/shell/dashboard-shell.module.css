@@ -32,21 +32,22 @@
 .skipLink { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 .skipLink:focus { position: fixed; top: 8px; left: 8px; z-index: 60; width: auto; height: auto; clip-path: none; padding: 12px; background: white; }
 @media (min-width: 64rem) {
-  .liveSidebar { display: flex; flex-direction: column; position: fixed; inset: 0 auto 0 0; width: 256px; z-index: 30; padding: 0 20px 20px; border-right: 1px solid var(--color-line); background: white; }
+  .liveSidebar { display: flex; flex-direction: column; position: fixed; inset: 0 auto 0 0; width: 256px; z-index: 30; padding: 0 20px 20px; border-right: 1px solid var(--color-line); background: white; transition: width 240ms var(--ease-drawer), padding 240ms var(--ease-drawer); }
   .sidebarScroll { min-height: 0; flex: 1; overflow-y: auto; overflow-x: hidden; padding-bottom: 24px; }
-  .liveFrame { margin-left: 256px; }
-  /* Folding and unfolding (FLIP, driven from DashboardShell): the page takes its
-     final margin at once and slides from where it was, while the full-width
-     sidebar is trimmed from the right in step. Only transform and clip-path
-     move; the page lays out once. Labels fade out first and back in after. */
-  .sidebarScroll, .accountActions, .brandLink { transition: opacity 160ms var(--ease-out); }
-  .liveSidebar[data-phase="folding"], .liveSidebar[data-phase="unfolding"] { overflow: hidden; border-right-color: transparent; }
-  .liveSidebar[data-phase="folding"]::after, .liveSidebar[data-phase="unfolding"]::after { content: ""; position: absolute; top: 0; right: 0; bottom: 0; width: 1px; background: var(--color-line); }
-  .root[data-sidebar-phase="folding"], .root[data-sidebar-phase="unfolding"] { overflow-x: clip; }
+  .liveFrame { margin-left: 256px; transition: margin-left 240ms var(--ease-drawer); }
+  /* Folding and unfolding: the full menu keeps its 216px layout and is clipped
+     by the moving edge instead of reflowing. Labels fade out quickly as the
+     width closes, and fade back in only once it has opened. */
+  .sidebarScroll, .accountActions, .brandLink { transition: opacity 160ms var(--ease-out) 120ms; }
+  .liveSidebar[data-phase="folding"], .liveSidebar[data-phase="unfolding"] { overflow: hidden; }
+  .liveSidebar[data-phase="folding"] :is(.sidebarScroll, .accountActions),
+  .liveSidebar[data-phase="unfolding"] :is(.sidebarScroll, .accountActions) { min-width: 216px; }
   .liveSidebar[data-phase="folding"] :is(.sidebarScroll, .accountActions, .brandLink),
   .liveSidebar[data-phase="unfolding"] :is(.sidebarScroll, .accountActions, .brandLink) { opacity: 0; pointer-events: none; }
-  .liveSidebar[data-phase="folding"] :is(.sidebarScroll, .accountActions, .brandLink) { transition-duration: 100ms; }
+  .liveSidebar[data-phase="folding"] :is(.sidebarScroll, .accountActions, .brandLink) { transition: opacity 100ms var(--ease-out); }
   .liveSidebar[data-phase="unfolding"] :is(.sidebarScroll, .accountActions, .brandLink) { transition: none; }
+  /* The rail arrives already settled, so it fades in without the label delay. */
+  .liveSidebar[data-phase="rail"] :is(.sidebarScroll, .accountActions) { transition-delay: 0ms; }
   .brandLink { flex: none; }
   .mobileMenu { visibility: hidden; }
   .liveDrawer { display: none; }
@@ -68,6 +69,7 @@
 .drawerHeading { height: 44px; margin: -10px -20px 0; padding: 0 12px 0 20px; background: var(--dashboard-topbar-bg); }
 .drawerHeading button { color: white; }
 .drawerTitle { display: flex; align-items: center; }
+@media (prefers-reduced-motion: reduce) { .liveSidebar, .liveFrame { transition: none !important; } }
 
 /* Motion for the dashboard shell. The global reduced-motion rule in
    app/globals.css also switches the animations off. */
@@ -112,34 +114,37 @@
 }
 
 /* The phone and tablet drawer slides in from the left edge and leaves the same
-   way. Transitions, not keyframes, so reopening it mid-exit turns it around
-   from where it is. Drawer holds the dialog open (data-closing) for the exit. */
-.liveDrawer {
-  transform: translateX(-100%);
-  transition: transform 200ms var(--ease-out);
+   way; Drawer holds the dialog open for the exit before closing it. */
+.liveDrawer[open] {
+  animation: live-drawer-in 300ms var(--ease-drawer) both;
 }
 
-.liveDrawer[open]:not([data-closing]) {
-  transform: none;
-  transition: transform 300ms var(--ease-drawer);
+.liveDrawer[open]::backdrop {
+  animation: fade 300ms var(--ease-out) both;
 }
 
-.liveDrawer::backdrop {
-  opacity: 0;
-  transition: opacity 200ms var(--ease-out);
+.liveDrawer[data-closing] {
+  animation: live-drawer-out 200ms var(--ease-out) both;
 }
 
-.liveDrawer[open]:not([data-closing])::backdrop {
-  opacity: 1;
-  transition: opacity 300ms var(--ease-out);
+.liveDrawer[data-closing]::backdrop {
+  animation: fade-out 200ms var(--ease-out) both;
 }
 
-@starting-style {
-  .liveDrawer[open]:not([data-closing]) {
+@keyframes live-drawer-in {
+  from {
     transform: translateX(-100%);
   }
+}
 
-  .liveDrawer[open]:not([data-closing])::backdrop {
+@keyframes live-drawer-out {
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes fade-out {
+  to {
     opacity: 0;
   }
 }
@@ -148,6 +153,13 @@
   .navPanel,
   .navChevron {
     transition: none;
+  }
+
+  .liveDrawer[open],
+  .liveDrawer[open]::backdrop,
+  .liveDrawer[data-closing],
+  .liveDrawer[data-closing]::backdrop {
+    animation: none;
   }
 
   .drawer[open],
