@@ -72,7 +72,7 @@ export function ChurchHomeView({ data, canOversee, header }: { data: ChurchHome;
   </Page>;
 
   if (data.kind === "unit") return <Page>
-    <Heading title={`${data.unit.name} team`} sub={`Unit leader${data.unit.branchName ? ` · ${data.unit.branchName}` : ""}${data.reportsTo ? ` · Reports to ${data.reportsTo}` : ""}`} tag="View only" />
+    <Heading title={`${data.unit.name} team`} sub={`Unit leader${data.unit.branchName ? ` · ${data.unit.branchName}` : ""}${data.reportsTo ? ` · Reports to ${data.reportsTo}` : ""}`} />
     <div className={styles.sectionTitle}><h2>Direct workers</h2><span className={styles.rowMeta}>{plural(data.workers.length, "worker")}</span></div>
     {data.workers.length ? <div className={styles.panel}><ul className={styles.list}>{data.workers.map((worker, index) => <li key={worker.userId}><Link className={styles.row} href={`/dashboard/church/${encodeURIComponent(worker.userId)}`}>
       <Mark text={short(worker.name)} index={index} />
