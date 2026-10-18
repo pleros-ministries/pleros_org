@@ -5,6 +5,9 @@ import { getAppSession } from "@/lib/app-session";
 import { getSogpEnrollmentByUserId } from "@/lib/db/queries/sogp";
 import { getSogpReferralsDashboard } from "@/lib/db/queries/sogp-referrals";
 
+// Cache Components: reads the session and per-learner data before rendering.
+export const instant = false;
+
 export default async function SogpReferralsPage() {
   const session = await getAppSession();
   if (!session) redirect("/login?returnTo=/dashboard/sogp/referrals");
