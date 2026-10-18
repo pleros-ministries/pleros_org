@@ -19,6 +19,9 @@
 .routeMain { min-width: 0; touch-action: pan-y pinch-zoom; }
 .routeViewport { overflow: clip; }
 .routePage { min-height: calc(100dvh - var(--dashboard-topbar-offset)); }
+/* You pages are a column so the bottom bar rests at the bottom of short pages (18 October). */
+.routePage[data-area="you"] { display: flex; flex-direction: column; }
+.routePage[data-area="you"] > nav[aria-label="You"] { margin-top: auto; }
 .routeViewport[data-route-origin="community"] .routePage[data-area="you"] { left: -100%; }
 .routeViewport[data-route-origin="community"] .routePage[data-area="community"] { left: 0; }
 .liveDrawer { padding-bottom: max(24px, env(safe-area-inset-bottom)); }
