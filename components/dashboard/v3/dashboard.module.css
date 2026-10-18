@@ -12,7 +12,7 @@
   --color-text-muted: #63676d;
   --color-line: #e7e9ec;
   --color-surface-muted: #f6f7f8;
-  --dashboard-gutter: 20px;
+  --dashboard-gutter: 16px;
   --dashboard-card-radius: 16px;
   /* Data and list panels: crisper than illustrated cards (user decision 17 October). */
   --dashboard-panel-radius: 10px;
@@ -216,10 +216,10 @@
 .dialogHeading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .dialogHeading h2 { margin: 0; }
 .profileLink { display: flex !important; align-items: center; gap: 12px; min-height: 72px; margin-top: 14px; text-decoration: none; }
-.profileAvatar { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: var(--status-blue-bg); color: var(--status-blue-text); font-size: 12px; font-weight: 500; flex-shrink: 0; align-self: flex-start; margin-top: 14px; }
+.profileAvatar { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: var(--status-blue-bg); color: var(--status-blue-text); font-size: 13px; font-weight: 500; flex-shrink: 0; }
 .profileLink > svg { margin-right: 4px; }
 .profileName { font-size: 15px; line-height: 22px; font-weight: 500; color: var(--color-text); overflow-wrap: anywhere; }
-.profileAction { font-size: 14px; line-height: 22px; color: var(--color-brand-blue); }
+.profileAction { font-size: 13px; line-height: 18px; color: var(--color-brand-blue); }
 .drawerRoots { display: grid; gap: 12px; padding-block: 22px 24px; margin-top: 12px; border-block: 1px solid var(--color-line); }
 .drawerRoots a { display: flex !important; align-items: center; gap: 12px; min-height: 38px; padding: 0 12px !important; color: var(--color-text); border-radius: 10px; text-decoration: none; }
 .drawerRoots a[aria-current] { background: var(--status-blue-bg); color: var(--color-brand-blue); font-weight: 500; }

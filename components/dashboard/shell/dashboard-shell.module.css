@@ -22,6 +22,8 @@
 /* You pages are a column so the bottom bar rests at the bottom of short pages (18 October). */
 .routePage[data-area="you"] { display: flex; flex-direction: column; }
 .routePage[data-area="you"] > nav[aria-label="You"] { margin-top: auto; }
+/* A centred child of a flex column shrinks to its content; keep pages full width so wide layouts (Home on desktop) get their columns. */
+.routePage[data-area="you"] > :not(nav[aria-label="You"]) { width: 100%; }
 .routeViewport[data-route-origin="community"] .routePage[data-area="you"] { left: -100%; }
 .routeViewport[data-route-origin="community"] .routePage[data-area="community"] { left: 0; }
 .liveDrawer { padding-bottom: max(24px, env(safe-area-inset-bottom)); }
@@ -57,7 +59,7 @@
 }
 
 /* The Pleros logomark on a brand-blue strip, level with the 44px top bar. */
-.brand { display: flex; align-items: center; justify-content: space-between; gap: 8px; height: 44px; margin: 0 -20px; padding: 0 10px 0 20px; background: var(--dashboard-topbar-bg); color: white; flex: none; }
+.brand { display: flex; align-items: center; justify-content: space-between; gap: 8px; height: 44px; margin: 0 -21px 0 -20px; padding: 0 11px 0 20px; background: var(--dashboard-topbar-bg); color: white; flex: none; }
 .brand[data-collapsed] { margin-inline: -12px; padding: 0; flex-direction: column; justify-content: center; height: auto; min-height: 44px; gap: 0; }
 .brand[data-collapsed] .brandLink { display: none; }
 .brandLink { display: inline-flex; align-items: center; }
