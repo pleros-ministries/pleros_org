@@ -5,6 +5,7 @@ import { useEffect, useState, useTransition } from "react";
 import lesson from "./sogp-lesson.module.css";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import {
+  ArrowDown,
   ArrowLeft,
   ArrowRight,
   Check,
@@ -232,15 +233,18 @@ export function SogpDayView({ dayNumber }: { dayNumber: number }) {
         <div className={lesson.stepsHead}><h2 id="lesson-steps">Your steps</h2><span>{doneSteps} of 4 done</span></div>
         <ol className={`${lesson.panel} ${lesson.list}`}>
           <li><ToggleStep title="Listen to the teaching" done={listened} pending={listenedMutation.isPending} failed={listenedMutation.isError} doneMeta="Listened · tap to unmark" todoMeta="Tap to mark as listened" onToggle={() => listenedMutation.mutate(!listened)} /></li>
-          <li><ToggleStep title="Read the notes" done={data.track.progress.notesRead} pending={notesMutation.isPending} failed={notesMutation.isError} doneMeta="Read · tap to unmark" todoMeta="Tap to mark as read" onToggle={() => notesMutation.mutate(!data.track.progress.notesRead)} /></li>
+          <li>{data.track.lesson.notesContent
+            ? <div className={lesson.row}><button type="button" role="checkbox" aria-checked={data.track.progress.notesRead} aria-label={data.track.progress.notesRead ? "Unmark notes as read" : "Mark notes as read"} className={lesson.markButton} disabled={notesMutation.isPending} onClick={() => notesMutation.mutate(!data.track.progress.notesRead)}><StepMark done={data.track.progress.notesRead} /></button><a className={lesson.rowLink} href="#lesson-notes"><span className={lesson.rowCopy}><span className={lesson.rowTitle}>Read the notes</span><span className={lesson.rowMeta}>{notesMutation.isError ? "Could not save. Try again." : data.track.progress.notesRead ? "Read · open the notes below" : "Open the notes below"}</span></span><ArrowDown className={`size-4 ${lesson.rowEnd}`} aria-hidden/></a></div>
+            : <ToggleStep title="Read the notes" done={data.track.progress.notesRead} pending={notesMutation.isPending} failed={notesMutation.isError} doneMeta="Read · tap to unmark" todoMeta="No notes for this track yet · tap to mark" onToggle={() => notesMutation.mutate(!data.track.progress.notesRead)} />}</li>
           <li><Link className={lesson.row} href={`/dashboard/sogp/course/day/${dayNumber}/quiz`}><StepMark done={data.track.progress.quizPassed} /><span className={lesson.rowCopy}><span className={lesson.rowTitle}>Pass the quiz</span><span className={lesson.rowMeta}>{data.bestQuizScore===null?"Not attempted":`Best score ${data.bestQuizScore}%`}</span></span><ArrowRight className={`size-4 ${lesson.rowEnd}`} aria-hidden/></Link></li>
           <li><Link className={lesson.row} href={`/dashboard/sogp/course/day/${dayNumber}/response`}><StepMark done={data.track.progress.writtenApproved} /><span className={lesson.rowCopy}><span className={lesson.rowTitle}>Write your response</span><span className={lesson.rowMeta}>{data.submission ? sentence(data.submission.status) : "Not started"}</span></span><ArrowRight className={`size-4 ${lesson.rowEnd}`} aria-hidden/></Link></li>
         </ol>
       </section>
       <LessonQuestion lessonId={data.track.lesson.id} lessonTitle={data.track.lesson.title} />
-      {data.track.lesson.notesContent ? <article className={`${lesson.panel} ${lesson.notes}`} aria-label="Lesson notes">
+      {data.track.lesson.notesContent ? <article id="lesson-notes" className={`${lesson.panel} ${lesson.notes}`} aria-labelledby="lesson-notes-title">
+        <h2 id="lesson-notes-title" className={lesson.notesTitle}>Notes</h2>
         <div className="prose prose-sm max-w-none leading-[1.7] text-[var(--color-text-strong)]" dangerouslySetInnerHTML={{__html:data.track.lesson.notesContent}}/>
-        <button type="button" className={lesson.secondary} disabled={data.track.progress.notesRead||notesMutation.isPending} onClick={()=>notesMutation.mutate(true)}>{data.track.progress.notesRead?"Notes marked as read":notesMutation.isPending?"Saving…":"Mark notes read"}<Check className="size-4" aria-hidden/></button>
+        {data.track.progress.notesRead ? null : <button type="button" className={lesson.secondary} disabled={notesMutation.isPending} onClick={()=>notesMutation.mutate(true)}>Mark notes read<Check className="size-4" aria-hidden/></button>}
       </article> : null}
       <details className={lesson.curriculum}><summary>All {tracks.length} tracks<ChevronDown className="size-4" aria-hidden/></summary><Curriculum data={data} /></details>
       <footer className={lesson.footer}>
