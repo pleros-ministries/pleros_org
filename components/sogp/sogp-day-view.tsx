@@ -5,8 +5,8 @@ import { useEffect, useState, useTransition } from "react";
 import { useSearchParams } from "next/navigation";
 import lesson from "./sogp-lesson.module.css";
 import { BrowserSuspense } from "./browser-suspense";
-import { SogpQuiz } from "./sogp-quiz";
-import { SogpWrittenResponse } from "./sogp-written-response";
+import { SogpQuiz, sogpQuizQuery } from "./sogp-quiz";
+import { SogpWrittenResponse, sogpResponseQuery } from "./sogp-written-response";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import {
   ArrowLeft,
@@ -172,7 +172,16 @@ export function SogpDayView({ dayNumber }: { dayNumber: number }) {
   const { data } = useSuspenseQuery({
     queryKey: ["sogp", "day", dayNumber],
     queryFn: () => fetchDay(dayNumber),
+    staleTime: 60_000,
   });
+  // Warm the other tabs and the next track while the learner reads, so tab
+  // switches and Continue do not wait on the network (user, 18 October).
+  const nextDayNumber = data.nextDay?.accessible ? data.nextDay.dayNumber : null;
+  useEffect(() => {
+    void queryClient.prefetchQuery(sogpQuizQuery(dayNumber));
+    void queryClient.prefetchQuery(sogpResponseQuery(dayNumber));
+    if (nextDayNumber) void queryClient.prefetchQuery({ queryKey: ["sogp", "day", nextDayNumber], queryFn: () => fetchDay(nextDayNumber), staleTime: 60_000 });
+  }, [queryClient, dayNumber, nextDayNumber]);
   const notesMutation = useMutation({
     mutationFn: async (done: boolean = true) => {
       const response = await fetch(`/api/sogp/course/day/${dayNumber}/progress`, {
@@ -229,6 +238,10 @@ export function SogpDayView({ dayNumber }: { dayNumber: number }) {
     { key: "response", label: "Response", short: "response", done: data.track.progress.writtenApproved },
   ];
   const doneSteps = steps.filter(step => step.done).length;
+  // A one-line holding message ("Transcripts would be uploaded soon.") is a
+  // status, not notes, so it reads muted (user, 18 October).
+  const notesText = (data.track.lesson.notesContent ?? "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  const notesArePlaceholder = notesText.length < 90;
 
   const tracks = data.dashboard.tracks.filter((item) => item.isRequired);
   const position = tracks.findIndex((item) => item.dayNumber === data.track.dayNumber) + 1;
@@ -253,14 +266,14 @@ export function SogpDayView({ dayNumber }: { dayNumber: number }) {
       </div>
       <div className={lesson.tabPanel} role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`}>
         {tab === "notes" ? <>
-          {data.track.lesson.notesContent ? <div className="prose prose-sm max-w-none leading-[1.7] text-[var(--color-text-strong)]" dangerouslySetInnerHTML={{__html:data.track.lesson.notesContent}}/> : <p className={lesson.empty}>Notes for this track are not available yet.</p>}
+          {notesArePlaceholder ? <p className={lesson.notesPlaceholder}>{notesText || "Notes for this track are not available yet."}</p> : <div className="prose prose-sm max-w-none leading-[1.7] text-[var(--color-text-strong)]" dangerouslySetInnerHTML={{__html:data.track.lesson.notesContent!}}/>}
           <button type="button" className={lesson.secondary} aria-pressed={data.track.progress.notesRead} disabled={notesMutation.isPending} onClick={()=>notesMutation.mutate(!data.track.progress.notesRead)}>{data.track.progress.notesRead ? <><Check className="size-4" aria-hidden/> Read · tap to unmark</> : <>Mark notes read<Check className="size-4" aria-hidden/></>}</button>
         </> : tab === "quiz" ? <BrowserSuspense fallback={<p className={lesson.meta}>Loading the quiz…</p>}><SogpQuiz dayNumber={dayNumber} embedded /></BrowserSuspense>
         : <BrowserSuspense fallback={<p className={lesson.meta}>Loading your response…</p>}><SogpWrittenResponse dayNumber={dayNumber} embedded /></BrowserSuspense>}
       </div>
       <footer className={lesson.footer}>
+        {data.previousDay?<Link className={lesson.footerBack} href={`/dashboard/sogp/course/day/${data.previousDay.dayNumber}`} aria-label="Previous track"><ArrowLeft className="size-4" aria-hidden/> Previous</Link>:null}
         {data.nextDay?<Link className={lesson.primary} href={`/dashboard/sogp/course/day/${data.nextDay.dayNumber}`}>Continue to track {(position || data.track.dayNumber) + 1}<ArrowRight className="size-4" aria-hidden/></Link>:<Link className={lesson.primary} href="/dashboard/sogp">Back to Learning<ArrowRight className="size-4" aria-hidden/></Link>}
-        {data.previousDay?<Link className={lesson.textLink} href={`/dashboard/sogp/course/day/${data.previousDay.dayNumber}`}><ArrowLeft className="size-4" aria-hidden/> Previous track</Link>:null}
       </footer>
       {/* Secondary tools sit apart from the lesson's own steps (user, 18 October). */}
       <section className={lesson.more} aria-label="More for this lesson">

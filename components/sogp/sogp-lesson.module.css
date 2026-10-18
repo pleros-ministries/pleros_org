@@ -70,7 +70,8 @@ a.row:hover { background: #f8f9fb; }
 .curriculum[open] > summary svg { transform: rotate(180deg); }
 
 /* Actions */
-.footer { display: grid; gap: 4px; margin-top: 4px; }
+.footer { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 8px; margin-top: 4px; }
+.footer > :only-child { grid-column: 1 / -1; }
 .primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-width: 0; height: 40px; padding: 0 16px; border: 0; border-radius: 12px; background: var(--color-community-blue, #2056d6); color: white; font: inherit; font-size: 14px; font-weight: 500; text-decoration: none; cursor: pointer; }
 .primary:hover { background: var(--color-community-blue-dark, #1948b8); }
 .primary:disabled { opacity: .55; cursor: default; }
@@ -150,8 +151,8 @@ a.panel.row { display: flex; border: 1px solid var(--dashboard-panel-edge, #e2e5
 .lessonTabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-bottom: 1px solid var(--color-line, #e7e9ec); }
 .lessonTabs button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 0; height: 42px; margin-bottom: -1px; padding: 0 4px; border: 0; border-bottom: 2px solid transparent; background: none; color: var(--color-text-muted); font: inherit; font-size: 13.5px; font-weight: 500; cursor: pointer; }
 .lessonTabs button[aria-selected="true"] { border-bottom-color: var(--color-community-blue, #2056d6); color: var(--color-community-blue, #2056d6); }
-.stepMark[data-small] { width: 16px; height: 16px; border-width: 1.5px; }
-.stepMark[data-small] svg { width: 10px; height: 10px; }
+.stepMark[data-small] { width: 14px; height: 14px; border-width: 1.5px; }
+.stepMark[data-small] svg { width: 9px; height: 9px; }
 .tabPanel { display: grid; gap: 14px; min-width: 0; }
 
 /* More: quiet rows below the lesson's main flow, no cards. */
@@ -164,3 +165,5 @@ a.panel.row { display: flex; border: 1px solid var(--dashboard-panel-edge, #e2e5
 .doneAction { display: inline-flex; flex: none; align-items: center; gap: 4px; height: 28px; padding: 0 10px; border: 0; border-radius: 8px; background: white; color: var(--color-community-blue, #2056d6); font: inherit; font-size: 12.5px; font-weight: 500; cursor: pointer; }
 .pending { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 10px; background: #f7e4cd; color: #92400e; font-size: 13.5px; font-weight: 500; }
 .textareaShort { min-height: 180px; }
+.footerBack { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 40px; padding: 0 14px; border: 1px solid var(--dashboard-panel-edge, #e2e5ea); border-radius: 12px; background: white; color: var(--color-community-blue, #2056d6); font-size: 13.5px; font-weight: 500; text-decoration: none; }
+.notesPlaceholder { margin: 0; font-size: 13.5px; line-height: 20px; color: var(--color-text-muted); }

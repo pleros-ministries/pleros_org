@@ -25,10 +25,15 @@ async function getQuiz(dayNumber: number): Promise<QuizPayload> {
   return response.json() as Promise<QuizPayload>;
 }
 
+/** Shared with the lesson page, which prefetches it so the Quiz tab opens at once. */
+export function sogpQuizQuery(dayNumber: number) {
+  return { queryKey: ["sogp", "quiz", dayNumber] as const, queryFn: () => getQuiz(dayNumber), staleTime: 5 * 60_000 };
+}
+
 /** `embedded` drops the page title so the quiz can sit in the lesson's Quiz tab. */
 export function SogpQuiz({ dayNumber, embedded = false }: { dayNumber: number; embedded?: boolean }) {
   const queryClient = useQueryClient();
-  const { data } = useSuspenseQuery({ queryKey: ["sogp", "quiz", dayNumber], queryFn: () => getQuiz(dayNumber) });
+  const { data } = useSuspenseQuery(sogpQuizQuery(dayNumber));
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [shareOpen, setShareOpen] = useState(false);
   const [retaking, setRetaking] = useState(false);

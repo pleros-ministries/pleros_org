@@ -19,10 +19,15 @@ async function getResponse(dayNumber: number): Promise<ResponsePayload> {
   return response.json() as Promise<ResponsePayload>;
 }
 
+/** Shared with the lesson page, which prefetches it so the Response tab opens at once. */
+export function sogpResponseQuery(dayNumber: number) {
+  return { queryKey: ["sogp", "response", dayNumber] as const, queryFn: () => getResponse(dayNumber), staleTime: 5 * 60_000 };
+}
+
 /** `embedded` drops the page title so the response can sit in the lesson's Response tab. */
 export function SogpWrittenResponse({ dayNumber, embedded = false }: { dayNumber: number; embedded?: boolean }) {
   const queryClient = useQueryClient();
-  const { data } = useSuspenseQuery({ queryKey: ["sogp", "response", dayNumber], queryFn: () => getResponse(dayNumber) });
+  const { data } = useSuspenseQuery(sogpResponseQuery(dayNumber));
   const [content, setContent] = useState(data.submission?.content ?? "");
   const mutation = useMutation({
     mutationFn: async (action: "save" | "submit") => {
