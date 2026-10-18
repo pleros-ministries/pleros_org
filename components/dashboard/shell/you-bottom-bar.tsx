@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+
+import { useIdlePrefetch } from "@/lib/dashboard/use-idle-prefetch";
 import {
   BookOpenIcon,
   CircleUserRoundIcon,
@@ -38,6 +40,8 @@ function isActive(pathname: string, item: YouItem) {
  */
 export function YouBottomBar({ learningHref }: { learningHref: string }) {
   const pathname = usePathname() ?? "/dashboard";
+  // Every You tab is loaded in the background so switching between them is instant.
+  useIdlePrefetch(["/dashboard", learningHref, "/dashboard/library", "/dashboard/partner", "/dashboard/profile"]);
   if (OWN_BOTTOM.test(pathname)) return null;
   const items: YouItem[] = [
     { key: "home", label: "Home", href: "/dashboard", icon: HouseIcon },

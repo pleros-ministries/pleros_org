@@ -63,7 +63,10 @@ export function OversightOverview({ data }: { data: OversightData }) {
         <div className="flex items-end justify-between gap-3">
           <span className="grid gap-0.5">
             <span className={styles.rowMeta}>Reports today</span>
-            <span className="font-[family-name:var(--font-dashboard-heading)] text-[22px] leading-7 font-medium">{data.totals.expected ? `${data.totals.reportedToday} of ${data.totals.expected}` : "No workers yet"}</span>
+            {/* The heading face is for the number only; an empty state reads as body text. */}
+            {data.totals.expected
+              ? <span className="font-[family-name:var(--font-dashboard-heading)] text-[19px] leading-6 font-medium">{data.totals.reportedToday} of {data.totals.expected}</span>
+              : <span className="text-[13.5px] leading-5 text-(--color-text-strong)">No workers placed yet</span>}
           </span>
           {data.totals.expected ? <span className={styles.pill} data-tone={pending.length ? "risk" : "ok"}>{pending.length ? `${pending.length} pending` : "All in"}</span> : null}
         </div>

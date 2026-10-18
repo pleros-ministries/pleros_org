@@ -11,6 +11,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+import { useIdlePrefetch } from "@/lib/dashboard/use-idle-prefetch";
+
 import { useUnreadQuestions } from "./ask/use-unread-questions";
 import { useUnreadMessages } from "./messages/use-unread-messages";
 
@@ -80,11 +82,13 @@ export function CommunityBottomBar({
   const unreadMessages = useUnreadMessages();
   const unreadQuestions = useUnreadQuestions();
 
-  if (placement === "bottom" && IN_CONVERSATION.test(pathname)) return null;
-
   const items: BarItem[] = oversightHref
     ? [...ITEMS, { key: "oversight", label: "Oversight", href: oversightHref, icon: NetworkIcon }]
     : ITEMS;
+  // Every Community destination is loaded in the background (only once, from the bottom bar).
+  useIdlePrefetch(placement === "bottom" ? items.map(item => item.href) : []);
+
+  if (placement === "bottom" && IN_CONVERSATION.test(pathname)) return null;
 
   return (
     <nav

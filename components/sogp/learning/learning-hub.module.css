@@ -69,3 +69,24 @@ a.row:hover { background: #f8f9fb; }
 .stepTag { flex: none; height: 20px; padding: 0 8px; border-radius: 99px; background: #eceef2; color: var(--color-text-muted); font-size: 11px; font-weight: 500; line-height: 20px; }
 .stepTag[data-status="now"] { background: #e4ebfd; color: #2331ae; }
 .stepTag[data-status="open"] { background: #fff1c2; color: #8a5a00; }
+
+/* Leaderboard preview (Pastor, 18 October): compact, top five, medal tints for
+   the top three, and your own rank pinned below when you're outside them. */
+.board { overflow: hidden; border: 1px solid var(--dashboard-panel-edge, #e2e5ea); border-radius: 12px; background: white; }
+.boardHead { display: flex; align-items: center; gap: 10px; padding: 12px 14px 10px; }
+.boardHead h2 { margin: 0; font-family: var(--font-dashboard-heading); font-size: 15px !important; line-height: 20px; font-weight: 500; }
+.boardIcon { display: grid; flex: none; place-items: center; width: 32px; height: 32px; border-radius: 9px; background: #fff1c2; color: #8a5a00; }
+.boardAll { flex: none; font-size: 12.5px; font-weight: 500; color: var(--color-community-blue, #2056d6); text-decoration: none; }
+.boardList { margin: 0; padding: 0 6px 6px; list-style: none; }
+.boardRow { display: flex; align-items: center; gap: 10px; min-height: 36px; padding: 0 8px; border-radius: 8px; }
+.boardRow[data-me] { background: #eef3fe; }
+.boardRow[data-me] .boardName { color: var(--color-community-blue, #2056d6); font-weight: 500; }
+.boardGap { position: relative; margin-top: 10px; }
+.boardGap::before { content: "···"; position: absolute; top: -12px; left: 0; right: 0; text-align: center; font-size: 10px; line-height: 10px; letter-spacing: 2px; color: #a6abb2; }
+.boardRank { display: grid; flex: none; place-items: center; width: 24px; height: 24px; border-radius: 7px; background: #f1f2f5; color: var(--color-text-muted); font-size: 11.5px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.boardRank[data-rank="1"] { background: #fde68a; color: #7a5200; }
+.boardRank[data-rank="2"] { background: #e5e7eb; color: #4b5260; }
+.boardRank[data-rank="3"] { background: #f6d5b8; color: #7a3a10; }
+.boardName { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; line-height: 18px; color: var(--color-text-strong); }
+.boardPts { flex: none; font-family: var(--font-dashboard-heading); font-size: 13px; font-weight: 500; font-variant-numeric: tabular-nums; color: var(--color-text-strong); }
+.boardPts small { font-family: var(--font-dashboard); font-size: 11px; font-weight: 400; color: var(--color-text-muted); }
