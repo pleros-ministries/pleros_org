@@ -17,14 +17,14 @@ class MeetingBoundary extends Component<{ children: ReactNode; onRetry: () => vo
 }
 type Report = { activityId: number; attended: boolean; participation: "leader" | "worker" | "disciple" };
 type MeetingChoice = SharedMeetingView & { ownReport: Report | null };
-function MeetingList({ unitId, day, onChoose, initialData }: { unitId: number; day: string; onChoose: (meeting: MeetingChoice) => void; initialData?: MeetingChoice[] }) {
+function MeetingList({ unitId, day, onChoose, onCreate, initialData }: { unitId: number; day: string; onChoose: (meeting: MeetingChoice) => void; onCreate: () => void; initialData?: MeetingChoice[] }) {
   const { data, error, refetch } = useSuspenseQuery({ queryKey: ["shared-church-meetings", unitId, day], initialData, refetchInterval: 15000, retry: (count, error) => error.message !== "Access denied" && count < 2, queryFn: async (): Promise<MeetingChoice[]> => {
     const response = await fetch(`/api/dashboard/shared-meetings?unit=${unitId}&day=${encodeURIComponent(day)}`, { cache: "no-store" });
     if (!response.ok) throw new Error(response.status === 403 ? "Access denied" : "Meetings could not be loaded.");
     return response.json();
   } });
   if (error) throw error;
-  return <MeetingChooser meetings={data} onChoose={onChoose} onRefresh={() => { void refetch(); }} />;
+  return <MeetingChooser meetings={data} onChoose={onChoose} onCreate={onCreate} onRefresh={() => { void refetch(); }} />;
 }
 export function LiveMeetingFlow({ dateKey, today, units, contacts, initial, readOnly = false, initialMeetings, embedded = false, onSaved }: {
   /** Inside the one-page report: no date line or big title; saving refreshes the page in place. */
@@ -37,19 +37,18 @@ export function LiveMeetingFlow({ dateKey, today, units, contacts, initial, read
   const [unitId, setUnitId] = useState(initial?.meeting.unitId ?? units[0]?.id ?? null), [day, setDay] = useState(dateKey), [mode, setMode] = useState<"select" | "create" | "attendance">(initial ? "attendance" : "select"), [attempt, setAttempt] = useState(0);
   const [selected, setSelected] = useState<(SharedMeetingView & { ownReport: Report | null }) | null>(initial ? { ...initial.meeting, ownReport: initial.report } : null);
   const [chosenContacts, setChosenContacts] = useState(initial?.contacts ?? []);
-  if (!units.length && !initial) return <section className={styles.form}><h1>Meeting reports</h1><p role="status">No church unit is assigned to you. Shared meetings require an explicit church assignment; community or SOGP membership does not grant access.</p></section>;
+  if (!units.length && !initial) return <section className={styles.form}><h1>Meeting reports</h1><p role="status">Meetings appear once you’re placed in a church unit. Ask your branch pastor to add you.</p></section>;
   return <div>
     {mode === "select" && unitId !== null ? <section className={styles.form}>
-      {embedded ? <p className={styles.muted}>Choose a meeting the leader created, or create one if you led it.</p> : <>
+      {embedded ? null : <>
       <ReportDateLine dateKey={day} today={today} days={reportableDateKeys(today)} onChange={value => { setDay(value); setSelected(null); }} />
       <div className={styles.titleBlock}><h1>Choose a meeting</h1><p className={styles.muted}>For workers and disciples. Choose a meeting created by the person who led it.</p></div>
       </>}
       {units.length > 1 ? <label className={styles.field}>Church unit<select value={unitId ?? ""} onChange={event => { setUnitId(Number(event.target.value)); setSelected(null); }}>{units.map(unit => <option key={unit.id} value={unit.id}>{unit.name}</option>)}</select></label> : null}
-      <QueryErrorResetBoundary>{({ reset }) => <MeetingBoundary key={attempt} onRetry={() => { reset(); setAttempt(value => value + 1); }}><Suspense fallback={<p role="status">Loading meetings…</p>}><MeetingList unitId={unitId} day={day} initialData={unitId === units[0]?.id && day === dateKey ? initialMeetings : undefined} onChoose={row => {
+      <QueryErrorResetBoundary>{({ reset }) => <MeetingBoundary key={attempt} onRetry={() => { reset(); setAttempt(value => value + 1); }}><Suspense fallback={<p role="status">Loading meetings…</p>}><MeetingList unitId={unitId} day={day} initialData={unitId === units[0]?.id && day === dateKey ? initialMeetings : undefined} onCreate={() => { requestKey.current = null; setMode("create"); }} onChoose={row => {
         if (row.ownReport) { router.push(`/dashboard/community/report/${row.ownReport.activityId}`); return; }
         setSelected(row); setChosenContacts([]); setMode("attendance");
       }} /></Suspense></MeetingBoundary>}</QueryErrorResetBoundary>
-      <div className={styles.footer}><button type="button" className={styles.secondaryWide} onClick={() => { requestKey.current = null; setMode("create"); }}>I led a meeting · Create it</button></div>
     </section> : <MeetingReportForm key={`${mode}:${selected?.id ?? "new"}`} creating={mode === "create"} dateKey={day} meeting={selected ?? undefined} contacts={contacts} selectedContacts={chosenContacts} initialReport={selected?.ownReport ?? undefined} readOnly={readOnly || Boolean(initial && !units.some(unit => unit.id === initial.meeting.unitId))} onCreateContact={createPrivateContactAction} onCancel={!initial ? () => setMode("select") : undefined} onSave={async payload => {
       const result = mode === "create" ? await createSharedMeetingAction({ ...payload, dateKey: day, unitId, requestKey: requestKey.current ??= crypto.randomUUID() }) : await saveSharedAttendanceAction({ meetingId: selected?.id, participation: payload.participation ?? "worker", attended: payload.attended, contacts: payload.contacts });
       if (!result.ok) return result;
