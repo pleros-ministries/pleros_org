@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState, useTransition } from "react";
 import lesson from "./sogp-lesson.module.css";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import {
@@ -8,7 +9,6 @@ import {
   ArrowRight,
   Check,
   ChevronDown,
-  ExternalLink,
   LockKeyhole,
   MessageCircleMore,
   Play,
@@ -116,6 +116,49 @@ function ToggleStep({ title, done, pending, failed, doneMeta, todoMeta, onToggle
   return <button type="button" role="checkbox" aria-checked={done} className={lesson.row} disabled={pending} onClick={onToggle}><StepMark done={done} /><span className={lesson.rowCopy}><span className={lesson.rowTitle}>{title}</span><span className={lesson.rowMeta}>{failed ? "Could not save. Tap to try again." : done ? doneMeta : todoMeta}</span></span></button>;
 }
 
+/** Ask about this lesson: to the active discipler (the same private thread as
+    podcast episode questions), else Ask Pleros (user, 18 October). */
+function LessonQuestion({ lessonId, lessonTitle }: { lessonId: number; lessonTitle: string }) {
+  const [route, setRoute] = useState<"discipler" | "ask" | null>(null);
+  const [open, setOpen] = useState(false);
+  const [body, setBody] = useState("");
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [saving, startSend] = useTransition();
+  const episodeGuid = `sogp-lesson-${lessonId}`;
+  useEffect(() => {
+    let live = true;
+    import("@/app/(site)/dashboard/sogp/discipleship/_actions")
+      .then(({ getEpisodeQuestionRouteAction }) => getEpisodeQuestionRouteAction())
+      .then(result => { if (live) setRoute(result.kind === "discipler" ? "discipler" : "ask"); }, () => { if (live) setRoute("ask"); });
+    return () => { live = false; };
+  }, []);
+  function send() {
+    if (!body.trim()) { setError("Write your question first."); return; }
+    startSend(async () => {
+      try {
+        const { askEpisodeQuestionAction } = await import("@/app/(site)/dashboard/sogp/discipleship/_actions");
+        const result = await askEpisodeQuestionAction({ episodeGuid, episodeTitle: lessonTitle, body: body.trim() });
+        if (!result.ok) { setError(result.error); return; }
+        setBody(""); setOpen(false); setSent(true); setError(null);
+      } catch { setError("Your question could not be sent. Try again."); }
+    });
+  }
+  const chip = <span className={lesson.chip} data-tint="amber"><MessageCircleMore className="size-[18px]" aria-hidden/></span>;
+  if (route === "ask") {
+    const params = new URLSearchParams({ episodeGuid, episodeTitle: lessonTitle });
+    return <Link className={`${lesson.panel} ${lesson.row}`} href={`/dashboard/community/ask?${params.toString()}`}>{chip}<span className={lesson.rowCopy}><span className={lesson.rowTitle}>Ask a question</span><span className={lesson.rowMeta}>Goes to Pleros through Ask Pleros</span></span><ArrowRight className={`size-4 ${lesson.rowEnd}`} aria-hidden/></Link>;
+  }
+  return <div className={lesson.panel}>
+    <button type="button" className={lesson.row} disabled={!route} aria-expanded={open} onClick={() => { setOpen(value => !value); setSent(false); }}>{chip}<span className={lesson.rowCopy}><span className={lesson.rowTitle}>Ask your discipler</span><span className={lesson.rowMeta}>{sent ? "Sent. Their reply shows in your group." : "Only you and your discipler see it"}</span></span><ChevronDown className={`size-4 ${lesson.rowEnd}`} style={{ transform: open ? "rotate(180deg)" : undefined }} aria-hidden/></button>
+    {open ? <div className={lesson.askBody}>
+      <label className={lesson.askLabel}>Your question<textarea className={lesson.textarea} rows={4} maxLength={2000} value={body} disabled={saving} onChange={event => setBody(event.target.value)} placeholder="What would you like to ask about this lesson?" /></label>
+      {error ? <p role="alert" className={lesson.error}>{error}</p> : null}
+      <button type="button" className={lesson.primary} disabled={saving} onClick={send}>{saving ? "Sending…" : "Send to my discipler"}</button>
+    </div> : null}
+  </div>;
+}
+
 export function SogpDayView({ dayNumber }: { dayNumber: number }) {
   const queryClient = useQueryClient();
   const { data } = useSuspenseQuery({
@@ -172,7 +215,6 @@ export function SogpDayView({ dayNumber }: { dayNumber: number }) {
   });
   const listened = data.track.progress.audioListened;
   const doneSteps = [listened, data.track.progress.notesRead, data.track.progress.quizPassed, data.track.progress.writtenApproved].filter(Boolean).length;
-  const telegramUrl = data.dashboard.cohort.telegramDiscussionUrl ?? data.dashboard.cohort.telegramChannelUrl ?? (data.dashboard.cohort.telegramBotUsername ? `https://t.me/${data.dashboard.cohort.telegramBotUsername.replace(/^@/, "")}` : null);
 
   const tracks = data.dashboard.tracks.filter((item) => item.isRequired);
   const position = tracks.findIndex((item) => item.dayNumber === data.track.dayNumber) + 1;
@@ -199,7 +241,7 @@ export function SogpDayView({ dayNumber }: { dayNumber: number }) {
           <li><Link className={lesson.row} href={`/dashboard/sogp/course/day/${dayNumber}/response`}><StepMark done={data.track.progress.writtenApproved} /><span className={lesson.rowCopy}><span className={lesson.rowTitle}>Write your response</span><span className={lesson.rowMeta}>{data.submission ? sentence(data.submission.status) : "Not started"}</span></span><ArrowRight className={`size-4 ${lesson.rowEnd}`} aria-hidden/></Link></li>
         </ol>
       </section>
-      {telegramUrl?<a className={`${lesson.panel} ${lesson.row}`} href={telegramUrl} target="_blank" rel="noreferrer"><span className={lesson.chip} data-tint="amber"><MessageCircleMore className="size-[18px]" aria-hidden/></span><span className={lesson.rowCopy}><span className={lesson.rowTitle}>Ask your question</span><span className={lesson.rowMeta}>Text or voice note in Telegram</span></span><ExternalLink className={`size-4 ${lesson.rowEnd}`} aria-hidden/></a>:null}
+      <LessonQuestion lessonId={data.track.lesson.id} lessonTitle={data.track.lesson.title} />
       {data.track.lesson.notesContent ? <article className={`${lesson.panel} ${lesson.notes}`} aria-label="Lesson notes">
         <div className="prose prose-sm max-w-none leading-[1.7] text-[var(--color-text-strong)]" dangerouslySetInnerHTML={{__html:data.track.lesson.notesContent}}/>
         <button type="button" className={lesson.secondary} disabled={data.track.progress.notesRead||notesMutation.isPending} onClick={()=>notesMutation.mutate(true)}>{data.track.progress.notesRead?"Notes marked as read":notesMutation.isPending?"Saving…":"Mark notes read"}<Check className="size-4" aria-hidden/></button>

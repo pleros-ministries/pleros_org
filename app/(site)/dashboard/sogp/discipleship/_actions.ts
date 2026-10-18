@@ -509,7 +509,7 @@ export async function askEpisodeQuestionAction(input: {
           recipientUserIds: [disciplerUserId],
           actorUserId: learner.userId,
           actorFirstName: learner.firstName,
-          pushBody: `${learner.firstName} asked a question about an episode.`,
+          pushBody: `${learner.firstName} asked you a question.`,
         }).catch((error) => console.error("Episode question notify failed:", error)),
       );
     }
