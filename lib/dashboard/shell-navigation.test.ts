@@ -6,8 +6,8 @@ const member: DashboardCapabilities = { sogpEnrolled: true, community: true, com
 
 describe("connected dashboard navigation", () => {
   test("reports are a Community tab; the You tabs and similar-looking paths stay You", () => {
-    for (const path of ["/dashboard", "/dashboard/sogp", "/dashboard/library", "/dashboard/library/teachings", "/dashboard/partner", "/dashboard/profile", "/dashboard/church", "/dashboard/community-other", "/dashboard/sogp/discipleship-other"]) expect(dashboardAreaForPath(path)).toBe("you");
-    for (const path of ["/dashboard/community", "/dashboard/community/report", "/dashboard/community/report/history?day=2026-10-13", "/dashboard/community/messages/4", "/dashboard/community/ask", "/dashboard/community/leader"]) expect(dashboardAreaForPath(path)).toBe("community");
+    for (const path of ["/dashboard", "/dashboard/sogp", "/dashboard/library", "/dashboard/library/teachings", "/dashboard/partner", "/dashboard/profile", "/dashboard/churchyard", "/dashboard/community-other", "/dashboard/sogp/discipleship-other"]) expect(dashboardAreaForPath(path)).toBe("you");
+    for (const path of ["/dashboard/church", "/dashboard/church/reports", "/dashboard/community", "/dashboard/community/report", "/dashboard/community/report/history?day=2026-10-13", "/dashboard/community/messages/4", "/dashboard/community/ask", "/dashboard/community/leader"]) expect(dashboardAreaForPath(path)).toBe("community");
   });
   test("discipleship belongs to Community and lives on each group's page", () => {
     const sections = buildDashboardNavigation(member);

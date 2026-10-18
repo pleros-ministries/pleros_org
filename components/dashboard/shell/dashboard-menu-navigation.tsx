@@ -3,7 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  BookOpenIcon, ChevronDownIcon, CircleUserRoundIcon, ClipboardCheckIcon, ContactRoundIcon, GraduationCapIcon,
+  BookOpenIcon, Building2Icon, ChevronDownIcon, CircleUserRoundIcon, ClipboardCheckIcon, ContactRoundIcon, GraduationCapIcon,
   HeartHandshakeIcon, HouseIcon, InboxIcon, LibraryBigIcon, ListIcon, NetworkIcon, ShieldCheckIcon, SparklesIcon,
   UsersRoundIcon, type LucideIcon,
 } from "lucide-react";
@@ -76,7 +76,11 @@ export function DashboardMenuNavigation({ sections, area, onArea, onNavigate, co
   const [expanded, setExpanded] = useState<{ area: DashboardArea | null; for: DashboardArea } | null>(null);
   const open = expanded && expanded.for === area ? expanded.area : area;
   const items = sections.flatMap(section => section.items);
-  const leadership = ["church", "admin", "instructor-workspace", "pastor-workspace"].flatMap(key => items.filter(item => item.key === key)).filter((item, index, list) => list.findIndex(other => other.href === item.href) === index);
+  const leadership = ["church", "admin", "instructor-workspace", "pastor-workspace"].flatMap(key => items.filter(item => item.key === key)).filter((item, index, list) => list.findIndex(other => other.href === item.href) === index)
+    // Church structure is a page inside Oversight, listed right under it.
+    .flatMap(item => item.key === "church" && item.href === "/dashboard/community/oversight" ? [item, { key: "church-structure", label: "Church structure", href: "/dashboard/church" }] : [item]);
+  const leadershipIcon = (key: string) => key === "church" ? NetworkIcon : key === "church-structure" ? Building2Icon : ShieldCheckIcon;
+  const leadershipActive = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
   if (collapsed) {
     return <nav aria-label="Dashboard" className={`${styles.menu} ${styles.rail}`}>
@@ -90,8 +94,8 @@ export function DashboardMenuNavigation({ sections, area, onArea, onNavigate, co
       </div> : null)}
       {leadership.length ? <div className={styles.railGroup} role="group" aria-label="Leadership">
         {leadership.map(item => {
-          const Icon = item.key === "church" ? NetworkIcon : ShieldCheckIcon;
-          return <Link key={item.key} href={item.href} title={item.label} aria-label={item.label} className={styles.railLink} aria-current={pathname === item.href || pathname.startsWith(`${item.href}/`) ? "page" : undefined}><Icon className="size-[18px]" strokeWidth={1.9} /></Link>;
+          const Icon = leadershipIcon(item.key);
+          return <Link key={item.key} href={item.href} title={item.label} aria-label={item.label} className={styles.railLink} aria-current={leadershipActive(item.href) ? "page" : undefined}><Icon className="size-[18px]" strokeWidth={1.9} /></Link>;
         })}
       </div> : null}
     </nav>;
@@ -134,8 +138,8 @@ export function DashboardMenuNavigation({ sections, area, onArea, onNavigate, co
     {leadership.length ? <>
       <p className={styles.label}>Leadership</p>
       {leadership.map(item => {
-        const Icon = item.key === "church" ? NetworkIcon : ShieldCheckIcon;
-        return <Link key={item.key} href={item.href} onClick={onNavigate} className={styles.areaLink} data-standalone data-active={pathname === item.href || pathname.startsWith(`${item.href}/`) || undefined}>
+        const Icon = leadershipIcon(item.key);
+        return <Link key={item.key} href={item.href} onClick={onNavigate} className={styles.areaLink} data-standalone data-sub={item.key === "church-structure" || undefined} data-active={leadershipActive(item.href) || undefined}>
           <Icon className="size-[18px]" strokeWidth={1.9} /><span>{item.label}</span>
         </Link>;
       })}

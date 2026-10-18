@@ -72,13 +72,13 @@ export function DailyReportView({ today, days, selected, activities, pleros, dec
       <div><h1>My reports</h1><p className={styles.meta}>{longDate(new Date(`${selected}T00:00:00Z`))}</p></div>
       <Link href="/dashboard/community/report/history" className={styles.secondary} style={{ minHeight: 32, padding: "0 12px", fontSize: 12.5 }}>History</Link>
     </header>
-    {week ? <nav aria-label="Choose a day" className="grid grid-cols-7 gap-1.5">
+    {week ? <nav aria-label="Choose a day" className="grid grid-cols-7 gap-1 rounded-[10px] border border-(--color-line) bg-white p-1.5">
       {days.slice().reverse().slice(-7).map(dateKey => {
         const date = new Date(`${dateKey}T00:00:00Z`);
         const state = week[dateKey];
         const tone = state === "complete" ? "var(--color-brand-blue)" : state === "partial" ? "#d98a1f" : dateKey === today ? "#e2e5ea" : "#c94a4a";
         return <Link key={dateKey} href={dayHref(dateKey, today)} aria-current={dateKey === selected ? "page" : undefined} aria-label={`${longDate(date)}: ${state ?? "not reported"}`}
-          className="grid justify-items-center gap-0.5 rounded-[10px] py-1.5 text-[11px] text-(--color-text-muted) no-underline aria-[current=page]:bg-[#eef3fe] aria-[current=page]:font-semibold aria-[current=page]:text-(--color-brand-blue)">
+          className="grid justify-items-center gap-0.5 rounded-[10px] py-1.5 text-[11px] text-(--color-text-muted) no-underline aria-[current=page]:bg-[#e4ebfd] aria-[current=page]:font-semibold aria-[current=page]:text-(--color-brand-blue)">
           <span>{weekday.format(date).slice(0, 1)}</span>
           <b className="font-[family-name:var(--font-dashboard-heading)] text-[14px] font-medium text-(--color-text-strong)">{date.getUTCDate()}</b>
           <i className="size-1.5 rounded-full" style={{ background: tone }} aria-hidden="true" />
@@ -87,7 +87,7 @@ export function DailyReportView({ today, days, selected, activities, pleros, dec
     </nav> : null}
     {!writable ? <p className={styles.meta}>This day is view only. Reports can be changed for today and the previous seven days.</p> : null}
 
-    <section aria-label="Report progress" className="flex items-center gap-2.5 rounded-[10px] bg-[#f6f7f9] px-3.5 py-3 text-[13px]">
+    <section aria-label="Report progress" className="flex items-center gap-2.5 rounded-[10px] border border-(--color-line) bg-white px-3.5 py-3 text-[13px]">
       <span><b className="font-semibold">{reportedCount} of 3</b> reported {selected === today ? "today" : "this day"}</span>
       <span className="ml-auto flex gap-1" aria-hidden="true">{[0, 1, 2].map(index => <i key={index} className="h-1.5 w-[22px] rounded-full" style={{ background: index < reportedCount ? "var(--color-brand-blue)" : "#e2e5ea" }} />)}</span>
     </section>
@@ -105,7 +105,7 @@ export function DailyReportView({ today, days, selected, activities, pleros, dec
           <span className={styles.cardTitle}><strong>{label}</strong>{key === "devotional" ? null : <span className={styles.meta}>{subtitle(key)}</span>}</span>
           <StatusPill tone={state.tone}>{state.label}</StatusPill>
         </div>
-        <div className={styles.cardBody}>
+        <div className={styles.cardBody} data-plain={key === "devotional" ? undefined : ""}>
           {key === "devotional" ? <>
             <ul className={styles.lines}>{pleros.map((line) => <li key={line.key}><Link className={styles.line} href={`${devotionalRoutes[line.key]}?date=${encodeURIComponent(selected)}${line.key === "bible" ? "&tab=bible" : ""}`}>
               <span className={line.detail ? styles.done : styles.notDone}><DashboardIcon name={line.detail ? "circlecheck" : "clock"} size={16} /></span>

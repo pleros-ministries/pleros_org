@@ -10,6 +10,7 @@
 .menu .areaLink { display: flex; flex: 1; min-width: 0; align-items: center; gap: 10px; min-height: 38px; padding: 0 10px; border-radius: 10px; color: var(--color-text-strong); font-size: 14px; font-weight: 500; text-decoration: none; }
 .menu .areaRow[data-active] .areaLink { color: var(--color-brand-blue); }
 .menu .areaLink[data-standalone]:hover { background: #f4f5f7; }
+.menu .areaLink[data-sub] { min-height: 34px; margin-left: 18px; padding-left: 18px; border-left: 1px solid var(--color-line); border-radius: 0 8px 8px 0; font-size: 13.5px; font-weight: 400; color: var(--color-text-muted); }
 .menu .areaLink[data-standalone][data-active] { background: var(--status-blue-bg); color: var(--color-brand-blue); }
 .areaLink svg { flex: none; }
 .areaLink > span { flex: 1; }

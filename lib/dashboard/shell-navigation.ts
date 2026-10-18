@@ -5,7 +5,8 @@ export function dashboardAreaForPath(href: string): DashboardArea {
   const path = href.split(/[?#]/)[0];
   const inCommunity = path === "/dashboard/community" || path.startsWith("/dashboard/community/");
   // Reports is a Community tab (Pastor review, 18 October): you report to the people you're accountable to.
-  const discipleship = ["/dashboard/sogp/discipleship", "/dashboard/sogp/enrollees", "/dashboard/sogp/invitations"].some(root => path === root || path.startsWith(`${root}/`));
+  // Church structure sits under Oversight, so it belongs to Community too.
+  const discipleship = ["/dashboard/sogp/discipleship", "/dashboard/sogp/enrollees", "/dashboard/sogp/invitations", "/dashboard/church"].some(root => path === root || path.startsWith(`${root}/`));
   return discipleship || inCommunity ? "community" : "you";
 }
 
@@ -46,6 +47,7 @@ const COMMUNITY: DashboardParent = { href: "/dashboard/community", label: "Back 
 const GROUPS: DashboardParent = { href: "/dashboard/community/groups", label: "Back to Groups" };
 const MY_SOGP: DashboardParent = { href: "/dashboard/sogp", label: "Back to Learning" };
 const LIBRARY: DashboardParent = { href: "/dashboard/library", label: "Back to Library" };
+const OVERSIGHT: DashboardParent = { href: "/dashboard/community/oversight", label: "Back to Oversight" };
 const REPORTS: DashboardParent = { href: "/dashboard/community/report", label: "Back to My reports" };
 
 /**
@@ -93,11 +95,13 @@ const DASHBOARD_FOCUS: Array<[RegExp, (match: RegExpMatchArray) => DashboardFocu
   [/^\/dashboard\/community\/messages\/\d+$/, () => ({ title: "Conversation", back: { href: "/dashboard/community/messages", label: "Back to Inbox" } })],
   [/^\/dashboard\/community\/ask\/\d+$/, () => ({ title: "Your question", back: { href: "/dashboard/community/ask", label: "Back to Ask Pleros" } })],
   [/^\/dashboard\/community\/leader$/, () => ({ title: "Leader tools", back: COMMUNITY })],
-  // Oversight (Pastor, Branch Pastor) inside Community; church structure and setup stay under /dashboard/church.
+  // Oversight (Pastor, Branch Pastor) inside Community. Church structure and setup keep their
+  // /dashboard/church routes but sit under Oversight (user request, 18 October); anyone without
+  // Oversight is sent from there back to their church page.
   [/^\/dashboard\/community\/oversight\/(branches\/\d+|questions)$/, m => ({ title: m[1] === "questions" ? "Questions waiting" : "Branch", back: { href: "/dashboard/community/oversight", label: "Back to Oversight" } })],
-  [/^\/dashboard\/church$/, () => ({ title: "Church structure", back: COMMUNITY })],
-  [/^\/dashboard\/church\/(?!branches|units|reports)[^/]+$/, () => ({ title: "Report details", back: { href: "/dashboard/church/reports", label: "Back to Church oversight" } })],
-  [/^\/dashboard\/church\/.+$/, m => ({ title: /branches\/new|\/pastor$/.test(m[0]) ? "Church setup" : /units\/new/.test(m[0]) ? "Add a unit" : /\/leader$/.test(m[0]) ? "Unit appointment" : /\/workers$/.test(m[0]) ? "Assign workers" : "Church oversight", back: { href: "/dashboard/church", label: "Back to Church oversight" } })],
+  [/^\/dashboard\/church$/, () => ({ title: "Church structure", back: OVERSIGHT })],
+  [/^\/dashboard\/church\/(?!branches|units|reports)[^/]+$/, () => ({ title: "Report details", back: { href: "/dashboard/church/reports", label: "Back to Church reports" } })],
+  [/^\/dashboard\/church\/.+$/, m => ({ title: /branches\/new|\/pastor$/.test(m[0]) ? "Church setup" : /units\/new/.test(m[0]) ? "Add a unit" : /\/leader$/.test(m[0]) ? "Unit appointment" : /\/workers$/.test(m[0]) ? "Assign workers" : "Church reports", back: { href: "/dashboard/church", label: "Back to Church structure" } })],
   // Library and the rest of You
   [/^\/dashboard\/library\/teachings$/, () => ({ title: "Teachings Library", back: LIBRARY })],
   [/^\/dashboard\/podcast$/, () => ({ title: "Podcast", back: LIBRARY })],

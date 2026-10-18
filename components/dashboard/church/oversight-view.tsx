@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { BellOffIcon, ChevronRightIcon, MessageCircleQuestionIcon, PlusIcon, UsersRoundIcon } from "lucide-react";
+import { BellOffIcon, Building2Icon, ChevronRightIcon, MessageCircleQuestionIcon, PlusIcon, UsersRoundIcon } from "lucide-react";
 
 import styles from "@/components/community/discipleship/discipleship-group.module.css";
 import { Initials } from "@/components/community/discipleship/shared";
@@ -71,7 +71,14 @@ export function OversightOverview({ data }: { data: OversightData }) {
         <Rate done={branch.reportedToday} total={branch.expected} />
       </Link></li>)}
     </ul></div> : <p className={`${styles.panel} ${styles.empty}`}>No branches yet.</p>}
-    <p className={styles.note}>Appointments and new units are set up from <Link href="/dashboard/church" className="underline underline-offset-2">church structure</Link>.</p>
+    <div className={styles.sectionTitle}><h2>Manage</h2></div>
+    <div className={styles.panel}><ul className={styles.list}>
+      <li><Link href="/dashboard/church" className={styles.row}>
+        <span className="grid size-9 shrink-0 place-items-center rounded-[10px] bg-[#e6ecfc] text-[#1f3260]" aria-hidden="true"><Building2Icon className="size-4" strokeWidth={2.2} /></span>
+        <span className={styles.rowCopy}><span className={styles.rowTitle} style={{ fontWeight: 500 }}>Church structure</span><span className={styles.rowMeta}>Branches, units, leaders and member placement</span></span>
+        <ChevronRightIcon className={`${styles.chev} size-4`} strokeWidth={2} />
+      </Link></li>
+    </ul></div>
   </div>;
 }
 
