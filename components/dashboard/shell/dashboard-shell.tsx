@@ -269,7 +269,7 @@ export function DashboardShell({ viewer, sections, children, notificationControl
       <RootHeader active={area} communityAvailable={dashboardAreaHref("community", sections) !== null} className={frame.liveHeader}
         onMenu={() => setMenu({ open: true, pathname })} onTab={selectRootTab}
         menuControl={<button className={cn(v3.iconButton, frame.mobileMenu)} onClick={() => setMenu({ open: true, pathname })} aria-label="Open dashboard navigation" aria-expanded={menuOpen} aria-controls={drawerId} aria-haspopup="dialog"><DashboardIcon name="menu" /></button>}
-        notifications={notificationControl ?? <NotificationBell tone="light" appearance="dashboard" />} />
+        notifications={notificationControl ?? <NotificationBell />} />
       {focusedLearning ? <Breadcrumbs pathname={pathname} title={focusedLearning} back={focus!.back} /> : null}
       <main id="dashboard-main" className={frame.routeMain} {...swipeHandlers}>
         <div ref={viewportRef} className={frame.routeViewport} data-route-origin={routedArea}>

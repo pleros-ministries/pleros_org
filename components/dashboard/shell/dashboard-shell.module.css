@@ -6,6 +6,9 @@
   --font-sen: var(--font-be-vietnam-pro);
   --font-suisse-intl: var(--font-be-vietnam-pro);
   --dashboard-topbar-offset: 2.75rem;
+  /* The public site's deep brand blue (globals' public --color-brand-blue), which the
+     dashboard's own --color-brand-blue overrides; the top bar matches the site (Pastor, 18 October). */
+  --dashboard-topbar-bg: #051480;
 }
 
 .root { font-synthesis: none; }
@@ -38,7 +41,7 @@
 }
 
 /* The Pleros logomark on a brand-blue strip, level with the 44px top bar. */
-.brand { display: flex; align-items: center; justify-content: space-between; gap: 8px; height: 44px; margin: 0 -20px; padding: 0 10px 0 20px; background: var(--color-community-blue, #2056d6); color: white; flex: none; }
+.brand { display: flex; align-items: center; justify-content: space-between; gap: 8px; height: 44px; margin: 0 -20px; padding: 0 10px 0 20px; background: var(--dashboard-topbar-bg); color: white; flex: none; }
 .brand[data-collapsed] { margin-inline: -12px; padding: 0; flex-direction: column; justify-content: center; height: auto; min-height: 44px; gap: 0; }
 .brand[data-collapsed] .brandLink { display: none; }
 .brandLink { display: inline-flex; align-items: center; }
@@ -46,7 +49,7 @@
 .collapseButton { display: grid; place-items: center; width: 34px; height: 34px; border: 0; border-radius: 9px; background: transparent; color: rgb(255 255 255 / 85%); cursor: pointer; }
 .collapseButton:hover { background: rgb(255 255 255 / 14%); color: white; }
 .railProfile { display: grid; place-items: center; margin-top: 14px; text-decoration: none; }
-.drawerHeading { height: 44px; margin: -10px -20px 0; padding: 0 12px 0 20px; background: var(--color-community-blue, #2056d6); }
+.drawerHeading { height: 44px; margin: -10px -20px 0; padding: 0 12px 0 20px; background: var(--dashboard-topbar-bg); }
 .drawerHeading button { color: white; }
 .drawerTitle { display: flex; align-items: center; }
 @media (prefers-reduced-motion: reduce) { .liveSidebar, .liveFrame { transition: none !important; } }
@@ -122,13 +125,13 @@
 /* The slim blue top bar (Pastor review, 18 October): brand blue, white
    controls, a lime mark under the current area. The back-titled header of a
    deep page shares it. */
-.root .liveHeader { height: 44px; background: var(--color-community-blue, #2056d6); color: white; border-bottom: 0; }
-.root .liveHeader :is(a, button) { color: white; }
+.root .liveHeader { height: 44px; background: var(--dashboard-topbar-bg); color: white; border-bottom: 0; }
+/* The header's own controls only: the menu, a back link and the bell (not the area tabs or the notifications panel). */
+.root .liveHeader > :is(a, button), .root .liveHeader > div > button { color: white; }
 .root .liveHeader nav button { color: rgb(255 255 255 / 72%); }
 .root .liveHeader nav button[aria-current] { color: white; }
 .root .liveHeader nav button[aria-current]::after { bottom: 0; width: 22px; height: 2px; border-radius: 2px; background: #d8ff65; }
 .root .liveHeader nav button:disabled { color: rgb(255 255 255 / 45%); }
-.root .liveHeader span[aria-hidden]:empty { background-color: #d8ff65; }
 .root .liveHeader .featureTitle { color: white; }
 
 /* No browser-default bold on operational pages (user feedback, 18 October):

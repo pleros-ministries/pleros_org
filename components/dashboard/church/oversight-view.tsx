@@ -53,49 +53,60 @@ export function OversightOverview({ data }: { data: OversightData }) {
   const pending = data.workers.filter(worker => !worker.reportedToday).sort((a, b) => b.silentDays - a.silentDays);
   const share = data.totals.expected ? Math.round((data.totals.reportedToday / data.totals.expected) * 100) : 0;
   const ready = data.totals.units - leaderless.length;
+  const stats: Array<[string, number]> = [["At risk", data.totals.atRisk], ["Questions", data.totals.waiting], ["Silent 3+ days", silent.length]];
+  // Three blocks (user feedback, 18 October: too many panels): today, one "needs you" list, branches.
   return <div className={styles.page}>
     <OversightHeader sub={`${data.scopeLabel} · ${plural(data.totals.branches, "branch")} · ${plural(data.totals.workers, "worker")}`} />
 
-    {/* Today at a glance: the day's reports, then the people side. */}
-    <section className={`${styles.panel} grid gap-3 p-3.5`} aria-label="Today">
-      <div className="flex items-end justify-between gap-3">
-        <span className="grid gap-0.5">
-          <span className={styles.rowMeta}>Reports today</span>
-          <span className="font-[family-name:var(--font-dashboard-heading)] text-[22px] leading-7 font-medium">{data.totals.expected ? `${data.totals.reportedToday} of ${data.totals.expected}` : "No workers yet"}</span>
-        </span>
-        {data.totals.expected ? <span className={styles.pill} data-tone={pending.length ? "risk" : "ok"}>{pending.length ? `${pending.length} pending` : "All in"}</span> : null}
+    <section className={styles.panel} aria-label="Today">
+      <div className="grid gap-2.5 p-3.5">
+        <div className="flex items-end justify-between gap-3">
+          <span className="grid gap-0.5">
+            <span className={styles.rowMeta}>Reports today</span>
+            <span className="font-[family-name:var(--font-dashboard-heading)] text-[22px] leading-7 font-medium">{data.totals.expected ? `${data.totals.reportedToday} of ${data.totals.expected}` : "No workers yet"}</span>
+          </span>
+          {data.totals.expected ? <span className={styles.pill} data-tone={pending.length ? "risk" : "ok"}>{pending.length ? `${pending.length} pending` : "All in"}</span> : null}
+        </div>
+        {data.totals.expected ? <span className="h-1.5 overflow-hidden rounded-full bg-[#eceef2]" aria-hidden="true"><i className="block h-full rounded-full bg-[var(--color-community-blue)]" style={{ width: `${share}%` }} /></span> : null}
       </div>
-      {data.totals.expected ? <span className="h-1.5 overflow-hidden rounded-full bg-[#eceef2]" aria-hidden="true"><i className="block h-full rounded-full bg-[var(--color-community-blue)]" style={{ width: `${share}%` }} /></span> : null}
+      <div className="grid grid-cols-3 border-t border-(--color-line) py-2.5">
+        {stats.map(([label, value], index) => <span key={label} className={`grid gap-px px-3.5 ${index ? "border-l border-(--color-line)" : ""}`}>
+          <span className="text-[11.5px] leading-[15px] text-[var(--color-community-muted)]">{label}</span>
+          <span className="font-[family-name:var(--font-dashboard-heading)] text-[17px] leading-6 font-medium" style={{ color: value > 0 ? "#92400e" : undefined }}>{value}</span>
+        </span>)}
+      </div>
     </section>
-    <Strip items={[["At risk", data.totals.atRisk, data.totals.atRisk > 0], ["Questions", data.totals.waiting, data.totals.waiting > 0], ["Silent 3+ days", silent.length, silent.length > 0]]} />
 
-    <div className={styles.sectionTitle}><h2>Needs attention</h2></div>
-    {attention.length ? <div className={styles.panel}><ul className={styles.list}>
+    <div className={styles.sectionTitle}><h2>Needs you</h2><Link href={`${OVERSIGHT_PATH}/reports`} className={styles.quiet}>All reports</Link></div>
+    {attention.length || pending.length ? <div className={styles.panel}><ul className={styles.list}>
       {attention.map(item => <li key={item.key}><Link href={item.href} className={styles.row}>
         <span className="grid size-9 shrink-0 place-items-center rounded-[10px]" style={{ background: item.tone[0], color: item.tone[1] }} aria-hidden="true">{item.icon}</span>
         <span className={styles.rowCopy}><span className={styles.rowTitle}>{item.title}</span><span className={styles.rowMeta}>{item.meta}</span></span>
         <ChevronRightIcon className={`${styles.chev} size-4`} strokeWidth={2} />
       </Link></li>)}
-    </ul></div> : <p className={`${styles.panel} ${styles.empty}`}>Nothing needs you right now.</p>}
-
-    <div className={styles.sectionTitle}><h2>Pending reports</h2><Link href={`${OVERSIGHT_PATH}/reports`} className={styles.quiet}>All reports</Link></div>
-    {pending.length ? <div className={styles.panel}><ul className={styles.list}>
       {pending.slice(0, 4).map(worker => <li key={worker.userId}><Link href={`/dashboard/church/${worker.userId}`} className={styles.row}>
         <Initials name={worker.name} />
-        <span className={styles.rowCopy}><span className={styles.rowTitle}>{worker.name}</span><span className={styles.rowMeta}>{[worker.role === "unit_leader" ? "Unit leader" : "Worker", data.branches.find(branch => branch.id === worker.branchId)?.name, worker.silentDays >= 3 ? `no report in ${worker.silentDays} days` : null].filter(Boolean).join(" · ")}</span></span>
+        <span className={styles.rowCopy}><span className={styles.rowTitle}>{worker.name}</span><span className={styles.rowMeta}>{[worker.role === "unit_leader" ? "Unit leader" : "Worker", data.branches.find(branch => branch.id === worker.branchId)?.name, worker.silentDays >= 3 ? `no report in ${worker.silentDays} days` : "no report yet today"].filter(Boolean).join(" · ")}</span></span>
         <span className={styles.pill} data-tone={worker.silentDays >= 3 ? "off" : "risk"}>Not yet</span>
       </Link></li>)}
-    </ul></div> : <p className={`${styles.panel} ${styles.empty}`}>{data.totals.expected ? "Everyone has reported today." : "Reports appear once workers are placed in units."}</p>}
+    </ul></div> : <p className={`${styles.panel} ${styles.empty}`}>{data.totals.expected ? "Nothing needs you right now. Everyone has reported today." : "Nothing needs you right now."}</p>}
 
-    <div className={styles.sectionTitle}><h2>Structure</h2><Link href={`${OVERSIGHT_PATH}/structure`} className={styles.quiet}>Manage</Link></div>
-    <Strip items={[["Branches", data.totals.branches], ["Units ready", data.totals.units ? `${ready}/${data.totals.units}` : "–", leaderless.length > 0], ["Workers", data.totals.workers]]} />
-    {data.branches.length ? <div className={styles.panel}><ul className={styles.list}>
-      {data.branches.map((branch, index) => <li key={branch.id}><Link href={`${OVERSIGHT_PATH}/branches/${branch.id}`} className={styles.row}>
-        <Mark text={short(branch.name)} index={index} />
-        <span className={styles.rowCopy}><span className={styles.rowTitle}>{branch.name}</span><span className={styles.rowMeta}>{[branch.pastors.map(pastor => pastor.name).join(", ") || "No branch pastor", plural(branch.units.length, "unit"), plural(branch.workerCount, "worker")].join(" · ")}</span></span>
-        <Rate done={branch.reportedToday} total={branch.expected} />
-      </Link></li>)}
-    </ul></div> : <p className={`${styles.panel} ${styles.empty}`}>No branches yet. Add one from Structure.</p>}
+    <div className={styles.sectionTitle}>
+      <h2>{data.role === "pastor" ? "Branches" : "Your branches"}</h2>
+      <Link href={`${OVERSIGHT_PATH}/structure`} className={styles.quiet}>Manage</Link>
+    </div>
+    {data.branches.length ? <div className={styles.panel}>
+      <p className="m-0 border-b border-(--color-line) px-3.5 py-2.5 text-[12px] leading-4 text-[var(--color-community-muted)]">
+        {plural(data.totals.branches, "branch")} · {data.totals.units ? `${ready} of ${plural(data.totals.units, "unit")} ready` : "no units yet"} · {plural(data.totals.workers, "worker")}
+      </p>
+      <ul className={styles.list}>
+        {data.branches.map((branch, index) => <li key={branch.id}><Link href={`${OVERSIGHT_PATH}/branches/${branch.id}`} className={styles.row}>
+          <Mark text={short(branch.name)} index={index} />
+          <span className={styles.rowCopy}><span className={styles.rowTitle}>{branch.name}</span><span className={styles.rowMeta}>{[branch.pastors.map(pastor => pastor.name).join(", ") || "No branch pastor", plural(branch.units.length, "unit")].join(" · ")}</span></span>
+          <Rate done={branch.reportedToday} total={branch.expected} />
+        </Link></li>)}
+      </ul>
+    </div> : <p className={`${styles.panel} ${styles.empty}`}>No branches yet. Add one from Structure.</p>}
   </div>;
 }
 
