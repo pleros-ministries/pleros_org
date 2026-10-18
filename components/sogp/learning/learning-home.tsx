@@ -67,7 +67,7 @@ export function PathChooser({ data }: { data: LearningViewData }) {
   }
   const podcastPick = path === "podcast_one" || path === "podcast_two";
   const choiceStyle = (on: boolean) => ({ display: "grid", gap: 8, padding: 14, borderRadius: 14, background: "white", border: `1.5px solid ${on ? "var(--color-brand-blue)" : "var(--dashboard-panel-edge, #e2e5ea)"}`, boxShadow: on ? "0 0 0 3px rgb(32 86 214 / 10%)" : "none", cursor: "pointer", textAlign: "left" as const });
-  const chip = (on: boolean) => ({ height: 30, padding: "0 11px", borderRadius: 10, border: `1px solid ${on ? "var(--color-brand-blue)" : "var(--dashboard-panel-edge, #e2e5ea)"}`, background: on ? "#eef3fe" : "white", color: on ? "var(--color-brand-blue)" : "var(--color-text-strong)", fontSize: 12.5, fontWeight: 500 });
+  const chip = (on: boolean) => ({ minHeight: 32, padding: "6px 10px", lineHeight: "16px", textAlign: "center" as const, borderRadius: 10, border: `1px solid ${on ? "var(--color-brand-blue)" : "var(--dashboard-panel-edge, #e2e5ea)"}`, background: on ? "#eef3fe" : "white", color: on ? "var(--color-brand-blue)" : "var(--color-text-strong)", fontSize: 12.5, fontWeight: 500 });
   const tag = <span style={{ height: 20, padding: "0 7px", borderRadius: 99, background: "#e4ebfd", color: "#2331ae", fontSize: 11, lineHeight: "20px", fontWeight: 500 }}>Current</span>;
   // Two paths side by side, the current one marked, Podcast's pace inline (mockup B).
   return <section className={`${styles.page} ${styles.choicePage}`}>
