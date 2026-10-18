@@ -38,7 +38,7 @@ export function SogpAudioPlayer({
   });
 
   return (
-    <div className="min-w-0 rounded-[12px] bg-[var(--color-brand-sky-soft)] p-3.5 sm:p-4">
+    <div className="min-w-0 rounded-[12px] bg-[var(--color-brand-sky-soft)] p-3 min-[360px]:p-3.5 sm:p-4">
       <LessonAudioControls key={`${dayNumber}:${src}`} src={src} onProgress={(seconds, duration) => {
         if (!notified.current && Number.isFinite(duration) && duration > 0 && seconds / duration >= 0.9) {
           notified.current = true;

@@ -29,7 +29,7 @@ export function LessonAudioControls({ src, onProgress, initialPositionSeconds = 
   const download = resolveMediaDownload(src);
   const ready = duration > 0;
   const progress = ready ? Math.min(100, time / duration * 100) : 0;
-  const smallControl = `relative grid size-11 shrink-0 place-items-center rounded-full text-(--color-brand-blue) transition-colors hover:bg-(--color-brand-sky) disabled:opacity-40 ${focusRing}`;
+  const smallControl = `relative grid size-10 shrink-0 place-items-center min-[360px]:size-11 rounded-full text-(--color-brand-blue) transition-colors hover:bg-(--color-brand-sky) disabled:opacity-40 ${focusRing}`;
 
   async function toggle() {
     const audio = audioRef.current;
@@ -71,14 +71,14 @@ export function LessonAudioControls({ src, onProgress, initialPositionSeconds = 
       <input type="range" min={0} max={100} step={0.1} value={progress} disabled={!ready} onChange={event => seek(Number(event.target.value) / 100 * duration)} aria-label={`Seek ${label}`} aria-valuetext={`${clock(time)} of ${clock(duration)}`} className={`h-6 block w-full min-w-0 cursor-pointer accent-(--color-brand-blue) disabled:opacity-40 ${focusRing}`} />
       <div className="flex items-center justify-between text-[12px] tabular-nums text-(--color-text-on-sky)"><span>{clock(time)}</span>{error ? <span role="alert" className="text-(--destructive)">Couldn’t load · <button type="button" onClick={() => { setError(null); audioRef.current?.load(); }} className={`rounded-sm font-medium text-(--color-brand-blue) underline ${focusRing}`}>Retry</button></span> : <span>{ready ? `−${clock(duration - time)}` : "Loading audio…"}</span>}</div>
     </div>
-    <div className="grid min-w-0 grid-cols-[1fr_auto_1fr] items-center gap-2">
+    <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-1 min-[360px]:gap-2">
       <div className="flex justify-start">
         <button type="button" onClick={() => { const next = SPEEDS[(SPEEDS.indexOf(rate) + 1) % SPEEDS.length]!; setRate(next); if (audioRef.current) audioRef.current.playbackRate = next; }}
-          aria-label={`Playback speed ${rate}×. Tap to change.`} className={`inline-flex h-9 min-w-12 items-center justify-center rounded-full border border-(--color-line-strong) bg-white px-2.5 text-[13px] font-medium tabular-nums text-(--color-text-strong) transition-colors hover:border-(--color-brand-blue) ${focusRing}`}>{rate}×</button>
+          aria-label={`Playback speed ${rate}×. Tap to change.`} className={`inline-flex h-9 min-w-10 items-center justify-center rounded-full border border-(--color-line-strong) bg-white px-2 min-[360px]:min-w-12 min-[360px]:px-2.5 text-[13px] font-medium tabular-nums text-(--color-text-strong) transition-colors hover:border-(--color-brand-blue) ${focusRing}`}>{rate}×</button>
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-1 min-[360px]:gap-3">
         <button type="button" disabled={!ready} onClick={() => seek(time - 15)} aria-label="Rewind 15 seconds" className={smallControl}><RotateCcw className="size-6" aria-hidden /><span aria-hidden className="absolute text-[9px] font-medium">15</span></button>
-        <button type="button" onClick={toggle} aria-label={playing ? `Pause ${label}` : `Play ${label}`} className={`grid size-14 shrink-0 place-items-center rounded-full bg-(--color-brand-blue) text-white transition-colors hover:bg-(--color-brand-blue-hover) ${focusRing}`}>
+        <button type="button" onClick={toggle} aria-label={playing ? `Pause ${label}` : `Play ${label}`} className={`grid size-12 shrink-0 place-items-center rounded-full bg-(--color-brand-blue) min-[360px]:size-14 text-white transition-colors hover:bg-(--color-brand-blue-hover) ${focusRing}`}>
           {waiting && playing ? <LoaderCircle className="size-6 animate-spin motion-reduce:animate-none" aria-hidden /> : playing ? <Pause className="size-6" aria-hidden /> : <Play className="ml-0.5 size-6" aria-hidden />}
         </button>
         <button type="button" disabled={!ready} onClick={() => seek(time + 15)} aria-label="Forward 15 seconds" className={smallControl}><RotateCw className="size-6" aria-hidden /><span aria-hidden className="absolute text-[9px] font-medium">15</span></button>
