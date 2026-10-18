@@ -41,10 +41,10 @@ export function PodcastLeaderboardToggle({
     <div className={cn("grid gap-1.5", className)}>
       <label className="flex cursor-pointer items-start justify-between gap-3">
         <span className="grid min-w-0 gap-0.5">
-          <span className="text-xs font-semibold text-zinc-900">
+          <span className="text-[13px] font-medium leading-[18px] text-(--color-text-strong)">
             Show me on the leaderboard
           </span>
-          <span className="text-[0.7rem] leading-[1.45] text-zinc-500">
+          <span className="text-[12px] leading-4 text-(--color-text-muted)">
             Only your first name and points are shown.
           </span>
         </span>
@@ -59,7 +59,7 @@ export function PodcastLeaderboardToggle({
           />
           <span
             aria-hidden="true"
-            className="h-5 w-9 rounded-full bg-zinc-300 transition-colors peer-checked:bg-(--color-brand-blue) peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-(--color-brand-blue) peer-disabled:opacity-50"
+            className="h-5 w-9 rounded-full bg-zinc-300 transition-colors peer-checked:bg-[#2056d6] peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[#2056d6] peer-disabled:opacity-50"
           />
           <span
             aria-hidden="true"
@@ -68,7 +68,7 @@ export function PodcastLeaderboardToggle({
         </span>
       </label>
       {error ? (
-        <p role="alert" className="text-[0.7rem] text-red-700">
+        <p role="alert" className="text-[12px] text-red-700">
           {error}
         </p>
       ) : null}

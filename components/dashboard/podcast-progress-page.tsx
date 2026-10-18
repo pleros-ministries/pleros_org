@@ -5,9 +5,10 @@ import { useFormStatus } from "react-dom";
 import Link from "next/link";
 import {
   ArrowLeftIcon,
+  ArrowUpRightIcon,
   CheckIcon,
   ChevronDownIcon,
-  ArrowUpRightIcon,
+  PlayIcon,
   SearchIcon,
 } from "lucide-react";
 
@@ -16,8 +17,6 @@ import {
   togglePodcastEpisodeProgressAction,
 } from "@/app/_actions/podcast-progress-actions";
 import { SogpCalendar } from "@/components/sogp/sogp-calendar";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import type { RssEpisode } from "@/lib/anchor-rss";
 import {
   buildPodcastDays,
@@ -30,17 +29,16 @@ import {
 } from "@/lib/podcast-journey";
 import type { PodcastLeaderboardData } from "@/lib/podcast-leaderboard";
 import {
-  getPodcastSeriesTitle,
   groupPodcastEpisodesBySeries,
   STANDALONE_PODCAST_SERIES_ID,
   type PodcastEpisodeGroup,
 } from "@/lib/podcast-progress";
-import { getSogpLearningWeek } from "@/lib/sogp/calendar";
 import { cn } from "@/lib/utils";
 
-import { PodcastDailyTasks } from "./podcast-daily-tasks";
+import styles from "./podcast.module.css";
+import { durationLabel, PodcastDailyTasks } from "./podcast-daily-tasks";
 import { PodcastJourneyCard } from "./podcast-journey-card";
-import { PodcastOtherDetails } from "./podcast-other-details";
+import { PodcastOtherDetails, PodcastProgressStrip } from "./podcast-other-details";
 import { PodcastTrackPicker } from "./podcast-track-picker";
 
 const INITIAL_STATE = { error: null as string | null };
@@ -67,19 +65,18 @@ function MarkAllAsListenedButton({
   const { pending } = useFormStatus();
 
   return (
-    <Button
+    <button
       type="submit"
-      variant="primary"
-      size="sm"
       disabled={pending || disabled}
-      className="w-fit rounded-full px-4"
+      className={styles.btn}
+      data-small=""
     >
       {pending
         ? "Saving..."
         : allEpisodesListened
           ? "Mark all as unlistened"
           : "Mark all as listened"}
-    </Button>
+    </button>
   );
 }
 
@@ -108,7 +105,6 @@ function EpisodeProgressCheckbox({
           event.currentTarget.form?.requestSubmit();
         }
       }}
-      className="mt-1 size-5 rounded-[var(--radius-xs)] border-[rgba(6,16,86,0.24)] accent-[var(--color-brand-blue)] disabled:opacity-50"
     />
   );
 }
@@ -129,6 +125,9 @@ function EpisodeRow({
     INITIAL_STATE,
   );
   const formRef = useRef<HTMLFormElement>(null);
+  const meta = [formatDate(episode.isoDate), durationLabel(episode.duration)]
+    .filter(Boolean)
+    .join(" · ");
 
   function handleEpisodeRowClick(event: MouseEvent<HTMLElement>) {
     const target = event.target;
@@ -148,62 +147,52 @@ function EpisodeRow({
   }
 
   return (
-    <article
-      onClick={handleEpisodeRowClick}
-      className={cn(
-        "grid cursor-pointer gap-4 border-b border-[rgba(6,16,86,0.1)] px-4 py-5 transition-colors last:border-b-0 hover:bg-[rgba(6,16,86,0.03)] sm:px-5",
-        listened && "bg-[rgba(40,170,80,0.06)]",
-      )}
-    >
-      <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-3">
-        <form ref={formRef} action={formAction}>
-          <input type="hidden" name="episodeGuid" value={episode.guid} />
-          <input type="hidden" name="listened" value={listened ? "true" : "false"} />
-          <label className="flex min-h-9 min-w-9 items-start justify-center pt-0.5">
-            <span className="sr-only">Mark {episode.title} as listened</span>
-            <EpisodeProgressCheckbox
-              episode={episode}
-              listened={listened}
-              onToggleListened={onToggleListened}
-              previewMode={previewMode}
-            />
-          </label>
-        </form>
+    <article onClick={handleEpisodeRowClick} className={styles.epRow}>
+      <form ref={formRef} action={formAction}>
+        <input type="hidden" name="episodeGuid" value={episode.guid} />
+        <input type="hidden" name="listened" value={listened ? "true" : "false"} />
+        {/* The number chip is the listened checkbox: blue with a tick once listened. */}
+        <label className={styles.epCheck} data-done={listened || undefined}>
+          <span className="sr-only">Mark {episode.title} as listened</span>
+          {listened ? (
+            <CheckIcon className="size-4" strokeWidth={2.4} aria-hidden="true" />
+          ) : episode.episodeNumber ? (
+            <span aria-hidden="true">{episode.episodeNumber}</span>
+          ) : (
+            <PlayIcon className="size-3.5" fill="currentColor" strokeWidth={0} aria-hidden="true" />
+          )}
+          <EpisodeProgressCheckbox
+            episode={episode}
+            listened={listened}
+            onToggleListened={onToggleListened}
+            previewMode={previewMode}
+          />
+        </label>
+      </form>
 
-        <div className="grid gap-1.5">
-          <div className="flex flex-wrap items-center gap-2">
-            {episode.episodeNumber ? (
-              <span className="text-[10px] font-medium uppercase tracking-[0.08em] text-(--color-text-muted)">
-                Ep. {episode.episodeNumber}
-              </span>
-            ) : null}
-            {listened ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-(--color-brand-lime) px-2 py-0.5 text-[11px] font-medium text-(--color-brand-blue)">
-                <CheckIcon className="size-3" />
-                Listened
-              </span>
-            ) : null}
-          </div>
-
-          <h2 className="text-[13.5px] font-medium leading-snug">
-            <a
-              href={episode.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-(--color-text-strong) transition-colors hover:text-(--color-brand-blue)"
-            >
-              {episode.title}
-            </a>
-          </h2>
-
-          <div className="text-[12px] text-[var(--color-text-muted)]">
-            {episode.isoDate ? <span>{formatDate(episode.isoDate)}</span> : null}
-          </div>
-        </div>
+      <div className={styles.rowCopy}>
+        <h4 className={styles.rowTitleWrap}>
+          <a
+            href={episode.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.epTitle}
+          >
+            {episode.title}
+          </a>
+        </h4>
+        {meta ? <span className={styles.rowMeta}>{meta}</span> : null}
+        {!previewMode && state.error ? (
+          <p className={styles.error}>{state.error}</p>
+        ) : null}
       </div>
 
-      {!previewMode && state.error ? (
-        <p className="text-[0.75rem] text-[var(--destructive)]">{state.error}</p>
+      {listened ? (
+        <span className={styles.epEnd}>
+          <span className={styles.pill} data-tone="done">
+            Listened
+          </span>
+        </span>
       ) : null}
     </article>
   );
@@ -241,11 +230,12 @@ function PodcastSeriesGroup({
   const contentId = `podcast-series-${group.id}-episodes`;
 
   return (
-    <section className="overflow-hidden rounded-[var(--radius-md)] border border-[rgba(6,16,86,0.1)] bg-white">
+    <section className={styles.panel}>
       <div
         className={cn(
-          "grid gap-3 bg-[rgba(6,16,86,0.035)] transition-[padding] duration-200 ease-out",
-          isCollapsed ? "px-4 py-3 sm:px-5" : "px-4 py-4 sm:px-5",
+          styles.seriesHead,
+          "transition-[padding] duration-200 ease-out",
+          isCollapsed ? "px-3.5 py-3" : "px-3.5 pb-0 pt-3",
         )}
       >
         <button
@@ -253,19 +243,17 @@ function PodcastSeriesGroup({
           aria-expanded={!isCollapsed}
           aria-controls={contentId}
           onClick={() => setIsCollapsed((current) => !current)}
-          className="flex w-full items-start justify-between gap-3 text-left"
+          className={styles.seriesToggle}
         >
-          <div className="grid gap-1">
-            <h2 className="text-[15px] font-medium leading-snug tracking-[-0.015em] text-(--color-text-strong)">
-              {group.title}
-            </h2>
-            <p className="text-[12px] text-[var(--color-text-muted)]">
+          <span className={styles.rowCopy}>
+            <h3>{group.title}</h3>
+            <span className={styles.rowMeta}>
               {listenedCount} of {group.episodes.length} listened
-            </p>
-          </div>
+            </span>
+          </span>
           <ChevronDownIcon
             className={cn(
-              "mt-0.5 size-5 shrink-0 text-[var(--color-brand-blue)] transition-transform",
+              "size-4 shrink-0 text-[#a6abb2] transition-transform",
               !isCollapsed && "rotate-180",
             )}
           />
@@ -280,22 +268,21 @@ function PodcastSeriesGroup({
         >
           <div
             className={cn(
-              "grid min-h-0 gap-3 overflow-hidden",
+              "grid min-h-0 gap-2 overflow-hidden",
               isCollapsed && "invisible pointer-events-none",
             )}
           >
-            <div className="flex flex-wrap items-center gap-2">
+            <div className={cn(styles.actions, "pb-3")}>
               {previewMode ? (
-                <Button
+                <button
                   type="button"
-                  variant="primary"
-                  size="sm"
                   disabled={!seriesEpisodeGuids.length || isCollapsed}
                   onClick={() => onSetListened(seriesEpisodeGuids, nextListened)}
-                  className="w-fit rounded-full px-4"
+                  className={styles.btn}
+                  data-small=""
                 >
                   {allEpisodesListened ? "Mark all as unlistened" : "Mark all as listened"}
-                </Button>
+                </button>
               ) : (
                 <form
                   action={formAction}
@@ -312,20 +299,20 @@ function PodcastSeriesGroup({
                 </form>
               )}
               {onStartJourney ? (
-                <Button
+                <button
                   type="button"
-                  variant="outline"
-                  size="sm"
                   disabled={isCollapsed}
                   onClick={onStartJourney}
-                  className="w-fit rounded-full px-4"
+                  className={styles.btn}
+                  data-quiet=""
+                  data-small=""
                 >
                   Listen as a daily journey
-                </Button>
+                </button>
               ) : null}
             </div>
             {!previewMode && state.error ? (
-              <p className="text-[0.75rem] text-[var(--destructive)]">{state.error}</p>
+              <p className={cn(styles.error, "pb-2")}>{state.error}</p>
             ) : null}
           </div>
         </div>
@@ -359,15 +346,6 @@ function PodcastSeriesGroup({
     </section>
   );
 }
-
-function firstName(name: string) {
-  return name.trim().split(/\s+/)[0] || "there";
-}
-
-const weekdayFormatter = new Intl.DateTimeFormat("en-NG", {
-  weekday: "short",
-  timeZone: "UTC",
-});
 
 export function PodcastProgressPage({
   episodes,
@@ -456,9 +434,6 @@ export function PodcastProgressPage({
     prayerDateKeys: prayed,
     todayKey,
   });
-  const weekEpisodeDays = getSogpLearningWeek(days, selectedDay.dateKey).filter(
-    (day) => day !== null && day.episode !== null,
-  );
 
   function toggleLocalListened(episodeGuid: string, nextListened: boolean) {
     setLocalListenedGuids((current) => {
@@ -500,198 +475,102 @@ export function PodcastProgressPage({
     });
   }
 
+  const firstName = listenerName.trim().split(/\s+/)[0] || "there";
+  const subtitle = journeySummary
+    ? journeySummary.finished
+      ? `${journey.title} · finished`
+      : `${journey.title} · day ${journeySummary.dayNumber} of ${journeySummary.totalDays}`
+    : `Hi ${firstName}, new episodes Monday to Saturday`;
+
   return (
-    <section className="site-font-theme min-h-[calc(100dvh-var(--dashboard-topbar-offset,0px))] bg-[var(--color-surface-muted)] pb-16 text-zinc-900">
-      <header className="bg-[var(--color-brand-blue)] text-white">
-        <div className="site-shell-page sogp-shell-page flex items-center justify-between gap-4 py-2.5">
-          {/* The live dashboard shell carries navigation; the preview has no shell. */}
-          {previewMode ? (
-            <Link
-              href="/preview/dashboard"
-              className="inline-flex min-h-8 items-center gap-1.5 rounded-sm px-1 text-xs font-medium text-white/85 transition-colors duration-150 hover:text-white focus-visible:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white active:scale-[0.98]"
-            >
-              <ArrowLeftIcon className="size-3.5" strokeWidth={2} /> Dashboard
-            </Link>
-          ) : (
-            <span />
-          )}
-          <span className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-[var(--color-brand-lime)]">
-            Podcast
-          </span>
+    <div className={styles.page}>
+      {/* The live dashboard shell carries navigation; the preview has no shell. */}
+      {previewMode ? (
+        <Link href="/preview/dashboard" className={styles.back}>
+          <ArrowLeftIcon className="size-3.5" strokeWidth={2} /> Dashboard
+        </Link>
+      ) : null}
+
+      <div className={styles.heading}>
+        <div>
+          <h1>Podcast</h1>
+          <p className={styles.sub}>{subtitle}</p>
         </div>
-        <div className="site-shell-page sogp-shell-page grid gap-1 pb-4 pt-1">
-          <p className="text-[10px] font-medium uppercase tracking-[0.08em] text-white/75">
-            Pleros Podcast
-          </p>
-          <h1 className="text-[24px] font-medium leading-[1.1] tracking-[-0.025em] text-white">
-            Welcome, {firstName(listenerName)}
-          </h1>
-          {selectedDay.dayNumber ? (
-            <p className="text-xs font-medium text-white/75">
-              Day {selectedDay.dayNumber} of {days.length} · {journey.title}
-            </p>
-          ) : selectedDay.episode ? (
-            <p className="text-xs font-medium text-white/75">
-              {selectedDay.episode.episodeNumber
-                ? `Ep. ${selectedDay.episode.episodeNumber} · `
-                : null}
-              {getPodcastSeriesTitle(selectedDay.episode.title)}
-            </p>
-          ) : null}
-        </div>
-      </header>
-
-      <div className="site-shell-page sogp-shell-page grid gap-4 pb-6 lg:grid-cols-[15.5rem_minmax(0,1fr)] lg:items-start lg:pt-4 xl:grid-cols-[15.5rem_minmax(0,1fr)_15.5rem]">
-        <aside
-          data-podcast-section="calendar"
-          className="grid gap-4 lg:sticky lg:top-4 lg:row-span-3 xl:row-span-2"
-        >
-          <section className="relative left-1/2 right-1/2 -mx-[50vw] w-screen rounded-none bg-[var(--color-brand-sky)] p-3 lg:static lg:left-auto lg:right-auto lg:mx-0 lg:w-auto lg:rounded-sm">
-            <SogpCalendar
-              days={days}
-              selectedDateKey={selectedDay.dateKey}
-              todayKey={todayKey}
-              onSelect={setSelectedDateKey}
-              tinted
-            />
-          </section>
-
-          {weekEpisodeDays.length ? (
-            <section className="hidden rounded-sm border border-zinc-200 bg-white lg:block">
-              <div className="border-b border-zinc-100 px-4 py-3">
-                <h2 className="text-[13.5px] font-medium text-(--color-text-strong)">
-                  This week’s episodes
-                </h2>
-              </div>
-              <ul className="grid gap-0.5 p-2">
-                {weekEpisodeDays.map((day) =>
-                  day?.episode ? (
-                    <li key={day.dateKey}>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedDateKey(day.dateKey)}
-                        aria-pressed={day.dateKey === selectedDay.dateKey}
-                        className={cn(
-                          "grid w-full cursor-pointer grid-cols-[1rem_minmax(0,1fr)] items-start gap-2 rounded-[0.45rem] px-2 py-2 text-left transition-colors hover:bg-[var(--color-brand-sky-soft)]",
-                          day.dateKey === selectedDay.dateKey &&
-                            "bg-[var(--color-brand-sky-soft)]",
-                        )}
-                      >
-                        <span
-                          className={cn(
-                            "mt-0.5 grid size-4 place-items-center rounded-full",
-                            day.episodeListened
-                              ? "bg-[var(--color-brand-lime)] text-[var(--color-brand-blue)]"
-                              : "border border-zinc-300",
-                          )}
-                        >
-                          {day.episodeListened ? (
-                            <CheckIcon className="size-3" strokeWidth={2.5} />
-                          ) : null}
-                        </span>
-                        <span className="grid min-w-0 gap-0.5">
-                          <span className="text-[10px] font-medium uppercase tracking-[0.08em] text-(--color-text-muted)">
-                            {weekdayFormatter.format(
-                              new Date(`${day.dateKey}T00:00:00.000Z`),
-                            )}
-                          </span>
-                          <span className="truncate text-xs text-zinc-700">
-                            {day.episode.title}
-                          </span>
-                        </span>
-                      </button>
-                    </li>
-                  ) : null,
-                )}
-              </ul>
-            </section>
-          ) : null}
-        </aside>
-
-        <div data-podcast-section="daily-content" className="grid min-w-0 gap-4">
-          <PodcastJourneyCard
-            journey={journey}
-            summary={journeySummary}
-            onChangeJourney={() => openPicker()}
-          />
-          <PodcastDailyTasks
-            // A save error belongs to the day it happened on.
-            key={selectedDay.dateKey}
-            day={selectedDay}
-            todayKey={todayKey}
-            previewMode={previewMode}
-            onSetEpisodeListened={toggleLocalListened}
-            onSetPrayerComplete={setLocalPrayerComplete}
-          />
-        </div>
-
-        <div className="grid content-start gap-4 lg:col-start-2 xl:sticky xl:top-4 xl:col-start-auto xl:row-span-2">
-          <PodcastOtherDetails
-            summary={summary}
-            journeySummary={journeySummary}
-            leaderboard={leaderboard}
-            previewMode={previewMode}
-          />
-        </div>
-
-        <section
-          data-podcast-section="all-episodes"
-          className="grid min-w-0 gap-4 rounded-[var(--radius-md)] border border-zinc-200 bg-white p-4 md:p-5 lg:col-start-2"
-        >
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="text-[15px] font-medium tracking-[-0.015em] text-(--color-text-strong)">
-              All episodes
-            </h2>
-            <span className="rounded-full bg-[var(--color-brand-sky-soft)] px-2.5 py-0.5 text-[12px] font-medium text-[var(--color-brand-blue)]">
-              {summary.episodesListened} of {summary.episodesTotal} listened
-            </span>
-          </div>
-
-          <Link
-            href="/podcast"
-            className="group inline-flex w-fit items-center gap-1 text-[12.5px] font-medium text-[var(--color-brand-blue)] hover:underline"
-          >
-            Open podcast
-            <ArrowUpRightIcon className="size-3.5 transition-transform duration-150 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-          </Link>
-
-          <div className="relative">
-            <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--color-text-muted)]" />
-            <Input
-              type="search"
-              placeholder="Search episodes"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              className="h-10 pl-9"
-            />
-          </div>
-
-          <div className="grid gap-4">
-            {episodeGroups.length ? (
-              episodeGroups.map((group, index) => (
-                <PodcastSeriesGroup
-                  key={group.id}
-                  group={group}
-                  listened={listened}
-                  onToggleListened={toggleLocalListened}
-                  onSetListened={setLocalSeriesListened}
-                  previewMode={previewMode}
-                  defaultCollapsed={index > 0}
-                  onStartJourney={
-                    group.id === STANDALONE_PODCAST_SERIES_ID
-                      ? undefined
-                      : () => openPicker(podcastSeriesTrack(group.id))
-                  }
-                />
-              ))
-            ) : (
-              <p className="rounded-[var(--radius-md)] border border-(--color-line) bg-white px-4 py-5 text-[13px] text-[var(--color-text-muted)]">
-                No podcast episodes match your search.
-              </p>
-            )}
-          </div>
-        </section>
       </div>
+
+      <PodcastProgressStrip summary={summary} journeySummary={journeySummary} />
+
+      <section data-podcast-section="calendar" className={cn(styles.panel, "p-3")}>
+        <SogpCalendar
+          days={days}
+          selectedDateKey={selectedDay.dateKey}
+          todayKey={todayKey}
+          onSelect={setSelectedDateKey}
+        />
+      </section>
+
+      <div data-podcast-section="daily-content" className="grid min-w-0 gap-3">
+        <PodcastDailyTasks
+          // A save error belongs to the day it happened on.
+          key={selectedDay.dateKey}
+          day={selectedDay}
+          todayKey={todayKey}
+          previewMode={previewMode}
+          onSetEpisodeListened={toggleLocalListened}
+          onSetPrayerComplete={setLocalPrayerComplete}
+        />
+        <PodcastJourneyCard
+          journey={journey}
+          summary={journeySummary}
+          onChangeJourney={() => openPicker()}
+        />
+      </div>
+
+      <section data-podcast-section="all-episodes" className="grid min-w-0 gap-3">
+        <div className={styles.sectionTitle}>
+          <h2>All episodes</h2>
+          <Link href="/podcast" className={styles.link}>
+            Open podcast
+            <ArrowUpRightIcon className="size-3.5" strokeWidth={2} />
+          </Link>
+        </div>
+
+        <label className={styles.search}>
+          <SearchIcon className="size-4 shrink-0" aria-hidden="true" />
+          <span className="sr-only">Search episodes</span>
+          <input
+            type="search"
+            placeholder="Search episodes"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+          />
+        </label>
+
+        {episodeGroups.length ? (
+          episodeGroups.map((group, index) => (
+            <PodcastSeriesGroup
+              key={group.id}
+              group={group}
+              listened={listened}
+              onToggleListened={toggleLocalListened}
+              onSetListened={setLocalSeriesListened}
+              previewMode={previewMode}
+              defaultCollapsed={index > 0}
+              onStartJourney={
+                group.id === STANDALONE_PODCAST_SERIES_ID
+                  ? undefined
+                  : () => openPicker(podcastSeriesTrack(group.id))
+              }
+            />
+          ))
+        ) : (
+          <div className={styles.panel}>
+            <p className={styles.empty}>No podcast episodes match your search.</p>
+          </div>
+        )}
+      </section>
+
+      <PodcastOtherDetails leaderboard={leaderboard} previewMode={previewMode} />
 
       <PodcastTrackPicker
         open={picker.open}
@@ -703,6 +582,6 @@ export function PodcastProgressPage({
         previewMode={previewMode}
         onChosen={handleTrackChosen}
       />
-    </section>
+    </div>
   );
 }
