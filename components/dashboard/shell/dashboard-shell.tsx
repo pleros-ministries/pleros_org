@@ -4,7 +4,7 @@ import { useEffect, useId, useRef, useState, useTransition, type ReactNode } fro
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useFormStatus } from "react-dom";
+import { flushSync, useFormStatus } from "react-dom";
 import { motion } from "motion/react";
 import { LoaderCircleIcon, LogOutIcon, PanelLeftCloseIcon, PanelLeftOpenIcon } from "lucide-react";
 
@@ -55,8 +55,19 @@ function scopeDocumentTypography() {
 
 const COLLAPSED_KEY = "pleros-sidebar-collapsed";
 const REMEMBERED_KEY = "pleros-area-positions";
-/** Matches the sidebar width transition in dashboard-shell.module.css. */
+/** The sidebar fold: 240ms on the drawer curve, closing 256px down to the 72px rail. */
 const SIDEBAR_MS = 240;
+const SIDEBAR_EASE = "cubic-bezier(0.32, 0.72, 0, 1)";
+const RAIL_SHIFT = 256 - 72;
+/** The right inset of a computed `inset(...)` clip-path, in px (0 for none). */
+function clipRight(value: string) {
+  const parts = /inset\(([^)]*)\)/.exec(value)?.[1].trim().split(/\s+/) ?? [];
+  return parseFloat(parts[1] ?? parts[0] ?? "0") || 0;
+}
+/** The horizontal translation of a computed transform, in px. */
+function shiftX(value: string) {
+  return value === "none" ? 0 : new DOMMatrixReadOnly(value).m41;
+}
 type SidebarPhase = "open" | "folding" | "rail" | "unfolding";
 /** Matches the drawer exit animation in dashboard-shell.module.css. */
 const DRAWER_EXIT_MS = 200;
@@ -67,7 +78,7 @@ function Brand({ collapsed = false, onToggle }: { collapsed?: boolean; onToggle?
     <Link href="/dashboard" aria-label="Pleros home" className={frame.brandLink}>
       <Image src="/site/home/assets/white-pleros-logomark.webp" alt="Pleros" width={2067} height={1016} className={frame.brandMark} priority />
     </Link>
-    {onToggle ? <button type="button" className={frame.collapseButton} onClick={onToggle} aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"} aria-pressed={collapsed} title={collapsed ? "Expand sidebar" : "Collapse sidebar"}>
+    {onToggle ? <button type="button" className={frame.collapseButton} data-sidebar-toggle onClick={onToggle} aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"} aria-pressed={collapsed} title={collapsed ? "Expand sidebar" : "Collapse sidebar"}>
       {collapsed ? <PanelLeftOpenIcon className="size-[18px]" strokeWidth={1.9} /> : <PanelLeftCloseIcon className="size-[18px]" strokeWidth={1.9} />}
     </button> : null}
   </div>;
@@ -224,23 +235,54 @@ export function DashboardShell({ viewer, sections, children, notificationControl
     // sections only changes identity on refresh; the remembered targets are what matter.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname, routedArea, router]);
-  // Desktop sidebar can fold to an icon rail; remembered per browser. Folding
-  // fades the labels while the width closes, and only then swaps in the rail;
-  // unfolding drops the rail, opens the width, then fades the labels back in.
+  // Desktop sidebar can fold to an icon rail; remembered per browser. The fold
+  // is a FLIP: the page takes its final margin at once (one layout) and slides
+  // from where it was, while the full-width sidebar is trimmed from the right in
+  // step; the rail swaps in only when the trim ends. A second click mid-fold
+  // turns it around from wherever it is on screen.
   const [sidebar, setSidebar] = useState<SidebarPhase>("open");
-  const sidebarTimer = useRef<number | undefined>(undefined);
+  const asideRef = useRef<HTMLElement>(null);
+  const pageRef = useRef<HTMLDivElement>(null);
+  const sidebarMotion = useRef<Animation[]>([]);
   useEffect(() => {
     try { if (window.localStorage.getItem(COLLAPSED_KEY) === "1") setSidebar("rail"); } catch { /* storage blocked: stay expanded */ }
-    return () => window.clearTimeout(sidebarTimer.current);
+    return () => sidebarMotion.current.forEach(animation => animation.cancel());
   }, []);
   const collapsed = sidebar === "folding" || sidebar === "rail";
   const toggleCollapsed = () => {
     const folding = !collapsed;
     try { window.localStorage.setItem(COLLAPSED_KEY, folding ? "1" : "0"); } catch { /* storage blocked */ }
-    const settle = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : SIDEBAR_MS;
-    window.clearTimeout(sidebarTimer.current);
-    setSidebar(folding ? "folding" : "unfolding");
-    sidebarTimer.current = window.setTimeout(() => setSidebar(folding ? "rail" : "open"), settle);
+    const aside = asideRef.current, page = pageRef.current;
+    const toggle = aside?.querySelector<HTMLElement>("[data-sidebar-toggle]");
+    const moving = sidebar === "folding" || sidebar === "unfolding";
+    if (!aside || !page || !toggle || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      sidebarMotion.current.forEach(animation => animation.cancel());
+      setSidebar(folding ? "rail" : "open");
+      return;
+    }
+    // First: where the trim and the page are on screen right now.
+    const trimFrom = moving ? clipRight(getComputedStyle(aside).clipPath) : folding ? 0 : RAIL_SHIFT;
+    const pageLeft = parseFloat(getComputedStyle(page).marginLeft) + shiftX(getComputedStyle(page).transform);
+    sidebarMotion.current.forEach(animation => animation.cancel());
+    // Last: the page's final margin, laid out once.
+    flushSync(() => setSidebar(folding ? "folding" : "unfolding"));
+    const pageFrom = pageLeft - parseFloat(getComputedStyle(page).marginLeft);
+    // Invert and play: only clip-path and transform move.
+    const trimTo = folding ? RAIL_SHIFT : 0;
+    const timing = { duration: SIDEBAR_MS * Math.max(0.35, Math.abs(trimTo - trimFrom) / RAIL_SHIFT), easing: SIDEBAR_EASE, fill: "forwards" as const };
+    const edge = (inset: number) => ({ transform: `translateX(${-inset}px)` });
+    const trim = aside.animate([{ clipPath: `inset(0px ${trimFrom}px 0px 0px)` }, { clipPath: `inset(0px ${trimTo}px 0px 0px)` }], timing);
+    sidebarMotion.current = [
+      trim,
+      aside.animate([edge(trimFrom), edge(trimTo)], { ...timing, pseudoElement: "::after" }),
+      toggle.animate([edge(trimFrom), edge(trimTo)], timing),
+      page.animate([{ transform: `translateX(${pageFrom}px)` }, { transform: "translateX(0px)" }], { ...timing, fill: "none" }),
+    ];
+    trim.finished.then(() => {
+      flushSync(() => setSidebar(folding ? "rail" : "open"));
+      sidebarMotion.current.forEach(animation => animation.cancel());
+      sidebarMotion.current = [];
+    }, () => { /* cancelled: a second click turned it around */ });
   };
   const rail = sidebar === "rail";
   // Keyed on the address, not the sections object: a refresh hands the shell a
@@ -282,14 +324,14 @@ export function DashboardShell({ viewer, sections, children, notificationControl
     return () => wide.removeEventListener("change", onChange);
   }, []);
 
-  return <CrumbLabelProvider><div data-sidebar-collapsed={collapsed || undefined} className={cn("pleros-select-scope site-font-theme min-h-dvh bg-white font-[family-name:var(--font-be-vietnam-pro)]", dashboardFont.variable, dashboardHeadingFont.variable, dashboardFont.className, v3.root, frame.root)}>
+  return <CrumbLabelProvider><div data-sidebar-collapsed={collapsed || undefined} data-sidebar-phase={sidebar} className={cn("pleros-select-scope site-font-theme min-h-dvh bg-white font-[family-name:var(--font-be-vietnam-pro)]", dashboardFont.variable, dashboardHeadingFont.variable, dashboardFont.className, v3.root, frame.root)}>
     <a href="#dashboard-main" className={cn(frame.skipLink, focusRing)}>Skip to content</a>
-    <aside className={frame.liveSidebar} data-collapsed={collapsed || undefined} data-phase={sidebar}>
+    <aside ref={asideRef} className={frame.liveSidebar} data-collapsed={rail || undefined} data-phase={sidebar}>
       <Brand collapsed={rail} onToggle={toggleCollapsed} />
       <div className={frame.sidebarScroll}><Profile viewer={viewer} compact={rail} /><ShellNavigation sections={sections} area={area} onArea={selectTab} collapsed={rail} /></div>
       <AccountActions compact={rail} />
     </aside>
-    <div className={frame.liveFrame}>
+    <div ref={pageRef} className={frame.liveFrame}>
       {/* The You/Community switch stays on every page (user request, 18 October); deep pages
           add the breadcrumb below it, which carries the way back. */}
       <RootHeader active={area} communityAvailable={dashboardAreaHref("community", sections) !== null} className={frame.liveHeader}
