@@ -1,10 +1,14 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 
 import { getAppSession } from "@/lib/app-session";
 import { CommunityError } from "@/lib/community/errors";
 import { logFollowUp, recordContactInvite, type FollowUpSubject } from "@/lib/db/queries/people-follow-ups";
+import { handOverEnrollee, searchHandoverCandidates, type HandoverCandidate } from "@/lib/db/queries/enrollee-handover";
+import { firstNameOf } from "@/lib/community/visibility";
+import { sendPushToUser } from "@/lib/push/send";
 
 export type PeopleActionResult = { ok: true } | { ok: false; error: string };
 
@@ -45,4 +49,36 @@ export async function recordContactInviteAction(input: { privateContactId: numbe
     if (!Number.isSafeInteger(input.privateContactId) || !Number.isSafeInteger(input.groupId)) throw new CommunityError("Choose a contact and a group.");
     return recordContactInvite(userId, input.privateContactId, input.groupId);
   });
+}
+
+/** People who could take over following up an enrollee (full names, adults only). */
+export async function searchHandoverCandidatesAction(input: { enrollmentId: number; term: string }): Promise<{ ok: true; people: HandoverCandidate[] } | { ok: false; error: string }> {
+  const session = await getAppSession();
+  if (!session) return { ok: false, error: "Log in to continue." };
+  try {
+    return { ok: true, people: await searchHandoverCandidates(session.user.id, input.enrollmentId, input.term) };
+  } catch (error) {
+    console.error("Handover search failed:", error);
+    return { ok: false, error: "Search failed. Try again." };
+  }
+}
+
+/** Hands an enrollee the caller follows up to someone else; the new person gets a names-only push. */
+export async function handOverEnrolleeAction(input: { enrollmentId: number; newOwnerUserId: string }) {
+  let notice: { enrolleeFirstName: string; newOwnerFirstName: string } | null = null;
+  let actorName = "";
+  const result = await run(async userId => {
+    const session = await getAppSession();
+    actorName = session ? firstNameOf(session.user.name) : "Someone";
+    notice = await handOverEnrollee(userId, input.enrollmentId, input.newOwnerUserId);
+  });
+  if (result.ok && notice) {
+    const { enrolleeFirstName } = notice;
+    after(() => sendPushToUser(input.newOwnerUserId, {
+      title: "New person to follow up",
+      body: `${actorName} handed ${enrolleeFirstName} to you to follow up.`,
+      url: `/dashboard/community/enrollees/${input.enrollmentId}`,
+    }, { gate: "community" }).catch(error => console.error("Handover push failed:", error)));
+  }
+  return result;
 }

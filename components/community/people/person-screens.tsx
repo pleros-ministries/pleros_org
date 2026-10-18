@@ -6,7 +6,8 @@ import { useState, useTransition } from "react";
 import type { ReactNode } from "react";
 import { CheckIcon, ClipboardListIcon, HomeIcon, LockIcon, MailIcon, MessageCircleIcon, PenLineIcon, PhoneIcon, SendIcon, UserPlusIcon } from "lucide-react";
 
-import { logFollowUpAction, recordContactInviteAction } from "@/app/(site)/dashboard/community/_actions/people-actions";
+import { handOverEnrolleeAction, logFollowUpAction, recordContactInviteAction, searchHandoverCandidatesAction } from "@/app/(site)/dashboard/community/_actions/people-actions";
+import type { HandoverCandidate } from "@/lib/db/queries/enrollee-handover";
 import { inviteEnrolleeToGroup, withdrawGroupInvitation } from "@/app/_actions/sogp-invitation-actions";
 import type { FollowUpEntry, FollowUpKind, OwnEnrollee } from "@/lib/db/queries/people-follow-ups";
 import type { SentInvitation } from "@/lib/db/queries/sogp-group-invitations";
@@ -96,6 +97,57 @@ export function FollowUpLog({ subject, firstName, entries, extra, startOpen = fa
 }
 
 /** One enrollee the viewer follows up: how they joined, how to reach them, and getting them into a group. */
+/** Hand this enrollee to someone else to follow up (user decision, 18 October). */
+function HandOver({ enrollmentId, firstName }: { enrollmentId: number; firstName: string }) {
+  const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [term, setTerm] = useState("");
+  const [people, setPeople] = useState<HandoverCandidate[]>([]);
+  const [chosen, setChosen] = useState<HandoverCandidate | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [searching, startSearch] = useTransition();
+  const [saving, startSave] = useTransition();
+  function search(value: string) {
+    setTerm(value); setChosen(null); setError(null);
+    if (value.trim().length < 2) { setPeople([]); return; }
+    startSearch(async () => {
+      const result = await searchHandoverCandidatesAction({ enrollmentId, term: value });
+      if (result.ok) setPeople(result.people); else setError(result.error);
+    });
+  }
+  function confirm() {
+    if (!chosen) return;
+    startSave(async () => {
+      const result = await handOverEnrolleeAction({ enrollmentId, newOwnerUserId: chosen.userId });
+      if (!result.ok) { setError(result.error); return; }
+      router.push("/dashboard/community/enrollees");
+    });
+  }
+  return <>
+    <div className={styles.sectionTitle}>
+      <h2>Follow-up person</h2>
+      <button type="button" className={styles.quiet} onClick={() => { setOpen(!open); setChosen(null); setError(null); }} aria-expanded={open}>{open ? "Cancel" : "Hand over"}</button>
+    </div>
+    {open ? <div className={`${styles.panel} grid gap-3 p-3.5`}>
+      {chosen ? <>
+        <p className="m-0 text-[13.5px]">Hand {firstName} to <b className="font-medium">{chosen.name}</b>?</p>
+        <p className="m-0 text-[12px] text-(--color-community-muted)">They become {firstName}’s follow-up person. You stop seeing {firstName}’s phone number, and your follow-up notes stay private to you.</p>
+        <div className="flex gap-2"><button type="button" className={styles.btn} data-primary disabled={saving} onClick={confirm}>{saving ? "Handing over…" : "Hand over"}</button><button type="button" className={styles.btn} disabled={saving} onClick={() => setChosen(null)}>Back</button></div>
+      </> : <>
+        <label className="grid gap-1.5 text-[13px] font-medium">Who should follow up {firstName}?<input type="search" value={term} onChange={event => search(event.target.value)} placeholder="Search by name" autoComplete="off" className="h-10 rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white px-3 text-[14px] font-normal outline-none focus:border-(--color-community-blue)" /></label>
+        {term.trim().length >= 2 ? (people.length ? <ul className={`${styles.list} -mx-3.5`}>
+          {people.map(person => <li key={person.userId}><button type="button" className={`${styles.row} w-full text-left`} onClick={() => setChosen(person)}>
+            <Initials name={person.name} />
+            <span className="grid min-w-0 flex-1"><span className="truncate text-[13.5px] font-medium">{person.name}</span>{person.region ? <span className="text-[12px] text-(--color-community-muted)">{person.region}</span> : null}</span>
+            <span className="text-[12.5px] font-medium text-(--color-community-blue)">Choose</span>
+          </button></li>)}
+        </ul> : <p className="m-0 text-[12.5px] text-(--color-community-muted)">{searching ? "Searching…" : "No one found with that name."}</p>) : null}
+      </>}
+      {error ? <p role="alert" className="m-0 text-[12.5px] text-(--destructive)">{error}</p> : null}
+    </div> : null}
+  </>;
+}
+
 export function EnrolleeDetail({ enrollee, followUps }: { enrollee: OwnEnrollee; followUps: FollowUpEntry[] }) {
   const subject = { enrollmentId: enrollee.enrollmentId };
   const inYours = enrollee.group?.yours && enrollee.group.groupId != null && enrollee.group.membershipId != null;
@@ -130,6 +182,8 @@ export function EnrolleeDetail({ enrollee, followUps }: { enrollee: OwnEnrollee;
     </div>
 
     <FollowUpLog subject={subject} firstName={enrollee.firstName} entries={followUps} />
+
+    <HandOver enrollmentId={enrollee.enrollmentId} firstName={enrollee.firstName} />
 
     <p className={styles.note}><LockIcon className="mr-1 inline size-3 -translate-y-px" strokeWidth={2.2} aria-hidden />Their phone number and your follow-ups are only for you as their follow-up person. Progress and answers show once they join one of your groups.</p>
   </div>;
