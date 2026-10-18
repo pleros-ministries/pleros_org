@@ -59,7 +59,7 @@ describe("dashboard devotion tracking", () => {
     expect(podcastPage).toContain("grid-rows-[1fr]");
     expect(podcastPage).toContain("defaultCollapsed");
     expect(podcastPage).toContain("defaultCollapsed={index > 0}");
-    expect(podcastPage).toContain('isCollapsed ? "px-4 py-3 sm:px-5"');
+    expect(podcastPage).toContain('isCollapsed ? "px-3.5 py-3"');
     expect(podcastPage).not.toContain("Select unlistened");
     expect(podcastPage).not.toContain("Mark unlistened as listened");
     expect(podcastPage).not.toContain("Mark selected as listened");
@@ -91,15 +91,16 @@ describe("dashboard devotion tracking", () => {
   test("keeps podcast progress controls comfortable on mobile", () => {
     const podcastPage = source("components", "dashboard", "podcast-progress-page.tsx");
 
-    expect(podcastPage).toContain("grid-cols-[auto_minmax(0,1fr)]");
-    expect(podcastPage).toContain('className="grid gap-1.5"');
-    expect(podcastPage).toContain("min-h-9 min-w-9");
-    expect(podcastPage).toContain("size-5");
-    expect(podcastPage).toContain("px-4 py-5");
-    expect(podcastPage).toContain("h-10 pl-9");
-    expect(podcastPage).toContain("rounded-full");
-    expect(podcastPage).toContain('size="sm"');
-    expect(podcastPage).toContain("w-fit rounded-full px-4");
+    const podcastStyles = source("components", "dashboard", "podcast.module.css");
+
+    // The episode number chip is the listened checkbox: a 36px tap target.
+    expect(podcastPage).toContain("styles.epCheck");
+    expect(podcastStyles).toContain(".epCheck { position: relative; display: grid; flex: none; place-items: center; width: 36px; height: 36px;");
+    // Titles wrap to two lines; the search field stays 16px so phones don't zoom.
+    expect(podcastPage).toContain("styles.rowTitleWrap");
+    expect(podcastStyles).toContain("-webkit-line-clamp: 2");
+    expect(podcastStyles).toContain("font-size: 16px");
+    expect(podcastPage).toContain('type="search"');
     expect(podcastPage).not.toContain("w-full rounded-full");
     expect(podcastPage).toContain("previewMode");
   });

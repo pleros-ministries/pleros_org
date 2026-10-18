@@ -3,7 +3,6 @@
 import { useState, useTransition } from "react";
 
 import { choosePodcastTrackAction } from "@/app/_actions/podcast-journey-actions";
-import { SOGP_TASK_PRIMARY_BUTTON } from "@/components/sogp/sogp-daily-tasks";
 import {
   Dialog,
   DialogContent,
@@ -49,36 +48,36 @@ function TrackOptionRow({
   onSelect: (track: string) => void;
 }) {
   return (
-    <label className="grid cursor-pointer grid-cols-[auto_minmax(0,1fr)] items-start gap-3 rounded-md border border-zinc-200 bg-white px-3 py-3 transition-colors hover:bg-zinc-50 has-checked:border-(--color-brand-blue) has-checked:bg-(--color-brand-sky-soft)">
+    <label className="grid min-w-0 cursor-pointer grid-cols-[auto_minmax(0,1fr)] items-start gap-3 rounded-[10px] border border-[#e2e5ea] bg-white px-3.5 py-3 transition-colors hover:bg-[#f8f9fb] has-checked:border-[#2056d6] has-checked:bg-[#f4f7fe]">
       <input
         type="radio"
         name="podcast-track"
         value={option.track}
         checked={checked}
         onChange={() => onSelect(option.track)}
-        className="mt-0.5 size-4 accent-(--color-brand-blue)"
+        className="mt-0.5 size-4 accent-[#2056d6]"
       />
       <span className="grid min-w-0 gap-0.5">
         <span className="flex flex-wrap items-center gap-1.5">
-          <span className="ppc-heading text-sm font-semibold text-zinc-900">
+          <span className="text-[13.5px] font-medium leading-[18px] text-(--color-text-strong)">
             {option.title}
           </span>
           {option.recommended ? (
-            <span className="rounded-full bg-(--color-brand-lime) px-2 py-0.5 text-[0.62rem] font-semibold text-(--color-brand-blue)">
+            <span className="h-5 rounded-full bg-[#e4ebfd] px-2 text-[11px] font-medium leading-5 text-[#2331ae]">
               Recommended
             </span>
           ) : null}
           {current ? (
-            <span className="rounded-full border border-zinc-200 bg-white px-2 py-0.5 text-[0.62rem] font-semibold text-zinc-500">
+            <span className="h-5 rounded-full bg-[#eceef2] px-2 text-[11px] font-medium leading-5 text-(--color-text-muted)">
               Current
             </span>
           ) : null}
         </span>
         {option.description ? (
-          <span className="text-xs leading-[1.45] text-zinc-500">{option.description}</span>
+          <span className="text-[12px] leading-4 text-(--color-text-muted)">{option.description}</span>
         ) : null}
         {option.meta ? (
-          <span className="text-[0.7rem] font-medium text-zinc-400">{option.meta}</span>
+          <span className="text-[12px] leading-4 text-(--color-text-muted)">{option.meta}</span>
         ) : null}
       </span>
     </label>
@@ -169,10 +168,10 @@ function PickerBody({
   return (
     <>
       <DialogHeader>
-        <DialogTitle className="ppc-heading text-lg font-semibold text-zinc-900">
+        <DialogTitle className="font-[family-name:var(--font-dashboard-heading)] text-[17px] font-medium leading-6 text-(--color-text-strong)">
           Choose your journey
         </DialogTitle>
-        <DialogDescription className="text-xs leading-[1.5] text-zinc-500">
+        <DialogDescription className="text-[12.5px] leading-[18px] text-(--color-text-muted)">
           Listen to one episode a day. Missed days stay open so you can catch up.
         </DialogDescription>
       </DialogHeader>
@@ -189,7 +188,7 @@ function PickerBody({
           />
         ))}
         {seriesOptions.length ? (
-          <p className="pt-2 text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-zinc-400">
+          <p className="pt-2 text-[12.5px] leading-[18px] text-(--color-text-muted)">
             Or follow one series
           </p>
         ) : null}
@@ -204,8 +203,8 @@ function PickerBody({
         ))}
       </fieldset>
 
-      <div className="grid gap-2 border-t border-zinc-100 pt-3">
-        <p className="text-xs leading-[1.5] text-zinc-500">
+      <div className="grid gap-2 border-t border-[#e7e9ec] pt-3">
+        <p className="text-[12px] leading-4 text-(--color-text-muted)">
           {isLatest
             ? "Episodes you’ve already listened to stay ticked."
             : "Day 1 starts today. Episodes you’ve already listened to stay ticked."}
@@ -214,12 +213,12 @@ function PickerBody({
           type="button"
           onClick={choose}
           disabled={pending || (isLatest && isCurrent)}
-          className={`${SOGP_TASK_PRIMARY_BUTTON} w-fit`}
+          className="inline-flex h-10 w-full cursor-pointer items-center justify-center rounded-[11px] bg-[#2056d6] px-4 text-[14px] font-medium text-white disabled:cursor-not-allowed disabled:opacity-50 sm:w-fit"
         >
           {pending ? "Saving…" : actionLabel}
         </button>
         {error ? (
-          <p role="alert" className="text-xs text-red-700">
+          <p role="alert" className="text-[12px] text-red-700">
             {error}
           </p>
         ) : null}
@@ -251,7 +250,7 @@ export function PodcastTrackPicker({
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="site-font-theme grid max-h-[85vh] grid-rows-[auto_minmax(0,1fr)_auto] gap-4 overflow-hidden rounded-md border-zinc-200 bg-white p-5 text-zinc-900 sm:p-6">
+      <DialogContent className="site-font-theme grid max-h-[85vh] grid-rows-[auto_minmax(0,1fr)_auto] gap-4 overflow-hidden rounded-[12px] border-[#e2e5ea] bg-white p-4 text-(--color-text-strong) sm:p-5">
         {/* The popup unmounts when closed, so each opening starts afresh. */}
         <PickerBody
           currentTrack={currentTrack}
