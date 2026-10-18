@@ -165,9 +165,8 @@ describe("focused Welcome Pack pages", () => {
       />,
     );
     expect(html.match(/<a /g)).toHaveLength(1);
-    expect(html).toContain("Welcome to SOGP");
+    expect(html).toContain("Your journey of purpose starts here");
     expect(html).not.toContain("Welcome to Pleros");
-    expect(html).toContain("Your journey of Purpose starts here");
     expect(html).not.toContain("Your journey starts here");
     expect(html).toContain("Join the orientation group");
     expect(html).not.toContain("lucide-send");
@@ -198,8 +197,8 @@ describe("focused Welcome Pack pages", () => {
     expect(orientationHtml).toContain("sogp-welcome-WaXgk9zqi78.mp4");
     expect(orientationHtml).not.toContain("site-hero-eyebrow");
     expect(giftsHtml).not.toContain("site-hero-eyebrow");
-    expect(orientationHtml).toContain("uppercase");
-    expect(orientationHtml).toContain("Welcome Pack");
+    // The shell breadcrumb names the Welcome Pack; the page has no eyebrow.
+    expect(orientationHtml).not.toContain("uppercase");
     expect(giftsHtml).toContain("Welcome to Purpose (ebook)");
     expect(giftsHtml).toContain("Welcome to Purpose (Audiobook)");
   });

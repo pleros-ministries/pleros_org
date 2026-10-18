@@ -7,7 +7,6 @@ import {
   DashboardPageFrame,
   DashboardPageHeader,
   DashboardSection,
-  EyebrowLink,
 } from "./shared/page";
 import { dashboardFont } from "./shared/ui";
 import {
@@ -25,10 +24,6 @@ import { OrientationSurveyGate } from "./orientation-survey-gate";
 const hubPath = "/dashboard/welcomepack";
 
 /** Eyebrow leading back to the hub on every Welcome Pack subpage. */
-function HubEyebrow({ basePath }: { basePath: string }) {
-  return <EyebrowLink href={basePath}>Welcome Pack</EyebrowLink>;
-}
-
 export function WelcomePackHubPage({
   basePath = hubPath,
   setupComplete = false,
@@ -68,7 +63,7 @@ export function WelcomePackJoinPage({
   return (
     <Root className={cn("min-w-0 bg-white", dashboardFont, !embedded && "min-h-screen")}>
       <DashboardPageFrame className="grid grid-cols-[minmax(0,1fr)] gap-6 sm:max-w-[38rem]">
-        <DashboardPageHeader eyebrow="Welcome to SOGP" title="Your journey of Purpose starts here" />
+        <DashboardPageHeader title="Your journey of purpose starts here" />
 
         {videoSrc ? (
           <WelcomePackVideo src={videoSrc} poster={videoPosterSrc} shape="square" />
@@ -97,7 +92,7 @@ export function WelcomePackOrientationPage({
 }) {
   return (
     <DashboardPageFrame className="grid max-w-[46rem] gap-6">
-      <DashboardPageHeader eyebrow={<HubEyebrow basePath={basePath} />} title="Orientation video" />
+      <DashboardPageHeader title="Orientation video" />
       <WelcomePackVideo
         src={videoSrc}
         poster="/site/sogp/sogp-welcome-WaXgk9zqi78.jpg"
@@ -115,14 +110,13 @@ export function WelcomePackOrientationPage({
  */
 export function WelcomePackSetupPage({
   children,
-  basePath = hubPath,
 }: {
   children: ReactNode;
   basePath?: string;
 }) {
   return (
     <DashboardPageFrame className="grid max-w-[46rem] gap-6">
-      <DashboardPageHeader eyebrow={<HubEyebrow basePath={basePath} />} title="Set up your app and reminders" />
+      <DashboardPageHeader title="Set up your app and reminders" />
       {children}
     </DashboardPageFrame>
   );
@@ -130,14 +124,13 @@ export function WelcomePackSetupPage({
 
 export function WelcomePackGiftsPage({
   extraGiftsUnlocked,
-  basePath = hubPath,
 }: {
   extraGiftsUnlocked: boolean;
   basePath?: string;
 }) {
   return (
     <DashboardPageFrame className="grid max-w-[44rem] gap-8">
-      <DashboardPageHeader eyebrow={<HubEyebrow basePath={basePath} />} title="Your gifts" />
+      <DashboardPageHeader title="Your gifts" />
 
       <DashboardSection title="Main gifts">
         <WelcomePackGiftGrid>

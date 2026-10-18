@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { BellOffIcon, ChevronRightIcon, MessageCircleQuestionIcon, PlusIcon, UsersRoundIcon } from "lucide-react";
+import { BellOffIcon, ChevronRightIcon, LockIcon, MessageCircleQuestionIcon, PlusIcon, UsersRoundIcon } from "lucide-react";
 
 import styles from "@/components/community/discipleship/discipleship-group.module.css";
 import { Initials } from "@/components/community/discipleship/shared";
@@ -151,7 +151,7 @@ export function OversightBranch({ data, branchId }: { data: OversightData; branc
 
     {tab === "disciplers" ? (disciplers.length ? <>
       <div className={styles.panel}><ul className={styles.list}>{disciplers.map(row => <DisciplerRow key={row.enrollmentId} row={row} />)}</ul></div>
-      <p className={styles.note}>🔒 Counts only. Only the discipler reads questions and answers.</p>
+      <p className={styles.note}><LockIcon className="mr-1 inline size-3 -translate-y-px" strokeWidth={2.2} aria-hidden />Counts only. Only the discipler reads questions and answers.</p>
     </> : <p className={`${styles.panel} ${styles.empty}`}>No one in this branch leads a discipleship group with disciples yet.</p>) : null}
 
     {tab === "reports" ? (workers.length ? <div className={styles.panel}><ul className={styles.list}>
@@ -176,6 +176,6 @@ export function QuestionsWaiting({ data }: { data: OversightData }) {
         {row.messageUserId ? <MessageButton userId={row.messageUserId} /> : null}
       </li>)}
     </ul></div> : <p className={`${styles.panel} ${styles.empty}`}>Every question has been answered within 3 days.</p>}
-    <p className={styles.note}>🔒 You see who has questions waiting and for how long, never the questions or answers. Only the discipler reads them.</p>
+    <p className={styles.note}><LockIcon className="mr-1 inline size-3 -translate-y-px" strokeWidth={2.2} aria-hidden />You see who has questions waiting and for how long, never the questions or answers. Only the discipler reads them.</p>
   </div>;
 }

@@ -7,7 +7,7 @@ import { usePushSubscription } from "@/lib/push/use-push";
 
 const manageLink = (
   <Link
-    href="/dashboard/welcomepack/setup"
+    href="/dashboard/profile/reminders"
     className="w-fit text-xs font-medium text-[var(--color-brand-blue)] underline underline-offset-4"
   >
     Manage reminders

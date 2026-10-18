@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { CheckIcon, MessageCircleIcon, PhoneIcon, UserPlusIcon } from "lucide-react";
+import type { ReactNode } from "react";
+import { CheckIcon, ClipboardListIcon, HomeIcon, LockIcon, MailIcon, MessageCircleIcon, PenLineIcon, PhoneIcon, SendIcon, UserPlusIcon } from "lucide-react";
 
 import { logFollowUpAction, recordContactInviteAction } from "@/app/(site)/dashboard/community/_actions/people-actions";
 import { inviteEnrolleeToGroup, withdrawGroupInvitation } from "@/app/_actions/sogp-invitation-actions";
@@ -20,7 +21,8 @@ const clock = new Intl.DateTimeFormat("en-GB", { hour: "numeric", minute: "2-dig
 const firstOf = (name: string) => name.trim().split(/\s+/)[0] || name;
 
 const KIND_LABEL: Record<FollowUpKind, string> = { whatsapp: "WhatsApp", call: "Call", visit: "Visit", message: "Message", note: "Note" };
-const KIND_ICON: Record<FollowUpKind, string> = { whatsapp: "✆", call: "☏", visit: "⌂", message: "✉", note: "✎" };
+const iconClass = "size-3.5";
+const KIND_ICON: Record<FollowUpKind, ReactNode> = { whatsapp: <MessageCircleIcon className={iconClass} strokeWidth={2.2} />, call: <PhoneIcon className={iconClass} strokeWidth={2.2} />, visit: <HomeIcon className={iconClass} strokeWidth={2.2} />, message: <MailIcon className={iconClass} strokeWidth={2.2} />, note: <PenLineIcon className={iconClass} strokeWidth={2.2} /> };
 const SOURCE: Record<OwnEnrollee["source"], string> = { code: "Your referral code", link: "Your referral link", geography: "Your area", reassigned: "Reassigned to you", assigned: "Assigned to you" };
 
 type Subject = { enrollmentId: number } | { privateContactId: number };
@@ -42,7 +44,7 @@ function ContactButtons({ subject, whatsappUrl, callHref, firstName }: { subject
 export function FollowUpLog({ subject, firstName, entries, extra, startOpen = false }: {
   subject: Subject; firstName: string; entries: FollowUpEntry[];
   /** Read-only history rows merged in by date (reports a contact was part of, when they were saved). */
-  extra?: Array<{ key: string; icon: string; title: string; meta: string; at: string; href?: string }>;
+  extra?: Array<{ key: string; icon: ReactNode; title: string; meta: string; at: string; href?: string }>;
   startOpen?: boolean;
 }) {
   const router = useRouter();
@@ -83,7 +85,7 @@ export function FollowUpLog({ subject, firstName, entries, extra, startOpen = fa
       <ul className={styles.list}>
         {rows.map(row => {
           const body = <>
-            <span className="grid size-7 shrink-0 place-items-center rounded-full bg-[#f1f2f5] text-[12px]" aria-hidden="true">{row.icon}</span>
+            <span className="grid size-8 shrink-0 place-items-center rounded-full bg-[#eef1f6] text-[#4a5568]" aria-hidden="true">{row.icon}</span>
             <span className={styles.rowCopy}><span className={styles.rowTitle} style={{ fontWeight: 500 }}>{row.title}</span><span className={styles.rowMeta} style={{ whiteSpace: "normal" }}>{row.meta}</span></span>
           </>;
           return <li key={row.key}>{row.href ? <Link href={row.href} className={styles.row}>{body}</Link> : <div className={styles.row}>{body}</div>}</li>;
@@ -129,7 +131,7 @@ export function EnrolleeDetail({ enrollee, followUps }: { enrollee: OwnEnrollee;
 
     <FollowUpLog subject={subject} firstName={enrollee.firstName} entries={followUps} />
 
-    <p className={styles.note}>🔒 Their phone number and your follow-ups are only for you as their follow-up person. Progress and answers show once they join one of your groups.</p>
+    <p className={styles.note}><LockIcon className="mr-1 inline size-3 -translate-y-px" strokeWidth={2.2} aria-hidden />Their phone number and your follow-ups are only for you as their follow-up person. Progress and answers show once they join one of your groups.</p>
   </div>;
 }
 
@@ -267,11 +269,11 @@ export function ContactDetail({ contact, followUps }: { contact: ContactDetailDa
     {contact.note ? <div className={`${styles.panel} ${styles.tools}`}><p style={{ margin: 0, whiteSpace: "pre-wrap" }}>{contact.note}</p></div> : <p className={`${styles.panel} ${styles.empty}`}>No note saved.</p>}
 
     <FollowUpLog subject={subject} firstName={first} entries={followUps} extra={[
-      ...contact.history.map(row => ({ key: `report-${row.activityId}`, icon: "◎", title: REPORT_KIND[row.kind] ?? "Report", meta: `${longDay.format(new Date(`${row.date}T12:00:00Z`))} · in your report`, at: `${row.date}T12:00:00.000Z`, href: `/dashboard/community/report/${row.activityId}` })),
-      ...(contact.invite ? [{ key: "invite", icon: "↗", title: `Invited to ${contact.invite.groupName}`, meta: `${longDay.format(new Date(contact.invite.at))} · shared on WhatsApp`, at: contact.invite.at }] : []),
-      { key: "saved", icon: "+", title: "Contact saved", meta: `${longDay.format(saved)}, ${clock.format(saved)}`, at: contact.createdAt },
+      ...contact.history.map(row => ({ key: `report-${row.activityId}`, icon: <ClipboardListIcon className={iconClass} strokeWidth={2.2} />, title: REPORT_KIND[row.kind] ?? "Report", meta: `${longDay.format(new Date(`${row.date}T12:00:00Z`))} · in your report`, at: `${row.date}T12:00:00.000Z`, href: `/dashboard/community/report/${row.activityId}` })),
+      ...(contact.invite ? [{ key: "invite", icon: <SendIcon className={iconClass} strokeWidth={2.2} />, title: `Invited to ${contact.invite.groupName}`, meta: `${longDay.format(new Date(contact.invite.at))} · shared on WhatsApp`, at: contact.invite.at }] : []),
+      { key: "saved", icon: <UserPlusIcon className={iconClass} strokeWidth={2.2} />, title: "Contact saved", meta: `${longDay.format(saved)}, ${clock.format(saved)}`, at: contact.createdAt },
     ]} />
 
-    <p className={styles.note}>🔒 Private to you. Saving a contact never creates an account or a group membership.</p>
+    <p className={styles.note}><LockIcon className="mr-1 inline size-3 -translate-y-px" strokeWidth={2.2} aria-hidden />Private to you. Saving a contact never creates an account or a group membership.</p>
   </div>;
 }

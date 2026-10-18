@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { MessageCircleIcon } from "lucide-react";
+import { LockIcon, MessageCircleIcon } from "lucide-react";
 
 import { logWhatsAppContactAction, removeDiscipleAction } from "@/app/(site)/dashboard/sogp/discipleship/_actions";
 import { LeaderPromptList, formatDiscipleshipDate, useDiscipleshipAction } from "@/components/sogp/discipleship-check-ins";
@@ -117,7 +117,7 @@ export function DiscipleDetail({ groupId, groupName, disciple, week, work, promp
 
     {tab === "questions" ? <div className={`${styles.panel} ${styles.tools}`}><LeaderEpisodeQuestionList questions={episodeQuestions} preview={false} /></div> : null}
 
-    <p className={styles.note}>🔒 Only you, as {disciple.firstName}&apos;s discipler, see their work here. Other disciples never do.</p>
+    <p className={styles.note}><LockIcon className="mr-1 inline size-3 -translate-y-px" strokeWidth={2.2} aria-hidden />Only you, as {disciple.firstName}&apos;s discipler, see their work here. Other disciples never do.</p>
 
     {!paused ? <button type="button" className={styles.danger} disabled={remove.pending} onClick={() => {
       if (window.confirm(`Remove ${disciple.firstName} from your group?`)) {

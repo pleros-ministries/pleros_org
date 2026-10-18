@@ -124,7 +124,7 @@ export function SetupSteps({
           {continueLabel}
         </Link>
         <p className={`font-[var(--font-be-vietnam-pro)] ${SETUP_NOTE}`}>
-          You can come back to these steps from your Welcome Pack at any time.
+          You can change these any time in Profile, under Notifications and reminders.
         </p>
       </div>
     </div>

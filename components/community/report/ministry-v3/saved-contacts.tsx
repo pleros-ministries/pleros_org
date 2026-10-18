@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { LockIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { startTransition, useRef, useState } from "react";
 import { DashboardIcon, StatusPill } from "@/components/dashboard/v3/primitives";
@@ -85,7 +86,7 @@ export function AddSavedContact({ onPersist, inviteGroups = [], initialInviteGro
     </> : null}
     {serverError ? <p role="alert" className={people.error}>{serverError}</p> : null}
     <button type="button" className={people.share} style={{ border: 0 }} disabled={busy} onClick={save}>{busy ? "Saving…" : inviteTo ? "Save and invite" : "Save contact"}</button>
-    <p className={people.note}>🔒 Private to you. Saving won’t create an account or add them to a group; they join only after enrolling and accepting.</p>
+    <p className={people.note}><LockIcon className="mr-1 inline size-3 -translate-y-px" strokeWidth={2.2} aria-hidden />Private to you. Saving won’t create an account or add them to a group; they join only after enrolling and accepting.</p>
   </div>;
 }
 

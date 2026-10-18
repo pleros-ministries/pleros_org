@@ -53,8 +53,8 @@ describe("Welcome Pack setup page", () => {
 
     expect(html).toContain("Set up your app and reminders");
     expect(html).toContain("text-[24px]");
-    // The back link to the hub.
-    expect(html).toContain('href="/dashboard/welcomepack"');
+    // The shell breadcrumb links back to the hub; the page has no eyebrow link.
+    expect(html).not.toContain('href="/dashboard/welcomepack"');
 
     const positions = STEP_TITLES.map((title) => html.indexOf(title));
     expect(positions.every((position) => position >= 0)).toBe(true);

@@ -249,7 +249,7 @@ export function NotificationBell() {
       </div>
 
       <footer className={styles.foot}>
-        <Link href="/dashboard/welcomepack/setup" className={styles.textButton} onClick={close}><SettingsIcon className="size-4" strokeWidth={2} aria-hidden="true" />Notification settings</Link>
+        <Link href="/dashboard/profile/reminders" className={styles.textButton} onClick={close}><SettingsIcon className="size-4" strokeWidth={2} aria-hidden="true" />Notification settings</Link>
       </footer>
     </div> : null}
   </div>;

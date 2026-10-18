@@ -69,6 +69,7 @@ const DASHBOARD_FOCUS: Array<[RegExp, (match: RegExpMatchArray) => DashboardFocu
   [/^\/dashboard\/sogp\/reviews\/\d+\/(attendance|make-up-offer|make-up)$/, m => ({ title: m[1] === "attendance" ? "Confirm attendance" : m[1] === "make-up-offer" ? "Offer a make-up" : "Make up a review", back: { href: "/dashboard/sogp/reviews", label: "Back to group reviews" } })],
   [/^\/dashboard\/sogp\/reviews$/, () => ({ title: "Group reviews", back: MY_SOGP })],
   [/^\/dashboard\/sogp\/follow-up\/(request|welcome)$/, m => ({ title: m[1] === "request" ? "Follow-up request" : "Welcome to SOGP", back: { href: "/dashboard/sogp/follow-up", label: "Back to your follow-up person" } })],
+  [/^\/dashboard\/profile\/reminders$/, () => ({ title: "Notifications and reminders", back: { href: "/dashboard/profile", label: "Back to Profile" } })],
   [/^\/dashboard\/community\/enrollees\/(\d+)\/invite$/, m => ({ title: "Invite to a group", back: { href: `/dashboard/community/enrollees/${m[1]}`, label: "Back to enrollee" } })],
   [/^\/dashboard\/community\/enrollees\/\d+$/, () => ({ title: "Enrollee", back: { href: "/dashboard/community/enrollees", label: "Back to My enrollees" } })],
   [/^\/dashboard\/(community|sogp)\/enrollees$/, () => ({ title: "My enrollees", back: GROUPS })],
@@ -108,7 +109,7 @@ const DASHBOARD_FOCUS: Array<[RegExp, (match: RegExpMatchArray) => DashboardFocu
   [/^\/dashboard\/(prayer-watch|pre-sogp)(\/.*)?$/, m => ({ title: m[1] === "pre-sogp" ? "Pre-SOGP" : "Prayer Watch", back: MY_SOGP })],
   [/^\/dashboard\/podcast\/leaderboard$/, () => ({ title: "Podcast leaderboard", back: { href: "/dashboard/podcast", label: "Back to Podcast" } })],
   [/^\/dashboard\/discipleship-journey\/[^/]+$/, () => ({ title: "Discipleship journey", back: { href: "/dashboard/discipleship-journey", label: "Back to discipleship journey" } })],
-  [/^\/dashboard\/welcomepack\/.+$/, () => ({ title: "Welcome Pack", back: { href: "/dashboard/welcomepack", label: "Back to Welcome Pack" } })],
+  [/^\/dashboard\/welcomepack\/([^/]+)/, m => ({ title: ({ join: "Join", setup: "App and reminders", gifts: "Your gifts", orientation: "Orientation video", audiobook: "Audiobook" } as Record<string, string>)[m[1]] ?? "Welcome Pack", back: { href: "/dashboard/welcomepack", label: "Back to Welcome Pack" } })],
   [/^\/dashboard\/(welcomepack|discipleship-journey)(\/.*)?$/, m => ({
     title: m[1] === "welcomepack" ? "Welcome Pack" : "Discipleship journey",
     back: YOU,

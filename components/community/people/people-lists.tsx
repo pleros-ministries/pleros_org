@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { MessageCircleIcon, NotebookPenIcon, PhoneIcon, PlusIcon, SearchIcon, Share2Icon, UserPlusIcon } from "lucide-react";
+import { LockIcon, MessageCircleIcon, NotebookPenIcon, PhoneIcon, PlusIcon, SearchIcon, Share2Icon, UserPlusIcon } from "lucide-react";
 
 import { logFollowUpAction } from "@/app/(site)/dashboard/community/_actions/people-actions";
 
@@ -68,7 +68,7 @@ export function SavedContactsList({ contacts, readOnly, invites = {} }: {
         </li>)}
       </ul>
     </div> : <p className={`${styles.panel} ${styles.empty}`}>{query || filter !== "all" ? "No contacts match." : "No saved contacts yet. Add the people you meet in ministry."}</p>}
-    <p className={styles.note}>🔒 Contacts never become group members on their own. They join only after enrolling and accepting your invite.</p>
+    <p className={styles.note}><LockIcon className="mr-1 inline size-3 -translate-y-px" strokeWidth={2.2} aria-hidden />Contacts never become group members on their own. They join only after enrolling and accepting your invite.</p>
   </div>;
 }
 

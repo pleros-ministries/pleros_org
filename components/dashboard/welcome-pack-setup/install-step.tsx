@@ -133,8 +133,7 @@ export function InstallStep({
                 aria-hidden="true"
               />
               <span>
-                Open Pleros from your Home Screen, sign in again, and return to
-                Welcome Pack, then App and reminders.
+                Open Pleros from your Home Screen, sign in again, and come back to this page.
               </span>
             </li>
           </ol>

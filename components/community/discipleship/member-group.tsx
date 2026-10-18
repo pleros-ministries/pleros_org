@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { MessageCircleIcon } from "lucide-react";
+import { LockIcon, MessageCircleIcon } from "lucide-react";
 
 import { leaveDiscipleshipGroupAction, setDiscipleSharesPhoneAction } from "@/app/(site)/dashboard/sogp/discipleship/_actions";
 import { DisciplePromptList, useDiscipleshipAction } from "@/components/sogp/discipleship-check-ins";
@@ -69,7 +69,7 @@ export function MemberGroupView({ joined, discipler, ownEpisodeQuestions, discus
         <div className={styles.sectionTitle}><h2>Your questions about teachings</h2></div>
         <div className={`${styles.panel} ${styles.tools}`}><OwnEpisodeQuestionList questions={ownEpisodeQuestions} leaderFirstName={lead} preview={false} /></div>
       </> : null}
-      <p className={styles.note}>🔒 Only {lead} reads your answers. Other disciples never see them.</p>
+      <p className={styles.note}><LockIcon className="mr-1 inline size-3 -translate-y-px" strokeWidth={2.2} aria-hidden />Only {lead} reads your answers. Other disciples never see them.</p>
     </> : null}
 
     {tab === "discussion" ? <>

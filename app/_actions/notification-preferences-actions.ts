@@ -22,6 +22,7 @@ const SAVE_FAILED = "We could not save that. Please try again.";
 function revalidateReminderSurfaces() {
   revalidatePath("/dashboard/welcomepack");
   revalidatePath("/dashboard/welcomepack/setup");
+  revalidatePath("/dashboard/profile/reminders");
   revalidatePath("/dashboard/sogp");
   revalidatePath("/dashboard/pre-sogp");
 }
