@@ -8,6 +8,9 @@ import { buildReferralUrl } from "@/lib/sogp/referral";
 import { resolvePublicSiteUrl } from "@/lib/welcome-campaign";
 import { EnrolleesList } from "@/components/community/people/people-lists";
 
+// Cache Components: reads the session and per-person data before rendering.
+export const instant = false;
+
 export default async function MyEnrolleesPage() {
   const session = await getAppSession();
   if (!session) redirect("/login?returnTo=/dashboard/community/enrollees");

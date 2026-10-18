@@ -5,6 +5,9 @@ import { listLedGroupInvites } from "@/lib/db/queries/led-discipleship-invites";
 import { createPrivateContactAction } from "@/app/(site)/dashboard/community/_actions/reporting-v3-actions";
 import { AddSavedContact } from "@/components/community/report/ministry-v3/saved-contacts";
 
+// Cache Components: reads the session and per-person data before rendering.
+export const instant = false;
+
 /** `?invite=<groupId>` comes from "Add contact" on a group page you lead. */
 export default async function AddSavedContactPage({ searchParams }: { searchParams: Promise<{ invite?: string }> }) {
   const session = await getAppSession();

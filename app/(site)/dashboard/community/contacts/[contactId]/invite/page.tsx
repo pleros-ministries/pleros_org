@@ -8,6 +8,9 @@ import { listInviteGroups } from "@/lib/db/queries/invite-groups";
 import { getPrivateMinistryContact } from "@/lib/db/queries/private-ministry-contacts";
 import { buildWhatsAppUrl } from "@/lib/sogp/discipleship";
 
+// Cache Components: reads the session and per-person data before rendering.
+export const instant = false;
+
 /** Share one of the viewer's group invite links with a private contact on WhatsApp. */
 export default async function WhatsAppInvitePage({ params, searchParams }: { params: Promise<{ contactId: string }>; searchParams: Promise<{ group?: string }> }) {
   const [{ contactId }, { group }] = await Promise.all([params, searchParams]);

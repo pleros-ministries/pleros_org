@@ -6,6 +6,9 @@ import { CrumbLabel } from "@/components/dashboard/shell/breadcrumbs";
 import { getAppSession } from "@/lib/app-session";
 import { getOwnEnrollee, listFollowUps } from "@/lib/db/queries/people-follow-ups";
 
+// Cache Components: reads the session and per-person data before rendering.
+export const instant = false;
+
 export const metadata: Metadata = { title: "Enrollee" };
 
 /** One enrollee whose follow-up the viewer owns. Anyone else gets a 404. */

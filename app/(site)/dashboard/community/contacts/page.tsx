@@ -15,6 +15,9 @@ import { SavedContactsList } from "@/components/community/people/people-lists";
 import people from "@/components/community/discipleship/discipleship-group.module.css";
 import { listContactInviteStatus } from "@/lib/db/queries/people-follow-ups";
 
+// Cache Components: reads the session and per-person data before rendering.
+export const instant = false;
+
 /** Most people one member's list will load; older ones drop off the end. */
 const LIST_LIMIT = 1000;
 

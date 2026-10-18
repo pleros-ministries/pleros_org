@@ -6,6 +6,9 @@ import { getAppSession } from "@/lib/app-session";
 import { listInviteGroups } from "@/lib/db/queries/invite-groups";
 import { getOwnEnrollee } from "@/lib/db/queries/people-follow-ups";
 
+// Cache Components: reads the session and per-person data before rendering.
+export const instant = false;
+
 /** Invite an enrollee the viewer follows up into one of their discipleship groups (in Pleros). */
 export default async function InviteEnrolleePage({ params }: { params: Promise<{ enrollmentId: string }> }) {
   const { enrollmentId: raw } = await params;

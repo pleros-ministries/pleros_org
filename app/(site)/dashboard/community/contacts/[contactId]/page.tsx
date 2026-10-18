@@ -10,6 +10,9 @@ import { getPrivateMinistryContact } from "@/lib/db/queries/private-ministry-con
 import { reportingV3SchemaReady } from "@/lib/db/queries/reporting-v3-gate";
 import { buildWhatsAppUrl } from "@/lib/sogp/discipleship";
 
+// Cache Components: reads the session and per-person data before rendering.
+export const instant = false;
+
 /** One of the viewer's private saved contacts. Owner-only. */
 export default async function PrivateContactPage({ params }: { params: Promise<{ contactId: string }> }) {
   const session = await getAppSession();
