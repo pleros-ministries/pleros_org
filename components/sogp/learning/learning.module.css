@@ -23,8 +23,9 @@
 .eyebrow { font-size: 12px; line-height: 20px; font-weight: 500; letter-spacing: .3px; text-transform: uppercase; color: var(--color-text-muted); }
 .metaRow { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; }
 .metaRow a { display: inline-flex; min-height: 36px; align-items: center; margin-block: -8px; font-size: 13px; font-weight: 500; }
-.choicePage { display: flex; flex-direction: column; min-height: calc(100svh - 48px); padding-bottom: max(16px, env(safe-area-inset-bottom)); }
-.choicePage .footer { margin-top: auto; border: 0; padding-top: 0; text-align: center; }
+/* Continue follows the choices: pinned to the page bottom it hid behind the bottom bar (18 October). */
+.choicePage { display: flex; flex-direction: column; padding-bottom: max(16px, env(safe-area-inset-bottom)); }
+.choicePage .footer { border: 0; padding-top: 0; text-align: center; }
 .choicePage .primary:disabled { background: var(--color-surface-muted); border-color: var(--color-line); color: var(--color-text-muted); opacity: 1; }
 .planSearch { display: flex; align-items: center; gap: 12px; padding-left: 16px; min-height: 36px; border: 1px solid var(--color-line); border-radius: 11px; color: var(--color-text-muted); }
 .planSearch > svg { flex-shrink: 0; }
