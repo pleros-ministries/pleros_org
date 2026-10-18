@@ -1,0 +1,84 @@
+/* My reports as one page (Pastor voice note, 18 October): three sections that
+   open and close in place, a review sheet, and a submit bar. */
+
+.page { display: grid; gap: 12px; min-width: 0; max-width: 560px; margin-inline: auto; padding-bottom: 96px; color: var(--color-text-strong); font-size: 14px; line-height: 21px; }
+.page p { margin: 0; }
+.meta { font-size: 12.5px; line-height: 18px; color: var(--color-text-muted); }
+.hint { font-size: 12px; line-height: 17px; color: var(--color-text-muted); }
+.error { font-size: 13px; line-height: 20px; color: var(--destructive); }
+.dayHeader { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.dayHeader h1 { margin: 2px 0 0; }
+
+.week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; padding: 6px; border: 1px solid var(--color-line); border-radius: 10px; background: white; }
+.week a { display: grid; justify-items: center; gap: 2px; padding: 5px 0; border-radius: 8px; color: var(--color-text-muted); font-size: 11px; text-decoration: none; }
+.week a b { font-family: var(--font-dashboard-heading); font-size: 14px; font-weight: 500; color: var(--color-text-strong); }
+.week a i { width: 6px; height: 6px; border-radius: 50%; }
+.week a[aria-current="page"] { background: #e4ebfd; color: var(--color-community-blue, #2056d6); font-weight: 500; }
+
+.section { overflow: hidden; border: 1px solid var(--color-line); border-radius: 12px; background: white; }
+.section[data-open] { box-shadow: 0 6px 18px rgb(5 20 128 / 6%); }
+.head { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 64px; padding: 12px 14px; border: 0; background: none; text-align: left; color: inherit; font: inherit; cursor: pointer; }
+.icon { display: grid; flex: none; place-items: center; width: 36px; height: 36px; border-radius: 10px; }
+.titles { display: grid; flex: 1; min-width: 0; gap: 1px; }
+.title { font-family: var(--font-dashboard-heading); font-size: 15px; line-height: 20px; font-weight: 500; }
+.summary { overflow: hidden; font-size: 12px; line-height: 17px; color: var(--color-text-muted); text-overflow: ellipsis; white-space: nowrap; }
+.chev { flex: none; width: 18px; height: 18px; color: #8a9099; transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1); }
+[aria-expanded="true"] > .chev { transform: rotate(180deg); }
+.pill { flex: none; height: 22px; padding: 0 8px; border-radius: 99px; font-size: 11px; font-weight: 500; line-height: 22px; white-space: nowrap; }
+.pill[data-tone="ready"] { background: #e4ebfd; color: #2331ae; }
+.pill[data-tone="todo"] { background: #f7e4cd; color: #92400e; }
+.pill[data-tone="nil"] { background: #eceef2; color: var(--color-text-muted); }
+
+.body { display: grid; gap: 10px; padding: 2px 14px 14px; border-top: 1px solid var(--color-line); animation: open 180ms ease-out both; }
+.lines { margin: 0; padding: 0; list-style: none; }
+.line { display: flex; align-items: center; gap: 10px; min-height: 44px; color: inherit; text-decoration: none; }
+.lines li + li .line { border-top: 1px solid var(--color-line); }
+.lineCopy { display: grid; flex: 1; min-width: 0; font-size: 13.5px; line-height: 19px; }
+.tick { display: grid; flex: none; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: #eceef2; color: white; }
+.tick[data-on] { background: var(--color-community-blue, #2056d6); }
+.saved { display: grid; gap: 10px; margin: 10px 0 0; padding: 0; list-style: none; }
+
+.sub { overflow: hidden; margin-top: 2px; border: 1px solid var(--color-line); border-radius: 10px; }
+.sub:first-of-type { margin-top: 10px; }
+.subHead { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 46px; padding: 0 12px; border: 0; background: white; text-align: left; color: inherit; font: inherit; cursor: pointer; }
+.subTitle { font-size: 13.5px; font-weight: 500; }
+.subMeta { overflow: hidden; flex: 1; font-size: 12px; color: var(--color-text-muted); text-overflow: ellipsis; white-space: nowrap; }
+.subHead > .chev { margin-left: auto; }
+.subBody { padding: 14px 12px 12px; border-top: 1px solid var(--color-line); background: #fcfcfd; }
+/* The embedded forms keep their own fields at the dashboard scale: 13px labels,
+   14px dropdowns (AGENTS rule), 16px free-text fields so phones never zoom. */
+.subBody label { font-size: 13px !important; line-height: 18px; }
+.subBody select { height: 38px; font-size: 14px !important; }
+.subBody :is(h2, h3) { font-size: 14px !important; }
+.subBody > div > div > fieldset > :first-child:not([hidden]), .subBody fieldset > label:first-of-type { margin-top: 0 !important; }
+.subBody > div > section, .subBody > div > div { padding: 0 !important; margin: 0 !important; border: 0 !important; box-shadow: none !important; background: transparent !important; }
+
+.rowActions { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 4px; }
+.secondary { display: inline-flex; align-items: center; justify-content: center; min-height: 32px; padding: 0 12px; border: 1px solid var(--color-line); border-radius: 10px; background: white; color: var(--color-community-blue, #2056d6); font: inherit; font-size: 12.5px; font-weight: 500; text-decoration: none; cursor: pointer; }
+.done { display: inline-flex; align-items: center; min-height: 32px; padding: 0 14px; border: 0; border-radius: 10px; background: var(--color-community-blue, #2056d6); color: white; font: inherit; font-size: 12.5px; font-weight: 500; cursor: pointer; }
+.quiet { padding: 0; border: 0; background: none; color: var(--color-community-blue, #2056d6); font: inherit; font-size: 12.5px; font-weight: 500; cursor: pointer; }
+.secondary:disabled, .done:disabled, .quiet:disabled, .submit:disabled { opacity: .6; cursor: default; }
+
+/* The submit bar sits above the Community bottom bar on phones. */
+.bar { position: relative; z-index: 20; display: grid; gap: 6px; margin-top: 4px; padding: 10px 12px 12px; border: 1px solid var(--color-line); border-radius: 14px; background: rgb(255 255 255 / 96%); box-shadow: 0 -6px 20px rgb(5 20 128 / 6%); backdrop-filter: blur(8px); }
+.bar[data-floating] { position: sticky; bottom: calc(52px + env(safe-area-inset-bottom)); }
+@media (min-width: 64rem) { .bar[data-floating] { bottom: 16px; } }
+.barMeta { text-align: center; font-size: 11.5px; color: var(--color-text-muted); }
+.submit { display: grid; place-items: center; min-height: 42px; border: 0; border-radius: 12px; background: var(--color-community-blue, #2056d6); color: white; font: inherit; font-size: 14px; font-weight: 500; cursor: pointer; }
+.submitted { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; color: #2331ae; font-size: 13px; font-weight: 500; text-align: center; }
+
+.shade { position: fixed; inset: 0; z-index: 80; display: flex; align-items: flex-end; justify-content: center; background: rgb(10 15 40 / 38%); animation: fade 160ms ease-out both; }
+.sheet { width: min(560px, 100%); max-height: min(88dvh, 720px); overflow-y: auto; padding: 10px 16px max(16px, env(safe-area-inset-bottom)); border-radius: 18px 18px 0 0; background: white; animation: rise 220ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+@media (min-width: 64rem) { .shade { align-items: center; } .sheet { border-radius: 18px; } }
+.grab { display: block; width: 36px; height: 4px; margin: 0 auto 12px; border-radius: 2px; background: #d9dce1; }
+.sheet h2 { margin: 0; font-family: var(--font-dashboard-heading); font-size: 18px !important; line-height: 25px; font-weight: 500; }
+.review { margin-top: 10px; padding: 10px 12px; border: 1px solid var(--color-line); border-radius: 10px; }
+.review b { font-family: var(--font-dashboard-heading); font-size: 14px; font-weight: 500; }
+.review p { margin: 3px 0 0; font-size: 12.5px; line-height: 18px; color: var(--color-text-muted); }
+.sheetActions { display: grid; gap: 8px; margin-top: 14px; }
+.sheetActions .secondary { min-height: 42px; border-radius: 12px; font-size: 14px; }
+
+@keyframes open { from { opacity: 0; transform: translateY(-4px); } }
+@keyframes fade { from { opacity: 0; } }
+@keyframes rise { from { transform: translateY(24px); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .body, .shade, .sheet, .chev { animation: none; transition: none; } }

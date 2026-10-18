@@ -86,7 +86,9 @@ export function ContactSheet({ onClose, onAdd, onPersist, standalone = false }: 
 }
 
 /** Persistence is supplied by an adapter; this presenter never imports DB/auth/actions. */
-export function MinistryFormV3({ dateKey, today, days, onDayChange, initialKind = "outreach", initialContacts = [], initialCount = "", onSave, savedContacts = [], onCreateContact, initialDetails, readOnly = false, lockKind = false }: {
+export function MinistryFormV3({ dateKey, today, days, onDayChange, initialKind = "outreach", initialContacts = [], initialCount = "", onSave, savedContacts = [], onCreateContact, initialDetails, readOnly = false, lockKind = false, embedded = false }: {
+  /** Inside the one-page report: no date line, title or kind switch (the section names the kind). */
+  embedded?: boolean;
   dateKey: string; today?: string; days?: string[]; onDayChange?: (dateKey: string) => void; initialKind?: "outreach" | "follow_up"; initialContacts?: MinistryContact[]; initialCount?: string;
   onSave: (payload: MinistryFormPayload) => Promise<{ ok: true } | { ok: false; error: string }>;
   savedContacts?: MinistryContact[]; onCreateContact?: PersistContact; readOnly?: boolean; lockKind?: boolean;
@@ -143,9 +145,11 @@ export function MinistryFormV3({ dateKey, today, days, onDayChange, initialKind 
   }
   return <div className={styles.form} aria-busy={saving}>
     <fieldset className={styles.controls} disabled={saving || saved || readOnly}><legend className={styles.srOnly}>Ministry report</legend>
+    {embedded ? null : <>
     <ReportDateLine dateKey={dateKey} today={today} days={days} onChange={onDayChange} />
     <h1>One simple report</h1>
-    <fieldset className={styles.kind}><legend className={styles.srOnly}>Ministry activity</legend>
+    </>}
+    <fieldset className={styles.kind} hidden={embedded}><legend className={styles.srOnly}>Ministry activity</legend>
       {([ ["outreach", "Evangelism"], ["follow_up", "Discipleship"] ] as const).map(([key, label]) => <label key={key}>
         <input type="radio" name="ministry-kind" value={key} checked={kind === key} disabled={saving || saved || lockKind} onChange={() => { setKind(key); setMethod("In person"); setOutcomes({}); setCount(""); }} /><span>{label}</span>
       </label>)}
@@ -186,7 +190,7 @@ export function MinistryFormV3({ dateKey, today, days, onDayChange, initialKind 
     <details className={styles.note}><summary>Add an overall note</summary><label className={styles.field} htmlFor="ministry-note">Overall note (optional)<textarea id="ministry-note" rows={4} maxLength={MINISTRY_NOTE_MAX} value={note} onChange={event => setNote(event.target.value)} /></label></details>
     {error ? <p className={styles.error} role="alert">{error}</p> : null}
     {saved ? <p role="status">Report saved.</p> : null}
-    <div className={styles.footer}><button type="button" className={styles.primary} disabled={saving || saved || readOnly} onClick={save}>{readOnly ? "This day is view only" : saving ? "Saving…" : saved ? "Report saved" : "Save ministry report"}<DashboardIcon name="check" /></button></div>
+    <div className={styles.footer}><button type="button" className={styles.primary} disabled={saving || saved || readOnly} onClick={save}>{readOnly ? "This day is view only" : saving ? "Saving…" : saved ? "Saved" : embedded ? `Save ${kind === "outreach" ? "evangelism" : "discipleship"}` : "Save ministry report"}<DashboardIcon name="check" /></button></div>
     </fieldset>
     {sheet ? <ContactSheet onClose={closeSheet} onPersist={onCreateContact} onAdd={contact => { setContacts(current => [...current, contact]); setSources(current => [...current, contact]); closeSheet(); }} /> : null}
   </div>;
