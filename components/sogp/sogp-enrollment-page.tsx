@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, CalendarDays, CircleCheck, Radio } from "lucide-react";
+import { ArrowLeft, CircleCheck, Route } from "lucide-react";
 
 import { AuthGeometryPanel } from "@/components/auth/auth-geometry-panel";
 import authCardStyles from "@/components/auth/auth-page-card.module.css";
@@ -7,18 +7,14 @@ import { HomepageFooter } from "@/components/home/homepage-footer";
 import { PublicSitePageShell } from "@/components/home/public-site-page-shell";
 import { SogpEnrollmentForm } from "./sogp-enrollment-form";
 import { SogpPublicQueryProvider } from "./sogp-public-query-provider";
+import { ReferralInvitePill } from "./referral-invite-pill";
 import type { CountryCode } from "libphonenumber-js/min";
 
 const summary = [
   {
-    label: "Four weeks",
-    meta: "24 guided tracks, Monday to Saturday",
-    Icon: CalendarDays,
-  },
-  {
-    label: "Weekly reviews",
-    meta: "One live review on weekends",
-    Icon: Radio,
+    label: "Choose your path",
+    meta: "Teaching tracks or the podcast, at a pace that suits you",
+    Icon: Route,
   },
   {
     label: "Free enrolment",
@@ -29,8 +25,10 @@ const summary = [
 
 export function SogpEnrollmentPage({
   defaultCountryCode,
+  referrerFirstName = null,
 }: {
   defaultCountryCode: CountryCode;
+  referrerFirstName?: string | null;
 }) {
   return (
     <PublicSitePageShell>
@@ -55,8 +53,9 @@ export function SogpEnrollmentPage({
                 </Link>
               </div>
               <div className="mt-6 grid gap-4">
+                {referrerFirstName ? <ReferralInvitePill firstName={referrerFirstName} /> : null}
                 <h1 className="site-hero-heading max-w-none text-[clamp(2.1rem,8vw,2.35rem)] text-[var(--color-brand-blue)] md:max-w-[15ch] md:text-[clamp(2.35rem,4vw,3rem)]">Take your next step with SOGP</h1>
-                <p className="site-section-intro max-w-[34rem] [font-size:0.875rem] leading-[1.55] text-[var(--color-text-muted)]">Join a guided four-week journey into truth, spiritual growth, and God&apos;s purpose.</p>
+                <p className="site-section-intro max-w-[34rem] [font-size:0.875rem] leading-[1.55] text-[var(--color-text-muted)]">Join a guided journey into truth, spiritual growth, and God&apos;s purpose.</p>
               </div>
               <div className="mt-6">
                 <ul className="grid gap-3">

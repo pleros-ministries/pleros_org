@@ -93,3 +93,10 @@ button.row { cursor: pointer; }
   .page[data-wide] > .heading, .page[data-wide] > [data-span] { grid-column: 1 / -1; }
 }
 .column { display: grid; align-content: start; gap: 12px; min-width: 0; }
+
+
+/* Invite friends: inline row actions and people. */
+.inlineAction { display: inline-flex; flex: none; align-items: center; gap: 4px; height: 32px; padding: 0 11px; border: 1px solid var(--dashboard-panel-edge, #e2e5ea); border-radius: 9px; background: white; color: var(--color-community-blue, #2056d6); font: inherit; font-size: 12.5px; font-weight: 500; cursor: pointer; }
+.inlineAction:hover { background: #f8f9fb; }
+.avatar { display: grid; flex: none; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: #e4ebfd; color: #2331ae; font-size: 13px; font-weight: 500; }
+.code { letter-spacing: .04em; font-variant-numeric: tabular-nums; }

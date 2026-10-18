@@ -112,7 +112,7 @@ export function SogpOtherDetails({
         <ul className="m-0 list-none overflow-hidden rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white p-0">
           <li>
             <DetailRow
-              title="Invite friends"
+              title="Invite someone"
               description="Share your referral link and follow their progress."
               href="/dashboard/sogp/referrals"
               icon={<UserPlusIcon className="size-4" strokeWidth={2.2} />}

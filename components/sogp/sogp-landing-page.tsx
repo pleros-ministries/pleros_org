@@ -24,6 +24,7 @@ import {
 import { SogpLandingAnalytics } from "./sogp-analytics";
 import { SogpHeroPhone } from "./sogp-hero-phone";
 import { SogpIntroVideo } from "./sogp-intro-video";
+import { ReferralInvitePill } from "./referral-invite-pill";
 import { SogpCurriculumAccordion } from "./sogp-curriculum-accordion";
 
 function SectionCta({
@@ -209,7 +210,7 @@ function ToolsSection({ enrolHref }: { enrolHref: string }) {
   );
 }
 
-export function SogpLandingPage({ enrolHref }: { enrolHref: string }) {
+export function SogpLandingPage({ enrolHref, referrerFirstName = null }: { enrolHref: string; referrerFirstName?: string | null }) {
   const schoolName = content.hero.titleLines[3].replace(/^with the /, "");
 
   return (
@@ -220,6 +221,7 @@ export function SogpLandingPage({ enrolHref }: { enrolHref: string }) {
         <section className="bg-white">
           <div className="site-shell-page sogp-shell-page grid gap-8 pb-14 pt-10 lg:max-w-none lg:grid-cols-[minmax(0,1.2fr)_minmax(22rem,0.8fr)] lg:items-center lg:gap-12 lg:pb-20 lg:pt-12">
             <div className="grid min-w-0 gap-7">
+              {referrerFirstName ? <ReferralInvitePill firstName={referrerFirstName} /> : null}
               <h1 className="site-hero-heading max-w-[18ch] text-[clamp(2.65rem,5vw,4.65rem)] leading-[0.96] text-[var(--color-brand-blue)]">
                 {content.hero.titleLines.slice(0, 3).map((line) => (
                   <span key={line} className="block">

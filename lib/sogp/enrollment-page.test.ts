@@ -28,7 +28,8 @@ test("keeps the enrolment page focused with a compact summary list", () => {
   expect(pageSource).toContain("[font-size:0.875rem] font-medium leading-tight");
   expect(pageSource).toContain("text-[clamp(2.1rem,8vw,2.35rem)]");
   expect(pageSource).toContain("[font-size:0.875rem] leading-[1.55]");
-  expect(pageSource).toContain('meta: "One live review on weekends"');
+  expect(pageSource).toContain('label: "Choose your path"');
+  expect(pageSource).not.toContain('Weekly reviews');
   expect(pageSource).not.toContain("One required review every Sunday");
   expect(formSource).toContain(">First name<RequiredMark /></label>");
   expect(formSource).toContain("[font-size:0.8125rem] font-medium");

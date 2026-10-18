@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { SogpLandingPage } from "@/components/sogp/sogp-landing-page";
+import { getReferrerFirstName } from "@/lib/db/queries/sogp-referrals";
 
 // Cache Components: Reads the request; not adopted yet.
 export const instant = false;
@@ -34,5 +35,7 @@ export default async function SogpPage({
   const query = params.toString();
   const enrolHref = `/sogp/enrol${query ? `?${query}` : ""}`;
 
-  return <SogpLandingPage enrolHref={enrolHref} />;
+  const ref = params.get("ref");
+  const referrerFirstName = ref ? await getReferrerFirstName(ref).catch(() => null) : null;
+  return <SogpLandingPage enrolHref={enrolHref} referrerFirstName={referrerFirstName} />;
 }

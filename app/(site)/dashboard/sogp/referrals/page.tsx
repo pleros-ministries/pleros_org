@@ -15,5 +15,5 @@ export default async function SogpReferralsPage() {
   const initialData = await getSogpReferralsDashboard(session.user.id);
   if (!initialData) redirect("/sogp/enrol");
 
-  return <ShareReferral code={initialData.referralCode} url={initialData.referralUrl} referredCount={initialData.referredCount} />;
+  return <ShareReferral code={initialData.referralCode} url={initialData.referralUrl} referredCount={initialData.referredCount} referred={initialData.referred} />;
 }

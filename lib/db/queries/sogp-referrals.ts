@@ -20,6 +20,23 @@ function firstNameOf(value: string) {
 }
 
 /**
+ * First name of the learner who owns a referral code, for the "invited you"
+ * line a friend sees on the public SOGP pages. First name only; null when the
+ * code is unknown or its owner has withdrawn.
+ */
+export async function getReferrerFirstName(code: string): Promise<string | null> {
+  const trimmed = code.trim();
+  if (!trimmed || trimmed.length > 32) return null;
+  const [row] = await db
+    .select({ firstName: schema.sogpEnrollments.firstName, name: schema.sogpEnrollments.name, status: schema.sogpEnrollments.status })
+    .from(schema.sogpEnrollments)
+    .where(eq(schema.sogpEnrollments.referralCode, trimmed))
+    .limit(1);
+  if (!row || row.status === "withdrawn") return null;
+  return firstNameOf(row.firstName || row.name);
+}
+
+/**
  * Returns the enrolment's own referral code, minting one on first call. The
  * partial unique index on `referral_code` makes a colliding code raise 23505;
  * retry a few times before giving up.

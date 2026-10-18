@@ -312,7 +312,7 @@ export function PreSogpPage({
                     href="/dashboard/sogp/referrals"
                     className="text-xs font-medium text-[var(--color-brand-blue)] underline underline-offset-4"
                   >
-                    Invite friends and track their progress
+                    Invite someone and follow their progress
                   </Link>
                 )}
                 {preview ? null : (

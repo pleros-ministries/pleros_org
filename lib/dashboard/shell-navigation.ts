@@ -75,7 +75,7 @@ const DASHBOARD_FOCUS: Array<[RegExp, (match: RegExpMatchArray) => DashboardFocu
   [/^\/dashboard\/community\/invitations\/\d+\/sent$/, () => ({ title: "Invitation", back: { href: "/dashboard/community/enrollees", label: "Back to My enrollees" } })],
   [/^\/dashboard\/sogp\/invitations\/\d+$/, () => ({ title: "Group invitation", back: COMMUNITY })],
   [/^\/dashboard\/sogp\/(days|path|plan|listen|follow-up|readiness|referrals|leaderboard|certificate|traditional|history)$/, m => ({
-    title: ({ days: "Your SOGP days", history: "Your history", path: "Change path or pace", plan: "Edit full plan", listen: "Today’s listening", "follow-up": "Your follow-up person", readiness: "Certification", referrals: "Your SOGP referral", leaderboard: "Leaderboard", certificate: "Certificate", traditional: "Calendar and assessments" } as Record<string, string>)[m[1]],
+    title: ({ days: "Your SOGP days", history: "Your history", path: "Change path or pace", plan: "Edit full plan", listen: "Today’s listening", "follow-up": "Your follow-up person", readiness: "Certification", referrals: "Invite someone", leaderboard: "Leaderboard", certificate: "Certificate", traditional: "Calendar and assessments" } as Record<string, string>)[m[1]],
     back: MY_SOGP,
   })],
   [/^\/dashboard\/sogp\/.+$/, () => ({ title: "Learning", back: MY_SOGP })],

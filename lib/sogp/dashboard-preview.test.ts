@@ -81,7 +81,7 @@ describe("SOGP dashboard previews", () => {
     expect(sogpPage).toContain("<SogpOtherDetails");
     expect(sogpOtherDetails).toContain("Other details");
     expect(sogpOtherDetails).toContain("Course progress");
-    expect(sogpOtherDetails).toContain("Invite friends");
+    expect(sogpOtherDetails).toContain("Invite someone");
     expect(sogpOtherDetails).toContain("Share what you learnt today");
     expect(sogpOtherDetails).not.toContain("Prayer Watch reminder");
   });
