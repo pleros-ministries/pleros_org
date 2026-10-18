@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
+import { XIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { QUESTION_BODY_MAX } from "@/lib/community/ask-pleros";
@@ -31,7 +32,9 @@ export const QUESTION_STATUS_LABEL = {
   closed: "Closed",
 } as const;
 
-function AskForm({ episode }: { episode?: { guid: string; title: string } }) {
+function AskForm({ episode: linkedEpisode }: { episode?: { guid: string; title: string } }) {
+  // The learner can drop the lesson or episode link to ask something general.
+  const [episode, setEpisode] = useState(linkedEpisode);
   const router = useRouter();
   const [body, setBody] = useState("");
   // The asker chooses every time; nothing is preselected.
@@ -67,7 +70,10 @@ function AskForm({ episode }: { episode?: { guid: string; title: string } }) {
         submit();
       }}
     >
-      {episode ? <p className="rounded-xl bg-[var(--color-community-canvas)] px-3 py-2 text-[13px] text-[var(--color-community-ink)]">About this {episode.guid.startsWith("sogp-lesson-") ? "lesson" : "episode"}: {episode.title}</p> : null}
+      {episode ? <div className="flex items-start gap-2 rounded-xl bg-[var(--color-community-canvas)] py-2 pl-3 pr-1.5 text-[13px] text-[var(--color-community-ink)]">
+        <p className="min-w-0 flex-1 py-0.5">About this {episode.guid.startsWith("sogp-lesson-") ? "lesson" : "episode"}: {episode.title}</p>
+        <button type="button" onClick={() => setEpisode(undefined)} aria-label="Remove the link and ask a general question" className="grid size-7 shrink-0 cursor-pointer place-items-center rounded-full text-[var(--color-text-muted)] hover:bg-white hover:text-[var(--color-community-ink)]"><XIcon className="size-4" aria-hidden /></button>
+      </div> : null}
       <label className="grid gap-1 text-[13px] font-medium text-[var(--color-community-ink)]">
         Your question *
         <textarea
