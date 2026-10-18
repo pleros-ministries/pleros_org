@@ -138,3 +138,7 @@
    bare <strong>/<b> read as medium. Zero specificity, so any explicit weight
    class still wins. */
 .root :where(strong, b) { font-weight: 500; }
+
+/* Dropdown values are 14px everywhere in the dashboard (user feedback, 18 October;
+   the same rule as /sogp/enrol). Free-text fields stay at 16px so phones never zoom. */
+:global(html[data-pleros-dashboard="true"] select) { font-size: 14px !important; }
