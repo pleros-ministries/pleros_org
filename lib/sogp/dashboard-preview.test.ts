@@ -69,11 +69,10 @@ describe("SOGP dashboard previews", () => {
     );
     expect(sogpPage).toContain("SOGP");
 
-    // Header: navy background with white text throughout, less vertical
-    // chrome — per the September 2026 dashboard redesign.
-    expect(sogpPage).toContain("bg-[var(--color-brand-blue)] text-white");
+    // Header: the Learning hub's h1 with a short muted line (18 October retouch).
+    expect(sogpPage).toContain("<h1>Calendar and assessments</h1>");
     expect(sogpPage).toContain("Welcome, {firstName");
-    expect(sogpPage.indexOf("bg-[var(--color-brand-blue)] text-white")).toBeLessThan(
+    expect(sogpPage.indexOf("<h1>Calendar and assessments</h1>")).toBeLessThan(
       sogpPage.indexOf("Welcome, {firstName"),
     );
 
@@ -83,9 +82,8 @@ describe("SOGP dashboard previews", () => {
     expect(sogpTasks).toContain("done");
     expect(sogpTasks).toContain("task");
 
-    // Other details: a visually separate, light-blue grouped section.
+    // Other details: a titled section of white panels.
     expect(sogpPage).toContain("<SogpOtherDetails");
-    expect(sogpOtherDetails).toContain("bg-[var(--color-brand-sky-soft)]");
     expect(sogpOtherDetails).toContain("Other details");
     expect(sogpOtherDetails).toContain("Course progress");
     expect(sogpOtherDetails).toContain("Invite friends");

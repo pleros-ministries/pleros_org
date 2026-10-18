@@ -22,9 +22,9 @@ export function SogpCourseOutline({
   listClassName?: string;
 }) {
   return (
-    <nav aria-label="Course curriculum" className={`overflow-hidden rounded-sm border border-zinc-200 bg-white ${className}`}>
-      <div className="border-b border-zinc-100 px-4 py-3">
-        <h2 className="ppc-heading text-sm font-semibold text-zinc-900">Course outline</h2>
+    <nav aria-label="Course curriculum" className={`overflow-hidden rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white ${className}`}>
+      <div className="border-b border-[var(--color-line,#e7e9ec)] px-3.5 py-3">
+        <h2 className="m-0 font-[family-name:var(--font-dashboard-heading)] text-[15px] font-medium leading-[22px] text-(--color-text-strong)">Course outline</h2>
       </div>
       <div className={`overflow-y-auto px-2 pb-3 ${listClassName}`}>
         {data.levels.map((level) => {
@@ -32,10 +32,10 @@ export function SogpCourseOutline({
             (day) => day.track?.curriculumLevel === level.level,
           );
           return (
-            <section key={level.level} className="border-t border-zinc-100 py-2.5 first:border-t-0">
+            <section key={level.level} className="border-t border-[var(--color-line,#e7e9ec)] py-2.5 first:border-t-0">
               <div className="flex items-center justify-between gap-2 px-2 pb-1.5">
-                <strong className="ppc-heading text-xs font-semibold text-zinc-900">Level {level.level}</strong>
-                <span className="text-[0.6rem] font-semibold uppercase tracking-[0.06em] text-zinc-400">{level.completed}/{level.total}</span>
+                <strong className="text-[13px] font-medium text-(--color-text-strong)">Level {level.level}</strong>
+                <span className="text-xs tabular-nums text-(--color-text-muted)">{level.completed}/{level.total}</span>
               </div>
               <div className="grid gap-0.5">
                 {levelDays.map((day) => {
@@ -56,10 +56,10 @@ export function SogpCourseOutline({
                       type="button"
                       onClick={() => onSelect(day.dateKey)}
                       aria-current={selected ? "page" : undefined}
-                      className={`grid min-h-9 w-full cursor-pointer grid-cols-[1rem_1fr] items-start gap-2 rounded-sm px-2 py-2 text-left transition-colors duration-150 active:scale-[0.98] ${selected ? "bg-[var(--color-brand-sky)] text-zinc-900" : "text-zinc-700 hover:bg-zinc-50"}`}
+                      className={`grid min-h-9 w-full cursor-pointer grid-cols-[1rem_1fr] items-start gap-2 rounded-sm px-2 py-2 text-left transition-colors duration-150 active:scale-[0.98] ${selected ? "bg-[#eef3fe] text-[var(--color-community-blue,#2056d6)]" : "text-(--color-text-strong) hover:bg-[#f8f9fb]"}`}
                     >
-                      <Icon className={`mt-0.5 size-3.5 ${track.accessible ? "text-[var(--color-brand-blue)]" : "text-zinc-300"}`} strokeWidth={2} />
-                      <span className="text-[0.7rem] leading-[1.35]">{track.levelPosition}. {track.title}</span>
+                      <Icon className={`mt-0.5 size-3.5 ${track.accessible ? "text-[var(--color-community-blue,#2056d6)]" : "text-[#c3c8cf]"}`} strokeWidth={2} />
+                      <span className="text-[12.5px] leading-[1.4]">{track.levelPosition}. {track.title}</span>
                     </button>
                   );
                 })}

@@ -1,12 +1,16 @@
 "use client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
-import { DashboardIcon, StatusPill } from "@/components/dashboard/v3/primitives";
+import { useState, useTransition, type ReactNode } from "react";
+import { DashboardIcon } from "@/components/dashboard/v3/primitives";
 import { acceptFollowUpOwner, answerGroupInvitation, inviteEnrolleeToGroup, withdrawGroupInvitation } from "@/app/_actions/sogp-invitation-actions";
 import type { FollowUpWelcome as WelcomeData, OwnEnrolleeRow } from "@/lib/db/queries/sogp-follow-up-routes";
 import type { ReceivedInvitation, SentInvitation } from "@/lib/db/queries/sogp-group-invitations";
 import styles from "./follow-up-invitations.module.css";
+
+function StatusPill({ children, tone }: { children: ReactNode; tone: "blue" | "green" | "amber" | "neutral" | "lilac" }) {
+  return <span className={styles.pill} data-tone={tone === "amber" ? "todo" : tone === "blue" || tone === "green" ? "done" : undefined}>{children}</span>;
+}
 
 const first = (name: string) => name.trim().split(/\s+/)[0] || name;
 const initials = (name: string) => name.trim().split(/\s+/).slice(0, 2).map(part => part[0]?.toUpperCase() ?? "").join("");

@@ -1,14 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import {
   useMutation,
   useQueryClient,
   useSuspenseQuery,
 } from "@tanstack/react-query";
-import { FlameIcon, InfoIcon, TrophyIcon } from "lucide-react";
+import { FlameIcon, TrophyIcon } from "lucide-react";
 
-import { Avatar } from "@/components/community/avatar";
 import type { LeaderboardData } from "@/lib/db/queries/sogp-leaderboard";
 import {
   LEADERBOARD_POINTS,
@@ -16,7 +15,7 @@ import {
   LEADERBOARD_STREAK_MILESTONE_DAYS,
 } from "@/lib/sogp/leaderboard-scoring";
 
-import { SogpActivitySection } from "./sogp-activity-section";
+import styles from "./learning-tools.module.css";
 
 export const LEADERBOARD_QUERY_KEY = ["sogp", "leaderboard"] as const;
 
@@ -61,7 +60,7 @@ const POINT_RULES: Array<{ label: string; value: string }> = [
 export function StreakBadge({ days }: { days: number }) {
   if (days < 1) return null;
   return (
-    <span className="inline-flex items-center gap-1 text-[0.7rem] font-medium text-orange-600">
+    <span className={styles.streak}>
       <FlameIcon className="size-3" strokeWidth={2} aria-hidden />
       {days}-day streak
     </span>
@@ -113,201 +112,159 @@ export function LeaderboardPage({
     : [];
 
   return (
-    <section className="site-font-theme min-h-screen bg-[#f6f5f1] pb-16 text-(--color-text-strong)">
+    <section className={styles.page}>
       {/* Navigation comes from the dashboard shell. */}
-      <div className="site-shell-page sogp-shell-page grid gap-4 pb-6 pt-5">
-        <header className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-          <h1 className="text-[24px] font-medium leading-[1.1] tracking-[-0.025em] text-(--color-text-strong)">
-            Leaderboard
-          </h1>
-          <p className="text-[0.62rem] font-medium uppercase tracking-[0.1em] text-zinc-400">
-            {data.cohortTitle} · {data.total}{" "}
-            {data.total === 1 ? "participant" : "participants"}
-          </p>
+      <header className={styles.heading}>
+        <h1>Leaderboard</h1>
+        <p className={styles.sub}>
+          {data.cohortTitle} · {data.total}{" "}
+          {data.total === 1 ? "participant" : "participants"}
+        </p>
+      </header>
+
+      {me ? (
+        <>
+          <div className={styles.strip} style={{ "--strip-count": 3 } as CSSProperties}>
+            <div><span>Your rank</span><strong>#{me.rank}</strong></div>
+            <div><span>Points</span><strong>{me.points}</strong></div>
+            <div><span>Day streak</span><strong>{me.currentStreak}</strong></div>
+          </div>
+          {me.alias ? (
+            <p className={styles.note}>Showing on the leaderboard as {me.alias}.</p>
+          ) : null}
+        </>
+      ) : null}
+
+      <section className={styles.board} aria-labelledby="sogp-leaderboard-ranking">
+        <header className={styles.boardHead}>
+          <span className={styles.boardIcon} aria-hidden="true">
+            <TrophyIcon className="size-4" strokeWidth={2.2} />
+          </span>
+          <span className={styles.rowCopy}>
+            <h2 id="sogp-leaderboard-ranking">Cohort ranking</h2>
+            <span className={styles.rowMeta}>
+              {me ? `You’re #${me.rank} of ${data.total}` : `Top of ${data.total} in your cohort`}
+            </span>
+          </span>
         </header>
-
-        {me ? (
-          <SogpActivitySection
-            title="Your standing"
-            icon={
-              <TrophyIcon
-                className="size-4 text-[var(--color-brand-blue)]"
-                strokeWidth={2}
-              />
-            }
-          >
-            <div className="flex flex-wrap items-end justify-between gap-3">
-              <p className="text-2xl font-medium text-(--color-text-strong)">
-                #{me.rank}
-                <span className="ml-2 text-sm font-medium text-(--color-text-muted)">
-                  {me.points} points
-                </span>
-              </p>
-              <StreakBadge days={me.currentStreak} />
-            </div>
-            {me.alias ? (
-              <p className="text-xs text-(--color-text-muted)">
-                Showing on the leaderboard as{" "}
-                <strong className="font-semibold text-(--color-text-strong)">
-                  {me.alias}
-                </strong>
-                .
-              </p>
-            ) : null}
-            <dl className="grid grid-cols-2 gap-2">
-              {breakdown.map((item) => (
-                <div
-                  key={item.label}
-                  className="rounded-sm border border-zinc-200 bg-zinc-50 px-3 py-2"
-                >
-                  <dt className="text-[0.7rem] text-(--color-text-muted)">{item.label}</dt>
-                  <dd className="text-[13.5px] font-medium text-(--color-text-strong)">
-                    {item.value}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          </SogpActivitySection>
-        ) : null}
-
-        <SogpActivitySection
-          title="Cohort ranking"
-          icon={
-            <TrophyIcon
-              className="size-4 text-[var(--color-brand-blue)]"
-              strokeWidth={2}
-            />
-          }
-        >
-          {data.top.length === 0 ? (
-            <p className="text-xs text-(--color-text-muted)">
-              No one is on the leaderboard yet.
-            </p>
-          ) : (
-            <ol className="grid gap-2">
-              {data.top.map((entry, index) => (
-                <li
-                  key={`${entry.rank}-${index}`}
-                  aria-current={entry.isMe ? "true" : undefined}
-                  className={`flex items-center gap-3 rounded-sm border px-3 py-2 ${
-                    entry.isMe
-                      ? "border-[var(--color-brand-blue)] bg-sky-50"
-                      : "border-zinc-200 bg-white"
-                  }`}
-                >
-                  <span className="w-6 shrink-0 text-center text-sm font-medium text-(--color-text-muted)">
-                    {entry.rank}
-                  </span>
-                  <Avatar name={entry.name} size={32} />
-                  <span className="grid min-w-0 flex-1 gap-0.5">
-                    <span className="truncate text-sm font-medium text-(--color-text-strong)">
-                      {entry.name}
-                      {entry.isMe ? (
-                        <span className="ml-1.5 text-[0.65rem] font-medium uppercase tracking-[0.08em] text-[var(--color-brand-blue)]">
-                          You
-                        </span>
-                      ) : null}
-                    </span>
-                    <StreakBadge days={entry.currentStreak} />
-                  </span>
-                  <span className="shrink-0 text-sm font-medium text-(--color-text-strong)">
-                    {entry.points}
-                    <span className="ml-1 text-[0.65rem] font-medium text-zinc-400">
-                      pts
-                    </span>
-                  </span>
-                </li>
-              ))}
-            </ol>
-          )}
-        </SogpActivitySection>
-
-        <SogpActivitySection
-          title="How points work"
-          description="Points are worked out from your activity, so they update as you go."
-          icon={
-            <InfoIcon
-              className="size-4 text-[var(--color-brand-blue)]"
-              strokeWidth={2}
-            />
-          }
-        >
-          <ul className="grid gap-1.5">
-            {POINT_RULES.map((rule) => (
+        {data.top.length === 0 ? (
+          <p className={styles.empty}>No one is on the leaderboard yet.</p>
+        ) : (
+          <ol className={styles.boardList}>
+            {data.top.map((entry, index) => (
               <li
-                key={rule.label}
-                className="flex items-center justify-between gap-3 text-xs text-(--color-text-muted)"
+                key={`${entry.rank}-${index}`}
+                aria-current={entry.isMe ? "true" : undefined}
+                className={styles.boardRow}
+                data-me={entry.isMe || undefined}
               >
-                <span>{rule.label}</span>
-                <strong className="font-medium text-(--color-text-strong)">
-                  +{rule.value}
-                </strong>
+                <span className={styles.boardRank} data-rank={entry.rank <= 3 ? entry.rank : undefined}>
+                  {entry.rank}
+                </span>
+                <span className={styles.boardCopy}>
+                  <span className={styles.boardName}>
+                    {entry.name}
+                    {entry.isMe ? " · You" : ""}
+                  </span>
+                  <StreakBadge days={entry.currentStreak} />
+                </span>
+                <span className={styles.boardPts}>
+                  {entry.points}
+                  <small> pts</small>
+                </span>
               </li>
             ))}
-          </ul>
-          <p className="text-[0.7rem] leading-[1.45] text-zinc-400">
-            Withdrawn participants are not ranked. Scoring may be adjusted over
-            time, which can change everyone&apos;s total.
-          </p>
-        </SogpActivitySection>
+          </ol>
+        )}
+      </section>
 
-        {me ? (
-          <SogpActivitySection
-            title="Display name"
-            description="Your full name is shown by default. Set a display name if you'd rather appear under something else — it must be unique in your cohort."
-            icon={
-              <InfoIcon
-                className="size-4 text-[var(--color-brand-blue)]"
-                strokeWidth={2}
-              />
-            }
-          >
-            <form
-              className="flex flex-wrap items-start gap-2"
-              onSubmit={(event) => {
-                event.preventDefault();
-                alias.mutate(aliasDraft ?? me.alias ?? "");
-              }}
-            >
-              <input
-                type="text"
-                inputMode="text"
-                maxLength={24}
-                placeholder="e.g. Faithful7"
-                value={aliasDraft ?? me.alias ?? ""}
-                onChange={(event) => setAliasDraft(event.target.value)}
-                disabled={alias.isPending}
-                className="h-9 min-w-0 flex-1 rounded-sm border border-zinc-200 bg-white px-3 text-sm text-(--color-text-strong) outline-none focus:border-[var(--color-brand-blue)]"
-              />
-              <button
-                type="submit"
-                disabled={alias.isPending}
-                className="inline-flex h-8 shrink-0 items-center rounded-[10px] bg-[var(--color-brand-blue)] px-3.5 text-[13px] font-medium text-white disabled:opacity-55"
-              >
-                Save
-              </button>
-              {me.alias ? (
-                <button
-                  type="button"
-                  disabled={alias.isPending}
-                  onClick={() => {
-                    setAliasDraft("");
-                    alias.mutate(null);
-                  }}
-                  className="inline-flex h-9 shrink-0 items-center rounded-full border border-zinc-200 bg-white px-4 text-xs font-medium text-zinc-700 disabled:opacity-55"
-                >
-                  Use my real name
-                </button>
-              ) : null}
-            </form>
-            {alias.isError ? (
-              <p role="alert" className="text-xs text-red-600">
-                {alias.error.message}
-              </p>
-            ) : null}
-          </SogpActivitySection>
-        ) : null}
+      {me ? (
+        <>
+          <div className={styles.sectionTitle}><h2>Your points</h2></div>
+          <div className={styles.panel}>
+            <ul className={styles.list}>
+              {breakdown.map((item) => (
+                <li key={item.label} className={styles.row}>
+                  <span className={styles.rowCopy}><span className={styles.rowTitle}>{item.label}</span></span>
+                  <span className={styles.rowValue}>{item.value}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </>
+      ) : null}
+
+      <div className={styles.sectionTitle}><h2>How points work</h2></div>
+      <div className={styles.panel}>
+        <ul className={styles.list}>
+          {POINT_RULES.map((rule) => (
+            <li key={rule.label} className={styles.row} style={{ paddingBlock: 10 }}>
+              <span className={styles.rowCopy}><span className={styles.rowMeta} style={{ fontSize: 13, color: "var(--color-text-strong)" }}>{rule.label}</span></span>
+              <span className={styles.rowValue}>+{rule.value}</span>
+            </li>
+          ))}
+        </ul>
       </div>
+      <p className={styles.note}>
+        Points are worked out from your activity, so they update as you go. Withdrawn participants are not ranked. Scoring may be adjusted over
+        time, which can change everyone&apos;s total.
+      </p>
+
+      {me ? (
+        <>
+          <div className={styles.sectionTitle}><h2>Display name</h2></div>
+          <div className={styles.panel}>
+            <div className={styles.panelBody}>
+              <p className={styles.rowMeta}>
+                Your full name is shown by default. Set a display name if you&apos;d rather appear under something else. It must be unique in your cohort.
+              </p>
+              <form
+                className="grid gap-2"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  alias.mutate(aliasDraft ?? me.alias ?? "");
+                }}
+              >
+                <input
+                  type="text"
+                  inputMode="text"
+                  maxLength={24}
+                  aria-label="Display name"
+                  placeholder="e.g. Faithful7"
+                  value={aliasDraft ?? me.alias ?? ""}
+                  onChange={(event) => setAliasDraft(event.target.value)}
+                  disabled={alias.isPending}
+                  className={styles.input}
+                />
+                <div className={styles.actions}>
+                  <button type="submit" disabled={alias.isPending} className={styles.btn}>
+                    Save
+                  </button>
+                  {me.alias ? (
+                    <button
+                      type="button"
+                      disabled={alias.isPending}
+                      onClick={() => {
+                        setAliasDraft("");
+                        alias.mutate(null);
+                      }}
+                      className={styles.btn}
+                      data-quiet=""
+                    >
+                      Use my real name
+                    </button>
+                  ) : null}
+                </div>
+              </form>
+              {alias.isError ? (
+                <p role="alert" className={styles.error}>
+                  {alias.error.message}
+                </p>
+              ) : null}
+            </div>
+          </div>
+        </>
+      ) : null}
     </section>
   );
 }

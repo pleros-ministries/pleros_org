@@ -39,24 +39,22 @@ function TaskPill({
   return (
     <span
       className={cn(
-        "inline-flex h-7 items-center gap-1 rounded-full border px-2.5 text-xs font-semibold",
-        state === "complete" &&
-          "border-transparent bg-[var(--color-brand-sky-soft)] text-[var(--color-brand-blue)]",
-        state === "current" &&
-          "border-[var(--color-brand-blue)] text-[var(--color-brand-blue)]",
-        state === "pending" && "border-zinc-200 text-zinc-400",
+        "inline-flex h-5 items-center gap-1 rounded-full px-2 text-[11px] font-medium leading-5",
+        state === "complete" && "bg-[#e4ebfd] text-[#2331ae]",
+        state === "current" && "bg-[#f7e4cd] text-[#92400e]",
+        state === "pending" && "bg-[#eceef2] text-(--color-text-muted)",
       )}
     >
-      {state === "complete" ? <CheckIcon className="size-3.5" strokeWidth={2.5} /> : null}
+      {state === "complete" ? <CheckIcon className="size-3" strokeWidth={2.5} /> : null}
       {label}
     </span>
   );
 }
 
 export const SOGP_TASK_PRIMARY_BUTTON =
-  "inline-flex h-9 cursor-pointer items-center justify-center gap-1.5 rounded-full bg-[var(--color-brand-blue)] px-4 text-xs font-semibold text-white transition-colors active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50";
+  "inline-flex h-[38px] max-w-full cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-[11px] bg-[var(--color-community-blue,#2056d6)] px-3.5 text-[13.5px] font-medium text-white transition-colors active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50";
 export const SOGP_TASK_SECONDARY_BUTTON =
-  "inline-flex h-9 cursor-pointer items-center gap-2 rounded-full border border-zinc-200 bg-white px-3 text-xs font-semibold text-zinc-700 transition-colors hover:bg-zinc-50 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50";
+  "inline-flex h-[38px] max-w-full cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-[11px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white px-3.5 text-[13.5px] font-medium text-[var(--color-community-blue,#2056d6)] transition-colors hover:bg-[#f8f9fb] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50";
 
 export function TaskCard({
   number,
@@ -64,6 +62,7 @@ export function TaskCard({
   description,
   complete,
   locked,
+  flat = false,
   children,
 }: {
   number: number;
@@ -71,28 +70,37 @@ export function TaskCard({
   description?: string;
   complete: boolean;
   locked?: boolean;
+  /** Rows inside one panel (the SOGP day) instead of separate cards. */
+  flat?: boolean;
   children: ReactNode;
 }) {
   return (
-    <li className="grid gap-3 rounded-[var(--radius-md)] border border-zinc-200 bg-white p-4">
+    <li
+      className={cn(
+        "relative grid min-w-0 gap-3",
+        flat
+          ? "px-3.5 py-3 [&+&]:before:absolute [&+&]:before:inset-x-3.5 [&+&]:before:top-0 [&+&]:before:h-px [&+&]:before:bg-[var(--color-line,#e7e9ec)] [&+&]:before:content-['']"
+          : "rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white p-3.5",
+      )}
+    >
       <div className="flex items-start gap-3">
         <span
           className={cn(
-            "grid size-7 shrink-0 place-items-center rounded-full text-xs font-bold",
+            "grid size-7 shrink-0 place-items-center rounded-[8px] text-xs font-semibold",
             complete
-              ? "bg-[var(--color-brand-lime)] text-[var(--color-brand-blue)]"
-              : "bg-[var(--color-brand-blue)] text-white",
+              ? "bg-[var(--color-community-blue,#2056d6)] text-white"
+              : "bg-[#f1f2f5] text-(--color-text-muted)",
           )}
         >
           {complete ? <CheckIcon className="size-3.5" strokeWidth={2.5} /> : number}
         </span>
         <div className="grid min-w-0 gap-1 pt-0.5">
-          <h3 className="ppc-heading text-base font-semibold text-zinc-900">{title}</h3>
+          <h3 className="m-0 text-[13.5px] font-medium leading-[18px] text-(--color-text-strong)">{title}</h3>
           {description ? (
-            <p className="text-xs leading-[1.5] text-zinc-500">{description}</p>
+            <p className="text-xs leading-4 text-(--color-text-muted) [overflow-wrap:anywhere]">{description}</p>
           ) : null}
         </div>
-        {locked ? <LockKeyholeIcon className="ml-auto size-4 shrink-0 text-zinc-300" /> : null}
+        {locked ? <LockKeyholeIcon className="ml-auto size-4 shrink-0 text-[#a6abb2]" /> : null}
       </div>
       {children}
     </li>
@@ -159,6 +167,7 @@ export function SogpDailyTasks({
       complete: teachingComplete,
       node: (
         <TaskCard
+          flat
           key="teaching"
           number={1}
           title="Teaching"
@@ -183,7 +192,7 @@ export function SogpDailyTasks({
               ) : null}
             </div>
           ) : (
-            <p className="text-xs leading-[1.5] text-zinc-500">{track.lockedReason}</p>
+            <p className="text-xs leading-4 text-(--color-text-muted)">{track.lockedReason}</p>
           )}
         </TaskCard>
       ),
@@ -195,6 +204,7 @@ export function SogpDailyTasks({
     complete: selectedDay.prayerWatchComplete,
     node: (
       <TaskCard
+        flat
         key="prayer"
         number={teachingTasks.length + 1}
         title="5:30 am Prayer Watch"
@@ -218,7 +228,7 @@ export function SogpDailyTasks({
             className={secondaryButton}
           >
             {selectedDay.prayerWatchComplete ? (
-              <CheckIcon className="size-4 rounded-[4px] bg-[var(--color-brand-blue)] p-0.5 text-white" strokeWidth={2.5} />
+              <CheckIcon className="size-4 rounded-[4px] bg-[var(--color-community-blue,#2056d6)] p-0.5 text-white" strokeWidth={2.5} />
             ) : (
               <span className="grid size-4 place-items-center rounded-[4px] border border-zinc-300" />
             )}
@@ -244,6 +254,7 @@ export function SogpDailyTasks({
     complete: reviewComplete,
     node: (
       <TaskCard
+        flat
         key="review"
         number={teachingTasks.length + 2}
         title="Review"
@@ -281,7 +292,7 @@ export function SogpDailyTasks({
               className={secondaryButton}
             >
               {selectedDay.review.complete ? (
-                <CheckIcon className="size-4 rounded-[4px] bg-[var(--color-brand-blue)] p-0.5 text-white" strokeWidth={2.5} />
+                <CheckIcon className="size-4 rounded-[4px] bg-[var(--color-community-blue,#2056d6)] p-0.5 text-white" strokeWidth={2.5} />
               ) : (
                 <span className="grid size-4 place-items-center rounded-[4px] border border-zinc-300" />
               )}
@@ -311,17 +322,19 @@ export function SogpDailyTasks({
   const heading = isToday ? `Today, ${weekdayDayLabel}` : weekdayDayLabel;
 
   return (
-    <section className="grid gap-4 rounded-[var(--radius-md)] border border-zinc-200 bg-white p-4 md:p-5">
-      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <h2 className="ppc-heading text-lg font-semibold text-zinc-900">{heading}</h2>
-        <span className="text-xs font-semibold text-[var(--color-brand-blue)]">
+    <section className="grid min-w-0 gap-3">
+      <div className="mx-px -mb-1 flex min-w-0 items-center justify-between gap-3">
+        <h2 className="m-0 font-[family-name:var(--font-dashboard-heading)] text-[15px] font-medium leading-[22px] text-(--color-text-strong)">{heading}</h2>
+        <span className="shrink-0 text-[12.5px] text-(--color-text-muted)">
           {doneCount} of {tasks.length} done
         </span>
       </div>
-      <p className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-zinc-400">
-        Your {tasks.length} task{tasks.length === 1 ? "" : "s"} for {isToday ? "today" : weekdayDayLabel}
-      </p>
-      <ol className="grid gap-3">{tasks.map((task) => task.node)}</ol>
+      <div className="overflow-hidden rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white">
+        <p className="mx-3.5 mt-3 text-[12.5px] leading-[18px] text-(--color-text-muted)">
+          Your {tasks.length} task{tasks.length === 1 ? "" : "s"} for {isToday ? "today" : weekdayDayLabel}
+        </p>
+        <ol className="m-0 grid list-none p-0">{tasks.map((task) => task.node)}</ol>
+      </div>
     </section>
   );
 }

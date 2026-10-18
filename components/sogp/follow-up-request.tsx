@@ -1,12 +1,16 @@
 "use client";
 import Link from "next/link";
-import { useRef, useState, useTransition } from "react";
+import { useRef, useState, useTransition, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { sendFollowUpRequest } from "@/app/_actions/sogp-follow-up-actions";
-import { DashboardIcon, StatusPill } from "@/components/dashboard/v3/primitives";
+import { DashboardIcon } from "@/components/dashboard/v3/primitives";
 import type { FollowUpView } from "@/lib/db/queries/sogp-follow-up-requests";
 import styles from "./follow-up-request.module.css";
+
+function StatusPill({ children, tone }: { children: ReactNode; tone: "blue" | "green" | "amber" | "neutral" | "lilac" }) {
+  return <span className={styles.pill} data-tone={tone === "amber" ? "todo" : tone === "blue" || tone === "green" ? "done" : undefined}>{children}</span>;
+}
 
 export function FollowUpRequest({ data, preview = false }: { data: FollowUpView; preview?: boolean }) {
   const [reason, setReason] = useState("");
