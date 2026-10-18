@@ -2,7 +2,6 @@
 
 import { useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Check, Headphones } from "lucide-react";
 
 import { LessonAudioControls } from "@/components/media/lesson-audio-controls";
 import { ShareLearningProgressDialog } from "./share-learning-progress-dialog";
@@ -39,11 +38,7 @@ export function SogpAudioPlayer({
   });
 
   return (
-    <div className="rounded-[var(--radius-md)] border border-[var(--color-line)] bg-[var(--color-brand-sky-soft)] p-4 sm:p-5">
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-2"><Headphones className="size-5 text-[var(--color-brand-blue)]" /><span className="font-[var(--font-sen)] text-[15px] font-medium text-[var(--color-text-strong)]">Teaching audio</span></div>
-        {listened ? <span className="inline-flex items-center gap-1 rounded-full bg-[var(--color-brand-lime)] px-2.5 py-1 text-[11.5px] font-medium text-[var(--color-brand-blue)]"><Check className="size-3" /> Listened</span> : null}
-      </div>
+    <div className="min-w-0 rounded-[10px] bg-[var(--color-brand-sky-soft)] p-3.5 sm:p-4">
       <LessonAudioControls key={`${dayNumber}:${src}`} src={src} onProgress={(seconds, duration) => {
         if (!notified.current && Number.isFinite(duration) && duration > 0 && seconds / duration >= 0.9) {
           notified.current = true;
@@ -63,7 +58,7 @@ export function SogpAudioPlayer({
               notified.current = true;
               mutation.mutate();
             }}
-            className="inline-flex h-8 shrink-0 items-center rounded-full border border-[var(--color-brand-blue)] px-3 text-xs font-medium text-[var(--color-brand-blue)] disabled:opacity-50"
+            className="inline-flex h-8 shrink-0 items-center rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white px-3 text-[12.5px] font-medium text-[var(--color-community-blue,#2056d6)] disabled:opacity-50"
           >
             {mutation.isPending ? "Marking…" : "I've listened to this"}
           </button>

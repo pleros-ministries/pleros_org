@@ -52,7 +52,7 @@ export function LessonAudioControls({ src, onProgress, initialPositionSeconds = 
     }
   }
 
-  return <div className="grid gap-4" data-dashboard-audio={dashboard || undefined} role="group" aria-label={`${label} audio controls`}>
+  return <div className="grid min-w-0 gap-4" data-dashboard-audio={dashboard || undefined} role="group" aria-label={`${label} audio controls`}>
     <audio ref={audioRef} src={src} preload="metadata"
       onLoadedMetadata={event => metadata(event.currentTarget)} onDurationChange={event => metadata(event.currentTarget)}
       onPlay={() => setPlaying(true)} onPause={event => { setPlaying(false); setWaiting(false); onSavePosition?.(event.currentTarget.currentTime); }}
@@ -69,23 +69,23 @@ export function LessonAudioControls({ src, onProgress, initialPositionSeconds = 
       </button>
       <button type="button" disabled={!ready} onClick={() => seek(time + 15)} aria-label="Forward 15 seconds" className={smallControl}><RotateCw className="size-6" aria-hidden /><span aria-hidden className="absolute text-[9px] font-medium">15</span></button>
     </div>
-    <div className="grid gap-1.5">
-      <input type="range" min={0} max={100} step={0.1} value={progress} disabled={!ready} onChange={event => seek(Number(event.target.value) / 100 * duration)} aria-label={`Seek ${label}`} aria-valuetext={`${clock(time)} of ${clock(duration)}`} className={`${dashboard ? "min-h-11" : "h-6"} w-full cursor-pointer accent-(--color-brand-blue) disabled:opacity-40 ${focusRing}`} />
+    <div className="grid min-w-0 gap-1.5">
+      <input type="range" min={0} max={100} step={0.1} value={progress} disabled={!ready} onChange={event => seek(Number(event.target.value) / 100 * duration)} aria-label={`Seek ${label}`} aria-valuetext={`${clock(time)} of ${clock(duration)}`} className={`${dashboard ? "min-h-11" : "h-6"} block w-full min-w-0 cursor-pointer accent-(--color-brand-blue) disabled:opacity-40 ${focusRing}`} />
       <div className={`flex items-center justify-between ${dashboard ? "text-[13px]" : "text-[11.5px]"} tabular-nums text-(--color-text-muted)`}><span>{clock(time)}</span><span>{ready ? `−${clock(duration - time)}` : error ? "Audio unavailable" : "Loading audio…"}</span></div>
     </div>
-    <div className={`flex ${dashboard ? "flex-wrap" : ""} items-center justify-between gap-3 border-t border-(--color-line) pt-3`}>
+    <div className={`flex min-w-0 flex-wrap items-center justify-between ${dashboard ? "gap-3" : "gap-x-2 gap-y-1"} border-t border-(--color-line) pt-3`}>
       <label className={`flex shrink-0 items-center gap-2 whitespace-nowrap ${dashboard ? "text-[13px]" : "text-[12px]"} text-(--color-text-muted)`}>Speed
         <select aria-label="Playback speed" value={rate} onChange={event => { const value = Number(event.target.value); setRate(value); if (audioRef.current) audioRef.current.playbackRate = value; }} className={`${dashboard ? "min-h-11" : "h-8"} rounded-md border border-(--color-line-strong) bg-white pl-2 text-[12.5px] font-medium text-(--color-text-strong)`}>
           {[0.75, 1, 1.25, 1.5, 2].map(value => <option key={value} value={value}>{value}×</option>)}
         </select>
       </label>
-      <div className="flex items-center gap-1">
+      <div className="flex min-w-0 items-center gap-1">
         <button type="button" aria-label={muted || volume === 0 ? `Unmute ${label}` : `Mute ${label}`} className={smallControl} onClick={() => { const audio = audioRef.current; if (!audio) return; if (volume === 0) { audio.volume = 1; audio.muted = false; } else audio.muted = !audio.muted; }}>
           {muted || volume === 0 ? <VolumeX className="size-4" aria-hidden /> : <Volume2 className="size-4" aria-hidden />}
         </button>
-        <input type="range" min={0} max={1} step={0.05} value={muted ? 0 : volume} onChange={event => { if (audioRef.current) { audioRef.current.volume = Number(event.target.value); audioRef.current.muted = false; } }} aria-label={`${label} volume`} className={`hidden ${dashboard ? "min-h-11" : "h-6"} w-16 accent-(--color-brand-blue) sm:block ${focusRing}`} />
+        <input type="range" min={0} max={1} step={0.05} value={muted ? 0 : volume} onChange={event => { if (audioRef.current) { audioRef.current.volume = Number(event.target.value); audioRef.current.muted = false; } }} aria-label={`${label} volume`} className={`hidden ${dashboard ? "min-h-11" : "h-6"} w-16 min-w-0 accent-(--color-brand-blue) sm:block ${focusRing}`} />
       </div>
-      {download ? <a href={download.href} download={download.attachment || undefined} target="_blank" rel="noreferrer" className={`inline-flex ${dashboard ? "min-h-11" : "h-8"} items-center gap-1.5 rounded-md px-2 text-[12.5px] font-medium text-(--color-brand-blue) hover:bg-(--color-brand-sky-soft) ${focusRing}`}><Download className="size-3.5" aria-hidden />Download audio</a> : null}
+      {download ? <a href={download.href} download={download.attachment || undefined} target="_blank" rel="noreferrer" className={`inline-flex ${dashboard ? "min-h-11" : "h-8"} min-w-0 items-center gap-1.5 whitespace-nowrap rounded-md px-2 text-[12.5px] font-medium text-(--color-brand-blue) hover:bg-(--color-brand-sky-soft) ${focusRing}`}><Download className="size-3.5" aria-hidden />Download audio</a> : null}
     </div>
     {error ? <div className="flex flex-wrap items-center gap-2 text-[12px]"><p role="alert" className="text-(--destructive)">{error}</p><button type="button" onClick={() => { setError(null); audioRef.current?.load(); }} className={`rounded-sm font-medium text-(--color-brand-blue) underline ${focusRing}`}>Reload audio</button></div> : null}
   </div>;

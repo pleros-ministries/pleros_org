@@ -5,6 +5,7 @@ import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-q
 import { CheckCircle2, RotateCcw } from "lucide-react";
 
 import { ShareLearningProgressDialog } from "./share-learning-progress-dialog";
+import lesson from "./sogp-lesson.module.css";
 
 type QuizPayload = {
   dayNumber: number;
@@ -48,12 +49,44 @@ export function SogpQuiz({ dayNumber }: { dayNumber: number }) {
     },
   });
 
+  const result = mutation.data;
   return (
-    <section className="site-shell-page sogp-shell-page py-10">
-      <div className="mx-auto mt-8 grid max-w-3xl gap-6">
-        <header className="grid gap-2"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-brand-blue)]">Day {dayNumber} assessment</p><h1 className="font-[var(--font-sen)] text-2xl font-semibold tracking-[-0.02em] text-[var(--color-text-strong)]">{data.lessonTitle}</h1><p className="text-sm text-[var(--color-text-muted)]">Pass mark: 70%{data.bestScore === null ? "" : ` · Best score: ${data.bestScore}%`}</p></header>
-        {mutation.data ? <div className={`grid justify-items-center gap-3 rounded-[var(--radius-md)] p-8 text-center ${mutation.data.passed ? "bg-[var(--color-brand-sky)]" : "bg-amber-50"}`}><CheckCircle2 className={`size-9 ${mutation.data.passed ? "text-emerald-600" : "text-amber-600"}`}/><h2 className="font-[var(--font-sen)] text-3xl font-semibold">{mutation.data.score}%</h2><p className="text-sm">{mutation.data.passed ? "Quiz passed. Keep going." : "Review the teaching and try again."}</p><button type="button" onClick={()=>{mutation.reset();setAnswers({});}} className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[var(--color-line-strong)] px-4 text-xs font-semibold"><RotateCcw className="size-3.5"/> Try again</button></div> : <form className="grid gap-4" onSubmit={(event)=>{event.preventDefault();mutation.mutate();}}>{data.questions.map((question,index)=><fieldset key={question.id} className="grid gap-4 rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white p-5 md:p-6"><legend className="sr-only">Question {index+1}</legend><p className="font-[var(--font-sen)] text-lg font-semibold leading-[1.35] text-[var(--color-text-strong)]"><span className="mr-2 text-[var(--color-brand-blue)]">{index+1}.</span>{question.questionText}</p>{question.questionType === "multiple_choice" ? <div className="grid gap-2">{(question.options??[]).map((option)=><label key={option} className={`flex min-h-10 cursor-pointer items-center gap-3 rounded-[0.6rem] border px-4 text-sm transition ${answers[String(question.id)]===option?"border-[var(--color-brand-blue)] bg-[var(--color-brand-sky)]":"border-[var(--color-line)] hover:bg-[var(--color-surface-muted)]"}`}><input type="radio" name={`question-${question.id}`} value={option} checked={answers[String(question.id)]===option} onChange={()=>setAnswers((current)=>({...current,[String(question.id)]:option}))}/><span>{option}</span></label>)}</div> : <textarea rows={4} className="rounded-[var(--radius-sm)] border border-[var(--color-line-strong)] p-3" value={answers[String(question.id)]??""} onChange={(event)=>setAnswers((current)=>({...current,[String(question.id)]:event.target.value}))}/>}</fieldset>)}{mutation.error?<p role="alert" className="text-sm text-red-700">{mutation.error.message}</p>:null}<button type="submit" disabled={mutation.isPending} className="min-h-[38px] rounded-full bg-[var(--color-brand-blue)] px-6 text-sm font-semibold text-white disabled:opacity-50">{mutation.isPending?"Submitting":"Submit quiz"}</button></form>}
-      </div>
+    <section className={lesson.page}>
+      <header className={lesson.header}>
+        <h1>{data.lessonTitle}</h1>
+        <p className={lesson.sub}>Day {dayNumber} quiz · Pass mark 70%{data.bestScore === null ? "" : ` · Best score ${data.bestScore}%`}</p>
+      </header>
+      {result ? (
+        <div className={`${lesson.panel} ${lesson.result}`} role="status">
+          <span className={lesson.chip} data-tint={result.passed ? undefined : "amber"}><CheckCircle2 className="size-5" aria-hidden /></span>
+          <strong>{result.score}%</strong>
+          <p>{result.passed ? "Quiz passed. Keep going." : "Review the teaching and try again."}</p>
+          <button type="button" className={lesson.secondary} onClick={() => { mutation.reset(); setAnswers({}); }}><RotateCcw className="size-3.5" aria-hidden /> Try again</button>
+        </div>
+      ) : (
+        <form className={lesson.stack} onSubmit={(event) => { event.preventDefault(); mutation.mutate(); }}>
+          {data.questions.map((question, index) => (
+            <fieldset key={question.id} className={lesson.question}>
+              <legend className="sr-only">Question {index + 1}</legend>
+              <p className={lesson.questionText}><span>{index + 1}.</span><span>{question.questionText}</span></p>
+              {question.questionType === "multiple_choice" ? (
+                <div className={lesson.options}>
+                  {(question.options ?? []).map((option) => (
+                    <label key={option} className={lesson.option}>
+                      <input type="radio" name={`question-${question.id}`} value={option} checked={answers[String(question.id)] === option} onChange={() => setAnswers((current) => ({ ...current, [String(question.id)]: option }))} />
+                      <span>{option}</span>
+                    </label>
+                  ))}
+                </div>
+              ) : (
+                <textarea rows={4} aria-label={`Answer to question ${index + 1}`} className={lesson.textarea} value={answers[String(question.id)] ?? ""} onChange={(event) => setAnswers((current) => ({ ...current, [String(question.id)]: event.target.value }))} />
+              )}
+            </fieldset>
+          ))}
+          {mutation.error ? <p role="alert" className={lesson.error}>{mutation.error.message}</p> : null}
+          <button type="submit" disabled={mutation.isPending} className={lesson.primary}>{mutation.isPending ? "Submitting…" : "Submit quiz"}</button>
+        </form>
+      )}
       <ShareLearningProgressDialog
         open={shareOpen}
         onOpenChange={setShareOpen}

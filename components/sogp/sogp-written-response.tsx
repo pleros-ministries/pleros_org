@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { CheckCircle2 } from "lucide-react";
 
+import lesson from "./sogp-lesson.module.css";
+
 type ResponsePayload = {
   dayNumber: number;
   lessonTitle: string;
@@ -40,28 +42,29 @@ export function SogpWrittenResponse({ dayNumber }: { dayNumber: number }) {
   const locked = data.submission?.status === "submitted" || data.submission?.status === "approved";
 
   return (
-    <section className="site-shell-page sogp-shell-page py-10">
-      <div className="mx-auto mt-8 grid max-w-3xl gap-6">
-        <header className="grid gap-2"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-brand-blue)]">Day {dayNumber} written response</p><h1 className="font-[var(--font-sen)] text-2xl font-semibold tracking-[-0.02em] text-[var(--color-text-strong)]">{data.lessonTitle}</h1></header>
-        <section className="rounded-[var(--radius-md)] bg-[var(--color-brand-sky)] p-5 md:p-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-brand-blue)]">Response prompt</p>
-          {data.prompt ? (
-            <div
-              className="prose prose-sm mt-3 max-w-none font-[var(--font-sen)] text-[var(--color-text-strong)] prose-headings:font-[var(--font-sen)] prose-headings:text-[var(--color-text-strong)]"
-              dangerouslySetInnerHTML={{ __html: data.prompt }}
-            />
-          ) : (
-            <p className="mt-3 font-[var(--font-sen)] text-xl font-semibold leading-[1.4] text-[var(--color-text-strong)]">
-              Reflect on what this teaching changes in your understanding and practice.
-            </p>
-          )}
-        </section>
-        {data.submission?.status === "approved" ? <div className="flex items-center gap-3 rounded-[var(--radius-md)] border border-emerald-200 bg-emerald-50 p-5 text-emerald-900"><CheckCircle2 className="size-5"/><span className="text-sm font-semibold">Your response is approved.</span></div>:null}
-        {data.submission?.reviewerNote ? <div className="rounded-[var(--radius-md)] border border-amber-200 bg-amber-50 p-5"><p className="text-xs font-semibold uppercase tracking-[0.12em] text-amber-800">Reviewer note</p><p className="mt-2 text-sm leading-[1.55] text-amber-950">{data.submission.reviewerNote}</p></div>:null}
-        <textarea value={content} onChange={(event)=>setContent(event.target.value)} disabled={locked} rows={14} maxLength={20000} className="w-full resize-y rounded-[var(--radius-md)] border border-[var(--color-line-strong)] bg-white p-5 font-[var(--font-be-vietnam-pro)] text-sm leading-[1.7] outline-none focus-visible:border-[var(--color-brand-blue)] focus-visible:ring-2 focus-visible:ring-[var(--color-focus)] disabled:bg-[var(--color-surface-muted)]" placeholder="Write your response here…"/>
-        {mutation.error?<p role="alert" className="text-sm text-red-700">{mutation.error.message}</p>:null}
-        {!locked?<div className="flex flex-wrap justify-end gap-3"><button type="button" disabled={mutation.isPending||!content.trim()} onClick={()=>mutation.mutate("save")} className="min-h-9 rounded-full border border-[var(--color-line-strong)] bg-white px-5 text-sm font-semibold disabled:opacity-50">Save draft</button><button type="button" disabled={mutation.isPending||!content.trim()} onClick={()=>mutation.mutate("submit")} className="h-8 rounded-[10px] bg-[var(--color-brand-blue)] px-3.5 text-[13px] font-semibold text-white disabled:opacity-50">Submit for review</button></div>:null}
-      </div>
+    <section className={lesson.page}>
+      <header className={lesson.header}>
+        <h1>{data.lessonTitle}</h1>
+        <p className={lesson.sub}>Day {dayNumber} written response</p>
+      </header>
+      <section className={lesson.prompt} aria-label="Response prompt">
+        <p className={lesson.meta}>Response prompt</p>
+        {data.prompt ? (
+          <div className="prose prose-sm max-w-none text-[var(--color-text-strong)]" dangerouslySetInnerHTML={{ __html: data.prompt }} />
+        ) : (
+          <p className={lesson.promptFallback}>Reflect on what this teaching changes in your understanding and practice.</p>
+        )}
+      </section>
+      {data.submission?.status === "approved" ? <div className={lesson.done}><CheckCircle2 className="size-5 shrink-0" aria-hidden /><span>Your response is approved.</span></div> : null}
+      {data.submission?.reviewerNote ? <div className={lesson.note}><b>Reviewer note</b><p>{data.submission.reviewerNote}</p></div> : null}
+      <textarea value={content} onChange={(event) => setContent(event.target.value)} disabled={locked} rows={12} maxLength={20000} aria-label="Your written response" className={lesson.textarea} placeholder="Write your response here…" />
+      {mutation.error ? <p role="alert" className={lesson.error}>{mutation.error.message}</p> : null}
+      {!locked ? (
+        <div className={lesson.actions}>
+          <button type="button" disabled={mutation.isPending || !content.trim()} onClick={() => mutation.mutate("save")} className={lesson.secondary}>Save draft</button>
+          <button type="button" disabled={mutation.isPending || !content.trim()} onClick={() => mutation.mutate("submit")} className={lesson.primary}>Submit for review</button>
+        </div>
+      ) : null}
     </section>
   );
 }
