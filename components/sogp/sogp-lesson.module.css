@@ -70,7 +70,7 @@ a.row:hover { background: #f8f9fb; }
 .curriculum[open] > summary svg { transform: rotate(180deg); }
 
 /* Actions */
-.footer { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 8px; margin-top: 4px; }
+.footer { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 8px; margin-top: 20px; }
 .footer > :only-child { grid-column: 1 / -1; }
 .primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-width: 0; height: 40px; padding: 0 16px; border: 0; border-radius: 12px; background: var(--color-community-blue, #2056d6); color: white; font: inherit; font-size: 14px; font-weight: 500; text-decoration: none; cursor: pointer; }
 .primary:hover { background: var(--color-community-blue-dark, #1948b8); }
