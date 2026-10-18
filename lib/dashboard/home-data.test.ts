@@ -13,6 +13,7 @@ vi.mock("@/lib/db/queries/sogp-certification-facts", () => ({ getOwnCertificatio
 vi.mock("@/lib/db/queries/sogp-leaderboard", () => ({ getSogpLeaderboard: reads.leaderboard }));
 vi.mock("@/lib/db/queries/sogp-discipleship", () => ({ getHomeDiscipleshipSummary: reads.group }));
 vi.mock("@/lib/sogp/daily-date", () => ({ lagosToday: () => "2026-10-13" }));
+vi.mock("@/lib/db/queries/notification-preferences", () => ({ getReminderPreferences: async () => ({ remindersSavedAt: new Date("2026-10-01T00:00:00Z") }) }));
 import { getDashboardHomeData } from "./home-data";
 import type { getDashboardViewer } from "./viewer";
 

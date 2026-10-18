@@ -13,12 +13,12 @@ import type { OversightData, OversightDiscipler } from "@/lib/db/queries/oversig
 export const OVERSIGHT_PATH = "/dashboard/community/oversight";
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
 const tones: Array<[string, string]> = [["#e6ecfc", "#1f3260"], ["#efe7fb", "#3e1876"], ["#f6e4ac", "#5a4508"], ["#fde3cf", "#7a3a10"], ["#cfe6fb", "#0e3f73"]];
-const short = (name: string) => {
+export const short = (name: string) => {
   const words = name.trim().split(/\s+/);
   return (words.length > 1 ? words.slice(0, 2).map(part => part[0] ?? "").join("") : name.trim().slice(0, 2)).toUpperCase();
 };
 
-function Mark({ text, index }: { text: string; index: number }) {
+export function Mark({ text, index }: { text: string; index: number }) {
   const [bg, ink] = tones[index % tones.length]!;
   return <span className="grid size-10 shrink-0 place-items-center rounded-[10px] text-[13px] font-semibold" style={{ background: bg, color: ink, fontFamily: "var(--font-dashboard-heading)" }} aria-hidden="true">{text}</span>;
 }
@@ -31,7 +31,7 @@ function Rate({ done, total }: { done: number; total: number }) {
   </span>;
 }
 
-function Strip({ items }: { items: Array<[string, number | string, boolean?]> }) {
+export function Strip({ items }: { items: Array<[string, number | string, boolean?]> }) {
   return <div className={styles.strip}>
     {items.map(([label, value, warn]) => <div key={label}><span>{label}</span><strong style={{ color: warn ? "#92400e" : undefined }}>{value}</strong></div>)}
   </div>;
