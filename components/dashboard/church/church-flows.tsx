@@ -75,10 +75,8 @@ export function PlaceChurchMember({ branches }: { branches: Array<{ id: number; 
     });
   }
   return <div className="grid gap-3">
-    <div className="flex items-start justify-between gap-3">
-      <span className="grid gap-0.5"><h2 className={forms.panelTitle}>Place a church member</h2><span className={styles.rowMeta}>A branch only, with no church office</span></span>
-      <span className={styles.pill}>Branch only</span>
-    </div>
+    {/* One descriptive header (user feedback, 18 October): no subtitle or tag. */}
+    <h2 className={forms.panelTitle}>Add a member to a branch without a church role</h2>
     <PeopleSearch multiple={false} chosen={chosen} onChange={setChosen} />
     <label className={forms.field}>Branch<select value={branchId} onChange={event => setBranchId(Number(event.target.value))}>{branches.map(branch => <option key={branch.id} value={branch.id}>{branch.name}</option>)}</select></label>
     <Problem error={error} />
