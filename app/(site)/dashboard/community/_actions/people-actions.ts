@@ -75,8 +75,8 @@ export async function handOverEnrolleeAction(input: { enrollmentId: number; newO
   if (result.ok && notice) {
     const { enrolleeFirstName } = notice;
     after(() => sendPushToUser(input.newOwnerUserId, {
-      title: "New person to follow up",
-      body: `${actorName} handed ${enrolleeFirstName} to you to follow up.`,
+      title: "Someone new to look after",
+      body: `${actorName} handed ${enrolleeFirstName} over to you.`,
       url: `/dashboard/community/enrollees/${input.enrollmentId}`,
     }, { gate: "community" }).catch(error => console.error("Handover push failed:", error)));
   }

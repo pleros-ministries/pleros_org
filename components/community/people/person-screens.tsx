@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import type { ReactNode } from "react";
-import { CheckIcon, ClipboardListIcon, HomeIcon, LockIcon, MailIcon, MessageCircleIcon, PenLineIcon, PhoneIcon, SendIcon, UserPlusIcon } from "lucide-react";
+import { ArrowRightLeftIcon, CheckIcon, ChevronRightIcon, ClipboardListIcon, HomeIcon, LockIcon, MailIcon, MessageCircleIcon, PenLineIcon, PhoneIcon, SendIcon, UserPlusIcon } from "lucide-react";
 
 import { handOverEnrolleeAction, logFollowUpAction, recordContactInviteAction, searchHandoverCandidatesAction } from "@/app/(site)/dashboard/community/_actions/people-actions";
 import type { HandoverCandidate } from "@/lib/db/queries/enrollee-handover";
@@ -97,7 +97,7 @@ export function FollowUpLog({ subject, firstName, entries, extra, startOpen = fa
 }
 
 /** One enrollee the viewer follows up: how they joined, how to reach them, and getting them into a group. */
-/** Hand this enrollee to someone else to follow up (user decision, 18 October). */
+/** Hand this enrollee over to someone else to look after (user decision, 18 October). */
 function HandOver({ enrollmentId, firstName }: { enrollmentId: number; firstName: string }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -124,17 +124,21 @@ function HandOver({ enrollmentId, firstName }: { enrollmentId: number; firstName
     });
   }
   return <>
-    <div className={styles.sectionTitle}>
-      <h2>Follow-up person</h2>
-      <button type="button" className={styles.quiet} onClick={() => { setOpen(!open); setChosen(null); setError(null); }} aria-expanded={open}>{open ? "Cancel" : "Hand over"}</button>
-    </div>
+    {open ? <div className={styles.sectionTitle}>
+      <h2>Hand {firstName} over</h2>
+      <button type="button" className={styles.quiet} onClick={() => { setOpen(false); setChosen(null); setError(null); setTerm(""); setPeople([]); }}>Cancel</button>
+    </div> : <button type="button" className={`${styles.panel} ${styles.row} w-full cursor-pointer text-left`} onClick={() => setOpen(true)} aria-expanded={false}>
+      <span className="grid size-8 shrink-0 place-items-center rounded-[9px] bg-[#eef1f6] text-[#4a5568]" aria-hidden="true"><ArrowRightLeftIcon className="size-4" strokeWidth={2.2} /></span>
+      <span className="grid min-w-0 flex-1"><span className="text-[13.5px] font-medium">Hand {firstName} over to someone else</span><span className="text-[12px] text-(--color-community-muted)">They’ll look after {firstName} instead of you</span></span>
+      <ChevronRightIcon className="size-4 shrink-0 text-[#a6abb2]" />
+    </button>}
     {open ? <div className={`${styles.panel} grid gap-3 p-3.5`}>
       {chosen ? <>
-        <p className="m-0 text-[13.5px]">Hand {firstName} to <b className="font-medium">{chosen.name}</b>?</p>
-        <p className="m-0 text-[12px] text-(--color-community-muted)">They become {firstName}’s follow-up person. You stop seeing {firstName}’s phone number, and your follow-up notes stay private to you.</p>
-        <div className="flex gap-2"><button type="button" className={styles.btn} data-primary disabled={saving} onClick={confirm}>{saving ? "Handing over…" : "Hand over"}</button><button type="button" className={styles.btn} disabled={saving} onClick={() => setChosen(null)}>Back</button></div>
+        <p className="m-0 text-[13.5px]">Hand {firstName} over to <b className="font-medium">{chosen.name}</b>?</p>
+        <p className="m-0 text-[12px] text-(--color-community-muted)">{chosen.name.split(" ")[0]} will look after {firstName} from now on. {firstName} leaves your enrollees and you stop seeing their phone number. Your notes stay private to you.</p>
+        <div className="flex gap-2"><button type="button" className={styles.btn} data-primary disabled={saving} onClick={confirm}>{saving ? "Handing over…" : `Hand ${firstName} over`}</button><button type="button" className={styles.btn} disabled={saving} onClick={() => setChosen(null)}>Back</button></div>
       </> : <>
-        <label className="grid gap-1.5 text-[13px] font-medium">Who should follow up {firstName}?<input type="search" value={term} onChange={event => search(event.target.value)} placeholder="Search by name" autoComplete="off" className="h-10 rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white px-3 text-[14px] font-normal outline-none focus:border-(--color-community-blue)" /></label>
+        <label className="grid gap-1.5 text-[13px] font-medium">Who should look after {firstName} now?<input type="search" value={term} onChange={event => search(event.target.value)} placeholder="Search by name" autoComplete="off" className="h-10 rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white px-3 text-[14px] font-normal outline-none focus:border-(--color-community-blue)" /></label>
         {term.trim().length >= 2 ? (people.length ? <ul className={`${styles.list} -mx-3.5`}>
           {people.map(person => <li key={person.userId}><button type="button" className={`${styles.row} w-full text-left`} onClick={() => setChosen(person)}>
             <Initials name={person.name} />
@@ -185,7 +189,7 @@ export function EnrolleeDetail({ enrollee, followUps }: { enrollee: OwnEnrollee;
 
     <HandOver enrollmentId={enrollee.enrollmentId} firstName={enrollee.firstName} />
 
-    <p className={styles.note}><LockIcon className="mr-1 inline size-3 -translate-y-px" strokeWidth={2.2} aria-hidden />Their phone number and your follow-ups are only for you as their follow-up person. Progress and answers show once they join one of your groups.</p>
+    <p className={styles.note}><LockIcon className="mr-1 inline size-3 -translate-y-px" strokeWidth={2.2} aria-hidden />Their phone number and your follow-ups are only for you, as the person looking after them. Progress and answers show once they join one of your groups.</p>
   </div>;
 }
 
