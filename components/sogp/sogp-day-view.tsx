@@ -222,14 +222,10 @@ export function SogpDayView({ dayNumber }: { dayNumber: number }) {
     <section className={lesson.page}>
       <header className={lesson.header}>
         <h1>{data.track.lesson.title}</h1>
-        <p className={lesson.sub}>Week {data.track.weekNumber} · Track {position || data.track.dayNumber} of {tracks.length}</p>
+        <p className={lesson.sub}>Week {data.track.weekNumber} · Track {position || data.track.dayNumber} of {tracks.length} · Traditional, 1 hr/day</p>
       </header>
-      <article className={lesson.card} aria-label="Lesson audio">
-        <div className={lesson.cardHead}>
-          <p className={lesson.meta}>Traditional track · 1 hr/day</p>
-        </div>
-        {data.track.lesson.audioUrl ? <SogpAudioPlayer key={dayNumber} dayNumber={dayNumber} src={data.track.lesson.audioUrl} listened={data.track.progress.audioListened}/> : <p className={lesson.notice}>Teaching audio is being prepared.</p>}
-      </article>
+      {/* The player is the one tinted panel; no white card around it (user, 18 October). */}
+      {data.track.lesson.audioUrl ? <SogpAudioPlayer key={dayNumber} dayNumber={dayNumber} src={data.track.lesson.audioUrl} listened={data.track.progress.audioListened}/> : <p className={lesson.notice}>Teaching audio is being prepared.</p>}
       {/* One checklist: each step shows its state and its action in the same row
           (user, 18 October: a separate Completion list duplicated the actions). */}
       <section className={lesson.steps} aria-labelledby="lesson-steps">

@@ -69,7 +69,7 @@ export function LessonAudioControls({ src, onProgress, initialPositionSeconds = 
         No volume slider: phones use their hardware buttons. */}
     <div className="grid min-w-0 gap-1">
       <input type="range" min={0} max={100} step={0.1} value={progress} disabled={!ready} onChange={event => seek(Number(event.target.value) / 100 * duration)} aria-label={`Seek ${label}`} aria-valuetext={`${clock(time)} of ${clock(duration)}`} className={`h-6 block w-full min-w-0 cursor-pointer accent-(--color-brand-blue) disabled:opacity-40 ${focusRing}`} />
-      <div className="flex items-center justify-between text-[12px] tabular-nums text-(--color-text-on-sky)"><span>{clock(time)}</span><span>{ready ? `−${clock(duration - time)}` : error ? "Audio unavailable" : "Loading audio…"}</span></div>
+      <div className="flex items-center justify-between text-[12px] tabular-nums text-(--color-text-on-sky)"><span>{clock(time)}</span>{error ? <span role="alert" className="text-(--destructive)">Couldn’t load · <button type="button" onClick={() => { setError(null); audioRef.current?.load(); }} className={`rounded-sm font-medium text-(--color-brand-blue) underline ${focusRing}`}>Retry</button></span> : <span>{ready ? `−${clock(duration - time)}` : "Loading audio…"}</span>}</div>
     </div>
     <div className="grid min-w-0 grid-cols-[1fr_auto_1fr] items-center gap-2">
       <div className="flex justify-start">
@@ -91,6 +91,5 @@ export function LessonAudioControls({ src, onProgress, initialPositionSeconds = 
           </button>}
       </div>
     </div>
-    {error ? <div className="flex flex-wrap items-center gap-2 text-[12px]"><p role="alert" className="text-(--destructive)">{error}</p><button type="button" onClick={() => { setError(null); audioRef.current?.load(); }} className={`rounded-sm font-medium text-(--color-brand-blue) underline ${focusRing}`}>Reload audio</button></div> : null}
   </div>;
 }
