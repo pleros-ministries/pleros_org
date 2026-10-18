@@ -2,16 +2,13 @@ import Link from "next/link";
 import type { DailyReportCategory, DailyReportStatus } from "@/lib/community/daily-report";
 
 import { activityKindLabel } from "@/lib/community/ministry-activities";
-import { totalReached, type MinistryNumbers } from "@/lib/community/ministry-report";
-import { dateKeyLabel } from "@/lib/community/time";
+import { sumMinistryNumbers, totalReached, type MinistryNumbers } from "@/lib/community/ministry-report";
 import type {
   DayActivitySummary,
   MemberActivity,
 } from "@/lib/db/queries/ministry-activities";
 
 import { dayHref } from "./day-picker";
-import { ReportTabs } from "./report-tabs";
-import { card } from "./styles";
 
 export type HistoryDay = {
   dateKey: string;
@@ -22,43 +19,7 @@ export type HistoryDay = {
 
 type Period = { count: number; totals: MinistryNumbers };
 
-function Totals({ title, period }: { title: string; period: Period }) {
-  const figures = [
-    { label: "Activities", value: period.count },
-    { label: "Reached", value: totalReached(period.totals) },
-    { label: "Saved", value: period.totals.saved },
-    { label: "Filled", value: period.totals.filled },
-    { label: "Healed", value: period.totals.healed },
-    { label: "Follow-ups", value: period.totals.followUps },
-  ];
-  return (
-    <div className={`${card} grid gap-2 p-4`}>
-      <p className="text-xs font-medium text-zinc-500">{title}</p>
-      <dl className="grid grid-cols-3 gap-2 sm:grid-cols-6">
-        {figures.map((figure) => (
-          <div key={figure.label} className="grid gap-0.5">
-            <dd className="ppc-heading text-base font-semibold text-zinc-900">
-              {figure.value}
-            </dd>
-            <dt className="text-[0.7rem] text-zinc-500">{figure.label}</dt>
-          </div>
-        ))}
-      </dl>
-    </div>
-  );
-}
 
-function Dot({ on, label }: { on: boolean; label: string }) {
-  return (
-    <span
-      title={label}
-      aria-label={`${label}: ${on ? "done" : "not recorded"}`}
-      className={`inline-block size-2 rounded-full ${
-        on ? "bg-(--color-brand-blue)" : "bg-zinc-200"
-      }`}
-    />
-  );
-}
 
 /** The kinds logged that day, e.g. "evangelism, prayer meeting". */
 function kindsOf(activities: MemberActivity[]): string {
@@ -67,116 +28,81 @@ function kindsOf(activities: MemberActivity[]): string {
   return [...seen].join(", ");
 }
 
-/** The History tab: recent totals and the last two weeks day by day. */
+const rangeDay = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
+const weekdayShort = new Intl.DateTimeFormat("en-GB", { weekday: "short", timeZone: "UTC" });
+
+function dayState(day: HistoryDay): "complete" | "partial" | "missing" {
+  const done = day.statuses ? Object.values(day.statuses).filter(status => status !== "missing").length : 0;
+  return done === 3 ? "complete" : done ? "partial" : "missing";
+}
+
+/**
+ * Report history as week cards (mockup C, 17 October): each block of seven
+ * days shows which were complete and the week's totals, and opens to its days.
+ * The first card is the last 7 days; This month sums the calendar month.
+ */
 export function ReportHistoryView({
   today,
   reportable,
   days,
-  week,
   month,
 }: {
   today: string;
-  /** Days still open for changes; these link back to the Report tab. */
+  /** Days still open for changes; these link back to the day screen. */
   reportable: string[];
   days: HistoryDay[];
   week: Period;
   month: Period;
 }) {
+  const weeks: HistoryDay[][] = [];
+  for (let index = 0; index < days.length; index += 7) weeks.push(days.slice(index, index + 7));
+  const label = (chunk: HistoryDay[], index: number) => index === 0 ? "Last 7 days"
+    : `${rangeDay.format(new Date(`${chunk.at(-1)!.dateKey}T00:00:00Z`))} – ${rangeDay.format(new Date(`${chunk[0]!.dateKey}T00:00:00Z`))}`;
   return (
-    <div className="grid gap-4">
-      <header className="grid gap-1">
-        <h1 className="ppc-heading text-lg font-semibold text-zinc-900">Daily report</h1>
-        <p className="max-w-md text-sm text-zinc-500">
-          Your recent activities added up, and each of your last {days.length} days.
-        </p>
+    <div className="mx-auto grid w-full max-w-[640px] gap-3">
+      <header className="grid gap-0.5">
+        <h1 className="m-0">Report history</h1>
+        <p className="m-0 text-[12.5px] text-(--color-text-muted)">Your last {weeks.length} weeks</p>
       </header>
-
-      <ReportTabs active="history" />
-
-      <div className="grid gap-3 sm:grid-cols-2">
-        <Totals title="Last 7 days" period={week} />
-        <Totals title="This month" period={month} />
+      {weeks.map((chunk, index) => {
+        const activities = chunk.flatMap(day => day.activities);
+        const totals = sumMinistryNumbers(activities);
+        const complete = chunk.filter(day => dayState(day) === "complete").length;
+        return <details key={chunk[0]!.dateKey} open={index === 0} className="overflow-hidden rounded-[12px] border border-(--dashboard-panel-edge,#e2e5ea) bg-white">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-3.5 py-3">
+            <span className="grid min-w-0"><span className="text-[13.5px] font-semibold">{label(chunk, index)}</span><span className="text-[12px] text-(--color-text-muted)">{complete} of {chunk.length} days complete · {activities.length} {activities.length === 1 ? "activity" : "activities"}</span></span>
+            <span className="flex gap-1" aria-hidden="true">{[...chunk].reverse().map(day => {
+              const state = dayState(day);
+              return <i key={day.dateKey} className="size-2 rounded-[3px]" style={{ background: state === "complete" ? "var(--color-brand-blue)" : state === "partial" ? "#d98a1f" : "#e2e5ea" }} />;
+            })}</span>
+          </summary>
+          <dl className="m-0 grid grid-cols-3 border-t border-(--color-line)">
+            {([["Reached", totalReached(totals)], ["Saved", totals.saved], ["Follow-ups", totals.followUps]] as const).map(([name, value], position) => <div key={name} className={`grid gap-px px-3.5 py-2.5 ${position ? "border-l border-(--color-line)" : ""}`}>
+              <dd className="m-0 font-[family-name:var(--font-dashboard-heading)] text-[17px] font-medium">{value}</dd>
+              <dt className="text-[11px] text-(--color-text-muted)">{name}</dt>
+            </div>)}
+          </dl>
+          <ul className="m-0 list-none border-t border-(--color-line) p-0">
+            {chunk.map(day => {
+              const state = dayState(day);
+              const date = new Date(`${day.dateKey}T00:00:00Z`);
+              const kinds = kindsOf(day.activities);
+              const body = <>
+                <span className="w-9 shrink-0 text-[12px] text-(--color-text-muted)">{weekdayShort.format(date)}</span>
+                <span className="min-w-0 flex-1 truncate text-[13px]">{rangeDay.format(date)}{kinds ? <span className="text-(--color-text-muted)"> · {kinds}</span> : null}</span>
+                <span className="shrink-0 rounded-full px-2 text-[11px] font-medium leading-5" style={{ background: state === "complete" ? "#e4ebfd" : state === "partial" ? "#f7e4cd" : "#eceef2", color: state === "complete" ? "#2331ae" : state === "partial" ? "#92400e" : "var(--color-text-muted)" }}>{state === "complete" ? "Complete" : state === "partial" ? "Partly" : day.dateKey === today ? "Not yet" : "Missed"}</span>
+              </>;
+              return <li key={day.dateKey} className="border-t border-(--color-line) first:border-t-0">{reportable.includes(day.dateKey)
+                ? <Link href={dayHref(day.dateKey, today)} className="flex items-center gap-2 px-3.5 py-2.5 text-inherit no-underline hover:bg-[#f8f9fb]">{body}</Link>
+                : <div className="flex items-center gap-2 px-3.5 py-2.5">{body}</div>}</li>;
+            })}
+          </ul>
+        </details>;
+      })}
+      <div className="flex items-center justify-between rounded-[10px] bg-[#f6f7f9] px-3.5 py-3 text-[13px]">
+        <span>This month</span>
+        <span className="text-(--color-text-muted)">{month.count} {month.count === 1 ? "activity" : "activities"} · {totalReached(month.totals)} reached · {month.totals.saved} saved</span>
       </div>
-
-      <section className={`${card} overflow-hidden`}>
-        <h2 className="ppc-heading border-b border-zinc-100 px-4 py-3 text-sm font-semibold text-zinc-900">
-          Your last {days.length} days
-        </h2>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-[13px]">
-            <thead className="text-xs text-zinc-500">
-              <tr>
-                <th className="px-4 py-2 font-medium">Day</th>
-                <th className="px-2 py-2 font-medium">Activities</th>
-                <th className="px-2 py-2 text-right font-medium">Reached</th>
-                <th className="px-2 py-2 text-right font-medium">Saved</th>
-                <th className="px-2 py-2 text-right font-medium">Follow-ups</th>
-                <th className="px-4 py-2 font-medium">Pleros</th>
-                {days.some((day) => day.statuses) ? <th className="px-4 py-2 font-medium">Reports</th> : null}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-100">
-              {days.map((day) => {
-                const totals =
-                  day.activities.length > 0
-                    ? day.activities.reduce(
-                        (sum, activity) => ({
-                          reached: sum.reached + totalReached(activity),
-                          saved: sum.saved + activity.saved,
-                          followUps: sum.followUps + activity.followUps,
-                        }),
-                        { reached: 0, saved: 0, followUps: 0 },
-                      )
-                    : null;
-                const open = reportable.includes(day.dateKey);
-                return (
-                  <tr key={day.dateKey} className={totals ? "" : "text-zinc-400"}>
-                    <td className="whitespace-nowrap px-4 py-2 font-medium text-zinc-900">
-                      {(
-                        <Link
-                          href={dayHref(day.dateKey, today)}
-                          title={open ? "View or edit report" : "View report"}
-                          className="text-(--color-brand-blue) underline underline-offset-2"
-                        >
-                          {dateKeyLabel(day.dateKey)}
-                        </Link>
-                      )}
-                    </td>
-                    <td className="px-2 py-2 text-zinc-700">
-                      {totals ? (
-                        <>
-                          {day.activities.length}
-                          <span className="text-xs text-zinc-500"> · {kindsOf(day.activities)}</span>
-                        </>
-                      ) : (
-                        "–"
-                      )}
-                    </td>
-                    <td className="px-2 py-2 text-right tabular-nums">{totals?.reached ?? "–"}</td>
-                    <td className="px-2 py-2 text-right tabular-nums">{totals?.saved ?? "–"}</td>
-                    <td className="px-2 py-2 text-right tabular-nums">{totals?.followUps ?? "–"}</td>
-                    <td className="px-4 py-2">
-                      <span className="flex items-center gap-1.5">
-                        <Dot on={day.activity.bible} label="Bible reading" />
-                        <Dot on={day.activity.prayerWatch} label="Prayer Watch" />
-                        {day.activity.sogp == null ? null : (
-                          <Dot on={day.activity.sogp} label="SOGP" />
-                        )}
-                        <Dot on={day.activity.podcastEpisodes > 0} label="Podcast" />
-                      </span>
-                    </td>
-                    {day.statuses ? <td className="whitespace-nowrap px-4 py-2 text-[12px]">{Object.entries(day.statuses).map(([category, status]) => <p key={category}><span className="capitalize">{category}</span> · {status === "missing" ? "Not yet" : status === "nil" ? "Nil" : "Reported"}</p>)}</td> : null}
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-        <p className="border-t border-zinc-100 px-4 py-2 text-xs text-zinc-500">
-          Dots show Bible reading, Prayer Watch, SOGP (when you are in a cohort)
-          and podcast for each day.
-        </p>
-      </section>
     </div>
   );
 }

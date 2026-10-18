@@ -28,13 +28,14 @@ describe("the daily report routes", () => {
     expect(edit).toContain("This day can no longer be changed.");
   });
 
-  test("the History tab carries the totals and the two-week table", () => {
+  test("report history shows week cards with totals and the month", () => {
     const history = read(...reportDir, "history", "page.tsx");
     expect(history).toContain("listActivitiesForUser");
     expect(history).toContain("getActivityRange");
     const view = read("components", "community", "report", "report-history-view.tsx");
     expect(view).toContain("Last 7 days");
     expect(view).toContain("This month");
+    expect(view).toContain("days complete");
   });
 
   test("the tabs are Report, People and History", () => {

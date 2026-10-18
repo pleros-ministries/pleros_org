@@ -21,7 +21,8 @@ import {
 import { lagosToday, shiftDate } from "@/lib/sogp/daily-date";
 import { enumerateDateKeys } from "@/lib/sogp/daily-participation";
 
-const HISTORY_DAYS = 14;
+/** Four weeks of week cards. */
+const HISTORY_DAYS = 28;
 
 export default async function ReportHistoryRoute() {
   // Session and context load together instead of one roundtrip after the other.
