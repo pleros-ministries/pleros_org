@@ -11,6 +11,11 @@ describe("dashboard swipe navigation", () => {
       expect(tabAfterSwipe("you",dx,dy,time)).toBe("you");
     }
   });
+  test("a quick short flick switches tabs", () => {
+    expect(tabAfterSwipe("you",-40,4,100)).toBe("community");
+    expect(tabAfterSwipe("community",40,-4,100)).toBe("you");
+    expect(tabAfterSwipe("you",-20,0,40)).toBe("you");
+  });
   test("a deliberate drag can be held before release", () => {
     expect(tabAfterSwipe("you",-140,8,1500)).toBe("community");
   });

@@ -55,6 +55,11 @@ function scopeDocumentTypography() {
 
 const COLLAPSED_KEY = "pleros-sidebar-collapsed";
 const REMEMBERED_KEY = "pleros-area-positions";
+/** Matches the sidebar width transition in dashboard-shell.module.css. */
+const SIDEBAR_MS = 240;
+type SidebarPhase = "open" | "folding" | "rail" | "unfolding";
+/** Matches the drawer exit animation in dashboard-shell.module.css. */
+const DRAWER_EXIT_MS = 200;
 
 /** The Pleros logomark on a brand-blue strip, level with the blue top bar. */
 function Brand({ collapsed = false, onToggle }: { collapsed?: boolean; onToggle?: () => void }) {
@@ -117,8 +122,18 @@ function Drawer({ open, onClose, viewer, sections, area, onArea, id }: {
   const titleId = useId();
   useEffect(() => {
     const dialog = ref.current;
-    if (open && !dialog?.open) dialog?.showModal();
-    if (!open && dialog?.open) dialog.close();
+    if (!dialog) return;
+    if (open) {
+      delete dialog.dataset.closing;
+      if (!dialog.open) dialog.showModal();
+      return;
+    }
+    if (!dialog.open) return;
+    // Hold the dialog open while it slides back out (DRAWER_EXIT_MS matches the CSS).
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { dialog.close(); return; }
+    dialog.dataset.closing = "";
+    const timer = window.setTimeout(() => { delete dialog.dataset.closing; dialog.close(); }, DRAWER_EXIT_MS);
+    return () => window.clearTimeout(timer);
   }, [open]);
   return <dialog id={id} ref={ref} aria-labelledby={titleId} onClose={onClose}
     onCancel={event => { event.preventDefault(); onClose(); }}
@@ -209,15 +224,25 @@ export function DashboardShell({ viewer, sections, children, notificationControl
     // sections only changes identity on refresh; the remembered targets are what matter.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname, routedArea, router]);
-  // Desktop sidebar can fold to an icon rail; remembered per browser.
-  const [collapsed, setCollapsed] = useState(false);
+  // Desktop sidebar can fold to an icon rail; remembered per browser. Folding
+  // fades the labels while the width closes, and only then swaps in the rail;
+  // unfolding drops the rail, opens the width, then fades the labels back in.
+  const [sidebar, setSidebar] = useState<SidebarPhase>("open");
+  const sidebarTimer = useRef<number | undefined>(undefined);
   useEffect(() => {
-    try { if (window.localStorage.getItem(COLLAPSED_KEY) === "1") setCollapsed(true); } catch { /* storage blocked: stay expanded */ }
+    try { if (window.localStorage.getItem(COLLAPSED_KEY) === "1") setSidebar("rail"); } catch { /* storage blocked: stay expanded */ }
+    return () => window.clearTimeout(sidebarTimer.current);
   }, []);
-  const toggleCollapsed = () => setCollapsed(value => {
-    try { window.localStorage.setItem(COLLAPSED_KEY, value ? "0" : "1"); } catch { /* storage blocked */ }
-    return !value;
-  });
+  const collapsed = sidebar === "folding" || sidebar === "rail";
+  const toggleCollapsed = () => {
+    const folding = !collapsed;
+    try { window.localStorage.setItem(COLLAPSED_KEY, folding ? "1" : "0"); } catch { /* storage blocked */ }
+    const settle = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : SIDEBAR_MS;
+    window.clearTimeout(sidebarTimer.current);
+    setSidebar(folding ? "folding" : "unfolding");
+    sidebarTimer.current = window.setTimeout(() => setSidebar(folding ? "rail" : "open"), settle);
+  };
+  const rail = sidebar === "rail";
   // Keyed on the address, not the sections object: a refresh hands the shell a
   // new (equal) sections array, which re-ran this and prefetched in a loop.
   const communityPrefetchHref = dashboardAreaHref("community", sections);
@@ -259,10 +284,10 @@ export function DashboardShell({ viewer, sections, children, notificationControl
 
   return <CrumbLabelProvider><div data-sidebar-collapsed={collapsed || undefined} className={cn("pleros-select-scope site-font-theme min-h-dvh bg-white font-[family-name:var(--font-be-vietnam-pro)]", dashboardFont.variable, dashboardHeadingFont.variable, dashboardFont.className, v3.root, frame.root)}>
     <a href="#dashboard-main" className={cn(frame.skipLink, focusRing)}>Skip to content</a>
-    <aside className={frame.liveSidebar} data-collapsed={collapsed || undefined}>
-      <Brand collapsed={collapsed} onToggle={toggleCollapsed} />
-      <div className={frame.sidebarScroll}><Profile viewer={viewer} compact={collapsed} /><ShellNavigation sections={sections} area={area} onArea={selectTab} collapsed={collapsed} /></div>
-      <AccountActions compact={collapsed} />
+    <aside className={frame.liveSidebar} data-collapsed={collapsed || undefined} data-phase={sidebar}>
+      <Brand collapsed={rail} onToggle={toggleCollapsed} />
+      <div className={frame.sidebarScroll}><Profile viewer={viewer} compact={rail} /><ShellNavigation sections={sections} area={area} onArea={selectTab} collapsed={rail} /></div>
+      <AccountActions compact={rail} />
     </aside>
     <div className={frame.liveFrame}>
       {/* The You/Community switch stays on every page (user request, 18 October); deep pages

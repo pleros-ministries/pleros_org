@@ -46,6 +46,10 @@
   --space-20: 5rem;
   --space-24: 6rem;
 
+  /* Motion */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+
   /* Radius */
   --radius-sm: 0.875rem;  /* 14px */
   --radius-md: 1.125rem;  /* 18px */
@@ -1581,6 +1585,18 @@ select:dir(rtl):not([multiple]):not([size]):not(.sogp-field-select):not(.sogp-ph
   transform: scale(0.97);
 }
 
+/* Base UI popovers and menus: grow out of their trigger and shrink back into it. */
+.pleros-popover-motion {
+  transform-origin: var(--transform-origin);
+  transition: opacity 150ms var(--ease-out), transform 150ms var(--ease-out);
+}
+
+.pleros-popover-motion[data-starting-style],
+.pleros-popover-motion[data-ending-style] {
+  opacity: 0;
+  transform: scale(0.97);
+}
+
 .sogp-popup-search {
   display: flex;
   align-items: center;
@@ -1682,11 +1698,17 @@ select:dir(rtl):not([multiple]):not([size]):not(.sogp-field-select):not(.sogp-ph
     scroll-behavior: auto;
   }
 
+  /* Fewer and gentler, not none: keyframe animations jump to their end state,
+     and existing transitions keep their timing but only for fades and colour,
+     so nothing moves, scales or resizes. Elements without a transition stay
+     instant (transition-duration is untouched). */
   *,
   *::before,
   *::after {
-    animation: none !important;
-    transition: none !important;
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-property: opacity, color, background-color, border-color, box-shadow, fill, stroke !important;
   }
 }
 

@@ -27,7 +27,7 @@ function SortMenu({ view, onChange }: { view: FeedView; onChange: (view: FeedVie
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner sideOffset={6} align="end">
-          <Popover.Popup className="z-50 w-48 rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white p-1 shadow-[0_8px_24px_rgb(37_43_51/12%)] outline-none">
+          <Popover.Popup className="pleros-popover-motion z-50 w-48 rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white p-1 shadow-[0_8px_24px_rgb(37_43_51/12%)] outline-none">
             <p className="m-0 px-2.5 pt-1.5 pb-1 text-[11px] font-medium tracking-[0.04em] text-[var(--color-community-muted)] uppercase">Sort by</p>
             {FEED_SORTS.map((sort) => {
               const Icon = SORT_ICONS[sort] ?? ClockIcon;

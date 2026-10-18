@@ -128,13 +128,16 @@ export function DashboardMenuNavigation({ sections, area, onArea, onNavigate, co
             <ChevronDownIcon className="size-4" strokeWidth={2} style={{ transform: isOpen ? "none" : "rotate(-90deg)" }} aria-hidden="true" />
           </button> : null}
         </div>
-        {isOpen && children[next].length ? <div id={listId} className={styles.children}>
-          {children[next].map(item => {
-            const ChildIcon = item.icon;
-            return <Link key={item.key} href={item.href} onClick={onNavigate} className={styles.child} aria-current={routed === next && isCurrent(pathname, item) ? "page" : undefined}>
-              <ChildIcon className="size-4 shrink-0" strokeWidth={1.8} aria-hidden="true" /><span>{item.label}</span>{item.badge ? <NavBadge kind={item.badge} /> : null}
-            </Link>;
-          })}
+        {/* Always mounted so the list can grow and fold with its chevron; inert while folded. */}
+        {children[next].length ? <div id={listId} className={styles.childrenPanel} data-open={isOpen || undefined} inert={!isOpen}>
+          <div className={styles.childrenClip}><div className={styles.children}>
+            {children[next].map(item => {
+              const ChildIcon = item.icon;
+              return <Link key={item.key} href={item.href} onClick={onNavigate} className={styles.child} aria-current={routed === next && isCurrent(pathname, item) ? "page" : undefined}>
+                <ChildIcon className="size-4 shrink-0" strokeWidth={1.8} aria-hidden="true" /><span>{item.label}</span>{item.badge ? <NavBadge kind={item.badge} /> : null}
+              </Link>;
+            })}
+          </div></div>
         </div> : null}
       </div>;
     })}

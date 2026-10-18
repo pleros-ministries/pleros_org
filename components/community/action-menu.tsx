@@ -40,7 +40,7 @@ export function ActionMenu({
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner sideOffset={6} align="end">
-          <Popover.Popup className="site-font-theme z-50 w-48 rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white p-1 text-[13px] shadow-[0_8px_24px_rgb(37_43_51/12%)] outline-none">
+          <Popover.Popup className="pleros-popover-motion site-font-theme z-50 w-48 rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white p-1 text-[13px] shadow-[0_8px_24px_rgb(37_43_51/12%)] outline-none">
             <div className="grid gap-0.5">
               {actions.map((action) => {
                 const Icon = action.icon;

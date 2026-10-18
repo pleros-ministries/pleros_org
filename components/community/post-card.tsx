@@ -14,7 +14,7 @@ import {
   CopyIcon,
   EyeOffIcon,
   FlagIcon,
-  MegaphoneIcon,
+  BadgeCheckIcon,
   MessageCircleIcon,
   PencilIcon,
   PinIcon,
@@ -447,24 +447,26 @@ export function PostCard({
             <PinIcon className="size-3" strokeWidth={2} /> Pinned
           </p>
         ) : null}
-        {/* One quiet line under the name: where it was posted, role, topic, time. */}
+        {/* Official posts carry a verified badge beside the name; one quiet line
+            under it: where it was posted, role, topic. */}
         <div className="flex items-center gap-2.5">
           <Avatar name={post.authorName} size={32} />
           <div className="min-w-0 flex-1">
-            <p className="m-0 truncate text-[13.5px] font-semibold leading-[18px] text-[var(--color-community-ink)]">
-              {post.authorName}
-            </p>
-            <p className="m-0 mt-px flex items-center gap-1 truncate text-[11.5px] leading-[15px] text-[var(--color-community-muted)]">
+            <p className="m-0 flex min-w-0 items-center gap-1 text-[13.5px] font-semibold leading-[18px] text-[var(--color-community-ink)]">
+              <span className="truncate">{post.authorName}</span>
               {post.kind === "official" ? (
-                <span className="inline-flex shrink-0 items-center gap-0.5 font-semibold text-[var(--color-community-blue)]">
-                  <MegaphoneIcon className="size-3" strokeWidth={2.2} />
-                  {staysInGroup ? "Announcement" : "Official"}
-                  <span aria-hidden className="ml-0.5 font-normal text-[#b3b8bf]">·</span>
-                </span>
+                <BadgeCheckIcon
+                  role="img"
+                  aria-label={staysInGroup ? "Announcement" : "Official"}
+                  className="size-[15px] shrink-0 fill-[var(--color-community-blue)] text-white"
+                  strokeWidth={2.2}
+                >
+                  <title>{staysInGroup ? "Announcement" : "Official"}</title>
+                </BadgeCheckIcon>
               ) : null}
-              <span className="truncate">
-                {[scopeLabel, roleLabel, post.kind === "official" ? null : topic].filter(Boolean).join(" · ")}
-              </span>
+            </p>
+            <p className="m-0 mt-px truncate text-[11.5px] leading-[15px] text-[var(--color-community-muted)]">
+              {[scopeLabel, roleLabel, post.kind === "official" ? null : topic].filter(Boolean).join(" · ")}
             </p>
           </div>
           <ActionMenu
@@ -658,7 +660,7 @@ function ShareMenu({
       </Popover.Trigger>
       <Popover.Portal>
         <Popover.Positioner sideOffset={8} align="end">
-          <Popover.Popup className="z-50 w-64 rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white p-1 text-[13px] shadow-[0_8px_24px_rgb(37_43_51/12%)] outline-none">
+          <Popover.Popup className="pleros-popover-motion z-50 w-64 rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white p-1 text-[13px] shadow-[0_8px_24px_rgb(37_43_51/12%)] outline-none">
             {mode === "menu" ? (
               <div className="grid gap-0.5">
                 {canRepost ? (

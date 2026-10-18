@@ -35,6 +35,8 @@ async function fetchNotificationSummary(): Promise<number> {
   return data.unread;
 }
 
+/** Matches the panel exit in notification-center.module.css. */
+const PANEL_EXIT_MS = 180;
 const text = (value: unknown) => (typeof value === "string" && value.trim() ? value : null);
 const id = (value: unknown) => (typeof value === "number" && Number.isInteger(value) && value > 0 ? value : typeof value === "string" && /^\d{1,9}$/.test(value) ? Number(value) : null);
 
@@ -118,6 +120,8 @@ function when(iso: string, now: Date): { group: "Today" | "Yesterday" | "Earlier
 export function NotificationBell() {
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
+  // Keeps the panel mounted while it leaves (PANEL_EXIT_MS matches the CSS).
+  const [leaving, setLeaving] = useState(false);
   const [filter, setFilter] = useState<"all" | "unread">("all");
   const [clearedAt, setClearedAt] = useState<number | null>(null);
   const root = useRef<HTMLDivElement>(null);
@@ -153,7 +157,10 @@ export function NotificationBell() {
 
   function close() {
     setOpen(false);
-    setFilter("all");
+    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setLeaving(true);
+      window.setTimeout(() => setLeaving(false), PANEL_EXIT_MS);
+    }
     if ((data?.notifications ?? []).some(item => !item.readAt) && clearedAt === null) markRead.mutate();
     setClearedAt(null);
     trigger.current?.focus();
@@ -187,7 +194,7 @@ export function NotificationBell() {
     .filter(group => group.rows.length);
 
   return <div className={styles.anchor} ref={root}>
-    <button type="button" ref={trigger} onClick={() => (open ? close() : setOpen(true))}
+    <button type="button" ref={trigger} onClick={() => { if (open) { close(); return; } setFilter("all"); setOpen(true); }}
       aria-label={unread > 0 ? `Notifications, ${unread} unread` : "Notifications"} aria-expanded={open} aria-controls={panelId} aria-haspopup="dialog"
       className={dashboardStyles.iconButton}>
       <span className={styles.bell}>
@@ -196,7 +203,7 @@ export function NotificationBell() {
       </span>
     </button>
 
-    {open ? <div id={panelId} role="dialog" aria-labelledby={titleId} className={styles.panel}>
+    {open || leaving ? <div id={panelId} role="dialog" aria-labelledby={titleId} className={styles.panel} data-closing={!open || undefined} inert={!open}>
       <header className={styles.head}>
         <h2 id={titleId} data-dashboard-shell-title>Notifications</h2>
         <div className={styles.headActions}>

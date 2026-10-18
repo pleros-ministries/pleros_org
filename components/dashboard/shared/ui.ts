@@ -11,7 +11,7 @@ export const focusRing =
 /** Calm white surface with a hairline border. */
 export const panel = "rounded-[var(--radius-lg)] border border-(--color-line) bg-white";
 
-const buttonBase = `inline-flex min-h-8 items-center justify-center gap-1.5 rounded-full px-3 text-[12.5px] font-medium transition-[background-color,color,border-color,box-shadow] duration-150 disabled:cursor-not-allowed disabled:opacity-50 ${focusRing}`;
+const buttonBase = `inline-flex min-h-8 items-center justify-center gap-1.5 rounded-full px-3 text-[12.5px] font-medium transition-[background-color,color,border-color,box-shadow,scale] duration-150 ease-out active:scale-[0.97] disabled:cursor-not-allowed disabled:active:scale-100 disabled:opacity-50 ${focusRing}`;
 
 export const buttonPrimary = `${buttonBase} bg-(--color-brand-blue) text-white hover:bg-(--color-brand-blue-hover)`;
 export const buttonSecondary = `${buttonBase} border border-(--color-line-strong) bg-white text-(--color-text-strong) hover:border-(--color-brand-blue) hover:text-(--color-brand-blue)`;

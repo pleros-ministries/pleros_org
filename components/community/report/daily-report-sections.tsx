@@ -23,6 +23,8 @@ const devotionalRoutes: Record<ActivityLine["key"], string> = {
   prayerWatch: "/dashboard/prayer-watch", bible: "/dashboard/prayer-watch",
   podcast: "/dashboard/podcast", sogp: "/dashboard/sogp",
 };
+/** Matches the review sheet exit in daily-report-sections.module.css. */
+const REVIEW_EXIT_MS = 180;
 const weekday = new Intl.DateTimeFormat("en-GB", { weekday: "long", timeZone: "UTC" });
 const dayMonth = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", timeZone: "UTC" });
 const longDate = (date: Date) => `${weekday.format(date)}, ${dayMonth.format(date)}`;
@@ -117,7 +119,13 @@ export function DailyReportSections({ today, days, selected, activities, pleros,
 
   const [open, setOpen] = useState<DailyReportCategory | null>(null);
   const [sub, setSub] = useState<string | null>(null);
-  const [reviewing, setReviewing] = useState(false);
+  // "closing" keeps the sheet mounted while it sinks away (REVIEW_EXIT_MS matches the CSS).
+  const [review, setReview] = useState<"open" | "closing" | null>(null);
+  const closeReview = () => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) { setReview(null); return; }
+    setReview("closing");
+    window.setTimeout(() => setReview(current => current === "closing" ? null : current), REVIEW_EXIT_MS);
+  };
   const toggle = (key: DailyReportCategory) => { setOpen(current => (current === key ? null : key)); setSub(null); };
   const dayWord = selected === today ? "today" : "this day";
   const addHref = `/dashboard/community/report/new?day=${encodeURIComponent(selected)}`;
@@ -136,7 +144,7 @@ export function DailyReportSections({ today, days, selected, activities, pleros,
       if (!result.ok) return result;
     }
     return { ok: true as const };
-  }, { onDone: () => { setReviewing(false); setOpen(null); } });
+  }, { onDone: () => { closeReview(); setOpen(null); } });
 
   const statusFor = (key: DailyReportCategory): { label: string; tone: Tone } => {
     if (key === "devotional") return statuses.devotional !== "missing" ? { label: "Confirmed", tone: "ready" } : recorded.length ? { label: "To confirm", tone: "todo" } : { label: "Nothing yet", tone: "todo" };
@@ -220,11 +228,11 @@ export function DailyReportSections({ today, days, selected, activities, pleros,
         ? <div className={styles.submitted}><CheckIcon className="size-4" strokeWidth={2.5} aria-hidden="true" />Report submitted for {dayWord}. Open a section to change it.</div>
         : <>
           <span className={styles.barMeta}>{readyCount} of 3 sections ready</span>
-          <button type="button" className={styles.submit} disabled={pending} onClick={() => setReviewing(true)}>Review and submit</button>
+          <button type="button" className={styles.submit} disabled={pending} onClick={() => setReview("open")}>Review and submit</button>
         </>}
     </div> : null}
 
-    {reviewing ? <div className={styles.shade} role="presentation" onClick={event => { if (event.target === event.currentTarget) setReviewing(false); }}>
+    {review ? <div className={styles.shade} data-closing={review === "closing" || undefined} role="presentation" onClick={event => { if (event.target === event.currentTarget) closeReview(); }}>
       <div className={styles.sheet} role="dialog" aria-modal="true" aria-labelledby="report-review-title">
         <span className={styles.grab} aria-hidden="true" />
         <h2 id="report-review-title" data-dashboard-shell-title>Your report for {selected === today ? "today" : weekday.format(new Date(`${selected}T00:00:00Z`))}</h2>
@@ -243,7 +251,7 @@ export function DailyReportSections({ today, days, selected, activities, pleros,
         </div>
         <div className={styles.sheetActions}>
           <button type="button" className={styles.submit} disabled={pending} onClick={submit}>{pending ? "Submitting…" : "Confirm and submit"}</button>
-          <button type="button" className={styles.secondary} disabled={pending} onClick={() => setReviewing(false)}>Edit</button>
+          <button type="button" className={styles.secondary} disabled={pending} onClick={closeReview}>Edit</button>
         </div>
       </div>
     </div> : null}
