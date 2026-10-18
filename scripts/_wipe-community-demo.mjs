@@ -1,34 +1,32 @@
-// Throwaway: removes ALL community content (demo only — nothing real exists yet)
-// and undoes any demo unit leader. Leaves units / unit_members intact.
+// Removes only the seeded teaching posts (and any old "[DEMO]" posts) from
+// the community feed, with their comments, reactions, flags and
+// notifications. Real members' posts are left alone.
 // Run: node --env-file=.env scripts/_wipe-community-demo.mjs
 import { neon } from "@neondatabase/serverless";
 
 const sql = neon(process.env.DATABASE_URL);
 
-const TABLES = [
-  "community_notifications",
-  "content_flags",
-  "comment_reactions",
-  "community_post_comments",
-  "post_reactions",
-  "community_posts",
-];
+const rows = await sql`
+  select id from community_posts
+  where title like '[DEMO]%'
+     or images::text like '%feed-lesson-%'
+     or shared_from_post_id in (
+       select id from community_posts
+       where title like '[DEMO]%' or images::text like '%feed-lesson-%'
+     )`;
+const ids = rows.map((row) => row.id);
 
-async function counts(label) {
-  const out = {};
-  for (const t of TABLES) out[t] = (await sql.query(`select count(*)::int n from ${t}`))[0].n;
-  out["unit_members(leader)"] = (
-    await sql`select count(*)::int n from unit_members where role = 'leader'`
-  )[0].n;
-  console.log(label, out);
+if (ids.length > 0) {
+  const commentIds = (
+    await sql`select id from community_post_comments where post_id = any(${ids})`
+  ).map((row) => row.id);
+  await sql`
+    delete from content_flags
+    where (target_type = 'post' and target_id = any(${ids}))
+       or (target_type = 'comment' and target_id = any(${commentIds}))`;
+  await sql`delete from community_notifications where (payload->>'postId')::int = any(${ids})`;
+  await sql`delete from community_posts where id = any(${ids}) and shared_from_post_id is not null`;
+  await sql`delete from community_posts where id = any(${ids})`; // comments + reactions cascade
 }
 
-await counts("before:");
-
-await sql`delete from community_notifications`;
-await sql`delete from content_flags`;
-await sql`delete from community_posts`; // comments + reactions cascade
-await sql`update unit_members set role = 'member' where role = 'leader'`;
-
-await counts("after: ");
-console.log("\nunits / unit_members are untouched (they derive from real enrolments).");
+console.log(`Removed ${ids.length} demo post(s).`);
