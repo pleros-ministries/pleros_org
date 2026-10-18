@@ -6,7 +6,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useFormStatus } from "react-dom";
 import { motion } from "motion/react";
-import { LoaderCircleIcon, LogOutIcon } from "lucide-react";
+import { LoaderCircleIcon, LogOutIcon, PanelLeftCloseIcon, PanelLeftOpenIcon } from "lucide-react";
 
 import { signOutDashboardAction } from "@/app/_actions/auth-actions";
 import DashboardLoading from "@/app/(site)/dashboard/loading";
@@ -53,8 +53,27 @@ function scopeDocumentTypography() {
   };
 }
 
-function Profile({ viewer, onNavigate }: { viewer: DashboardShellViewer; onNavigate?: () => void }) {
+const COLLAPSED_KEY = "pleros-sidebar-collapsed";
+
+/** The Pleros logomark on a brand-blue strip, level with the blue top bar. */
+function Brand({ collapsed = false, onToggle }: { collapsed?: boolean; onToggle?: () => void }) {
+  return <div className={frame.brand} data-collapsed={collapsed || undefined}>
+    <Link href="/dashboard" aria-label="Pleros home" className={frame.brandLink}>
+      <Image src="/site/home/assets/white-pleros-logomark.webp" alt="Pleros" width={2067} height={1016} className={frame.brandMark} priority />
+    </Link>
+    {onToggle ? <button type="button" className={frame.collapseButton} onClick={onToggle} aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"} aria-pressed={collapsed} title={collapsed ? "Expand sidebar" : "Collapse sidebar"}>
+      {collapsed ? <PanelLeftOpenIcon className="size-[18px]" strokeWidth={1.9} /> : <PanelLeftCloseIcon className="size-[18px]" strokeWidth={1.9} />}
+    </button> : null}
+  </div>;
+}
+
+function Profile({ viewer, onNavigate, compact = false }: { viewer: DashboardShellViewer; onNavigate?: () => void; compact?: boolean }) {
   const initials = viewer.name.trim().split(/\s+/).map(part => part[0] ?? "").join("").slice(0, 2).toUpperCase();
+  if (compact) return <Link href="/dashboard/profile" className={frame.railProfile} aria-label="Profile and settings" title="Profile and settings">
+    <span className={v3.profileAvatar} aria-hidden>
+      {viewer.image ? <Image src={viewer.image} alt="" width={36} height={36} unoptimized className="size-9 rounded-full object-cover" /> : initials}
+    </span>
+  </Link>;
   return <Link href="/dashboard/profile" onClick={onNavigate} className={v3.profileLink} aria-label="Profile and settings">
     <span className={v3.profileAvatar} aria-hidden>
       {viewer.image ? <Image src={viewer.image} alt="" width={36} height={36} unoptimized className="size-9 rounded-full object-cover" /> : initials}
@@ -67,25 +86,25 @@ function Profile({ viewer, onNavigate }: { viewer: DashboardShellViewer; onNavig
   </Link>;
 }
 
-function SignOutSubmit() {
+function SignOutSubmit({ compact = false }: { compact?: boolean }) {
   const { pending } = useFormStatus();
-  return <button type="submit" disabled={pending} aria-busy={pending} className={cn(compactButton, "flex-1")}>
+  return <button type="submit" disabled={pending} aria-busy={pending} aria-label={compact ? "Sign out" : undefined} title={compact ? "Sign out" : undefined} className={cn(compactButton, "flex-1")}>
     {pending ? <LoaderCircleIcon className="size-3.5 animate-spin" aria-hidden /> : <LogOutIcon className="size-3.5" aria-hidden />}
-    {pending ? "Signing out" : "Sign out"}
+    {compact ? null : pending ? "Signing out" : "Sign out"}
   </button>;
 }
 
-function AccountActions() {
+function AccountActions({ compact = false }: { compact?: boolean }) {
   return <div className={frame.accountActions}>
-    <form action={signOutDashboardAction} className="flex flex-1"><SignOutSubmit /></form>
+    <form action={signOutDashboardAction} className="flex flex-1"><SignOutSubmit compact={compact} /></form>
   </div>;
 }
 
-function ShellNavigation({ sections, area, onArea, onNavigate }: {
+function ShellNavigation({ sections, area, onArea, onNavigate, collapsed }: {
   sections: DashboardNavSection[]; area: DashboardArea;
-  onArea: (next: DashboardArea, animated?: boolean) => void; onNavigate?: () => void;
+  onArea: (next: DashboardArea, animated?: boolean) => void; onNavigate?: () => void; collapsed?: boolean;
 }) {
-  return <DashboardMenuNavigation sections={sections} area={area} onArea={onArea} onNavigate={onNavigate} />;
+  return <DashboardMenuNavigation sections={sections} area={area} onArea={onArea} onNavigate={onNavigate} collapsed={collapsed} />;
 }
 
 function Drawer({ open, onClose, viewer, sections, area, onArea, id }: {
@@ -103,7 +122,10 @@ function Drawer({ open, onClose, viewer, sections, area, onArea, id }: {
     onCancel={event => { event.preventDefault(); onClose(); }}
     onClick={event => { if (event.target === event.currentTarget) onClose(); }}
     className={cn(v3.dialog, v3.drawer, frame.liveDrawer)}>
-    <div className={v3.dialogHeading}><h2 id={titleId} data-dashboard-shell-title>Menu</h2><button className={v3.iconButton} onClick={onClose} aria-label="Close navigation"><DashboardIcon name="close" /></button></div>
+    <div className={cn(v3.dialogHeading, frame.drawerHeading)}>
+      <h2 id={titleId} data-dashboard-shell-title className={frame.drawerTitle}><Image src="/site/home/assets/white-pleros-logomark.webp" alt="Pleros menu" width={2067} height={1016} className={frame.brandMark} /></h2>
+      <button className={v3.iconButton} onClick={onClose} aria-label="Close navigation"><DashboardIcon name="close" /></button>
+    </div>
     <Profile viewer={viewer} onNavigate={onClose} />
     <ShellNavigation sections={sections} area={area} onArea={onArea} onNavigate={onClose} />
     <div className={frame.drawerAccount}><AccountActions /></div>
@@ -157,6 +179,15 @@ export function DashboardShell({ viewer, sections, children, notificationControl
     selectTab(next, animated);
   };
   useEffect(scopeDocumentTypography, []);
+  // Desktop sidebar can fold to an icon rail; remembered per browser.
+  const [collapsed, setCollapsed] = useState(false);
+  useEffect(() => {
+    try { if (window.localStorage.getItem(COLLAPSED_KEY) === "1") setCollapsed(true); } catch { /* storage blocked: stay expanded */ }
+  }, []);
+  const toggleCollapsed = () => setCollapsed(value => {
+    try { window.localStorage.setItem(COLLAPSED_KEY, value ? "0" : "1"); } catch { /* storage blocked */ }
+    return !value;
+  });
   // Keyed on the address, not the sections object: a refresh hands the shell a
   // new (equal) sections array, which re-ran this and prefetched in a loop.
   const communityPrefetchHref = dashboardAreaHref("community", sections);
@@ -196,11 +227,12 @@ export function DashboardShell({ viewer, sections, children, notificationControl
     return () => wide.removeEventListener("change", onChange);
   }, []);
 
-  return <CrumbLabelProvider><div className={cn("pleros-select-scope site-font-theme min-h-dvh bg-white font-[family-name:var(--font-be-vietnam-pro)]", dashboardFont.variable, dashboardHeadingFont.variable, dashboardFont.className, v3.root, frame.root)}>
+  return <CrumbLabelProvider><div data-sidebar-collapsed={collapsed || undefined} className={cn("pleros-select-scope site-font-theme min-h-dvh bg-white font-[family-name:var(--font-be-vietnam-pro)]", dashboardFont.variable, dashboardHeadingFont.variable, dashboardFont.className, v3.root, frame.root)}>
     <a href="#dashboard-main" className={cn(frame.skipLink, focusRing)}>Skip to content</a>
-    <aside className={frame.liveSidebar}>
-      <div className={frame.sidebarScroll}><Profile viewer={viewer} /><ShellNavigation sections={sections} area={area} onArea={selectTab} /></div>
-      <AccountActions />
+    <aside className={frame.liveSidebar} data-collapsed={collapsed || undefined}>
+      <Brand collapsed={collapsed} onToggle={toggleCollapsed} />
+      <div className={frame.sidebarScroll}><Profile viewer={viewer} compact={collapsed} /><ShellNavigation sections={sections} area={area} onArea={selectTab} collapsed={collapsed} /></div>
+      <AccountActions compact={collapsed} />
     </aside>
     <div className={frame.liveFrame}>
       {focusedLearning ? <header className={cn(v3.header,frame.liveHeader)}>

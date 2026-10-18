@@ -86,7 +86,8 @@ describe("connected dashboard navigation", () => {
     expect(dashboardTrailForPath("/dashboard/library/teachings").map(crumb => crumb.label)).toEqual(["You", "Library"]);
     expect(dashboardParentForPath("/dashboard/podcast")).toEqual({ href: "/dashboard/library", label: "Back to Library" });
     expect(dashboardParentForPath("/dashboard/prayer-watch")).toEqual({ href: "/dashboard/sogp", label: "Back to Learning" });
-    expect(dashboardTrailForPath("/dashboard/community/enrollees/7").map(crumb => crumb.label)).toEqual(["Groups", "My enrollees"]);
+    expect(dashboardTrailForPath("/dashboard/community/enrollees/7").map(crumb => crumb.label)).toEqual(["Community", "Groups", "My enrollees"]);
+    expect(dashboardTrailForPath("/dashboard/community/groups").map(crumb => crumb.label)).toEqual(["Community"]);
     expect(dashboardParentForPath("/dashboard/sogp/reviews/42/attendance")).toEqual({ href: "/dashboard/sogp/reviews", label: "Back to group reviews" });
     expect(dashboardParentForPath("/dashboard/sogp/course/day/4/quiz")).toEqual({ href: "/dashboard/sogp/course/day/4", label: "Back to lesson" });
     expect(dashboardParentForPath("/dashboard/community/contacts/new")).toEqual({ href: "/dashboard/community/contacts", label: "Back to saved contacts" });

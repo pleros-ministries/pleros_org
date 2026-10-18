@@ -57,7 +57,7 @@ export const YOU_TABS = ["/dashboard", "/dashboard/sogp", "/dashboard/library", 
 
 /**
  * The dashboard's hierarchy in one place, most specific first. Tab roots
- * (the You tabs, Community home, Groups, Feed, Inbox, Reports) have no entry and keep the
+ * (the You tabs, Community home, Feed, Inbox, Reports) have no entry and keep the
  * You/Community tabs; everything else gets "← Title" pointing at its parent.
  */
 const DASHBOARD_FOCUS: Array<[RegExp, (match: RegExpMatchArray) => DashboardFocus]> = [
@@ -85,7 +85,8 @@ const DASHBOARD_FOCUS: Array<[RegExp, (match: RegExpMatchArray) => DashboardFocu
   [/^\/dashboard\/community\/contacts$/, () => ({ title: "Saved contacts", back: GROUPS })],
   [/^\/dashboard\/community\/report\/(history|new|\d+)$/, m => ({ title: m[1] === "history" ? "Report history" : m[1] === "new" ? "New report" : "Edit activity", back: REPORTS })],
   [/^\/dashboard\/community\/report\/.+$/, () => ({ title: "My reports", back: REPORTS })],
-  // Community deep screens
+  // Community deep screens. Groups left the bottom bar (18 October), so it steps back to Community.
+  [/^\/dashboard\/community\/groups$/, () => ({ title: "Groups", back: COMMUNITY })],
   [/^\/dashboard\/community\/discipleship\/(\d+)\/disciples\/\d+$/, m => ({ title: "Disciple", back: { href: `/dashboard/community/discipleship/${m[1]}`, label: "Back to group" } })],
   [/^\/dashboard\/community\/(unit\/\d+|groups\/\d+|discipleship\/\d+|discipleship)$/, () => ({ title: "Group", back: GROUPS })],
   [/^\/dashboard\/community\/post\/\d+$/, () => ({ title: "Post", back: { href: "/dashboard/community/feed", label: "Back to Feed" } })],

@@ -47,15 +47,15 @@ export function YouBottomBar({ learningHref }: { learningHref: string }) {
     { key: "partner", label: "Partner", href: "/dashboard/partner", icon: HeartHandshakeIcon },
     { key: "profile", label: "Profile", href: "/dashboard/profile", icon: CircleUserRoundIcon },
   ];
-  return <nav aria-label="You" className="sticky bottom-0 z-30 grid grid-cols-5 border-t border-(--color-line) bg-white px-1 pt-1.5 pb-[calc(0.25rem_+_env(safe-area-inset-bottom))] lg:hidden">
+  return <nav aria-label="You" className="sticky bottom-0 z-30 grid grid-cols-5 border-t border-(--color-line) bg-white px-1 pt-1 pb-[calc(0.125rem_+_env(safe-area-inset-bottom))] lg:hidden">
     {items.map(item => {
       const Icon = item.icon;
       const active = isActive(pathname, item);
       return <Link key={item.key} href={item.href} aria-current={active ? "page" : undefined}
-        className={`relative grid min-h-10 content-center justify-items-center gap-0.5 text-[11px] leading-[14px] font-medium transition-colors ${active
-          ? "text-[var(--color-community-blue)] before:absolute before:-top-1.5 before:left-1/4 before:right-1/4 before:h-0.5 before:rounded-full before:bg-[var(--color-community-blue)]"
+        className={`relative grid min-h-9 content-center justify-items-center gap-px text-[10.5px] leading-[13px] font-medium transition-colors ${active
+          ? "text-[var(--color-community-blue)] before:absolute before:-top-1 before:left-1/4 before:right-1/4 before:h-0.5 before:rounded-full before:bg-[var(--color-community-blue)]"
           : "text-(--color-text-muted) hover:text-[var(--color-community-blue)]"}`}>
-        <Icon className="size-5" strokeWidth={1.8} />
+        <Icon className="size-[19px]" strokeWidth={1.8} />
         {item.label}
       </Link>;
     })}

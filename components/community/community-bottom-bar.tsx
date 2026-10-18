@@ -56,13 +56,13 @@ const IN_CONVERSATION = /^\/dashboard\/community\/messages\/\d+/;
 // Grounded, not floating (Pastor review, 17 October): flush to the bottom edge,
 // a hairline above, the active item marked by colour and a short top rule.
 const itemClass =
-  "relative grid min-h-10 content-center justify-items-center gap-0.5 text-[11px] leading-[14px] font-medium transition-colors";
+  "relative grid min-h-9 content-center justify-items-center gap-px text-[10.5px] leading-[13px] font-medium transition-colors";
 const idleClass = "text-(--color-text-muted) hover:text-[var(--color-community-blue)]";
 const topItemClass =
   "relative inline-flex min-h-9 items-center gap-2 rounded-[10px] px-3 text-[13px] leading-5 font-medium transition-colors";
 const topActiveClass = "bg-(--status-blue-bg,#e4ebfd) text-[var(--color-community-blue)]";
 const activeClass =
-  "text-[var(--color-community-blue)] before:absolute before:-top-1.5 before:left-1/4 before:right-1/4 before:h-0.5 before:rounded-full before:bg-[var(--color-community-blue)]";
+  "text-[var(--color-community-blue)] before:absolute before:-top-1 before:left-1/4 before:right-1/4 before:h-0.5 before:rounded-full before:bg-[var(--color-community-blue)]";
 
 /**
  * Community's main destinations: Home, Feed, Inbox and Reports, plus Oversight
@@ -91,7 +91,7 @@ export function CommunityBottomBar({
       aria-label="Community"
       className={placement === "top"
         ? "sticky top-[var(--dashboard-topbar-offset,2.75rem)] z-20 hidden border-b border-(--color-line) bg-white lg:flex lg:justify-center lg:gap-2 lg:px-6 lg:py-1"
-        : `sticky bottom-0 z-30 grid ${items.length === 5 ? "grid-cols-5" : "grid-cols-4"} border-t border-(--color-line) bg-white px-1 pt-1.5 pb-[calc(0.25rem_+_env(safe-area-inset-bottom))] lg:hidden`}
+        : `sticky bottom-0 z-30 grid ${items.length === 5 ? "grid-cols-5" : "grid-cols-4"} border-t border-(--color-line) bg-white px-1 pt-1 pb-[calc(0.125rem_+_env(safe-area-inset-bottom))] lg:hidden`}
     >
       {items.map((item) => {
         const Icon = item.icon;
@@ -108,7 +108,7 @@ export function CommunityBottomBar({
               : `${itemClass} ${active ? activeClass : idleClass}`}
           >
             <span className="relative">
-              <Icon className={placement === "top" ? "size-4" : "size-5"} strokeWidth={1.8} />
+              <Icon className={placement === "top" ? "size-4" : "size-[19px]"} strokeWidth={1.8} />
               {inboxCount > 0 ? (
                 <span
                   aria-label={`${inboxCount} unread`}

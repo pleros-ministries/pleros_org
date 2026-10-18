@@ -13,7 +13,7 @@ import styles from "./daily-report.module.css";
 
 type IconName = Parameters<typeof DashboardIcon>[0]["name"];
 const categories: { key: DailyReportCategory; label: string; icon: IconName }[] = [
-  { key: "devotional", label: "Devotional", icon: "book" },
+  { key: "devotional", label: "Devotion", icon: "book" },
   { key: "ministry", label: "Ministry", icon: "heart" },
   { key: "meetings", label: "Meetings", icon: "people" },
 ];
@@ -69,7 +69,7 @@ export function DailyReportView({ today, days, selected, activities, pleros, dec
   const reportedCount = reported;
   return <div className={styles.page}>
     <header className={styles.dayHeader}>
-      <div><h1>My reports</h1><p className={styles.meta}>{longDate(new Date(`${selected}T00:00:00Z`))} · Lagos time</p></div>
+      <div><h1>My reports</h1><p className={styles.meta}>{longDate(new Date(`${selected}T00:00:00Z`))}</p></div>
       <Link href="/dashboard/community/report/history" className={styles.secondary} style={{ minHeight: 32, padding: "0 12px", fontSize: 12.5 }}>History</Link>
     </header>
     {week ? <nav aria-label="Choose a day" className="grid grid-cols-7 gap-1.5">
@@ -102,7 +102,7 @@ export function DailyReportView({ today, days, selected, activities, pleros, dec
       return <section key={`${selected}:${key}`} className={styles.card}>
         <div className={styles.cardHead}>
           <DashboardIcon name={icon} />
-          <span className={styles.cardTitle}><strong>{label}</strong><span className={styles.meta}>{key === "devotional" ? "Filled in from your Pleros activity" : subtitle(key)}</span></span>
+          <span className={styles.cardTitle}><strong>{label}</strong>{key === "devotional" ? null : <span className={styles.meta}>{subtitle(key)}</span>}</span>
           <StatusPill tone={state.tone}>{state.label}</StatusPill>
         </div>
         <div className={styles.cardBody}>
@@ -112,7 +112,7 @@ export function DailyReportView({ today, days, selected, activities, pleros, dec
               <span><strong>{line.label}</strong><span className={styles.meta}>{line.detail ?? "Not recorded"}</span></span>
               <DashboardIcon name="right" size={16} />
             </Link></li>)}</ul>
-            {enabled && writable && statuses.devotional === "missing" ? <button type="button" className={styles.primary} disabled={pending} onClick={() => declare("devotional")}>Confirm devotional report<DashboardIcon name="check" /></button> : null}
+            {enabled && writable && statuses.devotional === "missing" ? <button type="button" className={styles.primary} disabled={pending} onClick={() => declare("devotional")}>Confirm devotion report<DashboardIcon name="check" /></button> : null}
           </> : <>
             {items.length ? <ul className={styles.activities}>{items.map((activity) => <ActivityCard key={activity.id} activity={activity} meetingDetails={meetingDetails.find((row) => row.activityId === activity.id)} today={today} canChange={writable} />)}</ul> : null}
             {writable ? <div className="flex flex-wrap justify-end gap-2">

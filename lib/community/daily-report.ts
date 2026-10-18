@@ -23,7 +23,7 @@ export function validateDailyDeclaration(input: {
 }): string | null {
   if (!canReportFor(input.date, input.today)) return "That report date is view only.";
   if (typeof input.category !== "string" || !["devotional", "ministry", "meetings"].includes(input.category)) return "Choose a report category.";
-  if (input.category === "devotional") return input.declaration === "confirmed" ? null : "Confirm the devotional report from its recorded sources.";
+  if (input.category === "devotional") return input.declaration === "confirmed" ? null : "Confirm the devotion report from its recorded sources.";
   if (input.declaration !== "nil") return "Choose Nil to explicitly record no activity.";
   return input.categoryActivityCount > 0 ? "Recorded activity already exists for this category." : null;
 }

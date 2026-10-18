@@ -26,12 +26,30 @@
 .skipLink { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 .skipLink:focus { position: fixed; top: 8px; left: 8px; z-index: 60; width: auto; height: auto; clip-path: none; padding: 12px; background: white; }
 @media (min-width: 64rem) {
-  .liveSidebar { display: flex; flex-direction: column; position: fixed; inset: 0 auto 0 0; width: 256px; z-index: 30; padding: 20px; border-right: 1px solid var(--color-line); background: white; }
-  .sidebarScroll { min-height: 0; flex: 1; overflow-y: auto; padding-bottom: 24px; }
-  .liveFrame { margin-left: 256px; }
+  .liveSidebar { display: flex; flex-direction: column; position: fixed; inset: 0 auto 0 0; width: 256px; z-index: 30; padding: 0 20px 20px; border-right: 1px solid var(--color-line); background: white; transition: width 200ms cubic-bezier(0.22, 1, 0.36, 1), padding 200ms cubic-bezier(0.22, 1, 0.36, 1); }
+  .sidebarScroll { min-height: 0; flex: 1; overflow-y: auto; overflow-x: hidden; padding-bottom: 24px; }
+  .liveFrame { margin-left: 256px; transition: margin-left 200ms cubic-bezier(0.22, 1, 0.36, 1); }
   .mobileMenu { visibility: hidden; }
   .liveDrawer { display: none; }
+  /* Collapsed: a 72px icon rail; labels move into tooltips. */
+  .liveSidebar[data-collapsed] { width: 72px; padding-inline: 12px; }
+  .root[data-sidebar-collapsed] .liveFrame { margin-left: 72px; }
+  .liveSidebar[data-collapsed] .accountActions button { padding-inline: 0; justify-content: center; }
 }
+
+/* The Pleros logomark on a brand-blue strip, level with the 44px top bar. */
+.brand { display: flex; align-items: center; justify-content: space-between; gap: 8px; height: 44px; margin: 0 -20px; padding: 0 10px 0 20px; background: var(--color-community-blue, #2056d6); color: white; flex: none; }
+.brand[data-collapsed] { margin-inline: -12px; padding: 0; flex-direction: column; justify-content: center; height: auto; min-height: 44px; gap: 0; }
+.brand[data-collapsed] .brandLink { display: none; }
+.brandLink { display: inline-flex; align-items: center; }
+.brandMark { display: block; width: auto; height: 28px; }
+.collapseButton { display: grid; place-items: center; width: 34px; height: 34px; border: 0; border-radius: 9px; background: transparent; color: rgb(255 255 255 / 85%); cursor: pointer; }
+.collapseButton:hover { background: rgb(255 255 255 / 14%); color: white; }
+.railProfile { display: grid; place-items: center; margin-top: 14px; text-decoration: none; }
+.drawerHeading { height: 44px; margin: -10px -20px 0; padding: 0 12px 0 20px; background: var(--color-community-blue, #2056d6); }
+.drawerHeading button { color: white; }
+.drawerTitle { display: flex; align-items: center; }
+@media (prefers-reduced-motion: reduce) { .liveSidebar, .liveFrame { transition: none !important; } }
 
 /* Motion for the dashboard shell. The global reduced-motion rule in
    app/globals.css also switches the animations off. */
