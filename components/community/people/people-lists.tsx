@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { LockIcon, MessageCircleIcon, NotebookPenIcon, PhoneIcon, PlusIcon, SearchIcon, Share2Icon, UserPlusIcon } from "lucide-react";
+import { ArrowRightLeftIcon, CheckIcon, LockIcon, MessageCircleIcon, NotebookPenIcon, PhoneIcon, PlusIcon, SearchIcon, Share2Icon, UserPlusIcon } from "lucide-react";
+import { HandoverPicker } from "./handover-picker";
 
 import { logFollowUpAction } from "@/app/(site)/dashboard/community/_actions/people-actions";
 
@@ -100,6 +101,15 @@ export function EnrolleesList({ rows, referralUrl, contacts = {} }: {
   const [query, setQuery] = useState("");
   const [copied, setCopied] = useState(false);
   const [now] = useState(() => Date.now());
+  // Multi-select hand over (user request, 18 October).
+  const [selecting, setSelecting] = useState(false);
+  const [selected, setSelected] = useState<Set<number>>(() => new Set());
+  const [handing, setHanding] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
+  const toggle = (id: number) => setSelected(current => { const next = new Set(current); if (next.has(id)) next.delete(id); else next.add(id); return next; });
+  const stopSelecting = () => { setSelecting(false); setSelected(new Set()); setHanding(false); };
+  const selectedRows = free.filter(row => selected.has(row.enrollmentId));
+  const who = selectedRows.length === 1 ? selectedRows[0]!.name.split(" ")[0]! : `${selectedRows.length} people`;
   const needle = query.trim().toLowerCase();
   const visible = free.filter(row => !needle || row.name.toLowerCase().includes(needle));
   const recent = visible.filter(row => now - new Date(row.assignedAt).getTime() < WEEK_MS);
@@ -129,18 +139,20 @@ export function EnrolleesList({ rows, referralUrl, contacts = {} }: {
     <div className={styles.panel}>
       <ul className={styles.list}>
         {items.map(row => <li key={row.enrollmentId} className={styles.row}>
-          <Link href={`/dashboard/community/enrollees/${row.enrollmentId}`} className={styles.personLink}>
+          {selecting ? <button type="button" role="checkbox" aria-label={row.name} aria-checked={selected.has(row.enrollmentId)} onClick={() => toggle(row.enrollmentId)} className={`${styles.personLink} cursor-pointer border-0 bg-transparent p-0 text-left`}>
+            <span className={`grid size-9 shrink-0 place-items-center rounded-full border-[1.5px] ${selected.has(row.enrollmentId) ? "border-(--color-community-blue) bg-(--color-community-blue) text-white" : "border-[#c9ced6] bg-white text-transparent"}`} aria-hidden="true"><CheckIcon className="size-4" strokeWidth={3} /></span>
+            <span className={styles.rowCopy}><span className={styles.rowTitle}>{row.name}</span><span className={styles.rowMeta}>{row.handedOverBy ? `Handed over by ${row.handedOverBy}` : SOURCE[row.source]} · {day.format(new Date(row.assignedAt))}</span></span>
+          </button> : <Link href={`/dashboard/community/enrollees/${row.enrollmentId}`} className={styles.personLink}>
           <Initials name={row.name} />
           <span className={styles.rowCopy}>
             <span className={styles.rowTitle}>{row.name}</span>
-            <span className={styles.rowMeta}>{SOURCE[row.source]} · {day.format(new Date(row.assignedAt))}</span>
+            <span className={styles.rowMeta}>{row.handedOverBy ? `Handed over by ${row.handedOverBy}` : SOURCE[row.source]} · {day.format(new Date(row.assignedAt))}</span>
             {row.lastContactedAt
               ? <span className={styles.rowMeta}>Last contact {day.format(new Date(row.lastContactedAt))}</span>
               : <span className={styles.rowMeta} style={{ color: "#92400e" }}>Not contacted yet</span>}
           </span>
-          </Link>
-          {end(row)}
-          <ActionMenu label={`Follow up with ${row.name}`} actions={followUp(row)} trigger="Follow up" />
+          </Link>}
+          {selecting ? null : <>{end(row)}<ActionMenu label={`Follow up with ${row.name}`} actions={followUp(row)} trigger="Follow up" /></>}
         </li>)}
       </ul>
     </div>
@@ -151,9 +163,17 @@ export function EnrolleesList({ rows, referralUrl, contacts = {} }: {
       <div><h1>My enrollees</h1><p className={styles.sub}>{free.length} {free.length === 1 ? "person" : "people"} to bring into a group</p></div>
       {referralUrl ? <button type="button" className={styles.btn} data-primary onClick={share}><Share2Icon className="size-3.5" strokeWidth={2} />{copied ? "Link copied" : "Share link"}</button> : null}
     </div>
-    {free.length ? <SearchBox label="Search enrollees" value={query} onChange={setQuery} /> : null}
+    {free.length ? <div className="flex items-center gap-2">
+      <div className="min-w-0 flex-1"><SearchBox label="Search enrollees" value={query} onChange={setQuery} /></div>
+      <button type="button" className={styles.btn} style={{ height: 40 }} onClick={() => selecting ? stopSelecting() : setSelecting(true)} aria-pressed={selecting}>{selecting ? "Cancel" : "Select"}</button>
+    </div> : null}
+    {notice ? <p role="status" className={`${styles.panel} m-0 px-3.5 py-2.5 text-[13px]`}>{notice}</p> : null}
     {visible.length ? <>{list("This week", recent)}{list("Earlier", earlier)}</>
       : <p className={`${styles.panel} ${styles.empty}`}>{needle ? "No one matches your search." : rows.length ? "Everyone you follow up is in a group. Find them under their group." : "When someone joins with your code or link, they’ll appear here."}</p>}
     <p className={styles.note}>Invite picks one of your discipleship groups. They join after accepting in Pleros.</p>
+    {selecting && selected.size ? <div className="sticky bottom-[calc(60px+env(safe-area-inset-bottom))] z-20 grid gap-3 rounded-[14px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white p-3 shadow-[0_-6px_20px_rgb(5_20_128/8%)] lg:bottom-4">
+      {handing ? <HandoverPicker bare enrollmentIds={[...selected]} who={who} onDone={({ moved, skipped }) => { stopSelecting(); setNotice(`Handed ${moved === 1 ? "1 person" : `${moved} people`} over.${skipped ? ` ${skipped} could not be moved; they may already have moved.` : ""}`); router.refresh(); }} />
+        : <div className="flex items-center justify-between gap-3"><span className="text-[13.5px] font-medium">{selected.size} selected</span><button type="button" className={styles.btn} data-primary onClick={() => setHanding(true)}><ArrowRightLeftIcon className="size-3.5" strokeWidth={2.2} />Hand over</button></div>}
+    </div> : null}
   </div>;
 }

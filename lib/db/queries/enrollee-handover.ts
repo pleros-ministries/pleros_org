@@ -61,5 +61,26 @@ export async function handOverEnrollee(callerUserId: string, enrollmentId: numbe
     .where(and(eq(s.pastorAssignments.enrollmentId, enrollmentId), eq(s.pastorAssignments.pastorUserId, callerUserId)))
     .returning({ id: s.pastorAssignments.enrollmentId });
   if (!moved.length) throw new CommunityError("Only their current follow-up person can hand them over.");
-  return { enrolleeFirstName: firstNameOf(enrollee.firstName || enrollee.name), newOwnerFirstName: firstNameOf(target.name) };
+  return { enrollmentId, enrolleeUserId: enrollee.userId, enrolleeFirstName: firstNameOf(enrollee.firstName || enrollee.name), newOwnerFirstName: firstNameOf(target.name) };
+}
+
+export const HANDOVER_BATCH_MAX = 50;
+
+/** Several enrollees to one person (My enrollees multi-select). Each move is guarded on its own; any the caller no longer owns are skipped. */
+export async function handOverEnrollees(callerUserId: string, rawIds: unknown, newOwnerUserId: string) {
+  const ids = Array.isArray(rawIds) ? [...new Set(rawIds.filter((id): id is number => typeof id === "number" && Number.isSafeInteger(id) && id > 0))] : [];
+  if (!ids.length) throw new CommunityError("Choose who to hand over.");
+  if (ids.length > HANDOVER_BATCH_MAX) throw new CommunityError(`Hand over up to ${HANDOVER_BATCH_MAX} people at a time.`);
+  const moved: Awaited<ReturnType<typeof handOverEnrollee>>[] = [];
+  let skipped = 0;
+  for (const id of ids) {
+    try { moved.push(await handOverEnrollee(callerUserId, id, newOwnerUserId)); }
+    catch (error) {
+      // The first failure that is about the new owner applies to every row, so stop and say so.
+      if (error instanceof CommunityError && !/current follow-up person|could not be found|other than the enrollee/.test(error.message)) throw error;
+      skipped += 1;
+    }
+  }
+  if (!moved.length) throw new CommunityError("None of these could be handed over. They may already have moved.");
+  return { moved, skipped };
 }

@@ -64,6 +64,8 @@ function summarise(n: Notification): string {
     case "group_join_request": return `${text(p.name) ?? "Someone"} asked to join ${text(p.groupName) ?? "your group"}`;
     case "group_join_approved": return `You are now a member of ${text(p.groupName) ?? "the group"}`;
     case "pleros_reply": return "Pleros replied to your question";
+    case "enrollee_handed_over": return `${text(p.fromName) ?? "Someone"} handed ${text(p.enrolleeName) ?? "someone"} over to you`;
+    case "follow_up_changed": return `${text(p.ownerName) ?? "Someone new"} will look after you now`;
     default: return "Community update";
   }
 }
@@ -74,6 +76,8 @@ function destination(n: Notification): string | null {
   const post = id(p.postId);
   if (post && ["official_post", "post_comment", "comment_reply", "discipleship_post"].includes(n.kind)) return `/dashboard/community/post/${post}`;
   if (n.kind === "daily_report_reminder") return `/dashboard/community/report${typeof p.day === "string" && /^\d{4}-\d{2}-\d{2}$/.test(p.day) ? `?day=${p.day}` : ""}`;
+  if (n.kind === "enrollee_handed_over") return id(p.enrollmentId) ? `/dashboard/community/enrollees/${id(p.enrollmentId)}` : "/dashboard/community/enrollees";
+  if (n.kind === "follow_up_changed") return "/dashboard/sogp/follow-up/welcome";
   if (n.kind === "pleros_reply") return id(p.questionId) ? `/dashboard/community/ask/${id(p.questionId)}` : "/dashboard/community/ask";
   if (n.kind.startsWith("group_join")) return id(p.groupId) ? `/dashboard/community/groups/${id(p.groupId)}` : "/dashboard/community/groups";
   if (n.kind.startsWith("discipleship_")) return "/dashboard/community/discipleship";
@@ -89,6 +93,7 @@ function icon(kind: string): { node: ReactNode; tone: [string, string] } {
   if (kind === "post_comment" || kind === "comment_reply") return { node: <MessageCircleIcon className={size} strokeWidth={2} />, tone: ["#e4ebfd", "#2331ae"] };
   if (kind.includes("prayer") || kind === "discipleship_prayed") return { node: <HandHeartIcon className={size} strokeWidth={2} />, tone: ["#fde3cf", "#7a3a10"] };
   if (kind.startsWith("discipleship_") || kind.startsWith("group_join")) return { node: <UsersRoundIcon className={size} strokeWidth={2} />, tone: ["#efe7fb", "#56209c"] };
+  if (kind === "enrollee_handed_over" || kind === "follow_up_changed") return { node: <UsersRoundIcon className={size} strokeWidth={2} />, tone: ["#e4ebfd", "#2331ae"] };
   if (kind === "pleros_reply") return { node: <MessageCircleQuestionIcon className={size} strokeWidth={2} />, tone: ["#cfe6fb", "#0e3f73"] };
   if (kind === "made_leader" || kind === "leader_nudge" || kind === "flag_resolved") return { node: <ShieldCheckIcon className={size} strokeWidth={2} />, tone: ["#e6ecfc", "#1f3260"] };
   return { node: <BellIcon className={size} strokeWidth={2} />, tone: ["#eceef2", "#4b5260"] };

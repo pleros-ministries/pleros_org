@@ -237,6 +237,9 @@ export const communityNotificationKindEnum = pgEnum(
     "group_join_request",
     "group_join_approved",
     "pleros_reply",
+    // Follow-up handover (18 October): the new owner, then the learner.
+    "enrollee_handed_over",
+    "follow_up_changed",
   ],
 );
 

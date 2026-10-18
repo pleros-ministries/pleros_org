@@ -16,7 +16,7 @@ export async function getOwnLearningView(userId: string): Promise<LearningViewDa
   const published = dashboard.tracks.filter(track => track.lesson.status === "published");
   const next = published.find(track => track.accessible && !track.completed && track.dayNumber !== null);
   // The route only describes the owner it assigned; a later admin change reads as "Current follow-up".
-  const [followUp] = await db.select({ name:users.name,source:sogpFollowUpRoutes.source }).from(pastorAssignments).innerJoin(users,eq(pastorAssignments.pastorUserId,users.id))
+  const [followUp] = await db.select({ name:users.name,source:sogpFollowUpRoutes.source,choice:sogpFollowUpRoutes.choice }).from(pastorAssignments).innerJoin(users,eq(pastorAssignments.pastorUserId,users.id))
     .leftJoin(sogpFollowUpRoutes,and(eq(sogpFollowUpRoutes.enrollmentId,pastorAssignments.enrollmentId),eq(sogpFollowUpRoutes.ownerUserId,pastorAssignments.pastorUserId)))
     .where(eq(pastorAssignments.enrollmentId,dashboard.enrollment.id)).limit(1);
   return {

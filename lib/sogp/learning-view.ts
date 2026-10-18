@@ -8,7 +8,8 @@ export type LearningViewData = {
   episodes: LearningEpisode[];
   canWrite: boolean;
   writeBlockReason: "not_enabled" | "withdrawn" | null;
-  followUp?: { name: string; source?: "code" | "link" | "geography" | null } | null;
+  /** `choice` is null while a link arrival has not yet kept or changed their person. */
+  followUp?: { name: string; source?: "code" | "link" | "geography" | null; choice?: "accepted" | "requested" | null } | null;
   traditional: { completed: number; total: number; nextTitle: string | null; resumeHref: string };
 };
 export function learningWriteNotice(data: LearningViewData) {

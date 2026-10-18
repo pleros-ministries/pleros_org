@@ -27,7 +27,9 @@ type Kind =
   | "discipleship_question_reply"
   | "group_join_request"
   | "group_join_approved"
-  | "pleros_reply";
+  | "pleros_reply"
+  | "enrollee_handed_over"
+  | "follow_up_changed";
 
 const PUSH_COPY: Record<Kind, { title: string }> = {
   official_post: { title: "New Pleros update" },
@@ -52,6 +54,8 @@ const PUSH_COPY: Record<Kind, { title: string }> = {
   group_join_request: { title: "Someone asked to join your group" },
   group_join_approved: { title: "You're in" },
   pleros_reply: { title: "Pleros replied" },
+  enrollee_handed_over: { title: "Someone new to look after" },
+  follow_up_changed: { title: "Someone new is looking after you" },
 };
 
 /**

@@ -69,8 +69,15 @@ export function LearningHub({ hub, learning }: { hub: LearningHubData; learning:
         : <Link href={hub.card.href} className={styles.resume}>{hub.card.action} <PlayIcon className="size-4" fill="currentColor" strokeWidth={0} /></Link>}
     </section>;
 
+  // A learner who joined by someone's link chooses whether to keep them (user, 18 October).
+  const linkChoicePending = learning.followUp?.source === "link" && learning.followUp.choice == null;
   return <div className={styles.page}>
     <div className={styles.column}>
+      {linkChoicePending ? <Link href="/dashboard/sogp/follow-up/welcome" className={`${styles.panel} ${styles.row}`} style={{ display: "flex", background: "#eef3fe", borderColor: "#d6e0fb" }}>
+        <span className={styles.avatar} aria-hidden="true">{initials(learning.followUp!.name)}</span>
+        <span className={styles.rowCopy}><span className={styles.rowTitle} style={{ fontWeight: 500 }}>{learning.followUp!.name.split(" ")[0]} invited you</span><span className={styles.rowMeta}>Keep them as the person who looks after you, or ask for someone else</span></span>
+        <ChevronRightIcon className="size-4 shrink-0 text-[#a6abb2]" strokeWidth={2} />
+      </Link> : null}
       {resume}
 
       {hub.state === "preparing" ? <p className={styles.notice}>Your cohort hasn’t started yet. Pre-SOGP is open now, and your first teachings unlock on the start date.</p> : null}

@@ -6,8 +6,8 @@ import { useState, useTransition } from "react";
 import type { ReactNode } from "react";
 import { ArrowRightLeftIcon, CheckIcon, ChevronRightIcon, ClipboardListIcon, HomeIcon, LockIcon, MailIcon, MessageCircleIcon, PenLineIcon, PhoneIcon, SendIcon, UserPlusIcon } from "lucide-react";
 
-import { handOverEnrolleeAction, logFollowUpAction, recordContactInviteAction, searchHandoverCandidatesAction } from "@/app/(site)/dashboard/community/_actions/people-actions";
-import type { HandoverCandidate } from "@/lib/db/queries/enrollee-handover";
+import { logFollowUpAction, recordContactInviteAction } from "@/app/(site)/dashboard/community/_actions/people-actions";
+import { HandoverPicker } from "./handover-picker";
 import { inviteEnrolleeToGroup, withdrawGroupInvitation } from "@/app/_actions/sogp-invitation-actions";
 import type { FollowUpEntry, FollowUpKind, OwnEnrollee } from "@/lib/db/queries/people-follow-ups";
 import type { SentInvitation } from "@/lib/db/queries/sogp-group-invitations";
@@ -101,54 +101,16 @@ export function FollowUpLog({ subject, firstName, entries, extra, startOpen = fa
 function HandOver({ enrollmentId, firstName }: { enrollmentId: number; firstName: string }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [term, setTerm] = useState("");
-  const [people, setPeople] = useState<HandoverCandidate[]>([]);
-  const [chosen, setChosen] = useState<HandoverCandidate | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [searching, startSearch] = useTransition();
-  const [saving, startSave] = useTransition();
-  function search(value: string) {
-    setTerm(value); setChosen(null); setError(null);
-    if (value.trim().length < 2) { setPeople([]); return; }
-    startSearch(async () => {
-      const result = await searchHandoverCandidatesAction({ enrollmentId, term: value });
-      if (result.ok) setPeople(result.people); else setError(result.error);
-    });
-  }
-  function confirm() {
-    if (!chosen) return;
-    startSave(async () => {
-      const result = await handOverEnrolleeAction({ enrollmentId, newOwnerUserId: chosen.userId });
-      if (!result.ok) { setError(result.error); return; }
-      router.push("/dashboard/community/enrollees");
-    });
-  }
   return <>
     {open ? <div className={styles.sectionTitle}>
       <h2>Hand {firstName} over</h2>
-      <button type="button" className={styles.quiet} onClick={() => { setOpen(false); setChosen(null); setError(null); setTerm(""); setPeople([]); }}>Cancel</button>
+      <button type="button" className={styles.quiet} onClick={() => setOpen(false)}>Cancel</button>
     </div> : <button type="button" className={`${styles.panel} ${styles.row} w-full cursor-pointer text-left`} onClick={() => setOpen(true)} aria-expanded={false}>
       <span className="grid size-8 shrink-0 place-items-center rounded-[9px] bg-[#eef1f6] text-[#4a5568]" aria-hidden="true"><ArrowRightLeftIcon className="size-4" strokeWidth={2.2} /></span>
       <span className="grid min-w-0 flex-1"><span className="text-[13.5px] font-medium">Hand {firstName} over to someone else</span><span className="text-[12px] text-(--color-community-muted)">They’ll look after {firstName} instead of you</span></span>
       <ChevronRightIcon className="size-4 shrink-0 text-[#a6abb2]" />
     </button>}
-    {open ? <div className={`${styles.panel} grid gap-3 p-3.5`}>
-      {chosen ? <>
-        <p className="m-0 text-[13.5px]">Hand {firstName} over to <b className="font-medium">{chosen.name}</b>?</p>
-        <p className="m-0 text-[12px] text-(--color-community-muted)">{chosen.name.split(" ")[0]} will look after {firstName} from now on. {firstName} leaves your enrollees and you stop seeing their phone number. Your notes stay private to you.</p>
-        <div className="flex gap-2"><button type="button" className={styles.btn} data-primary disabled={saving} onClick={confirm}>{saving ? "Handing over…" : `Hand ${firstName} over`}</button><button type="button" className={styles.btn} disabled={saving} onClick={() => setChosen(null)}>Back</button></div>
-      </> : <>
-        <label className="grid gap-1.5 text-[13px] font-medium">Who should look after {firstName} now?<input type="search" value={term} onChange={event => search(event.target.value)} placeholder="Search by name" autoComplete="off" className="h-10 rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white px-3 text-[14px] font-normal outline-none focus:border-(--color-community-blue)" /></label>
-        {term.trim().length >= 2 ? (people.length ? <ul className={`${styles.list} -mx-3.5`}>
-          {people.map(person => <li key={person.userId}><button type="button" className={`${styles.row} w-full text-left`} onClick={() => setChosen(person)}>
-            <Initials name={person.name} />
-            <span className="grid min-w-0 flex-1"><span className="truncate text-[13.5px] font-medium">{person.name}</span>{person.region ? <span className="text-[12px] text-(--color-community-muted)">{person.region}</span> : null}</span>
-            <span className="text-[12.5px] font-medium text-(--color-community-blue)">Choose</span>
-          </button></li>)}
-        </ul> : <p className="m-0 text-[12.5px] text-(--color-community-muted)">{searching ? "Searching…" : "No one found with that name."}</p>) : null}
-      </>}
-      {error ? <p role="alert" className="m-0 text-[12.5px] text-(--destructive)">{error}</p> : null}
-    </div> : null}
+    {open ? <HandoverPicker enrollmentIds={[enrollmentId]} who={firstName} onDone={() => router.push("/dashboard/community/enrollees")} /> : null}
   </>;
 }
 

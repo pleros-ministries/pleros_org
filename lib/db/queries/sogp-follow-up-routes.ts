@@ -94,7 +94,11 @@ export type OwnEnrolleeRow = {
   group: { yours: boolean; name: string | null } | null;
   /** A pending invitation into one of the viewer's groups. */
   invited: boolean;
+  /** First name of the member who handed them over (not an admin reassignment). */
+  handedOverBy?: string | null;
 };
+
+const assigner = alias(s.users, "enrollee_assigner");
 
 /** Enrollees whose follow-up the viewer owns, across every source. */
 export async function listOwnEnrollees(userId: string): Promise<OwnEnrolleeRow[]> {
@@ -102,8 +106,10 @@ export async function listOwnEnrollees(userId: string): Promise<OwnEnrolleeRow[]
     enrollmentId: s.pastorAssignments.enrollmentId, name: s.sogpEnrollments.name, assignedAt: s.pastorAssignments.assignedAt,
     assignedBy: s.pastorAssignments.assignedBy, lastContactedAt: s.pastorAssignments.lastContactedAt,
     routeSource: s.sogpFollowUpRoutes.source, routeOwner: s.sogpFollowUpRoutes.ownerUserId,
+    assignerName: assigner.name, assignerRole: assigner.role,
   }).from(s.pastorAssignments)
     .innerJoin(s.sogpEnrollments, eq(s.sogpEnrollments.id, s.pastorAssignments.enrollmentId))
+    .leftJoin(assigner, eq(assigner.id, s.pastorAssignments.assignedBy))
     .leftJoin(s.sogpFollowUpRoutes, eq(s.sogpFollowUpRoutes.enrollmentId, s.pastorAssignments.enrollmentId))
     .where(eq(s.pastorAssignments.pastorUserId, userId))
     .orderBy(desc(s.pastorAssignments.assignedAt)).limit(200);
@@ -134,6 +140,8 @@ export async function listOwnEnrollees(userId: string): Promise<OwnEnrolleeRow[]
       lastContactedAt: row.lastContactedAt ? new Date(row.lastContactedAt).toISOString() : null,
       group: membership ? { yours, name: yours ? membership.name : null } : null,
       invited: !membership && invited.has(row.enrollmentId),
+      handedOverBy: row.assignedBy && row.assignedBy !== userId && row.assignerName && row.assignerRole !== "admin" && row.assignerRole !== "super_admin"
+        ? row.assignerName.trim().split(/\s+/)[0] ?? null : null,
     };
   });
 }
