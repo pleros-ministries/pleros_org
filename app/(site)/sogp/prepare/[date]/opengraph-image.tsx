@@ -6,7 +6,6 @@ import { ImageResponse } from "next/og";
 import { getOpenSogpCohort } from "@/lib/db/queries/sogp";
 import { getPublicPreparationPost } from "@/lib/db/queries/sogp-journey";
 
-export const runtime = "nodejs";
 export const alt = "Pre-SOGP preparation";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";

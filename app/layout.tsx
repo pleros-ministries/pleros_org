@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { RootIntegrations } from "@/components/root-integrations";
 import { Be_Vietnam_Pro, DM_Sans, Figtree, Sen } from "next/font/google";
 import localFont from "next/font/local";
@@ -96,7 +97,8 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="page-shell antialiased" suppressHydrationWarning>
-        <RootIntegrations />
+        {/* Reads usePathname(); Cache Components needs it behind Suspense. */}
+        <Suspense fallback={null}><RootIntegrations /></Suspense>
         {children}
       </body>
     </html>

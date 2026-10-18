@@ -23,7 +23,6 @@ import {
   getLearningProgressTeachingLabel,
 } from "@/lib/sogp/learning-progress-share";
 
-export const runtime = "nodejs";
 
 const SIZE = { width: 1080, height: 1080 };
 

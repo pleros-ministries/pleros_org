@@ -3,7 +3,6 @@ import { PageHeader } from "@/components/ppc/page-header";
 import { Breadcrumb } from "@/components/ppc/breadcrumb";
 import { UploadForm } from "../_components/UploadForm";
 
-export const revalidate = 0;
 
 export default async function AdminLibraryUploadPage() {
   const [nextSn, teachings] = await Promise.all([getNextSn(), getAllTeachings()]);

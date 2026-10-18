@@ -6,7 +6,6 @@ import { getSogpCohortById } from "@/lib/db/queries/sogp";
 import { DAILY_DATE_PATTERN } from "@/lib/sogp/daily-participation";
 import { buildDailyParticipationWorkbook } from "@/lib/sogp/report-workbook";
 
-export const runtime = "nodejs";
 
 export async function GET(request: Request) {
   try {

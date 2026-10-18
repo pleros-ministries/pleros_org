@@ -1,13 +1,18 @@
+import { connection } from "next/server";
 import { dashboardFont } from "@/components/dashboard/v3/font";
 import styles from "@/components/dashboard/v3/dashboard.module.css";
 import { DailyReportView } from "@/components/community/report/daily-report-view";
 import { emptyMinistryNumbers, reportableDateKeys } from "@/lib/community/ministry-report";
 import { lagosToday } from "@/lib/sogp/daily-date";
 
+// Cache Components: synthetic demo reads the clock, so it renders per request.
+export const instant = false;
+
 export const metadata = { title: "Daily report visual preview", robots: { index: false, follow: false } };
 
 /** Labelled sample data. Buttons call live actions, which refuse without a session. */
-export default function DailyReportPreview() {
+export default async function DailyReportPreview() {
+  await connection();
   const today = lagosToday();
   return <div className={`${dashboardFont.className} ${styles.root}`} data-dashboard-v3><p className="px-4 py-2 text-xs text-(--color-text-muted)">Visual preview · sample data · nothing saved</p><div className="px-4 pb-8">
     <DailyReportView today={today} days={reportableDateKeys(today)} selected={today} enabled flash={null}

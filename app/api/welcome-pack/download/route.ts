@@ -11,7 +11,6 @@ import {
   resolveWelcomePackDownloadFilePath,
 } from "@/lib/welcome-pack-download";
 
-export const runtime = "nodejs";
 
 async function hasWelcomePackAccess(): Promise<boolean> {
   const appSession = await getAppSession();

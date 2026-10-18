@@ -6,7 +6,6 @@ import { PageHeader } from "@/components/ppc/page-header";
 import { Breadcrumb } from "@/components/ppc/breadcrumb";
 import { AdminLibraryClient } from "./_components/AdminLibraryClient";
 
-export const revalidate = 0;
 
 export default async function AdminLibraryPage() {
   const teachings = await getAllTeachings();

@@ -1,3 +1,5 @@
+import { cacheLife } from "next/cache";
+
 export const ANCHOR_RSS_URL =
   "https://anchor.fm/s/10db96b2c/podcast/rss" as const;
 
@@ -73,31 +75,25 @@ function parseItems(xml: string): RssEpisode[] {
   });
 }
 
-let _cache: { episodes: RssEpisode[]; fetchedAt: number } | null = null;
-const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+// Last good list on this instance, served if the feed fails (failures are never cached).
+let lastGoodEpisodes: RssEpisode[] = [];
 
 export async function fetchAnchorEpisodes(): Promise<RssEpisode[]> {
-  // In-memory cache so we don't hammer the RSS feed on every render
-  if (_cache && Date.now() - _cache.fetchedAt < CACHE_TTL_MS) {
-    return _cache.episodes;
-  }
-
   try {
-    const res = await fetch(ANCHOR_RSS_URL, {
-      next: { revalidate: 300 }, // Next.js data cache: 5 min
-    });
-
-    if (!res.ok) {
-      console.error(`[anchor-rss] fetch failed: ${res.status}`);
-      return _cache?.episodes ?? [];
-    }
-
-    const xml = await res.text();
-    const episodes = parseItems(xml);
-    _cache = { episodes, fetchedAt: Date.now() };
+    const episodes = await loadAnchorEpisodes();
+    lastGoodEpisodes = episodes;
     return episodes;
   } catch (err) {
     console.error("[anchor-rss] error:", err);
-    return _cache?.episodes ?? [];
+    return lastGoodEpisodes;
   }
+}
+
+/** Cache Components: the feed is cached for five minutes, so pages can prerender it. */
+async function loadAnchorEpisodes(): Promise<RssEpisode[]> {
+  "use cache";
+  cacheLife({ stale: 300, revalidate: 300, expire: 3600 });
+  const res = await fetch(ANCHOR_RSS_URL);
+  if (!res.ok) throw new Error(`fetch failed: ${res.status}`);
+  return parseItems(await res.text());
 }

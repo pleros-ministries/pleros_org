@@ -5,7 +5,6 @@ import { getSogpReportData } from "@/lib/db/queries/sogp-report";
 import { buildSogpReport } from "@/lib/sogp/report";
 import { buildSogpReportWorkbook } from "@/lib/sogp/report-workbook";
 
-export const runtime = "nodejs";
 
 export async function GET(request: Request) {
   try {

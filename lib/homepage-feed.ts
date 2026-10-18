@@ -1,3 +1,5 @@
+import { cacheLife } from "next/cache";
+
 const YOUTUBE_CHANNEL_RSS_URL =
   "https://www.youtube.com/feeds/videos.xml?channel_id=UCamQ1mD2w-TOwliMk88CuwA";
 
@@ -258,6 +260,9 @@ type YtVideoDetail = {
 };
 
 export async function getLatestYoutubeVideos(limit = 5): Promise<YoutubeEpisode[]> {
+  // Cache Components: replaces the 30-minute fetch cache so pages can prerender it.
+  "use cache";
+  cacheLife({ stale: 300, revalidate: 1800, expire: 86400 });
   const apiKey = process.env.YOUTUBE_API_KEY;
 
   if (!apiKey) {
@@ -377,6 +382,9 @@ async function getLatestYoutubeVideosFallback(limit: number): Promise<YoutubeEpi
 
 
 export async function getLatestYoutubeEpisode(): Promise<YoutubeEpisode | null> {
+  // Cache Components: replaces the 30-minute fetch cache so pages can prerender it.
+  "use cache";
+  cacheLife({ stale: 300, revalidate: 1800, expire: 86400 });
   try {
     const response = await fetch(YOUTUBE_CHANNEL_RSS_URL, {
       next: { revalidate: 1800 },

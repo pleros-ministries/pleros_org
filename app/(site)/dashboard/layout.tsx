@@ -1,19 +1,27 @@
+import { Suspense } from "react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
 
 import { CommunityQueryProvider } from "@/components/community/community-query-provider";
+import { DashboardFrameFallback } from "@/components/dashboard/shell/dashboard-frame-fallback";
 import { DashboardShell } from "@/components/dashboard/shell/dashboard-shell";
 import { PushBindingSync } from "@/components/push/push-binding-sync";
 import { recordDashboardVisit } from "@/lib/db/queries/admin-analytics";
 import { getDashboardViewer } from "@/lib/dashboard/viewer";
 import { normalizeLearnerReturnTo } from "@/lib/sogp/auth-flow";
 
-export default async function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+// Cache Components: the frame prerenders as the static shell; everything that reads
+// the request (headers, session, navigation) streams in behind this boundary.
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <Suspense fallback={<DashboardFrameFallback />}>
+      <DashboardFrame>{children}</DashboardFrame>
+    </Suspense>
+  );
+}
+
+async function DashboardFrame({ children }: { children: React.ReactNode }) {
   const requestHeaders = await headers();
   const pathname = requestHeaders.get("x-pleros-pathname") ?? "/dashboard";
   const returnTo = normalizeLearnerReturnTo(pathname);

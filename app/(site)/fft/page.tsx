@@ -12,6 +12,9 @@ import {
   WELCOME_ACCESS_COOKIE_NAME,
 } from "@/lib/welcome-access";
 
+// Cache Components: Reads the request; not adopted yet.
+export const instant = false;
+
 export const metadata: Metadata = {
   title: "First time with us",
   description: "Tell us where you joined Fullness of Christ Church so we can send you a special gift.",

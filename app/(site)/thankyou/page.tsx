@@ -9,6 +9,9 @@ import {
 import { getWelcomePackLeadByEmail } from "@/lib/db/queries/welcome-pack-leads";
 import { resolveWelcomeDisplayName } from "@/lib/welcome-display-name";
 
+// Cache Components: Reads the request; not adopted yet.
+export const instant = false;
+
 export default async function ThankYouRoute() {
   const appSession = await getAppSession();
   const cookieStore = await cookies();

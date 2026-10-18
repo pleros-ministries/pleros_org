@@ -8,9 +8,10 @@ import { isDateKey } from "@/lib/community/ministry-report";
 import { toDateKey } from "@/lib/prayer-watch";
 
 export default async function DashboardPrayerWatchPage({ searchParams }: { searchParams: Promise<{ date?: string; tab?: string }> }) {
+  const params = await searchParams;
+  // After the request data, so the clock is read at request time, never in the prerender.
   const now = new Date();
   const todayKey = toDateKey(now);
-  const params = await searchParams;
   const selected = isDateKey(params.date) && params.date <= todayKey ? params.date : null;
   const year = Number((selected ?? todayKey).slice(0, 4));
   const month = Number((selected ?? todayKey).slice(5, 7)) - 1;

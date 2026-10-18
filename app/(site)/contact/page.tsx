@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
+import { connection } from "next/server";
 
 import { ContactPageView } from "../../../components/home/contact-page-view";
 
-export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Contact Us",
@@ -10,6 +10,10 @@ export const metadata: Metadata = {
     "Reach out to Pleros Ministries and Missions for your next step and spiritual journey.",
 };
 
-export default function ContactPage() {
+// Was force-dynamic: the form stamps its start time per request.
+export const instant = false;
+
+export default async function ContactPage() {
+  await connection();
   return <ContactPageView />;
 }

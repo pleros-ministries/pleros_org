@@ -1,5 +1,8 @@
 import { redirect } from "next/navigation";
 
+// Cache Components: Reads the request; not adopted yet.
+export const instant = false;
+
 const UTM_KEYS = [
   "utm_source",
   "utm_medium",

@@ -12,6 +12,9 @@ import {
 import { getPublicPreparationPost } from "@/lib/db/queries/sogp-journey";
 import { forwardUtmParams } from "@/lib/sogp/share";
 
+// Cache Components: Reads the request; not adopted yet.
+export const instant = false;
+
 const DATE_KEY = /^\d{4}-\d{2}-\d{2}$/;
 
 type PageProps = {
