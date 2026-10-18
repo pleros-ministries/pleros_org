@@ -1,7 +1,11 @@
+import { connection } from "next/server";
 import type { Metadata } from "next";
 
 import { WelcomeDashboardView } from "@/components/dashboard/welcome-dashboard-view";
 import { welcomeDashboardSections } from "@/lib/welcome-dashboard-content";
+
+// Cache Components: synthetic demo reads the clock, so it renders per request.
+export const instant = false;
 
 export const metadata: Metadata = {
   title: "Dashboard preview",
@@ -34,6 +38,7 @@ const previewDashboardSections = welcomeDashboardSections.map((section) => ({
   }),
 }));
 
-export default function DashboardPreviewPage() {
+export default async function DashboardPreviewPage() {
+  await connection();
   return <WelcomeDashboardView sections={previewDashboardSections} />;
 }

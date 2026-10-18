@@ -7,6 +7,9 @@ import { QueryProvider } from "@/components/query-provider";
 import { getAppSession } from "@/lib/app-session";
 import { getChurchAssignment } from "@/lib/db/queries/church-organisation";
 import { dashboardFont } from "@/components/dashboard/v3/font";
+
+// Cache Components: Staff console: not adopted yet (docs/dashboard-demo/CACHE_COMPONENTS_PLAN.md).
+export const instant = false;
 export const metadata: Metadata = {
   title: "Pleros Admin",
   description: "Pleros operations and administration",

@@ -18,7 +18,6 @@ import {
 } from "@/lib/db/queries/outreach-contacts";
 import { lagosToday } from "@/lib/sogp/daily-date";
 
-export const runtime = "nodejs";
 
 /** Most rows one export sheet will hold. */
 const EXPORT_LIMIT = 50_000;

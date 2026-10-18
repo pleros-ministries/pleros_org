@@ -9,6 +9,9 @@ import styles from "@/components/preview/pleros/demo.module.css";
 import { timeOfDayGreeting } from "@/lib/preview/pleros/greeting";
 import { lagosToday } from "@/lib/sogp/daily-date";
 
+// Cache Components: Synthetic demo routes stay request-time.
+export const instant = false;
+
 export const metadata: Metadata = {
   title: "Pleros dashboard demo",
   robots: { index: false, follow: false },

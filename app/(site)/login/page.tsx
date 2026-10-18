@@ -7,6 +7,9 @@ import { HomepageFooter } from "@/components/home/homepage-footer";
 import { PublicSitePageShell } from "@/components/home/public-site-page-shell";
 import { normalizeLearnerReturnTo } from "@/lib/sogp/auth-flow";
 
+// Cache Components: Reads the request; not adopted yet.
+export const instant = false;
+
 export const metadata: Metadata = {
   title: "Log in to Pleros",
   description: "Continue your School of God's Purpose journey.",

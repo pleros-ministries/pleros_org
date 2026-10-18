@@ -16,6 +16,9 @@ import {
   isValidInviteCode,
 } from "@/lib/sogp/discipleship";
 
+// Cache Components: Reads the request; not adopted yet.
+export const instant = false;
+
 export const metadata: Metadata = {
   title: "Join a SOGP discipleship group",
   description: "Walk through the School of God's Purpose with someone who cares about your growth.",

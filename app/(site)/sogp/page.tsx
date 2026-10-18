@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 
 import { SogpLandingPage } from "@/components/sogp/sogp-landing-page";
 
+// Cache Components: Reads the request; not adopted yet.
+export const instant = false;
+
 export const metadata: Metadata = {
   title: "School of God's Purpose",
   description:

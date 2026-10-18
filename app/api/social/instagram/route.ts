@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 
 import { getLatestInstagramPostsWithDiagnostics } from "@/lib/homepage-feed";
 
-export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
   const { posts, diagnostics } = await getLatestInstagramPostsWithDiagnostics();
