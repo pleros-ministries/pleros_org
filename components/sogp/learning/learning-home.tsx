@@ -8,6 +8,7 @@ import { learningResume, learningWriteNotice, type LearningViewData } from "@/li
 import type { SogpLearningPath } from "@/lib/sogp/learning-input";
 import { switchPodcastPace } from "@/lib/sogp/podcast-plan";
 import { DashboardIcon } from "@/components/dashboard/v3/primitives";
+import { BookOpenIcon, HeadphonesIcon } from "lucide-react";
 import styles from "./learning.module.css";
 import { PaceSwitchConfirm, PathSwitchConfirm, TraditionalPreview } from "./path-switch";
 
@@ -66,22 +67,20 @@ export function PathChooser({ data }: { data: LearningViewData }) {
     return current !== "traditional" && path !== "traditional" && plan ? <PaceSwitchConfirm {...props} /> : <PathSwitchConfirm {...props} />;
   }
   const podcastPick = path === "podcast_one" || path === "podcast_two";
-  const choiceStyle = (on: boolean) => ({ display: "grid", gap: 8, padding: 14, borderRadius: 14, background: "white", border: `1.5px solid ${on ? "var(--color-brand-blue)" : "var(--dashboard-panel-edge, #e2e5ea)"}`, boxShadow: on ? "0 0 0 3px rgb(32 86 214 / 10%)" : "none", cursor: "pointer", textAlign: "left" as const });
-  const chip = (on: boolean) => ({ minHeight: 32, padding: "6px 10px", lineHeight: "16px", textAlign: "center" as const, borderRadius: 10, border: `1px solid ${on ? "var(--color-brand-blue)" : "var(--dashboard-panel-edge, #e2e5ea)"}`, background: on ? "#eef3fe" : "white", color: on ? "var(--color-brand-blue)" : "var(--color-text-strong)", fontSize: 12.5, fontWeight: 500 });
-  const tag = <span style={{ height: 20, padding: "0 7px", borderRadius: 99, background: "#e4ebfd", color: "#2331ae", fontSize: 11, lineHeight: "20px", fontWeight: 500 }}>Current</span>;
-  // Two paths side by side, the current one marked, Podcast's pace inline (mockup B).
+  const tag = <span className={styles.currentTag}>Current</span>;
+  // Two paths, the current one marked, Podcast's pace inline as a segmented control (mockup B).
   return <section className={`${styles.page} ${styles.choicePage}`}>
     <header className={styles.header}><h1>How you learn SOGP</h1><p className={styles.muted}>{current ? "You keep everything you’ve done. Switching only changes what comes next." : "Choose the time you can set aside each day."}</p></header>
-    <div role="radiogroup" aria-label="Learning path" style={{ display: "grid", gap: 10 }}>
-      <button type="button" role="radio" aria-checked={path === "traditional"} onClick={() => { setPath("traditional"); setError(null); }} style={choiceStyle(path === "traditional")}>
-        <span style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}><strong style={{ fontSize: 15 }}>Traditional · 1 hr/day</strong>{current === "traditional" ? tag : null}</span>
+    <div role="radiogroup" aria-label="Learning path" className={styles.pathOptions}>
+      <button type="button" role="radio" aria-checked={path === "traditional"} onClick={() => { setPath("traditional"); setError(null); }} className={styles.pathOption}>
+        <span className={styles.pathOptionHead}><span className={styles.pathOptionTitle}><span className={styles.pathOptionIcon} style={{ background: "#e4ebfd", color: "#2331ae" }} aria-hidden="true"><BookOpenIcon className="size-4" strokeWidth={2} /></span><strong>Traditional · 1 hr/day</strong></span>{current === "traditional" ? tag : null}</span>
         <span className={styles.meta}>A teaching a day with a quiz and a written response. Counts toward your certificate, with a weekly group review.</span>
       </button>
-      <div role="radio" aria-checked={podcastPick} tabIndex={0} onClick={() => { if (!podcastPick) { setPath(current === "podcast_one" ? "podcast_one" : "podcast_two"); setError(null); } }} onKeyDown={event => { if ((event.key === "Enter" || event.key === " ") && !podcastPick) { event.preventDefault(); setPath("podcast_two"); } }} style={choiceStyle(podcastPick)}>
-        <span style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}><strong style={{ fontSize: 15 }}>Podcast</strong>{current && current !== "traditional" ? tag : null}</span>
+      <div role="radio" aria-checked={podcastPick} tabIndex={0} onClick={() => { if (!podcastPick) { setPath(current === "podcast_one" ? "podcast_one" : "podcast_two"); setError(null); } }} onKeyDown={event => { if ((event.key === "Enter" || event.key === " ") && !podcastPick) { event.preventDefault(); setPath("podcast_two"); } }} className={styles.pathOption}>
+        <span className={styles.pathOptionHead}><span className={styles.pathOptionTitle}><span className={styles.pathOptionIcon} style={{ background: "#cfe6fb", color: "#0e3f73" }} aria-hidden="true"><HeadphonesIcon className="size-4" strokeWidth={2} /></span><strong>Podcast</strong></span>{current && current !== "traditional" ? tag : null}</span>
         <span className={styles.meta}>Listen to episodes at your own pace and reorder what’s left. Weekly group review.</span>
-        <span style={{ display: "flex", gap: 6 }}>
-          {([["podcast_two", "30 min/day · 2 episodes"], ["podcast_one", "15 min/day · 1 episode"]] as const).map(([key, label]) => <button key={key} type="button" aria-pressed={path === key} onClick={event => { event.stopPropagation(); setPath(key); setError(null); }} style={chip(path === key)}>{label}</button>)}
+        <span className={styles.paceChips} role="group" aria-label="Podcast pace">
+          {([["podcast_two", "30 min/day · 2 episodes"], ["podcast_one", "15 min/day · 1 episode"]] as const).map(([key, label]) => <button key={key} type="button" aria-pressed={path === key} onClick={event => { event.stopPropagation(); setPath(key); setError(null); }}>{label}</button>)}
         </span>
       </div>
     </div>

@@ -6,6 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { chooseSogpPathAction, editSogpPlanAction } from "@/app/_actions/sogp-learning-actions";
 import { moveRemainingEpisode, podcastSuggestion, learningWriteNotice, type LearningViewData } from "@/lib/sogp/learning-view";
 import { DashboardIcon } from "@/components/dashboard/v3/primitives";
+import { GripVerticalIcon, LockIcon } from "lucide-react";
 import styles from "./learning.module.css";
 import { PlanPreviewStep, SuggestedTracklistStep, TracklistReadyStep } from "./plan-onboarding";
 
@@ -74,6 +75,15 @@ export function PlanEditor({ data,requestedPath }: { data: LearningViewData;requ
   if (stage === "preview") return <PlanPreviewStep pace={pace} guids={draft} episodes={episodeMap} onNext={() => setStage("suggested")} />;
   if (stage === "suggested") return <SuggestedTracklistStep pace={pace} guids={draft} episodes={episodeMap} onUse={() => setStage("ready")} onEdit={() => { setShowLibrary(false);setStage("edit"); }} />;
   if (stage === "ready") return <TracklistReadyStep pace={pace} guids={draft} episodes={episodeMap} saving={saving} canWrite={data.canWrite} error={error ?? (!data.canWrite ? learningWriteNotice(data) : null)} onEdit={() => { setShowLibrary(false);setStage("edit"); }} onStart={() => save(true)} />;
+  // The same slots as before (search matches, else the first two days until expanded), grouped by day.
+  const visibleDays: { day: number; slots: number[] }[] = [];
+  draft.forEach((guid,index) => {
+    const title = episodes.get(guid)?.title ?? "Episode no longer in the catalogue";
+    if (planSearch && !title.toLowerCase().includes(planSearch.toLowerCase())) return;
+    if (!planSearch && !showAllDays && index >= pace * 2) return;
+    const day = Math.floor(index / pace) + 1, last = visibleDays.at(-1);
+    if (last && last.day === day) last.slots.push(index); else visibleDays.push({ day,slots: [index] });
+  });
   const library = data.episodes.filter(episode => (!search || episode.title.toLowerCase().includes(search.toLowerCase())) && (filter === "all" || episode.title.toLowerCase().includes(filter)));
   return <section className={styles.page}>
     <header className={styles.header}><p className={styles.eyebrow}>{showLibrary ? "Build your plan" : `Podcast · ${pace === 2 ? "30" : "15"} min/day`}</p><h1>{showLibrary ? "Choose your episodes" : "Make the plan yours"}</h1><p className={styles.muted}>{showLibrary ? "Browse the library or use a suggested start. You can choose any available episodes." : "Reorder or replace remaining episodes. Completed episodes stay in your history."}</p></header>
@@ -84,26 +94,29 @@ export function PlanEditor({ data,requestedPath }: { data: LearningViewData;requ
     <div className={styles.stack}>
       {!draft.length ? <p className={styles.muted}>No episodes selected. Browse the library below or add the optional suggestion.</p> : null}
       {planSearch && !draft.some(guid => (episodes.get(guid)?.title ?? "Episode no longer in the catalogue").toLowerCase().includes(planSearch.toLowerCase())) ? <p className={styles.muted}>No episodes in your plan match this search.</p> : null}
-      {draft.map((guid,index) => {
-        const episode = episodes.get(guid), title = episode?.title ?? "Episode no longer in the catalogue", locked = listened.has(guid), position = positions.get(guid);
-        if (planSearch && !title.toLowerCase().includes(planSearch.toLowerCase())) return null;
-        if (!planSearch && !showAllDays && index >= pace * 2) return null;
-        return <div key={guid} className={styles.stack}>
-          {index % pace === 0 || planSearch ? <div className={styles.metaRow} id={index % pace === 0 ? `learning-day-${Math.floor(index / pace) + 1}` : undefined} style={{ scrollMarginTop: "80px" }}><h2>Day {Math.floor(index / pace) + 1}</h2><span className={styles.meta}>{dayMeta(draft.slice(Math.floor(index / pace) * pace,Math.floor(index / pace) * pace + pace))}</span></div> : null}
-          <article className={styles.episode} data-locked={locked}><div className={styles.episodeHeading}><DashboardIcon name={locked ? "lock" : "grip-vertical"} /><div className={styles.episodeCopy}><h3>{title}</h3><p className={locked ? styles.listenedMeta : styles.meta}>{episode?.duration || "Duration unavailable"} · {locked ? "Listened · Locked" : position ? `Saved at ${Math.floor(position.positionSeconds / 60)}:${String(Math.floor(position.positionSeconds % 60)).padStart(2,"0")}` : "Not started"}</p></div>{!locked ? <button type="button" className={styles.episodeMenu} aria-label={`Move or replace ${title}`} aria-expanded={editingSlot === guid} onClick={() => setEditingSlot(editingSlot === guid ? null : guid)}><DashboardIcon name="more" /></button> : null}</div>
-            {!locked ? <>
-              {editingSlot === guid ? <>
-              <label className={styles.stack}>Move {title} to slot<select value={index} disabled={saving} onChange={event => { setDraft(moveRemainingEpisode(draft,listened,index,Number(event.target.value)));setError(null); }}>{draft.map((other,slot) => !listened.has(other) ? <option key={other} value={slot}>Day {Math.floor(slot / pace) + 1} · Episode {slot % pace + 1}</option> : null)}</select></label>
-              <label className={styles.stack}>Replace {title}<select value={guid} disabled={saving} onChange={event => { setDraft(draft.map((item,slot) => slot === index ? event.target.value : item));setEditingSlot(null);setError(null); }}>{!episode ? <option value={guid}>Retain unavailable episode</option> : null}{data.episodes.filter(item => item.guid === guid || !queued.has(item.guid) && !archived.has(item.guid) && !listened.has(item.guid)).map(item => <option key={item.guid} value={item.guid}>{item.title}</option>)}</select></label>
-              <div className={styles.tools}><button type="button" disabled={saving} onClick={() => remove(index)}>Remove episode</button></div>
-              </> : null}
-            </> : null}
-          </article>
-        </div>;
-      })}
+      {visibleDays.map(({ day, slots }) => <div key={`day-${day}`} className={styles.stack} style={{ gap: 8 }}>
+        <div className={styles.sectionTitle} id={`learning-day-${day}`} style={{ scrollMarginTop: "80px" }}><h2>Day {day}</h2><span>{dayMeta(draft.slice((day - 1) * pace,(day - 1) * pace + pace))}</span></div>
+        <div className={styles.panel}><ol className={styles.list}>
+          {slots.map(index => {
+            const guid = draft[index]!, episode = episodes.get(guid), title = episode?.title ?? "Episode no longer in the catalogue", locked = listened.has(guid), position = positions.get(guid), editing = editingSlot === guid;
+            return <li key={guid} className={styles.slot} data-locked={locked} data-editing={editing || undefined}>
+              <div className={styles.slotRow}>
+                <span className={styles.order} aria-hidden="true">{index + 1}</span>
+                <span className={styles.rowCopy}><span className={styles.rowTitle}>{title}</span><span className={locked ? styles.listenedMeta : styles.rowMeta}>{episode?.duration || "Duration unavailable"} · {locked ? "Listened · Locked" : position ? `Saved at ${Math.floor(position.positionSeconds / 60)}:${String(Math.floor(position.positionSeconds % 60)).padStart(2,"0")}` : "Not started"}</span></span>
+                {!locked ? <button type="button" className={styles.reorder} aria-label={`Move or replace ${title}`} aria-expanded={editing} onClick={() => setEditingSlot(editing ? null : guid)}><GripVerticalIcon className="size-4" strokeWidth={2} /></button> : <span className={styles.lockMark} aria-hidden="true"><LockIcon className="size-4" strokeWidth={2} /></span>}
+              </div>
+              {!locked && editing ? <div className={styles.slotEdit}>
+                <label>Move {title} to slot<select value={index} disabled={saving} onChange={event => { setDraft(moveRemainingEpisode(draft,listened,index,Number(event.target.value)));setError(null); }}>{draft.map((other,slot) => !listened.has(other) ? <option key={other} value={slot}>Day {Math.floor(slot / pace) + 1} · Episode {slot % pace + 1}</option> : null)}</select></label>
+                <label>Replace {title}<select value={guid} disabled={saving} onChange={event => { setDraft(draft.map((item,slot) => slot === index ? event.target.value : item));setEditingSlot(null);setError(null); }}>{!episode ? <option value={guid}>Retain unavailable episode</option> : null}{data.episodes.filter(item => item.guid === guid || !queued.has(item.guid) && !archived.has(item.guid) && !listened.has(item.guid)).map(item => <option key={item.guid} value={item.guid}>{item.title}</option>)}</select></label>
+                <div className={styles.tools}><button type="button" disabled={saving} onClick={() => remove(index)}>Remove episode</button></div>
+              </div> : null}
+            </li>;
+          })}
+        </ol></div>
+      </div>)}
     </div>
     {!planSearch && !showAllDays && dayNumbers.length > 2 ? <button type="button" className={styles.rowButton} onClick={() => setShowAllDays(true)}><DashboardIcon name="calendar" /><span>Continue to days 3–{dayNumbers.length}</span><DashboardIcon name="down" size={16} /></button> : null}
-    <p className={styles.muted}>Use any episode’s menu to move it to another day or replace it from the library.</p>
+    <p className={styles.meta}>Tap an episode’s handle to move it to another day or replace it from the library.</p>
     <button type="button" className={styles.secondary} onClick={() => setShowLibrary(true)}>Choose more episodes<DashboardIcon name="plus" /></button>
     </> : <section className={styles.stack} aria-label="Podcast library">
       <label className={`${styles.planSearch} ${styles.filled}`}><span className="sr-only">Search titles or series</span><DashboardIcon name="search" /><input type="search" placeholder="Search titles or series" value={search} onChange={event => setSearch(event.target.value)} /></label>
