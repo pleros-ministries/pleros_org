@@ -2,10 +2,13 @@
 
 import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
+import { useSearchParams } from "next/navigation";
 import lesson from "./sogp-lesson.module.css";
+import { BrowserSuspense } from "./browser-suspense";
+import { SogpQuiz } from "./sogp-quiz";
+import { SogpWrittenResponse } from "./sogp-written-response";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import {
-  ArrowDown,
   ArrowLeft,
   ArrowRight,
   Check,
@@ -103,18 +106,8 @@ function Curriculum({ data }: { data: DayPayload }) {
   );
 }
 
-function sentence(value: string) {
-  const text = value.replaceAll("_", " ");
-  return text.charAt(0).toUpperCase() + text.slice(1);
-}
-
-function StepMark({ done = false }: { done?: boolean }) {
-  return <span className={lesson.stepMark} data-done={done || undefined} aria-label={done ? "Done" : "To do"}><Check className="size-3" strokeWidth={3} aria-hidden /></span>;
-}
-
-/** A step the learner marks themselves: the whole row toggles it. */
-function ToggleStep({ title, done, pending, failed, doneMeta, todoMeta, onToggle }: { title: string; done: boolean; pending: boolean; failed: boolean; doneMeta: string; todoMeta: string; onToggle: () => void }) {
-  return <button type="button" role="checkbox" aria-checked={done} className={lesson.row} disabled={pending} onClick={onToggle}><StepMark done={done} /><span className={lesson.rowCopy}><span className={lesson.rowTitle}>{title}</span><span className={lesson.rowMeta}>{failed ? "Could not save. Tap to try again." : done ? doneMeta : todoMeta}</span></span></button>;
+function StepMark({ done = false, small = false }: { done?: boolean; small?: boolean }) {
+  return <span className={lesson.stepMark} data-done={done || undefined} data-small={small || undefined} aria-label={done ? "Done" : "To do"}><Check className="size-3" strokeWidth={3} aria-hidden /></span>;
 }
 
 /** Ask about this lesson: to the active discipler (the same private thread as
@@ -160,8 +153,21 @@ function LessonQuestion({ lessonId, lessonTitle }: { lessonId: number; lessonTit
   </div>;
 }
 
+type LessonTab = "notes" | "quiz" | "response";
+const LESSON_TABS: LessonTab[] = ["notes", "quiz", "response"];
+
 export function SogpDayView({ dayNumber }: { dayNumber: number }) {
   const queryClient = useQueryClient();
+  const searchParams = useSearchParams();
+  const requestedTab = searchParams.get("tab") as LessonTab | null;
+  const [tab, setTab] = useState<LessonTab>(requestedTab && LESSON_TABS.includes(requestedTab) ? requestedTab : "notes");
+  // Keep the tab in the address so a shared or reloaded link reopens it.
+  function chooseTab(next: LessonTab) {
+    setTab(next);
+    const url = new URL(window.location.href);
+    url.searchParams.set("tab", next);
+    window.history.replaceState(null, "", url);
+  }
   const { data } = useSuspenseQuery({
     queryKey: ["sogp", "day", dayNumber],
     queryFn: () => fetchDay(dayNumber),
@@ -215,7 +221,13 @@ export function SogpDayView({ dayNumber }: { dayNumber: number }) {
     },
   });
   const listened = data.track.progress.audioListened;
-  const doneSteps = [listened, data.track.progress.notesRead, data.track.progress.quizPassed, data.track.progress.writtenApproved].filter(Boolean).length;
+  const steps = [
+    { key: "listen", label: "Listen", short: "listening", done: listened },
+    { key: "notes", label: "Notes", short: "notes", done: data.track.progress.notesRead },
+    { key: "quiz", label: "Quiz", short: "quiz", done: data.track.progress.quizPassed },
+    { key: "response", label: "Response", short: "response", done: data.track.progress.writtenApproved },
+  ];
+  const doneSteps = steps.filter(step => step.done).length;
 
   const tracks = data.dashboard.tracks.filter((item) => item.isRequired);
   const position = tracks.findIndex((item) => item.dayNumber === data.track.dayNumber) + 1;
@@ -225,30 +237,30 @@ export function SogpDayView({ dayNumber }: { dayNumber: number }) {
         <h1>{data.track.lesson.title}</h1>
         <p className={lesson.sub}>Week {data.track.weekNumber} · Track {position || data.track.dayNumber} of {tracks.length} · Traditional, 1 hr/day</p>
       </header>
-      {/* The player is the one tinted panel; no white card around it (user, 18 October). */}
-      {data.track.lesson.audioUrl ? <SogpAudioPlayer key={dayNumber} dayNumber={dayNumber} src={data.track.lesson.audioUrl} listened={data.track.progress.audioListened}/> : <p className={lesson.notice}>Teaching audio is being prepared.</p>}
-      {/* One checklist: each step shows its state and its action in the same row
-          (user, 18 October: a separate Completion list duplicated the actions). */}
-      <section className={lesson.steps} aria-labelledby="lesson-steps">
-        <div className={lesson.stepsHead}><h2 id="lesson-steps">Your steps</h2><span>{doneSteps} of 4 done</span></div>
-        <ol className={`${lesson.panel} ${lesson.list}`}>
-          <li><ToggleStep title="Listen to the teaching" done={listened} pending={listenedMutation.isPending} failed={listenedMutation.isError} doneMeta="Listened · tap to unmark" todoMeta="Tap to mark as listened" onToggle={() => listenedMutation.mutate(!listened)} /></li>
-          <li>{data.track.lesson.notesContent
-            ? <div className={lesson.row}><button type="button" role="checkbox" aria-checked={data.track.progress.notesRead} aria-label={data.track.progress.notesRead ? "Unmark notes as read" : "Mark notes as read"} className={lesson.markButton} disabled={notesMutation.isPending} onClick={() => notesMutation.mutate(!data.track.progress.notesRead)}><StepMark done={data.track.progress.notesRead} /></button><a className={lesson.rowLink} href="#lesson-notes"><span className={lesson.rowCopy}><span className={lesson.rowTitle}>Read the notes</span><span className={lesson.rowMeta}>{notesMutation.isError ? "Could not save. Try again." : data.track.progress.notesRead ? "Read · open the notes below" : "Open the notes below"}</span></span><ArrowDown className={`size-4 ${lesson.rowEnd}`} aria-hidden/></a></div>
-            : <ToggleStep title="Read the notes" done={data.track.progress.notesRead} pending={notesMutation.isPending} failed={notesMutation.isError} doneMeta="Read · tap to unmark" todoMeta="No notes for this track yet · tap to mark" onToggle={() => notesMutation.mutate(!data.track.progress.notesRead)} />}</li>
-          <li><Link className={lesson.row} href={`/dashboard/sogp/course/day/${dayNumber}/quiz`}><StepMark done={data.track.progress.quizPassed} /><span className={lesson.rowCopy}><span className={lesson.rowTitle}>Pass the quiz</span><span className={lesson.rowMeta}>{data.bestQuizScore===null?"Not attempted":`Best score ${data.bestQuizScore}%`}</span></span><ArrowRight className={`size-4 ${lesson.rowEnd}`} aria-hidden/></Link></li>
-          <li><Link className={lesson.row} href={`/dashboard/sogp/course/day/${dayNumber}/response`}><StepMark done={data.track.progress.writtenApproved} /><span className={lesson.rowCopy}><span className={lesson.rowTitle}>Write your response</span><span className={lesson.rowMeta}>{data.submission ? sentence(data.submission.status) : "Not started"}</span></span><ArrowRight className={`size-4 ${lesson.rowEnd}`} aria-hidden/></Link></li>
-        </ol>
-      </section>
+      {/* Option B (user, 18 October): a four-step strip, the player with its own
+          listened tick, then Notes, Quiz and Response as tabs that carry theirs. */}
+      <div className={lesson.strip} aria-label={`${doneSteps} of 4 steps done`}>
+        <div className={lesson.stripBars}>{steps.map(step => <i key={step.key} data-done={step.done || undefined} />)}</div>
+        <p className={lesson.meta}>{doneSteps === 4 ? "All four steps done" : `${doneSteps} of 4 steps · ${steps.filter(step => !step.done).map(step => step.short).join(", ")} left`}</p>
+      </div>
+      <div className={lesson.playerWrap}>
+        <button type="button" className={lesson.listenToggle} aria-pressed={listened} disabled={listenedMutation.isPending} onClick={() => listenedMutation.mutate(!listened)}>{listened ? <><Check className="size-3.5" aria-hidden /> Listened</> : "Mark listened"}</button>
+        {data.track.lesson.audioUrl ? <SogpAudioPlayer key={dayNumber} dayNumber={dayNumber} src={data.track.lesson.audioUrl} listened={listened}/> : <p className={lesson.notice}>Teaching audio is being prepared.</p>}
+      </div>
+      <div className={lesson.lessonTabs} role="tablist" aria-label="Lesson sections">
+        {steps.slice(1).map(step => <button key={step.key} type="button" role="tab" id={`tab-${step.key}`} aria-controls={`panel-${step.key}`} aria-selected={tab === step.key} onClick={() => chooseTab(step.key as LessonTab)}>{step.label}<StepMark done={step.done} small /></button>)}
+      </div>
+      <div className={lesson.tabPanel} role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`}>
+        {tab === "notes" ? <>
+          {data.track.lesson.notesContent ? <div className="prose prose-sm max-w-none leading-[1.7] text-[var(--color-text-strong)]" dangerouslySetInnerHTML={{__html:data.track.lesson.notesContent}}/> : <p className={lesson.empty}>Notes for this track are not available yet.</p>}
+          <button type="button" className={lesson.secondary} aria-pressed={data.track.progress.notesRead} disabled={notesMutation.isPending} onClick={()=>notesMutation.mutate(!data.track.progress.notesRead)}>{data.track.progress.notesRead ? <><Check className="size-4" aria-hidden/> Read · tap to unmark</> : <>Mark notes read<Check className="size-4" aria-hidden/></>}</button>
+        </> : tab === "quiz" ? <BrowserSuspense fallback={<p className={lesson.meta}>Loading the quiz…</p>}><SogpQuiz dayNumber={dayNumber} embedded /></BrowserSuspense>
+        : <BrowserSuspense fallback={<p className={lesson.meta}>Loading your response…</p>}><SogpWrittenResponse dayNumber={dayNumber} embedded /></BrowserSuspense>}
+      </div>
       <LessonQuestion lessonId={data.track.lesson.id} lessonTitle={data.track.lesson.title} />
-      {data.track.lesson.notesContent ? <article id="lesson-notes" className={`${lesson.panel} ${lesson.notes}`} aria-labelledby="lesson-notes-title">
-        <h2 id="lesson-notes-title" className={lesson.notesTitle}>Notes</h2>
-        <div className="prose prose-sm max-w-none leading-[1.7] text-[var(--color-text-strong)]" dangerouslySetInnerHTML={{__html:data.track.lesson.notesContent}}/>
-        {data.track.progress.notesRead ? null : <button type="button" className={lesson.secondary} disabled={notesMutation.isPending} onClick={()=>notesMutation.mutate(true)}>Mark notes read<Check className="size-4" aria-hidden/></button>}
-      </article> : null}
       <details className={lesson.curriculum}><summary>All {tracks.length} tracks<ChevronDown className="size-4" aria-hidden/></summary><Curriculum data={data} /></details>
       <footer className={lesson.footer}>
-        {data.nextDay?<Link className={lesson.primary} href={`/dashboard/sogp/course/day/${data.nextDay.dayNumber}`}>Continue after this lesson<ArrowRight className="size-4" aria-hidden/></Link>:<Link className={lesson.primary} href="/dashboard/sogp">Back to Learning<ArrowRight className="size-4" aria-hidden/></Link>}
+        {data.nextDay?<Link className={lesson.primary} href={`/dashboard/sogp/course/day/${data.nextDay.dayNumber}`}>Continue to track {(position || data.track.dayNumber) + 1}<ArrowRight className="size-4" aria-hidden/></Link>:<Link className={lesson.primary} href="/dashboard/sogp">Back to Learning<ArrowRight className="size-4" aria-hidden/></Link>}
         {data.previousDay?<Link className={lesson.textLink} href={`/dashboard/sogp/course/day/${data.previousDay.dayNumber}`}><ArrowLeft className="size-4" aria-hidden/> Previous track</Link>:null}
       </footer>
     </section>

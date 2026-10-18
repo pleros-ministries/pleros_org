@@ -15,38 +15,17 @@ function Header() {
   );
 }
 
-function Rows({ count }: { count: number }) {
-  return (
-    <div className={lesson.panel}>
-      {Array.from({ length: count }, (_, index) => (
-        <div key={index} className={lesson.row}>
-          <Bar style={{ width: 36, height: 36, borderRadius: 10, flex: "none" }} />
-          <span className={lesson.rowCopy} style={{ gap: 6 }}>
-            <Bar style={{ height: 13, width: "58%" }} />
-            <Bar style={{ height: 11, width: "36%" }} />
-          </span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-/** Lesson page: title, audio card, tabs, notes, rows, continue. */
+/** Lesson page: title, step strip, player, three tabs, notes, continue. */
 export function SogpLessonSkeleton() {
   return (
     <section className={lesson.page} aria-busy="true" aria-label="Loading lesson">
       <Header />
-      <div className={lesson.card}>
-        <Bar style={{ height: 12, width: 150 }} />
-        <Bar style={{ height: 196, borderRadius: 10 }} />
-      </div>
-      <Bar style={{ height: 38, borderRadius: 10 }} />
-      <div className={`${lesson.panel} ${lesson.notes}`}>
-        <Bar style={{ height: 12, width: "92%" }} />
-        <Bar style={{ height: 12, width: "84%" }} />
-        <Bar style={{ height: 12, width: "66%" }} />
-      </div>
-      <Rows count={3} />
+      <Bar style={{ height: 4, borderRadius: 2 }} />
+      <Bar style={{ height: 150, borderRadius: 12 }} />
+      <Bar style={{ height: 42, borderRadius: 0 }} />
+      <Bar style={{ height: 12, width: "92%" }} />
+      <Bar style={{ height: 12, width: "84%" }} />
+      <Bar style={{ height: 12, width: "66%" }} />
       <Bar style={{ height: 40, borderRadius: 12 }} />
     </section>
   );

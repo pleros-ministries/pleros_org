@@ -19,7 +19,8 @@ async function getResponse(dayNumber: number): Promise<ResponsePayload> {
   return response.json() as Promise<ResponsePayload>;
 }
 
-export function SogpWrittenResponse({ dayNumber }: { dayNumber: number }) {
+/** `embedded` drops the page title so the response can sit in the lesson's Response tab. */
+export function SogpWrittenResponse({ dayNumber, embedded = false }: { dayNumber: number; embedded?: boolean }) {
   const queryClient = useQueryClient();
   const { data } = useSuspenseQuery({ queryKey: ["sogp", "response", dayNumber], queryFn: () => getResponse(dayNumber) });
   const [content, setContent] = useState(data.submission?.content ?? "");
@@ -42,11 +43,11 @@ export function SogpWrittenResponse({ dayNumber }: { dayNumber: number }) {
   const locked = data.submission?.status === "submitted" || data.submission?.status === "approved";
 
   return (
-    <section className={lesson.page}>
-      <header className={lesson.header}>
+    <section className={embedded ? lesson.stack : lesson.page}>
+      {embedded ? null : <header className={lesson.header}>
         <h1>{data.lessonTitle}</h1>
         <p className={lesson.sub}>Day {dayNumber} written response</p>
-      </header>
+      </header>}
       <section className={lesson.prompt} aria-label="Response prompt">
         <p className={lesson.meta}>Response prompt</p>
         {data.prompt ? (

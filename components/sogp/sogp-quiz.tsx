@@ -25,7 +25,8 @@ async function getQuiz(dayNumber: number): Promise<QuizPayload> {
   return response.json() as Promise<QuizPayload>;
 }
 
-export function SogpQuiz({ dayNumber }: { dayNumber: number }) {
+/** `embedded` drops the page title so the quiz can sit in the lesson's Quiz tab. */
+export function SogpQuiz({ dayNumber, embedded = false }: { dayNumber: number; embedded?: boolean }) {
   const queryClient = useQueryClient();
   const { data } = useSuspenseQuery({ queryKey: ["sogp", "quiz", dayNumber], queryFn: () => getQuiz(dayNumber) });
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -51,11 +52,11 @@ export function SogpQuiz({ dayNumber }: { dayNumber: number }) {
 
   const result = mutation.data;
   return (
-    <section className={lesson.page}>
-      <header className={lesson.header}>
+    <section className={embedded ? lesson.stack : lesson.page}>
+      {embedded ? <p className={lesson.meta}>Pass mark 70%{data.bestScore === null ? "" : ` · Best score ${data.bestScore}%`}</p> : <header className={lesson.header}>
         <h1>{data.lessonTitle}</h1>
         <p className={lesson.sub}>Day {dayNumber} quiz · Pass mark 70%{data.bestScore === null ? "" : ` · Best score ${data.bestScore}%`}</p>
-      </header>
+      </header>}
       {result ? (
         <div className={`${lesson.panel} ${lesson.result}`} role="status">
           <span className={lesson.chip} data-tint={result.passed ? undefined : "amber"}><CheckCircle2 className="size-5" aria-hidden /></span>

@@ -1,9 +1,7 @@
-import { BrowserSuspense } from "@/components/sogp/browser-suspense";
-import { SogpErrorBoundary } from "@/components/sogp/sogp-error-boundary";
-import { SogpQuizSkeleton } from "@/components/sogp/sogp-lesson-skeleton";
-import { SogpQuiz } from "@/components/sogp/sogp-quiz";
+import { redirect } from "next/navigation";
 
+// The quiz lives in the lesson's Quiz tab now (user, 18 October).
 export default async function SogpQuizPage({ params }: { params: Promise<{ dayNumber: string }> }) {
   const { dayNumber } = await params;
-  return <SogpErrorBoundary><BrowserSuspense fallback={<SogpQuizSkeleton />}><SogpQuiz dayNumber={Number(dayNumber)}/></BrowserSuspense></SogpErrorBoundary>;
+  redirect(`/dashboard/sogp/course/day/${encodeURIComponent(dayNumber)}?tab=quiz`);
 }
