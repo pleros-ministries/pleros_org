@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { saveSogpPlaybackAction, setSogpListenedAction } from "@/app/_actions/sogp-learning-actions";
@@ -9,6 +9,7 @@ import { learningResume, learningWriteNotice, type LearningEpisode, type Learnin
 import { LessonAudioControls } from "@/components/media/lesson-audio-controls";
 import { DashboardIcon } from "@/components/dashboard/v3/primitives";
 import { ChevronRightIcon, HeadphonesIcon, LibraryIcon, ListMusicIcon } from "lucide-react";
+import { DisciplerQuestion } from "../discipler-question";
 import styles from "./learning.module.css";
 
 function PodcastPlayer({ episode,position,canWrite }: { episode: LearningEpisode;position?: { positionSeconds: number;revision: number };canWrite: boolean }) {
@@ -42,53 +43,6 @@ function dayLength(durations: (string | undefined)[]) {
   return total ? ` · ${Math.floor(total / 60)} min ${total % 60} sec of listening` : "";
 }
 
-/** Per-episode question: to the active discipler with episode context, else Ask Pleros. */
-function EpisodeQuestion({ episodeGuid, episodeTitle, canWrite }: { episodeGuid: string; episodeTitle: string; canWrite: boolean }) {
-  const [route, setRoute] = useState<"discipler" | "ask" | null>(null);
-  const [open, setOpen] = useState(false);
-  const [body, setBody] = useState("");
-  const [sent, setSent] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [saving, startSend] = useTransition();
-  useEffect(() => {
-    let live = true;
-    import("@/app/(site)/dashboard/sogp/discipleship/_actions").then(
-      ({ getEpisodeQuestionRouteAction }) => getEpisodeQuestionRouteAction().then(
-        result => { if (live) setRoute(result.kind === "discipler" ? "discipler" : "ask"); },
-        () => { if (live) setRoute("ask"); },
-      ),
-      () => { if (live) setRoute("ask"); },
-    );
-    return () => { live = false; };
-  }, []);
-  function send() {
-    if (!body.trim()) { setError("Write your question first."); return; }
-    startSend(async () => {
-      try {
-        const { askEpisodeQuestionAction } = await import("@/app/(site)/dashboard/sogp/discipleship/_actions");
-        const result = await askEpisodeQuestionAction({ episodeGuid, episodeTitle, body: body.trim() });
-        if (!result.ok) { setError(result.error); return; }
-        setBody(""); setOpen(false); setSent(true); setError(null);
-      } catch { setError("Your question could not be sent. Try again."); }
-    });
-  }
-  if (!route) return null;
-  if (route === "ask" && !open) {
-    const params = new URLSearchParams({ episodeGuid, episodeTitle });
-    return <div className={styles.stack}><Link className={styles.rowButton} href={`/dashboard/community/ask?${params.toString()}`}><DashboardIcon name="chat" /><span>Ask a question · Optional</span><DashboardIcon name="right" size={16} /></Link><p className={styles.meta}>Questions aren’t required for completion. They go to Pleros through Ask Pleros.</p></div>;
-  }
-  return <div className={styles.stack}>
-    {!open && !sent ? <button type="button" className={styles.rowButton} disabled={!canWrite} onClick={() => setOpen(true)}><DashboardIcon name="chat" /><span>Ask about this episode · Optional</span><DashboardIcon name="right" size={16} /></button> : null}
-    {open ? <>
-      <label className={styles.field}>Your question<textarea rows={4} maxLength={2000} value={body} disabled={saving} onChange={event => setBody(event.target.value)} placeholder="Ask your discipler about this episode" /></label>
-      {error ? <p role="alert" className={styles.error}>{error}</p> : null}
-      <div className={styles.tools}><button type="button" className={styles.primary} disabled={saving || !canWrite} onClick={send}>{saving ? "Sending…" : "Send to my discipler"}</button><button type="button" className={styles.secondary} onClick={() => { setOpen(false); setError(null); }}>Cancel</button></div>
-      <p className={styles.meta}>Only you and your discipler see this question.</p>
-    </> : null}
-    {sent ? <p role="status" className={styles.meta}>Sent to your discipler.</p> : null}
-    {!open && !sent ? <p className={styles.meta}>Questions aren’t required for completion.</p> : null}
-  </div>;
-}
 
 export function ListeningPage({ data,requestedDay }: { data: LearningViewData;requestedDay?: number }) {
   const [dayNumber] = useState(requestedDay ?? learningResume(data.state)?.dayNumber ?? 1);
@@ -133,7 +87,7 @@ export function ListeningPage({ data,requestedDay }: { data: LearningViewData;re
           </div>
           {episode ? <PodcastPlayer episode={episode} position={position} canWrite={data.canWrite} /> : <p className={styles.muted}>Your completion and saved position remain in your history.</p>}
           <button type="button" className={item.listened ? styles.secondary : styles.primary} disabled={saving || !data.canWrite} onClick={() => mark(item.episodeGuid,!item.listened)}>{saving ? "Saving…" : item.listened ? "Undo listened mark" : "Mark listened"}<DashboardIcon name="check" size={16} /></button>
-          {episode ? <EpisodeQuestion episodeGuid={item.episodeGuid} episodeTitle={episode.title} canWrite={data.canWrite} /> : null}
+          {episode ? <DisciplerQuestion guid={item.episodeGuid} title={episode.title} kind="episode" disabled={!data.canWrite} /> : null}
         </article>;
       })}
       {day.complete ? <Link className={styles.primary} href="/dashboard/sogp">Day completed · Back to Learning</Link> : null}
