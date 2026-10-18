@@ -130,3 +130,8 @@
 .root .liveHeader nav button:disabled { color: rgb(255 255 255 / 45%); }
 .root .liveHeader span[aria-hidden]:empty { background-color: #d8ff65; }
 .root .liveHeader .featureTitle { color: white; }
+
+/* No browser-default bold on operational pages (user feedback, 18 October):
+   bare <strong>/<b> read as medium. Zero specificity, so any explicit weight
+   class still wins. */
+.root :where(strong, b) { font-weight: 500; }

@@ -7,21 +7,10 @@ import styles from "@/components/community/discipleship/discipleship-group.modul
 import type { ChurchBranchSummary, ChurchHome } from "@/lib/db/queries/church-home";
 
 import { PlaceChurchMember } from "./church-flows";
+import { ChurchPage as Page, ChurchHeading as Heading } from "./church-ui";
 import { Mark, short, Strip } from "./oversight-view";
 
 const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
-
-/** Same frame as Oversight: one readable column on the white dashboard canvas. */
-function Page({ children }: { children: ReactNode }) {
-  return <div className="mx-auto w-full max-w-[640px] px-4 pt-[18px] pb-7"><div className={styles.page}>{children}</div></div>;
-}
-
-function Heading({ title, sub, tag }: { title: string; sub: string; tag?: string }) {
-  return <div className={styles.heading}>
-    <div><h1>{title}</h1><p className={styles.sub}>{sub}</p></div>
-    {tag ? <span className={styles.pill}>{tag}</span> : null}
-  </div>;
-}
 
 function Ready({ branch }: { branch: ChurchBranchSummary }) {
   if (!branch.units.length) return null;
