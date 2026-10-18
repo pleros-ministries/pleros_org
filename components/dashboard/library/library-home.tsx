@@ -3,6 +3,8 @@ import type { CSSProperties } from "react";
 
 import { HomeArt } from "@/components/dashboard/v3/home-art";
 
+import { AdvancedSogpNotify } from "./advanced-sogp-notify";
+
 import styles from "./library.module.css";
 
 const tone = (field: string, ink: string) => ({ "--dest-field": field, "--dest-ink": ink }) as CSSProperties;
@@ -12,7 +14,7 @@ const tone = (field: string, ink: string) => ({ "--dest-field": field, "--dest-i
  * Library (the public library, inside the app), the podcast and Advanced
  * SOGP, then the teaching series as shortcuts into the library.
  */
-export function LibraryHome({ series }: { series: Array<{ series: string; count: number }> }) {
+export function LibraryHome({ series, advancedInterest }: { series: Array<{ series: string; count: number }>; advancedInterest: boolean }) {
   const total = series.reduce((sum, row) => sum + row.count, 0);
   return <div className={styles.page}>
     <header className={styles.heading}>
@@ -35,6 +37,7 @@ export function LibraryHome({ series }: { series: Array<{ series: string; count:
     <section className={styles.dest} data-art style={{ ...tone("#56298a", "#4a2275"), "--dest-art": "url(\"/assets/dashboard/learning-card/my-learning-level-4.webp\")" } as CSSProperties} aria-label="Advanced SOGP, coming soon">
       <span className={styles.tag}>Coming soon</span>
       <div><h2>Advanced SOGP</h2><p>Deeper formation for those who’ve finished SOGP</p></div>
+      <AdvancedSogpNotify initialRegistered={advancedInterest} variant="card" />
     </section>
 
     {series.length ? <>

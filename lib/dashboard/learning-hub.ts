@@ -4,6 +4,7 @@ import { and, count, eq } from "drizzle-orm";
 
 import { fetchAnchorEpisodes } from "@/lib/anchor-rss";
 import { db } from "@/lib/db";
+import { hasAdvancedSogpInterest } from "@/lib/db/queries/advanced-sogp-interest";
 import * as s from "@/lib/db/schema";
 import { getReminderPreferences } from "@/lib/db/queries/notification-preferences";
 import { getSogpDashboardData } from "@/lib/db/queries/sogp";
@@ -38,6 +39,8 @@ export type LearningHubData = {
   leaderboard: { top: Array<{ rank: number; name: string; points: number; isMe: boolean }>; me: { rank: number; points: number } | null; total: number } | null;
   discipler: { firstName: string } | null;
   doneCount: number;
+  /** The learner asked to hear when Advanced SOGP opens (migration 0065). */
+  advancedInterest: boolean;
   /** The learning path, Welcome Pack → Pre-SOGP → SOGP (Pastor review, 18 October). */
   journey: {
     welcomePackDone: boolean;
@@ -68,11 +71,12 @@ async function preSogpCounts(userId: string, cohortId: number) {
 export async function getLearningHubData(userId: string, state: SogpLearningState | null): Promise<LearningHubData | null> {
   const day = lagosToday();
   // Certification facts are left to the readiness page: they repeat every read below.
-  const [course, journey, leaderboard, group] = await Promise.all([
+  const [course, journey, leaderboard, group, advancedInterest] = await Promise.all([
     getSogpDashboardData(userId),
     getActiveSogpJourney(userId).catch(() => null),
     getSogpLeaderboard(userId).catch(() => null),
     getHomeDiscipleshipSummary(userId).catch(() => ({ kind: "none" as const })),
+    hasAdvancedSogpInterest(userId).catch(() => false),
   ]);
   if (!course) return null;
   const [welcomePackDone, preSogp] = await Promise.all([
@@ -151,6 +155,7 @@ export async function getLearningHubData(userId: string, state: SogpLearningStat
     } : null,
     discipler: group.kind === "member" ? { firstName: group.leaderFirstName } : null,
     doneCount,
+    advancedInterest,
     journey: {
       welcomePackDone,
       preSogp,

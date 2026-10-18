@@ -1,0 +1,18 @@
+.wrap { position: relative; display: grid; justify-items: start; gap: 6px; }
+.button { display: inline-flex; align-items: center; gap: 6px; height: 34px; padding: 0 14px; border: 0; border-radius: 99px; font: inherit; font-size: 13px; font-weight: 500; line-height: 1; cursor: pointer; }
+.button:disabled { cursor: default; }
+.button:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+.error { font-size: 12px; line-height: 17px; }
+
+/* White pill on the purple Library card. */
+.wrap[data-variant="card"] .button { background: white; color: #4a2275; }
+.wrap[data-variant="card"] .button:not(:disabled):hover { background: #f4effc; }
+.wrap[data-variant="card"] .button:disabled { background: rgb(255 255 255 / 88%); }
+.wrap[data-variant="card"] .error { max-width: 64%; color: white; }
+
+/* Purple pill on Learning's pale Advanced SOGP panel. */
+.wrap[data-variant="panel"] { margin-top: 4px; }
+.wrap[data-variant="panel"] .button { height: 32px; font-size: 12.5px; background: #56298a; color: white; }
+.wrap[data-variant="panel"] .button:not(:disabled):hover { background: #4a2275; }
+.wrap[data-variant="panel"] .button:disabled { background: #e3d8f8; color: #3e1876; }
+.wrap[data-variant="panel"] .error { color: #b42318; }

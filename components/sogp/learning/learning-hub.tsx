@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { CSSProperties } from "react";
 import { AwardIcon, CalendarCheckIcon, CalendarDaysIcon, ChevronRightIcon, GemIcon, GiftIcon, HistoryIcon, SunIcon, MessageCircleQuestionIcon, PlayIcon, RefreshCcwIcon, RepeatIcon, TrophyIcon } from "lucide-react";
 
+import { AdvancedSogpNotify } from "@/components/dashboard/library/advanced-sogp-notify";
 import type { LearningHubData } from "@/lib/dashboard/learning-hub";
 import type { LearningViewData } from "@/lib/sogp/learning-view";
 
@@ -77,6 +78,7 @@ export function LearningHub({ hub, learning }: { hub: LearningHubData; learning:
       {hub.state === "completed" ? <div className={styles.panel} style={{ padding: 14, background: "#f6f3ff", borderColor: "#e3d8f8", display: "grid", gap: 6 }}>
         <b style={{ fontFamily: "var(--font-dashboard-heading)", fontSize: 15, fontWeight: 500, color: "#3e1876" }}>Advanced SOGP is coming</b>
         <span style={{ fontSize: 12.5, lineHeight: "18px", color: "#56209c" }}>Deeper formation for those who’ve finished SOGP. We’ll announce it in Pleros updates the moment it opens.</span>
+        <AdvancedSogpNotify initialRegistered={hub.advancedInterest} variant="panel" />
       </div> : null}
 
       {hub.catchUp && hub.state === "active" ? <div className={styles.catch}>
