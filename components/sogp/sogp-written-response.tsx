@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Clock3 } from "lucide-react";
 
 import lesson from "./sogp-lesson.module.css";
 
@@ -57,8 +57,10 @@ export function SogpWrittenResponse({ dayNumber, embedded = false }: { dayNumber
         )}
       </section>
       {data.submission?.status === "approved" ? <div className={lesson.done}><CheckCircle2 className="size-5 shrink-0" aria-hidden /><span>Your response is approved.</span></div> : null}
+      {data.submission?.status === "submitted" ? <div className={lesson.pending}><Clock3 className="size-5 shrink-0" aria-hidden /><span>Submitted · waiting for review</span></div> : null}
+      {data.submission?.status === "draft" ? <p className={lesson.meta}>Draft saved. Submit it when you’re ready.</p> : null}
       {data.submission?.reviewerNote ? <div className={lesson.note}><b>Reviewer note</b><p>{data.submission.reviewerNote}</p></div> : null}
-      <textarea value={content} onChange={(event) => setContent(event.target.value)} disabled={locked} rows={12} maxLength={20000} aria-label="Your written response" className={lesson.textarea} placeholder="Write your response here…" />
+      <textarea value={content} onChange={(event) => setContent(event.target.value)} disabled={locked} rows={12} maxLength={20000} aria-label="Your written response" className={`${lesson.textarea} ${embedded ? lesson.textareaShort : ""}`} placeholder="Write your response here…" />
       {mutation.error ? <p role="alert" className={lesson.error}>{mutation.error.message}</p> : null}
       {!locked ? (
         <div className={lesson.actions}>

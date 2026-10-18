@@ -13,6 +13,7 @@ import {
   ArrowRight,
   Check,
   ChevronDown,
+  ListOrdered,
   LockKeyhole,
   MessageCircleMore,
   Play,
@@ -138,13 +139,13 @@ function LessonQuestion({ lessonId, lessonTitle }: { lessonId: number; lessonTit
       } catch { setError("Your question could not be sent. Try again."); }
     });
   }
-  const chip = <span className={lesson.chip} data-tint="amber"><MessageCircleMore className="size-[18px]" aria-hidden/></span>;
+  const chip = <span className={lesson.quietIcon}><MessageCircleMore className="size-4" aria-hidden/></span>;
   if (route === "ask") {
     const params = new URLSearchParams({ episodeGuid, episodeTitle: lessonTitle });
-    return <Link className={`${lesson.panel} ${lesson.row}`} href={`/dashboard/community/ask?${params.toString()}`}>{chip}<span className={lesson.rowCopy}><span className={lesson.rowTitle}>Ask a question</span><span className={lesson.rowMeta}>Goes to Pleros through Ask Pleros</span></span><ArrowRight className={`size-4 ${lesson.rowEnd}`} aria-hidden/></Link>;
+    return <Link className={lesson.quietRow} href={`/dashboard/community/ask?${params.toString()}`}>{chip}<span className={lesson.rowCopy}><span className={lesson.rowTitle}>Ask a question</span><span className={lesson.rowMeta}>Goes to Pleros through Ask Pleros</span></span><ArrowRight className={`size-4 ${lesson.rowEnd}`} aria-hidden/></Link>;
   }
-  return <div className={lesson.panel}>
-    <button type="button" className={lesson.row} disabled={!route} aria-expanded={open} onClick={() => { setOpen(value => !value); setSent(false); }}>{chip}<span className={lesson.rowCopy}><span className={lesson.rowTitle}>Ask your discipler</span><span className={lesson.rowMeta}>{sent ? "Sent. Their reply shows in your group." : "Only you and your discipler see it"}</span></span><ChevronDown className={`size-4 ${lesson.rowEnd}`} style={{ transform: open ? "rotate(180deg)" : undefined }} aria-hidden/></button>
+  return <div>
+    <button type="button" className={lesson.quietRow} disabled={!route} aria-expanded={open} onClick={() => { setOpen(value => !value); setSent(false); }}>{chip}<span className={lesson.rowCopy}><span className={lesson.rowTitle}>Ask your discipler</span><span className={lesson.rowMeta}>{sent ? "Sent. Their reply shows in your group." : "Only you and your discipler see it"}</span></span><ChevronDown className={`size-4 ${lesson.rowEnd}`} style={{ transform: open ? "rotate(180deg)" : undefined }} aria-hidden/></button>
     {open ? <div className={lesson.askBody}>
       <label className={lesson.askLabel}>Your question<textarea className={lesson.textarea} rows={4} maxLength={2000} value={body} disabled={saving} onChange={event => setBody(event.target.value)} placeholder="What would you like to ask about this lesson?" /></label>
       {error ? <p role="alert" className={lesson.error}>{error}</p> : null}
@@ -257,12 +258,15 @@ export function SogpDayView({ dayNumber }: { dayNumber: number }) {
         </> : tab === "quiz" ? <BrowserSuspense fallback={<p className={lesson.meta}>Loading the quiz…</p>}><SogpQuiz dayNumber={dayNumber} embedded /></BrowserSuspense>
         : <BrowserSuspense fallback={<p className={lesson.meta}>Loading your response…</p>}><SogpWrittenResponse dayNumber={dayNumber} embedded /></BrowserSuspense>}
       </div>
-      <LessonQuestion lessonId={data.track.lesson.id} lessonTitle={data.track.lesson.title} />
-      <details className={lesson.curriculum}><summary>All {tracks.length} tracks<ChevronDown className="size-4" aria-hidden/></summary><Curriculum data={data} /></details>
       <footer className={lesson.footer}>
         {data.nextDay?<Link className={lesson.primary} href={`/dashboard/sogp/course/day/${data.nextDay.dayNumber}`}>Continue to track {(position || data.track.dayNumber) + 1}<ArrowRight className="size-4" aria-hidden/></Link>:<Link className={lesson.primary} href="/dashboard/sogp">Back to Learning<ArrowRight className="size-4" aria-hidden/></Link>}
         {data.previousDay?<Link className={lesson.textLink} href={`/dashboard/sogp/course/day/${data.previousDay.dayNumber}`}><ArrowLeft className="size-4" aria-hidden/> Previous track</Link>:null}
       </footer>
+      {/* Secondary tools sit apart from the lesson's own steps (user, 18 October). */}
+      <section className={lesson.more} aria-label="More for this lesson">
+        <LessonQuestion lessonId={data.track.lesson.id} lessonTitle={data.track.lesson.title} />
+        <details className={lesson.curriculum}><summary><span className={lesson.quietIcon}><ListOrdered className="size-4" aria-hidden/></span>All {tracks.length} tracks<ChevronDown className="size-4" aria-hidden/></summary><Curriculum data={data} /></details>
+      </section>
     </section>
   );
 }

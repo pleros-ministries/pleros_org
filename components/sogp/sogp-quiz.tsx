@@ -31,6 +31,7 @@ export function SogpQuiz({ dayNumber, embedded = false }: { dayNumber: number; e
   const { data } = useSuspenseQuery({ queryKey: ["sogp", "quiz", dayNumber], queryFn: () => getQuiz(dayNumber) });
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [shareOpen, setShareOpen] = useState(false);
+  const [retaking, setRetaking] = useState(false);
   const wasAlreadyPassed = useRef(data.bestScore !== null && data.bestScore >= 70);
   const mutation = useMutation({
     mutationFn: async () => {
@@ -51,13 +52,20 @@ export function SogpQuiz({ dayNumber, embedded = false }: { dayNumber: number; e
   });
 
   const result = mutation.data;
+  const showPassed = !result && !retaking && data.bestScore !== null && data.bestScore >= 70;
   return (
     <section className={embedded ? lesson.stack : lesson.page}>
-      {embedded ? <p className={lesson.meta}>Pass mark 70%{data.bestScore === null ? "" : ` · Best score ${data.bestScore}%`}</p> : <header className={lesson.header}>
+      {embedded ? (showPassed ? null : <p className={lesson.meta}>Pass mark 70%{data.bestScore === null ? "" : ` · Best score ${data.bestScore}%`}</p>) : <header className={lesson.header}>
         <h1>{data.lessonTitle}</h1>
         <p className={lesson.sub}>Day {dayNumber} quiz · Pass mark 70%{data.bestScore === null ? "" : ` · Best score ${data.bestScore}%`}</p>
       </header>}
-      {result ? (
+      {showPassed ? (
+        <div className={lesson.done}>
+          <CheckCircle2 className="size-5 shrink-0" aria-hidden />
+          <span className="flex-1">Passed with {data.bestScore}%</span>
+          <button type="button" className={lesson.doneAction} onClick={() => setRetaking(true)}><RotateCcw className="size-3.5" aria-hidden /> Retake</button>
+        </div>
+      ) : result ? (
         <div className={`${lesson.panel} ${lesson.result}`} role="status">
           <span className={lesson.chip} data-tint={result.passed ? undefined : "amber"}><CheckCircle2 className="size-5" aria-hidden /></span>
           <strong>{result.score}%</strong>

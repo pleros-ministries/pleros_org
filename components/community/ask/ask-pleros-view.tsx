@@ -67,7 +67,7 @@ function AskForm({ episode }: { episode?: { guid: string; title: string } }) {
         submit();
       }}
     >
-      {episode ? <p className="rounded-xl bg-[var(--color-community-canvas)] px-3 py-2 text-[13px] text-[var(--color-community-ink)]">About this episode: {episode.title}</p> : null}
+      {episode ? <p className="rounded-xl bg-[var(--color-community-canvas)] px-3 py-2 text-[13px] text-[var(--color-community-ink)]">About this {episode.guid.startsWith("sogp-lesson-") ? "lesson" : "episode"}: {episode.title}</p> : null}
       <label className="grid gap-1 text-[13px] font-medium text-[var(--color-community-ink)]">
         Your question *
         <textarea
