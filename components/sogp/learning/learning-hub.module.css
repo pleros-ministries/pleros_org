@@ -73,11 +73,11 @@ a.row:hover { background: #f8f9fb; }
 /* Leaderboard preview (Pastor, 18 October): compact, top five, medal tints for
    the top three, and your own rank pinned below when you're outside them. */
 .board { overflow: hidden; border: 1px solid var(--dashboard-panel-edge, #e2e5ea); border-radius: 12px; background: white; }
-.boardHead { display: flex; align-items: center; gap: 10px; padding: 12px 14px 10px; }
+.boardHead { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid var(--color-line, #e7e9ec); }
 .boardHead h2 { margin: 0; font-family: var(--font-dashboard-heading); font-size: 15px !important; line-height: 20px; font-weight: 500; }
 .boardIcon { display: grid; flex: none; place-items: center; width: 32px; height: 32px; border-radius: 9px; background: #fff1c2; color: #8a5a00; }
 .boardAll { flex: none; font-size: 12.5px; font-weight: 500; color: var(--color-community-blue, #2056d6); text-decoration: none; }
-.boardList { margin: 0; padding: 0 6px 6px; list-style: none; }
+.boardList { margin: 0; padding: 6px 6px 6px; list-style: none; }
 .boardRow { display: flex; align-items: center; gap: 10px; min-height: 36px; padding: 0 8px; border-radius: 8px; }
 .boardRow[data-me] { --color-text-muted: var(--color-text-on-sky); background: #eef3fe; }
 .boardRow[data-me] .boardName { color: var(--color-community-blue, #2056d6); font-weight: 500; }
