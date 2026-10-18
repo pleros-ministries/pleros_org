@@ -353,7 +353,7 @@
 }
 /* Desktop: learning and today on the left, tiles and reports beside them. */
 @media (min-width: 64rem) {
-  .content.homeContent { max-width: 1080px; padding-inline: 40px; display: grid; grid-template-columns: minmax(0, 1fr) 340px; column-gap: 28px; align-items: start; }
+  .content.homeContent { max-width: 1080px; padding-inline: 40px; display: grid; grid-template-columns: minmax(0, 1fr) clamp(280px, 30vw, 340px); column-gap: 28px; align-items: start; }
   .homeGreeting, .homeWide { grid-column: 1 / -1; }
   .homeSide > .homeSection:first-child { margin-top: 20px; }
   .homeRail { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 0; padding: 0; overflow: visible; }
