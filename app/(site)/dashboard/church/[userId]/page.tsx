@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import { getAppSession } from "@/lib/app-session";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
@@ -11,9 +12,15 @@ import { isDateKey, MINISTRY_FIELDS } from "@/lib/community/ministry-report";
 import { activityKindLabel } from "@/lib/community/ministry-activities";
 import { lagosToday, shiftDate } from "@/lib/sogp/daily-date";
 import { dateKeyLabel } from "@/lib/community/time";
-import { compactButton, focusRing } from "@/components/dashboard/shell/styles";
 import { reportRemindersEnabled } from "@/lib/db/queries/daily-report-preferences";
+import styles from "@/components/community/discipleship/discipleship-group.module.css";
+import forms from "@/components/dashboard/church/church-forms.module.css";
+import { ChurchHeading, ChurchPage } from "@/components/dashboard/church/church-ui";
+import { Mark, short, Strip } from "@/components/dashboard/church/oversight-view";
 import { ChurchReminderButton } from "@/components/dashboard/church/reminder-button";
+
+const STATUS_LABELS = { devotional: "Devotional", ministry: "Ministry", meetings: "Meetings" } as Record<string, string>;
+const statusText = (value: string) => value === "missing" ? "Not yet" : value === "nil" ? "Nil" : "Reported";
 
 export default async function ChurchReportPage({ params, searchParams }: { params: Promise<{ userId: string }>; searchParams: Promise<{ day?: string }> }) {
   const session = await getAppSession(); if (!session) redirect("/login?returnTo=/dashboard/church");
@@ -22,11 +29,31 @@ export default async function ChurchReportPage({ params, searchParams }: { param
   try { await requireChurchReportAccess(session.user.id, userId); } catch (error) { if (error instanceof CommunityError) notFound(); throw error; }
   const [[person], report] = await Promise.all([db.select({ name: users.name }).from(users).where(eq(users.id, userId)).limit(1), getChurchReport(session.user.id, userId, selected)]);
   if (!person) notFound();
-  return <div className="mx-auto grid max-w-3xl gap-5 p-4 sm:p-6"><header className="grid gap-1"><h1 className="font-medium">{person.name}</h1><p className="text-[12px] text-(--color-text-muted)">{dateKeyLabel(selected)}</p></header>
-    <nav aria-label="Report date" className="flex gap-2"><Link className={compactButton} href={`?day=${shiftDate(selected, -1)}`}>Previous day</Link>{selected < today ? <Link className={compactButton} href={`?day=${shiftDate(selected, 1)}`}>Next day</Link> : null}</nav>
-    <dl className="grid gap-2 rounded-xl border border-(--color-line) p-4">{Object.entries(report.statuses).map(([key, value]) => <div key={key} className="flex justify-between gap-3 text-[13px]"><dt className="capitalize">{key}</dt><dd>{value === "missing" ? "Not yet" : value === "nil" ? "Nil" : "Reported"}</dd></div>)}</dl>
-    <section className="grid gap-2 rounded-xl border border-(--color-line) p-4"><h2 className="font-medium">Devotional activity</h2><ul className="grid gap-2 text-[13px]">{report.devotion.map((line) => <li key={line.key}>{line.label} · {line.detail ?? "not recorded"}</li>)}</ul></section>
-    <section className="grid gap-3"><h2 className="font-medium">Recorded activities</h2>{report.activities.length ? report.activities.map((row) => <article key={row.id} className="grid gap-2 rounded-xl border border-(--color-line) p-4"><h3 className="font-medium">{row.title || activityKindLabel(row.kind)}</h3>{row.location || row.platform ? <p className="text-[12px] text-(--color-text-muted)">{[row.platform, row.location].filter(Boolean).join(" · ")}</p> : null}<dl className="grid grid-cols-2 gap-2 text-[13px]">{MINISTRY_FIELDS.filter(({ key }) => Number(row.numbers[key]) > 0).map(({ key, label }) => <div key={key}><dt className="text-(--color-text-muted)">{label}</dt><dd>{row.numbers[key]}</dd></div>)}</dl>{row.meeting ? <p className="text-[13px] capitalize">{row.meeting.reportingRole}</p> : null}{row.meeting?.taught ? <p className="whitespace-pre-wrap text-[13px]">{row.meeting.taught}</p> : null}</article>) : <p className="text-[13px] text-(--color-text-muted)">No activities recorded.</p>}</section>
+  return <ChurchPage>
+    <ChurchHeading title={person.name} sub={`${selected === today ? "Today · " : ""}${dateKeyLabel(selected)}`} />
+    <nav aria-label="Report date" className="flex items-center justify-between gap-2">
+      <Link className={styles.btn} href={`?day=${shiftDate(selected, -1)}`}><ChevronLeftIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" />Previous day</Link>
+      {selected < today ? <Link className={styles.btn} href={`?day=${shiftDate(selected, 1)}`}>Next day<ChevronRightIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" /></Link> : null}
+    </nav>
+    <Strip items={Object.entries(report.statuses).map(([key, value]) => [STATUS_LABELS[key] ?? key, statusText(value), value === "missing"])} />
+
+    <div className={styles.sectionTitle}><h2>Devotional activity</h2></div>
+    <div className={styles.panel}>{report.devotion.map(line => <div key={line.key} className={styles.kv}><span>{line.label}</span><b style={line.detail ? undefined : { color: "var(--color-community-muted)", fontWeight: 400 }}>{line.detail ?? "Not recorded"}</b></div>)}</div>
+
+    <div className={styles.sectionTitle}><h2>Recorded activities</h2><span className={styles.rowMeta}>{report.activities.length}</span></div>
+    {report.activities.length ? report.activities.map((row, index) => {
+      const numbers = MINISTRY_FIELDS.filter(({ key }) => Number(row.numbers[key]) > 0);
+      const title = row.title || activityKindLabel(row.kind);
+      const meta = [activityKindLabel(row.kind), row.platform, row.location, row.meeting ? `As ${row.meeting.reportingRole}` : null].filter(Boolean).join(" · ");
+      return <article key={row.id} className={styles.panel}>
+        <div className={styles.row}>
+          <Mark text={short(title)} index={index} />
+          <span className={styles.rowCopy}><span className={styles.rowTitle}>{title}</span><span className={styles.rowMeta}>{meta}</span></span>
+        </div>
+        {numbers.length ? <dl className={forms.numbers}>{numbers.map(({ key, label }) => <div key={key}><dt>{label}</dt><dd>{row.numbers[key]}</dd></div>)}</dl> : null}
+        {row.meeting?.taught ? <p className={forms.taught}>{row.meeting.taught}</p> : null}
+      </article>;
+    }) : <p className={`${styles.panel} ${styles.empty}`}>No activities recorded.</p>}
     <ChurchReminderButton subjectId={userId} day={selected} enabled={reportRemindersEnabled()} />
-  </div>;
+  </ChurchPage>;
 }

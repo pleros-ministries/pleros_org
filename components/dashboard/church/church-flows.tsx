@@ -1,34 +1,60 @@
 "use client";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useState, useTransition, type ReactNode } from "react";
+import { ArrowRightIcon, CheckIcon, SearchIcon, UserPlusIcon } from "lucide-react";
 import { addChurchPlace, addUnitWorkers, findChurchMembers, saveChurchAssignment, saveChurchBranchMembership } from "@/app/(site)/dashboard/church/actions";
-import { DashboardIcon, StatusPill } from "@/components/dashboard/v3/primitives";
+import { Initials } from "@/components/community/discipleship/shared";
 import type { ChurchPlace } from "@/lib/db/queries/church-home";
-import styles from "@/components/sogp/follow-up-invitations.module.css";
+import styles from "@/components/community/discipleship/discipleship-group.module.css";
+import forms from "./church-forms.module.css";
+import { ChurchHeading, ChurchPage } from "./church-ui";
+import { Mark, short } from "./oversight-view";
 
-const initials = (name: string) => name.trim().split(/\s+/).slice(0, 2).map(part => part[0]?.toUpperCase() ?? "").join("");
 type Person = { id: string; name: string };
+const plural = (n: number, one: string) => `${n} ${one}${n === 1 ? "" : "s"}`;
+const STEPS = ["Branch", "Branch pastor", "Unit leaders", "Workers"];
 
 function SetupSteps({ step }: { step: 1 | 2 | 3 | 4 }) {
-  return <div className={styles.steps} aria-label={`Step ${step} of 4`}>{["Branch", "Branch pastor", "Unit leaders", "Workers"].map((label, index) => <span key={label} data-active={index + 1 === step} data-done={index + 1 < step}><b>{index + 1}</b>{label}</span>)}</div>;
+  return <div className={forms.steps} aria-label={`Step ${step} of 4`}>
+    <div className={forms.bars} aria-hidden="true">{STEPS.map((label, index) => <i key={label} data-on={index < step ? "" : undefined} />)}</div>
+    <span className={styles.rowMeta}>Step {step} of 4 · {STEPS[step - 1]} · Next: {STEPS[step]?.toLowerCase()}</span>
+  </div>;
+}
+
+/** The place being set up, as one Oversight row. */
+function PlaceRow({ title, meta, index = 0, end }: { title: string; meta: string; index?: number; end?: ReactNode }) {
+  return <div className={styles.panel}><div className={styles.row}>
+    <Mark text={short(title)} index={index} />
+    <span className={styles.rowCopy}><span className={styles.rowTitle}>{title}</span><span className={styles.rowMeta}>{meta}</span></span>
+    {end}
+  </div></div>;
+}
+
+function Problem({ error }: { error: string | null }) {
+  return error ? <p className={styles.error} role="alert">{error}</p> : null;
 }
 
 /** Names-only member search (searchChurchCandidates); never contact details. */
-function PeopleSearch({ multiple, chosen, onChange, exclude = [] }: { multiple: boolean; chosen: Person[]; onChange: (people: Person[]) => void; exclude?: string[] }) {
+function PeopleSearch({ multiple, chosen, onChange, exclude = [], label = "Search church members" }: { multiple: boolean; chosen: Person[]; onChange: (people: Person[]) => void; exclude?: string[]; label?: string }) {
   const [query, setQuery] = useState(""), [results, setResults] = useState<Person[] | null>(null), [error, setError] = useState<string | null>(null), [pending, start] = useTransition();
   const picked = new Set(chosen.map(person => person.id));
   const rows = [...chosen, ...(results ?? []).filter(person => !picked.has(person.id) && !exclude.includes(person.id))];
-  return <div className={styles.section}>
-    <form className={styles.actions} style={{ gridTemplateColumns: "minmax(0, 1fr) auto" }} onSubmit={event => { event.preventDefault(); if (query.trim().length < 2) { setError("Type at least two letters."); return; } start(async () => { try { setResults(await findChurchMembers(query)); setError(null); } catch { setError("Member search is unavailable."); } }); }}>
-      <label className={styles.searchBox}><DashboardIcon name="search" size={20} /><span className="sr-only">Search church members</span><input type="search" placeholder="Search eligible people" value={query} onChange={event => setQuery(event.target.value)} /></label>
-      <button type="submit" className={styles.secondary} disabled={pending} style={{ minHeight: 44 }}>{pending ? "…" : "Search"}</button>
+  return <div className="grid gap-2.5">
+    <form className={forms.searchRow} role="search" onSubmit={event => { event.preventDefault(); if (query.trim().length < 2) { setError("Type at least two letters."); return; } start(async () => { try { setResults(await findChurchMembers(query)); setError(null); } catch { setError("Member search is unavailable."); } }); }}>
+      <label className={forms.search}><SearchIcon className="size-4 shrink-0" strokeWidth={2} aria-hidden="true" /><span className="sr-only">{label}</span><input type="search" placeholder="Search by name" value={query} onChange={event => setQuery(event.target.value)} /></label>
+      <button type="submit" className={`${styles.btn} ${forms.tall}`} disabled={pending}>{pending ? "Searching…" : "Search"}</button>
     </form>
-    {error ? <p className={styles.error} role="alert">{error}</p> : null}
-    {multiple && chosen.length ? <span className={styles.accent}>{chosen.length} selected</span> : null}
-    {rows.length ? <div className={styles.list} style={{ display: "grid", gap: 8 }}>{rows.map(person => {
+    <Problem error={error} />
+    {rows.length ? <div className={styles.panel}><ul className={styles.list}>{rows.map(person => {
       const selected = picked.has(person.id);
-      return <label key={person.id} className={styles.choice} data-selected={selected}><input type={multiple ? "checkbox" : "radio"} name="church-person" checked={selected} onChange={() => onChange(multiple ? selected ? chosen.filter(row => row.id !== person.id) : [...chosen, person] : [person])} /><span className={styles.avatar}>{initials(person.name)}</span><span><strong>{person.name}</strong><span className={styles.meta} style={{ display: "block" }}>Church member</span></span></label>;
-    })}</div> : results ? <p className={styles.muted}>No members match.</p> : null}
+      return <li key={person.id}><label className={`${styles.row} ${forms.choice}`} data-selected={selected}>
+        <Initials name={person.name} />
+        <span className={styles.rowCopy}><span className={styles.rowTitle}>{person.name}</span><span className={styles.rowMeta}>Church member</span></span>
+        <input type={multiple ? "checkbox" : "radio"} name="church-person" checked={selected} onChange={() => onChange(multiple ? selected ? chosen.filter(row => row.id !== person.id) : [...chosen, person] : [person])} />
+      </label></li>;
+    })}</ul></div> : results ? <p className={`${styles.panel} ${styles.empty}`}>No members match “{query.trim()}”.</p> : null}
+    {multiple && chosen.length ? <span className={styles.rowMeta}>{chosen.length} selected</span> : null}
   </div>;
 }
 
@@ -48,14 +74,16 @@ export function PlaceChurchMember({ branches }: { branches: Array<{ id: number; 
       setChosen([]); setError(null);
     });
   }
-  return <div className={styles.section}>
-    <div className={styles.sectionHead}><h2>Church member placement</h2><StatusPill tone="neutral">Branch only</StatusPill></div>
-    <p className={styles.muted}>Place ordinary members in a branch without giving them a staff or church-office role.</p>
+  return <div className="grid gap-3">
+    <div className="flex items-start justify-between gap-3">
+      <span className="grid gap-0.5"><h2 className={forms.panelTitle}>Place a church member</h2><span className={styles.rowMeta}>A branch only, with no church office</span></span>
+      <span className={styles.pill}>Branch only</span>
+    </div>
     <PeopleSearch multiple={false} chosen={chosen} onChange={setChosen} />
-    <label className={styles.field}>Branch<select value={branchId} onChange={event => setBranchId(Number(event.target.value))}>{branches.map(branch => <option key={branch.id} value={branch.id}>{branch.name}</option>)}</select></label>
-    {error ? <p className={styles.error} role="alert">{error}</p> : null}
-    {saved ? <p className={styles.accent}>{saved}</p> : null}
-    <button type="button" className={styles.primary} disabled={pending || !chosen.length || !branchId} onClick={save}>{pending ? "Saving…" : "Place in branch"}<DashboardIcon name="check" /></button>
+    <label className={forms.field}>Branch<select value={branchId} onChange={event => setBranchId(Number(event.target.value))}>{branches.map(branch => <option key={branch.id} value={branch.id}>{branch.name}</option>)}</select></label>
+    <Problem error={error} />
+    {saved ? <p className={forms.status} role="status">{saved}</p> : null}
+    <div className={forms.footer}><button type="button" className={`${styles.btn} ${forms.action}`} data-primary="" disabled={pending || !chosen.length || !branchId} onClick={save}>{pending ? "Saving…" : "Place in branch"}</button></div>
   </div>;
 }
 
@@ -70,21 +98,28 @@ export function CreatePlace({ branch }: { branch?: { id: number; name: string } 
       router.push(branch ? `/dashboard/church/units/${result.id}/leader` : `/dashboard/church/branches/${result.id}/pastor`); router.refresh();
     });
   }
-  return <section className={styles.page}>
-    <div className={styles.heading}><span className={styles.eyebrow}>Church setup</span><h1>{branch ? `Add a unit in ${branch.name}` : "Create a branch"}</h1><p>{branch ? "Units group workers under one unit leader." : "Pastor · Manage all branches"}</p></div>
+  return <ChurchPage>
+    <ChurchHeading title={branch ? "Add a unit" : "Create a branch"} sub={branch ? `${branch.name} branch` : "Fullness of Christ Church"} />
     {branch ? null : <SetupSteps step={1} />}
-    <div className={styles.panel}><strong>Fullness of Christ Church</strong><span className={styles.meta}>{branch ? `${branch.name} branch` : "Add the branch name."}</span></div>
-    <label className={styles.field}>{branch ? "Unit name" : "Branch name"}<input maxLength={100} value={name} onChange={event => setName(event.target.value)} aria-invalid={Boolean(error) || undefined} /></label>
-    <p className={styles.muted}>{branch ? "Next: appoint its unit leader, then add workers." : "Next: appoint a branch pastor, then unit leaders and workers."}</p>
-    {error ? <p className={styles.error} role="alert">{error}</p> : null}
-    <footer className={styles.footer}>{branch ? null : <p className={styles.meta} style={{ textAlign: "center" }}>Step 1 of 4 · Next: branch pastor</p>}<button type="button" className={styles.primary} disabled={pending} onClick={save}>{pending ? "Saving…" : branch ? "Add unit" : "Create branch"}<DashboardIcon name="arrow" /></button></footer>
-  </section>;
+    <form className={`${styles.panel} ${forms.body}`} onSubmit={event => { event.preventDefault(); save(); }}>
+      <label className={forms.field}>{branch ? "Unit name" : "Branch name"}
+        <input maxLength={100} value={name} onChange={event => setName(event.target.value)} aria-invalid={Boolean(error) || undefined} placeholder={branch ? "e.g. Ushering" : "e.g. Lekki"} />
+        <span className={forms.help}>{branch ? "Units group workers under one unit leader." : "You can rename it later."}</span>
+      </label>
+      <Problem error={error} />
+    </form>
+    <div className={forms.footer}>
+      <span className={styles.rowMeta}>{branch ? "Next: its unit leader" : "Next: a branch pastor"}</span>
+      <button type="button" className={`${styles.btn} ${forms.action}`} data-primary="" disabled={pending} onClick={save}>{pending ? "Saving…" : branch ? "Add unit" : "Create branch"}<ArrowRightIcon className="size-4" strokeWidth={2} aria-hidden="true" /></button>
+    </div>
+  </ChurchPage>;
 }
 
 /** Paper: Pleros-appoint-branch-pastor (step 2) and Pleros-church-appointment (unit leader). */
 export function AppointLeader({ place, role, supervisorId }: { place: ChurchPlace; role: "branch_pastor" | "unit_leader"; supervisorId: string | null }) {
   const router = useRouter(); const [chosen, setChosen] = useState<Person[]>([]); const [error, setError] = useState<string | null>(null); const [pending, start] = useTransition();
   const unitName = place.unit?.name;
+  const pastor = role === "branch_pastor";
   function save() {
     const person = chosen[0];
     if (!person) { setError("Choose who to appoint."); return; }
@@ -95,16 +130,30 @@ export function AppointLeader({ place, role, supervisorId }: { place: ChurchPlac
       router.push(role === "unit_leader" ? `/dashboard/church/units/${place.unit!.id}/workers` : "/dashboard/church"); router.refresh();
     });
   }
-  return <section className={styles.page}>
-    <div className={styles.heading}><span className={styles.eyebrow}>{role === "branch_pastor" ? "Church setup" : "Unit appointment"}</span><h1>{role === "branch_pastor" ? "Appoint a branch pastor" : "Appoint a unit leader"}</h1><p>{role === "branch_pastor" ? "Pastor · Manage all branches" : `${place.branch.name} branch only`}</p></div>
-    {role === "branch_pastor" ? <SetupSteps step={2} /> : null}
-    <div className={styles.panel}><strong>{role === "branch_pastor" ? place.branch.name : `${unitName}`}</strong><span className={styles.meta}>{role === "branch_pastor" ? (place.pastors.length ? `Current: ${place.pastors.map(row => row.name).join(", ")}` : "New branch · No branch pastor yet") : `${place.unit!.workers.length} workers · ${place.unit!.leader ? `Leader: ${place.unit!.leader.name}` : "No leader yet"}`}</span></div>
-    <div className={styles.section}><h2>{role === "branch_pastor" ? "Choose a church member" : "Choose unit leader"}</h2><PeopleSearch multiple={false} chosen={chosen} onChange={setChosen} /></div>
-    <div className={styles.card}><span className={styles.meta}>Role</span><strong>{role === "branch_pastor" ? "Branch pastor" : "Unit leader"}</strong><span className={styles.meta}>Assigned scope: {role === "branch_pastor" ? `${place.branch.name} only` : `${unitName} · ${place.branch.name}`}</span>
-      <span className={styles.meta}>{role === "branch_pastor" ? "Can manage unit leaders and workers in this branch." : "Can view their unit, its direct workers and their own reporting line. Assignments stay with the branch pastor."}</span></div>
-    {error ? <p className={styles.error} role="alert">{error}</p> : null}
-    <footer className={styles.footer}>{role === "branch_pastor" ? <p className={styles.meta} style={{ textAlign: "center" }}>Step 2 of 4 · Next: unit leaders</p> : null}<button type="button" className={styles.primary} disabled={pending || !chosen.length} onClick={save}>{pending ? "Saving…" : role === "branch_pastor" ? "Appoint branch pastor" : "Save appointment"}<DashboardIcon name="check" /></button></footer>
-  </section>;
+  return <ChurchPage>
+    <ChurchHeading title={pastor ? "Appoint a branch pastor" : "Appoint a unit leader"} sub={pastor ? `${place.branch.name} branch` : `${unitName} · ${place.branch.name} branch`} />
+    {pastor ? <SetupSteps step={2} /> : null}
+    {pastor
+      ? <PlaceRow title={place.branch.name} meta={place.pastors.length ? `Current: ${place.pastors.map(row => row.name).join(", ")}` : "No branch pastor yet"} />
+      : <PlaceRow title={unitName!} meta={`${plural(place.unit!.workers.length, "worker")} · ${place.unit!.leader ? `Leader: ${place.unit!.leader.name}` : "No leader yet"}`}
+        end={place.unit!.leader ? null : <span className={styles.pill} data-tone="risk">Needs a leader</span>} />}
+
+    <div className={styles.sectionTitle}><h2>{pastor ? "Choose a church member" : "Choose the unit leader"}</h2></div>
+    <PeopleSearch multiple={false} chosen={chosen} onChange={setChosen} />
+
+    <div className={styles.sectionTitle}><h2>Role</h2></div>
+    <div className={styles.panel}>
+      <div className={styles.kv}><span>Role</span><b>{pastor ? "Branch pastor" : "Unit leader"}</b></div>
+      <div className={styles.kv}><span>Scope</span><b>{pastor ? `${place.branch.name} only` : `${unitName} · ${place.branch.name}`}</b></div>
+    </div>
+    <p className={styles.note}>{pastor ? "Can manage unit leaders and workers in this branch." : "Sees their unit, its direct workers and their own reporting line. Assignments stay with the branch pastor."}</p>
+
+    <Problem error={error} />
+    <div className={forms.footer}>
+      {pastor ? <span className={styles.rowMeta}>Next: unit leaders</span> : null}
+      <button type="button" className={`${styles.btn} ${forms.action}`} data-primary="" disabled={pending || !chosen.length} onClick={save}>{pending ? "Saving…" : pastor ? "Appoint branch pastor" : "Save appointment"}<CheckIcon className="size-4" strokeWidth={2.2} aria-hidden="true" /></button>
+    </div>
+  </ChurchPage>;
 }
 
 /** Paper: Pleros-church-allocation. Workers join one unit under its leader. */
@@ -119,15 +168,27 @@ export function AddWorkers({ place }: { place: ChurchPlace }) {
       setChosen([]); router.refresh();
     });
   }
-  return <section className={styles.page}>
-    <div className={styles.heading}><span className={styles.eyebrow}>Assign workers</span><h1>Add to {unit.name}</h1><p>{place.branch.name} branch only</p></div>
-    <div className={styles.panel}><div className={styles.person}><span className={styles.avatar}>{unit.leader ? initials(unit.leader.name) : "—"}</span><div><strong>{unit.name} team</strong><span className={styles.meta}>{unit.leader ? `${unit.leader.name} · Unit leader` : "No leader yet"}</span></div></div><span className={styles.meta}>{unit.workers.length} {unit.workers.length === 1 ? "worker" : "workers"} currently assigned</span></div>
+  return <ChurchPage>
+    <ChurchHeading title={`${unit.name} workers`} sub={`${place.branch.name} branch`} />
+    <PlaceRow title={unit.name} meta={unit.leader ? `${unit.leader.name} · Unit leader` : "No leader yet"}
+      end={<span className={styles.pill} data-tone={unit.leader ? undefined : "risk"}>{unit.leader ? plural(unit.workers.length, "worker") : "Needs a leader"}</span>} />
     {unit.leader ? <>
-      <div className={styles.section}><h2>Available people</h2><PeopleSearch multiple chosen={chosen} onChange={setChosen} exclude={unit.workers.map(worker => worker.userId)} /></div>
-      {unit.workers.length ? <div className={styles.section}><h2>Current workers</h2><ul className={styles.list}>{unit.workers.map(worker => <li key={worker.userId} className={styles.row}><span className={styles.avatar}>{initials(worker.name)}</span><div><strong>{worker.name}</strong><StatusPill tone="green">In {unit.name}</StatusPill></div></li>)}</ul></div> : null}
-      {chosen.length ? <p className={styles.muted}>{unit.name} will have {unit.workers.length + chosen.length} workers. Reporting to {unit.leader.name} · {place.branch.name}</p> : null}
-    </> : <p className={styles.muted}>Appoint a unit leader first. Workers report to their unit leader.</p>}
-    {error ? <p className={styles.error} role="alert">{error}</p> : null}
-    {unit.leader ? <footer className={styles.footer}><button type="button" className={styles.primary} disabled={pending || !chosen.length} onClick={save}>{pending ? "Saving…" : `Assign ${chosen.length || ""} ${chosen.length === 1 ? "worker" : "workers"}`.replace("  ", " ")}<DashboardIcon name="check" /></button></footer> : null}
-  </section>;
+      <div className={styles.sectionTitle}><h2>Add people</h2></div>
+      <PeopleSearch multiple chosen={chosen} onChange={setChosen} exclude={unit.workers.map(worker => worker.userId)} />
+      {chosen.length ? <p className={styles.note}>{unit.name} will have {plural(unit.workers.length + chosen.length, "worker")}, reporting to {unit.leader.name}.</p> : null}
+      <Problem error={error} />
+      <div className={forms.footer}>
+        <button type="button" className={`${styles.btn} ${forms.action}`} data-primary="" disabled={pending || !chosen.length} onClick={save}>{pending ? "Saving…" : chosen.length ? `Assign ${plural(chosen.length, "worker")}` : "Assign workers"}<CheckIcon className="size-4" strokeWidth={2.2} aria-hidden="true" /></button>
+      </div>
+      <div className={styles.sectionTitle}><h2>Current workers</h2><span className={styles.rowMeta}>{unit.workers.length}</span></div>
+      {unit.workers.length ? <div className={styles.panel}><ul className={styles.list}>{unit.workers.map(worker => <li key={worker.userId} className={styles.row}>
+        <Initials name={worker.name} />
+        <span className={styles.rowCopy}><span className={styles.rowTitle}>{worker.name}</span><span className={styles.rowMeta}>Worker · reports to {unit.leader!.name}</span></span>
+      </li>)}</ul></div> : <p className={`${styles.panel} ${styles.empty}`}>No workers in {unit.name} yet.</p>}
+    </> : <>
+      <p className={`${styles.panel} ${styles.empty}`}>Appoint a unit leader first. Workers report to their unit leader.</p>
+      <Link href={`/dashboard/church/units/${unit.id}/leader`} className={`${styles.quiet} inline-flex items-center gap-1`}><UserPlusIcon className="size-3.5" strokeWidth={2.2} />Appoint a unit leader</Link>
+      <Problem error={error} />
+    </>}
+  </ChurchPage>;
 }
