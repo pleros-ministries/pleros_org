@@ -330,7 +330,18 @@ export async function getSogpDashboardData(
       db
         .select({
           track: schema.sogpCohortTracks,
-          lesson: schema.lessons,
+          // Every column but the notes body: notes are 20–50 KB a lesson and
+          // only the open lesson needs them (getSogpDayData loads that one).
+          // Selecting them here made each dashboard read ~780 KB and ~5 s.
+          lesson: {
+            id: schema.lessons.id,
+            levelId: schema.lessons.levelId,
+            lessonNumber: schema.lessons.lessonNumber,
+            title: schema.lessons.title,
+            audioUrl: schema.lessons.audioUrl,
+            responsePrompt: schema.lessons.responsePrompt,
+            status: schema.lessons.status,
+          },
           progress: schema.studentProgress,
         })
         .from(schema.sogpCohortTracks)
@@ -482,7 +493,7 @@ export async function getSogpDashboardData(
         lessonNumber: lesson.lessonNumber,
         title: lesson.title,
         audioUrl: lesson.audioUrl,
-        notesContent: lesson.notesContent,
+        notesContent: null as string | null,
         responsePrompt: lesson.responsePrompt,
         status: lesson.status,
       },
@@ -573,8 +584,14 @@ export async function getSogpDashboardData(
 export async function getSogpDayData(userId: string, dayNumber: number) {
   const dashboard = await getSogpDashboardData(userId);
   if (!dashboard) return null;
-  const track = dashboard.tracks.find((item) => item.dayNumber === dayNumber);
-  if (!track) return null;
+  const found = dashboard.tracks.find((item) => item.dayNumber === dayNumber);
+  if (!found) return null;
+  const [notes] = await db
+    .select({ notesContent: schema.lessons.notesContent })
+    .from(schema.lessons)
+    .where(eq(schema.lessons.id, found.lesson.id))
+    .limit(1);
+  const track = { ...found, lesson: { ...found.lesson, notesContent: notes?.notesContent ?? null } };
 
   return {
     dashboard,
