@@ -70,14 +70,14 @@ export function NewMessageDialog({
           <DialogTitle className="text-lg font-medium">New message</DialogTitle>
           <DialogDescription className="text-sm">
             {canSearch
-              ? "Search by first name, or pick someone below."
+              ? "Search by name, or pick someone below."
               : "You can message your group leader, your discipler and the Pleros team."}
           </DialogDescription>
         </DialogHeader>
 
         {canSearch ? (
           <label className="relative block">
-            <span className="sr-only">Search members by first name</span>
+            <span className="sr-only">Search members by name</span>
             <SearchIcon
               className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--color-community-muted)]"
               strokeWidth={2}
@@ -126,7 +126,7 @@ export function NewMessageDialog({
                   <button
                     type="button"
                     disabled={chat.pending}
-                    onClick={() => chat.open(member.userId)}
+                    onClick={() => chat.open(member.userId, () => { setInput(""); onOpenChange(false); })}
                     className="flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors hover:bg-[var(--color-community-canvas)] disabled:opacity-60"
                   >
                     <Avatar name={member.name} size={36} />

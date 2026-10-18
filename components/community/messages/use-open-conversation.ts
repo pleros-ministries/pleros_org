@@ -11,7 +11,7 @@ export function useOpenConversation() {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
-  function open(userId: string) {
+  function open(userId: string, onOpened?: () => void) {
     setError(null);
     startTransition(async () => {
       try {
@@ -21,6 +21,7 @@ export function useOpenConversation() {
           return;
         }
         router.push(`/dashboard/community/messages/${result.conversationId}`);
+        onOpened?.();
       } catch {
         setError("Could not open the conversation. Try again.");
       }

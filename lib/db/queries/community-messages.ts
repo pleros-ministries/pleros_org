@@ -31,6 +31,7 @@ import {
   type MessagingParty,
   type MessagingRelation,
 } from "@/lib/community/messaging";
+import { fuzzyNameScore, nameTokens } from "@/lib/community/fuzzy-name";
 import { firstNameOf, fullNameOf } from "@/lib/community/visibility";
 
 /**
@@ -898,7 +899,12 @@ export async function searchMembers(
   const term = query.trim().slice(0, 40);
   if (term.length < 2 || ctx.isMinor) return [];
 
-  const pattern = `${term.replace(/[\\%_]/g, "\\$&")}%`;
+  // Fuzzy (user request, 18 October): narrow loosely in SQL by the first two
+  // (three for longer words) letters of each typed word anywhere in the name, then score in code so
+  // surnames, word middles and small typos still match.
+  const tokens = nameTokens(term);
+  if (!tokens.length) return [];
+  const loose = tokens.map(token => `%${token.slice(0, token.length >= 4 ? 3 : 2).replace(/[\\%_]/g, "\\$&")}%`);
   const [rows, blocked] = await Promise.all([
     db
       .select({
@@ -916,10 +922,7 @@ export async function searchMembers(
       .where(
         and(
           ne(schema.sogpEnrollments.userId, ctx.userId),
-          or(
-            ilike(schema.sogpEnrollments.firstName, pattern),
-            ilike(schema.sogpEnrollments.name, pattern),
-          ),
+          or(...loose.map(pattern => ilike(schema.sogpEnrollments.name, pattern))),
           sql`not exists (
             select 1 from ${schema.sogpEnrollments} as minor_check
             where minor_check.user_id = ${schema.sogpEnrollments.userId}
@@ -928,20 +931,20 @@ export async function searchMembers(
         ),
       )
       .orderBy(asc(schema.sogpEnrollments.firstName))
-      .limit(60),
+      .limit(500),
     listBlockedPeerIds(ctx.userId),
   ]);
 
-  const contacts = new Map<string, MessageContact>();
+  const scored = new Map<string, { contact: MessageContact; score: number }>();
   for (const row of rows) {
-    if (blocked.has(row.userId) || contacts.has(row.userId)) continue;
-    contacts.set(row.userId, {
-      userId: row.userId,
-      name: fullNameOf(row.name || row.firstName),
-      unitName: row.unitName,
-      note: null,
-    });
-    if (contacts.size === 20) break;
+    if (blocked.has(row.userId) || scored.has(row.userId)) continue;
+    const name = fullNameOf(row.name || row.firstName);
+    const score = fuzzyNameScore(term, name);
+    if (!score) continue;
+    scored.set(row.userId, { contact: { userId: row.userId, name, unitName: row.unitName, note: null }, score });
   }
-  return [...contacts.values()];
+  return [...scored.values()]
+    .sort((a, b) => b.score - a.score || a.contact.name.localeCompare(b.contact.name))
+    .slice(0, 20)
+    .map(entry => entry.contact);
 }
