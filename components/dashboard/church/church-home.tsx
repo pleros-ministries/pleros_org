@@ -79,6 +79,7 @@ export function ChurchHomeView({ data, canOversee, header }: { data: ChurchHome;
       <span className={styles.rowCopy}><span className={styles.rowTitle}>{worker.name}</span><span className={styles.rowMeta}>Worker · {data.unit.name}</span></span>
       <ChevronRightIcon className={`${styles.chev} size-4`} strokeWidth={2} />
     </Link></li>)}</ul></div> : <p className={`${styles.panel} ${styles.empty}`}>No workers are assigned to you yet.</p>}
+    <div className={styles.sectionTitle}><h2>Manage</h2></div>
     <div className={styles.panel}><ul className={styles.list}>
       <ActionRow href={`/dashboard/church/units/${data.unit.id}/workers`} icon={<UserPlusIcon className="size-4" strokeWidth={2.2} />} tone={["#e4ebfd", "#2331ae"]} title="Add workers" meta={`People who serve in ${data.unit.name} with you`} />
       {reports}
@@ -122,6 +123,7 @@ export function ChurchHomeView({ data, canOversee, header }: { data: ChurchHome;
       <div className={styles.panel}>
         <UnitRows branch={branch} />
       </div>
+      <div className={styles.sectionTitle}><h2>Manage</h2></div>
       <div className={styles.panel}><ul className={styles.list}>
         <ActionRow href={`/dashboard/church/branches/${branch.id}/units/new`} icon={<PlusIcon className="size-4" strokeWidth={2.2} />} tone={["#e4ebfd", "#2331ae"]} title="Add a unit" meta={`A new team in ${branch.name}`} />
         {leaderless ? <ActionRow href={`/dashboard/church/units/${leaderless.id}/leader`} icon={<UsersRoundIcon className="size-4" strokeWidth={2.2} />} tone={["#efe7fb", "#56209c"]} title="Appoint a unit leader" meta={`${leaderless.name} has no leader yet`} /> : null}

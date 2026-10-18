@@ -146,7 +146,7 @@ export function AppointLeader({ place, role, supervisorId }: { place: ChurchPlac
       <div className={styles.kv}><span>Role</span><b>{pastor ? "Branch pastor" : "Unit leader"}</b></div>
       <div className={styles.kv}><span>Scope</span><b>{pastor ? `${place.branch.name} only` : `${unitName} · ${place.branch.name}`}</b></div>
     </div>
-    <p className={styles.note}>{pastor ? "Can manage unit leaders and workers in this branch." : "Sees their unit, its direct workers and their own reporting line. Assignments stay with the branch pastor."}</p>
+    <p className={styles.note}>{pastor ? "Can manage unit leaders and workers in this branch." : "Leads their unit: adds its workers, sees their reports and their own reporting line."}</p>
 
     <Problem error={error} />
     <div className={forms.footer}>
