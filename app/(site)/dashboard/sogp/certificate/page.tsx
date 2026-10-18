@@ -4,11 +4,28 @@ import { Award, Download } from "lucide-react";
 
 import { getAppSession } from "@/lib/app-session";
 import { getSogpDashboardData } from "@/lib/db/queries/sogp";
+import styles from "@/components/sogp/learning-tools.module.css";
 
 export default async function SogpCertificatePage() {
   const session = await getAppSession();
   if (!session) redirect("/sogp/enrol");
   const data = await getSogpDashboardData(session.user.id);
   if (!data?.certificate || data.certificate.revokedAt) redirect("/dashboard/sogp");
-  return <section className="site-shell-page sogp-shell-page grid min-h-[60vh] place-items-center py-16"><div className="grid max-w-xl justify-items-center gap-5 rounded-[var(--radius-md)] border border-[var(--color-line)] bg-white p-8 text-center shadow-[var(--shadow-md)]"><span className="grid size-16 place-items-center rounded-full bg-[var(--color-brand-lime)]"><Award className="size-8 text-[var(--color-brand-blue)]"/></span><div className="grid gap-2"><p className="site-hero-eyebrow justify-center">School of God&apos;s Purpose</p><h1 className="site-section-heading text-3xl">Your certificate is ready</h1><p className="text-sm leading-[1.5] text-[var(--color-text-muted)]">Celebrate your completion and keep your digital certificate.</p></div><a href={`/api/sogp/certificate/${data.certificate.verificationCode}`} className="inline-flex h-8 items-center gap-2 rounded-[10px] bg-[var(--color-brand-blue)] px-3.5 text-[13px] font-semibold text-white"><Download className="size-4"/> Download certificate</a><Link href="/dashboard/sogp" className="text-xs font-semibold text-[var(--color-text-muted)]">Back to SOGP</Link></div></section>;
+  return <section className={styles.page}>
+    <header className={styles.heading}>
+      <h1>Your certificate is ready</h1>
+      <p className={styles.sub}>School of God&apos;s Purpose · celebrate your completion and keep your digital certificate.</p>
+    </header>
+    <div className={styles.panel}>
+      <div className={styles.row}>
+        <span className={styles.chip} data-tone="amber"><Award className="size-4" strokeWidth={2.2} aria-hidden /></span>
+        <span className={styles.rowCopy}><span className={styles.rowTitle}>SOGP certificate</span><span className={styles.rowMeta}>Verification code {data.certificate.verificationCode}</span></span>
+        <span className={styles.pill} data-tone="done">Issued</span>
+      </div>
+      <div className={styles.panelBody} style={{ paddingTop: 0 }}>
+        <a href={`/api/sogp/certificate/${data.certificate.verificationCode}`} className={styles.btn} data-block=""><Download className="size-4" aria-hidden /> Download certificate</a>
+      </div>
+    </div>
+    <Link href="/dashboard/sogp" className={styles.textBtn}>Back to Learning</Link>
+  </section>;
 }

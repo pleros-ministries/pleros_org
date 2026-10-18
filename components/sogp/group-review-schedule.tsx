@@ -2,7 +2,7 @@
 
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { DashboardIcon, StatusPill } from "@/components/dashboard/v3/primitives";
+import { DashboardIcon } from "@/components/dashboard/v3/primitives";
 import styles from "./group-reviews.module.css";
 import type { GroupReviewScheduleInput } from "@/lib/sogp/group-review";
 
@@ -45,12 +45,12 @@ export function GroupReviewSchedule({ groups, schedule, initial, reschedule }: {
       } catch { setError(initial ? "The review could not be rescheduled. Your details are still here; try again." : "The review could not be scheduled. Your details are still here; try again."); }
     });
   }
-  if (!groups.length) return <section className={styles.page}><header className={styles.heading}><h1>Plan your weekly review</h1></header><p className={styles.info}>You don’t lead an active discipleship group. Paused or closed groups cannot schedule reviews.</p></section>;
+  if (!groups.length) return <section className={styles.page}><header className={styles.heading}><h1>Plan your weekly review</h1><p className={styles.meta}>Group reviews</p></header><p className={styles.info}>You don’t lead an active discipleship group. Paused or closed groups cannot schedule reviews.</p></section>;
   return <form className={styles.page} ref={form} noValidate onSubmit={event => { event.preventDefault(); submit(); }}>
-    <header className={styles.heading}><h1>{initial ? "Reschedule review" : "Plan your weekly review"}</h1><StatusPill tone="lilac">Discipler</StatusPill></header>
+    <header className={styles.heading}><h1>{initial ? "Reschedule review" : "Plan your weekly review"}</h1><p className={styles.meta}>As discipler · traditional and podcast learners</p></header>
     <section className={styles.section}><h2>Group</h2><div className={styles.groupPanel}>
       {groups.length === 1 ? <strong>{group?.name}</strong> : <select aria-label="Discipleship group" value={groupId} onChange={event => { setGroupId(Number(event.target.value)); }}>{groups.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</select>}
-      <p className={styles.meta}>Traditional and podcast learners</p>
+      <p className={styles.meta}>Your discipleship group</p>
     </div></section>
     <section className={styles.section}><h2>Review details</h2>
       <label className={styles.field}>Review title<input data-review-field value={title} maxLength={160} disabled={saving} onChange={event => setTitle(event.target.value)} /></label>
@@ -59,8 +59,7 @@ export function GroupReviewSchedule({ groups, schedule, initial, reschedule }: {
       <label className={styles.field}>Venue<input data-review-field value={venue} maxLength={300} disabled={saving} onChange={event => setVenue(event.target.value)} /></label>
       <label className={styles.field}>Session leader<input readOnly value={group?.leaderName ?? ""} /><span className={styles.meta}>Only this group’s lead can lead the session and confirm attendance.</span></label>
     </section>
-    <div className={styles.info}><p>The session leader confirms attendance on this review after it takes place.<br />{initial ? "Only reviews that have not started can be rescheduled." : "Scheduling does not confirm attendance."}</p></div>
-    <p className={styles.meta}>The same review appears in the group’s list.</p>
+    <p className={styles.info}>The session leader confirms attendance after the review takes place. {initial ? "Only reviews that have not started can be rescheduled." : "Scheduling does not confirm attendance."} The same review appears in the group’s list.</p>
     {error ? <p role="alert" className={styles.error}>{error}</p> : null}
     <footer className={styles.footer}><button type="submit" className={styles.primary} disabled={saving}>{saving ? "Saving…" : initial ? "Save new time" : "Schedule group review"}<DashboardIcon name="arrow" /></button></footer>
   </form>;

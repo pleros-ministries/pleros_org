@@ -13,6 +13,7 @@ import { getSogpDayRequirements } from "@/lib/sogp/journey";
 import { SogpCourseSidebar } from "./sogp-course-sidebar";
 import { SogpDailyTasks } from "./sogp-daily-tasks";
 import { SogpOtherDetails } from "./sogp-other-details";
+import styles from "./learning-tools.module.css";
 
 const queryKey = ["sogp", "journey"] as const;
 
@@ -133,49 +134,36 @@ export function SogpJourneyPage({
     : "live";
 
   return (
-    <section className="site-font-theme min-h-[calc(100dvh-var(--dashboard-topbar-offset,0px))] bg-[var(--color-surface-muted)] pb-16 text-zinc-900">
-      <header className="bg-[var(--color-brand-blue)] text-white">
-        <div className="site-shell-page sogp-shell-page flex items-center justify-between gap-4 py-2.5">
-          {/* The live dashboard shell carries navigation; the preview has no shell. */}
-          {preview ? (
-            <Link
-              href="/preview/dashboard"
-              className="inline-flex min-h-8 items-center gap-1.5 rounded-sm px-1 text-xs font-medium text-white/85 transition-colors duration-150 hover:text-white focus-visible:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white active:scale-[0.98]"
-            >
-              <ArrowLeftIcon className="size-3.5" strokeWidth={2} /> Dashboard
-            </Link>
-          ) : (
-            <span />
-          )}
-          <span className="text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-white">
-            SOGP
-          </span>
-        </div>
-        <div className="site-shell-page sogp-shell-page grid gap-1 pb-4 pt-1">
-          <p className="text-[0.65rem] font-semibold uppercase tracking-[0.12em] text-white/75">
-            {data.cohort.title}
-          </p>
-          <h1 className="ppc-heading text-2xl font-semibold tracking-[-0.02em] text-white">
-            Welcome, {firstName(data.enrollment.name)}
-          </h1>
-          {selectedDay.track ? (
-            <p className="text-xs font-medium text-white/75">
-              Level {selectedDay.track.curriculumLevel} · Track {selectedDay.track.levelPosition} of 6
-            </p>
-          ) : null}
-        </div>
+    <section className={styles.page} data-wide="">
+      <header className={styles.heading}>
+        {/* The live dashboard shell carries navigation; the preview has no shell. */}
+        {preview ? (
+          <Link
+            href="/preview/dashboard"
+            className="mb-1 inline-flex min-h-8 w-fit items-center gap-1.5 text-[12.5px] font-medium text-[var(--color-community-blue,#2056d6)]"
+          >
+            <ArrowLeftIcon className="size-3.5" strokeWidth={2} /> Dashboard
+          </Link>
+        ) : null}
+        <h1>Calendar and assessments</h1>
+        <p className={styles.sub}>
+          Welcome, {firstName(data.enrollment.name)} · SOGP · {data.cohort.title}
+          {selectedDay.track
+            ? ` · Level ${selectedDay.track.curriculumLevel}, track ${selectedDay.track.levelPosition} of 6`
+            : ""}
+        </p>
       </header>
 
-      <div className="site-shell-page sogp-shell-page grid gap-4 pb-6 lg:grid-cols-[15.5rem_minmax(0,1fr)] lg:items-start xl:grid-cols-[15.5rem_minmax(0,1fr)_15.5rem]">
-        <aside data-sogp-section="calendar" className="lg:sticky lg:top-4">
-          <SogpCourseSidebar
-            data={data}
-            selectedDateKey={selectedDateKey}
-            onSelect={setSelectedDateKey}
-          />
-        </aside>
+      <aside data-sogp-section="calendar" className="min-w-0 lg:sticky lg:top-4">
+        <SogpCourseSidebar
+          data={data}
+          selectedDateKey={selectedDateKey}
+          onSelect={setSelectedDateKey}
+        />
+      </aside>
 
-        <div data-sogp-section="daily-content" className="grid min-w-0 gap-4">
+      <div className={styles.column}>
+        <div data-sogp-section="daily-content" className={styles.column}>
           <SogpDailyTasks
             data={data}
             selectedDay={selectedDay}
@@ -202,19 +190,17 @@ export function SogpJourneyPage({
             reviewPending={mutation.isPending && mutation.variables?.kind === "review"}
           />
           {mutation.error ? (
-            <p role="alert" className="text-sm text-red-700">
+            <p role="alert" className={styles.error}>
               {mutation.error.message}
             </p>
           ) : null}
         </div>
 
-        <div className="grid content-start gap-4 lg:col-start-2 xl:sticky xl:top-4 xl:col-start-auto">
-          <SogpOtherDetails
-            data={data}
-            dayNumber={selectedDay.track?.dayNumber}
-            preview={preview}
-          />
-        </div>
+        <SogpOtherDetails
+          data={data}
+          dayNumber={selectedDay.track?.dayNumber}
+          preview={preview}
+        />
       </div>
     </section>
   );

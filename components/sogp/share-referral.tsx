@@ -1,8 +1,8 @@
 "use client";
 import Link from "next/link";
 import { useState } from "react";
-import { DashboardIcon } from "@/components/dashboard/v3/primitives";
-import styles from "./follow-up-invitations.module.css";
+import { ChevronRightIcon, CopyIcon, LinkIcon, Share2Icon, UsersRoundIcon } from "lucide-react";
+import styles from "./learning-tools.module.css";
 
 /** Paper: Pleros-share-referral. Every enrollee's own code and link; sharing never assigns or invites by itself. */
 export function ShareReferral({ code, url, referredCount }: { code: string; url: string; referredCount: number }) {
@@ -18,15 +18,31 @@ export function ShareReferral({ code, url, referredCount }: { code: string; url:
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer");
   }
   return <section className={styles.page}>
-    <div className={styles.heading}><h1>Grow with someone</h1><p>Your own code and link, ready to share.</p></div>
-    <div className={styles.section}><h2>Your referral code</h2>
-      <div className={styles.panel}><strong style={{ fontSize: 24, lineHeight: "32px", fontWeight: 500 }}>{code}</strong><button type="button" className={styles.copyRow} onClick={() => copy("code")}>{copied === "code" ? "Code copied" : "Copy code"}<DashboardIcon name="right" size={16} /></button></div>
-      <p>Code joins are assigned to you.</p></div>
-    <div className={styles.section}><h2>Your referral link</h2>
-      <div className={styles.card}><strong>Your personal invitation link</strong><button type="button" className={styles.copyRow} onClick={() => copy("link")}>{copied === "link" ? "Link copied" : "Copy link"}<DashboardIcon name="right" size={16} /></button></div>
-      <p>Link joins are assigned to you, then asked to accept you or request someone else.</p></div>
-    <div className={styles.info}><DashboardIcon name="people" size={16} /><p>Following up and group membership are separate. Group invitations need the person’s acceptance.</p></div>
-    <Link className={styles.textLink} href="/dashboard/community/enrollees">{referredCount ? `${referredCount} ${referredCount === 1 ? "person has" : "people have"} joined with your referral` : "See the people you follow up"}</Link>
-    <footer className={styles.footer}><p className={`${styles.meta}`} style={{ textAlign: "center" }}>Available to every SOGP enrollee.</p><button type="button" className={styles.primary} onClick={share}>Share referral link<DashboardIcon name="arrow" /></button></footer>
+    <header className={styles.heading}><h1>Grow with someone</h1><p className={styles.sub}>Your own code and link, ready to share.</p></header>
+    <div className={styles.strip} style={{ gridTemplateColumns: "repeat(2, minmax(0, 1fr))" }}>
+      <div><span>Joined with you</span><strong>{referredCount}</strong></div>
+      <div><span>Your code</span><strong style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{code}</strong></div>
+    </div>
+
+    <div className={styles.sectionTitle}><h2>Share</h2></div>
+    <div className={styles.panel}><ul className={styles.list}>
+      <li><button type="button" className={styles.row} onClick={() => copy("code")}>
+        <span className={styles.chip}><CopyIcon className="size-4" strokeWidth={2.2} /></span>
+        <span className={styles.rowCopy}><span className={styles.rowTitle}>{copied === "code" ? "Code copied" : "Copy code"}</span><span className={styles.rowMeta}>Code joins are assigned to you.</span></span>
+        {copied === "code" ? <span className={styles.pill} data-tone="done">Copied</span> : null}
+      </button></li>
+      <li><button type="button" className={styles.row} onClick={() => copy("link")}>
+        <span className={styles.chip} data-tone="sky"><LinkIcon className="size-4" strokeWidth={2.2} /></span>
+        <span className={styles.rowCopy}><span className={styles.rowTitle}>{copied === "link" ? "Link copied" : "Copy your personal link"}</span><span className={styles.rowMeta}>Link joins are assigned to you, then asked to accept you or request someone else.</span></span>
+        {copied === "link" ? <span className={styles.pill} data-tone="done">Copied</span> : null}
+      </button></li>
+      <li><Link className={styles.row} href="/dashboard/community/enrollees">
+        <span className={styles.chip} data-tone="peach"><UsersRoundIcon className="size-4" strokeWidth={2.2} /></span>
+        <span className={styles.rowCopy}><span className={styles.rowTitle}>{referredCount ? `${referredCount} ${referredCount === 1 ? "person has" : "people have"} joined with your referral` : "See the people you follow up"}</span><span className={styles.rowMeta}>My enrollees</span></span>
+        <ChevronRightIcon className={`size-4 ${styles.chev}`} strokeWidth={2} />
+      </Link></li>
+    </ul></div>
+    <p className={styles.note}>Following up and group membership are separate. Group invitations need the person’s acceptance. Available to every SOGP enrollee.</p>
+    <button type="button" className={styles.btn} data-block="" onClick={share}><Share2Icon className="size-4" strokeWidth={2.2} aria-hidden /> Share referral link</button>
   </section>;
 }

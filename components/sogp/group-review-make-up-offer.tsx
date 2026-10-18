@@ -2,7 +2,7 @@
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { offerReviewMakeup, confirmReviewMakeup } from "@/app/_actions/sogp-group-review-actions";
-import { DashboardIcon, StatusPill } from "@/components/dashboard/v3/primitives";
+import { DashboardIcon } from "@/components/dashboard/v3/primitives";
 import { groupReviewTimeLabel } from "@/lib/sogp/group-review";
 import type { LeadMakeUpContext } from "@/lib/db/queries/sogp-review-makeups";
 import styles from "./group-reviews.module.css";
@@ -31,9 +31,9 @@ export function GroupReviewMakeUpOffer({ data }: { data: LeadMakeUpContext }) {
     }catch{setError("Replacement attendance could not be saved. Try again.");}});
   }
   return <section className={styles.page}>
-    <header className={styles.heading}><h1>Offer a make-up review</h1><StatusPill tone="lilac">Group lead</StatusPill></header>
+    <header className={styles.heading}><h1>Offer a make-up review</h1><p className={styles.meta}>As group lead · {data.sheet.groupName}</p></header>
     <article className={styles.reviewCard}><h2 data-dashboard-learning-title className={styles.attendanceTitle}>{data.sheet.title}</h2><p className={styles.meta}>{data.sheet.groupName}</p><p>{groupReviewTimeLabel(data.sheet.startsAt,data.sheet.endsAt)}</p></article>
-    <div className={styles.info}><p>Each offer replaces this named missed review for one learner. Choosing it does not confirm attendance. Only you, the group lead, confirm after the replacement session.</p></div>
+    <p className={styles.info}>Each offer replaces this named missed review for one learner. Choosing it does not confirm attendance. Only you, the group lead, confirm after the replacement session.</p>
     {eligible.length ? <form className={styles.section} ref={form} noValidate onSubmit={event=>{event.preventDefault();offer();}}>
       <label className={styles.field}>Learner<select value={learnerId} disabled={saving} onChange={event=>setLearnerId(Number(event.target.value))}>{eligible.map(learner=><option key={learner.enrollmentId} value={learner.enrollmentId}>{learner.name}</option>)}</select></label>
       <label className={styles.field}>Date<input data-makeup-field type="date" value={date} disabled={saving} onChange={event=>setDate(event.target.value)} /></label>
@@ -45,7 +45,7 @@ export function GroupReviewMakeUpOffer({ data }: { data: LeadMakeUpContext }) {
     {notice ? <p className={styles.meta} role="status">{notice}</p> : null}{error?<p role="alert" className={styles.error}>{error}</p>:null}
     <section className={styles.section}><h2>Offered replacements</h2>{data.offers.length?data.offers.map(offer=><article key={offer.id} className={styles.reviewCard}>
       <h3>{offer.name}</h3><p>{groupReviewTimeLabel(offer.startsAt,offer.endsAt)}</p><p className={styles.meta}>{offer.venue}</p>
-      <StatusPill tone={offer.status==="attended"?"green":offer.status==="offered"?"neutral":"amber"}>{offer.status==="attended"?"Make-up completed":offer.status==="missed"?"Replacement missed":offer.status==="chosen"?"Chosen · Unconfirmed":"Offered · Not chosen"}</StatusPill>
+      <span className={styles.pill} data-tone={offer.status==="attended"?"done":offer.status==="offered"?undefined:"todo"}>{offer.status==="attended"?"Make-up completed":offer.status==="missed"?"Replacement missed":offer.status==="chosen"?"Chosen · Unconfirmed":"Offered · not chosen"}</span>
       {offer.status==="chosen"?<div className={styles.attendanceChoices}><button type="button" disabled={saving||new Date(offer.endsAt)>new Date()} onClick={()=>confirm(offer.id,"attended")}>Confirm attended</button><button type="button" disabled={saving||new Date(offer.endsAt)>new Date()} onClick={()=>confirm(offer.id,"missed")}>Confirm missed</button></div>:null}
     </article>):<p className={styles.meta}>No replacements offered yet.</p>}</section>
   </section>;

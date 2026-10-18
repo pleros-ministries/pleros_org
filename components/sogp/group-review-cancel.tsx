@@ -22,7 +22,7 @@ export function CancelReviewButton({ reviewId }: { reviewId: number }) {
     });
   }
   return <>
-    <button type="button" className={styles.rowLink} style={{ background: "none", border: "none", cursor: "pointer", textAlign: "left" }} disabled={pending} onClick={cancel}>{armed ? "Tap again to cancel this review" : "Cancel review"}<DashboardIcon name="close" size={16} /></button>
+    <button type="button" className={styles.rowLink} disabled={pending} onClick={cancel}>{armed ? "Tap again to cancel this review" : "Cancel review"}<DashboardIcon name="close" size={16} /></button>
     {error ? <p role="alert" className={styles.error}>{error}</p> : null}
   </>;
 }
