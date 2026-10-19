@@ -113,7 +113,9 @@ export function PlaceChurchMember({ branches }: { branches: Array<{ id: number; 
 }
 
 /** Paper: Pleros-create-branch (step 1 of 4) and the retained add-unit capability. */
-export function CreatePlace({ branch }: { branch?: { id: number; name: string } }) {
+export function CreatePlace({ branch, unitsRetired = false }: { branch?: { id: number; name: string };
+  /** Groups as oversight: no unit-leader or worker steps follow a branch. */
+  unitsRetired?: boolean }) {
   const router = useRouter(); const [name, setName] = useState(""); const [error, setError] = useState<string | null>(null); const [pending, start] = useTransition();
   function save() {
     if (!name.trim()) { setError(branch ? "Enter the unit name." : "Enter the branch name."); return; }
@@ -125,7 +127,7 @@ export function CreatePlace({ branch }: { branch?: { id: number; name: string } 
   }
   return <ChurchPage>
     <ChurchHeading title={branch ? "Add a unit" : "Create a branch"} sub={branch ? `${branch.name} branch` : "Fullness of Christ Church"} />
-    {branch ? null : <SetupSteps step={1} />}
+    {branch || unitsRetired ? null : <SetupSteps step={1} />}
     <form className={`${styles.panel} ${forms.body}`} onSubmit={event => { event.preventDefault(); save(); }}>
       <label className={forms.field}>{branch ? "Unit name" : "Branch name"}
         <input maxLength={100} value={name} onChange={event => setName(event.target.value)} aria-invalid={Boolean(error) || undefined} placeholder={branch ? "e.g. Ushering" : "e.g. Lekki"} />
@@ -141,7 +143,9 @@ export function CreatePlace({ branch }: { branch?: { id: number; name: string } 
 }
 
 /** Paper: Pleros-appoint-branch-pastor (step 2) and Pleros-church-appointment (unit leader). */
-export function AppointLeader({ place, role, supervisorId, moveTargets = [] }: { place: ChurchPlace; role: "branch_pastor" | "unit_leader"; supervisorId: string | null; moveTargets?: MoveTarget[] }) {
+export function AppointLeader({ place, role, supervisorId, moveTargets = [], unitsRetired = false }: { place: ChurchPlace; role: "branch_pastor" | "unit_leader"; supervisorId: string | null; moveTargets?: MoveTarget[];
+  /** Groups as oversight: a branch pastor is the last step; units are retired. */
+  unitsRetired?: boolean }) {
   const router = useRouter(); const [chosen, setChosen] = useState<Person[]>([]); const [error, setError] = useState<string | null>(null); const [pending, start] = useTransition();
   const unitName = place.unit?.name;
   const pastor = role === "branch_pastor";
@@ -173,7 +177,7 @@ export function AppointLeader({ place, role, supervisorId, moveTargets = [] }: {
   return <ChurchPage>
     {place.unit && !pastor ? <CrumbLabel href={`/dashboard/church/units/${place.unit.id}/leader`} label={`${place.unit.name} leader`} /> : null}
     <ChurchHeading title={pastor ? "Appoint a branch pastor" : replacing ? "Change unit leader" : "Appoint a unit leader"} sub={pastor ? `${place.branch.name} branch` : `${unitName} · ${place.branch.name} branch`} />
-    {pastor ? <SetupSteps step={2} /> : null}
+    {pastor && !unitsRetired ? <SetupSteps step={2} /> : null}
     {pastor
       ? <PlaceRow title={place.branch.name} meta={place.pastors.length ? `Current: ${place.pastors.map(row => row.name).join(", ")}` : "No branch pastor yet"} />
       : <PlaceRow title={unitName!} meta={`${plural(place.unit!.workers.length, "worker")} · ${place.unit!.leader ? `Leader: ${place.unit!.leader.name}` : "No leader yet"}`}
@@ -206,11 +210,11 @@ export function AppointLeader({ place, role, supervisorId, moveTargets = [] }: {
       <div className={styles.kv}><span>Role</span><b>{pastor ? "Branch pastor" : "Unit leader"}</b></div>
       <div className={styles.kv}><span>Scope</span><b>{pastor ? `${place.branch.name} only` : `${unitName} · ${place.branch.name}`}</b></div>
     </div>
-    <p className={styles.note}>{pastor ? "Can manage unit leaders and workers in this branch." : current ? `Leads ${unitName} from now on, and its workers report to them.` : "Leads their unit: adds its workers, sees their reports and their own reporting line."}</p>
+    <p className={styles.note}>{pastor ? unitsRetired ? "Sees reports from everyone placed in this branch, alongside their own groups." : "Can manage unit leaders and workers in this branch." : current ? `Leads ${unitName} from now on, and its workers report to them.` : "Leads their unit: adds its workers, sees their reports and their own reporting line."}</p>
 
     <Problem error={error} />
     <div className={forms.footer}>
-      {pastor ? <span className={styles.rowMeta}>Next: unit leaders</span> : null}
+      {pastor && !unitsRetired ? <span className={styles.rowMeta}>Next: unit leaders</span> : null}
       <button type="button" className={`${styles.btn} ${forms.action}`} data-primary="" disabled={pending || !chosen.length} onClick={save}>{pending ? "Saving…" : pastor ? "Appoint branch pastor" : replacing ? "Change leader" : "Save appointment"}<CheckIcon className="size-4" strokeWidth={2.2} aria-hidden="true" /></button>
     </div>
   </ChurchPage>;

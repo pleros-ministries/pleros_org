@@ -8,6 +8,7 @@ import { churchOrganisationEnabled, churchMultiBranchEnabled, getChurchAssignmen
 import { AssignmentControls } from "@/components/dashboard/church/assignment-controls";
 import { compactButton } from "@/components/dashboard/shell/styles";
 import { ChurchOversight } from "@/components/dashboard/church/church-oversight";
+import { groupOversightEnabled } from "@/lib/db/queries/oversight-tree";
 
 // Reads the session on every request (Cache Components).
 export const instant = false;
@@ -22,6 +23,8 @@ export default async function ChurchOversightPage({ searchParams }: { searchPara
   const [viewer, params] = await Promise.all([getChurchAssignment(session.user.id), searchParams]);
   const bootstrap = session.user.role === "super_admin";
   if (!viewer && !bootstrap) redirect("/dashboard");
+  // Groups as oversight retires these reports (19 October); first-time Pastor setup stays here.
+  if (groupOversightEnabled() && !(bootstrap && !viewer)) redirect("/dashboard/community/oversight");
   if (canManageChurchAssignments(viewer)) {
     const ctx = await getCommunityContext();
     if (ctx && canAccessCommunity(ctx)) redirect(`/dashboard/community/oversight/reports${params.supervisor ? `?supervisor=${encodeURIComponent(params.supervisor)}` : ""}`);

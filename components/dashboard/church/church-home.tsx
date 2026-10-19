@@ -50,9 +50,11 @@ function Note({ children }: { children: ReactNode }) {
 }
 
 /** Church structure (Paper: Pleros-church-pastor / -branch / -unit / -worker), in the Oversight style. */
-export function ChurchHomeView({ data, canOversee, header }: { data: ChurchHome; canOversee: boolean;
+export function ChurchHomeView({ data, canOversee, header, unitsRetired = false }: { data: ChurchHome; canOversee: boolean;
   /** Inside Oversight: its shared header replaces this page's own heading. */
-  header?: ReactNode }) {
+  header?: ReactNode;
+  /** Groups as oversight: units and workers are retired, so Structure is branches and branch pastors only. */
+  unitsRetired?: boolean }) {
   const [branchId, setBranchId] = useState(data.kind === "structure" ? data.branches[0]?.id ?? null : null);
   const reports = canOversee ? <ActionRow href={header ? "/dashboard/community/oversight/reports" : "/dashboard/church/reports"} icon={<ClipboardListIcon className="size-4" strokeWidth={2.2} />} tone={["#e4ebfd", "#2331ae"]} title="Daily reports" meta="For the people you lead" /> : null;
 
@@ -89,22 +91,26 @@ export function ChurchHomeView({ data, canOversee, header }: { data: ChurchHome;
 
   if (data.role === "pastor") return <Page bare={Boolean(header)}>
     {header ?? <Heading title="Church structure" sub="Fullness of Christ Church · all branches" />}
-    <Strip items={[["Branches", data.totals.branches], ["Units", data.totals.units], ["Workers", data.totals.workers]]} />
+    {unitsRetired
+      ? <Strip items={[["Branches", data.totals.branches], ["Branch pastors", data.branches.reduce((n, branch) => n + branch.pastors.length, 0)], ["Need a pastor", data.branches.filter(branch => !branch.pastors.length).length, data.branches.some(branch => !branch.pastors.length)]]} />
+      : <Strip items={[["Branches", data.totals.branches], ["Units", data.totals.units], ["Workers", data.totals.workers]]} />}
     <div className={styles.sectionTitle}><h2>Branches</h2><Link href="/dashboard/church/branches/new" className={`${styles.quiet} inline-flex items-center gap-1`}><PlusIcon className="size-3.5" strokeWidth={2.2} />Add branch</Link></div>
     {data.branches.length ? data.branches.map(branch => <section key={branch.id} className={styles.panel} aria-label={branch.name}>
       <div className="flex items-start justify-between gap-3 px-3.5 pt-3.5 pb-1">
         <span className={styles.rowCopy}>
           <span className="font-[family-name:var(--font-dashboard-heading)] text-[15px] leading-[22px] font-medium">{branch.name}</span>
-          <span className={styles.rowMeta}>{branch.pastors.length ? `${branch.pastors.map(row => row.name).join(", ")} · Branch pastor` : "No branch pastor yet"} · {plural(branch.workerCount, "worker")}</span>
+          <span className={styles.rowMeta}>{branch.pastors.length ? `${branch.pastors.map(row => row.name).join(", ")} · Branch pastor` : "No branch pastor yet"}{unitsRetired ? "" : ` · ${plural(branch.workerCount, "worker")}`}</span>
         </span>
-        <Ready branch={branch} />
+        {unitsRetired ? null : <Ready branch={branch} />}
       </div>
       <div className="flex flex-wrap px-3.5 pb-1"><RenamePlace key={branch.name} kind="branch" id={branch.id} name={branch.name} /></div>
       {branch.pastors.length ? null : <Link className={`${styles.quiet} mx-3.5 my-1 inline-flex items-center gap-1`} href={`/dashboard/church/branches/${branch.id}/pastor`}><UserPlusIcon className="size-3.5" strokeWidth={2.2} />Appoint a branch pastor</Link>}
-      <UnitRows branch={branch} />
-      <div className="flex justify-end border-t border-(--color-line) px-3.5 py-2.5">
-        <Link href={`/dashboard/church/branches/${branch.id}/units/new`} className={`${styles.quiet} inline-flex items-center gap-1`}><PlusIcon className="size-3.5" strokeWidth={2.2} />Add a unit</Link>
-      </div>
+      {unitsRetired ? <div className="h-2" aria-hidden="true" /> : <>
+        <UnitRows branch={branch} />
+        <div className="flex justify-end border-t border-(--color-line) px-3.5 py-2.5">
+          <Link href={`/dashboard/church/branches/${branch.id}/units/new`} className={`${styles.quiet} inline-flex items-center gap-1`}><PlusIcon className="size-3.5" strokeWidth={2.2} />Add a unit</Link>
+        </div>
+      </>}
     </section>) : <p className={`${styles.panel} ${styles.empty}`}>No branches yet. Add the first branch to start.</p>}
     {reports ? <><div className={styles.sectionTitle}><h2>Reports</h2></div><div className={styles.panel}><ul className={styles.list}>{reports}</ul></div></> : null}
     <Placement branches={data.branches} />

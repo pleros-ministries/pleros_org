@@ -5,6 +5,7 @@ import { getAppSession } from "@/lib/app-session";
 import { getChurchAssignment, hasChurchDirectReports } from "@/lib/db/queries/church-organisation";
 import { getChurchHome } from "@/lib/db/queries/church-home";
 import { ChurchHomeView } from "@/components/dashboard/church/church-home";
+import { groupOversightEnabled } from "@/lib/db/queries/oversight-tree";
 
 // Reads the session on every request (Cache Components).
 export const instant = false;
@@ -15,6 +16,8 @@ export default async function ChurchPage() {
   const viewer = await getChurchAssignment(session.user.id);
   // First-time Pastor setup stays on the retained setup controls.
   if (!viewer && session.user.role === "super_admin") redirect("/dashboard/church/reports");
+  // Groups as oversight retires the church page (19 October): the Pastor's branches live in Structure.
+  if (groupOversightEnabled()) redirect(viewer?.role === "pastor" ? "/dashboard/community/oversight/structure" : "/dashboard/community/oversight");
   // Pastors and Branch Pastors manage structure inside Oversight (user request, 18 October).
   if (canManageChurchAssignments(viewer)) {
     const ctx = await getCommunityContext();

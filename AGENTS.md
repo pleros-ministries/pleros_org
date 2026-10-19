@@ -74,6 +74,10 @@ Pastor, 19 October; plan in `docs/plans/groups-as-oversight.md`. Groups replace 
   - Leaders add anyone enrolled by name from the group's Invite panel (`searchGroupInvitees`, `inviteToGroupByName`). Results show full names only, never under-18s, and only "In a group", not whose group.
   - Accepting an invitation while in another group moves the person: `respondToInvitation` with `move`, then `joinGroupInTransaction` with `moveFromCurrent` ends the old membership. The invitation page says so first ("This moves you", "Move to this group").
 - SOGP follow-up into groups while the flag is on: every path that sets a follow-up owner calls `inviteIntoOwnersGroups` (`lib/db/queries/follow-up-group-invites.ts`) after its own write. These paths are enrolment referral and geography routing, `/admin/pastors` (single and bulk), follow-up request approval, the coordinator's owner change and handover. It sends a pending `referral`-origin invitation into the owner's active default group and withdraws an earlier owner's pending one. A failure is logged and never fails the assignment. Owners without an enrolment have no group, so nothing is sent.
+- The org chart is retired while the flag is on:
+  - Unit pages (`/dashboard/church/units/*`, `/branches/[id]/units/new`), `/dashboard/church` and `/dashboard/church/reports` redirect to Oversight. The super-admin's first-time Pastor setup still opens there, and the Pastor goes to Structure.
+  - Structure is the Pastor's only, showing branches, branch pastors and branch placement (`unitsRetired`). The setup steps stop at the branch pastor.
+  - The unit, worker and leader data stays in place for a rollback.
 
 ### SOGP discipleship groups
 

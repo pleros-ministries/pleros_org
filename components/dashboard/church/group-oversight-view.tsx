@@ -66,7 +66,7 @@ export function GroupOversightOverview({ data }: { data: GroupOversightData }) {
   const stats: Array<[string, number]> = [["At risk", totals.atRisk], ["Questions", totals.waiting], ["Silent 3+ days", totals.silent]];
 
   return <div className={styles.page}>
-    <OversightHeader title={data.under ? data.under.name : "Oversight"} structure={data.role !== "leader" && !data.under}
+    <OversightHeader title={data.under ? data.under.name : "Oversight"} structure={data.role === "pastor" && !data.under}
       sub={`${data.scopeLabel} · ${plural(totals.people, "person")}`} />
     {data.under ? <Link href={OVERSIGHT_PATH} className={`${styles.quiet} -mt-1`}>Back to your oversight</Link> : null}
 

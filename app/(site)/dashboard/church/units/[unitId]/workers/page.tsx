@@ -3,11 +3,14 @@ import { getAppSession } from "@/lib/app-session";
 import { getChurchPlace } from "@/lib/db/queries/church-home";
 import { AddWorkers } from "@/components/dashboard/church/church-flows";
 import { listWorkerMoveTargets } from "@/lib/db/queries/church-organisation";
+import { groupOversightEnabled } from "@/lib/db/queries/oversight-tree";
 
 // Reads the session on every request (Cache Components).
 export const instant = false;
 
 export default async function AddWorkersPage({ params }: { params: Promise<{ unitId: string }> }) {
+  // Groups as oversight retires units, workers and the church pages (19 October).
+  if (groupOversightEnabled()) redirect("/dashboard/community/oversight");
   const { unitId } = await params;
   const session = await getAppSession();
   if (!session) redirect(`/login?returnTo=/dashboard/church/units/${unitId}/workers`);

@@ -37,7 +37,7 @@ export default async function OversightReportsPage({ searchParams }: { searchPar
     return <>
       <ChurchOversight rows={rows} day={today} dayLabel={dateKeyLabel(today)} scope={data.scopeLabel} remindersEnabled={reportRemindersEnabled()}
         note="People in your groups and the groups under them. Open someone to read their full report."
-        header={<OversightHeader title={data.under ? data.under.name : "Oversight"} structure={data.role !== "leader" && !data.under} sub={`${data.scopeLabel} · ${dateKeyLabel(today)}`} />} />
+        header={<OversightHeader title={data.under ? data.under.name : "Oversight"} structure={data.role === "pastor" && !data.under} sub={`${data.scopeLabel} · ${dateKeyLabel(today)}`} />} />
       {data.under ? <Link href="/dashboard/community/oversight/reports" className="mt-3 inline-flex text-[12.5px] font-medium text-[var(--color-community-blue)]">All reports</Link> : null}
     </>;
   }
