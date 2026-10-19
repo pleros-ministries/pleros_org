@@ -42,7 +42,6 @@ export function GroupsDirectory({
   people?: PeopleToBringIn | null;
 }) {
   const mine = groups.filter(group => group.viewerStatus === "active");
-  const hasMine = locationGroups.length > 0 || Boolean(discipleship?.joined) || (discipleship?.leading.length ?? 0) > 0 || mine.length > 0;
   // New groups are oversight groups, created from a group page's form.
   const firstLed = discipleship?.leading[0];
   const newGroupHref = firstLed ? `/dashboard/community/discipleship/${firstLed.groupId}?panel=create` : "/dashboard/sogp/discipleship";
@@ -54,14 +53,8 @@ export function GroupsDirectory({
       <section className={homeStyles.block} aria-labelledby="groups-yours">
         <div className={homeStyles.blockHeading}>
           <h2 id="groups-yours">Your groups</h2>
-          <Link href={newGroupHref} prefetch={false}
-            className="inline-flex h-7 items-center gap-1 rounded-[10px] bg-[var(--color-community-blue)] px-2.5 text-[12.5px] font-semibold text-white no-underline">
-            <PlusIcon className="size-3.5" strokeWidth={2.4} />
-            New group
-          </Link>
         </div>
-        {hasMine ? (
-          <div className={homeStyles.groupGrid}>
+        <div className={homeStyles.groupGrid}>
             {locationGroups.map((group) => (
               <GroupCard key={`unit-${group.id}`} href={`/dashboard/community/unit/${group.id}`} art="location" title={group.name}
                 tag={group.relation === "manager" ? "You look after" : undefined}
@@ -79,10 +72,12 @@ export function GroupsDirectory({
               <GroupCard key={group.id} href={`/dashboard/community/groups/${group.id}`} art={group.privacy === "private" ? "private" : "public"} title={group.name}
                 meta={group.viewerRole === "owner" ? "You own this group" : group.viewerRole === "moderator" ? "You moderate" : `${group.memberCount} member${group.memberCount === 1 ? "" : "s"}`} />
             ))}
+            {/* Same "+ New group" card as Community Home, opening the oversight-group form. */}
+            <Link href={newGroupHref} prefetch={false} className={homeStyles.newGroup}>
+              <span className={homeStyles.newGroupIcon}><PlusIcon className="size-4" strokeWidth={2.2} /></span>
+              New group
+            </Link>
           </div>
-        ) : (
-          <p className="m-0 rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white px-4 py-3.5 text-[13px] text-[var(--color-community-muted)]">You’re not in a group yet.</p>
-        )}
       </section>
 
       {people ? <PeopleToBringInPanel people={people} id="groups-people" /> : null}
