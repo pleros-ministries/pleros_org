@@ -106,8 +106,20 @@ export function GroupOversightOverview({ data }: { data: GroupOversightData }) {
       </Link></li>)}
     </ul></div> : <p className={`${styles.panel} ${styles.empty}`}>{totals.people ? "Nothing needs you right now. Everyone has reported today." : "Nothing needs you right now."}</p>}
 
+    {data.under ? null : <>
+      {/* The one group you're in: its leader looks after you (groups as oversight, one overseer). */}
+      <div className={styles.sectionTitle}><h2>Group you’re in</h2></div>
+      {data.memberOf
+        ? <div className={styles.panel}><Link href={`/dashboard/community/discipleship/${data.memberOf.groupId}`} className={styles.row}>
+          <span className="size-10 shrink-0 rounded-[10px] bg-cover bg-center" style={{ backgroundColor: "#e6ecfc", ...groupIcon("discipleship") }} aria-hidden="true" />
+          <span className={styles.rowCopy}><span className={styles.rowTitle}>{data.memberOf.groupName}</span><span className={styles.rowMeta}>Led by {data.memberOf.leaderName}, who looks after you</span></span>
+          <ChevronRightIcon className={`${styles.chev} size-4`} strokeWidth={2} />
+        </Link></div>
+        : <p className={`${styles.panel} ${styles.empty}`}>You’re not in a group yet. When a leader adds you, you’ll accept from Community Home.</p>}
+    </>}
+
     {data.groups.length ? <>
-      <div className={styles.sectionTitle}><h2>{data.under ? `${data.under.name.split(" ")[0]}’s groups` : "Your groups"}</h2></div>
+      <div className={styles.sectionTitle}><h2>{data.under ? `${data.under.name.split(" ")[0]}’s groups` : "Groups you lead"}</h2></div>
       <div className={styles.panel}><ul className={styles.list}>
         {data.groups.map((group, index) => {
           const body = <>

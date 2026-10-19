@@ -58,6 +58,8 @@ export type GroupOversightData = {
   people: GroupOversightPerson[];
   /** The focus person's own groups. */
   groups: GroupOversightGroup[];
+  /** The group the viewer is in and who leads it (their overseer); only on their own Oversight. */
+  memberOf: { groupId: number; groupName: string; leaderName: string } | null;
   branches: GroupOversightBranch[];
   waiting: GroupOversightWaiting[];
   totals: { people: number; reportedToday: number; atRisk: number; waiting: number; silent: number };
@@ -161,6 +163,13 @@ export async function getGroupOversight(viewerId: string, options: { under?: str
     role !== "leader" && !under ? db.select({ branchId: s.sogpEnrollmentBranches.branchId, n: sql<number>`count(*)::int` }).from(s.sogpEnrollmentBranches).groupBy(s.sogpEnrollmentBranches.branchId) : [],
     getCommunityContext().catch(() => null),
   ]);
+  const [memberOf] = under ? [] : await db
+    .select({ groupId: s.discipleshipGroups.id, groupName: s.discipleshipGroups.name, leaderUserId: s.discipleshipGroups.leaderUserId })
+    .from(s.discipleshipMemberships)
+    .innerJoin(s.discipleshipGroups, eq(s.discipleshipGroups.id, s.discipleshipMemberships.groupId))
+    .where(and(eq(s.discipleshipMemberships.memberUserId, viewerId), eq(s.discipleshipMemberships.status, "active"), inArray(s.discipleshipGroups.status, ["active", "archived"])))
+    .limit(1);
+  const overseerName = memberOf?.leaderUserId ? (await loadNames([memberOf.leaderUserId])).get(memberOf.leaderUserId)?.name ?? "Member" : null;
 
   const canMessage = (userId: string) => {
     if (!ctx || userId === viewerId) return null;
@@ -228,6 +237,7 @@ export async function getGroupOversight(viewerId: string, options: { under?: str
     under: under ? { userId: under, name: names.get(under)?.name ?? "Member" } : null,
     people,
     groups,
+    memberOf: memberOf ? { groupId: memberOf.groupId, groupName: memberOf.groupName, leaderName: overseerName ?? "Member" } : null,
     branches,
     waiting,
     totals: {
