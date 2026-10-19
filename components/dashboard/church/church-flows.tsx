@@ -331,13 +331,12 @@ export function AddWorkers({ place, moveTargets = [] }: { place: ChurchPlace; mo
   return <ChurchPage>
     <CrumbLabel href={`/dashboard/church/units/${unit.id}/workers`} label={unit.name} />
     <UnitTitle unit={unit} branchName={place.branch.name} units={moveTargets} canManage={canManage} />
-    {/* Facts, not a destination: leader and worker count as plain rows (user feedback, 19 October). */}
+    {/* Facts, not a destination: the leader as a plain row; Current workers carries the count (user feedback, 19 October). */}
     <div className={styles.panel}>
       <div className={`${styles.kv} items-center`}><span>Unit leader</span><span className="flex min-w-0 items-center gap-3">
         <b className="truncate">{unit.leader?.name ?? "No leader yet"}</b>
         {canManage ? <Link href={`/dashboard/church/units/${unit.id}/leader`} className={styles.quiet}>{unit.leader ? "Change" : "Appoint"}</Link> : null}
       </span></div>
-      <div className={styles.kv}><span>Workers</span><b>{unit.workers.length}</b></div>
     </div>
     {unit.leader ? <>
       <div className={styles.sectionTitle}><h2>Add people</h2></div>
