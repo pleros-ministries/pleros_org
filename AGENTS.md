@@ -69,6 +69,10 @@ Pastor, 19 October; plan in `docs/plans/groups-as-oversight.md`. Groups replace 
   - Navigation shows Oversight to anyone who leads a group with members (`groupOversight`).
   - Questions waiting stay names and counts only.
 - Quiz answers and written work keep their own rule: the direct leader of an active membership only.
+- Groups UI while the flag is on:
+  - Community Home shows Your group (the group you're in and its leader) beside the location group, then Groups you lead with "+ New group", which opens `?panel=create`. Interest groups sit in their own row.
+  - Leaders add anyone enrolled by name from the group's Invite panel (`searchGroupInvitees`, `inviteToGroupByName`). Results show full names only, never under-18s, and only "In a group", not whose group.
+  - Accepting an invitation while in another group moves the person: `respondToInvitation` with `move`, then `joinGroupInTransaction` with `moveFromCurrent` ends the old membership. The invitation page says so first ("This moves you", "Move to this group").
 
 ### SOGP discipleship groups
 
