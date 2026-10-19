@@ -1,4 +1,4 @@
-import { eq, inArray } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 import { listUsersWithCommunityPushOff } from "@/lib/db/queries/notification-preferences";
@@ -29,7 +29,8 @@ type Kind =
   | "group_join_approved"
   | "pleros_reply"
   | "enrollee_handed_over"
-  | "follow_up_changed";
+  | "follow_up_changed"
+  | "unit_workers_added";
 
 const PUSH_COPY: Record<Kind, { title: string }> = {
   official_post: { title: "New Pleros update" },
@@ -56,6 +57,7 @@ const PUSH_COPY: Record<Kind, { title: string }> = {
   pleros_reply: { title: "Pleros replied" },
   enrollee_handed_over: { title: "Someone new to look after" },
   follow_up_changed: { title: "Someone new is looking after you" },
+  unit_workers_added: { title: "New workers in your unit" },
 };
 
 /**
@@ -197,6 +199,32 @@ export async function notifyChurchUnitLeader(input: { userId: string; unitId: nu
     kind: "made_leader",
     payload: { unitName: unit.name, branchName: unit.branchName, church: true },
     pushBody: `You now lead ${unit.name} in the ${unit.branchName} branch.`,
+    pushUrl: "/dashboard/church",
+  });
+}
+
+/**
+ * Workers added to or moved into a church unit (user request, 19 October): its
+ * leader hears who joined, by first name, unless the leader added them.
+ */
+export async function notifyUnitWorkersAdded(input: { unitId: number; workerIds: string[]; actorId: string }) {
+  if (!input.workerIds.length) return;
+  const [unit] = await db
+    .select({ name: schema.churchUnits.name, leaderId: schema.churchAssignments.userId })
+    .from(schema.churchUnits)
+    .innerJoin(schema.churchAssignments, and(eq(schema.churchAssignments.unitId, schema.churchUnits.id), eq(schema.churchAssignments.role, "unit_leader")))
+    .where(eq(schema.churchUnits.id, input.unitId))
+    .limit(1);
+  if (!unit || unit.leaderId === input.actorId) return;
+  const people = await db.select({ name: schema.users.name }).from(schema.users).where(inArray(schema.users.id, input.workerIds));
+  const names = people.map(person => person.name?.trim().split(/\s+/)[0]).filter((name): name is string => Boolean(name && !name.includes("@")));
+  const count = input.workerIds.length;
+  const who = names.length === 1 && count === 1 ? names[0]! : `${count} ${count === 1 ? "person" : "people"}`;
+  await notify({
+    userIds: [unit.leaderId],
+    kind: "unit_workers_added",
+    payload: { unitName: unit.name, names: names.slice(0, 5), count },
+    pushBody: `${who} joined ${unit.name} as ${count === 1 ? "a worker" : "workers"}.`,
     pushUrl: "/dashboard/church",
   });
 }

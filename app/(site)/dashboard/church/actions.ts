@@ -6,6 +6,11 @@ import { assignChurchBranchMembership, assignChurchMember, changeChurchUnitLeade
 import type { ChurchRole } from "@/lib/church/permissions";
 import type { OldLeaderPlacement } from "@/lib/db/queries/church-organisation";
 
+async function notifyWorkersJoined(unitId: number, workerIds: string[], actorId: string) {
+  try { const { notifyUnitWorkersAdded } = await import("@/lib/community/notify"); await notifyUnitWorkersAdded({ unitId, workerIds, actorId }); }
+  catch (error) { console.error("unit workers notification failed", error); }
+}
+
 /** The appointment is saved already; a failed notification must not report the save as failed. */
 async function notifyNewUnitLeader(userId: string, unitId: number) {
   try { const { notifyChurchUnitLeader } = await import("@/lib/community/notify"); await notifyChurchUnitLeader({ userId, unitId }); }
@@ -54,6 +59,7 @@ export async function addUnitWorkers(input: { unitId: number; userIds: string[] 
     if (!place?.unit?.leader) return { ok: false as const, error: "Appoint a unit leader before adding workers." };
     const ids = [...new Set(input.userIds)].slice(0, 50);
     for (const userId of ids) await assignChurchMember(session.user.id, { userId, role: "worker", branchId: place.branch.id, unitId: place.unit.id, supervisorId: place.unit.leader.userId });
+    await notifyWorkersJoined(place.unit.id, ids, session.user.id);
     revalidatePath("/dashboard", "layout");
     return { ok: true as const, count: ids.length };
   } catch (error) { if (error instanceof CommunityError) return { ok: false as const, error: error.message }; throw error; }
@@ -76,6 +82,7 @@ export async function moveUnitWorker(input: { userId: string; unitId: number }) 
     if (!target) return { ok: false as const, error: "Choose one of your units." };
     if (!target.leaderId) return { ok: false as const, error: `Appoint a leader for ${target.name} first.` };
     await assignChurchMember(session.user.id, { userId: input.userId, role: "worker", branchId: target.branchId, unitId: target.id, supervisorId: target.leaderId });
+    await notifyWorkersJoined(target.id, [input.userId], session.user.id);
     revalidatePath("/dashboard", "layout");
     return { ok: true as const, unitName: target.name };
   } catch (error) { if (error instanceof CommunityError) return { ok: false as const, error: error.message }; throw error; }
@@ -93,8 +100,10 @@ export async function renameChurchPlaceAction(input: { kind: "branch" | "unit"; 
 export async function changeUnitLeader(input: { unitId: number; userId: string; supervisorId: string | null; oldLeader: OldLeaderPlacement }) {
   try {
     const session = await actor();
-    await changeChurchUnitLeader(session.user.id, input);
+    const result = await changeChurchUnitLeader(session.user.id, input);
     await notifyNewUnitLeader(input.userId, input.unitId);
+    // The previous leader moved into another unit as a worker: that unit's leader hears it.
+    if (input.oldLeader.kind === "unit") await notifyWorkersJoined(input.oldLeader.unitId, [result.previousLeaderId], session.user.id);
     revalidatePath("/dashboard", "layout");
     return { ok: true as const };
   } catch (error) { if (error instanceof CommunityError) return { ok: false as const, error: error.message }; throw error; }

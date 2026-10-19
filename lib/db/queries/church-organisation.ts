@@ -365,5 +365,6 @@ export async function changeChurchUnitLeader(actorId: string, input: { unitId: n
       await tx.update(s.churchAssignments).set({ role: "worker", supervisorId: input.userId, assignedBy: actorId, updatedAt: new Date() })
         .where(eq(s.churchAssignments.userId, old.userId));
     } else throw new CommunityError("Choose where the previous leader goes.");
+    return { previousLeaderId: old.userId };
   });
 }
