@@ -420,7 +420,9 @@ export function activityKeyNumbers(
   const parts: string[] = [];
   const config = activityKindConfig(activity.kind);
   if (config.key === "outreach") {
-    parts.push(`${activity.reachedOnline + activity.reachedOffline} reached`);
+    // A broadcast may go out to an unknown number of people, saved as 0.
+    const reached = activity.reachedOnline + activity.reachedOffline;
+    parts.push(reached > 0 ? `${reached} reached` : "Reach not counted");
   } else if (config.people === "follow_up") {
     parts.push(plural(activity.followUps, "follow-up"));
   } else {
