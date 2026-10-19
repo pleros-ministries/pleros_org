@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition, type ReactNode } from "react";
-import { ArrowRightIcon, ArrowRightLeftIcon, CheckIcon, PencilIcon, SearchIcon, UserMinusIcon, UserPlusIcon } from "lucide-react";
+import { ArrowRightIcon, ArrowRightLeftIcon, CheckIcon, ChevronDownIcon, PencilIcon, SearchIcon, UserMinusIcon, UserPlusIcon } from "lucide-react";
 import { addChurchPlace, addUnitWorkers, changeUnitLeader, findChurchMembers, moveUnitWorker, removeUnitWorker, renameChurchPlaceAction, saveChurchAssignment, saveChurchBranchMembership } from "@/app/(site)/dashboard/church/actions";
 import { ActionMenu } from "@/components/community/action-menu";
 import { CrumbLabel } from "@/components/dashboard/shell/breadcrumbs";
@@ -218,39 +218,61 @@ export function AppointLeader({ place, role, supervisorId, moveTargets = [] }: {
 
 /** Paper: Pleros-church-allocation. Workers join one unit under its leader. */
 /** Inline rename for a branch or unit (user request, 19 October). */
-export function RenamePlace({ kind, id, name }: { kind: "branch" | "unit"; id: number; name: string }) {
+function RenameForm({ kind, id, name, onClose }: { kind: "branch" | "unit"; id: number; name: string; onClose: () => void }) {
   const router = useRouter();
-  const [editing, setEditing] = useState(false), [value, setValue] = useState(name), [error, setError] = useState<string | null>(null), [pending, start] = useTransition();
-  if (!editing) return <button type="button" className={`${styles.quiet} inline-flex items-center gap-1`} onClick={() => { setValue(name); setError(null); setEditing(true); }}><PencilIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" />Rename</button>;
+  const [value, setValue] = useState(name), [error, setError] = useState<string | null>(null), [pending, start] = useTransition();
   function save() {
     const next = value.trim();
     if (!next) { setError("Enter a name."); return; }
-    if (next === name) { setEditing(false); return; }
+    if (next === name) { onClose(); return; }
     start(async () => {
       const result = await renameChurchPlaceAction({ kind, id, name: next });
       if (!result.ok) { setError(result.error); return; }
-      setEditing(false); router.refresh();
+      onClose(); router.refresh();
     });
   }
   return <form className="grid basis-full gap-2.5" onSubmit={event => { event.preventDefault(); save(); }}>
     <label className={forms.field}>{kind === "branch" ? "Branch name" : "Unit name"}<input value={value} onChange={event => setValue(event.target.value)} maxLength={100} autoFocus disabled={pending} aria-invalid={error ? true : undefined} /></label>
     <Problem error={error} />
-    <div className="flex gap-2"><button type="submit" className={styles.btn} data-primary="" disabled={pending}>{pending ? "Saving…" : "Save name"}</button><button type="button" className={styles.btn} disabled={pending} onClick={() => setEditing(false)}>Cancel</button></div>
+    <div className="flex gap-2"><button type="submit" className={styles.btn} data-primary="" disabled={pending}>{pending ? "Saving…" : "Save name"}</button><button type="button" className={styles.btn} disabled={pending} onClick={onClose}>Cancel</button></div>
   </form>;
+}
+
+/** Inline rename for a branch or unit (user request, 19 October). */
+export function RenamePlace({ kind, id, name }: { kind: "branch" | "unit"; id: number; name: string }) {
+  const [editing, setEditing] = useState(false);
+  if (editing) return <RenameForm kind={kind} id={id} name={name} onClose={() => setEditing(false)} />;
+  return <button type="button" className={`${styles.quiet} inline-flex items-center gap-1`} onClick={() => setEditing(true)}><PencilIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" />Rename</button>;
 }
 
 type MoveTarget = { id: number; name: string; branchId: number; branchName: string; leaderId: string | null };
 
-/** Jump between the units a pastor manages without going back to Structure (user request, 19 October). */
-function UnitSwitcher({ unitId, units }: { unitId: number; units: MoveTarget[] }) {
+/**
+ * The unit's name is its own switcher, with rename beside it, so the page
+ * opens without extra rows of controls (user feedback, 19 October). A native
+ * select sits over the name, so phones get their own picker.
+ */
+function UnitTitle({ unit, branchName, units, canManage }: { unit: { id: number; name: string }; branchName: string; units: MoveTarget[]; canManage: boolean }) {
   const router = useRouter();
-  if (units.length < 2) return null;
-  const branches = [...new Set(units.map(unit => unit.branchName))];
-  return <label className={forms.field}><span className="sr-only">Switch unit</span>
-    <select value={unitId} onChange={event => router.push(`/dashboard/church/units/${event.target.value}/workers`)}>
-      {branches.map(branch => <optgroup key={branch} label={branch}>{units.filter(unit => unit.branchName === branch).map(unit => <option key={unit.id} value={unit.id}>{unit.name}{unit.leaderId ? "" : " · needs a leader"}</option>)}</optgroup>)}
-    </select>
-  </label>;
+  const [renaming, setRenaming] = useState(false);
+  if (renaming) return <RenameForm key={unit.name} kind="unit" id={unit.id} name={unit.name} onClose={() => setRenaming(false)} />;
+  const switchable = canManage && units.length > 1;
+  const branches = [...new Set(units.map(row => row.branchName))];
+  return <div className={styles.heading}><div className="min-w-0">
+    <div className="flex min-w-0 items-center gap-1">
+      <span className="relative inline-flex min-w-0 items-center gap-1">
+        <h1 className="truncate">{unit.name}</h1>
+        {switchable ? <>
+          <ChevronDownIcon className="size-5 shrink-0 text-(--color-community-blue)" strokeWidth={2.2} aria-hidden="true" />
+          <select aria-label="Switch unit" className="absolute inset-0 cursor-pointer opacity-0" value={unit.id} onChange={event => router.push(`/dashboard/church/units/${event.target.value}/workers`)}>
+            {branches.map(branch => <optgroup key={branch} label={branch}>{units.filter(row => row.branchName === branch).map(row => <option key={row.id} value={row.id}>{row.name}{row.leaderId ? "" : " · needs a leader"}</option>)}</optgroup>)}
+          </select>
+        </> : null}
+      </span>
+      {canManage ? <button type="button" aria-label={`Rename ${unit.name}`} title="Rename" onClick={() => setRenaming(true)} className="grid size-8 shrink-0 place-items-center rounded-full text-(--color-community-muted) hover:bg-(--color-community-canvas) hover:text-(--color-community-ink)"><PencilIcon className="size-4" strokeWidth={2} aria-hidden="true" /></button> : null}
+    </div>
+    <p className={styles.sub}>{branchName} branch</p>
+  </div></div>;
 }
 
 /** Move a worker to another unit or take them out of this one (Pastors and Branch Pastors, user request 19 October). */
@@ -308,8 +330,7 @@ export function AddWorkers({ place, moveTargets = [] }: { place: ChurchPlace; mo
   }
   return <ChurchPage>
     <CrumbLabel href={`/dashboard/church/units/${unit.id}/workers`} label={unit.name} />
-    <ChurchHeading title={unit.name} sub={`${place.branch.name} branch`} />
-    {canManage ? <UnitSwitcher unitId={unit.id} units={moveTargets} /> : null}
+    <UnitTitle unit={unit} branchName={place.branch.name} units={moveTargets} canManage={canManage} />
     {/* Facts, not a destination: leader and worker count as plain rows (user feedback, 19 October). */}
     <div className={styles.panel}>
       <div className={`${styles.kv} items-center`}><span>Unit leader</span><span className="flex min-w-0 items-center gap-3">
@@ -318,7 +339,6 @@ export function AddWorkers({ place, moveTargets = [] }: { place: ChurchPlace; mo
       </span></div>
       <div className={styles.kv}><span>Workers</span><b>{unit.workers.length}</b></div>
     </div>
-    {canManage ? <RenamePlace key={unit.name} kind="unit" id={unit.id} name={unit.name} /> : null}
     {unit.leader ? <>
       <div className={styles.sectionTitle}><h2>Add people</h2></div>
       <PeopleSearch key={round} multiple chosen={chosen} onChange={setChosen} exclude={unit.workers.map(worker => worker.userId)} blocked={person => {
