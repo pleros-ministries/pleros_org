@@ -27,7 +27,7 @@ import type {
 export const DEMO_STATE_VERSION = 2 as const;
 
 /** Mirrors the live rules in `lib/sogp/discipleship.ts` (pinned by a test, not imported: that module uses node:crypto). */
-export const DEMO_GROUPS_LED_MAX = 5;
+export const DEMO_GROUPS_LED_MAX = 20;
 export const DEMO_GROUP_NAME_MIN = 3;
 export const DEMO_GROUP_NAME_MAX = 60;
 
