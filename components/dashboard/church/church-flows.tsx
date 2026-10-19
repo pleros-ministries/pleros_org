@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition, type ReactNode } from "react";
-import { ArrowRightIcon, ArrowRightLeftIcon, CheckIcon, PencilIcon, SearchIcon, UserMinusIcon, UserPlusIcon, UsersRoundIcon } from "lucide-react";
+import { ArrowRightIcon, ArrowRightLeftIcon, CheckIcon, PencilIcon, SearchIcon, UserMinusIcon, UserPlusIcon } from "lucide-react";
 import { addChurchPlace, addUnitWorkers, changeUnitLeader, findChurchMembers, moveUnitWorker, removeUnitWorker, renameChurchPlaceAction, saveChurchAssignment, saveChurchBranchMembership } from "@/app/(site)/dashboard/church/actions";
 import { ActionMenu } from "@/components/community/action-menu";
 import { CrumbLabel } from "@/components/dashboard/shell/breadcrumbs";
@@ -310,12 +310,15 @@ export function AddWorkers({ place, moveTargets = [] }: { place: ChurchPlace; mo
     <CrumbLabel href={`/dashboard/church/units/${unit.id}/workers`} label={unit.name} />
     <ChurchHeading title={unit.name} sub={`${place.branch.name} branch`} />
     {canManage ? <UnitSwitcher unitId={unit.id} units={moveTargets} /> : null}
-    <PlaceRow title={unit.name} meta={unit.leader ? `${unit.leader.name} · Unit leader` : "No leader yet"}
-      end={<span className={styles.pill} data-tone={unit.leader ? undefined : "risk"}>{unit.leader ? plural(unit.workers.length, "worker") : "Needs a leader"}</span>} />
-    {canManage ? <div className="flex flex-wrap items-start gap-x-4 gap-y-2.5">
-      <RenamePlace key={unit.name} kind="unit" id={unit.id} name={unit.name} />
-      {unit.leader ? <Link href={`/dashboard/church/units/${unit.id}/leader`} className={`${styles.quiet} inline-flex items-center gap-1`}><UsersRoundIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" />Change leader</Link> : null}
-    </div> : null}
+    {/* Facts, not a destination: leader and worker count as plain rows (user feedback, 19 October). */}
+    <div className={styles.panel}>
+      <div className={`${styles.kv} items-center`}><span>Unit leader</span><span className="flex min-w-0 items-center gap-3">
+        <b className="truncate">{unit.leader?.name ?? "No leader yet"}</b>
+        {canManage ? <Link href={`/dashboard/church/units/${unit.id}/leader`} className={styles.quiet}>{unit.leader ? "Change" : "Appoint"}</Link> : null}
+      </span></div>
+      <div className={styles.kv}><span>Workers</span><b>{unit.workers.length}</b></div>
+    </div>
+    {canManage ? <RenamePlace key={unit.name} kind="unit" id={unit.id} name={unit.name} /> : null}
     {unit.leader ? <>
       <div className={styles.sectionTitle}><h2>Add people</h2></div>
       <PeopleSearch key={round} multiple chosen={chosen} onChange={setChosen} exclude={unit.workers.map(worker => worker.userId)} blocked={person => {
