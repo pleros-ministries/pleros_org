@@ -9,7 +9,6 @@ import { canAccessCommunity, getCommunityContext } from "@/lib/community/context
 import { getCommunityDiscipleship } from "@/lib/db/queries/community-discipleship";
 import { getDiscipleshipDashboard } from "@/lib/db/queries/sogp-discipleship";
 import { getLeaderEpisodeQuestions, getOwnEpisodeQuestions } from "@/lib/db/queries/sogp-episode-questions";
-import { groupOversightEnabled } from "@/lib/db/queries/oversight-tree";
 
 export const metadata: Metadata = { title: "Discipleship group" };
 
@@ -64,7 +63,6 @@ export default async function DiscipleshipGroupRoute({ params, searchParams }: {
       colourway={led.findIndex(group => group.groupId === groupId) % 2 === 1 ? "slate" : undefined}
       initialTab={TABS.includes(tab as LeaderTab) ? tab as LeaderTab : "disciples"}
       initialPanel={panel === "create" || panel === "invite" ? panel : null}
-      addByName={groupOversightEnabled()}
       discussion={discussion}
     />
   </SogpQueryProvider>;

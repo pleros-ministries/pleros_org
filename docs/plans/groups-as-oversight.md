@@ -60,11 +60,11 @@ The Pastor's direction from 19 October: groups replace the church org chart. The
    - Keep the `pastor` and `branch_pastor` rows and `church_branch_pastors`.
    - Hide the unit and appointment screens and redirect them.
    - Keep the data in place, so a rollback is possible, until production has run on groups for a while. A later migration drops units and the worker and leader rows.
-9. **Rollout.** Ship behind `DASHBOARD_GROUP_OVERSIGHT` (on by default once verified). Migration 0068 is applied separately, after review.
+9. **Rollout.** Straight on main, without a flag (user decision, 19 October). Migration 0069 was applied after review.
 
 ## Status (19 October)
 
-Steps 1 to 5 and the group rules are built and pushed. Everything runs only with `DASHBOARD_GROUP_OVERSIGHT=1`. Production is still on the church structure until the flag is turned on. Migration 0069 is applied.
+Built and live on main: steps 1 to 5 and the group rules. The flag was removed by user decision (19 October), and migration 0069 is applied.
 
 ## Order of work
 

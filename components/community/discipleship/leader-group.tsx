@@ -49,7 +49,7 @@ function discipleMeta(disciple: DiscipleSummary) {
  * first), discussion, check-ins and prayer requests, with the invite and
  * group settings in the hero. Each disciple opens their own page.
  */
-export function LeaderGroupView({ data, episodeQuestions, colourway, initialTab, initialPanel = null, addByName = false, discussion }: {
+export function LeaderGroupView({ data, episodeQuestions, colourway, initialTab, initialPanel = null, addByName = true, discussion }: {
   data: DiscipleshipDashboardData;
   episodeQuestions: LeaderEpisodeQuestion[];
   colourway?: "slate";

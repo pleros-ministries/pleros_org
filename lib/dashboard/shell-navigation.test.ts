@@ -26,7 +26,7 @@ describe("connected dashboard navigation", () => {
     const ordinary = dashboardWorkspace(buildDashboardNavigation(member));
     expect(ordinary.map(item => item.label)).toEqual(["My learning"]);
     expect(ordinary.some(item => item.href === "/dashboard/church")).toBe(false);
-    expect(dashboardWorkspace(buildDashboardNavigation({ ...member, churchOversight: true })).some(item => item.label === "Church oversight")).toBe(true);
+    expect(dashboardWorkspace(buildDashboardNavigation({ ...member, groupOversight: true })).some(item => item.label === "Oversight")).toBe(true);
   });
   test("staff receive a role-scoped workspace destination", () => {
     const cases = [
@@ -104,11 +104,7 @@ describe("groups as oversight navigation", () => {
     expect(oversightItems({ ...member, groupOversight: true })).toEqual([expect.objectContaining({ label: "Oversight", href: "/dashboard/community/oversight" })]);
   });
 
-  test("while the flag is on, an old church placement alone no longer adds a church page", () => {
+  test("an old church placement alone no longer adds a church page", () => {
     expect(oversightItems({ ...member, groupOversight: false, churchMember: true, churchOversight: true })).toEqual([]);
-  });
-
-  test("with the flag off, the church-structure entries stay", () => {
-    expect(oversightItems({ ...member, churchOversight: true }).map(item => item.label)).toEqual(["Church oversight"]);
   });
 });

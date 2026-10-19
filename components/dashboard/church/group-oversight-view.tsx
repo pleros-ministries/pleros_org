@@ -5,6 +5,7 @@ import { BellOffIcon, ChevronRightIcon, LockIcon, MessageCircleQuestionIcon } fr
 
 import styles from "@/components/community/discipleship/discipleship-group.module.css";
 import { Initials } from "@/components/community/discipleship/shared";
+import { groupIcon } from "@/components/community/groups/group-hero";
 import { MessageButton } from "@/components/community/messages/message-button";
 import type { GroupOversightData, GroupOversightPerson } from "@/lib/db/queries/group-oversight";
 
@@ -110,7 +111,8 @@ export function GroupOversightOverview({ data }: { data: GroupOversightData }) {
       <div className={styles.panel}><ul className={styles.list}>
         {data.groups.map((group, index) => {
           const body = <>
-            <Mark text={short(group.name)} index={index} />
+            {/* The same illustrated cut as Community Home's group cards, alternating colourways oldest first. */}
+            <span className="size-10 shrink-0 rounded-[10px] bg-cover bg-center" style={{ backgroundColor: index % 2 ? "#e6ecfc" : "#e3d8f8", ...groupIcon(index % 2 ? "leading-slate" : "leading") }} aria-hidden="true" />
             <span className={styles.rowCopy}><span className={styles.rowTitle}>{group.name}</span><span className={styles.rowMeta}>{plural(group.members, "member")}</span></span>
             <Rate done={group.reportedToday} total={group.members} />
           </>;

@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 import * as s from "@/lib/db/schema";
 import { CommunityError } from "@/lib/community/errors";
 import { churchBranchIds } from "@/lib/church/permissions";
-import { getChurchAssignment, requireChurchReportAccess } from "@/lib/db/queries/church-organisation";
+import { getChurchAssignment } from "@/lib/db/queries/church-organisation";
 import type { Tx } from "./outreach-contacts";
 import { decideOversight, OVERSIGHT_MAX_DEPTH, wouldCreateLoop, type OversightViewer } from "@/lib/oversight/tree";
 
@@ -17,11 +17,6 @@ import { decideOversight, OVERSIGHT_MAX_DEPTH, wouldCreateLoop, type OversightVi
 
 type Executor = typeof db | Tx;
 
-/**
- * Opt-in (`DASHBOARD_GROUP_OVERSIGHT=1`) until the Pastor's call moves people
- * into groups; off keeps the church-structure Oversight and report access.
- */
-export function groupOversightEnabled() { return process.env.DASHBOARD_GROUP_OVERSIGHT === "1"; }
 
 /** Serialises every change to who oversees whom, so two joins cannot build a loop between them. */
 export async function lockOversightTree(tx: Tx) {
@@ -119,10 +114,9 @@ export async function leadsAnyMembers(userId: string): Promise<boolean> {
   return Boolean(row);
 }
 
-/** Report access by whichever oversight model is live (`DASHBOARD_GROUP_OVERSIGHT`). */
+/** Report access: the person's overseers up the tree, the Pastor, their branch pastor and admins. */
 export async function requireReportAccess(viewerId: string, subjectId: string) {
-  if (groupOversightEnabled()) await requireOversight(viewerId, subjectId);
-  else await requireChurchReportAccess(viewerId, subjectId);
+  await requireOversight(viewerId, subjectId);
 }
 
 /** Someone under a focus person: who oversees them, through which group, and how far down. */

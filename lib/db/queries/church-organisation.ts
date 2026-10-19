@@ -258,36 +258,8 @@ async function readHasChurchDirectReports(userId: string) {
 export const getChurchAssignment = cache(readChurchAssignment);
 export const hasChurchDirectReports = cache(readHasChurchDirectReports);
 
-/** Units a Pastor or Branch Pastor can move workers into: their branches' units that have a leader. */
-export async function listWorkerMoveTargets(viewerId: string) {
-  requireEnabled();
-  const viewer = await getChurchAssignment(viewerId);
-  if (!canManageChurchAssignments(viewer)) return [];
-  const branchFilter = viewer!.role === "branch_pastor" ? inArray(s.churchUnits.branchId, churchBranchIds(viewer!)) : undefined;
-  const rows = await db.select({ id: s.churchUnits.id, name: s.churchUnits.name, branchId: s.churchUnits.branchId, branchName: s.churchBranches.name, leaderId: s.churchAssignments.userId })
-    .from(s.churchUnits)
-    .innerJoin(s.churchBranches, eq(s.churchBranches.id, s.churchUnits.branchId))
-    .leftJoin(s.churchAssignments, and(eq(s.churchAssignments.unitId, s.churchUnits.id), eq(s.churchAssignments.role, "unit_leader")))
-    .where(branchFilter);
-  return rows.map(row => ({ id: row.id, name: row.name, branchId: row.branchId, branchName: row.branchName, leaderId: row.leaderId }))
-    .sort((a, b) => a.branchName.localeCompare(b.branchName) || a.name.localeCompare(b.name));
-}
 
 /** A Pastor (any branch) or Branch Pastor (their branches) takes a worker out of their unit (user request, 19 October). */
-export async function removeChurchWorker(actorId: string, userId: string) {
-  requireEnabled();
-  return transactionDb.transaction(async (tx) => {
-    await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended('pleros:church-assignments', 0))`);
-    const actor = await loadChurchAssignmentForTransaction(tx, actorId);
-    if (!actor || !canManageChurchAssignments(actor)) throw new CommunityError("Only a pastor can remove workers.");
-    const current = await loadChurchAssignmentForTransaction(tx, userId);
-    if (!current || current.role !== "worker") throw new CommunityError("This person is no longer a worker.");
-    if (actor.role === "branch_pastor" && (current.branchId === null || !churchBranchIds(actor).includes(current.branchId))) throw new CommunityError("Manage only workers in your branch.");
-    const [dependent] = await tx.select({ id: s.churchAssignments.userId }).from(s.churchAssignments).where(eq(s.churchAssignments.supervisorId, userId)).limit(1);
-    if (dependent) throw new CommunityError("Reassign the people who report to them first.");
-    await tx.delete(s.churchAssignments).where(and(eq(s.churchAssignments.userId, userId), eq(s.churchAssignments.role, "worker")));
-  });
-}
 
 /** Renames a branch (the Pastor) or a unit (the Pastor, or a Branch Pastor in their branches); user request, 19 October. */
 export async function renameChurchPlace(actorId: string, input: { kind: "branch" | "unit"; id: number; name: string }) {
@@ -317,54 +289,3 @@ export async function renameChurchPlace(actorId: string, input: { kind: "branch"
   }
 }
 
-/**
- * Replaces a unit's leader (user request, 19 October): the new leader takes the
- * unit and its workers report to them. The pastor chooses where the old leader
- * goes: a worker here, a worker in another led unit, or out of the units.
- */
-export type OldLeaderPlacement = { kind: "stay" } | { kind: "unit"; unitId: number } | { kind: "remove" };
-export async function changeChurchUnitLeader(actorId: string, input: { unitId: number; userId: string; supervisorId: string | null; oldLeader: OldLeaderPlacement }) {
-  requireEnabled();
-  return transactionDb.transaction(async (tx) => {
-    await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended('pleros:church-assignments', 0))`);
-    const actor = await loadChurchAssignmentForTransaction(tx, actorId);
-    if (!actor || !canManageChurchAssignments(actor)) throw new CommunityError("Only a pastor can change a unit leader.");
-    const [unit] = await tx.select({ id: s.churchUnits.id, branchId: s.churchUnits.branchId }).from(s.churchUnits).where(eq(s.churchUnits.id, input.unitId));
-    if (!unit) throw new CommunityError("This unit could not be found.");
-    if (actor.role === "branch_pastor" && !churchBranchIds(actor).includes(unit.branchId)) throw new CommunityError("Manage only units in your branch.");
-    const [old] = await tx.select({ userId: s.churchAssignments.userId, supervisorId: s.churchAssignments.supervisorId }).from(s.churchAssignments)
-      .where(and(eq(s.churchAssignments.unitId, unit.id), eq(s.churchAssignments.role, "unit_leader"))).limit(1);
-    if (!old) throw new CommunityError("This unit has no leader yet. Appoint one instead.");
-    if (old.userId === input.userId) throw new CommunityError("They already lead this unit.");
-    const current = await loadChurchAssignmentForTransaction(tx, input.userId);
-    if (current && !(current.role === "worker" && current.unitId === unit.id)) throw new CommunityError("This person already has a church role elsewhere. Move them first.");
-    const [user] = await tx.select({ id: s.users.id }).from(s.users).where(eq(s.users.id, input.userId));
-    if (!user) throw new CommunityError("Choose an existing member.");
-    const supervisorId = old.supervisorId ?? input.supervisorId;
-    const parent = supervisorId ? await loadChurchAssignmentForTransaction(tx, supervisorId) : null;
-    if (!supervisorId || !validChurchParent("unit_leader", parent, unit.branchId, unit.id)) throw new CommunityError("Appoint a branch pastor for this branch first.");
-    const leader = { userId: input.userId, role: "unit_leader" as const, branchId: unit.branchId, unitId: unit.id, supervisorId, assignedBy: actorId };
-    await tx.insert(s.churchAssignments).values(leader).onConflictDoUpdate({ target: s.churchAssignments.userId, set: { ...leader, updatedAt: new Date() } });
-    await tx.update(s.churchAssignments).set({ supervisorId: input.userId, updatedAt: new Date() })
-      .where(and(eq(s.churchAssignments.supervisorId, old.userId), eq(s.churchAssignments.unitId, unit.id), eq(s.churchAssignments.role, "worker")));
-    const placement = input.oldLeader;
-    if (placement?.kind === "unit") {
-      if (placement.unitId === unit.id) throw new CommunityError("Choose a different unit for the previous leader.");
-      const [target] = await tx.select({ id: s.churchUnits.id, branchId: s.churchUnits.branchId }).from(s.churchUnits).where(eq(s.churchUnits.id, placement.unitId));
-      if (!target || (actor.role === "branch_pastor" && !churchBranchIds(actor).includes(target.branchId))) throw new CommunityError("Choose a unit you manage.");
-      const [targetLeader] = await tx.select({ userId: s.churchAssignments.userId }).from(s.churchAssignments)
-        .where(and(eq(s.churchAssignments.unitId, target.id), eq(s.churchAssignments.role, "unit_leader"))).limit(1);
-      if (!targetLeader) throw new CommunityError("That unit needs a leader before anyone can join it.");
-      await tx.update(s.churchAssignments).set({ role: "worker", branchId: target.branchId, unitId: target.id, supervisorId: targetLeader.userId, assignedBy: actorId, updatedAt: new Date() })
-        .where(eq(s.churchAssignments.userId, old.userId));
-    } else if (placement?.kind === "remove") {
-      const [dependent] = await tx.select({ id: s.churchAssignments.userId }).from(s.churchAssignments).where(eq(s.churchAssignments.supervisorId, old.userId)).limit(1);
-      if (dependent) throw new CommunityError("Someone still reports to the previous leader. Move them first.");
-      await tx.delete(s.churchAssignments).where(eq(s.churchAssignments.userId, old.userId));
-    } else if (placement?.kind === "stay") {
-      await tx.update(s.churchAssignments).set({ role: "worker", supervisorId: input.userId, assignedBy: actorId, updatedAt: new Date() })
-        .where(eq(s.churchAssignments.userId, old.userId));
-    } else throw new CommunityError("Choose where the previous leader goes.");
-    return { previousLeaderId: old.userId };
-  });
-}

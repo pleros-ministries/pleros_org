@@ -57,27 +57,26 @@ All authentication emails—SOGP OTP, password reset, email verification, staff 
 
 ### Groups as oversight
 
-Pastor, 19 October; plan in `docs/plans/groups-as-oversight.md`. Groups replace the church org chart: the leader of the group you are in is your overseer.
-- One overseer per person: one active membership per user. Joining needs a one-tap accept. Branch pastor status and scope survive the retired org chart.
+Pastor, 19 October; plan in `docs/plans/groups-as-oversight.md`. Groups replace the church org chart: the leader of the group you are in is your overseer. This is the only model on main, with no flag (user decision, 19 October). The unit, unit-leader and worker rules further down are retired history.
+- One overseer per person: one active membership per user. Joining needs a one-tap accept. Branch pastor status and scope survive underneath.
 - Migration 0069 (applied 19 October) keys groups, memberships and invitations on users (`leader_user_id`, `member_user_id`, `recipient_user_id`). Triggers fill these from the enrolment, so enrolment-keyed writes keep working.
-- Every join takes `lockOversightTree` and `assertNoOversightLoop`, which walks the whole chain (`loadOverseerChain`). The pure rules live in `lib/oversight/tree.ts`.
-- `DASHBOARD_GROUP_OVERSIGHT=1` switches Oversight, report access and the 8 pm reminder onto the tree. It is opt-in until people are in groups; off keeps the church-structure behaviour.
-- With the flag on:
-  - `getGroupOversight` (`lib/db/queries/group-oversight.ts`) shows a leader everyone under them to any depth, the Pastor every group person, and a branch pastor group people placed in their branches plus their own tree. `?under=` opens one person's tree after `canOversee`.
-  - Reports go through `requireReportAccess`, and overseers read the full report including shared meetings.
-  - The reminder audience is group members plus leaders with members.
-  - Navigation shows Oversight to anyone who leads a group with members (`groupOversight`).
-  - Questions waiting stay names and counts only.
+- Every join takes `lockOversightTree` and checks the whole chain for loops (`loadOverseerChain`, `wouldCreateLoop`). The pure rules live in `lib/oversight/tree.ts`.
+- `getGroupOversight` (`lib/db/queries/group-oversight.ts`) is Oversight:
+  - a leader sees everyone under them to any depth;
+  - the Pastor sees every group person;
+  - a branch pastor sees group people placed in their branches, plus their own tree;
+  - `?under=` opens one person's tree after `canOversee`.
+- Reports go through `requireReportAccess` (`canOversee`), and overseers read the full report including shared meetings. The 8 pm reminder goes to group members and leaders with members. Navigation shows Oversight to anyone who leads a group with members, and to the Pastor and branch pastors. Questions waiting stay names and counts only.
 - Quiz answers and written work keep their own rule: the direct leader of an active membership only.
-- Groups UI while the flag is on:
-  - Community Home shows Your group (the group you're in and its leader) beside the location group, then Groups you lead with "+ New group", which opens `?panel=create`. Interest groups sit in their own row.
-  - Leaders add anyone enrolled by name from the group's Invite panel (`searchGroupInvitees`, `inviteToGroupByName`). Results show full names only, never under-18s, and only "In a group", not whose group.
-  - Accepting an invitation while in another group moves the person: `respondToInvitation` with `move`, then `joinGroupInTransaction` with `moveFromCurrent` ends the old membership. The invitation page says so first ("This moves you", "Move to this group").
-- SOGP follow-up into groups while the flag is on: every path that sets a follow-up owner calls `inviteIntoOwnersGroups` (`lib/db/queries/follow-up-group-invites.ts`) after its own write. These paths are enrolment referral and geography routing, `/admin/pastors` (single and bulk), follow-up request approval, the coordinator's owner change and handover. It sends a pending `referral`-origin invitation into the owner's active default group and withdraws an earlier owner's pending one. A failure is logged and never fails the assignment. Owners without an enrolment have no group, so nothing is sent.
-- The org chart is retired while the flag is on:
-  - Unit pages (`/dashboard/church/units/*`, `/branches/[id]/units/new`), `/dashboard/church` and `/dashboard/church/reports` redirect to Oversight. The super-admin's first-time Pastor setup still opens there, and the Pastor goes to Structure.
-  - Structure is the Pastor's only, showing branches, branch pastors and branch placement (`unitsRetired`). The setup steps stop at the branch pastor.
-  - The unit, worker and leader data stays in place for a rollback.
+- Community Home shows Your group (the group you're in and its leader) beside the location group, then Groups you lead with "+ New group", which opens `?panel=create`. Interest groups sit in their own row.
+- Leaders add anyone enrolled by name from the group's Invite panel (`searchGroupInvitees`, `inviteToGroupByName`). Results show full names only, never under-18s, and only "In a group", not whose group. WhatsApp sharing on an invitation is ticked by default.
+- Accepting an invitation while in another group moves the person: `respondToInvitation` with `move`, then `joinGroupInTransaction` with `moveFromCurrent` ends the old membership. The invitation page says so first ("This moves you", "Move to this group").
+- SOGP follow-up into groups: every path that sets a follow-up owner calls `inviteIntoOwnersGroups` (`lib/db/queries/follow-up-group-invites.ts`) after its own write. These paths are enrolment referral and geography routing, `/admin/pastors` (single and bulk), request approval, the coordinator's owner change and handover. It sends a pending `referral`-origin invitation into the owner's active default group and withdraws an earlier owner's pending one. A failure is logged and never fails the assignment.
+- The org chart is retired:
+  - Unit pages, `/dashboard/church` and its reports page redirect to Oversight. `/dashboard/church/reports` remains only for the super-admin's first-time Pastor setup.
+  - Structure is the Pastor's branches, branch pastors and branch placement only (`ChurchStructureView`, `AppointBranchPastor`).
+  - Unit, worker and leader rows stay in the database until a later migration drops them.
+- Leaders can lead up to 20 groups. The default group can be renamed but not closed. Closing a group warns that its people lose their overseer, while the people they lead stay with them.
 
 ### SOGP discipleship groups
 

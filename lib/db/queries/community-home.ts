@@ -11,7 +11,6 @@ import { getCommunityHomeDiscipleship } from "./community-discipleship";
 import { countUnreadConversations } from "./community-messages";
 import { listOwnActiveCommunityGroups } from "./community-groups";
 import { listOwnPendingInvitations } from "./sogp-group-invitations";
-import { groupOversightEnabled } from "./oversight-tree";
 
 /** Read-only, session-owned home. Never creates a group or loads answer text. */
 export async function getCommunityHome() {
@@ -139,8 +138,6 @@ export async function getCommunityHome() {
     joinedGroup: discipleship.joined,
     ledGroups: discipleship.leading.filter(group => !group.paused),
     memberGroups: groups,
-    /** Groups as oversight: Home splits Your group from Groups you lead. */
-    groupOversight: groupOversightEnabled(),
   };
 }
 

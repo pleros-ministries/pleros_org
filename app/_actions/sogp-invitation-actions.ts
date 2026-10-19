@@ -6,7 +6,6 @@ import { acceptLinkOwner } from "@/lib/db/queries/sogp-follow-up-routes";
 import { DiscipleshipError } from "@/lib/db/queries/sogp-discipleship";
 import { getSogpEnrollmentByUserId } from "@/lib/db/queries/sogp";
 import { respondToInvitation, searchGroupInvitees, sendInAppInvitation, withdrawInvitation, type InviteCandidate } from "@/lib/db/queries/sogp-group-invitations";
-import { groupOversightEnabled } from "@/lib/db/queries/oversight-tree";
 import { isPastorAssignedToEnrollment } from "@/lib/db/queries/pastor-followups";
 
 type Result<T = object> = ({ ok: true } & T) | { ok: false; error: string };
@@ -68,7 +67,6 @@ export async function withdrawGroupInvitation(invitationId: number): Promise<Res
 export async function findGroupInvitees(input: { groupId: number; term: string }): Promise<Result<{ people: InviteCandidate[] }>> {
   const session = await getDashboardActionSession();
   if (!session) return { ok: false, error: "Sign in to continue." };
-  if (!groupOversightEnabled()) return { ok: false, error: "Adding people by name isn't available yet." };
   if (!Number.isInteger(input.groupId) || typeof input.term !== "string") return { ok: false, error: "Search by name." };
   try {
     const leader = await getSogpEnrollmentByUserId(session.user.id);
@@ -83,7 +81,6 @@ export async function findGroupInvitees(input: { groupId: number; term: string }
 export async function inviteToGroupByName(input: { groupId: number; enrollmentId: number }): Promise<Result<{ invitationId: number }>> {
   const session = await getDashboardActionSession();
   if (!session) return { ok: false, error: "Sign in to send an invitation." };
-  if (!groupOversightEnabled()) return { ok: false, error: "Adding people by name isn't available yet." };
   if (!Number.isInteger(input.groupId) || !Number.isInteger(input.enrollmentId)) return { ok: false, error: "Choose someone to invite." };
   try {
     const leader = await getSogpEnrollmentByUserId(session.user.id);

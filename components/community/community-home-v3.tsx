@@ -112,28 +112,14 @@ export function CommunityHomeV3({ data, people = null }: { data: CommunityHomeDa
       </div>
     </section> : null}
 
-    {data.groupOversight ? <OversightGroups data={data} /> : <section className={styles.block} aria-labelledby="community-groups">
-      <div className={styles.blockHeading}><h2 id="community-groups">Your groups</h2><Link href="/dashboard/community/groups">See all</Link></div>
-      <div className={styles.groupGrid}>
-        {data.locationGroup ? <GroupCard href={`/dashboard/community/unit/${data.locationGroup.id}`} art="location" title={data.locationGroup.name} meta="Your location group" /> : null}
-        {data.joinedGroup ? <GroupCard href={`/dashboard/community/discipleship/${data.joinedGroup.groupId}`} prefetch={false} art="discipleship" title={data.joinedGroup.groupName} meta="You're a member" /> : null}
-        {data.ledGroups.map((group, index) => <GroupCard key={`led-${group.groupId}`} href={`/dashboard/community/discipleship/${group.groupId}`} prefetch={false} art="leading" colourway={leadColourways[index % leadColourways.length]} title={group.groupName} meta={group.discipleCount ? `${group.discipleCount} ${group.discipleCount === 1 ? "disciple" : "disciples"}` : "Invite your first disciple"} />)}
-        {data.memberGroups.map(group => <GroupCard key={`member-${group.id}`} href={`/dashboard/community/groups/${group.id}`} art={group.privacy === "private" ? "private" : "public"} title={group.name} meta={group.viewerRole === "owner" ? "You own this group" : group.viewerRole === "moderator" ? "You moderate" : "Member"} />)}
-        <Link href="/dashboard/community/groups?create=1" className={styles.newGroup}>
-          <span className={styles.newGroupIcon}><DashboardIcon name="plus" size={16} /></span>
-          New group
-        </Link>
-      </div>
-    </section>}
+    <OversightGroups data={data} />
 
     {people ? <PeopleToBringInPanel people={people} id="community-people" /> : null}
 
     {data.church ? <section className={styles.block} aria-labelledby="community-oversight">
       <div className={styles.blockHeading}><h2 id="community-oversight">Oversight</h2></div>
       <div className={styles.oversightPanel}>
-        {data.church ? data.groupOversight
-          ? <OversightRow href={data.church.href} title="Oversight" description="Reports from the people in your groups" icon="network" tone="lilac" />
-          : <OversightRow href={data.church.href} title="Church oversight" description="Your branch and workers" icon="network" tone="lilac" /> : null}
+        {data.church ? <OversightRow href={data.church.href} title="Oversight" description="Reports from the people in your groups" icon="network" tone="lilac" /> : null}
       </div>
     </section> : null}
   </div>;

@@ -143,7 +143,7 @@ function AddByName({ groupId }: { groupId: number }) {
   </div>;
 }
 
-export function InvitePanel({ group, leaderFirstName, empty, addByName = false }: {
+export function InvitePanel({ group, leaderFirstName, empty, addByName = true }: {
   group: { id: number; name: string; inviteUrl: string };
   leaderFirstName: string;
   /** No disciples yet: also explain how joining works. */

@@ -6,13 +6,11 @@ import * as s from "@/lib/db/schema";
 import { CommunityError } from "@/lib/community/errors";
 import { isDateKey, canReportFor } from "@/lib/community/ministry-report";
 import { planDailyReportReminder } from "@/lib/community/daily-report-reminders";
-import { loadChurchAssignmentForTransaction } from "@/lib/db/queries/church-organisation";
-import { canReadChurchReport } from "@/lib/church/permissions";
 import { loadDailyReportingFacts } from "@/lib/db/queries/church-reports";
 import { lockDailyReporting } from "@/lib/db/queries/daily-report-declarations";
 import { reportRemindersEnabled } from "@/lib/db/queries/daily-report-preferences";
 import { sendPushToUser } from "@/lib/push/send";
-import { canOversee, groupOversightEnabled, isGroupPerson } from "@/lib/db/queries/oversight-tree";
+import { canOversee, isGroupPerson } from "@/lib/db/queries/oversight-tree";
 
 /** Both paths claim the same recipient/Lagos-day key with the in-app write atomically. */
 export async function sendDailyReportReminder(input: { subjectId: string; source: "manual" | "automatic"; reportDate?: string; viewerId?: string; now?: Date }) {
@@ -24,12 +22,9 @@ export async function sendDailyReportReminder(input: { subjectId: string; source
   const url = `/dashboard/community/report?day=${encodeURIComponent(dateKey)}`;
   const claimed = await transactionDb.transaction(async (tx) => {
     await lockDailyReporting(tx, input.subjectId, dateKey);
-    // Who is expected to report, and who may nudge them, follow the live oversight model.
-    const groups = groupOversightEnabled();
-    const expected = groups ? await isGroupPerson(tx, input.subjectId) : Boolean(await loadChurchAssignmentForTransaction(tx, input.subjectId));
-    const authorized = input.source === "automatic" || Boolean(input.viewerId) && (groups
-      ? await canOversee(input.viewerId!, input.subjectId)
-      : canReadChurchReport(await loadChurchAssignmentForTransaction(tx, input.viewerId!), await loadChurchAssignmentForTransaction(tx, input.subjectId)));
+    // Reports are expected from group people; their overseers may nudge them (groups as oversight).
+    const expected = await isGroupPerson(tx, input.subjectId);
+    const authorized = input.source === "automatic" || Boolean(input.viewerId) && await canOversee(input.viewerId!, input.subjectId);
     if (!expected || !authorized) throw new CommunityError("That person is outside your oversight.");
     const facts = await loadDailyReportingFacts(input.subjectId, dateKey);
     const plan = planDailyReportReminder({ now, subjectId: input.subjectId, reportDate: dateKey, expected, authorized, source: input.source, statuses: facts.statuses, alreadyRemindedToday: false });
@@ -71,8 +66,7 @@ export async function runDailyReportReminderDispatcher(now = new Date()) {
   if (!reportRemindersEnabled()) return { enabled: false, sent: 0, failures: 0 };
   if (Number(new Intl.DateTimeFormat("en-GB", { timeZone: "Africa/Lagos", hour: "2-digit", hourCycle: "h23" }).format(now)) < 20) return { enabled: true, sent: 0, failures: 0 };
   const day = new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Lagos" }).format(now);
-  const audience = groupOversightEnabled() ? await groupReminderAudience(day) : await db.select({ userId: s.churchAssignments.userId }).from(s.churchAssignments)
-    .where(sql`not exists (select 1 from ${s.notificationCheckpoints} as checkpoints where checkpoints.key = 'daily-report:' || ${s.churchAssignments}.user_id || ':' || ${day})`);
+  const audience = await groupReminderAudience(day);
   let sent = 0; let failures = 0;
   // Small batches keep database reads bounded by the assigned roster; no public user scan.
   for (let offset = 0; offset < audience.length; offset += 8) {

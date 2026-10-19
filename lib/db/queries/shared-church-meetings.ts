@@ -10,7 +10,7 @@ import { churchBranchIds } from "@/lib/church/permissions";
 import { inputRecord, parseReportContacts, parseSharedMeeting, reportId, reportRequestKey } from "@/lib/community/reporting-v3-input";
 import { requireReportingV3, reportingV3SchemaReady } from "./reporting-v3-gate";
 import { churchOrganisationEnabled, getChurchAssignment, loadChurchAssignmentForTransaction } from "./church-organisation";
-import { groupOversightEnabled, requireReportAccess } from "./oversight-tree";
+import { requireReportAccess } from "./oversight-tree";
 import { lockDailyReporting, clearDeclaredNil } from "./daily-report-declarations";
 import { requireOwnedReportContacts } from "./private-ministry-contacts";
 import { ownReportContacts } from "./ministry-report-v3";
@@ -134,7 +134,5 @@ export async function getScopedSharedMeetingDetails(viewerId: string, subjectId:
   if (!reportingV3SchemaReady()) return new Map<number, ReturnType<typeof sharedDetail> | null>();
   await requireReportAccess(viewerId, subjectId);
   // An overseer reads the full report (user decision, 19 October), shared meetings included.
-  const everything = groupOversightEnabled();
-  const viewer = everything ? null : await getChurchAssignment(viewerId);
-  return new Map((await sharedDetailRows(subjectId, dateKey)).map(row => [row.report.activityId, everything || canUseMeetingUnit(viewer, row.unit) ? sharedDetail(row, subjectId) : null] as const));
+  return new Map((await sharedDetailRows(subjectId, dateKey)).map(row => [row.report.activityId, sharedDetail(row, subjectId)] as const));
 }

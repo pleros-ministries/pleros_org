@@ -19,10 +19,13 @@ test("the default drawer renders only approved roots/workspace, not the legacy d
   expect(html).not.toContain("More destinations");
 });
 test("church tools remain capability-scoped and absent for ordinary learners",()=>{
-  const sections = buildDashboardNavigation({ sogpEnrolled:false,community:false,communityUnitId:null,discipleshipDiscussions:false,managesLocationGroups:false,staffConsole:false,churchAssignments:true,reporting:true });
-  const html = renderToStaticMarkup(<QueryClientProvider client={new QueryClient()}><DashboardMenuNavigation sections={sections} area="you" onArea={()=>{}} /></QueryClientProvider>);
-  expect(html).toContain('href="/dashboard/church"');
-  expect(html).not.toContain('href="/dashboard/community"');
+  // Groups as oversight (19 October): Oversight lives inside Community, for group leaders, the Pastor and branch pastors.
+  const sections = buildDashboardNavigation({ sogpEnrolled:true,community:true,communityUnitId:9,discipleshipDiscussions:true,managesLocationGroups:false,staffConsole:false,groupOversight:true,reporting:true });
+  const html = renderToStaticMarkup(<QueryClientProvider client={new QueryClient()}><DashboardMenuNavigation sections={sections} area="community" onArea={()=>{}} /></QueryClientProvider>);
+  expect(html).toContain('href="/dashboard/community/oversight"');
+  expect(html).not.toContain('href="/dashboard/church"');
+  const ordinary = renderToStaticMarkup(<QueryClientProvider client={new QueryClient()}><DashboardMenuNavigation sections={buildDashboardNavigation({ sogpEnrolled:true,community:true,communityUnitId:9,discipleshipDiscussions:true,managesLocationGroups:false,staffConsole:false,groupOversight:false })} area="community" onArea={()=>{}} /></QueryClientProvider>);
+  expect(ordinary).not.toContain('href="/dashboard/community/oversight"');
 });
 test("the drawer renders the admin workspace without restoring the destination dump",()=>{
   const sections = buildDashboardNavigation({ sogpEnrolled:true,community:true,communityUnitId:9,discipleshipDiscussions:true,managesLocationGroups:false,staffConsole:false,staffWorkspace:"super_admin" });

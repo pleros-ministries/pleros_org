@@ -1,28 +1,19 @@
 import { redirect } from "next/navigation";
-import { canManageChurchAssignments } from "@/lib/church/permissions";
-import { canAccessCommunity, getCommunityContext } from "@/lib/community/context";
 import { getAppSession } from "@/lib/app-session";
-import { getChurchAssignment, hasChurchDirectReports } from "@/lib/db/queries/church-organisation";
-import { getChurchHome } from "@/lib/db/queries/church-home";
-import { ChurchHomeView } from "@/components/dashboard/church/church-home";
-import { groupOversightEnabled } from "@/lib/db/queries/oversight-tree";
+import { getChurchAssignment } from "@/lib/db/queries/church-organisation";
 
 // Reads the session on every request (Cache Components).
 export const instant = false;
 
+/**
+ * The church page is retired (groups as oversight, 19 October): the Pastor's
+ * branches live in Oversight's Structure, everyone else's oversight in groups.
+ * First-time Pastor setup keeps its page.
+ */
 export default async function ChurchPage() {
   const session = await getAppSession();
   if (!session) redirect("/login?returnTo=/dashboard/church");
   const viewer = await getChurchAssignment(session.user.id);
-  // First-time Pastor setup stays on the retained setup controls.
   if (!viewer && session.user.role === "super_admin") redirect("/dashboard/church/reports");
-  // Groups as oversight retires the church page (19 October): the Pastor's branches live in Structure.
-  if (groupOversightEnabled()) redirect(viewer?.role === "pastor" ? "/dashboard/community/oversight/structure" : "/dashboard/community/oversight");
-  // Pastors and Branch Pastors manage structure inside Oversight (user request, 18 October).
-  if (canManageChurchAssignments(viewer)) {
-    const ctx = await getCommunityContext();
-    if (ctx && canAccessCommunity(ctx)) redirect("/dashboard/community/oversight/structure");
-  }
-  const [data, oversees] = await Promise.all([getChurchHome(session.user.id), hasChurchDirectReports(session.user.id)]);
-  return <ChurchHomeView data={data} canOversee={oversees || viewer?.role === "pastor" || viewer?.role === "branch_pastor"} />;
+  redirect(viewer?.role === "pastor" ? "/dashboard/community/oversight/structure" : "/dashboard/community/oversight");
 }

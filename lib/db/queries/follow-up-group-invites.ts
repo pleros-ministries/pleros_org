@@ -5,7 +5,6 @@ import { and, desc, eq, ne } from "drizzle-orm";
 import { db } from "@/lib/db";
 import * as s from "@/lib/db/schema";
 
-import { groupOversightEnabled } from "./oversight-tree";
 import { ensureDiscipleshipGroups } from "./sogp-discipleship";
 
 /**
@@ -19,7 +18,6 @@ import { ensureDiscipleshipGroups } from "./sogp-discipleship";
  * changes, an older pending one is withdrawn so it can't be accepted instead.
  */
 export async function inviteIntoOwnersGroup(input: { enrollmentId: number; ownerUserId: string; invitedBy?: string | null }): Promise<boolean> {
-  if (!groupOversightEnabled()) return false;
   const [[recipient], [owner]] = await Promise.all([
     db.select({ id: s.sogpEnrollments.id, userId: s.sogpEnrollments.userId }).from(s.sogpEnrollments).where(eq(s.sogpEnrollments.id, input.enrollmentId)).limit(1),
     // A group needs its leader's enrolment; an owner without one (a staff pastor) has no group to offer.
