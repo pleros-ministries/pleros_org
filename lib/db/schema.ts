@@ -2177,6 +2177,12 @@ export const discipleshipGroups = pgTable(
     leaderEnrollmentId: integer("leader_enrollment_id")
       .notNull()
       .references(() => sogpEnrollments.id, { onDelete: "cascade" }),
+    /**
+     * The leader as a person, the oversight identity (migration 0069). NOT NULL
+     * in the database and filled from the enrolment by a trigger, so inserts
+     * may leave it out; typed nullable here for that reason.
+     */
+    leaderUserId: text("leader_user_id").references(() => users.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
     inviteCode: text("invite_code").notNull(),
     /** Permanent system group used by branch-authorised follow-up assignments. */
@@ -2201,6 +2207,7 @@ export const discipleshipGroups = pgTable(
       .on(t.leaderEnrollmentId)
       .where(sql`${t.isDefault} = true`),
     index("discipleship_groups_status_idx").on(t.status),
+    index("discipleship_groups_leader_user_idx").on(t.leaderUserId, t.status),
   ],
 );
 
@@ -2214,6 +2221,8 @@ export const discipleshipMemberships = pgTable(
     discipleEnrollmentId: integer("disciple_enrollment_id")
       .notNull()
       .references(() => sogpEnrollments.id, { onDelete: "cascade" }),
+    /** The member as a person (migration 0069; trigger-filled like `leaderUserId`). */
+    memberUserId: text("member_user_id").references(() => users.id, { onDelete: "cascade" }),
     status: discipleshipMembershipStatusEnum("status")
       .notNull()
       .default("active"),
@@ -2233,6 +2242,11 @@ export const discipleshipMemberships = pgTable(
     uniqueIndex("discipleship_memberships_active_disciple_idx")
       .on(t.discipleEnrollmentId)
       .where(sql`${t.status} = 'active'`),
+    // One overseer per person (user decision, 19 October; migration 0069).
+    uniqueIndex("discipleship_memberships_active_member_idx")
+      .on(t.memberUserId)
+      .where(sql`${t.status} = 'active'`),
+    index("discipleship_memberships_member_idx").on(t.memberUserId, t.status),
     index("discipleship_memberships_group_status_idx").on(t.groupId, t.status),
   ],
 );
@@ -2720,6 +2734,8 @@ export const discipleshipGroupInvitations = pgTable("discipleship_group_invitati
   id: serial("id").primaryKey(),
   groupId: integer("group_id").notNull().references(() => discipleshipGroups.id, { onDelete: "cascade" }),
   recipientEnrollmentId: integer("recipient_enrollment_id").notNull().references(() => sogpEnrollments.id, { onDelete: "cascade" }),
+  /** The recipient as a person (migration 0069; trigger-filled). */
+  recipientUserId: text("recipient_user_id").references(() => users.id, { onDelete: "cascade" }),
   invitedBy: text("invited_by").references(() => users.id, { onDelete: "set null" }),
   origin: text("origin").$type<"referral" | "in_app">().notNull(),
   status: text("status").$type<"pending" | "accepted" | "declined" | "withdrawn">().notNull().default("pending"),
@@ -2728,6 +2744,7 @@ export const discipleshipGroupInvitations = pgTable("discipleship_group_invitati
 }, t => [
   uniqueIndex("discipleship_group_invitations_pending_idx").on(t.groupId, t.recipientEnrollmentId).where(sql`${t.status} = 'pending'`),
   index("discipleship_group_invitations_recipient_idx").on(t.recipientEnrollmentId, t.status),
+  index("discipleship_group_invitations_recipient_user_idx").on(t.recipientUserId, t.status),
   index("discipleship_group_invitations_group_idx").on(t.groupId, t.status),
   check("discipleship_group_invitations_origin_check", sql`${t.origin} in ('referral','in_app')`),
   check("discipleship_group_invitations_status_check", sql`${t.status} in ('pending','accepted','declined','withdrawn')`),
