@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { CheckIcon, CopyIcon } from "lucide-react";
 
 import type { DiscipleshipActionResult } from "@/app/(site)/dashboard/sogp/discipleship/_actions";
+import { findGroupInvitees, inviteToGroupByName } from "@/app/_actions/sogp-invitation-actions";
+import type { InviteCandidate } from "@/lib/db/queries/sogp-group-invitations";
 import { useDiscipleshipAction } from "@/components/sogp/discipleship-check-ins";
 import type { DiscipleSummary } from "@/lib/db/queries/sogp-discipleship";
 import { buildDiscipleshipShareMessage } from "@/lib/sogp/discipleship";
@@ -83,11 +85,71 @@ export function StatusStrip({ disciples }: { disciples: DiscipleSummary[] }) {
 }
 
 /** The group's own invite link: copy, share on WhatsApp, the leader's number consent and a fresh link. */
-export function InvitePanel({ group, leaderFirstName, empty }: {
+const CANDIDATE_NOTE: Record<InviteCandidate["state"], string> = {
+  free: "Not in a group yet",
+  in_a_group: "In a group · accepting moves them to yours",
+  in_this_group: "Already in this group",
+  invited: "Invited · waiting for them to accept",
+};
+
+/**
+ * Add someone to the group by name (groups as oversight, 19 October). It sends
+ * an in-app invitation; they join only when they accept, and the invitation
+ * tells them if accepting moves them from another group.
+ */
+function AddByName({ groupId }: { groupId: number }) {
+  const [term, setTerm] = useState("");
+  const [people, setPeople] = useState<InviteCandidate[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [sent, setSent] = useState<Set<number>>(new Set());
+  const [searching, startSearch] = useTransition();
+  const [sending, startSend] = useTransition();
+  const latest = useRef("");
+  useEffect(() => {
+    const value = term.trim();
+    latest.current = value;
+    if (value.length < 2) return;
+    const id = window.setTimeout(() => startSearch(async () => {
+      const result = await findGroupInvitees({ groupId, term: value });
+      if (latest.current !== value) return;
+      if (result.ok) { setPeople(result.people); setError(null); } else setError(result.error);
+    }), 250);
+    return () => window.clearTimeout(id);
+  }, [term, groupId]);
+  const shown = term.trim().length >= 2 ? people : null;
+  const invite = (person: InviteCandidate) => startSend(async () => {
+    setError(null);
+    const result = await inviteToGroupByName({ groupId, enrollmentId: person.enrollmentId });
+    if (!result.ok) { setError(result.error); return; }
+    setSent(current => new Set(current).add(person.enrollmentId));
+  });
+  return <div className={styles.panel}>
+    <div className="grid gap-2.5 p-3.5">
+      <label className="grid gap-1.5 text-[13px] font-medium">Add by name
+        <input type="search" value={term} onChange={event => setTerm(event.target.value)} placeholder="Search by name" autoComplete="off"
+          className="h-10 rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white px-3 text-[16px] font-normal outline-none focus:border-(--color-community-blue)" />
+      </label>
+      {searching && !shown ? <span className={styles.rowMeta}>Searching…</span> : null}
+      {error ? <p role="alert" className={styles.error}>{error}</p> : null}
+    </div>
+    {shown ? shown.length ? <ul className={styles.list}>{shown.map(person => {
+      const done = sent.has(person.enrollmentId) || person.state === "invited";
+      return <li key={person.enrollmentId} className={styles.row}>
+        <Initials name={person.name} />
+        <span className={styles.rowCopy}><span className={styles.rowTitle}>{person.name}</span><span className={styles.rowMeta}>{done ? CANDIDATE_NOTE.invited : CANDIDATE_NOTE[person.state]}</span></span>
+        {person.state === "in_this_group" ? null : <button type="button" className={`${styles.btn} ${styles.mini}`} data-primary={done ? undefined : ""} disabled={done || sending} onClick={() => invite(person)}>{done ? "Invited" : "Invite"}</button>}
+      </li>;
+    })}</ul> : <p className={`${styles.empty} m-0 border-t border-(--color-line) px-3.5 py-3`}>No one matches “{term.trim()}”.</p> : null}
+  </div>;
+}
+
+export function InvitePanel({ group, leaderFirstName, empty, addByName = false }: {
   group: { id: number; name: string; inviteUrl: string };
   leaderFirstName: string;
   /** No disciples yet: also explain how joining works. */
   empty: boolean;
+  /** Groups as oversight: add people by name as well as by link. */
+  addByName?: boolean;
 }) {
   const [copied, setCopied] = useState(false);
   const message = buildDiscipleshipShareMessage(leaderFirstName);
@@ -95,6 +157,7 @@ export function InvitePanel({ group, leaderFirstName, empty }: {
   const shortUrl = group.inviteUrl.replace(/^https?:\/\/(www\.)?/, "");
 
   return <>
+    {addByName ? <AddByName groupId={group.id} /> : null}
     <div className={styles.panel}>
       <div className={styles.invite}>
         <div className={styles.inviteLink}>
@@ -116,7 +179,7 @@ export function InvitePanel({ group, leaderFirstName, empty }: {
       <div className={styles.sectionTitle}><h2>How it works</h2></div>
       <div className={styles.panel}>
         <ol className={styles.steps}>
-          <li><b>1</b><span>Share the link<small>With someone you&apos;re already following up.</small></span></li>
+          <li><b>1</b><span>{addByName ? "Add them by name or share the link" : "Share the link"}<small>{addByName ? "Anyone in Pleros, or someone you’re following up." : "With someone you're already following up."}</small></span></li>
           <li><b>2</b><span>They accept<small>Joining always needs their confirmation; new people enrol in SOGP first.</small></span></li>
           <li><b>3</b><span>Walk with them<small>See their progress, ask check-ins and pray together.</small></span></li>
         </ol>

@@ -176,7 +176,7 @@ const JOIN_BLOCK_COPY: Record<DiscipleshipJoinBlock, string> = {
   own_group: "This is your own discipleship group. Share the link with the people you're walking with.",
   already_in_group:
     "You're already in a discipleship group. Leave your current group first if you'd like to join this one.",
-  circular: "This person is already in your discipleship group, so you can't join theirs.",
+  circular: "You already oversee this group's leader, so you can't join their group.",
   archived: "This discipleship group is no longer active.",
 };
 

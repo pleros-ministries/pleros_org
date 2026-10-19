@@ -43,6 +43,43 @@ function OversightRow({ href, title, description, icon, tone, prefetch }: { href
 }
 
 
+/**
+ * Groups as oversight (Pastor, 19 October): the group you're in, whose leader
+ * looks after you, then the groups you lead with "+ New group". Location and
+ * interest groups stay as they are.
+ */
+function OversightGroups({ data }: { data: CommunityHomeData }) {
+  const firstLed = data.ledGroups[0];
+  const newGroupHref = firstLed ? `/dashboard/community/discipleship/${firstLed.groupId}?panel=create` : "/dashboard/sogp/discipleship";
+  return <>
+    <section className={styles.block} aria-labelledby="community-your-group">
+      <div className={styles.blockHeading}><h2 id="community-your-group">Your group</h2></div>
+      <div className={styles.groupGrid}>
+        {data.joinedGroup
+          ? <GroupCard href={`/dashboard/community/discipleship/${data.joinedGroup.groupId}`} prefetch={false} art="discipleship" tag="Your group" title={data.joinedGroup.groupName} meta={`Led by ${data.joinedGroup.leaderFirstName}`} />
+          : <div className={styles.newGroup} style={{ cursor: "default", color: "var(--color-community-ink)" }}><span className="grid gap-0.5 text-left"><span>Not in a group yet</span><span className={styles.meta}>When a leader adds you, accept here</span></span></div>}
+        {data.locationGroup ? <GroupCard href={`/dashboard/community/unit/${data.locationGroup.id}`} art="location" title={data.locationGroup.name} meta="Your location group" /> : null}
+      </div>
+    </section>
+    <section className={styles.block} aria-labelledby="community-led-groups">
+      <div className={styles.blockHeading}><h2 id="community-led-groups">Groups you lead</h2></div>
+      <div className={styles.groupGrid}>
+        {data.ledGroups.map((group, index) => <GroupCard key={`led-${group.groupId}`} href={`/dashboard/community/discipleship/${group.groupId}`} prefetch={false} art="leading" colourway={leadColourways[index % leadColourways.length]} title={group.groupName} meta={group.discipleCount ? `${group.discipleCount} ${group.discipleCount === 1 ? "person" : "people"}` : "Add your first person"} />)}
+        <Link href={newGroupHref} prefetch={false} className={styles.newGroup}>
+          <span className={styles.newGroupIcon}><DashboardIcon name="plus" size={16} /></span>
+          New group
+        </Link>
+      </div>
+    </section>
+    {data.memberGroups.length ? <section className={styles.block} aria-labelledby="community-other-groups">
+      <div className={styles.blockHeading}><h2 id="community-other-groups">Interest groups</h2><Link href="/dashboard/community/groups">See all</Link></div>
+      <div className={styles.groupGrid}>
+        {data.memberGroups.map(group => <GroupCard key={`member-${group.id}`} href={`/dashboard/community/groups/${group.id}`} art={group.privacy === "private" ? "private" : "public"} title={group.name} meta={group.viewerRole === "owner" ? "You own this group" : group.viewerRole === "moderator" ? "You moderate" : "Member"} />)}
+      </div>
+    </section> : null}
+  </>;
+}
+
 export function CommunityHomeV3({ data, people = null }: { data: CommunityHomeData; people?: PeopleToBringIn | null }) {
   const firstInvitation = data.invitations[0];
   const firstResponse = data.responses[0];
@@ -75,7 +112,7 @@ export function CommunityHomeV3({ data, people = null }: { data: CommunityHomeDa
       </div>
     </section> : null}
 
-    <section className={styles.block} aria-labelledby="community-groups">
+    {data.groupOversight ? <OversightGroups data={data} /> : <section className={styles.block} aria-labelledby="community-groups">
       <div className={styles.blockHeading}><h2 id="community-groups">Your groups</h2><Link href="/dashboard/community/groups">See all</Link></div>
       <div className={styles.groupGrid}>
         {data.locationGroup ? <GroupCard href={`/dashboard/community/unit/${data.locationGroup.id}`} art="location" title={data.locationGroup.name} meta="Your location group" /> : null}
@@ -87,14 +124,16 @@ export function CommunityHomeV3({ data, people = null }: { data: CommunityHomeDa
           New group
         </Link>
       </div>
-    </section>
+    </section>}
 
     {people ? <PeopleToBringInPanel people={people} id="community-people" /> : null}
 
     {data.church ? <section className={styles.block} aria-labelledby="community-oversight">
       <div className={styles.blockHeading}><h2 id="community-oversight">Oversight</h2></div>
       <div className={styles.oversightPanel}>
-        {data.church ? <OversightRow href={data.church.href} title="Church oversight" description="Your branch and workers" icon="network" tone="lilac" /> : null}
+        {data.church ? data.groupOversight
+          ? <OversightRow href={data.church.href} title="Oversight" description="Reports from the people in your groups" icon="network" tone="lilac" />
+          : <OversightRow href={data.church.href} title="Church oversight" description="Your branch and workers" icon="network" tone="lilac" /> : null}
       </div>
     </section> : null}
   </div>;

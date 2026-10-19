@@ -20,8 +20,10 @@ export default async function Preview({ searchParams }: { searchParams: Promise<
         { enrollmentId: 2, name: "Miriam Ibe", source: "reassigned", assignedAt: now, lastContactedAt: null, group: null, invited: false },
         { enrollmentId: 3, name: "Tosin Ade", source: "link", assignedAt: daysAgo(9), lastContactedAt: daysAgo(3), group: null, invited: false },
       ]} />
+      : screen === "accept-move"
+        ? <InvitationResponse invitation={{ id: 1, status: "pending", origin: "in_app", createdAt: now, groupName: "Campus fellowship", leaderName: "Tolu Adeyemi", groupAvailable: true, currentGroup: { id: 2, name: "Efe’s discipleship group", leaderName: "Efe Daniels" } }} />
       : screen === "accept"
-        ? <InvitationResponse invitation={{ id: 1, status: "pending", origin: "in_app", createdAt: now, groupName: "Tolu’s discipleship group", leaderName: "Tolu Adeyemi", groupAvailable: true }} />
+        ? <InvitationResponse invitation={{ id: 1, status: "pending", origin: "in_app", createdAt: now, groupName: "Tolu’s discipleship group", leaderName: "Tolu Adeyemi", groupAvailable: true, currentGroup: null }} />
         : screen === "invite"
           ? <InviteEnrollee enrollee={{ enrollmentId: 1, name: "Daniel Okon", maskedEmail: "d•••@example.com" }} groups={[{ id: 1, name: "Tolu’s discipleship group" }]} leaderName="Tolu Adeyemi" />
           : screen === "pending"

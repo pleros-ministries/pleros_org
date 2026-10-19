@@ -113,9 +113,11 @@ export function InvitationResponse({ invitation }: { invitation: ReceivedInvitat
   const [error, setError] = useState<string | null>(null);
   const [sharesPhone, setSharesPhone] = useState(false);
   const leader = first(invitation.leaderName);
+  // One overseer (19 October): accepting while in another group moves them, so say it plainly first.
+  const current = invitation.currentGroup;
   const answer = (accept: boolean) => start(async () => {
     setError(null);
-    const result = await answerGroupInvitation({ invitationId: invitation.id, accept, sharesPhone });
+    const result = await answerGroupInvitation({ invitationId: invitation.id, accept, sharesPhone, move: accept && Boolean(current) });
     if (!result.ok) { setError(result.error); return; }
     router.push(result.status === "accepted" ? "/dashboard/community/discipleship" : "/dashboard/community");
   });
@@ -125,13 +127,15 @@ export function InvitationResponse({ invitation }: { invitation: ReceivedInvitat
     <div className={styles.heading}><StatusPill tone={invitation.status === "pending" ? "blue" : invitation.status === "accepted" ? "green" : "neutral"}>Group invitation</StatusPill></div>
     <div className={styles.card}><span className={styles.meta}>Discipleship group</span><strong>{invitation.groupName}</strong><span className={styles.meta}>Led by {invitation.leaderName}</span></div>
     {open ? <>
-      <div className={styles.section}><h2>Before you join</h2><p>Accepting makes you a member of this group. You can also decline this invitation.</p></div>
+      {current
+        ? <div className={styles.section}><h2>This moves you</h2><p>You’re in {current.name}, led by {current.leaderName}. Accepting moves you to {invitation.groupName}, and {leader} will look after you from now on instead of {first(current.leaderName)}.</p></div>
+        : <div className={styles.section}><h2>Before you join</h2><p>Accepting makes you a member of this group, and {leader} will look after you. You can also decline this invitation.</p></div>}
       <div className={styles.section}><h2>Your learning continues</h2><p>Your SOGP follow-up assignment is separate from joining this group.</p></div>
       <label className={styles.consent}><input type="checkbox" checked={sharesPhone} onChange={event => setSharesPhone(event.target.checked)} />Let {leader} message me on WhatsApp.</label>
       <span className={styles.meta}>You haven’t joined this group yet.</span>
       {error ? <p role="alert" className={styles.error}>{error}</p> : null}
       <footer className={styles.footer}>
-        <button type="button" className={styles.primary} disabled={pending} onClick={() => answer(true)}>Accept invitation<DashboardIcon name="check" /></button>
+        <button type="button" className={styles.primary} disabled={pending} onClick={() => answer(true)}>{current ? "Move to this group" : "Accept invitation"}<DashboardIcon name="check" /></button>
         <button type="button" className={styles.quiet} disabled={pending} onClick={() => answer(false)}>Decline</button>
       </footer>
     </> : <p className={styles.muted}>{invitation.status === "pending" ? "This group isn’t taking new members right now." : invitation.status === "withdrawn" ? "This invitation was withdrawn." : "You’ve already responded to this invitation."}</p>}

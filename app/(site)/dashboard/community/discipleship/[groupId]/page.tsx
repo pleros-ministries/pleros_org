@@ -9,6 +9,7 @@ import { canAccessCommunity, getCommunityContext } from "@/lib/community/context
 import { getCommunityDiscipleship } from "@/lib/db/queries/community-discipleship";
 import { getDiscipleshipDashboard } from "@/lib/db/queries/sogp-discipleship";
 import { getLeaderEpisodeQuestions, getOwnEpisodeQuestions } from "@/lib/db/queries/sogp-episode-questions";
+import { groupOversightEnabled } from "@/lib/db/queries/oversight-tree";
 
 export const metadata: Metadata = { title: "Discipleship group" };
 
@@ -21,9 +22,9 @@ const TABS: LeaderTab[] = ["disciples", "discussion", "checkins", "prayer"];
  */
 export default async function DiscipleshipGroupRoute({ params, searchParams }: {
   params: Promise<{ groupId: string }>;
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<{ tab?: string; panel?: string }>;
 }) {
-  const [{ groupId: rawId }, { tab }] = await Promise.all([params, searchParams]);
+  const [{ groupId: rawId }, { tab, panel }] = await Promise.all([params, searchParams]);
   if (!/^\d{1,9}$/.test(rawId)) notFound();
   const groupId = Number(rawId);
 
@@ -62,6 +63,8 @@ export default async function DiscipleshipGroupRoute({ params, searchParams }: {
       episodeQuestions={episodeQuestions}
       colourway={led.findIndex(group => group.groupId === groupId) % 2 === 1 ? "slate" : undefined}
       initialTab={TABS.includes(tab as LeaderTab) ? tab as LeaderTab : "disciples"}
+      initialPanel={panel === "create" || panel === "invite" ? panel : null}
+      addByName={groupOversightEnabled()}
       discussion={discussion}
     />
   </SogpQueryProvider>;

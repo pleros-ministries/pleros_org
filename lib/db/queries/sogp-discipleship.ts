@@ -31,6 +31,8 @@ import {
 import { toLagosDateKey } from "@/lib/sogp/formation-progress";
 import type { StudentStatus } from "@/lib/sogp/student-status";
 import { resolvePublicSiteUrl } from "@/lib/welcome-campaign";
+import { wouldCreateLoop } from "@/lib/oversight/tree";
+import { loadOverseerChain, lockOversightTree } from "./oversight-tree";
 
 import { getSogpDailyParticipation, getStudentStatusesForEnrollments } from "./sogp-daily";
 import { getActiveSogpJourney } from "./sogp-journey";
@@ -378,22 +380,34 @@ export async function evaluateJoinForViewer(
  */
 export async function joinGroupInTransaction(
   tx: Tx,
-  input: { groupId: number; viewerEnrollmentId: number; sharesPhone: boolean },
+  input: {
+    groupId: number;
+    viewerEnrollmentId: number;
+    sharesPhone: boolean;
+    /**
+     * The person confirmed leaving their current group for this one (groups as
+     * oversight, 19 October: one overseer, so accepting moves them).
+     */
+    moveFromCurrent?: boolean;
+  },
 ): Promise<DiscipleshipJoinDecision> {
+  // One lock for every change to who oversees whom, so two joins can't build a loop between them.
+  await lockOversightTree(tx);
   const [group] = await tx
     .select({
       id: schema.discipleshipGroups.id,
       status: schema.discipleshipGroups.status,
       leaderEnrollmentId: schema.discipleshipGroups.leaderEnrollmentId,
+      leaderUserId: schema.discipleshipGroups.leaderUserId,
     })
     .from(schema.discipleshipGroups)
     .where(eq(schema.discipleshipGroups.id, input.groupId))
     .for("update");
   if (!group) throw new DiscipleshipError("This invite link isn't valid.");
 
-  const [[viewerMembership], [circular]] = await Promise.all([
+  const [[viewerMembership], [circular], [viewer]] = await Promise.all([
     tx
-      .select({ groupId: schema.discipleshipMemberships.groupId })
+      .select({ id: schema.discipleshipMemberships.id, groupId: schema.discipleshipMemberships.groupId })
       .from(schema.discipleshipMemberships)
       .where(
         and(
@@ -417,16 +431,32 @@ export async function joinGroupInTransaction(
         ),
       )
       .limit(1),
+    tx
+      .select({ userId: schema.sogpEnrollments.userId })
+      .from(schema.sogpEnrollments)
+      .where(eq(schema.sogpEnrollments.id, input.viewerEnrollmentId))
+      .limit(1),
   ]);
 
+  const moving = Boolean(input.moveFromCurrent && viewerMembership && viewerMembership.groupId !== group.id);
   const decision = evaluateDiscipleshipJoin({
     viewerEnrollmentId: input.viewerEnrollmentId,
     group,
-    viewerActiveGroupId: viewerMembership?.groupId ?? null,
+    viewerActiveGroupId: moving ? null : viewerMembership?.groupId ?? null,
     leaderIsViewersDisciple: Boolean(circular),
   });
   if (!decision.ok) return decision;
+  // Any depth, not just a direct pair: the joiner must not already oversee the leader.
+  if (viewer && group.leaderUserId && wouldCreateLoop(await loadOverseerChain(tx, group.leaderUserId), viewer.userId, group.leaderUserId)) {
+    return { ok: false, reason: "circular" };
+  }
 
+  if (moving) {
+    await tx
+      .update(schema.discipleshipMemberships)
+      .set({ status: "left", endedAt: new Date() })
+      .where(and(eq(schema.discipleshipMemberships.id, viewerMembership!.id), eq(schema.discipleshipMemberships.status, "active")));
+  }
   await tx.insert(schema.discipleshipMemberships).values({
     groupId: group.id,
     discipleEnrollmentId: input.viewerEnrollmentId,

@@ -49,11 +49,15 @@ function discipleMeta(disciple: DiscipleSummary) {
  * first), discussion, check-ins and prayer requests, with the invite and
  * group settings in the hero. Each disciple opens their own page.
  */
-export function LeaderGroupView({ data, episodeQuestions, colourway, initialTab, discussion }: {
+export function LeaderGroupView({ data, episodeQuestions, colourway, initialTab, initialPanel = null, addByName = false, discussion }: {
   data: DiscipleshipDashboardData;
   episodeQuestions: LeaderEpisodeQuestion[];
   colourway?: "slate";
   initialTab: LeaderTab;
+  /** Opens a panel on arrival, e.g. "+ New group" on Community Home. */
+  initialPanel?: "invite" | "create" | null;
+  /** Groups as oversight: leaders also add people by name. */
+  addByName?: boolean;
   discussion: { viewerName: string; postingBlocked: boolean; initialPosts?: FeedPost[]; initialNextOffset?: number | null };
 }) {
   const router = useRouter();
@@ -61,7 +65,8 @@ export function LeaderGroupView({ data, episodeQuestions, colourway, initialTab,
   const paused = group.status === "archived";
   const disciples = [...group.disciples].sort(byNeed);
   const hasDisciples = disciples.length > 0;
-  const [panel, setPanel] = useState<"invite" | "rename" | "create" | null>(null);
+  // An empty group already shows the invite panel in place, so don't open a second one.
+  const [panel, setPanel] = useState<"invite" | "rename" | "create" | null>(initialPanel === "invite" && !hasDisciples ? null : initialPanel);
   const tabs: Array<{ key: LeaderTab; label: string; count?: number }> = [
     { key: "disciples", label: "Disciples", count: disciples.length },
     ...(hasDisciples && !paused ? [
@@ -112,7 +117,7 @@ export function LeaderGroupView({ data, episodeQuestions, colourway, initialTab,
     {close.error || regenerate.error ? <p role="alert" className={styles.error}>{close.error ?? regenerate.error}</p> : null}
 
     {paused ? <p className={`${styles.panel} ${styles.empty}`}>This group has been paused by the Pleros team. Contact support if you think this is a mistake.</p> : null}
-    {panel === "invite" ? <InvitePanel group={group} leaderFirstName={data.viewer.firstName} empty={false} /> : null}
+    {panel === "invite" ? <InvitePanel group={group} leaderFirstName={data.viewer.firstName} empty={false} addByName={addByName} /> : null}
     {panel === "rename" ? <RenameForm group={group} onDone={() => setPanel(null)} /> : null}
     {panel === "create" ? <CreateForm onCancel={() => setPanel(null)} onCreated={id => router.push(groupPath(id))} /> : null}
 
@@ -135,7 +140,7 @@ export function LeaderGroupView({ data, episodeQuestions, colourway, initialTab,
       <p className={styles.note}>Sorted by who needs you first. Tap someone for their week, check-ins, prayer and your follow-ups.</p>
     </> : paused ? null : <>
       <div className={styles.sectionTitle}><h2>Invite your first disciple</h2></div>
-      <InvitePanel group={group} leaderFirstName={data.viewer.firstName} empty />
+      <InvitePanel group={group} leaderFirstName={data.viewer.firstName} empty addByName={addByName} />
     </>) : null}
 
     {tab === "discussion" ? <>

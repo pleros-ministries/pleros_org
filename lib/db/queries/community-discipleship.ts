@@ -234,7 +234,8 @@ export async function getCommunityDiscipleship(
 }
 
 export type CommunityHomeDiscipleship = {
-  joined: { groupId: number; groupName: string } | null;
+  /** The group the viewer is in, and the first name of its leader (their overseer). */
+  joined: { groupId: number; groupName: string; leaderFirstName: string } | null;
   leading: Array<{ groupId: number; groupName: string; paused: boolean; discipleCount: number }>;
   discipleCount: number;
 };
@@ -261,7 +262,7 @@ export async function getCommunityHomeDiscipleship(userId: string): Promise<Comm
   ]);
   const countByGroup = new Map(countedRows.map(row => [row.groupId, row.n]));
   return {
-    joined: joinedRow ? { groupId: joinedRow.groupId, groupName: joinedRow.groupName } : null,
+    joined: joinedRow ? { groupId: joinedRow.groupId, groupName: joinedRow.groupName, leaderFirstName: firstNameOf(joinedRow.leaderFirstName || joinedRow.leaderName) } : null,
     leading: ledRows.map(row => ({
       groupId: row.id,
       groupName: row.name,

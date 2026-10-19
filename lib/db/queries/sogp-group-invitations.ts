@@ -1,11 +1,15 @@
 import "server-only";
-import { and, asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, ne, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/pg-core";
 
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
 import { transactionDb } from "@/lib/db/transaction";
 import { discipleshipJoinBlockMessage } from "@/lib/sogp/discipleship";
+import { fuzzyNameScore } from "@/lib/community/fuzzy-name";
+import { minorBirthYearFloor } from "@/lib/community/messaging";
+import { fullNameOf } from "@/lib/community/visibility";
+import { nameSearch } from "@/lib/db/name-search";
 import {
   DiscipleshipError,
   joinGroupInTransaction,
@@ -93,6 +97,8 @@ type InvitationRow = Awaited<ReturnType<typeof invitationQuery>>[number];
 export type ReceivedInvitation = {
   id: number; status: InvitationStatus; origin: "referral" | "in_app"; createdAt: string;
   groupName: string; leaderName: string; groupAvailable: boolean;
+  /** The recipient's own current group, so accepting can say it moves them (one overseer). */
+  currentGroup: { id: number; name: string; leaderName: string } | null;
 };
 /** Sender view: the recipient's name only; email/phone stay out of the payload. */
 export type SentInvitation = {
@@ -102,11 +108,24 @@ export type SentInvitation = {
 
 const iso = (value: Date | string | null) => (value ? new Date(value).toISOString() : null);
 
-function received(row: InvitationRow): ReceivedInvitation {
+function received(row: InvitationRow, current: ReceivedInvitation["currentGroup"] = null): ReceivedInvitation {
   return {
     id: row.id, status: row.status, origin: row.origin, createdAt: iso(row.createdAt)!,
     groupName: row.groupName, leaderName: row.leaderName, groupAvailable: row.groupStatus === "active",
+    currentGroup: current && current.id !== row.groupId ? current : null,
   };
+}
+
+/** The group a person is in now, with its leader's name: theirs to see on their own invitations. */
+async function loadCurrentGroup(userId: string): Promise<ReceivedInvitation["currentGroup"]> {
+  const [row] = await db
+    .select({ id: schema.discipleshipGroups.id, name: schema.discipleshipGroups.name, leaderName: schema.users.name })
+    .from(schema.discipleshipMemberships)
+    .innerJoin(schema.discipleshipGroups, eq(schema.discipleshipGroups.id, schema.discipleshipMemberships.groupId))
+    .innerJoin(schema.users, eq(schema.users.id, schema.discipleshipGroups.leaderUserId))
+    .where(and(eq(schema.discipleshipMemberships.memberUserId, userId), eq(schema.discipleshipMemberships.status, "active")))
+    .limit(1);
+  return row ?? null;
 }
 function sent(row: InvitationRow): SentInvitation {
   return {
@@ -116,16 +135,22 @@ function sent(row: InvitationRow): SentInvitation {
 }
 
 export async function listOwnPendingInvitations(userId: string): Promise<ReceivedInvitation[]> {
-  const rows = await invitationQuery()
-    .where(and(eq(recipientEnrollment.userId, userId), eq(schema.discipleshipGroupInvitations.status, "pending")))
-    .orderBy(desc(schema.discipleshipGroupInvitations.createdAt))
-    .limit(20);
-  return rows.map(received);
+  const [rows, current] = await Promise.all([
+    invitationQuery()
+      .where(and(eq(recipientEnrollment.userId, userId), eq(schema.discipleshipGroupInvitations.status, "pending")))
+      .orderBy(desc(schema.discipleshipGroupInvitations.createdAt))
+      .limit(20),
+    loadCurrentGroup(userId),
+  ]);
+  return rows.map(row => received(row, current));
 }
 
 export async function getOwnInvitation(userId: string, invitationId: number): Promise<ReceivedInvitation | null> {
-  const [row] = await invitationQuery().where(eq(schema.discipleshipGroupInvitations.id, invitationId)).limit(1);
-  return row && row.recipientUserId === userId ? received(row) : null;
+  const [[row], current] = await Promise.all([
+    invitationQuery().where(eq(schema.discipleshipGroupInvitations.id, invitationId)).limit(1),
+    loadCurrentGroup(userId),
+  ]);
+  return row && row.recipientUserId === userId ? received(row, current) : null;
 }
 
 /** Invitations the leader sent, newest first; bounded to their own groups. */
@@ -148,6 +173,8 @@ export async function respondToInvitation(input: {
   invitationId: number;
   accept: boolean;
   sharesPhone: boolean;
+  /** Confirmed leaving their current group (the invitation page warns first). */
+  move?: boolean;
 }): Promise<{ ok: true; status: "accepted" | "declined" } | { ok: false; error: string }> {
   try {
     return await transactionDb.transaction(async tx => {
@@ -174,8 +201,9 @@ export async function respondToInvitation(input: {
           groupId: invitation.groupId,
           viewerEnrollmentId: invitation.recipientEnrollmentId,
           sharesPhone: input.sharesPhone,
+          moveFromCurrent: input.move === true,
         });
-        if (!decision.ok) return { ok: false as const, error: discipleshipJoinBlockMessage(decision.reason) };
+        if (!decision.ok) return { ok: false as const, error: decision.reason === "already_in_group" ? "You're in another group. Confirm the move to join this one." : discipleshipJoinBlockMessage(decision.reason) };
       }
       const status = input.accept ? "accepted" as const : "declined" as const;
       await tx
@@ -203,3 +231,54 @@ export async function withdrawInvitation(leaderEnrollmentId: number, invitationI
   return updated.length > 0;
 }
 
+export type InviteCandidate = { enrollmentId: number; name: string; state: "free" | "in_a_group" | "in_this_group" | "invited" };
+
+/**
+ * Leaders add people to a group by name (groups as oversight, 19 October).
+ * Full names, as the new-message picker shows them; under-18s are never
+ * listed, and whose group someone is in stays private ("In a group").
+ */
+export async function searchGroupInvitees(input: { leaderUserId: string; leaderEnrollmentId: number; groupId: number; term: string }): Promise<InviteCandidate[]> {
+  const group = await requireActiveLedGroup(input.leaderEnrollmentId, input.groupId);
+  const term = input.term.trim().slice(0, 60);
+  if (term.length < 2) return [];
+  const search = nameSearch(term, sql`concat_ws(' ', ${schema.sogpEnrollments.firstName}, ${schema.sogpEnrollments.name})`);
+  if (!search) return [];
+  const rows = await db
+    .select({ enrollmentId: schema.sogpEnrollments.id, userId: schema.sogpEnrollments.userId, name: schema.sogpEnrollments.name, firstName: schema.sogpEnrollments.firstName })
+    .from(schema.sogpEnrollments)
+    .where(and(
+      search.loose,
+      ne(schema.sogpEnrollments.userId, input.leaderUserId),
+      ne(schema.sogpEnrollments.status, "withdrawn"),
+      sql`not exists (select 1 from ${schema.sogpEnrollments} as minor_check where minor_check.user_id = ${schema.sogpEnrollments.userId} and minor_check.birth_year >= ${minorBirthYearFloor()})`,
+    ))
+    .orderBy(search.rank, asc(schema.sogpEnrollments.name), desc(schema.sogpEnrollments.createdAt))
+    .limit(300);
+  // One row per person, their latest enrolment.
+  const best = new Map<string, { enrollmentId: number; userId: string; name: string; score: number }>();
+  for (const row of rows) {
+    const name = fullNameOf(row.name || row.firstName || "");
+    const score = Math.max(fuzzyNameScore(term, name), fuzzyNameScore(term, row.firstName ?? ""));
+    if (!score || best.has(row.userId)) continue;
+    best.set(row.userId, { enrollmentId: row.enrollmentId, userId: row.userId, name, score });
+  }
+  const top = [...best.values()].sort((a, b) => b.score - a.score || a.name.localeCompare(b.name)).slice(0, 15);
+  if (!top.length) return [];
+  const ids = top.map(row => row.userId);
+  const [memberships, pending] = await Promise.all([
+    db.select({ userId: schema.discipleshipMemberships.memberUserId, groupId: schema.discipleshipMemberships.groupId })
+      .from(schema.discipleshipMemberships)
+      .where(and(inArray(schema.discipleshipMemberships.memberUserId, ids), eq(schema.discipleshipMemberships.status, "active"))),
+    db.select({ userId: schema.discipleshipGroupInvitations.recipientUserId })
+      .from(schema.discipleshipGroupInvitations)
+      .where(and(eq(schema.discipleshipGroupInvitations.groupId, group.id), eq(schema.discipleshipGroupInvitations.status, "pending"), inArray(schema.discipleshipGroupInvitations.recipientUserId, ids))),
+  ]);
+  const groupOf = new Map(memberships.flatMap(row => row.userId ? [[row.userId, row.groupId] as const] : []));
+  const invited = new Set(pending.map(row => row.userId));
+  return top.map(row => ({
+    enrollmentId: row.enrollmentId,
+    name: row.name,
+    state: groupOf.get(row.userId) === group.id ? "in_this_group" : invited.has(row.userId) ? "invited" : groupOf.has(row.userId) ? "in_a_group" : "free",
+  }));
+}
