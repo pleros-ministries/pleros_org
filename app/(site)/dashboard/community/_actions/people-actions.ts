@@ -9,6 +9,7 @@ import { logFollowUp, recordContactInvite, type FollowUpSubject } from "@/lib/db
 import { handOverEnrollees, searchHandoverCandidates, type HandoverCandidate } from "@/lib/db/queries/enrollee-handover";
 import { notify } from "@/lib/community/notify";
 import { firstNameOf } from "@/lib/community/visibility";
+import { inviteIntoOwnersGroups } from "@/lib/db/queries/follow-up-group-invites";
 
 export type PeopleActionResult = { ok: true } | { ok: false; error: string };
 
@@ -79,6 +80,8 @@ export async function handOverEnrolleesAction(input: { enrollmentIds: number[]; 
   revalidatePath("/dashboard/community/enrollees", "layout");
   revalidatePath("/dashboard/sogp", "layout");
   const { moved } = result;
+  // Groups as oversight: the new owner's group invites them; the old owner's pending invite is withdrawn.
+  after(() => inviteIntoOwnersGroups(moved.map(row => row.enrollmentId), input.newOwnerUserId, session.user.id).then(() => undefined));
   after(async () => {
     const ownerName = moved[0]!.newOwnerFirstName;
     const first = moved[0]!;

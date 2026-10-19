@@ -103,10 +103,11 @@ export async function listFollowUpRequests() {
 }
 export type FollowUpQueueRow = Awaited<ReturnType<typeof listFollowUpRequests>>[number];
 
-export async function resolveFollowUpRequest(input: { requestId: number; decision: "approve" | "decline"; replacementUserId?: string }) {
+/** Returns the new owner when an approval moved the enrollee, so the caller can invite them into that owner's group. */
+export async function resolveFollowUpRequest(input: { requestId: number; decision: "approve" | "decline"; replacementUserId?: string }): Promise<{ enrollmentId: number; ownerUserId: string; by: string } | null> {
   const session = await requireAdmin();
   if (!Number.isSafeInteger(input.requestId) || input.requestId < 1 || !["approve", "decline"].includes(input.decision)) throw new CommunityError("Choose an available request and decision.");
-  await transactionDb.transaction(async tx => {
+  return transactionDb.transaction(async tx => {
     const [request] = await tx.select().from(s.sogpFollowUpRequests).where(eq(s.sogpFollowUpRequests.id, input.requestId)).for("update");
     if (!request) throw new CommunityError("This request is no longer available.");
     if (request.status !== "pending") throw new CommunityError("This request has already been reviewed. Refresh the queue.");
@@ -129,5 +130,6 @@ export async function resolveFollowUpRequest(input: { requestId: number; decisio
       if (!changed.length) throw new CommunityError("The assignment changed while reviewing. Refresh and try again.");
     }
     await tx.update(s.sogpFollowUpRequests).set({ status: input.decision === "approve" ? "resolved" : "declined", reviewedBy: session.user.id, reviewedAt: new Date() }).where(eq(s.sogpFollowUpRequests.id, request.id));
+    return input.decision === "approve" && input.replacementUserId ? { enrollmentId: request.enrollmentId, ownerUserId: input.replacementUserId, by: session.user.id } : null;
   });
 }

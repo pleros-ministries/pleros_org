@@ -4,6 +4,7 @@ import { getDashboardActionSession } from "@/lib/dashboard-action-session";
 import { hasAdminAccess } from "@/lib/app-role";
 import { CommunityError } from "@/lib/community/errors";
 import { createOwnFollowUpRequest, listFollowUpOwnerCandidates, resolveFollowUpRequest } from "@/lib/db/queries/sogp-follow-up-requests";
+import { inviteIntoOwnersGroups } from "@/lib/db/queries/follow-up-group-invites";
 
 function refreshFollowUp() {
   revalidatePath("/dashboard/sogp", "layout");
@@ -20,7 +21,11 @@ export async function sendFollowUpRequest(reason: unknown) {
 export async function reviewFollowUpRequest(input: { requestId: number; decision: "approve" | "decline"; replacementUserId?: string }) {
   const session = await getDashboardActionSession();
   if (!session || !hasAdminAccess(session.user.role)) return { ok: false as const, error: "Only an admin can review these requests." };
-  try { await resolveFollowUpRequest(input); refreshFollowUp(); return { ok: true as const }; }
+  try {
+    const moved = await resolveFollowUpRequest(input);
+    if (moved) await inviteIntoOwnersGroups([moved.enrollmentId], moved.ownerUserId, moved.by);
+    refreshFollowUp(); return { ok: true as const };
+  }
   catch (error) { return { ok: false as const, error: error instanceof CommunityError ? error.message : "This decision could not be saved. Refresh and try again." }; }
 }
 
@@ -38,6 +43,8 @@ export async function changeEnrolleeOwner(input: { enrollmentId: number; ownerUs
   if (!session || !hasAdminAccess(session.user.role)) return { ok: false as const, error: "Only an admin can change follow-up owners." };
   try {
     const { changeFollowUpOwner } = await import("@/lib/db/queries/sogp-coordinator");
-    await changeFollowUpOwner(input); refreshFollowUp(); revalidatePath("/admin/follow-up"); return { ok: true as const };
+    await changeFollowUpOwner(input);
+    await inviteIntoOwnersGroups([input.enrollmentId], input.ownerUserId, session.user.id);
+    refreshFollowUp(); revalidatePath("/admin/follow-up"); return { ok: true as const };
   } catch (error) { return { ok: false as const, error: error instanceof CommunityError ? error.message : "The owner could not be changed. Try again." }; }
 }

@@ -16,6 +16,7 @@ import { resolvePublicSiteUrl } from "@/lib/welcome-campaign";
 import { formatCohortDates } from "./cohort-dates";
 import { formatSogpReferralSource } from "./enrollment";
 import type * as schema from "@/lib/db/schema";
+import { inviteIntoOwnersGroups } from "@/lib/db/queries/follow-up-group-invites";
 
 /**
  * Everything that should happen after a real `sogp_enrollments` row is
@@ -82,10 +83,15 @@ export function runSogpPostEnrollmentSideEffects(input: {
             source: values.referredVia === "code" ? "code" : "link",
             ownerUserId: referrer.userId,
           });
+          // Groups as oversight: the person who brought them in invites them into their group.
+          await inviteIntoOwnersGroups([enrollment.id], referrer.userId);
         }
       } else if (unit) {
         const ownerUserId = await autoAssignPastorForEnrollment(enrollment.id, unit.unitId);
-        if (ownerUserId) await recordFollowUpRoute({ enrollmentId: enrollment.id, source: "geography", ownerUserId });
+        if (ownerUserId) {
+          await recordFollowUpRoute({ enrollmentId: enrollment.id, source: "geography", ownerUserId });
+          await inviteIntoOwnersGroups([enrollment.id], ownerUserId);
+        }
       }
     } catch (error) {
       console.error("SOGP follow-up owner assignment failed:", error);

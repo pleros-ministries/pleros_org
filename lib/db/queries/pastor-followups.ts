@@ -315,12 +315,12 @@ export async function bulkAssignPastorToRegion(input: {
   unitId: number;
   pastorUserId: string;
   assignedBy: string;
-}): Promise<{ assigned: number }> {
+}): Promise<{ assigned: number; enrollmentIds: number[] }> {
   const members = await db
     .select({ enrollmentId: schema.unitMembers.enrollmentId })
     .from(schema.unitMembers)
     .where(eq(schema.unitMembers.unitId, input.unitId));
-  if (members.length === 0) return { assigned: 0 };
+  if (members.length === 0) return { assigned: 0, enrollmentIds: [] as number[] };
 
   await db
     .insert(schema.pastorAssignments)
@@ -340,7 +340,7 @@ export async function bulkAssignPastorToRegion(input: {
       },
     });
 
-  return { assigned: members.length };
+  return { assigned: members.length, enrollmentIds: members.map((m) => m.enrollmentId) };
 }
 
 /**

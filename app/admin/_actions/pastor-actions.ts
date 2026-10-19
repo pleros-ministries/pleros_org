@@ -11,6 +11,7 @@ import {
   setPastorRegion,
   unassignPastor,
 } from "@/lib/db/queries/pastor-followups";
+import { inviteIntoOwnersGroups } from "@/lib/db/queries/follow-up-group-invites";
 
 export async function assignPastorToEnrollment(input: {
   enrollmentId: number;
@@ -22,6 +23,7 @@ export async function assignPastorToEnrollment(input: {
     pastorUserId: input.pastorUserId,
     assignedBy: session.user.id,
   });
+  await inviteIntoOwnersGroups([input.enrollmentId], input.pastorUserId, session.user.id);
   revalidatePath("/admin/pastors");
   revalidatePath("/admin/my-enrollees");
 }
@@ -74,7 +76,8 @@ export async function bulkAssignPastorToAllInRegion(input: {
     pastorUserId: input.pastorUserId,
     assignedBy: session.user.id,
   });
+  await inviteIntoOwnersGroups(result.enrollmentIds, input.pastorUserId, session.user.id);
   revalidatePath("/admin/pastors");
   revalidatePath("/admin/my-enrollees");
-  return result;
+  return { assigned: result.assigned };
 }
