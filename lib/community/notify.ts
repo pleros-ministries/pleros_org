@@ -183,6 +183,24 @@ export async function notifyMadeLeader(input: {
   });
 }
 
+/** A church unit leader appointment (user request, 19 October): the unit and branch names only. */
+export async function notifyChurchUnitLeader(input: { userId: string; unitId: number }) {
+  const [unit] = await db
+    .select({ name: schema.churchUnits.name, branchName: schema.churchBranches.name })
+    .from(schema.churchUnits)
+    .innerJoin(schema.churchBranches, eq(schema.churchBranches.id, schema.churchUnits.branchId))
+    .where(eq(schema.churchUnits.id, input.unitId))
+    .limit(1);
+  if (!unit) return;
+  await notify({
+    userIds: [input.userId],
+    kind: "made_leader",
+    payload: { unitName: unit.name, branchName: unit.branchName, church: true },
+    pushBody: `You now lead ${unit.name} in the ${unit.branchName} branch.`,
+    pushUrl: "/dashboard/church",
+  });
+}
+
 export async function notifyFlagResolved(input: {
   reporterId: string;
   outcome: "actioned" | "dismissed";

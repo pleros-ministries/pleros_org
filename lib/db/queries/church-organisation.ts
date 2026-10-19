@@ -187,6 +187,9 @@ export async function assignChurchMember(actorId: string, input: { userId: strin
       await tx.delete(s.churchBranchPastors).where(eq(s.churchBranchPastors.userId, input.userId));
       if (branchIds.length) await tx.insert(s.churchBranchPastors).values(branchIds.map(branchId => ({ userId: input.userId, branchId })));
     }
+    // The unit a new leader now leads, for their notification; a re-save of the same appointment is not new.
+    const becameLeaderOf = input.role === "unit_leader" && input.unitId !== null && !(current?.role === "unit_leader" && current.unitId === input.unitId) ? input.unitId : null;
+    return { becameLeaderOf };
   });
 }
 

@@ -6,6 +6,12 @@ import { assignChurchBranchMembership, assignChurchMember, changeChurchUnitLeade
 import type { ChurchRole } from "@/lib/church/permissions";
 import type { OldLeaderPlacement } from "@/lib/db/queries/church-organisation";
 
+/** The appointment is saved already; a failed notification must not report the save as failed. */
+async function notifyNewUnitLeader(userId: string, unitId: number) {
+  try { const { notifyChurchUnitLeader } = await import("@/lib/community/notify"); await notifyChurchUnitLeader({ userId, unitId }); }
+  catch (error) { console.error("church leader notification failed", error); }
+}
+
 async function actor() { const session = await getAppSession(); if (!session) throw new CommunityError("Sign in to manage church assignments."); return session; }
 export async function findChurchMembers(query: string) {
   const session = await actor();
@@ -14,7 +20,8 @@ export async function findChurchMembers(query: string) {
 export async function saveChurchAssignment(input: { userId: string; role: ChurchRole; branchId: number | null; unitId: number | null; supervisorId: string | null; branchIds?: number[]; replace?: boolean }) {
   try {
     const session = await actor();
-    await assignChurchMember(session.user.id, { userId: input.userId, role: input.role, branchId: input.branchId, unitId: input.unitId, supervisorId: input.supervisorId, branchIds: input.branchIds, replace: input.replace === true }, session.user.role === "super_admin");
+    const { becameLeaderOf } = await assignChurchMember(session.user.id, { userId: input.userId, role: input.role, branchId: input.branchId, unitId: input.unitId, supervisorId: input.supervisorId, branchIds: input.branchIds, replace: input.replace === true }, session.user.role === "super_admin");
+    if (becameLeaderOf) await notifyNewUnitLeader(input.userId, becameLeaderOf);
     revalidatePath("/dashboard", "layout");
     return { ok: true as const };
   } catch (error) { if (error instanceof CommunityError) return { ok: false as const, error: error.message }; throw error; }
@@ -87,6 +94,7 @@ export async function changeUnitLeader(input: { unitId: number; userId: string; 
   try {
     const session = await actor();
     await changeChurchUnitLeader(session.user.id, input);
+    await notifyNewUnitLeader(input.userId, input.unitId);
     revalidatePath("/dashboard", "layout");
     return { ok: true as const };
   } catch (error) { if (error instanceof CommunityError) return { ok: false as const, error: error.message }; throw error; }

@@ -46,7 +46,7 @@ function summarise(n: Notification): string {
     case "official_post": return `New update: ${text(p.title) ?? "open the community"}`;
     case "post_comment": return `New comment on “${text(p.title) ?? "your post"}”`;
     case "comment_reply": return `Someone replied to your comment${text(p.title) ? ` on “${text(p.title)}”` : ""}`;
-    case "made_leader": return `You now lead ${text(p.unitName) ?? "your unit"}`;
+    case "made_leader": return `You now lead ${text(p.unitName) ?? "your unit"}${p.church && text(p.branchName) ? ` · ${text(p.branchName)} branch` : ""}`;
     case "flag_resolved": return `Your report was ${text(p.outcome) ?? "reviewed"}`;
     case "daily_report_reminder": return "Please complete your daily report";
     case "leader_nudge": return text(p.message) ?? "A note from your unit leader";
@@ -81,6 +81,7 @@ function destination(n: Notification): string | null {
   if (n.kind === "pleros_reply") return id(p.questionId) ? `/dashboard/community/ask/${id(p.questionId)}` : "/dashboard/community/ask";
   if (n.kind.startsWith("group_join")) return id(p.groupId) ? `/dashboard/community/groups/${id(p.groupId)}` : "/dashboard/community/groups";
   if (n.kind.startsWith("discipleship_")) return "/dashboard/community/discipleship";
+  if (n.kind === "made_leader" && p.church) return "/dashboard/church";
   if (n.kind === "made_leader" || n.kind === "leader_nudge") return "/dashboard/community/leader";
   return null;
 }
