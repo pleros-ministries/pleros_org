@@ -11,13 +11,16 @@ import { getCommunityHomeDiscipleship } from "./community-discipleship";
 import { countUnreadConversations } from "./community-messages";
 import { listOwnActiveCommunityGroups } from "./community-groups";
 import { listOwnPendingInvitations } from "./sogp-group-invitations";
+import { listUnitNames } from "./community-units";
 
 /** Read-only, session-owned home. Never creates a group or loads answer text. */
 export async function getCommunityHome() {
   const ctx = await getCommunityContext();
   if (!ctx || !canAccessCommunity(ctx)) return null;
   const leader = alias(schema.sogpEnrollments, "home_leader");
-  const [unreadConversations, discipleship, groups, viewer, responses, invitations, [owned], wavering, prayers] = await Promise.all([
+  const [managedLocations, unreadConversations, discipleship, groups, viewer, responses, invitations, [owned], wavering, prayers] = await Promise.all([
+    // Location groups the viewer looks after as assigned pastor (user report, 19 October: Edo had gone missing).
+    listUnitNames(ctx.managedUnitIds.filter(id => id !== ctx.unit?.id)),
     countUnreadConversations(ctx.userId),
     getCommunityHomeDiscipleship(ctx.userId),
     listOwnActiveCommunityGroups(ctx.userId),
@@ -135,6 +138,7 @@ export async function getCommunityHome() {
     discipleCount: discipleship.discipleCount,
     church: viewer?.navigation.find(section => section.key === "oversight")?.items.find(item => item.key === "church") ?? null,
     locationGroup: ctx.unit,
+    managedLocations,
     joinedGroup: discipleship.joined,
     ledGroups: discipleship.leading.filter(group => !group.paused),
     memberGroups: groups,
