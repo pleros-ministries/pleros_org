@@ -10,7 +10,8 @@ import { toLagosDateKey } from "./formation-progress";
 import type { StudentStatus } from "./student-status";
 
 /** Open groups one learner may lead at a time. */
-export const DISCIPLESHIP_GROUPS_LED_MAX = 5;
+/** Raised from 5 (groups as oversight, 19 October): leaders split people into as many groups as they need. */
+export const DISCIPLESHIP_GROUPS_LED_MAX = 20;
 
 export const DISCIPLESHIP_GROUP_NAME_MIN = 3;
 export const DISCIPLESHIP_GROUP_NAME_MAX = 60;

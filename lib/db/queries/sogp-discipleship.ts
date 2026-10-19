@@ -194,7 +194,7 @@ export async function renameDiscipleshipGroup(input: {
   const groups = await listLedGroups(input.leaderEnrollmentId);
   const group = groups.find((candidate) => candidate.id === input.groupId);
   if (!group || group.status !== "active") throw new DiscipleshipError(GROUP_UNAVAILABLE);
-  if (group.isDefault) throw new DiscipleshipError("The default SOGP discipleship group cannot be renamed.");
+  // The default group is renamable (groups as oversight, 19 October); it still can't be closed.
 
   const checked = validateDiscipleshipGroupName(
     input.name,

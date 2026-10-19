@@ -62,6 +62,10 @@ The Pastor's direction from 19 October: groups replace the church org chart. The
    - Keep the data in place, so a rollback is possible, until production has run on groups for a while. A later migration drops units and the worker and leader rows.
 9. **Rollout.** Ship behind `DASHBOARD_GROUP_OVERSIGHT` (on by default once verified). Migration 0068 is applied separately, after review.
 
+## Status (19 October)
+
+Steps 1 to 5 and the group rules are built and pushed. Everything runs only with `DASHBOARD_GROUP_OVERSIGHT=1`. Production is still on the church structure until the flag is turned on. Migration 0069 is applied.
+
 ## Order of work
 
 1. Migration 0068 and backfill, the tree lock and loop check, and `canOversee`, with tests.

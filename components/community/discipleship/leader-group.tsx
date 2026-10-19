@@ -89,7 +89,8 @@ export function LeaderGroupView({ data, episodeQuestions, colourway, initialTab,
     { key: "reviews", label: "Weekly group reviews", icon: CalendarCheckIcon, onSelect: () => router.push(`/dashboard/sogp/reviews?group=${group.id}`) },
     ...(data.createGroupBlock ? [] : [{ key: "create", label: "New group", icon: PlusIcon, onSelect: () => setPanel("create") }]),
     ...(canClose ? [{ key: "close", label: "Close group", icon: XCircleIcon, danger: true, onSelect: () => {
-      const released = hasDisciples ? ` and its ${disciples.length} disciple${disciples.length === 1 ? "" : "s"} will be released` : "";
+      // Closing ends oversight for everyone in it; whoever they lead stays with them.
+      const released = hasDisciples ? `. Its ${disciples.length === 1 ? "1 person" : `${disciples.length} people`} will leave the group and no longer have you looking after them; the people they lead stay with them` : "";
       if (window.confirm(`Close ${group.name}? Its invite link will stop working${released}. This can't be undone.`)) {
         close.run(() => closeDiscipleshipGroupAction({ groupId: group.id }), () => router.replace("/dashboard/community/groups"));
       }
