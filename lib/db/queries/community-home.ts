@@ -20,7 +20,8 @@ export async function getCommunityHome() {
   const leader = alias(schema.sogpEnrollments, "home_leader");
   const [managedLocations, unreadConversations, discipleship, groups, viewer, responses, invitations, [owned], wavering, prayers] = await Promise.all([
     // Location groups the viewer looks after as assigned pastor (user report, 19 October: Edo had gone missing).
-    listUnitNames(ctx.managedUnitIds.filter(id => id !== ctx.unit?.id)),
+    // Their own location group counts too when they look after it, as its pastor or member leader (user, 19 October: "I lead Oyo").
+    listUnitNames([...new Set([...ctx.managedUnitIds, ...(ctx.unit && ctx.isUnitLeader ? [ctx.unit.id] : [])])]),
     countUnreadConversations(ctx.userId),
     getCommunityHomeDiscipleship(ctx.userId),
     listOwnActiveCommunityGroups(ctx.userId),
@@ -137,7 +138,8 @@ export async function getCommunityHome() {
     disciplesEnabled: ctx.enrollmentId !== null,
     discipleCount: discipleship.discipleCount,
     church: viewer?.navigation.find(section => section.key === "oversight")?.items.find(item => item.key === "church") ?? null,
-    locationGroup: ctx.unit,
+    // A location group they look after sits with the groups they lead, not the ones they're under.
+    locationGroup: ctx.unit && !ctx.isUnitLeader && !ctx.managedUnitIds.includes(ctx.unit.id) ? ctx.unit : null,
     managedLocations,
     joinedGroup: discipleship.joined,
     ledGroups: discipleship.leading.filter(group => !group.paused),

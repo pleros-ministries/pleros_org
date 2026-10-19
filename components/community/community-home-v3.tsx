@@ -53,7 +53,7 @@ function OversightGroups({ data }: { data: CommunityHomeData }) {
   const newGroupHref = firstLed ? `/dashboard/community/discipleship/${firstLed.groupId}?panel=create` : "/dashboard/sogp/discipleship";
   return <>
     {data.joinedGroup || data.locationGroup ? <section className={styles.block} aria-labelledby="community-your-group">
-      <div className={styles.blockHeading}><h2 id="community-your-group">Your group</h2><Link href="/dashboard/community/groups">See all</Link></div>
+      <div className={styles.blockHeading}><h2 id="community-your-group">Groups you’re under</h2><Link href="/dashboard/community/groups">See all</Link></div>
       <div className={styles.groupGrid}>
         {data.joinedGroup ? <GroupCard href={`/dashboard/community/discipleship/${data.joinedGroup.groupId}`} prefetch={false} art="discipleship" tag="Your group" title={data.joinedGroup.groupName} meta={`Led by ${data.joinedGroup.leaderFirstName}`} /> : null}
         {data.locationGroup ? <GroupCard href={`/dashboard/community/unit/${data.locationGroup.id}`} art="location" title={data.locationGroup.name} meta="Your location group" /> : null}
