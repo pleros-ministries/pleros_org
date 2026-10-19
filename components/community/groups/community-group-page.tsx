@@ -32,7 +32,6 @@ import { MessageButton } from "../messages/message-button";
 import { PostFeed } from "../post-feed";
 import { GroupFormFields, type GroupFormValues } from "./group-form";
 import { AddContactAction, GroupHero, GroupTabs } from "./group-hero";
-import { GroupJoinButton } from "./group-join-button";
 import { useGroupAction } from "./use-group-action";
 
 type TabKey = "discussions" | "members" | "requests" | "about";
@@ -191,7 +190,6 @@ export function CommunityGroupPage({
           {detail.description ? ` · ${detail.description}` : ""}
         </>}
         actions={<>
-          <GroupJoinButton groupId={detail.id} join={viewer.join} />
           {viewer.isMember ? <AddContactAction /> : null}
           {viewer.isMember && !viewer.isOwner ? (
             <button

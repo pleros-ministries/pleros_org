@@ -3,39 +3,30 @@
 import { after } from "next/server";
 import { revalidatePath } from "next/cache";
 
-import { getAppSession } from "@/lib/app-session";
 import { canAccessCommunity, getCommunityContext } from "@/lib/community/context";
 import type { CommunityContext } from "@/lib/community/context";
 import {
   CommunityError,
-  POSTING_PAUSED_COPY,
   type CommunityActionResult,
 } from "@/lib/community/errors";
 import {
   canManageGroupMember,
   canModerateGroup,
-  evaluateGroupJoin,
-  groupJoinBlockCopy,
   normaliseGroupInput,
   ownsGroup,
 } from "@/lib/community/groups";
 import {
   notifyGroupJoinApproved,
-  notifyGroupJoinRequest,
 } from "@/lib/community/notify";
 import { RateLimitError } from "@/lib/community/rate-limit";
-import { firstNameOf } from "@/lib/community/visibility";
 import {
-  addGroupMember,
   approveAllGroupRequests,
   approveGroupRequest,
   banGroupMember,
-  createGroup,
   deleteGroupMembership,
   getGroupAccess,
   getGroupMembership,
   getGroupName,
-  listGroupManagerUserIds,
   removeOwnMembership,
   setGroupMemberRole,
   setGroupStatus,
@@ -72,23 +63,17 @@ function revalidateGroup(groupId: number) {
 
 // ─── Creating and editing ──────────────────────────────────────────────────
 
-/** Any community member can start a group; it is live at once with them as owner. */
+/**
+ * Retired (user decision, 19 October): every new group is an oversight group,
+ * started from Groups you lead, so interest groups can no longer be created.
+ */
 export async function createCommunityGroup(input: {
   name: string;
   description: string;
   privacy: string;
 }): Promise<CommunityActionResult<{ id: number }>> {
-  return run(async () => {
-    const ctx = await requireCommunity();
-    if (ctx.postingBlocked) throw new CommunityError(POSTING_PAUSED_COPY);
-
-    const parsed = normaliseGroupInput(input);
-    if (!parsed.ok) throw new CommunityError(parsed.error);
-
-    const group = await createGroup(ctx.userId, parsed.value);
-    revalidateGroup(group.id);
-    return { id: group.id };
-  });
+  void input;
+  return { ok: false, error: "Start a new group from Groups you lead." };
 }
 
 /** The owner (or an admin) changes a group's name, description or privacy. */
@@ -139,53 +124,18 @@ export async function setCommunityGroupArchived(input: {
 
 // ─── Joining and leaving ───────────────────────────────────────────────────
 
-/** Joins a public group at once, or asks to join a private one. */
+/**
+ * Retired (user decision, 19 October): groups are entered only by invitation,
+ * and the leader of the group you're in oversees you, so nobody joins or asks
+ * to join on their own.
+ */
 export async function joinCommunityGroup(
   groupId: number,
 ): Promise<CommunityActionResult<{ outcome: "joined" | "requested" }>> {
-  return run(async () => {
-    const ctx = await requireCommunity();
-    const access = await getGroupAccess(ctx.userId, groupId);
-    if (!access) throw new CommunityError(GROUP_GONE);
-
-    const decision = evaluateGroupJoin(access);
-    if (decision.action === "none") {
-      throw new CommunityError(groupJoinBlockCopy(decision.reason));
-    }
-
-    const requested = decision.action === "request";
-    await addGroupMember({
-      groupId,
-      userId: ctx.userId,
-      status: requested ? "pending" : "active",
-    });
-
-    if (requested) {
-      const session = await getAppSession();
-      const requesterFirstName = firstNameOf(session?.user.name ?? "Someone");
-      after(() =>
-        (async () => {
-          const [groupName, managerUserIds] = await Promise.all([
-            getGroupName(groupId),
-            listGroupManagerUserIds(groupId),
-          ]);
-          await notifyGroupJoinRequest({
-            groupId,
-            groupName: groupName ?? "your group",
-            managerUserIds,
-            requesterUserId: ctx.userId,
-            requesterFirstName,
-          });
-        })().catch((error) =>
-          console.error("Group join-request notification failed:", error),
-        ),
-      );
-    }
-
-    revalidateGroup(groupId);
-    return { outcome: requested ? ("requested" as const) : ("joined" as const) };
-  });
+  void groupId;
+  return { ok: false, error: "Groups are invite-only. Ask the group's leader to add you." };
 }
+
 
 /** Leaves a group, or withdraws a request to join. */
 export async function leaveCommunityGroup(

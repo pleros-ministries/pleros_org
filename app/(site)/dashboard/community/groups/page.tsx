@@ -33,6 +33,11 @@ export default async function CommunityGroupsRoute({ searchParams }: { searchPar
     reportingV3SchemaReady() ? listPrivateMinistryContacts(ctx.userId).then(rows => rows.length).catch(() => null) : Promise.resolve(null),
     ctx.enrollmentId != null ? listOwnEnrollees(ctx.userId).catch(() => null) : Promise.resolve(null),
   ]);
+  // Old "New group" links (`?create=1`) open the oversight-group form.
+  if (create === "1") {
+    const firstLed = discipleship?.leading.find(group => !group.paused);
+    redirect(firstLed ? `/dashboard/community/discipleship/${firstLed.groupId}?panel=create` : "/dashboard/sogp/discipleship");
+  }
   const locationGroups: LocationGroupLink[] = [
     ...(ctx.unit
       ? [{ id: ctx.unit.id, name: ctx.unit.name, relation: "member" as const }]
@@ -45,8 +50,6 @@ export default async function CommunityGroupsRoute({ searchParams }: { searchPar
       groups={groups}
       locationGroups={locationGroups}
       discipleship={discipleship ? { joined: discipleship.joined, leading: discipleship.leading.filter((group) => !group.paused) } : null}
-      canCreate={!ctx.postingBlocked}
-      startCreating={create === "1" && !ctx.postingBlocked}
       people={{ contacts, enrollees: enrollees ? { total: enrollees.length, free: enrollees.filter(row => !row.group).length } : null }}
     />
   );

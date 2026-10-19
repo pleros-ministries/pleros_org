@@ -29,7 +29,8 @@ export default async function CommunityGroupRoute({
   if (!ctx || !canAccessCommunity(ctx)) redirect("/sogp/enrol");
 
   const detail = await getGroupDetail(id, ctx);
-  if (!detail) notFound();
+  // No browsing (user decision, 19 October): only members and admins open a group.
+  if (!detail || (!detail.viewer.isMember && !ctx.isAdmin)) notFound();
 
   // `getGroupPosts` returns nothing for a private group the viewer is not in.
   const posts = detail.viewer.canView ? await getGroupPosts(id, ctx) : [];
