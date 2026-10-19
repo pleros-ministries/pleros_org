@@ -232,3 +232,34 @@ async function readHasChurchDirectReports(userId: string) {
 /** Request-scoped: layouts, pages and loaders read this repeatedly in one render. */
 export const getChurchAssignment = cache(readChurchAssignment);
 export const hasChurchDirectReports = cache(readHasChurchDirectReports);
+
+/** Units a Pastor or Branch Pastor can move workers into: their branches' units that have a leader. */
+export async function listWorkerMoveTargets(viewerId: string) {
+  requireEnabled();
+  const viewer = await getChurchAssignment(viewerId);
+  if (!canManageChurchAssignments(viewer)) return [];
+  const branchFilter = viewer!.role === "branch_pastor" ? inArray(s.churchUnits.branchId, churchBranchIds(viewer!)) : undefined;
+  const rows = await db.select({ id: s.churchUnits.id, name: s.churchUnits.name, branchId: s.churchUnits.branchId, branchName: s.churchBranches.name, leaderId: s.churchAssignments.userId })
+    .from(s.churchUnits)
+    .innerJoin(s.churchBranches, eq(s.churchBranches.id, s.churchUnits.branchId))
+    .leftJoin(s.churchAssignments, and(eq(s.churchAssignments.unitId, s.churchUnits.id), eq(s.churchAssignments.role, "unit_leader")))
+    .where(branchFilter);
+  return rows.map(row => ({ id: row.id, name: row.name, branchId: row.branchId, branchName: row.branchName, leaderId: row.leaderId }))
+    .sort((a, b) => a.branchName.localeCompare(b.branchName) || a.name.localeCompare(b.name));
+}
+
+/** A Pastor (any branch) or Branch Pastor (their branches) takes a worker out of their unit (user request, 19 October). */
+export async function removeChurchWorker(actorId: string, userId: string) {
+  requireEnabled();
+  return transactionDb.transaction(async (tx) => {
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended('pleros:church-assignments', 0))`);
+    const actor = await loadChurchAssignmentForTransaction(tx, actorId);
+    if (!actor || !canManageChurchAssignments(actor)) throw new CommunityError("Only a pastor can remove workers.");
+    const current = await loadChurchAssignmentForTransaction(tx, userId);
+    if (!current || current.role !== "worker") throw new CommunityError("This person is no longer a worker.");
+    if (actor.role === "branch_pastor" && (current.branchId === null || !churchBranchIds(actor).includes(current.branchId))) throw new CommunityError("Manage only workers in your branch.");
+    const [dependent] = await tx.select({ id: s.churchAssignments.userId }).from(s.churchAssignments).where(eq(s.churchAssignments.supervisorId, userId)).limit(1);
+    if (dependent) throw new CommunityError("Reassign the people who report to them first.");
+    await tx.delete(s.churchAssignments).where(and(eq(s.churchAssignments.userId, userId), eq(s.churchAssignments.role, "worker")));
+  });
+}

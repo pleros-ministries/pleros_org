@@ -2,8 +2,9 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition, type ReactNode } from "react";
-import { ArrowRightIcon, CheckIcon, SearchIcon, UserPlusIcon } from "lucide-react";
-import { addChurchPlace, addUnitWorkers, findChurchMembers, saveChurchAssignment, saveChurchBranchMembership } from "@/app/(site)/dashboard/church/actions";
+import { ArrowRightIcon, ArrowRightLeftIcon, CheckIcon, SearchIcon, UserMinusIcon, UserPlusIcon } from "lucide-react";
+import { addChurchPlace, addUnitWorkers, findChurchMembers, moveUnitWorker, removeUnitWorker, saveChurchAssignment, saveChurchBranchMembership } from "@/app/(site)/dashboard/church/actions";
+import { ActionMenu } from "@/components/community/action-menu";
 import { Initials } from "@/components/community/discipleship/shared";
 import type { ChurchPlace } from "@/lib/db/queries/church-home";
 import styles from "@/components/community/discipleship/discipleship-group.module.css";
@@ -169,9 +170,52 @@ export function AppointLeader({ place, role, supervisorId }: { place: ChurchPlac
 }
 
 /** Paper: Pleros-church-allocation. Workers join one unit under its leader. */
-export function AddWorkers({ place }: { place: ChurchPlace }) {
+type MoveTarget = { id: number; name: string; branchId: number; branchName: string; leaderId: string | null };
+
+/** Move a worker to another unit or take them out of this one (Pastors and Branch Pastors, user request 19 October). */
+function WorkerTools({ worker, unitId, targets, onDone }: { worker: { userId: string; name: string }; unitId: number; targets: MoveTarget[]; onDone: (message: string) => void }) {
+  const [mode, setMode] = useState<"move" | "remove" | null>(null);
+  const [to, setTo] = useState<number>(0);
+  const [error, setError] = useState<string | null>(null);
+  const [pending, start] = useTransition();
+  const first = worker.name.split(" ")[0];
+  const options = targets.filter(unit => unit.id !== unitId);
+  const branches = [...new Set(options.map(unit => unit.branchName))];
+  function run(task: () => Promise<{ ok: boolean; error?: string; unitName?: string }>, done: (unitName?: string) => string) {
+    setError(null);
+    start(async () => {
+      const result = await task();
+      if (!result.ok) { setError(result.error ?? "Could not save."); return; }
+      setMode(null); onDone(done(result.unitName));
+    });
+  }
+  return <>
+    <ActionMenu label={`Manage ${worker.name}`} trigger="Manage" actions={[
+      ...(options.length ? [{ key: "move", label: "Move to another unit", icon: ArrowRightLeftIcon, onSelect: () => { setMode("move"); setTo(0); } }] : []),
+      { key: "remove", label: "Remove from unit", icon: UserMinusIcon, danger: true, onSelect: () => setMode("remove") },
+    ]} />
+    {mode ? <div className="grid basis-full gap-2.5 border-t border-[var(--dashboard-panel-edge,#e2e5ea)] pt-3">
+      {mode === "move" ? <>
+        <label className={forms.field}>Move {first} to<select value={to} onChange={event => setTo(Number(event.target.value))} disabled={pending}>
+          <option value={0} disabled>Choose a unit</option>
+          {branches.map(branch => <optgroup key={branch} label={branch}>{options.filter(unit => unit.branchName === branch).map(unit => <option key={unit.id} value={unit.id} disabled={!unit.leaderId}>{unit.name}{unit.leaderId ? "" : " (no leader yet)"}</option>)}</optgroup>)}
+        </select></label>
+        <p className={styles.rowMeta}>{first} will report to that unit’s leader.</p>
+        <div className="flex gap-2"><button type="button" className={styles.btn} data-primary="" disabled={pending || !to} onClick={() => run(() => moveUnitWorker({ userId: worker.userId, unitId: to }), unitName => `${first} moved to ${unitName ?? "the new unit"}.`)}>{pending ? "Moving…" : `Move ${first}`}</button><button type="button" className={styles.btn} disabled={pending} onClick={() => setMode(null)}>Cancel</button></div>
+      </> : <>
+        <p className="m-0 text-[13px]">Remove {first} from this unit? They stay a church member and can be added to a unit again later.</p>
+        <div className="flex gap-2"><button type="button" className={`${styles.btn} border-red-200 text-red-700`} disabled={pending} onClick={() => run(() => removeUnitWorker({ userId: worker.userId }), () => `${first} was removed from the unit.`)}>{pending ? "Removing…" : `Remove ${first}`}</button><button type="button" className={styles.btn} disabled={pending} onClick={() => setMode(null)}>Cancel</button></div>
+      </>}
+      <Problem error={error} />
+    </div> : null}
+  </>;
+}
+
+export function AddWorkers({ place, moveTargets = [] }: { place: ChurchPlace; moveTargets?: MoveTarget[] }) {
   const router = useRouter(); const [chosen, setChosen] = useState<Person[]>([]); const [error, setError] = useState<string | null>(null); const [pending, start] = useTransition();
   const [round, setRound] = useState(0);
+  const [notice, setNotice] = useState<string | null>(null);
+  const canManage = place.viewerRole === "pastor" || place.viewerRole === "branch_pastor";
   const unit = place.unit!;
   function save() {
     if (!chosen.length) { setError("Choose at least one person."); return; }
@@ -194,9 +238,11 @@ export function AddWorkers({ place }: { place: ChurchPlace }) {
         <button type="button" className={`${styles.btn} ${forms.action}`} data-primary="" disabled={pending || !chosen.length} onClick={save}>{pending ? "Saving…" : chosen.length ? `Assign ${plural(chosen.length, "worker")}` : "Assign workers"}<CheckIcon className="size-4" strokeWidth={2.2} aria-hidden="true" /></button>
       </div>
       <div className={styles.sectionTitle}><h2>Current workers</h2><span className={styles.rowMeta}>{unit.workers.length}</span></div>
-      {unit.workers.length ? <div className={styles.panel}><ul className={styles.list}>{unit.workers.map(worker => <li key={worker.userId} className={styles.row}>
+      {notice ? <p className={forms.status} role="status">{notice}</p> : null}
+      {unit.workers.length ? <div className={styles.panel}><ul className={styles.list}>{unit.workers.map(worker => <li key={worker.userId} className={`${styles.row} flex-wrap`}>
         <Initials name={worker.name} />
         <span className={styles.rowCopy}><span className={styles.rowTitle}>{worker.name}</span><span className={styles.rowMeta}>Worker · reports to {unit.leader!.name}</span></span>
+        {canManage ? <WorkerTools worker={worker} unitId={unit.id} targets={moveTargets} onDone={message => { setNotice(message); router.refresh(); }} /> : null}
       </li>)}</ul></div> : <p className={`${styles.panel} ${styles.empty}`}>No workers in {unit.name} yet.</p>}
     </> : <>
       <p className={`${styles.panel} ${styles.empty}`}>Appoint a unit leader first. Workers report to their unit leader.</p>

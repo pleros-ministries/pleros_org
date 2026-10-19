@@ -2,7 +2,7 @@
 import { revalidatePath } from "next/cache";
 import { getAppSession } from "@/lib/app-session";
 import { CommunityError } from "@/lib/community/errors";
-import { assignChurchBranchMembership, assignChurchMember, createChurchPlace, searchChurchCandidates } from "@/lib/db/queries/church-organisation";
+import { assignChurchBranchMembership, assignChurchMember, createChurchPlace, listWorkerMoveTargets, removeChurchWorker, searchChurchCandidates } from "@/lib/db/queries/church-organisation";
 import type { ChurchRole } from "@/lib/church/permissions";
 
 async function actor() { const session = await getAppSession(); if (!session) throw new CommunityError("Sign in to manage church assignments."); return session; }
@@ -48,5 +48,27 @@ export async function addUnitWorkers(input: { unitId: number; userIds: string[] 
     for (const userId of ids) await assignChurchMember(session.user.id, { userId, role: "worker", branchId: place.branch.id, unitId: place.unit.id, supervisorId: place.unit.leader.userId });
     revalidatePath("/dashboard", "layout");
     return { ok: true as const, count: ids.length };
+  } catch (error) { if (error instanceof CommunityError) return { ok: false as const, error: error.message }; throw error; }
+}
+
+/** Pastor tools on a unit's workers (user request, 19 October). */
+export async function removeUnitWorker(input: { userId: string }) {
+  try {
+    const session = await actor();
+    await removeChurchWorker(session.user.id, input.userId);
+    revalidatePath("/dashboard", "layout");
+    return { ok: true as const };
+  } catch (error) { if (error instanceof CommunityError) return { ok: false as const, error: error.message }; throw error; }
+}
+
+export async function moveUnitWorker(input: { userId: string; unitId: number }) {
+  try {
+    const session = await actor();
+    const target = (await listWorkerMoveTargets(session.user.id)).find(unit => unit.id === input.unitId);
+    if (!target) return { ok: false as const, error: "Choose one of your units." };
+    if (!target.leaderId) return { ok: false as const, error: `Appoint a leader for ${target.name} first.` };
+    await assignChurchMember(session.user.id, { userId: input.userId, role: "worker", branchId: target.branchId, unitId: target.id, supervisorId: target.leaderId });
+    revalidatePath("/dashboard", "layout");
+    return { ok: true as const, unitName: target.name };
   } catch (error) { if (error instanceof CommunityError) return { ok: false as const, error: error.message }; throw error; }
 }
