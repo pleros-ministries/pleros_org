@@ -111,7 +111,8 @@ export function InvitationResponse({ invitation }: { invitation: ReceivedInvitat
   const router = useRouter();
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const [sharesPhone, setSharesPhone] = useState(false);
+  // Ticked by default (user decision, 19 October); they can untick before accepting.
+  const [sharesPhone, setSharesPhone] = useState(true);
   const leader = first(invitation.leaderName);
   // One overseer (19 October): accepting while in another group moves them, so say it plainly first.
   const current = invitation.currentGroup;
