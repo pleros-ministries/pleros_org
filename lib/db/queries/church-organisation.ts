@@ -96,13 +96,25 @@ export async function searchChurchCandidates(viewerId: string, query: string, bo
     const current = best.get(row.id);
     if (!current || score > current.score || (score === current.score && display.length > current.name.length)) best.set(row.id, { id: row.id, name: display, score });
   }
-  return [...best.values()]
-    .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name))
-    .slice(0, 20)
-    .map(({ id, name }) => ({ id, name }));
+  const top = [...best.values()].sort((a, b) => b.score - a.score || a.name.localeCompare(b.name)).slice(0, 20);
+  // Each person's current appointment, so the picker can say "Leads Second Gate"
+  // before a save would replace it (branch pastor report, 19 October).
+  const held = top.length ? await db
+    .select({ userId: s.churchAssignments.userId, role: s.churchAssignments.role, unitId: s.churchAssignments.unitId, unitName: s.churchUnits.name, branchName: s.churchBranches.name })
+    .from(s.churchAssignments)
+    .leftJoin(s.churchUnits, eq(s.churchUnits.id, s.churchAssignments.unitId))
+    .leftJoin(s.churchBranches, eq(s.churchBranches.id, s.churchAssignments.branchId))
+    .where(inArray(s.churchAssignments.userId, top.map(row => row.id))) : [];
+  const byUser = new Map(held.map(row => [row.userId, row]));
+  return top.map(({ id, name }): ChurchCandidate => {
+    const row = byUser.get(id);
+    return { id, name, current: row ? { role: row.role as ChurchRole, unitId: row.unitId, unitName: row.unitName, branchName: row.branchName } : null };
+  });
 }
 
-export async function assignChurchMember(actorId: string, input: { userId: string; role: ChurchRole; branchId: number | null; unitId: number | null; supervisorId: string | null; branchIds?: number[] }, bootstrap = false) {
+export type ChurchCandidate = { id: string; name: string; current: { role: ChurchRole; unitId: number | null; unitName: string | null; branchName: string | null } | null };
+
+export async function assignChurchMember(actorId: string, input: { userId: string; role: ChurchRole; branchId: number | null; unitId: number | null; supervisorId: string | null; branchIds?: number[]; replace?: boolean }, bootstrap = false) {
   requireEnabled();
   if (!["pastor", "branch_pastor", "unit_leader", "worker"].includes(input.role)) throw new CommunityError("Choose a church role.");
   return transactionDb.transaction(async (tx) => {
@@ -135,6 +147,17 @@ export async function assignChurchMember(actorId: string, input: { userId: strin
       !["worker", "unit_leader"].includes(input.role) ||
       (current && !["worker", "unit_leader"].includes(current.role))
     )) throw new CommunityError("Manage only workers and unit leaders in your branch.");
+    // One appointment per person, so saving a new one replaces the old. Never do
+    // that silently (branch pastor report, 19 October: leaders added as workers
+    // elsewhere left their units leaderless): a leader moves only when the caller
+    // confirmed it, and a worker only moves between units.
+    if (current && !bootstrap && !input.replace) {
+      const sameSpot = current.role === input.role && current.unitId === input.unitId && current.branchId === primaryBranch;
+      if (!sameSpot && current.role !== "worker") {
+        const where = current.unitId ? (await tx.select({ name: s.churchUnits.name }).from(s.churchUnits).where(eq(s.churchUnits.id, current.unitId)))[0]?.name : null;
+        throw new CommunityError(current.role === "unit_leader" ? `This person already leads ${where ?? "another unit"}. Change that unit's leader first, or confirm the move.` : "This person already holds a church role. Change it from Structure first.");
+      }
+    }
     const requestedBranches = input.role === "branch_pastor" && multi ? branchIds : primaryBranch === null ? [] : [primaryBranch];
     // Saving in multi-branch mode replaces all membership rows, including any
     // stale links on lower-tier appointments. Validate those removals as well.

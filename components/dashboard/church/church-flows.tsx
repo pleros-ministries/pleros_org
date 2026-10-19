@@ -5,6 +5,8 @@ import { useEffect, useState, useTransition, type ReactNode } from "react";
 import { ArrowRightIcon, ArrowRightLeftIcon, CheckIcon, PencilIcon, SearchIcon, UserMinusIcon, UserPlusIcon, UsersRoundIcon } from "lucide-react";
 import { addChurchPlace, addUnitWorkers, changeUnitLeader, findChurchMembers, moveUnitWorker, removeUnitWorker, renameChurchPlaceAction, saveChurchAssignment, saveChurchBranchMembership } from "@/app/(site)/dashboard/church/actions";
 import { ActionMenu } from "@/components/community/action-menu";
+import { CrumbLabel } from "@/components/dashboard/shell/breadcrumbs";
+import type { ChurchCandidate } from "@/lib/db/queries/church-organisation";
 import { Initials } from "@/components/community/discipleship/shared";
 import type { ChurchPlace } from "@/lib/db/queries/church-home";
 import styles from "@/components/community/discipleship/discipleship-group.module.css";
@@ -12,7 +14,16 @@ import forms from "./church-forms.module.css";
 import { ChurchHeading, ChurchPage } from "./church-ui";
 import { Mark, short } from "./oversight-view";
 
-type Person = { id: string; name: string };
+type Person = ChurchCandidate;
+
+/** What a person does now, shown in the picker so a save never replaces it unseen. */
+function currentRole(person: Person): string {
+  const held = person.current;
+  if (!held) return "Church member";
+  if (held.role === "pastor") return "Pastor";
+  if (held.role === "branch_pastor") return `Branch pastor${held.branchName ? ` · ${held.branchName}` : ""}`;
+  return `${held.role === "unit_leader" ? "Leads" : "Worker in"} ${held.unitName ?? "a unit"}`;
+}
 const plural = (n: number, one: string) => `${n} ${one}${n === 1 ? "" : "s"}`;
 const STEPS = ["Branch", "Branch pastor", "Unit leaders", "Workers"];
 
@@ -37,7 +48,7 @@ function Problem({ error }: { error: string | null }) {
 }
 
 /** Names-only member search (searchChurchCandidates); never contact details. */
-function PeopleSearch({ multiple, chosen, onChange, exclude = [], label = "Search church members" }: { multiple: boolean; chosen: Person[]; onChange: (people: Person[]) => void; exclude?: string[]; label?: string }) {
+function PeopleSearch({ multiple, chosen, onChange, exclude = [], label = "Search church members", blocked }: { multiple: boolean; chosen: Person[]; onChange: (people: Person[]) => void; exclude?: string[]; label?: string; blocked?: (person: Person) => string | null }) {
   const [query, setQuery] = useState(""), [results, setResults] = useState<Person[] | null>(null), [error, setError] = useState<string | null>(null), [pending, start] = useTransition();
   // Search as you type, after a short pause (user report, 18 October).
   useEffect(() => {
@@ -61,10 +72,11 @@ function PeopleSearch({ multiple, chosen, onChange, exclude = [], label = "Searc
     <Problem error={error} />
     {rows.length ? <div className={styles.panel}><ul className={styles.list}>{rows.map(person => {
       const selected = picked.has(person.id);
-      return <li key={person.id}><label className={`${styles.row} ${forms.choice}`} data-selected={selected}>
+      const reason = selected ? null : blocked?.(person) ?? null;
+      return <li key={person.id}><label className={`${styles.row} ${forms.choice}`} data-selected={selected} aria-disabled={reason ? true : undefined} style={reason ? { opacity: 0.6 } : undefined}>
         <Initials name={person.name} />
-        <span className={styles.rowCopy}><span className={styles.rowTitle}>{person.name}</span><span className={styles.rowMeta}>Church member</span></span>
-        <input type={multiple ? "checkbox" : "radio"} name="church-person" checked={selected} onChange={() => { if (multiple) onChange(selected ? chosen.filter(row => row.id !== person.id) : [...chosen, person]); else onChange([person]); if (!selected) setQuery(""); }} />
+        <span className={styles.rowCopy}><span className={styles.rowTitle}>{person.name}</span><span className={styles.rowMeta}>{reason ?? currentRole(person)}</span></span>
+        <input type={multiple ? "checkbox" : "radio"} name="church-person" checked={selected} disabled={Boolean(reason)} onChange={() => { if (multiple) onChange(selected ? chosen.filter(row => row.id !== person.id) : [...chosen, person]); else onChange([person]); if (!selected) setQuery(""); }} />
       </label></li>;
     })}</ul></div> : shown ? <p className={`${styles.panel} ${styles.empty}`}>No members match “{query.trim()}”.</p> : null}
     {multiple && chosen.length ? <span className={styles.rowMeta}>{chosen.length} selected</span> : null}
@@ -138,22 +150,28 @@ export function AppointLeader({ place, role, supervisorId, moveTargets = [] }: {
   const replacing = Boolean(current);
   // Where the previous leader goes: "stay", "remove" or another unit's id (user request, 19 October).
   const [oldTo, setOldTo] = useState("");
+  const [confirmMove, setConfirmMove] = useState(false);
+  const held = chosen[0]?.current;
+  const movingLeader = !pastor && !replacing && held?.role === "unit_leader" && held.unitId !== place.unit?.id;
+  const movingWorker = !pastor && !replacing && held?.role === "worker" && held.unitId !== place.unit?.id;
   const otherUnits = moveTargets.filter(unit => unit.id !== place.unit?.id && unit.leaderId);
   const oldBranches = [...new Set(otherUnits.map(unit => unit.branchName))];
   function save() {
     const person = chosen[0];
     if (!person) { setError("Choose who to appoint."); return; }
+    if (movingLeader && !confirmMove) { setError(`Confirm moving ${person.name.split(" ")[0]} from ${held!.unitName ?? "their unit"}.`); return; }
     if (replacing && !oldTo) { setError(`Choose where ${current!.name.split(" ")[0]} goes next.`); return; }
     if (!supervisorId && !replacing) { setError(role === "unit_leader" ? "Appoint a branch pastor for this branch first." : "Only the Pastor appoints branch pastors."); return; }
     start(async () => {
       const result = replacing
         ? await changeUnitLeader({ unitId: place.unit!.id, userId: person.id, supervisorId, oldLeader: oldTo === "stay" || oldTo === "remove" ? { kind: oldTo } : { kind: "unit", unitId: Number(oldTo) } })
-        : await saveChurchAssignment({ userId: person.id, role, branchId: place.branch.id, unitId: role === "unit_leader" ? place.unit!.id : null, supervisorId, ...(role === "branch_pastor" ? { branchIds: [place.branch.id] } : {}) });
+        : await saveChurchAssignment({ userId: person.id, role, branchId: place.branch.id, unitId: role === "unit_leader" ? place.unit!.id : null, supervisorId, replace: movingLeader && confirmMove, ...(role === "branch_pastor" ? { branchIds: [place.branch.id] } : {}) });
       if (!result.ok) { setError(result.error); return; }
       router.push(role === "unit_leader" ? `/dashboard/church/units/${place.unit!.id}/workers` : "/dashboard/church"); router.refresh();
     });
   }
   return <ChurchPage>
+    {place.unit && !pastor ? <CrumbLabel href={`/dashboard/church/units/${place.unit.id}/leader`} label={`${place.unit.name} leader`} /> : null}
     <ChurchHeading title={pastor ? "Appoint a branch pastor" : replacing ? "Change unit leader" : "Appoint a unit leader"} sub={pastor ? `${place.branch.name} branch` : `${unitName} · ${place.branch.name} branch`} />
     {pastor ? <SetupSteps step={2} /> : null}
     {pastor
@@ -162,7 +180,18 @@ export function AppointLeader({ place, role, supervisorId, moveTargets = [] }: {
         end={place.unit!.leader ? null : <span className={styles.pill} data-tone="risk">Needs a leader</span>} />}
 
     <div className={styles.sectionTitle}><h2>{pastor ? "Choose a church member" : replacing ? "Choose the new unit leader" : "Choose the unit leader"}</h2></div>
-    <PeopleSearch multiple={false} chosen={chosen} onChange={setChosen} exclude={current ? [current.userId] : []} />
+    <PeopleSearch multiple={false} chosen={chosen} onChange={value => { setChosen(value); setConfirmMove(false); }} exclude={current ? [current.userId] : []} blocked={person => {
+      const held = person.current;
+      if (!held || (held.role === "worker" && held.unitId === place.unit?.id)) return null;
+      if (held.role === "pastor" || held.role === "branch_pastor") return `${currentRole(person)} · cannot lead a unit`;
+      // A handover moves only people without another appointment; appointing can move a leader once confirmed.
+      if (replacing) return `${currentRole(person)} · move them first`;
+      return null;
+    }} />
+    {movingLeader ? <label className="flex items-start gap-2.5 text-[13px] leading-[19px]">
+      <input type="checkbox" className="mt-0.5" checked={confirmMove} onChange={event => setConfirmMove(event.target.checked)} />
+      <span>{chosen[0]!.name.split(" ")[0]} leads {chosen[0]!.current!.unitName ?? "another unit"} now. Move them here and leave {chosen[0]!.current!.unitName ?? "that unit"} without a leader.</span>
+    </label> : movingWorker ? <p className={styles.note}>{chosen[0]!.name.split(" ")[0]} leaves {chosen[0]!.current!.unitName ?? "their unit"} to lead {unitName}.</p> : null}
 
     {current ? <>
       <div className={styles.sectionTitle}><h2>Where does {current.name.split(" ")[0]} go?</h2></div>
@@ -211,6 +240,18 @@ export function RenamePlace({ kind, id, name }: { kind: "branch" | "unit"; id: n
 }
 
 type MoveTarget = { id: number; name: string; branchId: number; branchName: string; leaderId: string | null };
+
+/** Jump between the units a pastor manages without going back to Structure (user request, 19 October). */
+function UnitSwitcher({ unitId, units }: { unitId: number; units: MoveTarget[] }) {
+  const router = useRouter();
+  if (units.length < 2) return null;
+  const branches = [...new Set(units.map(unit => unit.branchName))];
+  return <label className={forms.field}><span className="sr-only">Switch unit</span>
+    <select value={unitId} onChange={event => router.push(`/dashboard/church/units/${event.target.value}/workers`)}>
+      {branches.map(branch => <optgroup key={branch} label={branch}>{units.filter(unit => unit.branchName === branch).map(unit => <option key={unit.id} value={unit.id}>{unit.name}{unit.leaderId ? "" : " · needs a leader"}</option>)}</optgroup>)}
+    </select>
+  </label>;
+}
 
 /** Move a worker to another unit or take them out of this one (Pastors and Branch Pastors, user request 19 October). */
 function WorkerTools({ worker, unitId, targets, onDone }: { worker: { userId: string; name: string }; unitId: number; targets: MoveTarget[]; onDone: (message: string) => void }) {
@@ -266,7 +307,9 @@ export function AddWorkers({ place, moveTargets = [] }: { place: ChurchPlace; mo
     });
   }
   return <ChurchPage>
+    <CrumbLabel href={`/dashboard/church/units/${unit.id}/workers`} label={unit.name} />
     <ChurchHeading title={`${unit.name} workers`} sub={`${place.branch.name} branch`} />
+    {canManage ? <UnitSwitcher unitId={unit.id} units={moveTargets} /> : null}
     <PlaceRow title={unit.name} meta={unit.leader ? `${unit.leader.name} · Unit leader` : "No leader yet"}
       end={<span className={styles.pill} data-tone={unit.leader ? undefined : "risk"}>{unit.leader ? plural(unit.workers.length, "worker") : "Needs a leader"}</span>} />
     {canManage ? <div className="flex flex-wrap items-start gap-x-4 gap-y-2.5">
@@ -275,8 +318,16 @@ export function AddWorkers({ place, moveTargets = [] }: { place: ChurchPlace; mo
     </div> : null}
     {unit.leader ? <>
       <div className={styles.sectionTitle}><h2>Add people</h2></div>
-      <PeopleSearch key={round} multiple chosen={chosen} onChange={setChosen} exclude={unit.workers.map(worker => worker.userId)} />
-      {chosen.length ? <p className={styles.note}>{unit.name} will have {plural(unit.workers.length + chosen.length, "worker")}, reporting to {unit.leader.name}.</p> : null}
+      <PeopleSearch key={round} multiple chosen={chosen} onChange={setChosen} exclude={unit.workers.map(worker => worker.userId)} blocked={person => {
+        const held = person.current;
+        if (!held || held.role === "worker") return null;
+        // Adding a leader as a worker would leave their unit without a leader.
+        return held.role === "unit_leader" ? `Already leads ${held.unitName ?? "another unit"}` : `${currentRole(person)} · cannot be a worker`;
+      }} />
+      {chosen.length ? <p className={styles.note}>{unit.name} will have {plural(unit.workers.length + chosen.length, "worker")}, reporting to {unit.leader.name}.{(() => {
+        const moving = chosen.filter(person => person.current?.role === "worker" && person.current.unitId !== unit.id);
+        return moving.length ? ` ${moving.map(person => `${person.name.split(" ")[0]} moves from ${person.current!.unitName ?? "another unit"}`).join(", ")}.` : "";
+      })()}</p> : null}
       <Problem error={error} />
       <div className={forms.footer}>
         <button type="button" className={`${styles.btn} ${forms.action}`} data-primary="" disabled={pending || !chosen.length} onClick={save}>{pending ? "Saving…" : chosen.length ? `Assign ${plural(chosen.length, "worker")}` : "Assign workers"}<CheckIcon className="size-4" strokeWidth={2.2} aria-hidden="true" /></button>
