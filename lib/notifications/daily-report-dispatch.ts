@@ -12,6 +12,7 @@ import { loadDailyReportingFacts } from "@/lib/db/queries/church-reports";
 import { lockDailyReporting } from "@/lib/db/queries/daily-report-declarations";
 import { reportRemindersEnabled } from "@/lib/db/queries/daily-report-preferences";
 import { sendPushToUser } from "@/lib/push/send";
+import { canOversee, groupOversightEnabled, isGroupPerson } from "@/lib/db/queries/oversight-tree";
 
 /** Both paths claim the same recipient/Lagos-day key with the in-app write atomically. */
 export async function sendDailyReportReminder(input: { subjectId: string; source: "manual" | "automatic"; reportDate?: string; viewerId?: string; now?: Date }) {
@@ -23,11 +24,15 @@ export async function sendDailyReportReminder(input: { subjectId: string; source
   const url = `/dashboard/community/report?day=${encodeURIComponent(dateKey)}`;
   const claimed = await transactionDb.transaction(async (tx) => {
     await lockDailyReporting(tx, input.subjectId, dateKey);
-    const subject = await loadChurchAssignmentForTransaction(tx, input.subjectId);
-    const viewer = input.viewerId ? await loadChurchAssignmentForTransaction(tx, input.viewerId) : null;
-    if (!subject || input.source === "manual" && !canReadChurchReport(viewer, subject)) throw new CommunityError("That person is outside your oversight.");
+    // Who is expected to report, and who may nudge them, follow the live oversight model.
+    const groups = groupOversightEnabled();
+    const expected = groups ? await isGroupPerson(tx, input.subjectId) : Boolean(await loadChurchAssignmentForTransaction(tx, input.subjectId));
+    const authorized = input.source === "automatic" || Boolean(input.viewerId) && (groups
+      ? await canOversee(input.viewerId!, input.subjectId)
+      : canReadChurchReport(await loadChurchAssignmentForTransaction(tx, input.viewerId!), await loadChurchAssignmentForTransaction(tx, input.subjectId)));
+    if (!expected || !authorized) throw new CommunityError("That person is outside your oversight.");
     const facts = await loadDailyReportingFacts(input.subjectId, dateKey);
-    const plan = planDailyReportReminder({ now, subjectId: input.subjectId, reportDate: dateKey, expected: true, authorized: input.source === "automatic" || canReadChurchReport(viewer, subject), source: input.source, statuses: facts.statuses, alreadyRemindedToday: false });
+    const plan = planDailyReportReminder({ now, subjectId: input.subjectId, reportDate: dateKey, expected, authorized, source: input.source, statuses: facts.statuses, alreadyRemindedToday: false });
     if (!plan) return false;
     const [claim] = await tx.insert(s.notificationCheckpoints).values({ key: plan.checkpointKey, value: "sent" }).onConflictDoNothing().returning({ key: s.notificationCheckpoints.key });
     if (!claim) return false;
@@ -44,11 +49,29 @@ export async function sendDailyReportReminder(input: { subjectId: string; source
   }
   return { sent: true, pushFailed };
 }
+/** Group members and leaders with members (groups as oversight, 19 October) not yet reminded today. */
+async function groupReminderAudience(day: string) {
+  const result = await db.execute<{ user_id: string }>(sql`
+    select distinct person.user_id from (
+      select m.member_user_id as user_id from discipleship_memberships m
+      join discipleship_groups g on g.id = m.group_id
+      where m.status = 'active' and g.status <> 'closed'
+      union
+      select g.leader_user_id from discipleship_groups g
+      join discipleship_memberships m on m.group_id = g.id and m.status = 'active'
+      where g.status <> 'closed'
+    ) person
+    where person.user_id is not null and not exists (
+      select 1 from ${s.notificationCheckpoints} as checkpoints where checkpoints.key = 'daily-report:' || person.user_id || ':' || ${day}
+    )`);
+  return result.rows.map(row => ({ userId: row.user_id }));
+}
+
 export async function runDailyReportReminderDispatcher(now = new Date()) {
   if (!reportRemindersEnabled()) return { enabled: false, sent: 0, failures: 0 };
   if (Number(new Intl.DateTimeFormat("en-GB", { timeZone: "Africa/Lagos", hour: "2-digit", hourCycle: "h23" }).format(now)) < 20) return { enabled: true, sent: 0, failures: 0 };
   const day = new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Lagos" }).format(now);
-  const audience = await db.select({ userId: s.churchAssignments.userId }).from(s.churchAssignments)
+  const audience = groupOversightEnabled() ? await groupReminderAudience(day) : await db.select({ userId: s.churchAssignments.userId }).from(s.churchAssignments)
     .where(sql`not exists (select 1 from ${s.notificationCheckpoints} as checkpoints where checkpoints.key = 'daily-report:' || ${s.churchAssignments}.user_id || ':' || ${day})`);
   let sent = 0; let failures = 0;
   // Small batches keep database reads bounded by the assigned roster; no public user scan.

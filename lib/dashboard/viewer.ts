@@ -8,6 +8,7 @@ import { getAppSession } from "@/lib/app-session";
 import { canAccessCommunity, getCommunityContext } from "@/lib/community/context";
 import { managesAnyUnit } from "@/lib/community/permissions";
 import { getSogpDashboardAccess } from "@/lib/db/queries/sogp-journey";
+import { groupOversightEnabled, leadsAnyMembers } from "@/lib/db/queries/oversight-tree";
 
 import {
   buildDashboardNavigation,
@@ -24,11 +25,13 @@ export const getDashboardViewer = cache(async () => {
   const session = await getAppSession();
   if (!session) return null;
 
-  const [sogpAccess, ctx, church, hasReports] = await Promise.all([
+  const groups = groupOversightEnabled();
+  const [sogpAccess, ctx, church, hasReports, leadsMembers] = await Promise.all([
     getSogpDashboardAccess(session.user.id),
     getCommunityContext(),
     getChurchAssignment(session.user.id),
     hasChurchDirectReports(session.user.id),
+    groups ? leadsAnyMembers(session.user.id) : Promise.resolve(false),
   ]);
   const community = canAccessCommunity(ctx);
 
@@ -45,6 +48,8 @@ export const getDashboardViewer = cache(async () => {
     churchOversight: hasReports,
     churchMember: church !== null,
     churchAssignments: canManageChurchAssignments(church) || churchOrganisationEnabled() && session.user.role === "super_admin",
+    // Undefined while the flag is off, so navigation keeps the church-structure entries.
+    groupOversight: groups ? leadsMembers || church?.role === "pastor" || church?.role === "branch_pastor" : undefined,
   };
 
   return {

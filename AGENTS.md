@@ -55,6 +55,21 @@ All authentication emails—SOGP OTP, password reset, email verification, staff 
 - SOGP dashboard/API access additionally requires an SOGP enrolment; a signed-in but unenrolled learner returns to `/sogp/enrol`.
 - Preserve `admin` and `super_admin` identities, accounts, roles, and sessions during auth migrations or cleanup. Super-admin access remains email-verified and fail-closed.
 
+### Groups as oversight
+
+Pastor, 19 October; plan in `docs/plans/groups-as-oversight.md`. Groups replace the church org chart: the leader of the group you are in is your overseer.
+- One overseer per person: one active membership per user. Joining needs a one-tap accept. Branch pastor status and scope survive the retired org chart.
+- Migration 0069 (applied 19 October) keys groups, memberships and invitations on users (`leader_user_id`, `member_user_id`, `recipient_user_id`). Triggers fill these from the enrolment, so enrolment-keyed writes keep working.
+- Every join takes `lockOversightTree` and `assertNoOversightLoop`, which walks the whole chain (`loadOverseerChain`). The pure rules live in `lib/oversight/tree.ts`.
+- `DASHBOARD_GROUP_OVERSIGHT=1` switches Oversight, report access and the 8 pm reminder onto the tree. It is opt-in until people are in groups; off keeps the church-structure behaviour.
+- With the flag on:
+  - `getGroupOversight` (`lib/db/queries/group-oversight.ts`) shows a leader everyone under them to any depth, the Pastor every group person, and a branch pastor group people placed in their branches plus their own tree. `?under=` opens one person's tree after `canOversee`.
+  - Reports go through `requireReportAccess`, and overseers read the full report including shared meetings.
+  - The reminder audience is group members plus leaders with members.
+  - Navigation shows Oversight to anyone who leads a group with members (`groupOversight`).
+  - Questions waiting stay names and counts only.
+- Quiz answers and written work keep their own rule: the direct leader of an active membership only.
+
 ### SOGP discipleship groups
 
 - Any enrolled learner leads up to five named groups (`DISCIPLESHIP_GROUPS_LED_MAX`). Each group's page, `/dashboard/community/discipleship/[groupId]`, is its single home (My disciples was retired on 17 October by user decision): the leader sees Disciples (sorted by who needs them), Discussion, Check-ins and Prayer, with Invite, rename, close, weekly reviews and new group in the hero; each disciple opens at `…/[groupId]/disciples/[membershipId]`; a disciple sees their discipler, their own check-ins and requests, the discussion and the members. `/dashboard/sogp/discipleship` now only redirects to the right group, and still creates the first group lazily; `/dashboard/community/discipleship` redirects to the group joined, else the first one led. The rest are created, renamed and closed by the leader. Each group has its own regenerable 8-hex invite link `/sogp/discipleship/[code]`, its own WhatsApp consent, check-ins and prayer requests. Groups have no size limit (removed 14 October by user decision). Each group page loads one group in full, so per-disciple reads stay bounded to one group. Community Home's "Needs you" lists, across every led group, disciples whose `last_known_status` is not active or at risk, unanswered check-in replies and unprayed requests (names and counts only, never answer or prayer text).

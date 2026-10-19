@@ -1,10 +1,16 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 
+import { GroupOversightBranch } from "@/components/dashboard/church/group-oversight-view";
 import { OversightBranch } from "@/components/dashboard/church/oversight-view";
 import { CrumbLabel } from "@/components/dashboard/shell/breadcrumbs";
 import { getAppSession } from "@/lib/app-session";
+import { getGroupOversight } from "@/lib/db/queries/group-oversight";
 import { getOversight } from "@/lib/db/queries/oversight";
+import { groupOversightEnabled } from "@/lib/db/queries/oversight-tree";
+
+// Reads the session on every request (Cache Components).
+export const instant = false;
 
 export const metadata: Metadata = { title: "Branch" };
 
@@ -15,6 +21,16 @@ export default async function OversightBranchPage({ params }: { params: Promise<
   const branchId = Number(raw);
   const session = await getAppSession();
   if (!session) redirect(`/login?returnTo=/dashboard/community/oversight/branches/${branchId}`);
+  if (groupOversightEnabled()) {
+    const data = await getGroupOversight(session.user.id);
+    if (!data) redirect("/dashboard/community");
+    const branch = data.branches.find(item => item.id === branchId);
+    if (!branch) notFound();
+    return <>
+      <CrumbLabel href={`/dashboard/community/oversight/branches/${branchId}`} label={branch.name} />
+      <GroupOversightBranch data={data} branchId={branchId} />
+    </>;
+  }
   const data = await getOversight(session.user.id);
   if (!data) redirect("/dashboard/church");
   const branch = data.branches.find(item => item.id === branchId);

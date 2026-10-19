@@ -23,9 +23,9 @@ function Remind({ subjectId, day }: { subjectId: string; day: string }) {
 }
 
 /** Church reports (Paper: Pleros-oversight), in the Oversight style. Status only: no notes, contacts or report text. */
-export function ChurchOversight({ rows, day, dayLabel, scope, remindersEnabled, header }: { rows: OversightRow[]; day: string; dayLabel: string; scope: string; remindersEnabled: boolean;
+export function ChurchOversight({ rows, day, dayLabel, scope, remindersEnabled, header, note = "Only people in your assigned scope. You see whether each category was reported, never the report text." }: { rows: OversightRow[]; day: string; dayLabel: string; scope: string; remindersEnabled: boolean;
   /** Inside Oversight: its shared header replaces this page's own heading. */
-  header?: React.ReactNode }) {
+  header?: React.ReactNode; note?: string }) {
   const needs = rows.filter(row => Object.values(row.statuses).includes("missing"));
   const [filter, setFilter] = useState<"needs" | "all">(needs.length ? "needs" : "all");
   const visible = filter === "needs" ? needs : rows;
@@ -53,6 +53,6 @@ export function ChurchOversight({ rows, day, dayLabel, scope, remindersEnabled, 
         {remindersEnabled && missing ? <Remind subjectId={row.userId} day={day} /> : <Link href={`/dashboard/church/${encodeURIComponent(row.userId)}?day=${day}`} aria-label={`Open ${row.name}’s report`}><ChevronRightIcon className={`${styles.chev} mt-3 size-4`} strokeWidth={2} /></Link>}
       </div></li>;
     })}</ul></div> : <p className={`${styles.panel} ${styles.empty}`}>{filter === "needs" ? "Everyone in your scope has reported." : "No one is in your oversight scope yet."}</p>}
-    <p className={styles.note}>Only people in your assigned scope. You see whether each category was reported, never the report text.</p>
+    <p className={styles.note}>{note}</p>
   </ChurchPage>;
 }

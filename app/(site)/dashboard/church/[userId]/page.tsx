@@ -6,7 +6,7 @@ import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { getChurchReport } from "@/lib/db/queries/church-reports";
-import { requireChurchReportAccess } from "@/lib/db/queries/church-organisation";
+import { requireReportAccess } from "@/lib/db/queries/oversight-tree";
 import { CommunityError } from "@/lib/community/errors";
 import { isDateKey, MINISTRY_FIELDS } from "@/lib/community/ministry-report";
 import { activityKindLabel } from "@/lib/community/ministry-activities";
@@ -29,7 +29,7 @@ export default async function ChurchReportPage({ params, searchParams }: { param
   const session = await getAppSession(); if (!session) redirect("/login?returnTo=/dashboard/church");
   const { userId } = await params; const today = lagosToday(); const { day } = await searchParams;
   const selected = isDateKey(day) && day <= today ? day : today;
-  try { await requireChurchReportAccess(session.user.id, userId); } catch (error) { if (error instanceof CommunityError) notFound(); throw error; }
+  try { await requireReportAccess(session.user.id, userId); } catch (error) { if (error instanceof CommunityError) notFound(); throw error; }
   const [[person], report] = await Promise.all([db.select({ name: users.name }).from(users).where(eq(users.id, userId)).limit(1), getChurchReport(session.user.id, userId, selected)]);
   if (!person) notFound();
   return <ChurchPage>

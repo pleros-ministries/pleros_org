@@ -27,6 +27,11 @@ export type DashboardCapabilities = {
   /** Holds any church appointment (worker placement, unit, branch or Pastor). */
   churchMember?: boolean;
   churchAssignments?: boolean;
+  /**
+   * Groups as oversight (19 October): leads a group with members, or is the
+   * Pastor or a branch pastor. Set only while `DASHBOARD_GROUP_OVERSIGHT` is on.
+   */
+  groupOversight?: boolean;
   reporting?: boolean;
 };
 
@@ -149,7 +154,9 @@ export function buildDashboardNavigation(
     });
   }
   const oversight: DashboardNavItem[] = [];
-  if (caps.churchOversight || caps.churchAssignments || caps.churchMember) {
+  if (caps.groupOversight && caps.community) {
+    oversight.push({ key: "church", label: "Oversight", href: "/dashboard/community/oversight" });
+  } else if (caps.groupOversight === undefined && (caps.churchOversight || caps.churchAssignments || caps.churchMember)) {
     // Pastors and Branch Pastors with Community land on Oversight inside it (bottom
     // bar kept); everyone else keeps their church page.
     oversight.push({ key: "church", label: caps.churchAssignments && caps.community ? "Oversight" : caps.churchAssignments ? "Church structure" : caps.churchOversight ? "Church oversight" : "My church placement", href: caps.churchAssignments && caps.community ? "/dashboard/community/oversight" : "/dashboard/church" });

@@ -18,14 +18,17 @@ const TABS = [
  * the same title and scope line, then Overview · Reports · Structure, so the
  * reports and structure pages read as parts of Oversight, not separate places.
  */
-export function OversightHeader({ sub, counts }: { sub: string; counts?: { reports?: number; structure?: number } }) {
+export function OversightHeader({ sub, counts, structure = true, title = "Oversight" }: { sub: string; counts?: { reports?: number; structure?: number };
+  /** Group leaders have no church structure to manage (groups as oversight, 19 October). */
+  structure?: boolean; title?: string }) {
   const pathname = usePathname() ?? OVERSIGHT_HOME;
-  // All three tabs load in the background, so switching between them is instant.
-  useIdlePrefetch(TABS.map(tab => tab.href));
+  const tabs = structure ? TABS : TABS.filter(tab => tab.label !== "Structure");
+  // Every tab loads in the background, so switching between them is instant.
+  useIdlePrefetch(tabs.map(tab => tab.href));
   return <>
-    <div className={styles.heading}><div><h1>Oversight</h1><p className={styles.sub}>{sub}</p></div></div>
-    <nav aria-label="Oversight" className="grid grid-cols-3 rounded-[10px] bg-[#eceef2] p-[3px]">
-      {TABS.map(tab => {
+    <div className={styles.heading}><div><h1>{title}</h1><p className={styles.sub}>{sub}</p></div></div>
+    <nav aria-label="Oversight" className={`grid ${tabs.length === 3 ? "grid-cols-3" : "grid-cols-2"} rounded-[10px] bg-[#eceef2] p-[3px]`}>
+      {tabs.map(tab => {
         const active = tab.href === OVERSIGHT_HOME ? pathname === OVERSIGHT_HOME : pathname === tab.href || pathname.startsWith(`${tab.href}/`);
         const count = tab.label === "Reports" ? counts?.reports : tab.label === "Structure" ? counts?.structure : undefined;
         return <Link key={tab.href} href={tab.href} prefetch scroll={false} aria-current={active ? "page" : undefined}

@@ -5,7 +5,7 @@ import { db } from "@/lib/db";
 import * as s from "@/lib/db/schema";
 import { CommunityError } from "@/lib/community/errors";
 import { churchBranchIds } from "@/lib/church/permissions";
-import { getChurchAssignment } from "@/lib/db/queries/church-organisation";
+import { getChurchAssignment, requireChurchReportAccess } from "@/lib/db/queries/church-organisation";
 import type { Tx } from "./outreach-contacts";
 import { decideOversight, OVERSIGHT_MAX_DEPTH, wouldCreateLoop, type OversightViewer } from "@/lib/oversight/tree";
 
@@ -16,6 +16,12 @@ import { decideOversight, OVERSIGHT_MAX_DEPTH, wouldCreateLoop, type OversightVi
  */
 
 type Executor = typeof db | Tx;
+
+/**
+ * Opt-in (`DASHBOARD_GROUP_OVERSIGHT=1`) until the Pastor's call moves people
+ * into groups; off keeps the church-structure Oversight and report access.
+ */
+export function groupOversightEnabled() { return process.env.DASHBOARD_GROUP_OVERSIGHT === "1"; }
 
 /** Serialises every change to who oversees whom, so two joins cannot build a loop between them. */
 export async function lockOversightTree(tx: Tx) {
@@ -109,6 +115,63 @@ export async function leadsAnyMembers(userId: string): Promise<boolean> {
     .from(s.discipleshipMemberships)
     .innerJoin(s.discipleshipGroups, eq(s.discipleshipGroups.id, s.discipleshipMemberships.groupId))
     .where(and(eq(s.discipleshipGroups.leaderUserId, userId), eq(s.discipleshipMemberships.status, "active"), inArray(s.discipleshipGroups.status, ["active", "archived"])))
+    .limit(1);
+  return Boolean(row);
+}
+
+/** Report access by whichever oversight model is live (`DASHBOARD_GROUP_OVERSIGHT`). */
+export async function requireReportAccess(viewerId: string, subjectId: string) {
+  if (groupOversightEnabled()) await requireOversight(viewerId, subjectId);
+  else await requireChurchReportAccess(viewerId, subjectId);
+}
+
+/** Someone under a focus person: who oversees them, through which group, and how far down. */
+export type TreeEdge = { userId: string; overseerId: string; groupId: number; depth: number };
+
+/** Everyone under the focus person, to any depth, nearest first. */
+export async function listDescendants(focusUserId: string): Promise<TreeEdge[]> {
+  const result = await db.execute<{ member: string; overseer: string; group_id: number; depth: number }>(sql`
+    with recursive tree(member, overseer, group_id, depth, path) as (
+      select m.member_user_id, g.leader_user_id, g.id, 1, array[g.leader_user_id, m.member_user_id]
+      from discipleship_groups g
+      join discipleship_memberships m on m.group_id = g.id and m.status = 'active'
+      where g.leader_user_id = ${focusUserId} and g.status <> 'closed'
+      union all
+      select m.member_user_id, g.leader_user_id, g.id, t.depth + 1, t.path || m.member_user_id
+      from tree t
+      join discipleship_groups g on g.leader_user_id = t.member and g.status <> 'closed'
+      join discipleship_memberships m on m.group_id = g.id and m.status = 'active'
+      where t.depth < ${OVERSIGHT_MAX_DEPTH} and not m.member_user_id = any(t.path)
+    )
+    select member, overseer, group_id, depth from tree order by depth`);
+  return result.rows.map(row => ({ userId: row.member, overseerId: row.overseer, groupId: Number(row.group_id), depth: Number(row.depth) }));
+}
+
+/**
+ * Everyone the group model expects a report from: members of an open group,
+ * and leaders who have members. Edges for members; leaders at the top of a
+ * tree have no overseer.
+ */
+export async function listGroupPeople(): Promise<{ edges: TreeEdge[]; roots: string[] }> {
+  const rows = await db.select({ userId: s.discipleshipMemberships.memberUserId, overseerId: s.discipleshipGroups.leaderUserId, groupId: s.discipleshipGroups.id })
+    .from(s.discipleshipMemberships)
+    .innerJoin(s.discipleshipGroups, eq(s.discipleshipGroups.id, s.discipleshipMemberships.groupId))
+    .where(and(eq(s.discipleshipMemberships.status, "active"), inArray(s.discipleshipGroups.status, ["active", "archived"])));
+  const edges = rows.flatMap(row => row.userId && row.overseerId ? [{ userId: row.userId, overseerId: row.overseerId, groupId: row.groupId, depth: 0 }] : []);
+  const members = new Set(edges.map(edge => edge.userId));
+  return { edges, roots: [...new Set(edges.map(edge => edge.overseerId))].filter(id => !members.has(id)) };
+}
+
+/** Whether a report is expected from this person under the group model. */
+export async function isGroupPerson(executor: Executor, userId: string): Promise<boolean> {
+  const [row] = await executor.select({ id: s.discipleshipMemberships.id })
+    .from(s.discipleshipMemberships)
+    .innerJoin(s.discipleshipGroups, eq(s.discipleshipGroups.id, s.discipleshipMemberships.groupId))
+    .where(and(
+      eq(s.discipleshipMemberships.status, "active"),
+      inArray(s.discipleshipGroups.status, ["active", "archived"]),
+      sql`(${s.discipleshipMemberships.memberUserId} = ${userId} or ${s.discipleshipGroups.leaderUserId} = ${userId})`,
+    ))
     .limit(1);
   return Boolean(row);
 }

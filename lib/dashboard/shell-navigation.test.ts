@@ -96,3 +96,19 @@ describe("connected dashboard navigation", () => {
     expect(dashboardParentForPath("/dashboard/community/report/history")).toEqual({ href: "/dashboard/community/report", label: "Back to My reports" });
   });
 });
+
+describe("groups as oversight navigation", () => {
+  const oversightItems = (caps: DashboardCapabilities) => buildDashboardNavigation(caps).flatMap(section => section.items).filter(item => item.key === "church");
+
+  test("a group leader with members gets Oversight inside Community", () => {
+    expect(oversightItems({ ...member, groupOversight: true })).toEqual([expect.objectContaining({ label: "Oversight", href: "/dashboard/community/oversight" })]);
+  });
+
+  test("while the flag is on, an old church placement alone no longer adds a church page", () => {
+    expect(oversightItems({ ...member, groupOversight: false, churchMember: true, churchOversight: true })).toEqual([]);
+  });
+
+  test("with the flag off, the church-structure entries stay", () => {
+    expect(oversightItems({ ...member, churchOversight: true }).map(item => item.label)).toEqual(["Church oversight"]);
+  });
+});

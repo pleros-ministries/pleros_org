@@ -8,6 +8,9 @@ import { canManageChurchAssignments } from "@/lib/church/permissions";
 import { getChurchAssignment } from "@/lib/db/queries/church-organisation";
 import { getChurchHome } from "@/lib/db/queries/church-home";
 
+// Reads the session on every request (Cache Components).
+export const instant = false;
+
 export const metadata: Metadata = { title: "Structure · Oversight" };
 
 /** Oversight's Structure tab: branches, units, leaders and member placement. */

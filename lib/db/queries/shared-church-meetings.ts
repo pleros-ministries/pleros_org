@@ -9,7 +9,8 @@ import { canUseMeetingUnit } from "@/lib/community/reporting-v3";
 import { churchBranchIds } from "@/lib/church/permissions";
 import { inputRecord, parseReportContacts, parseSharedMeeting, reportId, reportRequestKey } from "@/lib/community/reporting-v3-input";
 import { requireReportingV3, reportingV3SchemaReady } from "./reporting-v3-gate";
-import { churchOrganisationEnabled, getChurchAssignment, loadChurchAssignmentForTransaction, requireChurchReportAccess } from "./church-organisation";
+import { churchOrganisationEnabled, getChurchAssignment, loadChurchAssignmentForTransaction } from "./church-organisation";
+import { groupOversightEnabled, requireReportAccess } from "./oversight-tree";
 import { lockDailyReporting, clearDeclaredNil } from "./daily-report-declarations";
 import { requireOwnedReportContacts } from "./private-ministry-contacts";
 import { ownReportContacts } from "./ministry-report-v3";
@@ -131,7 +132,9 @@ export async function getOwnSharedMeetingDetails(userId: string, dateKey: string
 /** Internal organ projection: no contact ids, names, notes, emails or request keys. */
 export async function getScopedSharedMeetingDetails(viewerId: string, subjectId: string, dateKey: string) {
   if (!reportingV3SchemaReady()) return new Map<number, ReturnType<typeof sharedDetail> | null>();
-  await requireChurchReportAccess(viewerId, subjectId);
-  const viewer = await getChurchAssignment(viewerId);
-  return new Map((await sharedDetailRows(subjectId, dateKey)).map(row => [row.report.activityId, canUseMeetingUnit(viewer, row.unit) ? sharedDetail(row, subjectId) : null] as const));
+  await requireReportAccess(viewerId, subjectId);
+  // An overseer reads the full report (user decision, 19 October), shared meetings included.
+  const everything = groupOversightEnabled();
+  const viewer = everything ? null : await getChurchAssignment(viewerId);
+  return new Map((await sharedDetailRows(subjectId, dateKey)).map(row => [row.report.activityId, everything || canUseMeetingUnit(viewer, row.unit) ? sharedDetail(row, subjectId) : null] as const));
 }
