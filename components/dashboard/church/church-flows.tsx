@@ -308,7 +308,7 @@ export function AddWorkers({ place, moveTargets = [] }: { place: ChurchPlace; mo
   }
   return <ChurchPage>
     <CrumbLabel href={`/dashboard/church/units/${unit.id}/workers`} label={unit.name} />
-    <ChurchHeading title={`${unit.name} workers`} sub={`${place.branch.name} branch`} />
+    <ChurchHeading title={unit.name} sub={`${place.branch.name} branch`} />
     {canManage ? <UnitSwitcher unitId={unit.id} units={moveTargets} /> : null}
     <PlaceRow title={unit.name} meta={unit.leader ? `${unit.leader.name} · Unit leader` : "No leader yet"}
       end={<span className={styles.pill} data-tone={unit.leader ? undefined : "risk"}>{unit.leader ? plural(unit.workers.length, "worker") : "Needs a leader"}</span>} />
