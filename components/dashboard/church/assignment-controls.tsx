@@ -1,5 +1,5 @@
 "use client";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronDownIcon } from "lucide-react";
 import { addChurchPlace, findChurchMembers, saveChurchAssignment } from "@/app/(site)/dashboard/church/actions";
@@ -18,20 +18,27 @@ export function AssignmentControls({ viewer, bootstrap, branches, units, roster,
   const [userId, setUserId] = useState(""); const [role, setRole] = useState<ChurchRole>(viewer ? "worker" : "pastor");
   const [branch, setBranch] = useState(viewer?.branchId ? String(viewer.branchId) : ""); const [unit, setUnit] = useState(""); const [supervisor, setSupervisor] = useState("");
   const [name, setName] = useState(""); const [message, setMessage] = useState<string | null>(null); const [pending, start] = useTransition();
+  // Search as you type, after a short pause (user report, 18 October).
+  useEffect(() => {
+    const term = query.trim();
+    if (term.length < 2) return;
+    let live = true;
+    const id = setTimeout(() => { findChurchMembers(term).then(found => { if (live) setCandidates(found); }, () => { if (live) setMessage("Member search is unavailable."); }); }, 250);
+    return () => { live = false; clearTimeout(id); };
+  }, [query]);
   const branchId = role === "pastor" ? null : Number(branch) || null;
   const unitId = role === "pastor" || role === "branch_pastor" ? null : Number(unit) || null;
   const parents = roster.filter((row) => validChurchParent(role, row, branchId, unitId));
   const roles: ChurchRole[] = viewer?.role === "branch_pastor" ? ["unit_leader", "worker"] : viewer?.role === "pastor" ? ["branch_pastor", "unit_leader", "worker"] : bootstrap ? ["pastor"] : [];
-  function perform(task: () => Promise<{ ok: boolean; error?: string }>) { setMessage(null); start(async () => { try { const result = await task(); setMessage(result.ok ? "Saved." : result.error ?? "Could not save."); if (result.ok) router.refresh(); } catch { setMessage("Could not save. Try again."); } }); }
+  function perform(task: () => Promise<{ ok: boolean; error?: string }>) { setMessage(null); start(async () => { try { const result = await task(); setMessage(result.ok ? "Saved." : result.error ?? "Could not save."); if (result.ok) { setQuery(""); setCandidates([]); setUserId(""); } if (result.ok) router.refresh(); } catch { setMessage("Could not save. Try again."); } }); }
   return <details className={`${styles.panel} group`}>
     <summary className={`${styles.row} cursor-pointer list-none [&::-webkit-details-marker]:hidden`}>
       <span className={styles.rowCopy}><span className={styles.rowTitle}>Manage assignments</span><span className={styles.rowMeta}>Appoint people and add branches or units</span></span>
       <ChevronDownIcon className={`${styles.chev} size-4 transition-transform group-open:rotate-180`} strokeWidth={2} aria-hidden="true" />
     </summary>
     <div className="grid gap-4 border-t border-(--color-line) p-3.5">
-      <form className="grid gap-2.5" onSubmit={(event) => { event.preventDefault(); start(async () => { try { setCandidates(await findChurchMembers(query)); setUserId(""); } catch { setMessage("Member search is unavailable."); } }); }}>
-        <label className={forms.field}>Find member<input value={query} onChange={(event) => setQuery(event.target.value)} minLength={2} maxLength={80} required /></label>
-        <button className={`${styles.btn} ${forms.tall} justify-self-start`} disabled={pending}>Search</button>
+      <form className="grid gap-2.5" onSubmit={(event) => event.preventDefault()}>
+        <label className={forms.field}>Find member<input type="search" value={query} onChange={(event) => { setQuery(event.target.value); setUserId(""); }} maxLength={80} autoComplete="off" placeholder="Start typing a name" /></label>
       </form>
       <form className="grid gap-3" onSubmit={(event) => { event.preventDefault(); perform(() => saveChurchAssignment({ userId, role, branchId, unitId, supervisorId: role === "pastor" ? null : supervisor || null, ...(role === "branch_pastor" && multiBranch ? { branchIds: selectedBranches } : {}) })); }}>
         <label className={forms.field}>Member<select required value={userId} onChange={(event) => setUserId(event.target.value)}><option value="">Choose member</option>{candidates.map((row) => <option key={row.id} value={row.id}>{row.name}</option>)}</select></label>

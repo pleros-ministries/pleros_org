@@ -6,6 +6,7 @@ import { transactionDb } from "@/lib/db/transaction";
 import * as s from "@/lib/db/schema";
 import type { Tx } from "./outreach-contacts";
 import { CommunityError } from "@/lib/community/errors";
+import { fuzzyNameScore, nameTokens } from "@/lib/community/fuzzy-name";
 import { canManageChurchAssignments, canReadChurchReport, churchBranchIds, validChurchParent, type ChurchAssignment, type ChurchRole } from "@/lib/church/permissions";
 
 /** Default-live (0051/0053 installed); set the flag to "0" to roll back. */
@@ -69,9 +70,37 @@ export async function searchChurchCandidates(viewerId: string, query: string, bo
   const searcher = bootstrap ? null : await getChurchAssignment(viewerId);
   // Unit leaders search too, to add workers to their own unit; names and IDs only either way.
   if (!bootstrap && !canManageChurchAssignments(searcher) && searcher?.role !== "unit_leader") throw new CommunityError("You cannot appoint church workers.");
-  if (query.trim().length < 2) return [];
-  const escaped = query.trim().slice(0, 80).replace(/[\\%_]/g, "\\$&");
-  return db.select({ id: s.users.id, name: s.users.name }).from(s.users).where(ilike(s.users.name, `%${escaped}%`)).orderBy(s.users.name).limit(20);
+  const term = query.trim().slice(0, 80);
+  if (term.length < 2) return [];
+  // Forgiving search (user report, 18 October: people were missing): match the
+  // account name, the SOGP enrolment name and email, loosely in SQL by each
+  // typed word's first letters, then rank with the inbox's fuzzy name matcher.
+  const tokens = nameTokens(term);
+  if (!tokens.length) return [];
+  const loose = tokens.map(token => `%${token.slice(0, token.length >= 4 ? 3 : 2).replace(/[\\%_]/g, "\\$&")}%`);
+  const rows = await db
+    .select({ id: s.users.id, name: s.users.name, email: s.users.email, enrolledName: s.sogpEnrollments.name })
+    .from(s.users)
+    .leftJoin(s.sogpEnrollments, eq(s.sogpEnrollments.userId, s.users.id))
+    .where(or(...loose.flatMap(pattern => [ilike(s.users.name, pattern), ilike(s.sogpEnrollments.name, pattern), ilike(s.users.email, pattern)])))
+    .limit(600);
+  const best = new Map<string, { id: string; name: string; score: number }>();
+  for (const row of rows) {
+    const accountName = row.name?.trim() && !row.name.includes("@") ? row.name.trim() : "";
+    const display = accountName || row.enrolledName?.trim() || row.email.split("@")[0]!;
+    const score = Math.max(
+      fuzzyNameScore(term, accountName),
+      fuzzyNameScore(term, row.enrolledName ?? ""),
+      fuzzyNameScore(term, row.email.split("@")[0]!.replace(/[._\d]+/g, " ")),
+    );
+    if (!score) continue;
+    const current = best.get(row.id);
+    if (!current || score > current.score) best.set(row.id, { id: row.id, name: display, score });
+  }
+  return [...best.values()]
+    .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name))
+    .slice(0, 20)
+    .map(({ id, name }) => ({ id, name }));
 }
 
 export async function assignChurchMember(actorId: string, input: { userId: string; role: ChurchRole; branchId: number | null; unitId: number | null; supervisorId: string | null; branchIds?: number[] }, bootstrap = false) {

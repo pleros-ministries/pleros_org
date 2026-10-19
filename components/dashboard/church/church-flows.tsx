@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useTransition, type ReactNode } from "react";
+import { useEffect, useState, useTransition, type ReactNode } from "react";
 import { ArrowRightIcon, CheckIcon, SearchIcon, UserPlusIcon } from "lucide-react";
 import { addChurchPlace, addUnitWorkers, findChurchMembers, saveChurchAssignment, saveChurchBranchMembership } from "@/app/(site)/dashboard/church/actions";
 import { Initials } from "@/components/community/discipleship/shared";
@@ -38,22 +38,34 @@ function Problem({ error }: { error: string | null }) {
 /** Names-only member search (searchChurchCandidates); never contact details. */
 function PeopleSearch({ multiple, chosen, onChange, exclude = [], label = "Search church members" }: { multiple: boolean; chosen: Person[]; onChange: (people: Person[]) => void; exclude?: string[]; label?: string }) {
   const [query, setQuery] = useState(""), [results, setResults] = useState<Person[] | null>(null), [error, setError] = useState<string | null>(null), [pending, start] = useTransition();
+  // Search as you type, after a short pause (user report, 18 October).
+  useEffect(() => {
+    const term = query.trim();
+    if (term.length < 2) return;
+    let live = true;
+    const id = setTimeout(() => start(async () => {
+      try { const found = await findChurchMembers(term); if (live) { setResults(found); setError(null); } }
+      catch { if (live) setError("Member search is unavailable."); }
+    }), 250);
+    return () => { live = false; clearTimeout(id); };
+  }, [query]);
+  const shown = query.trim().length >= 2 ? results : null;
   const picked = new Set(chosen.map(person => person.id));
-  const rows = [...chosen, ...(results ?? []).filter(person => !picked.has(person.id) && !exclude.includes(person.id))];
+  const rows = [...chosen, ...(shown ?? []).filter(person => !picked.has(person.id) && !exclude.includes(person.id))];
   return <div className="grid gap-2.5">
-    <form className={forms.searchRow} role="search" onSubmit={event => { event.preventDefault(); if (query.trim().length < 2) { setError("Type at least two letters."); return; } start(async () => { try { setResults(await findChurchMembers(query)); setError(null); } catch { setError("Member search is unavailable."); } }); }}>
-      <label className={forms.search}><SearchIcon className="size-4 shrink-0" strokeWidth={2} aria-hidden="true" /><span className="sr-only">{label}</span><input type="search" placeholder="Search by name" value={query} onChange={event => setQuery(event.target.value)} /></label>
-      <button type="submit" className={`${styles.btn} ${forms.tall}`} disabled={pending}>{pending ? "Searching…" : "Search"}</button>
+    <form className={forms.searchRow} role="search" onSubmit={event => event.preventDefault()}>
+      <label className={forms.search}><SearchIcon className="size-4 shrink-0" strokeWidth={2} aria-hidden="true" /><span className="sr-only">{label}</span><input type="search" placeholder="Search by name" value={query} onChange={event => setQuery(event.target.value)} autoComplete="off" /></label>
     </form>
+    {pending ? <span className={styles.rowMeta}>Searching…</span> : null}
     <Problem error={error} />
     {rows.length ? <div className={styles.panel}><ul className={styles.list}>{rows.map(person => {
       const selected = picked.has(person.id);
       return <li key={person.id}><label className={`${styles.row} ${forms.choice}`} data-selected={selected}>
         <Initials name={person.name} />
         <span className={styles.rowCopy}><span className={styles.rowTitle}>{person.name}</span><span className={styles.rowMeta}>Church member</span></span>
-        <input type={multiple ? "checkbox" : "radio"} name="church-person" checked={selected} onChange={() => onChange(multiple ? selected ? chosen.filter(row => row.id !== person.id) : [...chosen, person] : [person])} />
+        <input type={multiple ? "checkbox" : "radio"} name="church-person" checked={selected} onChange={() => { if (multiple) onChange(selected ? chosen.filter(row => row.id !== person.id) : [...chosen, person]); else onChange([person]); if (!selected) setQuery(""); }} />
       </label></li>;
-    })}</ul></div> : results ? <p className={`${styles.panel} ${styles.empty}`}>No members match “{query.trim()}”.</p> : null}
+    })}</ul></div> : shown ? <p className={`${styles.panel} ${styles.empty}`}>No members match “{query.trim()}”.</p> : null}
     {multiple && chosen.length ? <span className={styles.rowMeta}>{chosen.length} selected</span> : null}
   </div>;
 }
@@ -64,6 +76,8 @@ export function PlaceChurchMember({ branches }: { branches: Array<{ id: number; 
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState<string | null>(null);
   const [pending, start] = useTransition();
+  // Bumped after a save so the search box and its results start fresh.
+  const [round, setRound] = useState(0);
   function save() {
     const person = chosen[0];
     if (!person || !branchId) { setError("Choose a church member and branch."); return; }
@@ -71,13 +85,13 @@ export function PlaceChurchMember({ branches }: { branches: Array<{ id: number; 
       const result = await saveChurchBranchMembership({ userId: person.id, branchId });
       if (!result.ok) { setError(result.error); return; }
       setSaved(`${person.name} was placed in ${branches.find(branch => branch.id === branchId)?.name}.`);
-      setChosen([]); setError(null);
+      setChosen([]); setError(null); setRound(value => value + 1);
     });
   }
   return <div className="grid gap-3">
     {/* One descriptive header (user feedback, 18 October): no subtitle or tag. */}
     <h2 className={forms.panelTitle}>Add member to branch</h2>
-    <PeopleSearch multiple={false} chosen={chosen} onChange={setChosen} />
+    <PeopleSearch key={round} multiple={false} chosen={chosen} onChange={value => { setChosen(value); setSaved(null); }} />
     <label className={forms.field}>Branch<select value={branchId} onChange={event => setBranchId(Number(event.target.value))}>{branches.map(branch => <option key={branch.id} value={branch.id}>{branch.name}</option>)}</select></label>
     <Problem error={error} />
     {saved ? <p className={forms.status} role="status">{saved}</p> : null}
@@ -157,13 +171,14 @@ export function AppointLeader({ place, role, supervisorId }: { place: ChurchPlac
 /** Paper: Pleros-church-allocation. Workers join one unit under its leader. */
 export function AddWorkers({ place }: { place: ChurchPlace }) {
   const router = useRouter(); const [chosen, setChosen] = useState<Person[]>([]); const [error, setError] = useState<string | null>(null); const [pending, start] = useTransition();
+  const [round, setRound] = useState(0);
   const unit = place.unit!;
   function save() {
     if (!chosen.length) { setError("Choose at least one person."); return; }
     start(async () => {
       const result = await addUnitWorkers({ unitId: unit.id, userIds: chosen.map(person => person.id) });
       if (!result.ok) { setError(result.error); return; }
-      setChosen([]); router.refresh();
+      setChosen([]); setRound(value => value + 1); router.refresh();
     });
   }
   return <ChurchPage>
@@ -172,7 +187,7 @@ export function AddWorkers({ place }: { place: ChurchPlace }) {
       end={<span className={styles.pill} data-tone={unit.leader ? undefined : "risk"}>{unit.leader ? plural(unit.workers.length, "worker") : "Needs a leader"}</span>} />
     {unit.leader ? <>
       <div className={styles.sectionTitle}><h2>Add people</h2></div>
-      <PeopleSearch multiple chosen={chosen} onChange={setChosen} exclude={unit.workers.map(worker => worker.userId)} />
+      <PeopleSearch key={round} multiple chosen={chosen} onChange={setChosen} exclude={unit.workers.map(worker => worker.userId)} />
       {chosen.length ? <p className={styles.note}>{unit.name} will have {plural(unit.workers.length + chosen.length, "worker")}, reporting to {unit.leader.name}.</p> : null}
       <Problem error={error} />
       <div className={forms.footer}>
