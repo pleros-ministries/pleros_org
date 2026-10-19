@@ -167,12 +167,12 @@ describe("reminders", () => {
 });
 
 describe("discipleship groups", () => {
-  it("respects the five-group limit and the paused-group block", () => {
+  it("respects the group limit and the paused-group block", () => {
     let state = buildDemoState(TODAY);
-    for (const name of ["Group three", "Group four", "Group five"]) {
-      state = ok(createGroup(state, WORKER, name));
-    }
-    expect(createGroup(state, WORKER, "Group six")).toMatchObject({ ok: false });
+    const open = () => state.groups.filter(group => group.leaderId === WORKER && group.status !== "closed").length;
+    for (let n = open(); n < DEMO_GROUPS_LED_MAX; n++) state = ok(createGroup(state, WORKER, `Group ${n + 1}`));
+    expect(open()).toBe(DEMO_GROUPS_LED_MAX);
+    expect(createGroup(state, WORKER, "One too many")).toMatchObject({ ok: false });
     expect(createGroup(buildDemoState(TODAY), "p-ngozi", "Another")).toMatchObject({ ok: false });
     expect(createGroup(buildDemoState(TODAY), WORKER, "Tolu's discipleship group")).toMatchObject({ ok: false });
   });
