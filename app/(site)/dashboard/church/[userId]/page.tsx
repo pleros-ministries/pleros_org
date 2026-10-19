@@ -19,6 +19,9 @@ import { ChurchHeading, ChurchPage } from "@/components/dashboard/church/church-
 import { Mark, short, Strip } from "@/components/dashboard/church/oversight-view";
 import { ChurchReminderButton } from "@/components/dashboard/church/reminder-button";
 
+// Reads the session on every request (Cache Components).
+export const instant = false;
+
 const STATUS_LABELS = { devotional: "Devotional", ministry: "Ministry", meetings: "Meetings" } as Record<string, string>;
 const statusText = (value: string) => value === "missing" ? "Not yet" : value === "nil" ? "Nil" : "Reported";
 

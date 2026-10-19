@@ -2,8 +2,9 @@
 import { revalidatePath } from "next/cache";
 import { getAppSession } from "@/lib/app-session";
 import { CommunityError } from "@/lib/community/errors";
-import { assignChurchBranchMembership, assignChurchMember, createChurchPlace, listWorkerMoveTargets, removeChurchWorker, searchChurchCandidates } from "@/lib/db/queries/church-organisation";
+import { assignChurchBranchMembership, assignChurchMember, changeChurchUnitLeader, createChurchPlace, listWorkerMoveTargets, removeChurchWorker, renameChurchPlace, searchChurchCandidates } from "@/lib/db/queries/church-organisation";
 import type { ChurchRole } from "@/lib/church/permissions";
+import type { OldLeaderPlacement } from "@/lib/db/queries/church-organisation";
 
 async function actor() { const session = await getAppSession(); if (!session) throw new CommunityError("Sign in to manage church assignments."); return session; }
 export async function findChurchMembers(query: string) {
@@ -70,5 +71,23 @@ export async function moveUnitWorker(input: { userId: string; unitId: number }) 
     await assignChurchMember(session.user.id, { userId: input.userId, role: "worker", branchId: target.branchId, unitId: target.id, supervisorId: target.leaderId });
     revalidatePath("/dashboard", "layout");
     return { ok: true as const, unitName: target.name };
+  } catch (error) { if (error instanceof CommunityError) return { ok: false as const, error: error.message }; throw error; }
+}
+
+export async function renameChurchPlaceAction(input: { kind: "branch" | "unit"; id: number; name: string }) {
+  try {
+    const session = await actor();
+    const result = await renameChurchPlace(session.user.id, input);
+    revalidatePath("/dashboard", "layout");
+    return { ok: true as const, name: result.name };
+  } catch (error) { if (error instanceof CommunityError) return { ok: false as const, error: error.message }; throw error; }
+}
+
+export async function changeUnitLeader(input: { unitId: number; userId: string; supervisorId: string | null; oldLeader: OldLeaderPlacement }) {
+  try {
+    const session = await actor();
+    await changeChurchUnitLeader(session.user.id, input);
+    revalidatePath("/dashboard", "layout");
+    return { ok: true as const };
   } catch (error) { if (error instanceof CommunityError) return { ok: false as const, error: error.message }; throw error; }
 }

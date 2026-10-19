@@ -6,7 +6,7 @@ import { ChevronRightIcon, ClipboardListIcon, LockIcon, PlusIcon, UserPlusIcon, 
 import styles from "@/components/community/discipleship/discipleship-group.module.css";
 import type { ChurchBranchSummary, ChurchHome } from "@/lib/db/queries/church-home";
 
-import { PlaceChurchMember } from "./church-flows";
+import { PlaceChurchMember, RenamePlace } from "./church-flows";
 import { ChurchPage as Page, ChurchHeading as Heading } from "./church-ui";
 import { Mark, short, Strip } from "./oversight-view";
 
@@ -99,6 +99,7 @@ export function ChurchHomeView({ data, canOversee, header }: { data: ChurchHome;
         </span>
         <Ready branch={branch} />
       </div>
+      <div className="flex flex-wrap px-3.5 pb-1"><RenamePlace key={branch.name} kind="branch" id={branch.id} name={branch.name} /></div>
       {branch.pastors.length ? null : <Link className={`${styles.quiet} mx-3.5 my-1 inline-flex items-center gap-1`} href={`/dashboard/church/branches/${branch.id}/pastor`}><UserPlusIcon className="size-3.5" strokeWidth={2.2} />Appoint a branch pastor</Link>}
       <UnitRows branch={branch} />
       <div className="flex justify-end border-t border-(--color-line) px-3.5 py-2.5">

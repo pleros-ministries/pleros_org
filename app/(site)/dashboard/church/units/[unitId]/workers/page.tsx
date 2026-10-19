@@ -4,6 +4,9 @@ import { getChurchPlace } from "@/lib/db/queries/church-home";
 import { AddWorkers } from "@/components/dashboard/church/church-flows";
 import { listWorkerMoveTargets } from "@/lib/db/queries/church-organisation";
 
+// Reads the session on every request (Cache Components).
+export const instant = false;
+
 export default async function AddWorkersPage({ params }: { params: Promise<{ unitId: string }> }) {
   const { unitId } = await params;
   const session = await getAppSession();

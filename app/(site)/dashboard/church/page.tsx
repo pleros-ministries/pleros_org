@@ -6,6 +6,9 @@ import { getChurchAssignment, hasChurchDirectReports } from "@/lib/db/queries/ch
 import { getChurchHome } from "@/lib/db/queries/church-home";
 import { ChurchHomeView } from "@/components/dashboard/church/church-home";
 
+// Reads the session on every request (Cache Components).
+export const instant = false;
+
 export default async function ChurchPage() {
   const session = await getAppSession();
   if (!session) redirect("/login?returnTo=/dashboard/church");

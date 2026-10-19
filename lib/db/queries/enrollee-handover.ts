@@ -5,6 +5,8 @@ import { db } from "@/lib/db";
 import * as s from "@/lib/db/schema";
 import { CommunityError } from "@/lib/community/errors";
 import { firstNameOf, fullNameOf } from "@/lib/community/visibility";
+import { fuzzyNameScore } from "@/lib/community/fuzzy-name";
+import { fullestName, nameSearch } from "@/lib/db/name-search";
 
 /**
  * Follow-up handover (user decision, 18 October): the person who currently
@@ -23,22 +25,34 @@ export async function searchHandoverCandidates(callerUserId: string, enrollmentI
   const term = typeof rawTerm === "string" ? rawTerm.trim().slice(0, 60) : "";
   if (term.length < 2) return [];
   const [enrollee] = await db.select({ userId: s.sogpEnrollments.userId }).from(s.sogpEnrollments).where(eq(s.sogpEnrollments.id, enrollmentId)).limit(1);
-  const pattern = `%${term.replace(/[%_\\]/g, "\\$&")}%`;
+  const search = nameSearch(term, sql`concat_ws(' ', ${s.users.name}, ${s.sogpEnrollments.name})`);
+  if (!search) return [];
   const rows = await db
-    .selectDistinctOn([s.users.id], { userId: s.users.id, name: s.users.name, region: s.sogpEnrollments.region })
+    .select({ userId: s.users.id, name: s.users.name, enrolledName: s.sogpEnrollments.name, region: s.sogpEnrollments.region })
     .from(s.users)
     .leftJoin(s.sogpEnrollments, and(eq(s.sogpEnrollments.userId, s.users.id), ne(s.sogpEnrollments.status, "withdrawn")))
     .where(and(
-      sql`${s.users.name} ilike ${pattern}`,
+      search.loose,
       ne(s.users.id, callerUserId),
       enrollee ? ne(s.users.id, enrollee.userId) : undefined,
       or(eq(s.users.role, "pastor"), eq(s.users.isPastor, true), and(sql`${s.sogpEnrollments.id} is not null`, adultThisYear)),
     ))
-    .orderBy(asc(s.users.id))
-    .limit(15);
-  return rows
-    .map(row => ({ userId: row.userId, name: fullNameOf(row.name), region: row.region || null }))
-    .sort((a, b) => a.name.localeCompare(b.name));
+    .orderBy(search.rank, asc(s.users.name), asc(s.users.id))
+    .limit(400);
+  // Rank by the fuzzy matcher over both stored names (user report, 19 October:
+  // an account name alone is sometimes only a first name).
+  const best = new Map<string, HandoverCandidate & { score: number }>();
+  for (const row of rows) {
+    const name = fullestName(row.name, row.enrolledName);
+    const score = Math.max(fuzzyNameScore(term, row.name ?? ""), fuzzyNameScore(term, row.enrolledName ?? ""));
+    if (!name || !score) continue;
+    const current = best.get(row.userId);
+    if (!current || score > current.score) best.set(row.userId, { userId: row.userId, name: fullNameOf(name), region: row.region || current?.region || null, score });
+  }
+  return [...best.values()]
+    .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name))
+    .slice(0, 15)
+    .map(({ userId, name, region }) => ({ userId, name, region }));
 }
 
 /** Moves the enrollee to `newOwnerUserId` if the caller still follows them up. Returns names for the notice. */

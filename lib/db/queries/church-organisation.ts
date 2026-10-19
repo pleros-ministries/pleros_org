@@ -1,12 +1,13 @@
 import "server-only";
 import { cache } from "react";
-import { and, eq, ilike, inArray, ne, or, sql } from "drizzle-orm";
+import { and, eq, inArray, ne, or, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { transactionDb } from "@/lib/db/transaction";
 import * as s from "@/lib/db/schema";
 import type { Tx } from "./outreach-contacts";
 import { CommunityError } from "@/lib/community/errors";
-import { fuzzyNameScore, nameTokens } from "@/lib/community/fuzzy-name";
+import { fuzzyNameScore } from "@/lib/community/fuzzy-name";
+import { fullestName, nameSearch } from "@/lib/db/name-search";
 import { canManageChurchAssignments, canReadChurchReport, churchBranchIds, validChurchParent, type ChurchAssignment, type ChurchRole } from "@/lib/church/permissions";
 
 /** Default-live (0051/0053 installed); set the flag to "0" to roll back. */
@@ -73,29 +74,27 @@ export async function searchChurchCandidates(viewerId: string, query: string, bo
   const term = query.trim().slice(0, 80);
   if (term.length < 2) return [];
   // Forgiving search (user report, 18 October: people were missing): match the
-  // account name, the SOGP enrolment name and email, loosely in SQL by each
+  // account name and the SOGP enrolment name, loosely in SQL by each
   // typed word's first letters, then rank with the inbox's fuzzy name matcher.
-  const tokens = nameTokens(term);
-  if (!tokens.length) return [];
-  const loose = tokens.map(token => `%${token.slice(0, token.length >= 4 ? 3 : 2).replace(/[\\%_]/g, "\\$&")}%`);
+  // Names only: an email match is never what the searcher meant (user, 19 October).
+  const haystack = sql`concat_ws(' ', ${s.users.name}, ${s.sogpEnrollments.name})`;
+  const search = nameSearch(term, haystack);
+  if (!search) return [];
   const rows = await db
-    .select({ id: s.users.id, name: s.users.name, email: s.users.email, enrolledName: s.sogpEnrollments.name })
+    .select({ id: s.users.id, name: s.users.name, enrolledName: s.sogpEnrollments.name })
     .from(s.users)
     .leftJoin(s.sogpEnrollments, eq(s.sogpEnrollments.userId, s.users.id))
-    .where(or(...loose.flatMap(pattern => [ilike(s.users.name, pattern), ilike(s.sogpEnrollments.name, pattern), ilike(s.users.email, pattern)])))
+    .where(search.loose)
+    .orderBy(search.rank, s.users.name, s.users.id)
     .limit(600);
   const best = new Map<string, { id: string; name: string; score: number }>();
   for (const row of rows) {
     const accountName = row.name?.trim() && !row.name.includes("@") ? row.name.trim() : "";
-    const display = accountName || row.enrolledName?.trim() || row.email.split("@")[0]!;
-    const score = Math.max(
-      fuzzyNameScore(term, accountName),
-      fuzzyNameScore(term, row.enrolledName ?? ""),
-      fuzzyNameScore(term, row.email.split("@")[0]!.replace(/[._\d]+/g, " ")),
-    );
-    if (!score) continue;
+    const display = fullestName(accountName, row.enrolledName);
+    const score = Math.max(fuzzyNameScore(term, accountName), fuzzyNameScore(term, row.enrolledName ?? ""));
+    if (!score || !display) continue;
     const current = best.get(row.id);
-    if (!current || score > current.score) best.set(row.id, { id: row.id, name: display, score });
+    if (!current || score > current.score || (score === current.score && display.length > current.name.length)) best.set(row.id, { id: row.id, name: display, score });
   }
   return [...best.values()]
     .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name))
@@ -261,5 +260,84 @@ export async function removeChurchWorker(actorId: string, userId: string) {
     const [dependent] = await tx.select({ id: s.churchAssignments.userId }).from(s.churchAssignments).where(eq(s.churchAssignments.supervisorId, userId)).limit(1);
     if (dependent) throw new CommunityError("Reassign the people who report to them first.");
     await tx.delete(s.churchAssignments).where(and(eq(s.churchAssignments.userId, userId), eq(s.churchAssignments.role, "worker")));
+  });
+}
+
+/** Renames a branch (the Pastor) or a unit (the Pastor, or a Branch Pastor in their branches); user request, 19 October. */
+export async function renameChurchPlace(actorId: string, input: { kind: "branch" | "unit"; id: number; name: string }) {
+  requireEnabled();
+  const name = typeof input.name === "string" ? input.name.trim().replace(/\s+/g, " ") : "";
+  if (!name || name.length > 100) throw new CommunityError("Enter a name under 100 characters.");
+  if (!Number.isSafeInteger(input.id) || input.id <= 0) throw new CommunityError("Choose a branch or unit.");
+  const actor = await getChurchAssignment(actorId);
+  if (!actor || !canManageChurchAssignments(actor)) throw new CommunityError("You cannot manage church structure.");
+  try {
+    if (input.kind === "branch") {
+      if (actor.role !== "pastor") throw new CommunityError("Only the Pastor renames branches.");
+      const [row] = await db.update(s.churchBranches).set({ name }).where(eq(s.churchBranches.id, input.id)).returning({ id: s.churchBranches.id });
+      if (!row) throw new CommunityError("This branch could not be found.");
+      return { name };
+    }
+    const [unit] = await db.select({ branchId: s.churchUnits.branchId }).from(s.churchUnits).where(eq(s.churchUnits.id, input.id));
+    if (!unit) throw new CommunityError("This unit could not be found.");
+    if (actor.role === "branch_pastor" && !churchBranchIds(actor).includes(unit.branchId)) throw new CommunityError("Rename only units in your branch.");
+    await db.update(s.churchUnits).set({ name }).where(eq(s.churchUnits.id, input.id));
+    return { name };
+  } catch (error) {
+    if (error instanceof CommunityError) throw error;
+    const code = (error as { code?: string; cause?: { code?: string } }).code ?? (error as { cause?: { code?: string } }).cause?.code;
+    if (code === "23505") throw new CommunityError(input.kind === "branch" ? "A branch with that name already exists." : "That branch already has a unit with this name.");
+    throw error;
+  }
+}
+
+/**
+ * Replaces a unit's leader (user request, 19 October): the new leader takes the
+ * unit and its workers report to them. The pastor chooses where the old leader
+ * goes: a worker here, a worker in another led unit, or out of the units.
+ */
+export type OldLeaderPlacement = { kind: "stay" } | { kind: "unit"; unitId: number } | { kind: "remove" };
+export async function changeChurchUnitLeader(actorId: string, input: { unitId: number; userId: string; supervisorId: string | null; oldLeader: OldLeaderPlacement }) {
+  requireEnabled();
+  return transactionDb.transaction(async (tx) => {
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended('pleros:church-assignments', 0))`);
+    const actor = await loadChurchAssignmentForTransaction(tx, actorId);
+    if (!actor || !canManageChurchAssignments(actor)) throw new CommunityError("Only a pastor can change a unit leader.");
+    const [unit] = await tx.select({ id: s.churchUnits.id, branchId: s.churchUnits.branchId }).from(s.churchUnits).where(eq(s.churchUnits.id, input.unitId));
+    if (!unit) throw new CommunityError("This unit could not be found.");
+    if (actor.role === "branch_pastor" && !churchBranchIds(actor).includes(unit.branchId)) throw new CommunityError("Manage only units in your branch.");
+    const [old] = await tx.select({ userId: s.churchAssignments.userId, supervisorId: s.churchAssignments.supervisorId }).from(s.churchAssignments)
+      .where(and(eq(s.churchAssignments.unitId, unit.id), eq(s.churchAssignments.role, "unit_leader"))).limit(1);
+    if (!old) throw new CommunityError("This unit has no leader yet. Appoint one instead.");
+    if (old.userId === input.userId) throw new CommunityError("They already lead this unit.");
+    const current = await loadChurchAssignmentForTransaction(tx, input.userId);
+    if (current && !(current.role === "worker" && current.unitId === unit.id)) throw new CommunityError("This person already has a church role elsewhere. Move them first.");
+    const [user] = await tx.select({ id: s.users.id }).from(s.users).where(eq(s.users.id, input.userId));
+    if (!user) throw new CommunityError("Choose an existing member.");
+    const supervisorId = old.supervisorId ?? input.supervisorId;
+    const parent = supervisorId ? await loadChurchAssignmentForTransaction(tx, supervisorId) : null;
+    if (!supervisorId || !validChurchParent("unit_leader", parent, unit.branchId, unit.id)) throw new CommunityError("Appoint a branch pastor for this branch first.");
+    const leader = { userId: input.userId, role: "unit_leader" as const, branchId: unit.branchId, unitId: unit.id, supervisorId, assignedBy: actorId };
+    await tx.insert(s.churchAssignments).values(leader).onConflictDoUpdate({ target: s.churchAssignments.userId, set: { ...leader, updatedAt: new Date() } });
+    await tx.update(s.churchAssignments).set({ supervisorId: input.userId, updatedAt: new Date() })
+      .where(and(eq(s.churchAssignments.supervisorId, old.userId), eq(s.churchAssignments.unitId, unit.id), eq(s.churchAssignments.role, "worker")));
+    const placement = input.oldLeader;
+    if (placement?.kind === "unit") {
+      if (placement.unitId === unit.id) throw new CommunityError("Choose a different unit for the previous leader.");
+      const [target] = await tx.select({ id: s.churchUnits.id, branchId: s.churchUnits.branchId }).from(s.churchUnits).where(eq(s.churchUnits.id, placement.unitId));
+      if (!target || (actor.role === "branch_pastor" && !churchBranchIds(actor).includes(target.branchId))) throw new CommunityError("Choose a unit you manage.");
+      const [targetLeader] = await tx.select({ userId: s.churchAssignments.userId }).from(s.churchAssignments)
+        .where(and(eq(s.churchAssignments.unitId, target.id), eq(s.churchAssignments.role, "unit_leader"))).limit(1);
+      if (!targetLeader) throw new CommunityError("That unit needs a leader before anyone can join it.");
+      await tx.update(s.churchAssignments).set({ role: "worker", branchId: target.branchId, unitId: target.id, supervisorId: targetLeader.userId, assignedBy: actorId, updatedAt: new Date() })
+        .where(eq(s.churchAssignments.userId, old.userId));
+    } else if (placement?.kind === "remove") {
+      const [dependent] = await tx.select({ id: s.churchAssignments.userId }).from(s.churchAssignments).where(eq(s.churchAssignments.supervisorId, old.userId)).limit(1);
+      if (dependent) throw new CommunityError("Someone still reports to the previous leader. Move them first.");
+      await tx.delete(s.churchAssignments).where(eq(s.churchAssignments.userId, old.userId));
+    } else if (placement?.kind === "stay") {
+      await tx.update(s.churchAssignments).set({ role: "worker", supervisorId: input.userId, assignedBy: actorId, updatedAt: new Date() })
+        .where(eq(s.churchAssignments.userId, old.userId));
+    } else throw new CommunityError("Choose where the previous leader goes.");
   });
 }

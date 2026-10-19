@@ -9,6 +9,9 @@ import { AssignmentControls } from "@/components/dashboard/church/assignment-con
 import { compactButton } from "@/components/dashboard/shell/styles";
 import { ChurchOversight } from "@/components/dashboard/church/church-oversight";
 
+// Reads the session on every request (Cache Components).
+export const instant = false;
+
 /**
  * Church reports for unit leaders and anyone else with direct reports. Pastors
  * and Branch Pastors with Community read them in Oversight's Reports tab; the

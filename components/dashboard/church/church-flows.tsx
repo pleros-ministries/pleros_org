@@ -2,8 +2,8 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition, type ReactNode } from "react";
-import { ArrowRightIcon, ArrowRightLeftIcon, CheckIcon, SearchIcon, UserMinusIcon, UserPlusIcon } from "lucide-react";
-import { addChurchPlace, addUnitWorkers, findChurchMembers, moveUnitWorker, removeUnitWorker, saveChurchAssignment, saveChurchBranchMembership } from "@/app/(site)/dashboard/church/actions";
+import { ArrowRightIcon, ArrowRightLeftIcon, CheckIcon, PencilIcon, SearchIcon, UserMinusIcon, UserPlusIcon, UsersRoundIcon } from "lucide-react";
+import { addChurchPlace, addUnitWorkers, changeUnitLeader, findChurchMembers, moveUnitWorker, removeUnitWorker, renameChurchPlaceAction, saveChurchAssignment, saveChurchBranchMembership } from "@/app/(site)/dashboard/church/actions";
 import { ActionMenu } from "@/components/community/action-menu";
 import { Initials } from "@/components/community/discipleship/shared";
 import type { ChurchPlace } from "@/lib/db/queries/church-home";
@@ -129,47 +129,87 @@ export function CreatePlace({ branch }: { branch?: { id: number; name: string } 
 }
 
 /** Paper: Pleros-appoint-branch-pastor (step 2) and Pleros-church-appointment (unit leader). */
-export function AppointLeader({ place, role, supervisorId }: { place: ChurchPlace; role: "branch_pastor" | "unit_leader"; supervisorId: string | null }) {
+export function AppointLeader({ place, role, supervisorId, moveTargets = [] }: { place: ChurchPlace; role: "branch_pastor" | "unit_leader"; supervisorId: string | null; moveTargets?: MoveTarget[] }) {
   const router = useRouter(); const [chosen, setChosen] = useState<Person[]>([]); const [error, setError] = useState<string | null>(null); const [pending, start] = useTransition();
   const unitName = place.unit?.name;
   const pastor = role === "branch_pastor";
+  // A unit that already has a leader gets a handover, not a second leader (user request, 19 October).
+  const current = pastor ? null : place.unit?.leader ?? null;
+  const replacing = Boolean(current);
+  // Where the previous leader goes: "stay", "remove" or another unit's id (user request, 19 October).
+  const [oldTo, setOldTo] = useState("");
+  const otherUnits = moveTargets.filter(unit => unit.id !== place.unit?.id && unit.leaderId);
+  const oldBranches = [...new Set(otherUnits.map(unit => unit.branchName))];
   function save() {
     const person = chosen[0];
     if (!person) { setError("Choose who to appoint."); return; }
-    if (!supervisorId) { setError(role === "unit_leader" ? "Appoint a branch pastor for this branch first." : "Only the Pastor appoints branch pastors."); return; }
+    if (replacing && !oldTo) { setError(`Choose where ${current!.name.split(" ")[0]} goes next.`); return; }
+    if (!supervisorId && !replacing) { setError(role === "unit_leader" ? "Appoint a branch pastor for this branch first." : "Only the Pastor appoints branch pastors."); return; }
     start(async () => {
-      const result = await saveChurchAssignment({ userId: person.id, role, branchId: place.branch.id, unitId: role === "unit_leader" ? place.unit!.id : null, supervisorId, ...(role === "branch_pastor" ? { branchIds: [place.branch.id] } : {}) });
+      const result = replacing
+        ? await changeUnitLeader({ unitId: place.unit!.id, userId: person.id, supervisorId, oldLeader: oldTo === "stay" || oldTo === "remove" ? { kind: oldTo } : { kind: "unit", unitId: Number(oldTo) } })
+        : await saveChurchAssignment({ userId: person.id, role, branchId: place.branch.id, unitId: role === "unit_leader" ? place.unit!.id : null, supervisorId, ...(role === "branch_pastor" ? { branchIds: [place.branch.id] } : {}) });
       if (!result.ok) { setError(result.error); return; }
       router.push(role === "unit_leader" ? `/dashboard/church/units/${place.unit!.id}/workers` : "/dashboard/church"); router.refresh();
     });
   }
   return <ChurchPage>
-    <ChurchHeading title={pastor ? "Appoint a branch pastor" : "Appoint a unit leader"} sub={pastor ? `${place.branch.name} branch` : `${unitName} · ${place.branch.name} branch`} />
+    <ChurchHeading title={pastor ? "Appoint a branch pastor" : replacing ? "Change unit leader" : "Appoint a unit leader"} sub={pastor ? `${place.branch.name} branch` : `${unitName} · ${place.branch.name} branch`} />
     {pastor ? <SetupSteps step={2} /> : null}
     {pastor
       ? <PlaceRow title={place.branch.name} meta={place.pastors.length ? `Current: ${place.pastors.map(row => row.name).join(", ")}` : "No branch pastor yet"} />
       : <PlaceRow title={unitName!} meta={`${plural(place.unit!.workers.length, "worker")} · ${place.unit!.leader ? `Leader: ${place.unit!.leader.name}` : "No leader yet"}`}
         end={place.unit!.leader ? null : <span className={styles.pill} data-tone="risk">Needs a leader</span>} />}
 
-    <div className={styles.sectionTitle}><h2>{pastor ? "Choose a church member" : "Choose the unit leader"}</h2></div>
-    <PeopleSearch multiple={false} chosen={chosen} onChange={setChosen} />
+    <div className={styles.sectionTitle}><h2>{pastor ? "Choose a church member" : replacing ? "Choose the new unit leader" : "Choose the unit leader"}</h2></div>
+    <PeopleSearch multiple={false} chosen={chosen} onChange={setChosen} exclude={current ? [current.userId] : []} />
 
+    {current ? <>
+      <div className={styles.sectionTitle}><h2>Where does {current.name.split(" ")[0]} go?</h2></div>
+      <label className={forms.field}><span className="sr-only">Where {current.name} goes</span><select value={oldTo} onChange={event => setOldTo(event.target.value)} disabled={pending}>
+        <option value="" disabled>Choose where</option>
+        {oldBranches.map(branch => <optgroup key={branch} label={branch}>{otherUnits.filter(unit => unit.branchName === branch).map(unit => <option key={unit.id} value={String(unit.id)}>Move to {unit.name}</option>)}</optgroup>)}
+        <optgroup label="Other"><option value="stay">Stay in {unitName} as a worker</option><option value="remove">Leave the unit (stays a church member)</option></optgroup>
+      </select></label>
+    </> : null}
     <div className={styles.sectionTitle}><h2>Role</h2></div>
     <div className={styles.panel}>
       <div className={styles.kv}><span>Role</span><b>{pastor ? "Branch pastor" : "Unit leader"}</b></div>
       <div className={styles.kv}><span>Scope</span><b>{pastor ? `${place.branch.name} only` : `${unitName} · ${place.branch.name}`}</b></div>
     </div>
-    <p className={styles.note}>{pastor ? "Can manage unit leaders and workers in this branch." : "Leads their unit: adds its workers, sees their reports and their own reporting line."}</p>
+    <p className={styles.note}>{pastor ? "Can manage unit leaders and workers in this branch." : current ? `Leads ${unitName} from now on, and its workers report to them.` : "Leads their unit: adds its workers, sees their reports and their own reporting line."}</p>
 
     <Problem error={error} />
     <div className={forms.footer}>
       {pastor ? <span className={styles.rowMeta}>Next: unit leaders</span> : null}
-      <button type="button" className={`${styles.btn} ${forms.action}`} data-primary="" disabled={pending || !chosen.length} onClick={save}>{pending ? "Saving…" : pastor ? "Appoint branch pastor" : "Save appointment"}<CheckIcon className="size-4" strokeWidth={2.2} aria-hidden="true" /></button>
+      <button type="button" className={`${styles.btn} ${forms.action}`} data-primary="" disabled={pending || !chosen.length} onClick={save}>{pending ? "Saving…" : pastor ? "Appoint branch pastor" : replacing ? "Change leader" : "Save appointment"}<CheckIcon className="size-4" strokeWidth={2.2} aria-hidden="true" /></button>
     </div>
   </ChurchPage>;
 }
 
 /** Paper: Pleros-church-allocation. Workers join one unit under its leader. */
+/** Inline rename for a branch or unit (user request, 19 October). */
+export function RenamePlace({ kind, id, name }: { kind: "branch" | "unit"; id: number; name: string }) {
+  const router = useRouter();
+  const [editing, setEditing] = useState(false), [value, setValue] = useState(name), [error, setError] = useState<string | null>(null), [pending, start] = useTransition();
+  if (!editing) return <button type="button" className={`${styles.quiet} inline-flex items-center gap-1`} onClick={() => { setValue(name); setError(null); setEditing(true); }}><PencilIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" />Rename</button>;
+  function save() {
+    const next = value.trim();
+    if (!next) { setError("Enter a name."); return; }
+    if (next === name) { setEditing(false); return; }
+    start(async () => {
+      const result = await renameChurchPlaceAction({ kind, id, name: next });
+      if (!result.ok) { setError(result.error); return; }
+      setEditing(false); router.refresh();
+    });
+  }
+  return <form className="grid basis-full gap-2.5" onSubmit={event => { event.preventDefault(); save(); }}>
+    <label className={forms.field}>{kind === "branch" ? "Branch name" : "Unit name"}<input value={value} onChange={event => setValue(event.target.value)} maxLength={100} autoFocus disabled={pending} aria-invalid={error ? true : undefined} /></label>
+    <Problem error={error} />
+    <div className="flex gap-2"><button type="submit" className={styles.btn} data-primary="" disabled={pending}>{pending ? "Saving…" : "Save name"}</button><button type="button" className={styles.btn} disabled={pending} onClick={() => setEditing(false)}>Cancel</button></div>
+  </form>;
+}
+
 type MoveTarget = { id: number; name: string; branchId: number; branchName: string; leaderId: string | null };
 
 /** Move a worker to another unit or take them out of this one (Pastors and Branch Pastors, user request 19 October). */
@@ -229,6 +269,10 @@ export function AddWorkers({ place, moveTargets = [] }: { place: ChurchPlace; mo
     <ChurchHeading title={`${unit.name} workers`} sub={`${place.branch.name} branch`} />
     <PlaceRow title={unit.name} meta={unit.leader ? `${unit.leader.name} · Unit leader` : "No leader yet"}
       end={<span className={styles.pill} data-tone={unit.leader ? undefined : "risk"}>{unit.leader ? plural(unit.workers.length, "worker") : "Needs a leader"}</span>} />
+    {canManage ? <div className="flex flex-wrap items-start gap-x-4 gap-y-2.5">
+      <RenamePlace key={unit.name} kind="unit" id={unit.id} name={unit.name} />
+      {unit.leader ? <Link href={`/dashboard/church/units/${unit.id}/leader`} className={`${styles.quiet} inline-flex items-center gap-1`}><UsersRoundIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" />Change leader</Link> : null}
+    </div> : null}
     {unit.leader ? <>
       <div className={styles.sectionTitle}><h2>Add people</h2></div>
       <PeopleSearch key={round} multiple chosen={chosen} onChange={setChosen} exclude={unit.workers.map(worker => worker.userId)} />

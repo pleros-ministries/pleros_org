@@ -1,5 +1,5 @@
 "use client";
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 
 import { handOverEnrolleesAction, searchHandoverCandidatesAction } from "@/app/(site)/dashboard/community/_actions/people-actions";
 import type { HandoverCandidate } from "@/lib/db/queries/enrollee-handover";
@@ -23,13 +23,19 @@ export function HandoverPicker({ enrollmentIds, who, onDone, bare = false }: {
   const [error, setError] = useState<string | null>(null);
   const [searching, startSearch] = useTransition();
   const [saving, startSave] = useTransition();
+  const latest = useRef("");
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   function search(value: string) {
     setTerm(value); setChosen(null); setError(null);
+    latest.current = value;
+    if (timer.current) clearTimeout(timer.current);
     if (value.trim().length < 2) { setPeople([]); return; }
-    startSearch(async () => {
+    // Wait for a pause in typing, and keep only the answer for the latest term.
+    timer.current = setTimeout(() => startSearch(async () => {
       const result = await searchHandoverCandidatesAction({ enrollmentId: enrollmentIds[0]!, term: value });
+      if (latest.current !== value) return;
       if (result.ok) setPeople(result.people); else setError(result.error);
-    });
+    }), 250);
   }
   function confirm() {
     if (!chosen) return;

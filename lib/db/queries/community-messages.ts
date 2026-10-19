@@ -4,7 +4,6 @@ import {
   desc,
   eq,
   gt,
-  ilike,
   inArray,
   isNotNull,
   lt,
@@ -31,7 +30,8 @@ import {
   type MessagingParty,
   type MessagingRelation,
 } from "@/lib/community/messaging";
-import { fuzzyNameScore, nameTokens } from "@/lib/community/fuzzy-name";
+import { fuzzyNameScore } from "@/lib/community/fuzzy-name";
+import { nameSearch } from "@/lib/db/name-search";
 import { firstNameOf, fullNameOf } from "@/lib/community/visibility";
 
 /**
@@ -902,9 +902,8 @@ export async function searchMembers(
   // Fuzzy (user request, 18 October): narrow loosely in SQL by the first two
   // (three for longer words) letters of each typed word anywhere in the name, then score in code so
   // surnames, word middles and small typos still match.
-  const tokens = nameTokens(term);
-  if (!tokens.length) return [];
-  const loose = tokens.map(token => `%${token.slice(0, token.length >= 4 ? 3 : 2).replace(/[\\%_]/g, "\\$&")}%`);
+  const search = nameSearch(term, sql`concat_ws(' ', ${schema.sogpEnrollments.firstName}, ${schema.sogpEnrollments.name})`);
+  if (!search) return [];
   const [rows, blocked] = await Promise.all([
     db
       .select({
@@ -922,7 +921,7 @@ export async function searchMembers(
       .where(
         and(
           ne(schema.sogpEnrollments.userId, ctx.userId),
-          or(...loose.map(pattern => ilike(schema.sogpEnrollments.name, pattern))),
+          search.loose,
           sql`not exists (
             select 1 from ${schema.sogpEnrollments} as minor_check
             where minor_check.user_id = ${schema.sogpEnrollments.userId}
@@ -930,7 +929,7 @@ export async function searchMembers(
           )`,
         ),
       )
-      .orderBy(asc(schema.sogpEnrollments.firstName))
+      .orderBy(search.rank, asc(schema.sogpEnrollments.name), asc(schema.sogpEnrollments.id))
       .limit(500),
     listBlockedPeerIds(ctx.userId),
   ]);
@@ -939,7 +938,7 @@ export async function searchMembers(
   for (const row of rows) {
     if (blocked.has(row.userId) || scored.has(row.userId)) continue;
     const name = fullNameOf(row.name || row.firstName);
-    const score = fuzzyNameScore(term, name);
+    const score = Math.max(fuzzyNameScore(term, name), fuzzyNameScore(term, row.firstName ?? ""));
     if (!score) continue;
     scored.set(row.userId, { contact: { userId: row.userId, name, unitName: row.unitName, note: null }, score });
   }
