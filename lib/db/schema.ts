@@ -2544,6 +2544,52 @@ export const advancedSogpInterest = pgTable("advanced_sogp_interest", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [uniqueIndex("advanced_sogp_interest_user_idx").on(t.userId)]);
 
+/**
+ * A learner's chapter-a-day Bible reading plan (Pastor, 18 October; migration
+ * 0068). One row per learner; each day's reading follows on from the last log.
+ */
+export const bibleReadingPlans = pgTable("bible_reading_plans", {
+  userId: text("user_id").primaryKey().references(() => users.id, { onDelete: "cascade" }),
+  chaptersPerDay: integer("chapters_per_day").notNull(),
+  startBook: text("start_book").notNull(),
+  startChapter: integer("start_chapter").notNull(),
+  /** The report day the plan was set; logs before it don't move the plan on. */
+  startedOn: date("started_on", { mode: "string" }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  check("bible_reading_plans_chapters_check", sql`${t.chaptersPerDay} between 1 and 50`),
+  check("bible_reading_plans_start_chapter_check", sql`${t.startChapter} >= 1`),
+]);
+
+/** The day's Teaching report: SOGP, podcast or both, plus an optional note (migration 0068). */
+export const dailyTeachingReports = pgTable("daily_teaching_reports", {
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  reportDate: date("report_date", { mode: "string" }).notNull(),
+  source: text("source").$type<"sogp" | "podcast" | "both">().notNull(),
+  note: text("note"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  primaryKey({ columns: [t.userId, t.reportDate] }),
+  check("daily_teaching_reports_source_check", sql`${t.source} in ('sogp', 'podcast', 'both')`),
+  check("daily_teaching_reports_note_check", sql`${t.note} is null or length(${t.note}) <= 500`),
+]);
+
+/**
+ * What the report pop-ups add to a ministry activity (migration 0068):
+ * evangelism style (broadcast or one-to-one), the discipleship actions ticked,
+ * and per-person outcomes keyed by report contact key ("private:12").
+ */
+export const ministryReportDetails = pgTable("ministry_report_details", {
+  activityId: integer("activity_id").primaryKey().references(() => ministryActivities.id, { onDelete: "cascade" }),
+  style: text("style").$type<"broadcast" | "direct">(),
+  actions: text("actions").array().notNull().default(sql`'{}'`),
+  contactOutcomes: jsonb("contact_outcomes").$type<Record<string, ("saved" | "filled" | "healed")[]>>().notNull().default(sql`'{}'::jsonb`),
+}, (t) => [
+  check("ministry_report_details_style_check", sql`${t.style} is null or ${t.style} in ('broadcast', 'direct')`),
+]);
+
 /** Canonical numerical projections remain in ministry_activities. */
 export const ministryReportEntries = pgTable("ministry_report_entries", {
   activityId: integer("activity_id").primaryKey().references(() => ministryActivities.id, { onDelete: "cascade" }),

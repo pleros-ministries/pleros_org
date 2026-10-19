@@ -10,6 +10,7 @@ import { requireOwnedReportContacts } from "./private-ministry-contacts";
 import { lockDailyReporting, clearDeclaredNil } from "./daily-report-declarations";
 import { writableReportDate, writeReportActivity, replaceReportContacts } from "./reporting-v3-store";
 import { reconcileFollowUps } from "./ministry-activities";
+import { writeMinistryDetails } from "./report-popups";
 
 export async function saveMinistryReportV3(userId: string, value: unknown) {
   requireReportingV3();
@@ -37,6 +38,7 @@ export async function saveMinistryReportV3(userId: string, value: unknown) {
     const activityId = await writeReportActivity(tx, userId, dateKey, parsed.activity, editingId);
     await tx.insert(s.ministryReportEntries).values({ activityId, userId, requestKey, method: parsed.method, context: parsed.context, enteredOutcomes: parsed.enteredOutcomes }).onConflictDoUpdate({ target: s.ministryReportEntries.activityId, set: { method: parsed.method, context: parsed.context, enteredOutcomes: parsed.enteredOutcomes } });
     await replaceReportContacts(tx, activityId, contacts);
+    await writeMinistryDetails(tx, activityId, parsed.details);
     if (parsed.activity.kind === "follow_up") {
       const method = parsed.method === "Phone call" ? "call" : parsed.method === "WhatsApp" ? "whatsapp" : parsed.method === "In person" ? "visit" : "other";
       await reconcileFollowUps(tx, { userId, activityId, dateKey, followUps: contacts.flatMap(row => row.legacyContactId === null ? [] : [{ contactId: row.legacyContactId, kind: method, outcomes: { saved: false, filled: false, healed: false }, note: null }]) });

@@ -22,11 +22,14 @@ export function ActivityCard({
   today,
   canChange,
   meetingDetails,
+  onEdit,
 }: {
   activity: MemberActivity;
   today: string;
   /** False once the day has left the reporting window. */
   canChange: boolean;
+  /** Reopens the activity's report pop-up; without it, Edit goes to the older edit page. */
+  onEdit?: () => void;
   meetingDetails?: { reportingRole: string; taught: string | null; shared?: boolean; attended?: boolean; peopleBrought?: number; totalAttendance?: number | null };
 }) {
   const router = useRouter();
@@ -74,9 +77,15 @@ export function ActivityCard({
       </div> : null}
       {canChange ? (
         <div className="flex flex-wrap items-center gap-4 pt-0.5">
-          <Link href={`/dashboard/community/report/${activity.id}`} className={textLink}>
-            Edit
-          </Link>
+          {onEdit ? (
+            <button type="button" onClick={onEdit} className={textLink}>
+              Edit
+            </button>
+          ) : (
+            <Link href={`/dashboard/community/report/${activity.id}`} className={textLink}>
+              Edit
+            </Link>
+          )}
           <button
             type="button"
             onClick={remove}

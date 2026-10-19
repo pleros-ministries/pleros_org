@@ -2,6 +2,7 @@ import { CommunityError } from "./errors";
 import { normaliseActivityInput, type ActivityInput } from "./ministry-activities";
 import { MINISTRY_COUNT_MAX, MINISTRY_FIELDS, isDateKey, type MinistryFieldKey } from "./ministry-report";
 import { CONTACTS_PER_DAY_MAX } from "./outreach-contacts";
+import { DIRECT_METHODS, DISCIPLESHIP_ACTIONS, PERSON_OUTCOMES, directMode, isEvangelismStyle, outcomeTotals, type ContactOutcomes, type DiscipleshipAction, type EvangelismStyle } from "./report-popups";
 
 export function inputRecord(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new CommunityError("Choose valid report details.");
@@ -32,7 +33,25 @@ function text(value: unknown, limit: number): string {
   return value.trim();
 }
 
-export function parseMinistryReport(value: unknown): { activity: ActivityInput; contacts: string[]; method: string; context: string | null; enteredOutcomes: Partial<Record<MinistryFieldKey, string>> } {
+/** What the report pop-ups add: evangelism style, discipleship ticks and per-person outcomes. */
+export type MinistryReportDetails = { style: EvangelismStyle | null; actions: DiscipleshipAction[]; contactOutcomes: ContactOutcomes };
+
+function parseActions(value: unknown): DiscipleshipAction[] {
+  if (value == null) return [];
+  if (!Array.isArray(value) || new Set(value).size !== value.length || value.some(key => !DISCIPLESHIP_ACTIONS.some(row => row.key === key))) throw new CommunityError("Choose what you did from the list.");
+  return value as DiscipleshipAction[];
+}
+function parseContactOutcomes(value: unknown, contacts: readonly string[]): ContactOutcomes {
+  if (value == null) return {};
+  const record = inputRecord(value), parsed: ContactOutcomes = {};
+  for (const [key, ticks] of Object.entries(record)) {
+    if (!contacts.includes(key) || !Array.isArray(ticks) || new Set(ticks).size !== ticks.length || ticks.some(tick => !(PERSON_OUTCOMES as readonly unknown[]).includes(tick))) throw new CommunityError("Choose saved, filled or healed for the people in this report.");
+    if (ticks.length) parsed[key] = ticks as ContactOutcomes[string];
+  }
+  return parsed;
+}
+
+export function parseMinistryReport(value: unknown): { activity: ActivityInput; contacts: string[]; method: string; context: string | null; enteredOutcomes: Partial<Record<MinistryFieldKey, string>>; details: MinistryReportDetails } {
   const input = inputRecord(value);
   if (input.kind !== "outreach" && input.kind !== "follow_up") throw new CommunityError("Choose Evangelism or Discipleship.");
   const contacts = parseReportContacts(input.contacts);
@@ -40,9 +59,14 @@ export function parseMinistryReport(value: unknown): { activity: ActivityInput; 
   if (count < contacts.length) throw new CommunityError("Include all named people in the total.");
   const context = text(input.context, 120);
   const method = text(input.method, 40);
-  const permitted = input.kind === "outreach" ? ["In person", "Online", "Both"] : ["In person", "Phone call", "WhatsApp", "Mixed methods"];
+  if (input.style != null && (input.kind !== "outreach" || !isEvangelismStyle(input.style))) throw new CommunityError("Choose broadcast or one-to-one.");
+  const style = input.kind === "outreach" && isEvangelismStyle(input.style) ? input.style : null;
+  const permitted: readonly string[] = input.kind === "follow_up" ? ["In person", "Phone call", "WhatsApp", "Mixed methods"] : style === "direct" ? DIRECT_METHODS : ["In person", "Online", "Both"];
   if (!permitted.includes(method)) throw new CommunityError("Choose how you connected.");
-  const outcomes = inputRecord(input.outcomes ?? {});
+  const actions = input.kind === "follow_up" ? parseActions(input.actions) : [];
+  const contactOutcomes = style === "direct" ? parseContactOutcomes(input.contactOutcomes, contacts) : {};
+  // One-to-one outcomes are ticked per person, so the totals come from the people.
+  const outcomes = style === "direct" ? Object.fromEntries(Object.entries(outcomeTotals(contactOutcomes)).filter(([, n]) => n > 0).map(([key, n]) => [key, String(n)])) : inputRecord(input.outcomes ?? {});
   const enteredOutcomes: Partial<Record<MinistryFieldKey, string>> = {};
   const values: Partial<Record<MinistryFieldKey, string>> = {};
   for (const { key } of MINISTRY_FIELDS) if ((input.kind === "follow_up" ? ["saved", "filled", "healed"] : ["saved", "notSaved", "filled", "healed"]).includes(key) && key in outcomes) {
@@ -52,8 +76,14 @@ export function parseMinistryReport(value: unknown): { activity: ActivityInput; 
     values[key] = raw; enteredOutcomes[key] = raw;
   }
   let mode: "online" | "offline" | "both" | undefined;
-  // Follow-ups live in the people picked, not in a number, so discipleship sets no counts here.
-  if (input.kind !== "follow_up") {
+  let platform = text(input.platform, 120);
+  // Follow-ups live in the people picked, not in a number, so discipleship sets no counts
+  // here and is never a broadcast: only evangelism takes a style.
+  if (input.kind !== "follow_up" && style === "direct") {
+    const direct = directMode(method);
+    mode = direct.mode; platform = direct.platform ?? "";
+    values[mode === "online" ? "reachedOnline" : "reachedOffline"] = String(count);
+  } else if (input.kind !== "follow_up") {
     mode = method === "Online" ? "online" : method === "Both" ? "both" : "offline";
     if (mode === "both") {
       const online = reportCount(input.onlineCount), offline = reportCount(input.offlineCount);
@@ -61,9 +91,9 @@ export function parseMinistryReport(value: unknown): { activity: ActivityInput; 
       values.reachedOnline = String(online); values.reachedOffline = String(offline);
     } else values[mode === "online" ? "reachedOnline" : "reachedOffline"] = String(count);
   }
-  const parsed = normaliseActivityInput({ kind: input.kind, mode, platform: text(input.platform, 120), platformOther: text(input.platformOther, 120), location: context, note: text(input.note, 500), values, peopleCount: contacts.length });
+  const parsed = normaliseActivityInput({ kind: input.kind, mode, platform, platformOther: text(input.platformOther, 120), location: context, note: text(input.note, 500), values, peopleCount: contacts.length });
   if (!parsed.ok) throw new CommunityError(parsed.error);
-  return { activity: parsed.value, contacts, method, context: context || null, enteredOutcomes };
+  return { activity: parsed.value, contacts, method, context: context || null, enteredOutcomes, details: { style, actions, contactOutcomes } };
 }
 
 export function parseSharedMeeting(value: unknown): {
