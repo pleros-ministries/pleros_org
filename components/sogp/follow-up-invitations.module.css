@@ -51,7 +51,13 @@
 .pill[data-tone="done"] { background: #e4ebfd; color: #2331ae; }
 .pill[data-tone="todo"] { background: #f7e4cd; color: #92400e; }
 .consent { display: flex; gap: 12px; align-items: flex-start; font-size: 13px; line-height: 20px; color: var(--color-text-muted); }
-.consent input { width: 20px; height: 20px; margin: 0; flex-shrink: 0; accent-color: var(--color-brand-blue); }
+/* A drawn checkbox in the community blue, so it matches the buttons instead of the browser's own. */
+.consent input { appearance: none; display: grid; place-items: center; width: 20px; height: 20px; margin: 0; flex-shrink: 0; border: 1.5px solid var(--dashboard-panel-edge, #c9ced6); border-radius: 6px; background: white; cursor: pointer; transition: background-color 120ms, border-color 120ms; }
+.consent input::after { content: ""; width: 11px; height: 11px; background: white; opacity: 0; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center / contain no-repeat; }
+.consent input:checked { border-color: var(--color-community-blue, #2056d6); background: var(--color-community-blue, #2056d6); }
+.consent input:checked::after { opacity: 1; }
+.consent input:focus-visible { outline: none; box-shadow: 0 0 0 3px rgb(32 86 214 / 18%); }
+.consent { cursor: pointer; }
 .page :is(button, a, input):focus-visible { outline: 2px solid var(--color-brand-blue); outline-offset: 3px; }
 .searchBox { min-width: 0; display: flex; align-items: center; gap: 12px; min-height: 36px; padding: 0 16px; border-radius: 11px; background: var(--color-surface-muted); color: var(--color-text-muted); }
 .searchBox input { flex: 1; min-width: 0; height: 36px; border: 0; background: transparent; font: inherit; font-size: 16px; color: var(--color-text-strong); outline: none; }
