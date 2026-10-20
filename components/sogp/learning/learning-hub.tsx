@@ -10,11 +10,12 @@ import { LeaderboardPreview } from "./leaderboard-preview";
 import styles from "./learning-hub.module.css";
 
 /** Each SOGP level's card art and colours, as on the You home's learning card. */
-const LEVEL_ART: Record<number, { image: string; field: string; ink: string }> = {
-  1: { image: "my-learning-background-v5.webp", field: "#2056d6", ink: "#2056d6" },
-  2: { image: "my-learning-level-2.webp", field: "#24704d", ink: "#1d5e40" },
-  3: { image: "my-learning-level-3.webp", field: "#b84f35", ink: "#a8432c" },
-  4: { image: "my-learning-level-4.webp", field: "#56298a", ink: "#4a2275" },
+/** Each level's art; `wide` is the 3:1 cut that covers wide cards without a seam (as on Home). */
+const LEVEL_ART: Record<number, { image: string; wide: string; field: string; ink: string }> = {
+  1: { image: "my-learning-background-v5.webp", wide: "my-learning-background-v5-wide.webp", field: "#2056d6", ink: "#2056d6" },
+  2: { image: "my-learning-level-2.webp", wide: "my-learning-level-2-wide.webp", field: "#24704d", ink: "#1d5e40" },
+  3: { image: "my-learning-level-3.webp", wide: "my-learning-level-3-wide.webp", field: "#b84f35", ink: "#a8432c" },
+  4: { image: "my-learning-level-4.webp", wide: "my-learning-level-4-wide.webp", field: "#56298a", ink: "#4a2275" },
 };
 
 const initials = (name: string) => name.trim().split(/\s+/).slice(0, 2).map(part => part[0] ?? "").join("").toUpperCase();
@@ -47,17 +48,17 @@ export function LearningHub({ hub, learning }: { hub: LearningHubData; learning:
   const finished = hub.card.total > 0 && hub.doneCount >= hub.card.total && !podcast;
 
   const resume = hub.state === "start"
-    ? <section className={styles.card} style={{ "--hub-art": `url("/assets/dashboard/learning-card/${art.image}")`, "--hub-field": art.field, "--hub-ink": art.ink } as CSSProperties}>
+    ? <section className={styles.card} style={{ "--hub-art": `url("/assets/dashboard/learning-card/${art.image}")`, "--hub-art-wide": `url("/assets/dashboard/learning-card/${art.wide}")`, "--hub-field": art.field, "--hub-ink": art.ink } as CSSProperties}>
       <div className={styles.cardTop}><span>{hub.cohortTitle ?? "SOGP"}</span></div>
       <div><h2>Choose how you’ll learn</h2><span className={styles.cardMeta}>A lesson a day, or podcasts at your own pace</span></div>
       <Link href="/dashboard/sogp/path" className={styles.resume}>Get started <ChevronRightIcon className="size-4" strokeWidth={2.2} /></Link>
     </section>
-    : finished ? <section className={styles.card} aria-label="SOGP finished" style={{ "--hub-art": `url("/assets/dashboard/learning-card/${LEVEL_ART[2]!.image}")`, "--hub-field": LEVEL_ART[2]!.field, "--hub-ink": LEVEL_ART[2]!.ink } as CSSProperties}>
+    : finished ? <section className={styles.card} aria-label="SOGP finished" style={{ "--hub-art": `url("/assets/dashboard/learning-card/${LEVEL_ART[2]!.image}")`, "--hub-art-wide": `url("/assets/dashboard/learning-card/${LEVEL_ART[2]!.wide}")`, "--hub-field": LEVEL_ART[2]!.field, "--hub-ink": LEVEL_ART[2]!.ink } as CSSProperties}>
       <div className={styles.cardTop}><span>{hub.cohortTitle ?? "SOGP"} · Completed</span></div>
       <div><h2>You’ve finished SOGP</h2><span className={styles.cardMeta}>{hub.doneCount} tracks complete</span></div>
       <Link href={hub.certificate.available ? "/dashboard/sogp/certificate" : "/dashboard/sogp/readiness"} className={styles.resume}>{hub.certificate.available ? "View your certificate" : "Check your certificate"} <ChevronRightIcon className="size-4" strokeWidth={2.2} /></Link>
     </section>
-    : <section className={styles.card} aria-label="Resume learning" style={{ "--hub-art": `url("/assets/dashboard/learning-card/${art.image}")`, "--hub-field": art.field, "--hub-ink": art.ink } as CSSProperties}>
+    : <section className={styles.card} aria-label="Resume learning" style={{ "--hub-art": `url("/assets/dashboard/learning-card/${art.image}")`, "--hub-art-wide": `url("/assets/dashboard/learning-card/${art.wide}")`, "--hub-field": art.field, "--hub-ink": art.ink } as CSSProperties}>
       <div className={styles.cardTop}><span>{hub.card.eyebrow}</span><span className={styles.pace}>{hub.paceLabel}</span></div>
       <div>
         <h2>{hub.card.title}</h2>
