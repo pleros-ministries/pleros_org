@@ -191,6 +191,7 @@ Most of these classes come from `components/community/discipleship/discipleship-
   - compact square for phones (`-compact-320/640.webp`);
   - a centred icon for 40px list tiles (`-icon-96/192.webp`).
 - **Delivery:** served with `image-set()` at 1x and 2x, from `public/assets/dashboard/community-groups/` and `public/assets/dashboard/learning-card/`.
+- **No seams:** a card 400px or wider (measured on its container, not the window) uses the 3:1 `-wide` cut on `background-size: cover`, anchored bottom-right. Without it the base colour shows as a strip where the art stops; this happened on the Learning hub, fixed 20 October.
 - **Text over art is always live text**, never baked in.
 - **No second blue hero:** only the My learning card is blue. Other illustrated tiles take their own complementary palette.
 
