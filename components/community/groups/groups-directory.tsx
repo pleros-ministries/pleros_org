@@ -63,7 +63,7 @@ export function GroupsDirectory({
             {discipleship?.leading.map((group, index) => (
               <GroupCard key={`led-${group.groupId}`} href={`/dashboard/community/discipleship/${group.groupId}`} prefetch={false} art="leading"
                 colourway={leadColourways[index % leadColourways.length]} title={group.groupName}
-                meta={group.discipleCount ? `${group.discipleCount} ${group.discipleCount === 1 ? "disciple" : "disciples"}` : "Invite your first disciple"} />
+                meta={group.discipleCount ? `${group.discipleCount} ${group.discipleCount === 1 ? "person" : "people"}` : "Invite someone"} />
             ))}
             {discipleship?.joined ? (
               <GroupCard href={`/dashboard/community/discipleship/${discipleship.joined.groupId}`} prefetch={false} art="discipleship" title={discipleship.joined.groupName} meta="You're a member" />

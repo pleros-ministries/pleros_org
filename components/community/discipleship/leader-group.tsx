@@ -140,7 +140,7 @@ export function LeaderGroupView({ data, episodeQuestions, colourway, initialTab,
       </div>
       <p className={styles.note}>Sorted by who needs you first. Tap someone for their week, check-ins, prayer and your follow-ups.</p>
     </> : paused ? null : <>
-      <div className={styles.sectionTitle}><h2>Invite your first disciple</h2></div>
+      <div className={styles.sectionTitle}><h2>Invite someone</h2></div>
       <InvitePanel group={group} leaderFirstName={data.viewer.firstName} empty addByName={addByName} />
     </>) : null}
 

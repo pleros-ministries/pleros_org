@@ -62,7 +62,7 @@ function OversightGroups({ data }: { data: CommunityHomeData }) {
     <section className={styles.block} aria-labelledby="community-led-groups">
       <div className={styles.blockHeading}><h2 id="community-led-groups">Groups you lead</h2>{data.joinedGroup || data.locationGroup ? null : <Link href="/dashboard/community/groups">See all</Link>}</div>
       <div className={styles.groupGrid}>
-        {data.ledGroups.map((group, index) => <GroupCard key={`led-${group.groupId}`} href={`/dashboard/community/discipleship/${group.groupId}`} prefetch={false} art="leading" colourway={leadColourways[index % leadColourways.length]} title={group.groupName} meta={group.discipleCount ? `${group.discipleCount} ${group.discipleCount === 1 ? "person" : "people"}` : "Add your first person"} />)}
+        {data.ledGroups.map((group, index) => <GroupCard key={`led-${group.groupId}`} href={`/dashboard/community/discipleship/${group.groupId}`} prefetch={false} art="leading" colourway={leadColourways[index % leadColourways.length]} title={group.groupName} meta={group.discipleCount ? `${group.discipleCount} ${group.discipleCount === 1 ? "person" : "people"}` : "Invite someone"} />)}
         {data.managedLocations.map(unit => <GroupCard key={`unit-${unit.id}`} href={`/dashboard/community/unit/${unit.id}`} art="location" tag="You look after" title={unit.name} meta="Location group" />)}
         <Link href={newGroupHref} prefetch={false} className={styles.newGroup}>
           <span className={styles.newGroupIcon}><DashboardIcon name="plus" size={16} /></span>
