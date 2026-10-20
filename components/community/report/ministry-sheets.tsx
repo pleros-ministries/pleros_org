@@ -35,6 +35,8 @@ function useMinistrySave() {
         requestKey.current ??= crypto.randomUUID();
         const result = await saveUnifiedMinistryAction({ ...payload, requestKey: requestKey.current });
         if (!result.ok) { setError(result.error); return; }
+        // A new entry after this one (broadcast, then one-to-one) needs its own key.
+        requestKey.current = null;
         router.refresh(); done();
       } catch { setError("Your report could not be saved. Your entries are still here. Try again."); }
     });
@@ -88,7 +90,14 @@ export function EvangelismSheet({ dateKey, contacts: initialContacts, initial, o
   const editWhere: Where = broadcastEdit?.method === "Online" ? "online" : broadcastEdit?.method === "Both" ? "both" : broadcastEdit ? "offline" : "online";
   const { pending, error, setError, save } = useMinistrySave();
   const [step, setStep] = useState<Step>(directEdit ? "direct" : broadcastEdit ? "broadcast" : "kind");
-  const [choice, setChoice] = useState<"broadcast" | "direct">(directEdit ? "direct" : "broadcast");
+  // Both kinds can be picked (Pastor, 20 October): each is saved as its own entry, broadcast first.
+  const [choice, setChoice] = useState<Set<"broadcast" | "direct">>(() => new Set([directEdit ? "direct" : "broadcast"]));
+  const both = !edit && choice.has("broadcast") && choice.has("direct");
+  const toggleChoice = (kind: "broadcast" | "direct") => setChoice(current => {
+    const next = new Set(current);
+    if (next.has(kind)) next.delete(kind); else next.add(kind);
+    return next;
+  });
   const [contacts, setContacts] = useState(() => withSaved(initialContacts, edit?.contacts));
   const [picked, setPicked] = useState<string[]>(() => edit?.contacts.map(row => row.key) ?? []);
   const [note, setNote] = useState(edit?.note ?? "");
@@ -146,24 +155,27 @@ export function EvangelismSheet({ dateKey, contacts: initialContacts, initial, o
   }
 
   if (step === "kind") return <ReportSheet title="Evangelism" subtitle="What kind of outreach was it?" onClose={onClose}
-    footer={() => <button type="button" className={styles.primary} onClick={() => { setError(null); setStep(choice); }}>Continue</button>}>
+    footer={() => <button type="button" className={styles.primary} disabled={!choice.size} onClick={() => { setError(null); setStep(choice.has("broadcast") ? "broadcast" : "direct"); }}>Continue</button>}>
     {() => <>
-      <button type="button" className={styles.kind} aria-pressed={choice === "broadcast"} onClick={() => setChoice("broadcast")}>
+      <button type="button" className={styles.kind} aria-pressed={choice.has("broadcast")} onClick={() => toggleChoice("broadcast")}>
         <span className={styles.kindIcon} style={{ background: "#e4ebfd", color: "#2331ae" }} aria-hidden="true"><MegaphoneIcon className="size-5" /></span>
         <span><h3>Broadcast</h3><p>You shared the gospel with many at once. No names needed.</p>
           <span className={styles.examples}><span>Status or post</span><span>Live</span><span>Street preaching</span><span>Bus or market</span></span></span>
       </button>
-      <button type="button" className={styles.kind} aria-pressed={choice === "direct"} onClick={() => setChoice("direct")}>
+      <button type="button" className={styles.kind} aria-pressed={choice.has("direct")} onClick={() => toggleChoice("direct")}>
         <span className={styles.kindIcon} style={{ background: "#dcefe3", color: "#1f6b45" }} aria-hidden="true"><UserRoundIcon className="size-5" /></span>
         <span><h3>One-to-one</h3><p>You spoke with specific people. Add them so you can follow them up.</p>
           <span className={styles.examples}><span>Conversation</span><span>Call or chat</span><span>Visit</span></span></span>
       </button>
-      <p className={styles.hint}>Did both today? Save one, then add the other.</p>
+      <p className={styles.hint}>Did both today? Choose both, and you’ll fill in each in turn.</p>
     </>}
   </ReportSheet>;
 
   if (step === "broadcast") return <ReportSheet title="Broadcast" subtitle="Shared with many at once" back="Evangelism" onBack={() => setStep("kind")} onClose={onClose}
-    footer={close => <button type="button" className={styles.primary} disabled={pending} onClick={() => saveBroadcast(close)}>{pending ? "Saving…" : edit ? "Save changes" : "Save broadcast"}</button>}>
+    footer={close => <button type="button" className={styles.primary} disabled={pending} onClick={() => saveBroadcast(both ? () => {
+      // The one-to-one part starts with its own people and note.
+      setPicked([]); setNote(""); setNoteOpen(false); setTicks({}); setOthers(0); setPlace(""); setStep("direct");
+    } : close)}>{pending ? "Saving…" : edit ? "Save changes" : both ? "Save and continue to one-to-one" : "Save broadcast"}</button>}>
     {() => <>
       <div className={styles.field}><span className={styles.label}>Where?</span><Segmented label="Where" options={WHERE} value={where} onChange={setWhere} /></div>
       {where !== "offline" ? <label className={styles.field}><span className={styles.label}>Platform</span>
