@@ -12,7 +12,8 @@ import { homeDesktopNavGroups } from "@/lib/site-homepage-content";
 export function DashboardFooter() {
   const about = homeDesktopNavGroups.find(group => group.label === "About");
   return <footer className="site-font-theme mt-8 bg-[var(--color-brand-blue)] text-white">
-    <div className="site-shell-bar-inner grid gap-6 pt-6 pb-8">
+    {/* Room for the grounded bottom bar on phones and tablets. */}
+    <div className="site-shell-bar-inner grid gap-6 pt-6 pb-24 lg:pb-8">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <Link href="/" aria-label="Pleros website" className="inline-flex transition-opacity hover:opacity-85">
           <Image src="/site/home/assets/footer--wordmark.webp" alt="Pleros" width={144} height={66} className="h-[2.4rem] w-auto" />
