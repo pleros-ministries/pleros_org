@@ -10,6 +10,7 @@ import { fuzzyNameScore } from "@/lib/community/fuzzy-name";
 import { minorBirthYearFloor } from "@/lib/community/messaging";
 import { fullNameOf } from "@/lib/community/visibility";
 import { nameSearch } from "@/lib/db/name-search";
+import { notifyGroupInvitation } from "@/lib/community/notify";
 import {
   DiscipleshipError,
   joinGroupInTransaction,
@@ -51,7 +52,11 @@ export async function sendInAppInvitation(input: {
     .values({ groupId: group.id, recipientEnrollmentId: recipient.id, invitedBy: input.leaderUserId, origin: "in_app" })
     .onConflictDoNothing()
     .returning({ id: schema.discipleshipGroupInvitations.id });
-  if (created) return created;
+  if (created) {
+    // The invitation is saved; a failed notification never fails the invite.
+    await notifyGroupInvitation({ invitationId: created.id }).catch(error => console.error("group invitation notification failed", error));
+    return created;
+  }
   const [existing] = await db
     .select({ id: schema.discipleshipGroupInvitations.id })
     .from(schema.discipleshipGroupInvitations)

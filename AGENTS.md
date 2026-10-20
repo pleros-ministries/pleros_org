@@ -76,6 +76,7 @@ Pastor, 19 October; plan in `docs/plans/groups-as-oversight.md`. Groups replace 
   - Unit pages, `/dashboard/church` and its reports page redirect to Oversight. `/dashboard/church/reports` remains only for the super-admin's first-time Pastor setup.
   - Structure is the Pastor's branches, branch pastors and branch placement only (`ChurchStructureView`, `AppointBranchPastor`).
   - Unit, worker and leader rows stay in the database until a later migration drops them.
+- Every new group invitation (by name, from My enrollees, or a follow-up assignment) sends a `group_invitation` notification and push (migration 0070, applied 20 October), opening `/dashboard/sogp/invitations/[id]`. It carries the leader's first name and the group name; the push names the leader only. The 12 invitations pending on 20 October were backfilled in-app only, with no push.
 - Leaders can lead up to 20 groups. The default group can be renamed but not closed. Closing a group warns that its people lose their overseer, while the people they lead stay with them.
 
 ### SOGP discipleship groups

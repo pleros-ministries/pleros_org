@@ -5,6 +5,8 @@ import { and, desc, eq, ne } from "drizzle-orm";
 import { db } from "@/lib/db";
 import * as s from "@/lib/db/schema";
 
+import { notifyGroupInvitation } from "@/lib/community/notify";
+
 import { ensureDiscipleshipGroups } from "./sogp-discipleship";
 
 /**
@@ -50,6 +52,7 @@ export async function inviteIntoOwnersGroup(input: { enrollmentId: number; owner
     .values({ groupId: group.id, recipientEnrollmentId: recipient.id, invitedBy: input.invitedBy ?? input.ownerUserId, origin: "referral" })
     .onConflictDoNothing()
     .returning({ id: s.discipleshipGroupInvitations.id });
+  if (created[0]) await notifyGroupInvitation({ invitationId: created[0].id }).catch(error => console.error("group invitation notification failed", error));
   return created.length > 0;
 }
 

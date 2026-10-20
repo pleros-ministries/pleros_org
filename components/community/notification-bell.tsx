@@ -65,6 +65,7 @@ function summarise(n: Notification): string {
     case "group_join_approved": return `You are now a member of ${text(p.groupName) ?? "the group"}`;
     case "pleros_reply": return "Pleros replied to your question";
     case "enrollee_handed_over": return `${text(p.fromName) ?? "Someone"} handed ${text(p.enrolleeName) ?? "someone"} over to you`;
+    case "group_invitation": return `${text(p.name) ?? "A leader"} invited you to join ${text(p.groupName) ?? "their group"}`;
     case "unit_workers_added": {
       const names = Array.isArray(p.names) ? p.names.filter((name): name is string => typeof name === "string") : [];
       const count = typeof p.count === "number" ? p.count : names.length;
@@ -88,6 +89,7 @@ function destination(n: Notification): string | null {
   if (n.kind.startsWith("group_join")) return id(p.groupId) ? `/dashboard/community/groups/${id(p.groupId)}` : "/dashboard/community/groups";
   if (n.kind.startsWith("discipleship_")) return "/dashboard/community/discipleship";
   if ((n.kind === "made_leader" && p.church) || n.kind === "unit_workers_added") return "/dashboard/church";
+  if (n.kind === "group_invitation") return id(p.invitationId) ? `/dashboard/sogp/invitations/${id(p.invitationId)}` : "/dashboard/community";
   if (n.kind === "made_leader" || n.kind === "leader_nudge") return "/dashboard/community/leader";
   return null;
 }
@@ -100,7 +102,7 @@ function icon(kind: string): { node: ReactNode; tone: [string, string] } {
   if (kind === "post_comment" || kind === "comment_reply") return { node: <MessageCircleIcon className={size} strokeWidth={2} />, tone: ["#e4ebfd", "#2331ae"] };
   if (kind.includes("prayer") || kind === "discipleship_prayed") return { node: <HandHeartIcon className={size} strokeWidth={2} />, tone: ["#fde3cf", "#7a3a10"] };
   if (kind.startsWith("discipleship_") || kind.startsWith("group_join")) return { node: <UsersRoundIcon className={size} strokeWidth={2} />, tone: ["#efe7fb", "#56209c"] };
-  if (kind === "enrollee_handed_over" || kind === "follow_up_changed" || kind === "unit_workers_added") return { node: <UsersRoundIcon className={size} strokeWidth={2} />, tone: ["#e4ebfd", "#2331ae"] };
+  if (kind === "enrollee_handed_over" || kind === "follow_up_changed" || kind === "unit_workers_added" || kind === "group_invitation") return { node: <UsersRoundIcon className={size} strokeWidth={2} />, tone: ["#e4ebfd", "#2331ae"] };
   if (kind === "pleros_reply") return { node: <MessageCircleQuestionIcon className={size} strokeWidth={2} />, tone: ["#cfe6fb", "#0e3f73"] };
   if (kind === "made_leader" || kind === "leader_nudge" || kind === "flag_resolved") return { node: <ShieldCheckIcon className={size} strokeWidth={2} />, tone: ["#e6ecfc", "#1f3260"] };
   return { node: <BellIcon className={size} strokeWidth={2} />, tone: ["#eceef2", "#4b5260"] };

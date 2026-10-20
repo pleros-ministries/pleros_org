@@ -30,7 +30,8 @@ type Kind =
   | "pleros_reply"
   | "enrollee_handed_over"
   | "follow_up_changed"
-  | "unit_workers_added";
+  | "unit_workers_added"
+  | "group_invitation";
 
 const PUSH_COPY: Record<Kind, { title: string }> = {
   official_post: { title: "New Pleros update" },
@@ -58,6 +59,7 @@ const PUSH_COPY: Record<Kind, { title: string }> = {
   enrollee_handed_over: { title: "Someone new to look after" },
   follow_up_changed: { title: "Someone new is looking after you" },
   unit_workers_added: { title: "New workers in your unit" },
+  group_invitation: { title: "You're invited to a group" },
 };
 
 /**
@@ -200,6 +202,34 @@ export async function notifyChurchUnitLeader(input: { userId: string; unitId: nu
     payload: { unitName: unit.name, branchName: unit.branchName, church: true },
     pushBody: `You now lead ${unit.name} in the ${unit.branchName} branch.`,
     pushUrl: "/dashboard/church",
+  });
+}
+
+/**
+ * A group invitation (user request, 20 October: invitations had no notification).
+ * The leader's first name and the group's name, which the invitation page shows
+ * the recipient anyway; the push names the leader only.
+ */
+export async function notifyGroupInvitation(input: { invitationId: number }) {
+  const [row] = await db
+    .select({
+      recipientUserId: schema.discipleshipGroupInvitations.recipientUserId,
+      groupName: schema.discipleshipGroups.name,
+      leaderName: schema.users.name,
+    })
+    .from(schema.discipleshipGroupInvitations)
+    .innerJoin(schema.discipleshipGroups, eq(schema.discipleshipGroups.id, schema.discipleshipGroupInvitations.groupId))
+    .innerJoin(schema.users, eq(schema.users.id, schema.discipleshipGroups.leaderUserId))
+    .where(eq(schema.discipleshipGroupInvitations.id, input.invitationId))
+    .limit(1);
+  if (!row?.recipientUserId) return;
+  const leader = row.leaderName?.trim().split(/\s+/)[0] || "A leader";
+  await notify({
+    userIds: [row.recipientUserId],
+    kind: "group_invitation",
+    payload: { invitationId: input.invitationId, name: leader, groupName: row.groupName },
+    pushBody: `${leader} invited you to join their group.`,
+    pushUrl: `/dashboard/sogp/invitations/${input.invitationId}`,
   });
 }
 

@@ -242,6 +242,8 @@ export const communityNotificationKindEnum = pgEnum(
     "follow_up_changed",
     // Church units (19 October, migration 0067): workers added to or moved into a leader's unit.
     "unit_workers_added",
+    // Groups as oversight (20 October, migration 0070): you were invited into a group.
+    "group_invitation",
   ],
 );
 
