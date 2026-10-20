@@ -8,6 +8,9 @@ import { lagosGreeting } from "@/lib/dashboard/greeting";
 import { getWelcomePackLeadByEmail } from "@/lib/db/queries/welcome-pack-leads";
 import { resolveWelcomeDisplayName } from "@/lib/welcome-display-name";
 
+// Reads the session or params on every request (Cache Components).
+export const instant = false;
+
 export default async function WelcomeDashboardPage() {
   // Request-cached, so this shares the layout's session and capability reads.
   const viewer = await getDashboardViewer();

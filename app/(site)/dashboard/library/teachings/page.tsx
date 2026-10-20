@@ -7,6 +7,9 @@ import { PlayerProvider } from "@/app/(site)/library/_components/PlayerContext";
 import { getAppSession } from "@/lib/app-session";
 import { getAllTeachings } from "@/lib/db/queries/teachings";
 
+// Reads the session or params on every request (Cache Components).
+export const instant = false;
+
 export const metadata: Metadata = { title: "Teachings Library" };
 
 // Shares the public library's 60s cache shape: Date → string inside the cache scope.

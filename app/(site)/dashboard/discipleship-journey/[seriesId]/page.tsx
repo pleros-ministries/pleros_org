@@ -6,6 +6,9 @@ import {
   discipleshipJourneySections,
 } from "@/lib/discipleship-journey-content";
 
+// Reads the session or params on every request (Cache Components).
+export const instant = false;
+
 type DashboardDiscipleshipJourneySeriesPageProps = {
   params: Promise<{
     seriesId: string;

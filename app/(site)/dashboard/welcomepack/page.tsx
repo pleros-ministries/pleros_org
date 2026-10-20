@@ -2,6 +2,9 @@ import { WelcomePackHubPage } from "@/components/dashboard/welcome-pack-pages";
 import { getReminderPreferences } from "@/lib/db/queries/notification-preferences";
 import { requireWelcomePackAccess } from "@/lib/welcome-pack-dashboard-access";
 
+// Reads the session or params on every request (Cache Components).
+export const instant = false;
+
 export default async function DashboardWelcomePackPage() {
   const { userId } = await requireWelcomePackAccess();
 

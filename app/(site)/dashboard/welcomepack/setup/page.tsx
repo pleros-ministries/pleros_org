@@ -16,6 +16,9 @@ import {
 } from "@/lib/notifications/reminder-preferences";
 import { requireWelcomePackAccess } from "@/lib/welcome-pack-dashboard-access";
 
+// Reads the session or params on every request (Cache Components).
+export const instant = false;
+
 // Kept outside the component: reading the clock is not a pure render step.
 function cohortHasStarted(startsAt: Date | null) {
   return !startsAt || startsAt.getTime() <= Date.now();
