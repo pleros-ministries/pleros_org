@@ -87,18 +87,22 @@ function Rate({ group }: { group: Group }) {
   </span>;
 }
 
-/** One group, opening to its members; a member who leads opens again, to any depth. */
-function GroupBranch({ group, index, depth = 0, withStatus = false }: { group: Group; index: number; depth?: number; withStatus?: boolean }) {
-  const [open, setOpen] = useState(depth === 0 && index === 0);
+/**
+ * One group, opening to its members, never deeper (user feedback, 20 October:
+ * too much nesting). A member who leads groups has "Their groups", which opens
+ * their groups as a view of their own.
+ */
+function GroupBranch({ group, index, withStatus = false, open: startOpen = false, onOpenPerson }: { group: Group; index: number; withStatus?: boolean; open?: boolean; onOpenPerson: (person: Person) => void }) {
+  const [open, setOpen] = useState(startOpen);
   return <li>
-    <button type="button" className={`${styles.row} w-full text-left`} style={{ paddingLeft: 14 + depth * 16 }} aria-expanded={open} onClick={() => setOpen(value => !value)}>
+    <button type="button" className={`${styles.row} w-full text-left`} aria-expanded={open} onClick={() => setOpen(value => !value)}>
       <GroupIcon index={index} />
-      <span className={styles.rowCopy}><span className={styles.rowTitle}>{group.name}</span><span className={styles.rowMeta}>{depth ? `Led by ${group.leader} · ` : ""}{plural(group.members.length, "member")}</span></span>
+      <span className={styles.rowCopy}><span className={styles.rowTitle}>{group.name}</span><span className={styles.rowMeta}>{group.leader === "You" ? "" : `Led by ${group.leader} · `}{plural(group.members.length, "member")}</span></span>
       <Rate group={group} />
       <ChevronDownIcon className={`${styles.chev} size-4 transition-transform ${open ? "rotate-180" : ""}`} strokeWidth={2} />
     </button>
-    {open ? <ul className={styles.list} style={{ background: depth % 2 ? "white" : "#fafbfc" }}>
-      {group.members.map(person => <PersonBranch key={person.id} person={person} depth={depth + 1} withStatus={withStatus} />)}
+    {open ? <ul className={styles.list} style={{ background: "#fafbfc" }}>
+      {group.members.map(person => <PersonRow key={person.id} person={person} withStatus={withStatus} onOpen={onOpenPerson} />)}
     </ul> : null}
   </li>;
 }
@@ -110,50 +114,61 @@ function StatusPills({ statuses }: { statuses: Person["statuses"] }) {
   </span>)}</span>;
 }
 
-function PersonBranch({ person, depth, withStatus }: { person: Person; depth: number; withStatus: boolean }) {
-  const [open, setOpen] = useState(false);
+function PersonRow({ person, withStatus, onOpen }: { person: Person; withStatus: boolean; onOpen: (person: Person) => void }) {
   const leads = person.groups ?? [];
   return <li>
-    <div className={`${styles.row} items-start`} style={{ paddingLeft: 14 + depth * 16 }}>
+    <div className={`${styles.row} items-start`} style={{ paddingLeft: 30 }}>
       <Initials name={person.name} />
       <span className={`${styles.rowCopy} gap-1`}>
         <span className={styles.rowTitle}>{person.name}</span>
         {withStatus ? <StatusPills statuses={person.statuses} /> : <span className={styles.rowMeta}>{leads.length ? `Leads ${plural(leads.length, "group")} · ${plural(everyone(leads).length, "person", "people")}` : reported(person) ? "Reported today" : "No report yet today"}</span>}
       </span>
       {leads.length
-        ? <button type="button" className={`${styles.btn} ${styles.mini}`} aria-expanded={open} onClick={() => setOpen(value => !value)}>{open ? "Hide" : "Their groups"}<ChevronDownIcon className={`size-3.5 transition-transform ${open ? "rotate-180" : ""}`} strokeWidth={2.2} /></button>
+        ? <button type="button" className={`${styles.btn} ${styles.mini}`} onClick={() => onOpen(person)}>Their groups<ChevronRightIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" /></button>
         : withStatus && !reported(person) ? <button type="button" className={`${styles.btn} ${styles.mini}`}><BellIcon className="size-3.5" strokeWidth={2.2} />Remind</button>
         : <span className={styles.pill} data-tone={reported(person) ? "ok" : "risk"}>{reported(person) ? "Reported" : "Not yet"}</span>}
     </div>
-    {open ? <ul className={styles.list}>{leads.map((group, index) => <GroupBranch key={group.id} group={group} index={index + 1} depth={depth} withStatus={withStatus} />)}</ul> : null}
   </li>;
 }
 
-function Structure() {
-  const under = indirect(SAMPLE);
+/** Where you are when you've opened someone's groups: back one step, and the names on the way. */
+function Trail({ trail, onBack }: { trail: Person[]; onBack: () => void }) {
+  if (!trail.length) return null;
+  const focus = trail[trail.length - 1]!;
+  return <div className="grid gap-1">
+    <button type="button" className={`${styles.quiet} inline-flex items-center gap-1`} onClick={onBack}><ChevronRightIcon className="size-3.5 rotate-180" strokeWidth={2.2} aria-hidden="true" />{trail.length > 1 ? `Back to ${trail[trail.length - 2]!.name.split(" ")[0]}’s groups` : "Back to your groups"}</button>
+    <span className="font-[family-name:var(--font-dashboard-heading)] text-[17px] leading-6 font-medium">{focus.name.split(" ")[0]}’s groups</span>
+    <span className={styles.rowMeta}>You › {trail.map(person => person.name.split(" ")[0]).join(" › ")}</span>
+  </div>;
+}
+
+function Structure({ groups, focusName, onOpenPerson }: { groups: Group[]; focusName: string | null; onOpenPerson: (person: Person) => void }) {
+  const under = indirect(groups);
   return <>
-    <div className={styles.sectionTitle}><h2>Groups you lead</h2><span className={styles.rowMeta}>{plural(SAMPLE.length, "group")}</span></div>
-    <div className={styles.panel}><ul className={styles.list}>{SAMPLE.map((group, index) => <GroupBranch key={group.id} group={group} index={index} />)}</ul></div>
-    <div className={styles.sectionTitle}><h2>Groups led by those you lead</h2><span className={styles.rowMeta}>{plural(under.length, "group")}</span></div>
-    <div className={styles.panel}><ul className={styles.list}>{under.map((group, index) => <GroupBranch key={group.id} group={group} index={index + 1} depth={0} />)}</ul></div>
-    <p className={styles.note}>Open a group to see its members. Anyone who leads a group opens again, as far down as it goes.</p>
+    <div className={styles.sectionTitle}><h2>{focusName ? `Groups ${focusName} leads` : "Groups you lead"}</h2><span className={styles.rowMeta}>{plural(groups.length, "group")}</span></div>
+    <div className={styles.panel}><ul className={styles.list}>{groups.map((group, index) => <GroupBranch key={group.id} group={group} index={index} open={index === 0} onOpenPerson={onOpenPerson} />)}</ul></div>
+    {under.length ? <>
+      <div className={styles.sectionTitle}><h2>Groups led by those {focusName ?? "you"} lead{focusName ? "s" : ""}</h2><span className={styles.rowMeta}>{plural(under.length, "group")}</span></div>
+      <div className={styles.panel}><ul className={styles.list}>{under.map((group, index) => <GroupBranch key={group.id} group={group} index={index + 1} onOpenPerson={onOpenPerson} />)}</ul></div>
+    </> : null}
+    <p className={styles.note}>Open a group to see its members. “Their groups” takes you into the groups that person leads.</p>
   </>;
 }
 
 const DAYS = ["Today", "Yesterday", "Sun 18", "Sat 17", "Fri 16"];
 
-function Reports() {
+function Reports({ groups: led, onOpenPerson }: { groups: Group[]; onOpenPerson: (person: Person) => void }) {
   const [day, setDay] = useState(DAYS[0]!);
   const [scope, setScope] = useState<"mine" | "under">("mine");
-  const groups = scope === "mine" ? SAMPLE : indirect(SAMPLE);
-  const people = everyone(groups);
+  const groups = scope === "mine" ? led : indirect(led);
+  const people = groups.flatMap(group => group.members);
   return <>
     <div className="flex gap-1.5 overflow-x-auto pb-0.5" role="tablist" aria-label="Report day">
       {DAYS.map(label => <button key={label} type="button" role="tab" aria-selected={day === label} onClick={() => setDay(label)}
         className={`${styles.btn} ${styles.mini} shrink-0`} data-primary={day === label ? "" : undefined}>{label}</button>)}
     </div>
     <div className="grid grid-cols-2 rounded-[10px] bg-[#eceef2] p-[3px]" role="tablist" aria-label="Whose reports">
-      {([["mine", "Groups you lead"], ["under", "Groups under them"]] as const).map(([key, label]) => <button key={key} type="button" role="tab" aria-selected={scope === key} onClick={() => setScope(key)}
+      {([["mine", "Groups led here"], ["under", "Groups under them"]] as const).map(([key, label]) => <button key={key} type="button" role="tab" aria-selected={scope === key} onClick={() => setScope(key)}
         className={`inline-flex h-8 items-center justify-center rounded-[7px] text-[13px] font-medium ${scope === key ? "bg-white text-[var(--color-community-ink)] shadow-[0_1px_2px_rgb(0_0_0/8%)]" : "text-[var(--color-community-muted)]"}`}>{label}</button>)}
     </div>
     <div className={styles.strip}>
@@ -161,8 +176,9 @@ function Reports() {
       <div><span>Need a report</span><strong style={{ color: "#92400e" }}>{people.filter(person => !reported(person)).length}</strong></div>
       <div><span>Groups</span><strong>{groups.length}</strong></div>
     </div>
-    <div className={styles.panel}><ul className={styles.list}>{groups.map((group, index) => <GroupBranch key={`${scope}-${group.id}`} group={group} index={index} withStatus />)}</ul></div>
-    <p className={styles.note}>{day} · open a group for each member’s report; open someone who leads to go down to their groups.</p>
+    {groups.length ? <div className={styles.panel}><ul className={styles.list}>{groups.map((group, index) => <GroupBranch key={`${scope}-${group.id}`} group={group} index={index} open={index === 0} withStatus onOpenPerson={onOpenPerson} />)}</ul></div>
+      : <p className={`${styles.panel} ${styles.empty}`}>No groups under them yet.</p>}
+    <p className={styles.note}>{day} · open a group for each member’s report. “Their groups” takes you into the groups that person leads.</p>
   </>;
 }
 
@@ -210,10 +226,18 @@ type Tab = "structure" | "reports" | "updates";
 export function OversightMockup({ initialTab = "structure" }: { initialTab?: Tab }) {
   const [tab, setTab] = useState<Tab>(initialTab);
   const [done, setDone] = useState<Set<string>>(new Set());
+  // The people whose groups you've opened, in order; empty is your own groups.
+  const [trail, setTrail] = useState<Person[]>([]);
+  const focus = trail[trail.length - 1] ?? null;
+  const groups = focus?.groups ?? SAMPLE;
+  const open = (person: Person) => { setTrail(current => [...current, person]); window.scrollTo({ top: 0 }); };
   const people = everyone(SAMPLE);
   return <div className={`${styles.page} mx-auto w-full max-w-[640px] px-4 pt-[18px] pb-7`}>
     <div className={styles.heading}><div><h1 className="m-0 font-[family-name:var(--font-dashboard-heading)] text-[21px] leading-7 font-medium">Oversight</h1><p className={styles.sub}>{plural(SAMPLE.length, "group")} you lead · {plural(people.length, "person", "people")} in all</p></div></div>
     <Tabs tab={tab} onTab={setTab} updates={UPDATES.length - done.size} />
-    {tab === "structure" ? <Structure /> : tab === "reports" ? <Reports /> : <Updates done={done} onDone={id => setDone(current => new Set(current).add(id))} />}
+    {tab !== "updates" ? <Trail trail={trail} onBack={() => setTrail(current => current.slice(0, -1))} /> : null}
+    {tab === "structure" ? <Structure key={focus?.id ?? "you"} groups={groups} focusName={focus ? focus.name.split(" ")[0]! : null} onOpenPerson={open} />
+      : tab === "reports" ? <Reports key={focus?.id ?? "you"} groups={groups} onOpenPerson={open} />
+      : <Updates done={done} onDone={id => setDone(current => new Set(current).add(id))} />}
   </div>;
 }
