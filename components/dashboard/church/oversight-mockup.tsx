@@ -79,11 +79,17 @@ function GroupIcon({ index }: { index: number }) {
   return <span className="size-10 shrink-0 rounded-[10px] bg-cover bg-center" style={{ backgroundColor: index % 2 ? "#e6ecfc" : "#e3d8f8", ...groupIcon(index % 2 ? "leading-slate" : "leading") }} aria-hidden="true" />;
 }
 
+/** Calmer (user feedback, 20 October): the count alone, amber only when someone is missing. */
 function Rate({ group }: { group: Group }) {
   const done = group.members.filter(reported).length;
-  return <span className="grid shrink-0 justify-items-end gap-1">
-    <span className={styles.meter} aria-hidden="true"><i style={{ width: `${Math.round((done / Math.max(1, group.members.length)) * 100)}%` }} /></span>
-    <span className={styles.rowMeta}>{done}/{group.members.length} today</span>
+  const all = done === group.members.length;
+  return <span className="shrink-0 text-right text-[12px] leading-4" style={{ color: all ? "var(--color-community-muted)" : "#a15c12" }}>{done} of {group.members.length}<br /><span className="text-[var(--color-community-muted)]">reported</span></span>;
+}
+
+/** A small dot and a word instead of a filled pill. */
+function Mark({ ok, label }: { ok: boolean; label: string }) {
+  return <span className="inline-flex shrink-0 items-center gap-1.5 text-[12px] leading-4" style={{ color: ok ? "var(--color-community-muted)" : "#a15c12" }}>
+    <i className="size-1.5 rounded-full" style={{ background: ok ? "#9aa7c4" : "#d98a1f" }} aria-hidden="true" />{label}
   </span>;
 }
 
@@ -101,16 +107,17 @@ function GroupBranch({ group, index, withStatus = false, open: startOpen = false
       <Rate group={group} />
       <ChevronDownIcon className={`${styles.chev} size-4 transition-transform ${open ? "rotate-180" : ""}`} strokeWidth={2} />
     </button>
-    {open ? <ul className={styles.list} style={{ background: "#fafbfc" }}>
+    {open ? <ul className={styles.list} style={{ borderTop: "1px solid var(--color-line, #e7e9ec)" }}>
       {group.members.map(person => <PersonRow key={person.id} person={person} withStatus={withStatus} onOpen={onOpenPerson} />)}
     </ul> : null}
   </li>;
 }
 
+/** The day's three parts on one quiet line; only what's missing is coloured. */
 function StatusPills({ statuses }: { statuses: Person["statuses"] }) {
   const labels = ["Devotion", "Ministry", "Meetings"];
-  return <span className="flex flex-wrap gap-1">{statuses.map((status, index) => <span key={labels[index]} className={styles.pill} data-tone={status === "reported" ? "ok" : status === "missing" ? "risk" : undefined}>
-    {labels[index]}{status === "reported" ? " ✓" : status === "nil" ? " · nil" : " · missing"}
+  return <span className="flex flex-wrap gap-x-2.5 gap-y-0.5 text-[12px] leading-4">{statuses.map((status, index) => <span key={labels[index]} style={{ color: status === "missing" ? "#a15c12" : "var(--color-community-muted)" }}>
+    {labels[index]} {status === "reported" ? "✓" : status === "nil" ? "· nil" : "· missing"}
   </span>)}</span>;
 }
 
@@ -121,12 +128,12 @@ function PersonRow({ person, withStatus, onOpen }: { person: Person; withStatus:
       <Initials name={person.name} />
       <span className={`${styles.rowCopy} gap-1`}>
         <span className={styles.rowTitle}>{person.name}</span>
-        {withStatus ? <StatusPills statuses={person.statuses} /> : <span className={styles.rowMeta}>{leads.length ? `Leads ${plural(leads.length, "group")} · ${plural(everyone(leads).length, "person", "people")}` : reported(person) ? "Reported today" : "No report yet today"}</span>}
+        {withStatus ? <StatusPills statuses={person.statuses} /> : leads.length ? <span className={styles.rowMeta}>{`Leads ${plural(leads.length, "group")} · ${plural(everyone(leads).length, "person", "people")}`}</span> : null}
       </span>
       {leads.length
-        ? <button type="button" className={`${styles.btn} ${styles.mini}`} onClick={() => onOpen(person)}>Their groups<ChevronRightIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" /></button>
-        : withStatus && !reported(person) ? <button type="button" className={`${styles.btn} ${styles.mini}`}><BellIcon className="size-3.5" strokeWidth={2.2} />Remind</button>
-        : <span className={styles.pill} data-tone={reported(person) ? "ok" : "risk"}>{reported(person) ? "Reported" : "Not yet"}</span>}
+        ? <button type="button" className={`${styles.quiet} inline-flex shrink-0 items-center gap-0.5 self-center`} onClick={() => onOpen(person)}>Their groups<ChevronRightIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" /></button>
+        : withStatus && !reported(person) ? <button type="button" className={`${styles.quiet} inline-flex shrink-0 items-center gap-1 self-center`}><BellIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" />Remind</button>
+        : withStatus ? null : <span className="self-center"><Mark ok={reported(person)} label={reported(person) ? "Reported" : "Not yet"} /></span>}
     </div>
   </li>;
 }
