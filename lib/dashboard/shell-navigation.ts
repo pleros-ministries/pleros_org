@@ -98,11 +98,11 @@ const DASHBOARD_FOCUS: Array<[RegExp, (match: RegExpMatchArray) => DashboardFocu
   // Oversight (Pastor, Branch Pastor) inside Community, with Overview · Reports · Structure tabs
   // (tab roots, no crumb). Setup screens keep their /dashboard/church routes and step back to
   // Structure; unit leaders and workers keep /dashboard/church and /dashboard/church/reports.
-  [/^\/dashboard\/community\/oversight\/(branches\/\d+|questions)$/, m => ({ title: m[1] === "questions" ? "Questions waiting" : "Branch", back: { href: "/dashboard/community/oversight", label: "Back to Oversight" } })],
+  [/^\/dashboard\/community\/oversight\/(branches(?:\/\d+)?|questions)$/, m => ({ title: m[1] === "questions" ? "Questions waiting" : m[1] === "branches" ? "Branches" : "Branch", back: { href: "/dashboard/community/oversight", label: "Back to Oversight" } })],
   [/^\/dashboard\/church$/, () => ({ title: "My church", back: COMMUNITY })],
   [/^\/dashboard\/church\/reports$/, () => ({ title: "Church reports", back: COMMUNITY })],
   [/^\/dashboard\/church\/(?!branches|units|reports)[^/]+$/, () => ({ title: "Report details", back: { href: "/dashboard/community/oversight/reports", label: "Back to Reports" } })],
-  [/^\/dashboard\/church\/.+$/, m => ({ title: /branches\/new|\/pastor$/.test(m[0]) ? "Church setup" : /units\/new/.test(m[0]) ? "Add a unit" : /\/leader$/.test(m[0]) ? "Unit appointment" : /\/workers$/.test(m[0]) ? "Unit" : "Assign workers", back: { href: "/dashboard/community/oversight/structure", label: "Back to Structure" } })],
+  [/^\/dashboard\/church\/.+$/, m => ({ title: /branches\/new|\/pastor$/.test(m[0]) ? "Church setup" : /units\/new/.test(m[0]) ? "Add a unit" : /\/leader$/.test(m[0]) ? "Unit appointment" : /\/workers$/.test(m[0]) ? "Unit" : "Assign workers", back: { href: "/dashboard/community/oversight/branches", label: "Back to branches" } })],
   // Library and the rest of You
   [/^\/dashboard\/library\/teachings$/, () => ({ title: "Teachings Library", back: LIBRARY })],
   [/^\/dashboard\/podcast$/, () => ({ title: "Podcast", back: LIBRARY })],

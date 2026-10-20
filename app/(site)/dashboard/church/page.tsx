@@ -15,5 +15,5 @@ export default async function ChurchPage() {
   if (!session) redirect("/login?returnTo=/dashboard/church");
   const viewer = await getChurchAssignment(session.user.id);
   if (!viewer && session.user.role === "super_admin") redirect("/dashboard/church/reports");
-  redirect(viewer?.role === "pastor" ? "/dashboard/community/oversight/structure" : "/dashboard/community/oversight");
+  redirect(viewer?.role === "pastor" ? "/dashboard/community/oversight/branches" : "/dashboard/community/oversight");
 }

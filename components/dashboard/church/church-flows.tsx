@@ -139,7 +139,7 @@ export function AppointBranchPastor({ place, supervisorId }: { place: ChurchPlac
     start(async () => {
       const result = await saveChurchAssignment({ userId: person.id, role: "branch_pastor", branchId: place.branch.id, unitId: null, supervisorId, replace: legacy, branchIds: [place.branch.id] });
       if (!result.ok) { setError(result.error); return; }
-      router.push("/dashboard/community/oversight/structure"); router.refresh();
+      router.push("/dashboard/community/oversight/branches"); router.refresh();
     });
   }
   return <ChurchPage>

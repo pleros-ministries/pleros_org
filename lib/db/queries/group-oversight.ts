@@ -39,6 +39,7 @@ export type GroupOversightPerson = {
   /** Members in the groups this person leads; above 0 means their row opens their tree. */
   leadsMembers: number;
   atRisk: boolean;
+  /** The selected day's report (`day`); `reportedToday` stays on today. */
   statuses: ReportStatuses;
   reportedToday: boolean;
   silentDays: number;
@@ -53,8 +54,10 @@ export type GroupOversightWaiting = { userId: string; name: string; waiting: num
 export type GroupOversightData = {
   role: "pastor" | "branch_pastor" | "leader";
   scopeLabel: string;
-  /** Set when the page is scoped to one person's tree (`?under=`). */
-  under: { userId: string; name: string } | null;
+  /** Set when the page is scoped to one person's tree (`?under=`); `backTo` is their overseer when that isn't the viewer. */
+  under: { userId: string; name: string; backTo: { userId: string; name: string } | null } | null;
+  /** The day the statuses describe: today or one of the previous seven Lagos days. */
+  day: string;
   people: GroupOversightPerson[];
   /** The focus person's own groups. */
   groups: GroupOversightGroup[];
@@ -99,7 +102,7 @@ async function loadBranches(ids: string[]) {
  * The viewer's Oversight, or null when they oversee no one. `under` scopes it
  * to one person in the viewer's oversight and the people below them.
  */
-export async function getGroupOversight(viewerId: string, options: { under?: string | null } = {}): Promise<GroupOversightData | null> {
+export async function getGroupOversight(viewerId: string, options: { under?: string | null; day?: string | null } = {}): Promise<GroupOversightData | null> {
   const church = await getChurchAssignment(viewerId);
   const role = church?.role === "pastor" ? "pastor" : church?.role === "branch_pastor" ? "branch_pastor" : "leader";
   const viewerBranches = role === "branch_pastor" ? churchBranchIds(church) : [];
@@ -135,11 +138,12 @@ export async function getGroupOversight(viewerId: string, options: { under?: str
 
   const edgeOf = new Map(edges.map(edge => [edge.userId, edge]));
   const today = lagosToday();
+  const day = options.day && /^\d{4}-\d{2}-\d{2}$/.test(options.day) && options.day <= today && options.day >= shiftDate(today, -7) ? options.day : today;
   const waitCutoff = new Date(Date.now() - QUESTION_WAIT_DAYS * DAY_MS);
   const overseerIds = [...new Set(ids.map(id => edgeOf.get(id)?.overseerId).filter((id): id is string => Boolean(id)))];
   const groupIds = [...new Set(ids.map(id => edgeOf.get(id)?.groupId).filter((id): id is number => id != null))];
 
-  const [names, groupRows, leadRows, riskRows, days, focusGroups, waitingRows, branchRows, learnerRows, ctx] = await Promise.all([
+  const [names, groupRows, leadRows, riskRows, days, focusGroups, waitingRows, branchRows, learnerRows, ctx, dayStatuses, underEdge] = await Promise.all([
     loadNames([...new Set([...ids, ...overseerIds, focus])]),
     groupIds.length ? db.select({ id: s.discipleshipGroups.id, name: s.discipleshipGroups.name }).from(s.discipleshipGroups).where(inArray(s.discipleshipGroups.id, groupIds)) : [],
     ids.length ? db.select({ leaderId: s.discipleshipGroups.leaderUserId, n: sql<number>`count(*)::int` })
@@ -162,7 +166,15 @@ export async function getGroupOversight(viewerId: string, options: { under?: str
       .where(role === "branch_pastor" ? inArray(s.churchBranches.id, viewerBranches.length ? viewerBranches : [-1]) : undefined).orderBy(s.churchBranches.name) : [],
     role !== "leader" && !under ? db.select({ branchId: s.sogpEnrollmentBranches.branchId, n: sql<number>`count(*)::int` }).from(s.sogpEnrollmentBranches).groupBy(s.sogpEnrollmentBranches.branchId) : [],
     getCommunityContext().catch(() => null),
+    day === today ? null : loadReportStatusesForUsers(ids, day),
+    // Whose groups to step back to from someone's groups: the person who leads them.
+    under ? db.select({ overseerId: s.discipleshipGroups.leaderUserId })
+      .from(s.discipleshipMemberships).innerJoin(s.discipleshipGroups, eq(s.discipleshipGroups.id, s.discipleshipMemberships.groupId))
+      .where(and(eq(s.discipleshipMemberships.memberUserId, under), eq(s.discipleshipMemberships.status, "active"), inArray(s.discipleshipGroups.status, ["active", "archived"])))
+      .limit(1).then(rows => rows[0]?.overseerId ?? null) : null,
   ]);
+  const backId = underEdge && underEdge !== viewerId && await canOversee(viewerId, underEdge) ? underEdge : null;
+  const backName = backId ? names.get(backId)?.name ?? (await loadNames([backId])).get(backId)?.name ?? "Member" : null;
   const [memberOf] = under ? [] : await db
     .select({ groupId: s.discipleshipGroups.id, groupName: s.discipleshipGroups.name, leaderUserId: s.discipleshipGroups.leaderUserId })
     .from(s.discipleshipMemberships)
@@ -199,7 +211,7 @@ export async function getGroupOversight(viewerId: string, options: { under?: str
       branchId: branchOf.get(userId) ?? null,
       leadsMembers: leads.get(userId) ?? 0,
       atRisk: risky.has(userId),
-      statuses: todayStatuses!.get(userId)!,
+      statuses: (dayStatuses ?? todayStatuses!).get(userId)!,
       reportedToday: reported(todayStatuses!.get(userId)),
       silentDays: silent === -1 ? history.length : silent,
       messageUserId: canMessage(userId),
@@ -235,7 +247,8 @@ export async function getGroupOversight(viewerId: string, options: { under?: str
   return {
     role,
     scopeLabel,
-    under: under ? { userId: under, name: names.get(under)?.name ?? "Member" } : null,
+    under: under ? { userId: under, name: names.get(under)?.name ?? "Member", backTo: backId ? { userId: backId, name: backName! } : null } : null,
+    day,
     people,
     groups,
     memberOf: memberOf ? { groupId: memberOf.groupId, groupName: memberOf.groupName, leaderName: overseerName ?? "Member" } : null,

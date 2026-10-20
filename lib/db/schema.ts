@@ -847,6 +847,42 @@ export const prayerWatchOtherTimes = pgTable(
   ],
 );
 
+/** Which Oversight updates each viewer has marked Done (migration 0072); the updates themselves are computed live. */
+export const oversightUpdateDones = pgTable("oversight_update_dones", {
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  updateKey: text("update_key").notNull(),
+  doneAt: timestamp("done_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [primaryKey({ columns: [t.userId, t.updateKey] })]);
+
+/** Natural assignment goals for a day (migration 0073): optional, never part of the daily report. */
+export const naturalAssignmentGoals = pgTable("natural_assignment_goals", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  reportDate: date("report_date", { mode: "string" }).notNull(),
+  title: text("title").notNull(),
+  outcome: text("outcome"),
+  position: integer("position").notNull().default(0),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  index("natural_assignment_goals_user_date_idx").on(t.userId, t.reportDate),
+  check("natural_assignment_goals_title_len", sql`char_length(${t.title}) between 1 and 200`),
+  check("natural_assignment_goals_outcome_len", sql`${t.outcome} is null or char_length(${t.outcome}) <= 1000`),
+]);
+
+export const naturalAssignmentTodos = pgTable("natural_assignment_todos", {
+  id: serial("id").primaryKey(),
+  goalId: integer("goal_id").notNull().references(() => naturalAssignmentGoals.id, { onDelete: "cascade" }),
+  text: text("text").notNull(),
+  deadline: time("deadline"),
+  doneAt: timestamp("done_at", { withTimezone: true }),
+  position: integer("position").notNull().default(0),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  index("natural_assignment_todos_goal_idx").on(t.goalId),
+  check("natural_assignment_todos_text_len", sql`char_length(${t.text}) between 1 and 200`),
+]);
+
 export const bibleReadingLogs = pgTable(
   "bible_reading_logs",
   {

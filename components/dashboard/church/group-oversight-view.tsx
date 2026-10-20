@@ -1,154 +1,277 @@
 "use client";
 
 import Link from "next/link";
-import { BellOffIcon, ChevronRightIcon, LockIcon, MessageCircleQuestionIcon } from "lucide-react";
+import { useOptimistic, useState, useTransition } from "react";
+import { BellIcon, BellOffIcon, CheckIcon, ChevronDownIcon, ChevronRightIcon, ClipboardCheckIcon, LockIcon, MessageCircleQuestionIcon, UserPlusIcon } from "lucide-react";
 
+import { remindChurchMember } from "@/app/(site)/dashboard/church/actions";
+import { setOversightUpdateDone } from "@/app/(site)/dashboard/community/_actions/oversight-actions";
 import styles from "@/components/community/discipleship/discipleship-group.module.css";
 import { Initials } from "@/components/community/discipleship/shared";
 import { groupIcon } from "@/components/community/groups/group-hero";
 import { MessageButton } from "@/components/community/messages/message-button";
 import type { GroupOversightData, GroupOversightPerson } from "@/lib/db/queries/group-oversight";
+import type { OversightUpdate } from "@/lib/db/queries/oversight-updates";
 
 import { OversightHeader } from "./oversight-nav";
-import { Mark, short } from "./oversight-view";
+import { Mark as BranchMark, short } from "./oversight-view";
+
+/**
+ * Oversight as Structure, Reports and Updates (Pastor, 20 October; built from
+ * the approved mockup). Groups open one level, to their members, never deeper;
+ * "Their groups" opens the groups someone leads as a view of its own
+ * (`?under=`). Reports name only what's missing; Updates is the old "Needs
+ * you", oldest first, ticked off with Done.
+ */
 
 export const OVERSIGHT_PATH = "/dashboard/community/oversight";
-const plural = (n: number, word: string) => `${n} ${n === 1 ? word : word === "person" ? "people" : word.endsWith("person") ? `${word.slice(0, -6)}people` : `${word}s`}`;
-const reportHref = (userId: string) => `/dashboard/church/${encodeURIComponent(userId)}`;
-const underHref = (userId: string) => `${OVERSIGHT_PATH}?under=${encodeURIComponent(userId)}`;
+const plural = (n: number, word: string) => `${n} ${n === 1 ? word : word === "person" ? "people" : `${word}s`}`;
+const first = (name: string) => name.split(" ")[0] || name;
+const reportHref = (userId: string, day?: string) => `/dashboard/church/${encodeURIComponent(userId)}${day ? `?day=${day}` : ""}`;
+const withUnder = (path: string, under: string | null | undefined, extra = "") => {
+  const query = [under ? `under=${encodeURIComponent(under)}` : "", extra].filter(Boolean).join("&");
+  return query ? `${path}?${query}` : path;
+};
+const reported = (person: GroupOversightPerson) => Object.values(person.statuses ?? {}).some(status => status !== "missing");
+const AMBER = "#a15c12";
 
-function Rate({ done, total }: { done: number; total: number }) {
-  if (!total) return <span className={styles.rowMeta}>No one yet</span>;
-  return <span className="grid shrink-0 justify-items-end gap-1">
-    <span className={styles.meter} aria-hidden="true"><i style={{ width: `${Math.round((done / total) * 100)}%` }} /></span>
-    <span className={styles.rowMeta}>{done}/{total} today</span>
+type ViewGroup = { id: number; name: string; leaderName: string | null; members: GroupOversightPerson[] };
+
+/** The focus person's groups, the groups their members lead, and (Pastor and branch pastors) every other group in view. */
+function groupsOf(data: GroupOversightData) {
+  const inTree = data.people.filter(person => person.depth != null);
+  const directIds = new Set(inTree.filter(person => person.depth === 1).map(person => person.userId));
+  const own: ViewGroup[] = data.groups.map(group => ({ id: group.id, name: group.name, leaderName: null, members: inTree.filter(person => person.groupId === group.id && person.depth === 1) }));
+  const collect = (people: GroupOversightPerson[]) => {
+    const map = new Map<number, ViewGroup>();
+    for (const person of people) {
+      if (person.groupId == null) continue;
+      const group = map.get(person.groupId) ?? { id: person.groupId, name: person.groupName ?? "Group", leaderName: person.overseerName, members: [] };
+      group.members.push(person);
+      map.set(person.groupId, group);
+    }
+    return [...map.values()].sort((a, b) => (a.leaderName ?? "").localeCompare(b.leaderName ?? "") || a.name.localeCompare(b.name));
+  };
+  const under = collect(inTree.filter(person => person.overseerId && directIds.has(person.overseerId)));
+  // The wider view: groups whose leader isn't a member of a group in view; deeper ones open through "Their groups".
+  const inView = new Set(data.people.filter(person => person.groupId != null).map(person => person.userId));
+  const other = collect(data.people.filter(person => person.depth == null && person.overseerId && !inView.has(person.overseerId)));
+  return { own, under, other };
+}
+
+function GroupIcon({ index }: { index: number }) {
+  return <span className="size-10 shrink-0 rounded-[10px] bg-cover bg-center" style={{ backgroundColor: index % 2 ? "#e6ecfc" : "#e3d8f8", ...groupIcon(index % 2 ? "leading-slate" : "leading") }} aria-hidden="true" />;
+}
+
+/** The count alone, amber only when someone is missing. */
+function Rate({ members }: { members: GroupOversightPerson[] }) {
+  if (!members.length) return <span className={`${styles.rowMeta} shrink-0`}>No one yet</span>;
+  const done = members.filter(reported).length;
+  return <span className="shrink-0 text-right text-[12px] leading-4" style={{ color: done === members.length ? "var(--color-community-muted)" : AMBER }}>
+    {done} of {members.length}<br /><span className="text-[var(--color-community-muted)]">reported</span>
   </span>;
 }
 
-/** Where someone sits: their group and, in the wider views, who leads it. */
-function placeOf(person: GroupOversightPerson, focusLeads: boolean) {
-  if (!person.groupName) return person.leadsMembers ? "Group leader" : null;
-  return person.depth === 1 && focusLeads ? person.groupName : `${person.overseerName ? `${person.overseerName.split(" ")[0]}’s` : "In"} ${person.groupName}`;
+/** A small dot and a word: green when it's in, amber when it's missing. */
+function Dot({ ok, label }: { ok: boolean; label: string }) {
+  return <span className="inline-flex shrink-0 items-center gap-1.5 text-[12px] leading-4" style={{ color: ok ? "var(--color-community-green-ink)" : AMBER }}>
+    <i className="size-1.5 rounded-full" style={{ background: ok ? "var(--color-community-green-ink)" : "#d98a1f" }} aria-hidden="true" />{label}
+  </span>;
 }
 
-function PersonRow({ person, focusLeads }: { person: GroupOversightPerson; focusLeads: boolean }) {
-  const meta = [
-    placeOf(person, focusLeads),
-    person.leadsMembers ? `leads ${plural(person.leadsMembers, "person")}` : null,
-    person.silentDays >= 3 ? `no report in ${person.silentDays} days` : null,
-  ].filter(Boolean).join(" · ");
-  return <li><div className={styles.row}>
+/** The day's report in a few words: only what's missing is named. Nil counts as in. */
+function ReportLine({ person }: { person: GroupOversightPerson }) {
+  const parts = [["devotional", "Devotion"], ["ministry", "Ministry"], ["meetings", "Meetings"]] as const;
+  const missing = parts.filter(([key]) => person.statuses?.[key] === "missing").map(([, label]) => label);
+  const label = !missing.length ? "All in" : missing.length === parts.length ? "Not reported"
+    : `${missing.map((name, index) => index ? name.toLowerCase() : name).join(", ")} missing`;
+  return <Dot ok={!missing.length} label={label} />;
+}
+
+function Remind({ userId, day }: { userId: string; day: string }) {
+  const [pending, start] = useTransition();
+  const [message, setMessage] = useState<string | null>(null);
+  if (message) return <span className={`${styles.rowMeta} shrink-0 self-center`}>{message}</span>;
+  return <button type="button" className={`${styles.quiet} inline-flex shrink-0 items-center gap-1 self-center`} disabled={pending}
+    onClick={() => start(async () => {
+      try { const result = await remindChurchMember(userId, day); setMessage(result.ok ? result.sent ? "Reminded" : "Already reminded" : result.error); }
+      catch { setMessage("Couldn’t remind"); }
+    })}><BellIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" />Remind</button>;
+}
+
+function PersonRow({ person, mode, day, remind, tab }: { person: GroupOversightPerson; mode: "structure" | "reports"; day: string; remind: boolean; tab: string }) {
+  return <li><div className={`${styles.row} items-start`} style={{ paddingLeft: 30 }}>
     <Initials name={person.name} />
-    <Link href={reportHref(person.userId)} className={`${styles.rowCopy} text-inherit no-underline`}>
+    <Link href={reportHref(person.userId, mode === "reports" ? day : undefined)} className={`${styles.rowCopy} gap-1 text-inherit no-underline`}>
       <span className={styles.rowTitle}>{person.name}</span>
-      <span className={styles.rowMeta}>{meta || "Member"}</span>
+      {mode === "reports" ? <ReportLine person={person} />
+        : person.leadsMembers ? <span className={styles.rowMeta}>Leads {plural(person.leadsMembers, "person")}</span> : null}
     </Link>
     {person.leadsMembers
-      ? <Link href={underHref(person.userId)} className={styles.btn} aria-label={`Open ${person.name}’s groups`}>Their groups<ChevronRightIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" /></Link>
-      : <span className={styles.pill} data-tone={person.reportedToday ? "ok" : person.silentDays >= 3 ? "off" : "risk"}>{person.reportedToday ? "Reported" : "Not yet"}</span>}
+      ? <Link href={withUnder(tab, person.userId, mode === "reports" ? `day=${day}` : "")} className={`${styles.quiet} inline-flex shrink-0 items-center gap-0.5 self-center`} aria-label={`Open ${person.name}’s groups`}>Their groups<ChevronRightIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" /></Link>
+      : mode === "reports" ? (!reported(person) && remind ? <Remind userId={person.userId} day={day} /> : null)
+      : <span className="self-center"><Dot ok={reported(person)} label={reported(person) ? "Reported" : "Not yet"} /></span>}
   </div></li>;
 }
 
-/**
- * Oversight on groups (Pastor, 19 October): today's reports, one "needs you"
- * list, the focus person's groups, the people under them, and branches for
- * the Pastor and branch pastors.
- */
-export function GroupOversightOverview({ data }: { data: GroupOversightData }) {
-  const { totals } = data;
-  const share = totals.people ? Math.round((totals.reportedToday / totals.people) * 100) : 0;
-  const pending = data.people.filter(person => !person.reportedToday).sort((a, b) => b.silentDays - a.silentDays);
-  const direct = data.people.filter(person => person.depth === 1);
-  const focusLeads = data.groups.length > 0;
-  const attention = [
-    totals.waiting ? { key: "questions", href: `${OVERSIGHT_PATH}/questions${data.under ? `?under=${encodeURIComponent(data.under.userId)}` : ""}`, tone: ["#fde3cf", "#7a3a10"], icon: <MessageCircleQuestionIcon className="size-4" strokeWidth={2.2} />, title: `${plural(totals.waiting, "question")} waiting over 3 days`, meta: data.waiting.slice(0, 3).map(row => row.name).join(", ") } : null,
-    totals.silent ? { key: "silent", href: `${OVERSIGHT_PATH}/reports${data.under ? `?under=${encodeURIComponent(data.under.userId)}` : ""}`, tone: ["#f6dcdc", "#9b2c2c"], icon: <BellOffIcon className="size-4" strokeWidth={2.2} />, title: `${plural(totals.silent, "person")} haven’t reported in 3 days`, meta: pending.filter(person => person.silentDays >= 3).slice(0, 3).map(person => person.name).join(", ") } : null,
-  ].filter(Boolean) as Array<{ key: string; href: string; tone: string[]; icon: React.ReactNode; title: string; meta: string }>;
-  const stats: Array<[string, number]> = [["At risk", totals.atRisk], ["Questions", totals.waiting], ["Silent 3+ days", totals.silent]];
+function GroupBranch({ group, index, open: startOpen, mode, day, remind, tab }: { group: ViewGroup; index: number; open: boolean; mode: "structure" | "reports"; day: string; remind: boolean; tab: string }) {
+  const [open, setOpen] = useState(startOpen);
+  return <li>
+    <button type="button" className={`${styles.row} w-full text-left`} aria-expanded={open} onClick={() => setOpen(value => !value)}>
+      <GroupIcon index={index} />
+      <span className={styles.rowCopy}><span className={styles.rowTitle}>{group.name}</span><span className={styles.rowMeta}>{group.leaderName ? `Led by ${first(group.leaderName)} · ` : ""}{plural(group.members.length, "member")}</span></span>
+      <Rate members={group.members} />
+      <ChevronDownIcon className={`${styles.chev} size-4 transition-transform ${open ? "rotate-180" : ""}`} strokeWidth={2} />
+    </button>
+    {open ? group.members.length
+      ? <ul className={styles.list} style={{ borderTop: "1px solid var(--color-line, #e7e9ec)" }}>
+        {group.members.map(person => <PersonRow key={person.userId} person={person} mode={mode} day={day} remind={remind} tab={tab} />)}
+      </ul>
+      : <p className={`${styles.empty} border-t border-(--color-line)`}>No one in this group yet. Invite people from the group’s page.</p> : null}
+  </li>;
+}
 
+function GroupList({ groups, offset = 0, openFirst = false, ...rest }: { groups: ViewGroup[]; offset?: number; openFirst?: boolean; mode: "structure" | "reports"; day: string; remind: boolean; tab: string }) {
+  return <div className={styles.panel}><ul className={styles.list}>
+    {groups.map((group, index) => <GroupBranch key={group.id} group={group} index={index + offset} open={openFirst && index === 0} {...rest} />)}
+  </ul></div>;
+}
+
+/** Where you are when you've opened someone's groups: back one step, then whose groups these are. */
+function Trail({ data, tab, extra = "" }: { data: GroupOversightData; tab: string; extra?: string }) {
+  if (!data.under) return null;
+  const back = data.under.backTo;
+  return <div className="grid gap-1">
+    <Link href={withUnder(tab, back?.userId, extra)} className={`${styles.quiet} inline-flex items-center gap-1`}>
+      <ChevronRightIcon className="size-3.5 rotate-180" strokeWidth={2.2} aria-hidden="true" />{back ? `Back to ${first(back.name)}’s groups` : "Back to your groups"}
+    </Link>
+    <span className="font-[family-name:var(--font-dashboard-heading)] text-[17px] leading-6 font-medium">{first(data.under.name)}’s groups</span>
+  </div>;
+}
+
+function Header({ data, updates }: { data: GroupOversightData; updates: number }) {
+  const people = data.people.length;
+  const sub = data.role === "leader" || data.under
+    ? `${plural(data.groups.length, "group")} ${data.under ? `${first(data.under.name)} leads` : "you lead"} · ${plural(people, "person")} in all`
+    : `${data.scopeLabel} · ${plural(people, "person")}`;
+  return <OversightHeader sub={sub} updates={updates} under={data.under?.userId} />;
+}
+
+/** Structure: the groups you lead, the groups led by those you lead, and the wider view for the Pastor and branch pastors. */
+export function OversightStructure({ data, updates }: { data: GroupOversightData; updates: number }) {
+  const { own, under, other } = groupsOf(data);
+  const who = data.under ? first(data.under.name) : null;
+  const shared = { mode: "structure" as const, day: data.day, remind: false, tab: OVERSIGHT_PATH };
   return <div className={styles.page}>
-    <OversightHeader title={data.under ? data.under.name : "Oversight"} structure={data.role === "pastor" && !data.under}
-      sub={`${data.scopeLabel} · ${plural(totals.people, "person")}`} />
-    {data.under ? <Link href={OVERSIGHT_PATH} className={`${styles.quiet} -mt-1`}>Back to your oversight</Link> : null}
-
-    <section className={styles.panel} aria-label="Today">
-      <div className="grid gap-2.5 p-3.5">
-        <div className="flex items-end justify-between gap-3">
-          <span className="grid gap-0.5">
-            <span className={styles.rowMeta}>Reports today</span>
-            {totals.people
-              ? <span className="font-[family-name:var(--font-dashboard-heading)] text-[19px] leading-6 font-medium">{totals.reportedToday} of {totals.people}</span>
-              : <span className="text-[13.5px] leading-5 text-(--color-text-strong)">No one in your groups yet</span>}
-          </span>
-          {totals.people ? <span className={styles.pill} data-tone={pending.length ? "risk" : "ok"}>{pending.length ? `${pending.length} pending` : "All in"}</span> : null}
-        </div>
-        {totals.people ? <span className="h-1.5 overflow-hidden rounded-full bg-[#eceef2]" aria-hidden="true"><i className="block h-full rounded-full bg-[var(--color-community-blue)]" style={{ width: `${share}%` }} /></span> : null}
-      </div>
-      <div className="grid grid-cols-3 border-t border-(--color-line) py-2.5">
-        {stats.map(([label, value], index) => <span key={label} className={`grid gap-px px-3.5 ${index ? "border-l border-(--color-line)" : ""}`}>
-          <span className="text-[11.5px] leading-[15px] text-[var(--color-community-muted)]">{label}</span>
-          <span className="font-[family-name:var(--font-dashboard-heading)] text-[17px] leading-6 font-medium" style={{ color: value > 0 ? "#92400e" : undefined }}>{value}</span>
-        </span>)}
-      </div>
-    </section>
-
-    <div className={styles.sectionTitle}><h2>Needs you</h2><Link href={`${OVERSIGHT_PATH}/reports${data.under ? `?under=${encodeURIComponent(data.under.userId)}` : ""}`} className={styles.quiet}>All reports</Link></div>
-    {attention.length || pending.length ? <div className={styles.panel}><ul className={styles.list}>
-      {attention.map(item => <li key={item.key}><Link href={item.href} className={styles.row}>
-        <span className="grid size-9 shrink-0 place-items-center rounded-[10px]" style={{ background: item.tone[0], color: item.tone[1] }} aria-hidden="true">{item.icon}</span>
-        <span className={styles.rowCopy}><span className={styles.rowTitle}>{item.title}</span><span className={styles.rowMeta}>{item.meta}</span></span>
-        <ChevronRightIcon className={`${styles.chev} size-4`} strokeWidth={2} />
-      </Link></li>)}
-      {pending.slice(0, 4).map(person => <li key={person.userId}><Link href={reportHref(person.userId)} className={styles.row}>
-        <Initials name={person.name} />
-        <span className={styles.rowCopy}><span className={styles.rowTitle}>{person.name}</span><span className={styles.rowMeta}>{[placeOf(person, focusLeads), person.silentDays >= 3 ? `no report in ${person.silentDays} days` : "no report yet today"].filter(Boolean).join(" · ")}</span></span>
-        <span className={styles.pill} data-tone={person.silentDays >= 3 ? "off" : "risk"}>Not yet</span>
-      </Link></li>)}
-    </ul></div> : <p className={`${styles.panel} ${styles.empty}`}>{totals.people ? "Nothing needs you right now. Everyone has reported today." : "Nothing needs you right now."}</p>}
-
-    {data.under ? null : <>
-      {/* The one group you're in: its leader looks after you (groups as oversight, one overseer). */}
-      <div className={styles.sectionTitle}><h2>Group you’re in</h2></div>
-      {data.memberOf
-        ? <div className={styles.panel}><Link href={`/dashboard/community/discipleship/${data.memberOf.groupId}`} className={styles.row}>
-          <span className="size-10 shrink-0 rounded-[10px] bg-cover bg-center" style={{ backgroundColor: "#e6ecfc", ...groupIcon("discipleship") }} aria-hidden="true" />
-          <span className={styles.rowCopy}><span className={styles.rowTitle}>{data.memberOf.groupName}</span><span className={styles.rowMeta}>Led by {data.memberOf.leaderName}, who looks after you</span></span>
-          <ChevronRightIcon className={`${styles.chev} size-4`} strokeWidth={2} />
-        </Link></div>
-        : <p className={`${styles.panel} ${styles.empty}`}>You’re not in a group yet. When a leader adds you, you’ll accept from Community Home.</p>}
-    </>}
-
-    {data.groups.length ? <>
-      <div className={styles.sectionTitle}><h2>{data.under ? `${data.under.name.split(" ")[0]}’s groups` : "Groups you lead"}</h2></div>
-      <div className={styles.panel}><ul className={styles.list}>
-        {data.groups.map((group, index) => {
-          const body = <>
-            {/* The same illustrated cut as Community Home's group cards, alternating colourways oldest first. */}
-            <span className="size-10 shrink-0 rounded-[10px] bg-cover bg-center" style={{ backgroundColor: index % 2 ? "#e6ecfc" : "#e3d8f8", ...groupIcon(index % 2 ? "leading-slate" : "leading") }} aria-hidden="true" />
-            <span className={styles.rowCopy}><span className={styles.rowTitle}>{group.name}</span><span className={styles.rowMeta}>{plural(group.members, "member")}</span></span>
-            <Rate done={group.reportedToday} total={group.members} />
-          </>;
-          return <li key={group.id}>{data.under ? <div className={styles.row}>{body}</div> : <Link href={`/dashboard/community/discipleship/${group.id}`} className={styles.row}>{body}</Link>}</li>;
-        })}
-      </ul></div>
+    <Header data={data} updates={updates} />
+    <Trail data={data} tab={OVERSIGHT_PATH} />
+    {own.length ? <>
+      <div className={styles.sectionTitle}><h2>{who ? `Groups ${who} leads` : "Groups you lead"}</h2><span className={styles.rowMeta}>{plural(own.length, "group")}</span></div>
+      <GroupList groups={own} openFirst {...shared} />
     </> : null}
-
-    {direct.length ? <>
-      <div className={styles.sectionTitle}><h2>In {data.under ? "their" : "your"} groups</h2><span className={styles.rowMeta}>{direct.length}</span></div>
-      <div className={styles.panel}><ul className={styles.list}>{direct.map(person => <PersonRow key={person.userId} person={person} focusLeads={focusLeads} />)}</ul></div>
-      {data.people.length > direct.length ? <p className={styles.note}>{plural(data.people.length - direct.length, "more person")} in the groups they lead. Open “Their groups” to see them.</p> : null}
+    {under.length ? <>
+      <div className={styles.sectionTitle}><h2>Groups led by those {who ?? "you"} lead{who ? "s" : ""}</h2><span className={styles.rowMeta}>{plural(under.length, "group")}</span></div>
+      <GroupList groups={under} offset={1} {...shared} />
     </> : null}
-
-    {data.branches.length ? <>
-      <div className={styles.sectionTitle}><h2>{data.role === "pastor" ? "Branches" : "Your branches"}</h2></div>
+    {other.length ? <>
+      <div className={styles.sectionTitle}><h2>{data.role === "pastor" ? "Every other group" : "Other groups in your branches"}</h2><span className={styles.rowMeta}>{plural(other.length, "group")}</span></div>
+      <GroupList groups={other} {...shared} />
+    </> : null}
+    {!own.length && !under.length && !other.length ? <p className={`${styles.panel} ${styles.empty}`}>No groups yet.</p> : null}
+    {!data.under && data.branches.length ? <>
+      <div className={styles.sectionTitle}><h2>{data.role === "pastor" ? "Branches" : "Your branches"}</h2>{data.role === "pastor" ? <Link href={`${OVERSIGHT_PATH}/branches`} className={styles.quiet}>Manage</Link> : null}</div>
       <div className={styles.panel}><ul className={styles.list}>
         {data.branches.map((branch, index) => <li key={branch.id}><Link href={`${OVERSIGHT_PATH}/branches/${branch.id}`} className={styles.row}>
-          <Mark text={short(branch.name)} index={index} />
+          <BranchMark text={short(branch.name)} index={index} />
           <span className={styles.rowCopy}><span className={styles.rowTitle}>{branch.name}</span><span className={styles.rowMeta}>{[branch.pastors.join(", ") || "No branch pastor", plural(branch.people, "person")].join(" · ")}</span></span>
-          <Rate done={branch.reportedToday} total={branch.people} />
+          <ChevronRightIcon className={`${styles.chev} size-4`} strokeWidth={2} />
         </Link></li>)}
       </ul></div>
     </> : null}
+    <p className={styles.note}>Open a group to see its members. “Their groups” takes you into the groups that person leads.</p>
+  </div>;
+}
+
+const dayChip = (day: string, today: string, index: number) => index === 0 ? "Today" : index === 1 ? "Yesterday"
+  : new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "numeric", timeZone: "UTC" }).format(new Date(`${day}T00:00:00Z`)).replace(",", "");
+
+/** Reports: a day picker, then the groups you lead or the groups under them, each member's report in a few words. */
+export function OversightReports({ data, updates, days, today, remind }: { data: GroupOversightData; updates: number; days: string[]; today: string; remind: boolean }) {
+  const { own, under, other } = groupsOf(data);
+  const [scope, setScope] = useState<"mine" | "under">(own.length || !other.length ? "mine" : "under");
+  const groups = scope === "mine" ? own : [...under, ...other];
+  const people = groups.flatMap(group => group.members);
+  const tab = `${OVERSIGHT_PATH}/reports`;
+  return <div className={styles.page}>
+    <Header data={data} updates={updates} />
+    <Trail data={data} tab={tab} extra={`day=${data.day}`} />
+    <div className="flex gap-1.5 overflow-x-auto pb-0.5" aria-label="Report day">
+      {days.map((day, index) => <Link key={day} href={withUnder(tab, data.under?.userId, day === today ? "" : `day=${day}`)} scroll={false}
+        aria-current={day === data.day ? "date" : undefined} className={`${styles.btn} ${styles.mini} shrink-0 no-underline`} data-primary={day === data.day ? "" : undefined}>{dayChip(day, today, index)}</Link>)}
+    </div>
+    <div className="grid grid-cols-2 rounded-[10px] bg-[#eceef2] p-[3px]" role="tablist" aria-label="Whose reports">
+      {([["mine", data.under ? `Groups ${first(data.under.name)} leads` : "Groups you lead"], ["under", "Groups under them"]] as const).map(([key, label]) => <button key={key} type="button" role="tab" aria-selected={scope === key} onClick={() => setScope(key)}
+        className={`inline-flex h-8 min-w-0 items-center justify-center rounded-[7px] px-1 text-[13px] font-medium ${scope === key ? "bg-white text-[var(--color-community-ink)] shadow-[0_1px_2px_rgb(0_0_0/8%)]" : "text-[var(--color-community-muted)]"}`}><span className="truncate">{label}</span></button>)}
+    </div>
+    <div className={styles.strip}>
+      <div><span>Reported</span><strong>{people.filter(reported).length}/{people.length}</strong></div>
+      <div><span>Need a report</span><strong style={{ color: people.some(person => !reported(person)) ? "#92400e" : undefined }}>{people.filter(person => !reported(person)).length}</strong></div>
+      <div><span>Groups</span><strong>{groups.length}</strong></div>
+    </div>
+    {groups.length
+      ? <GroupList key={`${scope}-${data.day}`} groups={groups} openFirst mode="reports" day={data.day} remind={remind && data.day === today} tab={tab} />
+      : <p className={`${styles.panel} ${styles.empty}`}>{scope === "mine" ? "No groups yet." : "No groups under them yet."}</p>}
+    <p className={styles.note}>Open a group for each member’s report. “Their groups” takes you into the groups that person leads.</p>
+  </div>;
+}
+
+const UPDATE_ICON: Record<OversightUpdate["kind"], [React.ReactNode, string, string]> = {
+  silent: [<BellOffIcon key="i" className="size-4" strokeWidth={2.2} />, "#f6dcdc", "#9b2c2c"],
+  question: [<MessageCircleQuestionIcon key="i" className="size-4" strokeWidth={2.2} />, "#fde3cf", "#7a3a10"],
+  risk: [<ClipboardCheckIcon key="i" className="size-4" strokeWidth={2.2} />, "#f7e4cd", "#92400e"],
+  joined: [<UserPlusIcon key="i" className="size-4" strokeWidth={2.2} />, "#e4ebfd", "#2331ae"],
+};
+const whenFmt = new Intl.DateTimeFormat("en-GB", { weekday: "short", hour: "numeric", minute: "2-digit", hour12: true, timeZone: "Africa/Lagos" });
+
+/** Updates: the old "Needs you", oldest first; Done moves one to the Done list, and back. */
+export function OversightUpdates({ data, updates: initial }: { data: GroupOversightData; updates: OversightUpdate[] }) {
+  const [view, setView] = useState<"todo" | "done">("todo");
+  const [error, setError] = useState<string | null>(null);
+  const [, start] = useTransition();
+  const [updates, setOptimistic] = useOptimistic(initial, (current, change: { key: string; done: boolean }) => current.map(update => update.key === change.key ? { ...update, done: change.done } : update));
+  const open = updates.filter(update => !update.done);
+  const rows = view === "todo" ? open : updates.filter(update => update.done);
+  const toggle = (key: string, done: boolean) => start(async () => {
+    setError(null);
+    setOptimistic({ key, done });
+    const result = await setOversightUpdateDone(key, done).catch(() => ({ ok: false as const, error: "Couldn’t save that. Try again." }));
+    if (!result.ok) setError(result.error);
+  });
+  return <div className={styles.page}>
+    <Header data={data} updates={open.length} />
+    <div className="grid grid-cols-2 rounded-[10px] bg-[#eceef2] p-[3px]" role="tablist" aria-label="Show">
+      {([["todo", `To do · ${open.length}`], ["done", `Done · ${updates.length - open.length}`]] as const).map(([key, label]) => <button key={key} type="button" role="tab" aria-selected={view === key} onClick={() => setView(key)}
+        className={`inline-flex h-8 items-center justify-center rounded-[7px] text-[13px] font-medium ${view === key ? "bg-white text-[var(--color-community-ink)] shadow-[0_1px_2px_rgb(0_0_0/8%)]" : "text-[var(--color-community-muted)]"}`}>{label}</button>)}
+    </div>
+    {error ? <p className={styles.rowMeta} role="alert" style={{ color: "#9b2c2c" }}>{error}</p> : null}
+    {rows.length ? <div className={styles.panel}><ul className={styles.list}>{rows.map(update => {
+      const [icon, bg, ink] = UPDATE_ICON[update.kind];
+      const detail = [update.detail, update.at ? whenFmt.format(new Date(update.at)) : null].filter(Boolean).join(" · ");
+      return <li key={update.key}><div className={styles.row} style={{ alignItems: "flex-start", gap: 14, padding: "16px 14px" }}>
+        <span className="grid size-10 shrink-0 place-items-center self-start rounded-[11px]" style={{ background: bg, color: ink, marginTop: -2 }} aria-hidden="true">{icon}</span>
+        <span className={`${styles.rowCopy} gap-1`}>
+          <span className={styles.rowTitle} style={{ whiteSpace: "normal", fontSize: 14, lineHeight: "20px" }}>{update.title}</span>
+          {detail ? <span className={styles.rowMeta} style={{ whiteSpace: "normal", lineHeight: "18px" }}>{detail}</span> : null}
+          <span className="mt-3 flex gap-2">
+            <Link href={update.href} className={`${styles.btn} ${styles.mini} no-underline`}>Open<ChevronRightIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" /></Link>
+            {update.done
+              ? <button type="button" className={`${styles.btn} ${styles.mini}`} onClick={() => toggle(update.key, false)}>Not done</button>
+              : <button type="button" className={`${styles.btn} ${styles.mini}`} data-primary="" onClick={() => toggle(update.key, true)} aria-label={`Mark done: ${update.title}`}><CheckIcon className="size-3.5" strokeWidth={2.4} aria-hidden="true" />Done</button>}
+          </span>
+        </span>
+      </div></li>;
+    })}</ul></div> : <p className={`${styles.panel} ${styles.empty}`}>{view === "todo" ? "You’re all caught up." : "Nothing ticked off yet."}</p>}
+    <p className={styles.note}>Oldest first, so you can work through them in order. Tap Done when you’ve dealt with one. Someone who is still quiet or behind a week later comes back.</p>
   </div>;
 }
 
@@ -162,7 +285,7 @@ export function GroupOversightBranch({ data, branchId }: { data: GroupOversightD
       <div><h1>{branch.name} branch</h1><p className={styles.sub}>{[branch.pastors.join(", ") || "No branch pastor", plural(branch.people, "person"), `${branch.learners} in SOGP`].join(" · ")}</p></div>
     </div>
     {people.length
-      ? <div className={styles.panel}><ul className={styles.list}>{people.map(person => <PersonRow key={person.userId} person={person} focusLeads={false} />)}</ul></div>
+      ? <div className={styles.panel}><ul className={styles.list}>{people.map(person => <PersonRow key={person.userId} person={person} mode="reports" day={data.day} remind={false} tab={`${OVERSIGHT_PATH}/reports`} />)}</ul></div>
       : <p className={`${styles.panel} ${styles.empty}`}>No one in this branch is in a group yet.</p>}
   </div>;
 }
