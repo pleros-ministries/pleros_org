@@ -125,10 +125,10 @@ export function BibleFreeSheet({ dateKey, initial, onClose }: { dateKey: string;
   </ReportSheet>;
 }
 
-export function PrayerWatchSheet({ dateKey, attended, onClose, onChange }: { dateKey: string; attended: string[]; onClose: () => void; onChange?: (sessions: string[]) => void }) {
+export function PrayerWatchSheet({ dateKey, attended, times, onClose, onChange }: { dateKey: string; attended: string[]; times?: string[]; onClose: () => void; onChange?: (sessions: string[], times: string[]) => void }) {
   return <ReportSheet title="Prayer Watch" subtitle={longDate(dateKey)} onClose={onClose}
     footer={close => <button type="button" className={styles.primary} onClick={close}>Done</button>}>
-    {() => <PrayerWatchInline date={dateKey} attended={attended} disabled={false} onChange={onChange} />}
+    {() => <PrayerWatchInline date={dateKey} attended={attended} times={times} disabled={false} onChange={onChange} />}
   </ReportSheet>;
 }
 

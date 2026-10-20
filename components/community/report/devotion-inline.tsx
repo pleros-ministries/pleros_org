@@ -2,7 +2,7 @@
 import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
 
-import { saveBibleReadingLogAction, togglePrayerWatchAttendanceAction } from "@/app/_actions/prayer-watch-actions";
+import { saveBibleReadingLogAction, savePrayerOtherTimeAction, togglePrayerWatchAttendanceAction } from "@/app/_actions/prayer-watch-actions";
 import { BIBLE_BOOKS, getBibleBook } from "@/lib/bible-reading";
 import { PRAYER_WATCH_SESSIONS } from "@/lib/prayer-watch";
 import { PRAYER_WATCH_ANOTHER_TIME } from "@/lib/prayer-watch-session";
@@ -14,44 +14,88 @@ import styles from "./daily-report-sections.module.css";
  * Both use the same actions as the Prayer Watch page.
  */
 
+const clock = new Intl.DateTimeFormat("en-GB", { hour: "numeric", minute: "2-digit", hour12: true, timeZone: "UTC" });
+/** "22:15" → "10:15 pm". */
+export const prayerTimeLabel = (time: string) => clock.format(new Date(`1970-01-01T${time}:00Z`)).replace(/\s/g, " ").toLowerCase();
+
 /**
  * Optimistic (user request, 20 October): a tap shows at once and reports up
  * through `onChange`, so the report row updates without waiting; a failed save
- * rolls that session back and says so. Chips never lock while saving.
+ * rolls it back and says so. Nothing locks while saving.
+ *
+ * "Another time" (user request, 20 October, for people who miss Prayer Watch):
+ * add the times you actually prayed. While any time is saved the day keeps its
+ * `unspecified` session, which is what every attendance count reads.
  */
-export function PrayerWatchInline({ date, attended, disabled, onChange }: { date: string; attended: string[]; disabled: boolean; onChange?: (sessions: string[]) => void }) {
+export function PrayerWatchInline({ date, attended, times: initialTimes = [], disabled, onChange }: {
+  date: string; attended: string[]; times?: string[]; disabled: boolean;
+  /** The day's sessions and times after every change, for the report row. */
+  onChange?: (sessions: string[], times: string[]) => void;
+}) {
   const router = useRouter();
   const [on, setOn] = useState(() => new Set(attended));
-  // The latest set, so a rollback after several quick taps undoes only its own session.
-  const current = useRef(on);
+  const [times, setTimes] = useState<string[]>(() => [...initialTimes].sort());
+  const [draft, setDraft] = useState("");
+  // The latest values, so a rollback after several quick taps undoes only its own change.
+  const current = useRef({ on, times });
   const [error, setError] = useState<string | null>(null);
   const [, start] = useTransition();
-  const sessions = [...PRAYER_WATCH_SESSIONS.map(session => ({ id: session.id as string, label: session.label, time: session.time })), { id: PRAYER_WATCH_ANOTHER_TIME.id as string, label: PRAYER_WATCH_ANOTHER_TIME.label, time: "Outside these times" }];
-  function apply(next: Set<string>) { current.current = next; setOn(next); onChange?.([...next]); }
+  const another = PRAYER_WATCH_ANOTHER_TIME.id as string;
+  function apply(next: { on: Set<string>; times: string[] }) {
+    current.current = next; setOn(next.on); setTimes(next.times); onChange?.([...next.on], next.times);
+  }
+  function failed(message: string, undo: () => { on: Set<string>; times: string[] }) {
+    setError(message); apply(undo());
+  }
   function toggle(session: string) {
-    const was = current.current.has(session);
-    const next = new Set(current.current); if (was) next.delete(session); else next.add(session);
-    apply(next);
+    const was = current.current.on.has(session);
+    const next = new Set(current.current.on); if (was) next.delete(session); else next.add(session);
+    apply({ ...current.current, on: next });
     setError(null);
     start(async () => {
       const form = new FormData();
       form.set("date", date); form.set("session", session); form.set("attended", String(was));
       const result = await togglePrayerWatchAttendanceAction({ error: null }, form).catch(() => ({ error: "That couldn’t be saved. Try again." }));
-      if (result.error) {
-        setError(result.error);
-        const back = new Set(current.current); if (was) back.add(session); else back.delete(session);
-        apply(back);
-        return;
-      }
+      if (result.error) return failed(result.error, () => { const back = new Set(current.current.on); if (was) back.add(session); else back.delete(session); return { ...current.current, on: back }; });
       router.refresh();
     });
   }
+  function changeTime(time: string, remove: boolean) {
+    const nextTimes = remove ? current.current.times.filter(item => item !== time) : [...new Set([...current.current.times, time])].sort();
+    const nextOn = new Set(current.current.on); if (nextTimes.length) nextOn.add(another); else nextOn.delete(another);
+    apply({ on: nextOn, times: nextTimes });
+    setError(null); setDraft("");
+    start(async () => {
+      const result = await savePrayerOtherTimeAction({ date, time, remove }).catch(() => ({ error: "That couldn’t be saved. Try again." }));
+      if (result.error) return failed(result.error, () => {
+        const times = remove ? [...new Set([...current.current.times, time])].sort() : current.current.times.filter(item => item !== time);
+        const back = new Set(current.current.on); if (times.length) back.add(another); else back.delete(another);
+        return { on: back, times };
+      });
+      router.refresh();
+    });
+  }
+  // A day ticked as "another time" before times existed has the session but no time.
+  const untimed = on.has(another) && !times.length;
   return <div className={styles.inlineForm}>
-    <p className={styles.hint}>Tap each time you prayed, live or as a replay.</p>
+    <p className={styles.hint}>Tap each session you joined, live or as a replay.</p>
     <div className={styles.sessionRow}>
-      {sessions.map(session => <button key={session.id} type="button" aria-pressed={on.has(session.id)} disabled={disabled} onClick={() => toggle(session.id)} className={styles.sessionChip} data-wide={session.id === PRAYER_WATCH_ANOTHER_TIME.id || undefined}>
+      {PRAYER_WATCH_SESSIONS.map(session => <button key={session.id} type="button" aria-pressed={on.has(session.id)} disabled={disabled} onClick={() => toggle(session.id)} className={styles.sessionChip}>
         <span>{session.label}</span><span className={styles.meta}>{session.time}</span>
       </button>)}
+    </div>
+    <div className={styles.otherTimes}>
+      <span className={styles.otherTitle}>Prayed at another time?</span>
+      <span className={styles.meta}>Missed a session? Add when you prayed.</span>
+      {times.length || untimed ? <div className={styles.timeChips}>
+        {times.map(time => <button key={time} type="button" className={styles.timeChip} disabled={disabled} onClick={() => changeTime(time, true)} aria-label={`Remove ${prayerTimeLabel(time)}`}>{prayerTimeLabel(time)}<span aria-hidden="true">×</span></button>)}
+        {untimed ? <button type="button" className={styles.timeChip} disabled={disabled} onClick={() => toggle(another)} aria-label="Remove another time">Another time<span aria-hidden="true">×</span></button> : null}
+      </div> : null}
+      <form className={styles.timeAdd} onSubmit={event => { event.preventDefault(); if (draft) changeTime(draft, false); }}>
+        <label className={styles.srOnly} htmlFor={`prayer-time-${date}`}>Time you prayed</label>
+        <input id={`prayer-time-${date}`} type="time" value={draft} disabled={disabled} onChange={event => setDraft(event.target.value)} />
+        <button type="submit" className={styles.done} disabled={disabled || !draft}>Add</button>
+      </form>
     </div>
     {error ? <p role="alert" className={styles.error}>{error}</p> : null}
   </div>;

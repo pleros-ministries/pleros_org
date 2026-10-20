@@ -26,7 +26,7 @@ import { useReportAction } from "./use-report-action";
 import styles from "./daily-report-sections.module.css";
 
 /** What a devotion save shows before the page refreshes; undefined fields fall back to the server's data. */
-type DevotionOverride = { date: string; prayer?: string[]; bible?: string; teaching?: string };
+type DevotionOverride = { date: string; prayer?: string[]; times?: string[]; bible?: string; teaching?: string };
 const capitalise = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
 
 /** Matches the review sheet exit in daily-report-sections.module.css. */
@@ -114,7 +114,7 @@ export function DailyReportSections({ today, days, selected, activities, edits =
   /** Saved evangelism and discipleship reports that reopen in their pop-up, by activity id. */
   edits?: Record<number, MinistryEdit>;
   /** The day's raw Prayer Watch sessions and Bible reading, for filling them in place. */
-  devotion?: { prayerWatch: string[]; bible: { chapters: number; book: string; chapter: number } | null };
+  devotion?: { prayerWatch: string[]; prayerTimes?: string[]; bible: { chapters: number; book: string; chapter: number } | null };
   declarations: { category: string; declaration: string }[];
   meetingDetails: { activityId: number; reportingRole: string; taught: string | null; shared?: boolean; attended?: boolean; peopleBrought?: number; totalAttendance?: number | null }[];
   enabled: boolean;
@@ -160,7 +160,9 @@ export function DailyReportSections({ today, days, selected, activities, edits =
   const sogpDetail = line("sogp"), podcastDetail = line("podcast");
   const teachingDone = Boolean(sogpDetail || podcastDetail || teaching || shown.teaching);
   const bibleDone = shown.bible !== undefined ? Boolean(shown.bible) : Boolean(devotion?.bible ?? line("bible"));
-  const prayerLine = shown.prayer !== undefined ? prayerSessionsLine(shown.prayer) : line("prayerWatch");
+  const prayerLine = shown.prayer !== undefined
+    ? prayerSessionsLine(shown.prayer, shown.times ?? devotion?.prayerTimes ?? [])
+    : devotion?.prayerTimes?.length ? prayerSessionsLine(devotion.prayerWatch, devotion.prayerTimes) : line("prayerWatch");
   const prayerDone = Boolean(prayerLine);
   const devotionDone = [bibleDone, prayerDone, teachingDone].filter(Boolean).length;
   const declared = (key: DailyReportCategory) => (declarations.find(row => row.category === key)?.declaration ?? null) as DailyReportDeclaration | null;
@@ -297,7 +299,7 @@ export function DailyReportSections({ today, days, selected, activities, edits =
     {popup === "bibleToday" ? plan && reading && bibleDay
       ? <BibleTodaySheet dateKey={selected} day={{ ...bibleDay, plan, reading }} onClose={close} onChangePlan={() => setPopup("biblePlan")} onOptimistic={optimisticSave} />
       : <BibleFreeSheet dateKey={selected} initial={bibleLogged} onClose={close} /> : null}
-    {popup === "prayerWatch" ? <PrayerWatchSheet dateKey={selected} attended={shown.prayer ?? devotion?.prayerWatch ?? []} onClose={close} onChange={sessions => setOverride({ ...shown, prayer: sessions, date: selected })} /> : null}
+    {popup === "prayerWatch" ? <PrayerWatchSheet dateKey={selected} attended={shown.prayer ?? devotion?.prayerWatch ?? []} times={shown.times ?? devotion?.prayerTimes ?? []} onClose={close} onChange={(sessions, times) => setOverride({ ...shown, prayer: sessions, times, date: selected })} /> : null}
     {popup === "teaching" ? <TeachingSheet dateKey={selected} sogp={sogpDetail} podcast={podcastDetail} report={teaching} available={popupsReady} onClose={close} onOptimistic={optimisticSave} /> : null}
     {popup === "evangelism" ? <EvangelismSheet dateKey={selected} contacts={contacts} onClose={close} /> : null}
     {popup === "discipleship" ? <DiscipleshipSheet dateKey={selected} contacts={contacts} teachings={teachings} onClose={close} /> : null}

@@ -14,6 +14,7 @@ import {
   index,
   pgEnum,
   date,
+  time,
   type AnyPgColumn,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
@@ -823,6 +824,26 @@ export const prayerWatchAttendance = pgTable(
       t.session,
     ),
     index("prayer_watch_attendance_user_idx").on(t.userId),
+  ],
+);
+
+/**
+ * When someone actually prayed under "Another time" (migration 0071; user
+ * request, 20 October, for people who miss Prayer Watch). Several a day; each
+ * day with a time also keeps its `unspecified` prayer_watch_attendance row.
+ */
+export const prayerWatchOtherTimes = pgTable(
+  "prayer_watch_other_times",
+  {
+    id: serial("id").primaryKey(),
+    userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+    prayedDate: date("prayed_date", { mode: "string" }).notNull(),
+    prayedAt: time("prayed_at").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("prayer_watch_other_times_user_date_time_idx").on(t.userId, t.prayedDate, t.prayedAt),
+    index("prayer_watch_other_times_user_date_idx").on(t.userId, t.prayedDate),
   ],
 );
 

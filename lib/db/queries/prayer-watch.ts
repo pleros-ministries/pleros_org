@@ -1,4 +1,4 @@
-import { and, eq, gte, lte } from "drizzle-orm";
+import { and, asc, eq, gte, lte } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 
@@ -93,4 +93,35 @@ export async function removePrayerWatchAttendance(
         eq(schema.prayerWatchAttendance.session, session),
       ),
     );
+}
+
+/**
+ * The times someone actually prayed under "Another time" (migration 0071),
+ * as "HH:MM", earliest first. The day's `unspecified` attendance row follows
+ * them: it exists while at least one time does.
+ */
+export async function listPrayerOtherTimes(userId: string, dateKey: string): Promise<string[]> {
+  const rows = await db
+    .select({ prayedAt: schema.prayerWatchOtherTimes.prayedAt })
+    .from(schema.prayerWatchOtherTimes)
+    .where(and(eq(schema.prayerWatchOtherTimes.userId, userId), eq(schema.prayerWatchOtherTimes.prayedDate, dateKey)))
+    .orderBy(asc(schema.prayerWatchOtherTimes.prayedAt));
+  return rows.map(row => row.prayedAt.slice(0, 5));
+}
+
+export async function addPrayerOtherTime(userId: string, dateKey: string, prayedAt: string) {
+  // Both writes are idempotent, so a retry after a partial failure lands in the same place.
+  await db.insert(schema.prayerWatchOtherTimes).values({ userId, prayedDate: dateKey, prayedAt }).onConflictDoNothing();
+  await logPrayerWatchAttendance(userId, dateKey, "unspecified");
+}
+
+export async function removePrayerOtherTime(userId: string, dateKey: string, prayedAt: string) {
+  await db.delete(schema.prayerWatchOtherTimes).where(and(
+    eq(schema.prayerWatchOtherTimes.userId, userId),
+    eq(schema.prayerWatchOtherTimes.prayedDate, dateKey),
+    eq(schema.prayerWatchOtherTimes.prayedAt, prayedAt),
+  ));
+  const [left] = await db.select({ id: schema.prayerWatchOtherTimes.id }).from(schema.prayerWatchOtherTimes)
+    .where(and(eq(schema.prayerWatchOtherTimes.userId, userId), eq(schema.prayerWatchOtherTimes.prayedDate, dateKey))).limit(1);
+  if (!left) await removePrayerWatchAttendance(userId, dateKey, "unspecified");
 }

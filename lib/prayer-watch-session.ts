@@ -24,9 +24,17 @@ export function isPrayerWatchSession(
   return LOGGABLE_PRAYER_WATCH_SESSIONS.has(value as PrayerWatchSessionId);
 }
 
-/** The day's sessions as one line, "morning, another time", in the day's order. Null when none. */
-export function prayerSessionsLine(sessions: string[]): string | null {
-  const order = ["morning", "afternoon", "evening", PRAYER_WATCH_ANOTHER_TIME.id];
-  const parts = order.filter(id => sessions.includes(id)).map(id => id === PRAYER_WATCH_ANOTHER_TIME.id ? "another time" : id);
+const clock = new Intl.DateTimeFormat("en-GB", { hour: "numeric", minute: "2-digit", hour12: true, timeZone: "UTC" });
+
+/**
+ * The day's sessions as one line, "morning, 10:15 pm", in the day's order.
+ * Times saved under Another time replace the words "another time". Null when none.
+ */
+export function prayerSessionsLine(sessions: string[], times: string[] = []): string | null {
+  const named = ["morning", "afternoon", "evening"].filter(id => sessions.includes(id));
+  const other = times.length
+    ? [...times].sort().map(time => clock.format(new Date(`1970-01-01T${time}:00Z`)).replace(/\s/g, " ").toLowerCase())
+    : sessions.includes(PRAYER_WATCH_ANOTHER_TIME.id) ? ["another time"] : [];
+  const parts = [...named, ...other];
   return parts.length ? parts.join(", ") : null;
 }

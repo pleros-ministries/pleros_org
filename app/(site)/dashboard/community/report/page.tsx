@@ -22,6 +22,7 @@ import { getBibleDay, getTeachingReport, listMinistryDetails, listRecentTeaching
 import { getOwnMinistryReportV3 } from "@/lib/db/queries/ministry-report-v3";
 import { ministryEdit, type MinistryEdit } from "@/lib/community/report-popups";
 import type { MemberActivity } from "@/lib/db/queries/ministry-activities";
+import { listPrayerOtherTimes } from "@/lib/db/queries/prayer-watch";
 
 // Reads the session on every request (Cache Components).
 export const instant = false;
@@ -62,7 +63,7 @@ export default async function MinistryReportRoute({
   const unitsRead = inline ? listMeetingUnits(ctx.userId).catch(() => []) : Promise.resolve([]);
   const plerosRead = getDayActivity(ctx.userId, selected);
   const activitiesRead = listActivitiesForDay(ctx.userId, selected);
-  const [activities, edits, pleros, declarations, meetingDetails, sharedDetails, week, contacts, units, initialMeetings, popupsReady, bibleDay, teaching, teachings] = await Promise.all([
+  const [activities, edits, pleros, declarations, meetingDetails, sharedDetails, week, contacts, units, initialMeetings, popupsReady, bibleDay, teaching, teachings, prayerTimes] = await Promise.all([
     activitiesRead,
     inline ? activitiesRead.then(list => loadMinistryEdits(ctx.userId, list)).catch((): Record<number, MinistryEdit> => ({})) : Promise.resolve<Record<number, MinistryEdit>>({}),
     plerosRead,
@@ -78,6 +79,8 @@ export default async function MinistryReportRoute({
     plerosRead.then(day => getBibleDay(ctx.userId, selected, day.bible)).catch(() => undefined),
     getTeachingReport(ctx.userId, selected).catch(() => null),
     inline ? listRecentTeachingTitles(ctx.userId, selected).catch(() => []) : Promise.resolve([]),
+    // Times prayed under Another time (migration 0071).
+    listPrayerOtherTimes(ctx.userId, selected).catch(() => [] as string[]),
   ]);
 
   return (
@@ -95,7 +98,7 @@ export default async function MinistryReportRoute({
       meetingDetails={[...meetingDetails, ...sharedDetails]}
       enabled={dailyReportingEnabled()}
       pleros={activityLines(pleros)}
-      devotion={{ prayerWatch: pleros.prayerWatch, bible: pleros.bible }}
+      devotion={{ prayerWatch: pleros.prayerWatch, prayerTimes, bible: pleros.bible }}
       week={week}
       popupsReady={popupsReady}
       bibleDay={bibleDay}
