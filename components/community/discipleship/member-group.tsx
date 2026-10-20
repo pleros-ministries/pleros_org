@@ -59,8 +59,8 @@ export function MemberGroupView({ joined, discipler, ownEpisodeQuestions, discus
         <span className={styles.rowCopy}><span className={styles.rowTitle} style={{ fontWeight: 500, whiteSpace: "normal" }}>{discipler.leaderName}</span><span className={styles.rowMeta}>Leads your group</span></span>
       </div>
       {discipler.whatsappUrl || joined.discipler.messageUserId ? <div className={styles.leaderActions}>
-        {discipler.whatsappUrl ? <a href={discipler.whatsappUrl} target="_blank" rel="noopener noreferrer" className={styles.btn}><MessageCircleIcon className="size-3.5" strokeWidth={2} />WhatsApp</a> : null}
-        {joined.discipler.messageUserId ? <MessageButton bare userId={joined.discipler.messageUserId} className={`${styles.btn} w-full`} /> : null}
+        {joined.discipler.messageUserId ? <MessageButton bare userId={joined.discipler.messageUserId} className={styles.btn} primary /> : null}
+        {discipler.whatsappUrl ? <a href={discipler.whatsappUrl} target="_blank" rel="noopener noreferrer" className={`${styles.btn} ${styles.whatsapp}`}><MessageCircleIcon className="size-3.5" strokeWidth={2} />WhatsApp</a> : null}
       </div> : null}
     </div>
 
