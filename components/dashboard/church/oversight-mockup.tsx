@@ -70,7 +70,7 @@ function Tabs({ tab, onTab, updates }: { tab: Tab; onTab: (tab: Tab) => void; up
     {tabs.map(([key, label]) => <button key={key} type="button" aria-current={tab === key ? "page" : undefined} onClick={() => onTab(key)}
       className={`inline-flex h-8 min-w-0 items-center justify-center gap-1.5 rounded-[7px] px-1 text-[13px] font-medium transition-colors ${tab === key ? "bg-white text-[var(--color-community-ink)] shadow-[0_1px_2px_rgb(0_0_0/8%)]" : "text-[var(--color-community-muted)]"}`}>
       <span className="truncate">{label}</span>
-      {key === "updates" && updates ? <span className="grid h-[18px] min-w-[18px] place-items-center rounded-full bg-[#f7e4cd] px-1 text-[11px] font-medium text-[#92400e]">{updates}</span> : null}
+      {key === "updates" && updates ? <span className="inline-grid box-border h-[18px] min-w-[18px] shrink-0 place-items-center rounded-full leading-none tabular-nums bg-[#f7e4cd] px-1 text-[11px] font-medium text-[#92400e]">{updates}</span> : null}
     </button>)}
   </nav>;
 }

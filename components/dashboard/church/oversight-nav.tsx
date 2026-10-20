@@ -34,7 +34,7 @@ export function OversightHeader({ sub, counts, structure = true, title = "Oversi
         return <Link key={tab.href} href={tab.href} prefetch scroll={false} aria-current={active ? "page" : undefined}
           className={`inline-flex h-8 min-w-0 items-center justify-center gap-1.5 rounded-[7px] px-1 text-[13px] font-medium no-underline transition-colors ${active ? "bg-white text-[var(--color-community-ink)] shadow-[0_1px_2px_rgb(0_0_0/8%)]" : "text-[var(--color-community-muted)]"}`}>
           <span className="truncate">{tab.label}</span>
-          {count ? <span className="grid h-[18px] min-w-[18px] place-items-center rounded-full bg-[#f7e4cd] px-1 text-[11px] font-semibold text-[#92400e]">{count}</span> : null}
+          {count ? <span className="inline-grid box-border h-[18px] min-w-[18px] shrink-0 place-items-center rounded-full leading-none tabular-nums bg-[#f7e4cd] px-1 text-[11px] font-semibold text-[#92400e]">{count}</span> : null}
         </Link>;
       })}
     </nav>

@@ -151,7 +151,7 @@ export function InboxSwitch() {
       <div className="mx-auto grid w-full max-w-[48rem] grid-cols-2 rounded-[10px] bg-[#eceef2] p-[3px]">
         <Link href={`${BASE}/messages`} aria-current={onMessages ? "page" : undefined} className={`${tab} ${onMessages ? "bg-white text-[var(--color-community-ink)] shadow-[0_1px_2px_rgb(0_0_0/8%)]" : "text-[var(--color-community-muted)]"}`}>
           Messages
-          {unreadMessages > 0 ? <span className="grid h-[18px] min-w-[18px] place-items-center rounded-full bg-[var(--color-community-blue)] px-1 text-[11px] font-semibold text-white">{unreadMessages > 9 ? "9+" : unreadMessages}</span> : null}
+          {unreadMessages > 0 ? <span className="inline-grid box-border h-[18px] min-w-[18px] shrink-0 place-items-center rounded-full leading-none tabular-nums bg-[var(--color-community-blue)] px-1 text-[11px] font-semibold text-white">{unreadMessages > 9 ? "9+" : unreadMessages}</span> : null}
         </Link>
         <Link href={`${BASE}/ask`} aria-current={onAsk ? "page" : undefined} className={`${tab} ${onAsk ? "bg-white text-[var(--color-community-ink)] shadow-[0_1px_2px_rgb(0_0_0/8%)]" : "text-[var(--color-community-muted)]"}`}>
           Ask Pleros
