@@ -131,14 +131,13 @@ function PersonRow({ person, withStatus, onOpen }: { person: Person; withStatus:
   </li>;
 }
 
-/** Where you are when you've opened someone's groups: back one step, and the names on the way. */
+/** Where you are when you've opened someone's groups: back one step, then whose groups these are. */
 function Trail({ trail, onBack }: { trail: Person[]; onBack: () => void }) {
   if (!trail.length) return null;
   const focus = trail[trail.length - 1]!;
   return <div className="grid gap-1">
     <button type="button" className={`${styles.quiet} inline-flex items-center gap-1`} onClick={onBack}><ChevronRightIcon className="size-3.5 rotate-180" strokeWidth={2.2} aria-hidden="true" />{trail.length > 1 ? `Back to ${trail[trail.length - 2]!.name.split(" ")[0]}’s groups` : "Back to your groups"}</button>
     <span className="font-[family-name:var(--font-dashboard-heading)] text-[17px] leading-6 font-medium">{focus.name.split(" ")[0]}’s groups</span>
-    <span className={styles.rowMeta}>You › {trail.map(person => person.name.split(" ")[0]).join(" › ")}</span>
   </div>;
 }
 
