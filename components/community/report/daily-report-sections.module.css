@@ -34,8 +34,9 @@ a.row { padding: 8px 14px; }
 .rowCopy { display: grid; flex: 1; gap: 1px; min-width: 0; }
 .rowTitle { font-size: 13.5px; font-weight: 500; line-height: 19px; }
 .rowDetail { overflow: hidden; font-size: 12px; line-height: 17px; color: var(--color-text-muted); text-overflow: ellipsis; white-space: nowrap; }
-.tick { display: grid; flex: none; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: #eceef2; color: white; }
-.tick[data-on] { background: var(--color-community-blue, #2056d6); }
+/* Empty is a hollow ring (user request, 20 October); done fills in the community blue. */
+.tick { display: grid; flex: none; place-items: center; box-sizing: border-box; width: 22px; height: 22px; border: 1.5px solid #c9ced6; border-radius: 50%; background: transparent; color: white; }
+.tick[data-on] { border-color: var(--color-community-blue, #2056d6); background: var(--color-community-blue, #2056d6); }
 .quick { display: inline-flex; flex: none; align-items: center; gap: 5px; min-height: 32px; padding: 0 12px; border: 1.5px solid var(--color-community-blue, #2056d6); border-radius: 99px; background: white; color: var(--color-community-blue, #2056d6); font: inherit; font-size: 12.5px; font-weight: 500; white-space: nowrap; cursor: pointer; transition: transform 150ms var(--ease-out); }
 .quick:active:not(:disabled) { transform: scale(0.97); }
 .quick:disabled { opacity: .6; cursor: default; }
