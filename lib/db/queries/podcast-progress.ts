@@ -3,6 +3,8 @@ import { and, eq, inArray } from "drizzle-orm";
 import { db } from "@/lib/db";
 
 import * as schema from "../schema";
+import { dedupeEpisodes, normaliseEpisodeText } from "@/lib/podcast-episode-search";
+
 import { sogpLearningSchemaReady } from "./sogp-learning-gate";
 
 function uniqueEpisodeGuids(episodeGuids: string[]) {
@@ -102,15 +104,20 @@ export async function listReportPodcastEpisodes(userId: string): Promise<{ episo
       .from(schema.podcastEpisodeProgress).where(eq(schema.podcastEpisodeProgress.userId, userId)),
   ]);
   const listened = new Map(rows.map(row => [row.guid, row.listenedAt]));
-  const episodes = [...catalogue]
-    .sort((a, b) => a.isoDate.localeCompare(b.isoDate) || (a.episodeNumber ?? 0) - (b.episodeNumber ?? 0))
-    .map(episode => {
-      const at = listened.get(episode.guid);
-      return { guid: episode.guid, title: episode.title, isoDate: episode.isoDate, duration: episode.duration, listenedOn: at ? toLagosDateKey(at) : null };
-    });
+  const ordered = [...catalogue].sort((a, b) => a.isoDate.localeCompare(b.isoDate) || (a.episodeNumber ?? 0) - (b.episodeNumber ?? 0));
+  // A repost of the same title is one row; it carries the earliest listen of any copy.
+  const heardAt = new Map<string, Date>();
+  for (const episode of ordered) {
+    const key = normaliseEpisodeText(episode.title), at = listened.get(episode.guid);
+    if (at && (!heardAt.has(key) || at < heardAt.get(key)!)) heardAt.set(key, at);
+  }
+  const episodes = dedupeEpisodes(ordered).map(episode => {
+    const at = heardAt.get(normaliseEpisodeText(episode.title)) ?? listened.get(episode.guid);
+    return { guid: episode.guid, title: episode.title, isoDate: episode.isoDate, duration: episode.duration, listenedOn: at ? toLagosDateKey(at) : null };
+  });
   // The most recently listened episode, by when it was listened.
   let last = -1, lastAt = 0;
-  episodes.forEach((episode, index) => { const at = listened.get(episode.guid)?.getTime() ?? 0; if (at > lastAt) { lastAt = at; last = index; } });
+  episodes.forEach((episode, index) => { const at = heardAt.get(normaliseEpisodeText(episode.title))?.getTime() ?? 0; if (at > lastAt) { lastAt = at; last = index; } });
   return { episodes, start: Math.max(0, last - 1) };
 }
 

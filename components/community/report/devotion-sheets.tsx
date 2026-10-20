@@ -6,6 +6,7 @@ import { CheckIcon } from "lucide-react";
 
 import { listReportPodcastEpisodesAction, logPlanReadingAction, saveBiblePlanAction, saveTeachingReportAction } from "@/app/(site)/dashboard/community/_actions/report-popup-actions";
 import type { ReportPodcastEpisode } from "@/lib/db/queries/podcast-progress";
+import { normaliseEpisodeText, searchEpisodes } from "@/lib/podcast-episode-search";
 import { BIBLE_BOOKS, getBibleBook } from "@/lib/bible-reading";
 import { BIBLE_DAY_MAX, BIBLE_PLAN_CHOICES, BIBLE_PLAN_MAX, TEACHING_NOTE_MAX, TEACHING_OTHER_MAX, readingEnd, readingLabel, teachingLabel, teachingParts, teachingSource, type BiblePosition, type TeachingParts } from "@/lib/community/report-popups";
 import type { BibleDay, TeachingReport } from "@/lib/db/queries/report-popups";
@@ -161,13 +162,15 @@ function PodcastPicker({ dateKey, picked, onChange, onLoaded }: { dateKey: strin
   }, [dateKey]);
   if (state === "loading") return <p className={styles.hint}>Loading episodes…</p>;
   if (state === "error") return <p className={styles.hint}>Episodes couldn’t load. Your podcast listening still records as you listen.</p>;
-  const search = query.trim().toLowerCase();
+  const search = normaliseEpisodeText(query);
   const [from, to] = range ?? [0, PAGE];
-  const shown = search ? state.episodes.filter(episode => episode.title.toLowerCase().includes(search)).slice(0, 30) : state.episodes.slice(from, to);
+  // Ranked, accent- and punctuation-blind, every word must match (`lib/podcast-episode-search.ts`).
+  const shown = search ? searchEpisodes(state.episodes, query) : state.episodes.slice(from, to);
   const toggle = (guid: string) => { const next = new Set(picked); if (next.has(guid)) next.delete(guid); else next.add(guid); onChange(next); };
   return <div className={styles.field}>
     <span className={styles.label}>Which episodes? <em>{picked.size ? `${picked.size} picked` : "Tap to pick"}</em></span>
-    <input className={styles.input} type="search" value={query} placeholder="Search episodes" onChange={event => setQuery(event.target.value)} />
+    <input className={styles.input} type="search" value={query} placeholder="Search episodes" aria-label="Search episodes" autoComplete="off" enterKeyHint="search" onChange={event => setQuery(event.target.value)} />
+    {search ? <span className={styles.hint} role="status">{shown.length ? `${shown.length === 30 ? "Top 30" : shown.length} ${shown.length === 1 ? "match" : "matches"}` : "No episodes match"}</span> : null}
     <div className={styles.episodes}>
       {!search && from > 0 ? <button type="button" className={styles.more} onClick={() => setRange([Math.max(0, from - PAGE), to])}>Show earlier episodes</button> : null}
       {shown.map(episode => {
@@ -181,7 +184,7 @@ function PodcastPicker({ dateKey, picked, onChange, onLoaded }: { dateKey: strin
           </span>
         </button>;
       })}
-      {!shown.length ? <p className={`${styles.hint} px-3 py-3`}>No episodes match.</p> : null}
+      {!shown.length && !search ? <p className={`${styles.hint} px-3 py-3`}>No episodes yet.</p> : null}
       {!search && to < state.episodes.length ? <button type="button" className={styles.more} onClick={() => setRange([from, to + PAGE])}>Show more episodes</button> : null}
     </div>
   </div>;
