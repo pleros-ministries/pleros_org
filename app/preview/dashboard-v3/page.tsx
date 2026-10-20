@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { dashboardFont as font } from "@/components/dashboard/v3/font";
 import { DashboardBaseline } from "@/components/dashboard/v3/baseline";
 
+// Reads searchParams on every request (Cache Components).
+export const instant = false;
+
 export const metadata: Metadata = { title: "Pleros visual baseline", robots: { index: false, follow: false } };
 export default async function BaselinePage({ searchParams }: { searchParams: Promise<{ role?: string }> }) {
   const query = await searchParams;

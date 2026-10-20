@@ -2,6 +2,9 @@ import { dashboardFont } from "@/components/dashboard/v3/font";
 import styles from "@/components/dashboard/v3/dashboard.module.css";
 import { SavedContactsPreview } from "@/components/community/report/ministry-v3/saved-contacts-preview";
 
+// Reads searchParams on every request (Cache Components).
+export const instant = false;
+
 export const metadata = { title: "Saved contacts visual preview", robots: { index: false, follow: false } };
 
 export default async function ContactsPreviewPage({ searchParams }: { searchParams: Promise<{ screen?: string }> }) {

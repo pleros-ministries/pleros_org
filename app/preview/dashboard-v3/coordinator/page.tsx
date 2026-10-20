@@ -2,6 +2,9 @@ import { dashboardFont } from "@/components/dashboard/v3/font";
 import styles from "@/components/dashboard/v3/dashboard.module.css";
 import { CoordinatorControlCentre, CoordinatorEnrolleeDetails } from "@/components/ppc/sogp-coordinator";
 
+// Reads searchParams on every request (Cache Components).
+export const instant = false;
+
 export const metadata = { title: "Coordinator visual preview", robots: { index: false, follow: false } };
 
 /** Labelled sample data. Actions refuse without an admin session. */

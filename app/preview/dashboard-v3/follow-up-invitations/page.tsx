@@ -3,6 +3,9 @@ import styles from "@/components/dashboard/v3/dashboard.module.css";
 import { ShareReferral } from "@/components/sogp/share-referral";
 import { FollowUpWelcome, InvitationResponse, InviteEnrollee, MyEnrollees, SentInvitationView } from "@/components/sogp/follow-up-invitations";
 
+// Reads searchParams on every request (Cache Components).
+export const instant = false;
+
 export const metadata = { title: "Follow-up and invitations visual preview", robots: { index: false, follow: false } };
 
 const now = new Date().toISOString();

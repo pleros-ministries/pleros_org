@@ -2,6 +2,9 @@ import { dashboardFont } from "@/components/dashboard/v3/font";
 import styles from "@/components/dashboard/v3/dashboard.module.css";
 import { GroupReviewPreview } from "@/components/sogp/group-review-preview";
 
+// Reads searchParams on every request (Cache Components).
+export const instant = false;
+
 export const metadata = { title: "Group reviews visual preview", robots: { index: false, follow: false } };
 
 export default async function ReviewsPreview({ searchParams }: { searchParams: Promise<{ screen?: string }> }) {
