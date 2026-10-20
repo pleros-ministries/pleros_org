@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition, type ReactNode } from "react";
-import { BookOpenIcon, CheckIcon, ChevronRightIcon, HeartHandshakeIcon, PlusIcon, UsersRoundIcon } from "lucide-react";
+import { BookOpenIcon, CheckIcon, ChevronRightIcon, HeartHandshakeIcon, PlusIcon, TargetIcon, UsersRoundIcon } from "lucide-react";
 
 import { clearDailyReportDeclaration, declareDailyReport } from "@/app/(site)/dashboard/community/_actions/daily-report-actions";
 import { logPlanReadingAction } from "@/app/(site)/dashboard/community/_actions/report-popup-actions";
@@ -109,7 +109,7 @@ type Popup = "biblePlan" | "bibleToday" | "prayerWatch" | "teaching" | "evangeli
  * Discipleship is ticked. "Review and submit" confirms devotion and marks any
  * empty section as nothing for the day, in one step.
  */
-export function DailyReportSections({ today, days, selected, activities, edits = {}, pleros, devotion, declarations, meetingDetails, enabled, week = null, inline, contacts = [], units = [], initialMeetings, bibleDay, teaching = null, teachings = [], popupsReady = false }: {
+export function DailyReportSections({ today, days, selected, activities, edits = {}, pleros, devotion, declarations, meetingDetails, enabled, week = null, inline, contacts = [], units = [], initialMeetings, bibleDay, teaching = null, teachings = [], popupsReady = false, assignment }: {
   today: string; days: string[]; selected: string; activities: MemberActivity[]; pleros: ActivityLine[];
   /** Saved evangelism and discipleship reports that reopen in their pop-up, by activity id. */
   edits?: Record<number, MinistryEdit>;
@@ -131,6 +131,8 @@ export function DailyReportSections({ today, days, selected, activities, edits =
   teachings?: string[];
   /** Migration 0068 is applied: plans and Teaching notes can be saved. */
   popupsReady?: boolean;
+  /** The day's natural assignment (migration 0073), for the Other reports card; undefined hides it. */
+  assignment?: { goals: number; todos: number; done: number };
 }) {
   const { run, pending, error } = useReportAction();
   const router = useRouter();
@@ -283,6 +285,17 @@ export function DailyReportSections({ today, days, selected, activities, edits =
         ? <Row title={meetings.length ? "Add another meeting" : "Add a meeting"} detail="Teaching, prayer or other" onOpen={() => setPopup("meeting")} end={<AddLabel />} />
         : <Row title="Log a meeting" detail="Teaching, prayer or other" href={`${addHref}&category=meetings`} end={<AddLabel />} /> : null}
     </Card>
+
+    {/* Other reports (Pastor, 20 October): optional, never part of the daily report. */}
+    {assignment ? <section className={styles.card} aria-label="Other reports">
+      <div className={styles.cardHead}>
+        <span className={styles.icon} style={{ background: "#e4ebfd", color: "#2331ae" }} aria-hidden="true"><TargetIcon className="size-4" strokeWidth={2} /></span>
+        <h2 className={styles.title}>Other reports</h2>
+        <Pill tone="nil">Optional</Pill>
+      </div>
+      <Row title="Natural assignment" href={`/dashboard/community/report/assignment${selected === today ? "" : `?day=${selected}`}`}
+        detail={assignment.goals ? `${assignment.goals === 1 ? "1 goal" : `${assignment.goals} goals`} · ${assignment.done} of ${assignment.todos} to-dos done` : "Your goals, to-dos and deadlines for the day"} />
+    </section> : null}
 
     {writable ? <p className={styles.meta}>You can report for today and the past 7 days. We’ll remind you at 8 pm if anything’s missing.</p> : null}
 

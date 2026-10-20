@@ -23,6 +23,7 @@ import { getOwnMinistryReportV3 } from "@/lib/db/queries/ministry-report-v3";
 import { ministryEdit, type MinistryEdit } from "@/lib/community/report-popups";
 import type { MemberActivity } from "@/lib/db/queries/ministry-activities";
 import { listPrayerOtherTimes } from "@/lib/db/queries/prayer-watch";
+import { getNaturalAssignmentSummary } from "@/lib/db/queries/natural-assignment";
 
 // Reads the session on every request (Cache Components).
 export const instant = false;
@@ -63,7 +64,7 @@ export default async function MinistryReportRoute({
   const unitsRead = inline ? listMeetingUnits(ctx.userId).catch(() => []) : Promise.resolve([]);
   const plerosRead = getDayActivity(ctx.userId, selected);
   const activitiesRead = listActivitiesForDay(ctx.userId, selected);
-  const [activities, edits, pleros, declarations, meetingDetails, sharedDetails, week, contacts, units, initialMeetings, popupsReady, bibleDay, teaching, teachings, prayerTimes] = await Promise.all([
+  const [activities, edits, pleros, declarations, meetingDetails, sharedDetails, week, contacts, units, initialMeetings, popupsReady, bibleDay, teaching, teachings, prayerTimes, assignment] = await Promise.all([
     activitiesRead,
     inline ? activitiesRead.then(list => loadMinistryEdits(ctx.userId, list)).catch((): Record<number, MinistryEdit> => ({})) : Promise.resolve<Record<number, MinistryEdit>>({}),
     plerosRead,
@@ -81,6 +82,8 @@ export default async function MinistryReportRoute({
     inline ? listRecentTeachingTitles(ctx.userId, selected).catch(() => []) : Promise.resolve([]),
     // Times prayed under Another time (migration 0071).
     listPrayerOtherTimes(ctx.userId, selected).catch(() => [] as string[]),
+    // Natural assignment under Other reports (migration 0073).
+    getNaturalAssignmentSummary(ctx.userId, selected).catch(() => undefined),
   ]);
 
   return (
@@ -104,6 +107,7 @@ export default async function MinistryReportRoute({
       bibleDay={bibleDay}
       teaching={teaching}
       teachings={teachings}
+      assignment={assignment}
     />
   );
 }

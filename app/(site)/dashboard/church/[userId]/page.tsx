@@ -6,7 +6,9 @@ import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { getChurchReport } from "@/lib/db/queries/church-reports";
+import { getNaturalAssignment } from "@/lib/db/queries/natural-assignment";
 import { requireReportAccess } from "@/lib/db/queries/oversight-tree";
+import { NaturalAssignmentSummary } from "@/components/community/report/natural-assignment";
 import { CommunityError } from "@/lib/community/errors";
 import { isDateKey, MINISTRY_FIELDS } from "@/lib/community/ministry-report";
 import { activityKindLabel } from "@/lib/community/ministry-activities";
@@ -30,7 +32,7 @@ export default async function ChurchReportPage({ params, searchParams }: { param
   const { userId } = await params; const today = lagosToday(); const { day } = await searchParams;
   const selected = isDateKey(day) && day <= today ? day : today;
   try { await requireReportAccess(session.user.id, userId); } catch (error) { if (error instanceof CommunityError) notFound(); throw error; }
-  const [[person], report] = await Promise.all([db.select({ name: users.name }).from(users).where(eq(users.id, userId)).limit(1), getChurchReport(session.user.id, userId, selected)]);
+  const [[person], report, assignment] = await Promise.all([db.select({ name: users.name }).from(users).where(eq(users.id, userId)).limit(1), getChurchReport(session.user.id, userId, selected), getNaturalAssignment(userId, selected)]);
   if (!person) notFound();
   return <ChurchPage>
     <ChurchHeading title={person.name} sub={`${selected === today ? "Today · " : ""}${dateKeyLabel(selected)}`} />
@@ -57,6 +59,11 @@ export default async function ChurchReportPage({ params, searchParams }: { param
         {row.meeting?.taught ? <p className={forms.taught}>{row.meeting.taught}</p> : null}
       </article>;
     }) : <p className={`${styles.panel} ${styles.empty}`}>No activities recorded.</p>}
+    {/* Natural assignment (optional, Pastor 20 October): the overseer reads it beside the daily report. */}
+    {assignment?.goals.length ? <>
+      <div className={styles.sectionTitle}><h2>Natural assignment</h2><span className={styles.rowMeta}>Optional</span></div>
+      <NaturalAssignmentSummary day={assignment} />
+    </> : null}
     <ChurchReminderButton subjectId={userId} day={selected} enabled={reportRemindersEnabled()} />
   </ChurchPage>;
 }

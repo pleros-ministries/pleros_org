@@ -85,7 +85,7 @@ const DASHBOARD_FOCUS: Array<[RegExp, (match: RegExpMatchArray) => DashboardFocu
   [/^\/dashboard\/community\/contacts\/(\d+)\/invite$/, m => ({ title: "Share group invitation", back: { href: `/dashboard/community/contacts/${m[1]}`, label: "Back to contact" } })],
   [/^\/dashboard\/community\/contacts\/(new|\d+)$/, m => ({ title: m[1] === "new" ? "Add contact" : "Contact details", back: { href: "/dashboard/community/contacts", label: "Back to saved contacts" } })],
   [/^\/dashboard\/community\/contacts$/, () => ({ title: "Saved contacts", back: GROUPS })],
-  [/^\/dashboard\/community\/report\/(history|new|\d+)$/, m => ({ title: m[1] === "history" ? "Report history" : m[1] === "new" ? "New report" : "Edit activity", back: REPORTS })],
+  [/^\/dashboard\/community\/report\/(history|new|assignment|\d+)$/, m => ({ title: m[1] === "history" ? "Report history" : m[1] === "new" ? "New report" : m[1] === "assignment" ? "Natural assignment" : "Edit activity", back: REPORTS })],
   [/^\/dashboard\/community\/report\/.+$/, () => ({ title: "My reports", back: REPORTS })],
   // Community deep screens. Groups left the bottom bar (18 October), so it steps back to Community.
   [/^\/dashboard\/community\/groups$/, () => ({ title: "Groups", back: COMMUNITY })],
