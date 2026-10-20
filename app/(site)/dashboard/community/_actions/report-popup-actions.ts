@@ -5,7 +5,9 @@ import { revalidatePath } from "next/cache";
 import { getCommunityContext } from "@/lib/community/context";
 import { CommunityError } from "@/lib/community/errors";
 import { canAccessReporting } from "@/lib/community/reporting-access";
+import { listReportPodcastEpisodes, setReportPodcastEpisodes } from "@/lib/db/queries/podcast-progress";
 import { logPlanReading, saveBiblePlan, saveTeachingReport } from "@/lib/db/queries/report-popups";
+import { writableReportDate } from "@/lib/db/queries/reporting-v3-store";
 
 /** Bible plan and Teaching writes from the report pop-ups; subject is always the signed-in member. */
 async function run<T>(fn: (userId: string) => Promise<T>) {
@@ -28,6 +30,23 @@ export async function saveBiblePlanAction(input: { dateKey: string; chaptersPerD
 export async function logPlanReadingAction(input: { dateKey: string; chapters?: number }) {
   return run(userId => logPlanReading(userId, input));
 }
-export async function saveTeachingReportAction(input: { dateKey: string; source: string; otherTitle?: string | null; note: string }) {
-  return run(userId => saveTeachingReport(userId, input));
+export async function saveTeachingReportAction(input: { dateKey: string; source: string; otherTitle?: string | null; note: string;
+  /** Podcast episodes picked or unpicked for this day (Pastor, 20 October). */
+  podcast?: { add: string[]; remove: string[] } }) {
+  return run(async userId => {
+    await saveTeachingReport(userId, input);
+    if (input.podcast) await setReportPodcastEpisodes(userId, writableReportDate(input.dateKey), input.podcast);
+  });
+}
+
+/** The podcast episodes to pick from in Teaching, in release order, opening near the last one listened. */
+export async function listReportPodcastEpisodesAction() {
+  try {
+    const ctx = await getCommunityContext();
+    if (!ctx || !await canAccessReporting(ctx)) throw new CommunityError("You do not have access to reporting.");
+    return { ok: true as const, value: await listReportPodcastEpisodes(ctx.userId) };
+  } catch (error) {
+    if (error instanceof CommunityError) return { ok: false as const, error: error.message };
+    throw error;
+  }
 }

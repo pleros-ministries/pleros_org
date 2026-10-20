@@ -99,3 +99,13 @@
 :is(.primary, .chip, .plan, .kind):active:not(:disabled) { transform: scale(0.97); }
 .primary:disabled, .quiet:disabled { opacity: .6; cursor: default; }
 .srOnly { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* Teaching's podcast episode picker (Pastor, 20 October): release order, opening near the last episode listened. */
+.episodes { overflow: hidden; border: 1px solid var(--color-line); border-radius: 12px; }
+.episode { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 48px; padding: 7px 12px; border: 0; background: white; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.episode + .episode { border-top: 1px solid var(--color-line); }
+.episode:disabled { cursor: default; }
+.episode:disabled .lineTitle { color: var(--color-text-muted); }
+.episode .tick[data-past] { background: #c9ced6; }
+.more { display: block; width: 100%; padding: 9px 12px; border: 0; border-top: 1px solid var(--color-line); background: #fafbfc; color: var(--color-community-blue, #2056d6); font: inherit; font-size: 12.5px; font-weight: 500; cursor: pointer; }
+.more:first-child { border-top: 0; border-bottom: 1px solid var(--color-line); }

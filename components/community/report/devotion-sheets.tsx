@@ -1,10 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { CheckIcon } from "lucide-react";
 
-import { logPlanReadingAction, saveBiblePlanAction, saveTeachingReportAction } from "@/app/(site)/dashboard/community/_actions/report-popup-actions";
+import { listReportPodcastEpisodesAction, logPlanReadingAction, saveBiblePlanAction, saveTeachingReportAction } from "@/app/(site)/dashboard/community/_actions/report-popup-actions";
+import type { ReportPodcastEpisode } from "@/lib/db/queries/podcast-progress";
 import { BIBLE_BOOKS, getBibleBook } from "@/lib/bible-reading";
 import { BIBLE_DAY_MAX, BIBLE_PLAN_CHOICES, BIBLE_PLAN_MAX, TEACHING_NOTE_MAX, TEACHING_OTHER_MAX, readingEnd, readingLabel, teachingLabel, teachingParts, teachingSource, type BiblePosition, type TeachingParts } from "@/lib/community/report-popups";
 import type { BibleDay, TeachingReport } from "@/lib/db/queries/report-popups";
@@ -133,6 +134,59 @@ export function PrayerWatchSheet({ dateKey, attended, times, onClose, onChange }
 }
 
 /** Teaching (Pastor: a general Teaching report, SOGP, podcast or both, with optional extra details). */
+const PAGE = 8;
+const dayLabel = (dateKey: string) => new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(`${dateKey}T00:00:00Z`));
+
+/**
+ * Pick the day's podcast episodes (Pastor, 20 October): every episode in
+ * release order, opening just before the last one listened, with a search.
+ * Episodes listened on another day stay on that day.
+ */
+function PodcastPicker({ dateKey, picked, onChange, onLoaded }: { dateKey: string; picked: Set<string>; onChange: (next: Set<string>) => void; onLoaded: (initial: Set<string>) => void }) {
+  const [state, setState] = useState<{ episodes: ReportPodcastEpisode[]; start: number } | "loading" | "error">("loading");
+  const [range, setRange] = useState<[number, number] | null>(null);
+  const [query, setQuery] = useState("");
+  useEffect(() => {
+    let live = true;
+    listReportPodcastEpisodesAction().then(result => {
+      if (!live) return;
+      if (!result.ok) { setState("error"); return; }
+      setState(result.value);
+      setRange([result.value.start, result.value.start + PAGE]);
+      onLoaded(new Set(result.value.episodes.filter(episode => episode.listenedOn === dateKey).map(episode => episode.guid)));
+    }).catch(() => { if (live) setState("error"); });
+    return () => { live = false; };
+    // Loads once per open; the parent keeps the picks.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dateKey]);
+  if (state === "loading") return <p className={styles.hint}>Loading episodes…</p>;
+  if (state === "error") return <p className={styles.hint}>Episodes couldn’t load. Your podcast listening still records as you listen.</p>;
+  const search = query.trim().toLowerCase();
+  const [from, to] = range ?? [0, PAGE];
+  const shown = search ? state.episodes.filter(episode => episode.title.toLowerCase().includes(search)).slice(0, 30) : state.episodes.slice(from, to);
+  const toggle = (guid: string) => { const next = new Set(picked); if (next.has(guid)) next.delete(guid); else next.add(guid); onChange(next); };
+  return <div className={styles.field}>
+    <span className={styles.label}>Which episodes? <em>{picked.size ? `${picked.size} picked` : "Tap to pick"}</em></span>
+    <input className={styles.input} type="search" value={query} placeholder="Search episodes" onChange={event => setQuery(event.target.value)} />
+    <div className={styles.episodes}>
+      {!search && from > 0 ? <button type="button" className={styles.more} onClick={() => setRange([Math.max(0, from - PAGE), to])}>Show earlier episodes</button> : null}
+      {shown.map(episode => {
+        const elsewhere = episode.listenedOn !== null && episode.listenedOn !== dateKey && !picked.has(episode.guid);
+        const on = picked.has(episode.guid);
+        return <button key={episode.guid} type="button" className={styles.episode} aria-pressed={on} disabled={elsewhere} onClick={() => toggle(episode.guid)}>
+          <span className={styles.tick} data-on={on ? "" : undefined} data-past={elsewhere ? "" : undefined} aria-hidden="true">{on || elsewhere ? <CheckIcon className="size-3" strokeWidth={3} /> : null}</span>
+          <span className={styles.lineCopy}>
+            <span className={styles.lineTitle}>{episode.title}</span>
+            <span className={styles.lineMeta}>{elsewhere ? `Listened ${dayLabel(episode.listenedOn!)}` : [episode.duration, episode.isoDate ? `Released ${dayLabel(episode.isoDate.slice(0, 10))}` : null].filter(Boolean).join(" · ")}</span>
+          </span>
+        </button>;
+      })}
+      {!shown.length ? <p className={`${styles.hint} px-3 py-3`}>No episodes match.</p> : null}
+      {!search && to < state.episodes.length ? <button type="button" className={styles.more} onClick={() => setRange([from, to + PAGE])}>Show more episodes</button> : null}
+    </div>
+  </div>;
+}
+
 export function TeachingSheet({ dateKey, sogp, podcast, report, available, onClose, onOptimistic }: {
   /** Optimistic (user request, 20 October): the row shows the teaching at once and the sheet closes. */
   onOptimistic?: OptimisticSave;
@@ -149,12 +203,21 @@ export function TeachingSheet({ dateKey, sogp, podcast, report, available, onClo
   const [note, setNote] = useState(report?.note ?? "");
   const lines = [
     parts.sogp ? { key: "sogp", title: "SOGP", detail: sogp } : null,
-    parts.podcast ? { key: "podcast", title: "Podcast", detail: podcast } : null,
+    // With episodes to pick, the picker below shows the podcast instead.
+    parts.podcast && !available ? { key: "podcast", title: "Podcast", detail: podcast } : null,
   ].filter(line => line !== null);
   const toggle = (key: keyof TeachingParts) => setParts(current => ({ ...current, [key]: !current[key] }));
   const other = parts.other ? otherTitle.trim() : "";
   const ready = (parts.sogp || parts.podcast || parts.other) && (!parts.other || Boolean(other));
-  const input = () => ({ dateKey, source: teachingSource(parts), otherTitle: other || null, note });
+  // Podcast episodes picked for this day; `initialPicks` is what was already recorded on it.
+  const [picks, setPicks] = useState<Set<string>>(new Set());
+  const [initialPicks, setInitialPicks] = useState<Set<string> | null>(null);
+  const podcastChange = () => {
+    // Unticking Podcast never erases real listening; only the picker changes episodes.
+    if (!initialPicks || !parts.podcast) return undefined;
+    return { add: [...picks].filter(guid => !initialPicks.has(guid)), remove: [...initialPicks].filter(guid => !picks.has(guid)) };
+  };
+  const input = () => ({ dateKey, source: teachingSource(parts), otherTitle: other || null, note, podcast: podcastChange() });
 
   return <ReportSheet title="Teaching" subtitle="What did you learn from today?" onClose={onClose}
     footer={available ? close => <button type="button" className={styles.primary} disabled={pending || !ready} onClick={() => {
@@ -177,6 +240,7 @@ export function TeachingSheet({ dateKey, sogp, podcast, report, available, onClo
           <span className={styles.lineCopy}><span className={styles.lineTitle}>{line.title}</span><span className={styles.lineMeta}>{line.detail ? `${line.detail} · recorded as you ${line.key === "sogp" ? "learned" : "listened"}` : `Nothing recorded yet. It fills in as you ${line.key === "sogp" ? "learn" : "listen"}.`}</span></span>
         </div>)}
       </div> : null}
+      {parts.podcast && available ? <PodcastPicker dateKey={dateKey} picked={picks} onChange={setPicks} onLoaded={initial => { setInitialPicks(initial); setPicks(new Set(initial)); }} /> : null}
       {parts.other && available ? <label className={styles.field}>
         <span className={styles.label}>What was the other teaching?</span>
         <input className={styles.input} maxLength={TEACHING_OTHER_MAX} value={otherTitle} placeholder="e.g. Sunday service, a sermon on YouTube" onChange={event => setOtherTitle(event.target.value)} />
