@@ -29,6 +29,8 @@ export default async function DiscipleshipGroupRoute({ params, searchParams }: {
   const [{ groupId: rawId }, { tab, panel }] = await Promise.all([params, searchParams]);
   if (!/^\d{1,9}$/.test(rawId)) notFound();
   const groupId = Number(rawId);
+  // Old "+ New group" links opened the form here; it has its own page now.
+  if (panel === "create") redirect("/dashboard/community/groups/new");
 
   const [session, ctx] = await Promise.all([getAppSession(), getCommunityContext()]);
   if (!session) redirect(`/login?returnTo=/dashboard/community/discipleship/${groupId}`);
@@ -65,7 +67,7 @@ export default async function DiscipleshipGroupRoute({ params, searchParams }: {
       episodeQuestions={episodeQuestions}
       colourway={led.findIndex(group => group.groupId === groupId) % 2 === 1 ? "slate" : undefined}
       initialTab={TABS.includes(tab as LeaderTab) ? tab as LeaderTab : "disciples"}
-      initialPanel={panel === "create" || panel === "invite" ? panel : null}
+      initialPanel={panel === "invite" ? panel : null}
       discussion={discussion}
     />
   </SogpQueryProvider>;

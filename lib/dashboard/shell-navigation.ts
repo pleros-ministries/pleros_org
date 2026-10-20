@@ -89,6 +89,7 @@ const DASHBOARD_FOCUS: Array<[RegExp, (match: RegExpMatchArray) => DashboardFocu
   [/^\/dashboard\/community\/report\/.+$/, () => ({ title: "My reports", back: REPORTS })],
   // Community deep screens. Groups left the bottom bar (18 October), so it steps back to Community.
   [/^\/dashboard\/community\/groups$/, () => ({ title: "Groups", back: COMMUNITY })],
+  [/^\/dashboard\/community\/groups\/new$/, () => ({ title: "New group", back: GROUPS })],
   [/^\/dashboard\/community\/discipleship\/(\d+)\/disciples\/\d+$/, m => ({ title: "Disciple", back: { href: `/dashboard/community/discipleship/${m[1]}`, label: "Back to group" } })],
   [/^\/dashboard\/community\/(unit\/\d+|groups\/\d+|discipleship\/\d+|discipleship)$/, () => ({ title: "Group", back: GROUPS })],
   [/^\/dashboard\/community\/post\/\d+$/, () => ({ title: "Post", back: { href: "/dashboard/community/feed", label: "Back to Feed" } })],

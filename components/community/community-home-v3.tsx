@@ -49,8 +49,7 @@ function OversightRow({ href, title, description, icon, tone, prefetch }: { href
  * interest groups stay as they are.
  */
 function OversightGroups({ data }: { data: CommunityHomeData }) {
-  const firstLed = data.ledGroups[0];
-  const newGroupHref = firstLed ? `/dashboard/community/discipleship/${firstLed.groupId}?panel=create` : "/dashboard/sogp/discipleship";
+  const newGroupHref = data.ledGroups.length ? "/dashboard/community/groups/new" : "/dashboard/sogp/discipleship";
   return <>
     {data.joinedGroup || data.locationGroup ? <section className={styles.block} aria-labelledby="community-your-group">
       <div className={styles.blockHeading}><h2 id="community-your-group">Groups you’re under</h2><Link href="/dashboard/community/groups">See all</Link></div>

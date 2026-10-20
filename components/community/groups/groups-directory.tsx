@@ -42,9 +42,8 @@ export function GroupsDirectory({
   people?: PeopleToBringIn | null;
 }) {
   const mine = groups.filter(group => group.viewerStatus === "active");
-  // New groups are oversight groups, created from a group page's form.
-  const firstLed = discipleship?.leading[0];
-  const newGroupHref = firstLed ? `/dashboard/community/discipleship/${firstLed.groupId}?panel=create` : "/dashboard/sogp/discipleship";
+  // New groups are oversight groups, created on their own page.
+  const newGroupHref = discipleship?.leading.length ? "/dashboard/community/groups/new" : "/dashboard/sogp/discipleship";
 
   // Under: the group whose leader oversees you, your location group, groups you're simply a member of.
   const under = [

@@ -7,7 +7,6 @@ import { CalendarCheckIcon, ChevronRightIcon, LinkIcon, PencilIcon, PlusIcon, Us
 
 import {
   closeDiscipleshipGroupAction,
-  createDiscipleshipGroupAction,
   regenerateInviteLinkAction,
   renameDiscipleshipGroupAction,
 } from "@/app/(site)/dashboard/sogp/discipleship/_actions";
@@ -54,8 +53,8 @@ export function LeaderGroupView({ data, episodeQuestions, colourway, initialTab,
   episodeQuestions: LeaderEpisodeQuestion[];
   colourway?: "slate";
   initialTab: LeaderTab;
-  /** Opens a panel on arrival, e.g. "+ New group" on Community Home. */
-  initialPanel?: "invite" | "create" | null;
+  /** Opens the invite panel on arrival. */
+  initialPanel?: "invite" | null;
   /** Groups as oversight: leaders also add people by name. */
   addByName?: boolean;
   discussion: { viewerName: string; postingBlocked: boolean; initialPosts?: FeedPost[]; initialNextOffset?: number | null };
@@ -66,7 +65,7 @@ export function LeaderGroupView({ data, episodeQuestions, colourway, initialTab,
   const disciples = [...group.disciples].sort(byNeed);
   const hasDisciples = disciples.length > 0;
   // An empty group already shows the invite panel in place, so don't open a second one.
-  const [panel, setPanel] = useState<"invite" | "rename" | "create" | null>(initialPanel === "invite" && !hasDisciples ? null : initialPanel);
+  const [panel, setPanel] = useState<"invite" | "rename" | null>(initialPanel === "invite" && !hasDisciples ? null : initialPanel);
   const tabs: Array<{ key: LeaderTab; label: string; count?: number }> = [
     { key: "disciples", label: "Members", count: disciples.length },
     ...(hasDisciples && !paused ? [
@@ -87,7 +86,7 @@ export function LeaderGroupView({ data, episodeQuestions, colourway, initialTab,
       if (window.confirm("Create a new invite link for this group? Its old link will stop working.")) regenerate.run(() => regenerateInviteLinkAction({ groupId: group.id }));
     } },
     { key: "reviews", label: "Weekly group reviews", icon: CalendarCheckIcon, onSelect: () => router.push(`/dashboard/sogp/reviews?group=${group.id}`) },
-    ...(data.createGroupBlock ? [] : [{ key: "create", label: "New group", icon: PlusIcon, onSelect: () => setPanel("create") }]),
+    ...(data.createGroupBlock ? [] : [{ key: "create", label: "New group", icon: PlusIcon, onSelect: () => router.push("/dashboard/community/groups/new") }]),
     ...(canClose ? [{ key: "close", label: "Close group", icon: XCircleIcon, danger: true, onSelect: () => {
       // Closing ends oversight for everyone in it; whoever they lead stays with them.
       const released = hasDisciples ? `. Its ${disciples.length === 1 ? "1 person" : `${disciples.length} people`} will leave the group and no longer have you looking after them; the people they lead stay with them` : "";
@@ -120,7 +119,6 @@ export function LeaderGroupView({ data, episodeQuestions, colourway, initialTab,
     {paused ? <p className={`${styles.panel} ${styles.empty}`}>This group has been paused by the Pleros team. Contact support if you think this is a mistake.</p> : null}
     {panel === "invite" ? <InvitePanel group={group} leaderFirstName={data.viewer.firstName} empty={false} addByName={addByName} /> : null}
     {panel === "rename" ? <RenameForm group={group} onDone={() => setPanel(null)} /> : null}
-    {panel === "create" ? <CreateForm onCancel={() => setPanel(null)} onCreated={id => router.push(groupPath(id))} /> : null}
 
     {tabs.length > 1 ? <GroupTabs tabs={tabs} value={tab} onChange={setTab} /> : null}
 
@@ -181,29 +179,6 @@ function RenameForm({ group, onDone }: { group: { id: number; name: string }; on
     <div className={styles.formActions}>
       <button type="button" className={styles.btn} onClick={onDone}>Cancel</button>
       <button type="submit" className={styles.btn} data-primary disabled={pending || !name.trim()}>Save name</button>
-    </div>
-  </form>;
-}
-
-function CreateForm({ onCancel, onCreated }: { onCancel: () => void; onCreated: (groupId: number) => void }) {
-  const [name, setName] = useState("");
-  const { pending, error, run } = useDiscipleshipAction(false);
-  return <form className={`${styles.panel} ${styles.form}`} onSubmit={event => {
-    event.preventDefault();
-    let createdId: number | undefined;
-    run(async () => {
-      const result = await createDiscipleshipGroupAction({ name });
-      if (result.ok) createdId = result.groupId;
-      return result;
-    }, () => { if (createdId) onCreated(createdId); });
-  }}>
-    <label htmlFor="new-discipleship-group">Name your new group</label>
-    <input id="new-discipleship-group" type="text" value={name} maxLength={DISCIPLESHIP_GROUP_NAME_MAX} onChange={event => setName(event.target.value)} placeholder="For example, Family or Campus fellowship" />
-    <p className={styles.note} style={{ margin: 0 }}>Each group has its own invite link.</p>
-    {error ? <p role="alert" className={styles.error}>{error}</p> : null}
-    <div className={styles.formActions}>
-      <button type="button" className={styles.btn} onClick={onCancel}>Cancel</button>
-      <button type="submit" className={styles.btn} data-primary disabled={pending || !name.trim()}>Create group</button>
     </div>
   </form>;
 }
