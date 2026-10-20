@@ -185,18 +185,23 @@ function Updates({ done, onDone }: { done: Set<string>; onDone: (id: string) => 
     {rows.length ? <div className={styles.panel}><ul className={styles.list}>{rows.map(update => {
       const [icon, bg, ink] = UPDATE_ICON[update.kind];
       const isDone = done.has(update.id);
-      return <li key={update.id}><div className={`${styles.row} items-start`}>
-        <span className="grid size-9 shrink-0 place-items-center rounded-[10px]" style={{ background: bg, color: ink }} aria-hidden="true">{icon}</span>
-        <span className={`${styles.rowCopy} gap-0.5`}>
-          <span className={styles.rowTitle} style={{ whiteSpace: "normal" }}>{update.title}</span>
-          <span className={styles.rowMeta} style={{ whiteSpace: "normal" }}>{update.detail} · {update.at}</span>
+      // Room to breathe (user feedback, 20 October): the title on its own line, details under it, actions last.
+      return <li key={update.id}><div className={styles.row} style={{ alignItems: "flex-start", gap: 14, padding: "16px 14px" }}>
+        <span className="grid size-10 shrink-0 place-items-center self-start rounded-[11px]" style={{ background: bg, color: ink, marginTop: -2 }} aria-hidden="true">{icon}</span>
+        <span className={`${styles.rowCopy} gap-1`}>
+          <span className={styles.rowTitle} style={{ whiteSpace: "normal", fontSize: 14, lineHeight: "20px" }}>{update.title}</span>
+          <span className={styles.rowMeta} style={{ whiteSpace: "normal", lineHeight: "18px" }}>{update.detail} · {update.at}</span>
+          {/* Actions under the text, so the update reads in full on a phone. */}
+          {isDone
+            ? <span className={`${styles.pill} mt-2 justify-self-start`} data-tone="ok">Done</span>
+            : <span className="mt-3 flex gap-2">
+              <button type="button" className={`${styles.btn} ${styles.mini}`}>Open<ChevronRightIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" /></button>
+              <button type="button" className={`${styles.btn} ${styles.mini}`} data-primary="" onClick={() => onDone(update.id)} aria-label={`Mark done: ${update.title}`}><CheckIcon className="size-3.5" strokeWidth={2.4} aria-hidden="true" />Done</button>
+            </span>}
         </span>
-        {isDone
-          ? <span className={styles.pill} data-tone="ok">Done</span>
-          : <span className="flex shrink-0 gap-1.5"><button type="button" className={`${styles.btn} ${styles.mini}`}>Open<ChevronRightIcon className="size-3.5" strokeWidth={2.2} /></button><button type="button" className={`${styles.btn} ${styles.mini}`} data-primary="" onClick={() => onDone(update.id)} aria-label={`Mark done: ${update.title}`}><CheckIcon className="size-3.5" strokeWidth={2.4} /></button></span>}
       </div></li>;
     })}</ul></div> : <p className={`${styles.panel} ${styles.empty}`}>{view === "todo" ? "You’re all caught up." : "Nothing ticked off yet."}</p>}
-    <p className={styles.note}>Oldest first, so you can work through them in order. Tick one when you’ve dealt with it.</p>
+    <p className={styles.note}>Oldest first, so you can work through them in order. Tap Done when you’ve dealt with one; it moves to Done.</p>
   </>;
 }
 
