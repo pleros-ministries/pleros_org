@@ -5,6 +5,9 @@ import type { DashboardHomeData } from "@/lib/dashboard/home";
 
 export const metadata = { title: "You home visual preview", robots: { index: false, follow: false } };
 
+// Reads searchParams on every request (Cache Components).
+export const instant = false;
+
 const reports: DashboardHomeData["reports"] = [
   { category: "devotional", title: "Devotional", description: "3 activities logged", status: "Not confirmed", tone: "amber" },
   { category: "ministry", title: "Ministry", description: "No report submitted", status: "Not reported", tone: "neutral" },
