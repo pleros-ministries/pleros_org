@@ -9,20 +9,23 @@ export function MessageButton({
   userId,
   label = "Message",
   className = "",
+  bare = false,
 }: {
   userId: string;
   label?: string;
   className?: string;
+  /** Only `className` styles the button, so it can match the buttons beside it. */
+  bare?: boolean;
 }) {
   const { open, pending, error } = useOpenConversation();
 
   return (
-    <span className="inline-flex flex-col items-end gap-0.5">
+    <span className={bare ? "grid gap-0.5" : "inline-flex flex-col items-end gap-0.5"}>
       <button
         type="button"
         disabled={pending}
         onClick={() => open(userId)}
-        className={`inline-flex min-h-9 items-center gap-1.5 rounded-full border border-[var(--color-community-edge)] bg-white px-4 text-[14px] font-medium text-[var(--color-community-blue)] transition-colors disabled:opacity-60 ${className}`}
+        className={bare ? className : `inline-flex min-h-9 items-center gap-1.5 rounded-full border border-[var(--color-community-edge)] bg-white px-4 text-[14px] font-medium text-[var(--color-community-blue)] transition-colors disabled:opacity-60 ${className}`}
       >
         <MessageCircleIcon className="size-3.5" strokeWidth={2} />
         {pending ? "Opening…" : label}

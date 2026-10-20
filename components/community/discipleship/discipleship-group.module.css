@@ -126,3 +126,6 @@ a.row:hover { background: var(--color-community-canvas); }
 .search { display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; border: 1px solid var(--dashboard-panel-edge, #e2e5ea); border-radius: 10px; background: white; color: var(--color-community-muted); }
 .search input { flex: 1; min-width: 0; height: 38px; border: 0; background: transparent; font-size: 16px; color: var(--color-community-ink); outline: none; }
 .personLink { display: flex; flex: 1; align-items: center; gap: 12px; min-width: 0; color: inherit; }
+.leaderActions { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 8px; padding: 0 14px 14px; }
+.leaderActions > * { justify-content: center; }
+.leaderActions .btn { height: 38px; font-size: 13px; }

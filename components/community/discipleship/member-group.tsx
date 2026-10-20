@@ -53,12 +53,15 @@ export function MemberGroupView({ joined, discipler, ownEpisodeQuestions, discus
     <GroupHero art="discipleship" tag="Your group" title={joined.groupName} meta={`Led by ${lead} · you joined ${joined.joinedMonth}`} />
 
     <div className={styles.panel}>
+      {/* Room to breathe (user feedback, 20 October): the name in full, the two ways to reach them underneath. */}
       <div className={styles.leader}>
         <Initials name={discipler.leaderName} />
-        <span className={styles.rowCopy}><span className={styles.rowTitle} style={{ fontWeight: 500 }}>{lead}</span><span className={styles.rowMeta}>Your discipler</span></span>
-        {discipler.whatsappUrl ? <a href={discipler.whatsappUrl} target="_blank" rel="noopener noreferrer" className={`${styles.btn} ${styles.mini}`}><MessageCircleIcon className="size-3.5" strokeWidth={2} />WhatsApp</a> : null}
-        {joined.discipler.messageUserId ? <MessageButton userId={joined.discipler.messageUserId} /> : null}
+        <span className={styles.rowCopy}><span className={styles.rowTitle} style={{ fontWeight: 500, whiteSpace: "normal" }}>{discipler.leaderName}</span><span className={styles.rowMeta}>Leads your group</span></span>
       </div>
+      {discipler.whatsappUrl || joined.discipler.messageUserId ? <div className={styles.leaderActions}>
+        {discipler.whatsappUrl ? <a href={discipler.whatsappUrl} target="_blank" rel="noopener noreferrer" className={styles.btn}><MessageCircleIcon className="size-3.5" strokeWidth={2} />WhatsApp</a> : null}
+        {joined.discipler.messageUserId ? <MessageButton bare userId={joined.discipler.messageUserId} className={`${styles.btn} w-full`} /> : null}
+      </div> : null}
     </div>
 
     <GroupTabs tabs={tabs} value={tab} onChange={setTab} />
@@ -69,7 +72,7 @@ export function MemberGroupView({ joined, discipler, ownEpisodeQuestions, discus
         <div className={styles.sectionTitle}><h2>Your questions about teachings</h2></div>
         <div className={`${styles.panel} ${styles.tools}`}><OwnEpisodeQuestionList questions={ownEpisodeQuestions} leaderFirstName={lead} preview={false} /></div>
       </> : null}
-      <p className={styles.note}><LockIcon className="mr-1 inline size-3 -translate-y-px" strokeWidth={2.2} aria-hidden />Only {lead} reads your answers. Other disciples never see them.</p>
+      <p className={styles.note}><LockIcon className="mr-1 inline size-3 -translate-y-px" strokeWidth={2.2} aria-hidden />Only {lead} reads your answers. Other members never see them.</p>
     </> : null}
 
     {tab === "discussion" ? <>
