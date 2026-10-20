@@ -103,8 +103,9 @@ a.row:hover { background: #f8f9fb; }
 .board[data-dense] .boardGap::before { top: -9px; }
 
 /* Wide cards (by the column's width, not the window's) use the 3:1 cut on cover, as Home does,
-   so the art always reaches the left edge and never leaves a seam of field colour. */
+   so the art always reaches the left edge and never leaves a seam of field colour. The compact
+   3:2 art at 114% of a 220px card is 376px wide, nudged 22px right, so it covers only up to 354px. */
 .column { container-type: inline-size; }
-@container (min-width: 400px) {
+@container (min-width: 350px) {
   .card { background-image: var(--hub-art-wide, var(--hub-art)); background-size: cover; background-position: right bottom; }
 }
