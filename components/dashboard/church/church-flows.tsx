@@ -112,7 +112,7 @@ export function CreatePlace() {
     });
   }
   return <ChurchPage>
-    <ChurchHeading title="Create a branch" sub="Fullness of Christ Church" />
+    <ChurchHeading title="Create a branch" sub="Its branch pastor is appointed next" />
     <form className={`${styles.panel} ${forms.body}`} onSubmit={event => { event.preventDefault(); save(); }}>
       <label className={forms.field}>Branch name
         <input maxLength={100} value={name} onChange={event => setName(event.target.value)} aria-invalid={Boolean(error) || undefined} placeholder="e.g. Lekki" />

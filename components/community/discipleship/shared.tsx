@@ -77,7 +77,7 @@ export function Meter({ value, max }: { value: number | null; max: number | null
 
 export function StatusStrip({ disciples }: { disciples: DiscipleSummary[] }) {
   const counts = statusCounts(disciples);
-  return <div className={styles.strip} aria-label="How your disciples are doing">
+  return <div className={styles.strip} aria-label="How your members are doing">
     <div><strong>{counts.ok}</strong><span><Dot tone="ok" />On track</span></div>
     <div><strong>{counts.risk}</strong><span><Dot tone="risk" />At risk</span></div>
     <div><strong>{counts.off}</strong><span><Dot tone="off" />Not active</span></div>

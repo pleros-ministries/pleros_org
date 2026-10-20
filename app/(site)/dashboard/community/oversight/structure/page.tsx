@@ -18,5 +18,5 @@ export default async function OversightStructurePage() {
   if (!session) redirect("/login?returnTo=/dashboard/community/oversight/structure");
   const [viewer, data] = await Promise.all([getChurchAssignment(session.user.id), getChurchHome(session.user.id)]);
   if (viewer?.role !== "pastor" || data.kind !== "structure") redirect("/dashboard/community/oversight");
-  return <ChurchStructureView branches={data.branches} header={<OversightHeader sub="Fullness of Christ Church · branches and branch pastors" />} />;
+  return <ChurchStructureView branches={data.branches} header={<OversightHeader sub="Branches and branch pastors" />} />;
 }

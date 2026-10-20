@@ -68,7 +68,7 @@ export function LeaderGroupView({ data, episodeQuestions, colourway, initialTab,
   // An empty group already shows the invite panel in place, so don't open a second one.
   const [panel, setPanel] = useState<"invite" | "rename" | "create" | null>(initialPanel === "invite" && !hasDisciples ? null : initialPanel);
   const tabs: Array<{ key: LeaderTab; label: string; count?: number }> = [
-    { key: "disciples", label: "Disciples", count: disciples.length },
+    { key: "disciples", label: "Members", count: disciples.length },
     ...(hasDisciples && !paused ? [
       { key: "discussion" as const, label: "Discussion" },
       { key: "checkins" as const, label: "Check-ins", count: group.prompts.reduce((n, prompt) => n + prompt.responses.filter(response => !response.leaderReply).length, 0) || undefined },
@@ -104,7 +104,7 @@ export function LeaderGroupView({ data, episodeQuestions, colourway, initialTab,
       colourway={colourway}
       tag={paused ? "Paused" : "You lead"}
       title={group.name}
-      meta={hasDisciples ? `${disciples.length} ${disciples.length === 1 ? "disciple" : "disciples"}` : "No disciples yet"}
+      meta={hasDisciples ? `${disciples.length} ${disciples.length === 1 ? "member" : "members"}` : "No members yet"}
       // The ··· menu always sits beside a primary action: Invite once people have
       // joined, otherwise Add a contact (the invite link fills the page below).
       actions={paused ? null : <>
@@ -197,7 +197,7 @@ function CreateForm({ onCancel, onCreated }: { onCancel: () => void; onCreated: 
       return result;
     }, () => { if (createdId) onCreated(createdId); });
   }}>
-    <label htmlFor="new-discipleship-group">Name your new discipleship group</label>
+    <label htmlFor="new-discipleship-group">Name your new group</label>
     <input id="new-discipleship-group" type="text" value={name} maxLength={DISCIPLESHIP_GROUP_NAME_MAX} onChange={event => setName(event.target.value)} placeholder="For example, Family or Campus fellowship" />
     <p className={styles.note} style={{ margin: 0 }}>Each group has its own invite link.</p>
     {error ? <p role="alert" className={styles.error}>{error}</p> : null}

@@ -19,7 +19,7 @@ export function ChurchStructureView({ branches, header }: { branches: ChurchBran
   const pastors = branches.reduce((n, branch) => n + branch.pastors.length, 0);
   const needPastor = branches.filter(branch => !branch.pastors.length).length;
   return <Page bare={Boolean(header)}>
-    {header ?? <Heading title="Church structure" sub="Fullness of Christ Church · branches and branch pastors" />}
+    {header ?? <Heading title="Church structure" sub="Branches and branch pastors" />}
     <Strip items={[["Branches", branches.length], ["Branch pastors", pastors], ["Need a pastor", needPastor, needPastor > 0]]} />
     <div className={styles.sectionTitle}><h2>Branches</h2><Link href="/dashboard/church/branches/new" className={`${styles.quiet} inline-flex items-center gap-1`}><PlusIcon className="size-3.5" strokeWidth={2.2} />Add branch</Link></div>
     {branches.length ? branches.map(branch => <section key={branch.id} className={`${styles.panel} pb-2`} aria-label={branch.name}>

@@ -228,7 +228,8 @@ export async function getGroupOversight(viewerId: string, options: { under?: str
   });
 
   const scopeLabel = under ? `${names.get(under)?.name ?? "Member"}’s groups`
-    : role === "pastor" ? "Fullness of Christ Church"
+    // No church branding in Oversight (Pastor, 20 October: Pleros is not FCC's app).
+    : role === "pastor" ? "Everyone in groups"
     : role === "branch_pastor" ? branches.map(branch => branch.name).join(", ") || "Your branch"
     : groups.length === 1 ? groups[0]!.name : `${groups.length} groups`;
   return {
