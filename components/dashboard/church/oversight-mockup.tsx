@@ -113,12 +113,16 @@ function GroupBranch({ group, index, withStatus = false, open: startOpen = false
   </li>;
 }
 
-/** The day's three parts on one quiet line; only what's missing is coloured. */
+/**
+ * The day's report in a few words: only what's missing is named (user
+ * feedback, 20 October: the three ticked parts were cluttered). Nil counts as in.
+ */
 function StatusPills({ statuses }: { statuses: Person["statuses"] }) {
   const labels = ["Devotion", "Ministry", "Meetings"];
-  return <span className="flex flex-wrap gap-x-2.5 gap-y-0.5 text-[12px] leading-4">{statuses.map((status, index) => <span key={labels[index]} style={{ color: status === "missing" ? "#a15c12" : "var(--color-community-muted)" }}>
-    {labels[index]} {status === "reported" ? "✓" : status === "nil" ? "· nil" : "· missing"}
-  </span>)}</span>;
+  const missing = labels.filter((_, index) => statuses[index] === "missing");
+  const label = !missing.length ? "All in" : missing.length === labels.length ? "Not reported"
+    : `${missing.map((name, index) => index ? name.toLowerCase() : name).join(", ")} missing`;
+  return <Mark ok={!missing.length} label={label} />;
 }
 
 function PersonRow({ person, withStatus, onOpen }: { person: Person; withStatus: boolean; onOpen: (person: Person) => void }) {
