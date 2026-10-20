@@ -178,7 +178,7 @@ function Reports({ groups: led, onOpenPerson }: { groups: Group[]; onOpenPerson:
         className={`${styles.btn} ${styles.mini} shrink-0`} data-primary={day === label ? "" : undefined}>{label}</button>)}
     </div>
     <div className="grid grid-cols-2 rounded-[10px] bg-[#eceef2] p-[3px]" role="tablist" aria-label="Whose reports">
-      {([["mine", "Groups led here"], ["under", "Groups under them"]] as const).map(([key, label]) => <button key={key} type="button" role="tab" aria-selected={scope === key} onClick={() => setScope(key)}
+      {([["mine", "Groups you lead"], ["under", "Groups under them"]] as const).map(([key, label]) => <button key={key} type="button" role="tab" aria-selected={scope === key} onClick={() => setScope(key)}
         className={`inline-flex h-8 items-center justify-center rounded-[7px] text-[13px] font-medium ${scope === key ? "bg-white text-[var(--color-community-ink)] shadow-[0_1px_2px_rgb(0_0_0/8%)]" : "text-[var(--color-community-muted)]"}`}>{label}</button>)}
     </div>
     <div className={styles.strip}>
