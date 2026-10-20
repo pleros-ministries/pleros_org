@@ -25,6 +25,7 @@ import {
   type SogpLevelStatus,
 } from "@/lib/sogp/progression";
 import { getSogpDashboardData } from "./sogp";
+import { sogpLearningSchemaReady } from "./sogp-learning-gate";
 import { getCohortPreparationLength } from "./sogp-preparation-length";
 
 import * as schema from "../schema";
@@ -457,6 +458,12 @@ export async function setSogpReviewComplete(input: {
 export type SogpJourneyData = {
   generatedAt: string;
   todayKey: string;
+  /**
+   * The learner's path (Pastor, 20 October: the calendar must follow it). On
+   * the podcast path a day's teaching is their own podcast day, so the
+   * Traditional quiz and written response are not part of the day.
+   */
+  path: "traditional" | "podcast";
   enrollment: { name: string };
   cohort: {
     title: string;
@@ -530,7 +537,7 @@ export async function getActiveSogpJourney(
   const requiredReviewIds = dashboard.liveClasses
     .filter((item) => item.isRequired && item.status !== "cancelled")
     .map((item) => item.id);
-  const [prayerRows, submissionRows, reviewRows] = await Promise.all([
+  const [prayerRows, submissionRows, reviewRows, pathRow] = await Promise.all([
     db
       .select({ dateKey: schema.prayerWatchAttendance.attendedDate })
       .from(schema.prayerWatchAttendance)
@@ -570,7 +577,17 @@ export async function getActiveSogpJourney(
             ),
           )
       : Promise.resolve([]),
+    sogpLearningSchemaReady()
+      ? db
+          .select({ path: schema.sogpLearningPreferences.path, hasPodcastPlan: schema.sogpLearningPreferences.hasPodcastPlan })
+          .from(schema.sogpLearningPreferences)
+          .where(eq(schema.sogpLearningPreferences.userId, userId))
+          .limit(1)
+          .then((rows) => rows[0] ?? null)
+          .catch(() => null)
+      : Promise.resolve(null),
   ]);
+  const podcast = Boolean(pathRow && pathRow.path !== "traditional" && pathRow.hasPodcastPlan);
 
   const prayerDates = new Set(prayerRows.map((row) => row.dateKey));
   const submissions = new Map(
@@ -636,7 +653,8 @@ export async function getActiveSogpJourney(
     // that day's assessment).
     const requirements = getSogpDayRequirements({
       prayerWatchComplete,
-      assessmentComplete: track ? assessmentComplete : undefined,
+      // Podcast learners keep their own pace: no dated Traditional assessment.
+      assessmentComplete: track && !podcast ? assessmentComplete : undefined,
       reviewComplete: review ? Boolean(completedReviewSource) : undefined,
     });
     const curriculumLevel = track
@@ -687,6 +705,7 @@ export async function getActiveSogpJourney(
   return {
     generatedAt: now.toISOString(),
     todayKey,
+    path: podcast ? "podcast" : "traditional",
     enrollment: { name: dashboard.enrollment.name },
     cohort: {
       title: dashboard.cohort.title,

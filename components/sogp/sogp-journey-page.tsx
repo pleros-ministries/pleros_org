@@ -141,10 +141,10 @@ export function SogpJourneyPage({
             <ArrowLeftIcon className="size-3.5" strokeWidth={2} /> Dashboard
           </Link>
         ) : null}
-        <h1>Calendar and assessments</h1>
+        <h1>{data.path === "podcast" ? "Your calendar" : "Calendar and assessments"}</h1>
         <p className={styles.sub}>
           {data.cohort.title}
-          {selectedDay.track
+          {data.path === "podcast" ? " · Podcast path" : selectedDay.track
             ? ` · Level ${selectedDay.track.curriculumLevel}, track ${selectedDay.track.levelPosition} of 6`
             : ""}
         </p>

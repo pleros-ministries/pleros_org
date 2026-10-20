@@ -7,6 +7,7 @@ import { useState, type ReactNode } from "react";
 import { GiftIcon, Share2Icon, TrophyIcon, UserPlusIcon, UsersRoundIcon } from "lucide-react";
 import type { DashboardHomeData, HomeLearningCard, HomeReport, HomeSogp, HomeToday } from "@/lib/dashboard/home";
 import { PRAYER_WATCH_YOUTUBE_URL } from "@/lib/prayer-watch";
+import { LeaderboardPreview } from "@/components/sogp/learning/leaderboard-preview";
 import { DashboardIcon, StatusPill } from "./primitives";
 import styles from "./dashboard.module.css";
 
@@ -275,9 +276,10 @@ function GrowTogether({ sogp }: { sogp: HomeSogp }) {
   return <section className={styles.homeSection} aria-labelledby="home-grow-heading">
     <div className={styles.homeSectionHeader}><h2 id="home-grow-heading">Grow together</h2></div>
     <ul className={styles.homeActions}>
-      <ActionRow href="/dashboard/sogp/leaderboard" icon={<TrophyIcon className="size-4" strokeWidth={2} />} tone={["#fff1c2", "#8a5a00"]} title={sogp.leaderboard ? <>Leaderboard · <span className={styles.homeRank}>#{sogp.leaderboard.rank}</span></> : "Leaderboard"} action="View">
+      {/* With a board to show, the leaderboard has its own preview under Your progress. */}
+      {sogp.board ? null : <ActionRow href="/dashboard/sogp/leaderboard" icon={<TrophyIcon className="size-4" strokeWidth={2} />} tone={["#fff1c2", "#8a5a00"]} title={sogp.leaderboard ? <>Leaderboard · <span className={styles.homeRank}>#{sogp.leaderboard.rank}</span></> : "Leaderboard"} action="View">
         <span>{sogp.leaderboard ? `${sogp.leaderboard.points} points this cohort` : "See how your cohort is growing"}</span>
-      </ActionRow>
+      </ActionRow>}
       <ActionRow href="/dashboard/sogp/referrals" icon={<UserPlusIcon className="size-4" strokeWidth={2} />} tone={["#f6d9de", "#5e2236"]} title="Invite someone" action="Share link">
         <span>Share your link and walk with them</span>
       </ActionRow>
@@ -318,6 +320,8 @@ export function DashboardHomeView({ name, greeting, data }: { name?: string; gre
       {data.welcomePack && !data.welcomePack.done ? <WelcomePackRow /> : null}
       {sogp?.today ? <TodaySection today={sogp.today} /> : null}
       {sogp?.progress ? <ProgressSection progress={sogp.progress} /> : null}
+      {/* The same leaderboard preview as Learning (Pastor, 20 October), not one row among the others. */}
+      {sogp?.board ? <div className={styles.homeSection}><LeaderboardPreview board={sogp.board} id="home-leaderboard" /></div> : null}
     </div>
     <div className={styles.homeSide}>
       {sogp ? <GrowTogether sogp={sogp} /> : null}

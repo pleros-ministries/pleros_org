@@ -68,11 +68,12 @@ export function SogpOtherDetails({
 }) {
   const [shareOpen, setShareOpen] = useState(false);
   const metrics = [
-    {
+    // Teachings count the Traditional tracks; a podcast learner's progress is on their plan.
+    ...(data.path === "podcast" ? [] : [{
       label: "Teachings",
       value: `${data.progress.coreCompleted}/${data.progress.coreTotal}`,
       percent: progressPercent(data.progress.coreCompleted, data.progress.coreTotal),
-    },
+    }]),
     {
       label: "Prayer Watch",
       value: `${data.progress.prayerPercent}%`,

@@ -26,17 +26,20 @@ export function SogpCourseSidebar({
         />
       </section>
 
-      <div className="hidden lg:block">
-        <SogpLevelTracker levels={data.levels} />
-      </div>
+      {/* Levels and the track outline belong to the Traditional path. */}
+      {data.path === "podcast" ? null : <>
+        <div className="hidden lg:block">
+          <SogpLevelTracker levels={data.levels} />
+        </div>
 
-      <SogpCourseOutline
-        data={data}
-        selectedDateKey={selectedDateKey}
-        onSelect={onSelect}
-        className="hidden lg:block"
-        listClassName="max-h-[calc(100vh-19rem)]"
-      />
+        <SogpCourseOutline
+          data={data}
+          selectedDateKey={selectedDateKey}
+          onSelect={onSelect}
+          className="hidden lg:block"
+          listClassName="max-h-[calc(100vh-19rem)]"
+        />
+      </>}
     </div>
   );
 }

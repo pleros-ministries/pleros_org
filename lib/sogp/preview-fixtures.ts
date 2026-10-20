@@ -149,6 +149,7 @@ const sogpDays: SogpJourneyData["days"] = sogpDates.map((dateKey) => {
 export const sogpPreviewData: SogpJourneyData = {
   generatedAt: "2026-09-24T12:00:00.000Z",
   todayKey: sogpTodayKey,
+  path: "traditional",
   enrollment: { name: "Daniel" },
   cohort: {
     title: "SOGP September 2026",

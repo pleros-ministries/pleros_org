@@ -77,6 +77,11 @@ export async function getDashboardHomeData(viewer: NonNullable<Awaited<ReturnTyp
       checksPassed: [facts.learningPass, facts.prayer.pass, facts.reviews.reviewPass].filter(Boolean).length,
     } : null,
     leaderboard: leaderboard?.me ? { rank: leaderboard.me.rank, points: leaderboard.me.points } : null,
+    board: leaderboard && leaderboard.top.length ? {
+      top: leaderboard.top.slice(0, 5).map(row => ({ rank: row.rank, name: row.name, points: row.points, isMe: row.isMe })),
+      me: leaderboard.me ? { rank: leaderboard.me.rank, points: leaderboard.me.points } : null,
+      total: leaderboard.total,
+    } : null,
     group,
     shareDayNumber: journey.days.find(row => row.dateKey === day)?.track?.dayNumber ?? lesson?.dayNumber ?? null,
   } : null;

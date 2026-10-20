@@ -6,6 +6,7 @@ import { AdvancedSogpNotify } from "@/components/dashboard/library/advanced-sogp
 import type { LearningHubData } from "@/lib/dashboard/learning-hub";
 import type { LearningViewData } from "@/lib/sogp/learning-view";
 
+import { LeaderboardPreview } from "./leaderboard-preview";
 import styles from "./learning-hub.module.css";
 
 /** Each SOGP level's card art and colours, as on the You home's learning card. */
@@ -44,7 +45,6 @@ export function LearningHub({ hub, learning }: { hub: LearningHubData; learning:
   const podcast = hub.path === "podcast_one" || hub.path === "podcast_two";
   // Every published track done: the card celebrates instead of resuming.
   const finished = hub.card.total > 0 && hub.doneCount >= hub.card.total && !podcast;
-  const outsideTop = hub.leaderboard?.me && !hub.leaderboard.top.some(row => row.isMe) ? hub.leaderboard.me : null;
 
   const resume = hub.state === "start"
     ? <section className={styles.card} style={{ "--hub-art": `url("/assets/dashboard/learning-card/${art.image}")`, "--hub-field": art.field, "--hub-ink": art.ink } as CSSProperties}>
@@ -107,28 +107,7 @@ export function LearningHub({ hub, learning }: { hub: LearningHubData; learning:
         </div>
       </> : null}
 
-      {hub.leaderboard && hub.leaderboard.top.length ? <section className={styles.board} aria-labelledby="hub-leaderboard">
-        <header className={styles.boardHead}>
-          <span className={styles.boardIcon} aria-hidden="true"><TrophyIcon className="size-4" strokeWidth={2.2} /></span>
-          <span className={styles.rowCopy}>
-            <h2 id="hub-leaderboard">Leaderboard</h2>
-            <span className={styles.rowMeta}>{hub.leaderboard.me ? `You’re #${hub.leaderboard.me.rank} of ${hub.leaderboard.total} · ${hub.leaderboard.me.points} pts` : `Top of ${hub.leaderboard.total} in your cohort`}</span>
-          </span>
-          <Link href="/dashboard/sogp/leaderboard" className={styles.boardAll}>See all</Link>
-        </header>
-        <ol className={styles.boardList}>
-          {hub.leaderboard.top.map((row, index) => <li key={`${index}-${row.rank}`} className={styles.boardRow} data-me={row.isMe || undefined}>
-            <span className={styles.boardRank} data-rank={row.rank <= 3 ? row.rank : undefined}>{row.rank}</span>
-            <span className={styles.boardName}>{row.isMe ? "You" : row.name}</span>
-            <span className={styles.boardPts}>{row.points}<small> pts</small></span>
-          </li>)}
-          {outsideTop ? <li className={`${styles.boardRow} ${styles.boardGap}`} data-me>
-            <span className={styles.boardRank}>{outsideTop.rank}</span>
-            <span className={styles.boardName}>You</span>
-            <span className={styles.boardPts}>{outsideTop.points}<small> pts</small></span>
-          </li> : null}
-        </ol>
-      </section> : null}
+      {hub.leaderboard && hub.leaderboard.top.length ? <LeaderboardPreview board={hub.leaderboard} id="hub-leaderboard" /> : null}
 
       {hub.review ? <div className={styles.panel}><div className={styles.row}>
         <span className={styles.num} aria-hidden="true"><CalendarCheckIcon className="size-3.5" strokeWidth={2.2} /></span>

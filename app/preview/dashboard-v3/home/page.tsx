@@ -32,6 +32,10 @@ const sogp: DashboardHomeData["sogp"] = {
   },
   progress: { learningLabel: "Teachings", learningDone: 10, learningTotal: 24, prayerPercent: 83, prayerRequired: 80, reviewsSatisfied: 1, reviewsOwed: 4, checksPassed: 2 },
   leaderboard: { rank: 7, points: 240 },
+  board: { total: 162, me: { rank: 7, points: 240 }, top: [
+    { rank: 1, name: "Ada O.", points: 410, isMe: false }, { rank: 2, name: "Bola K.", points: 388, isMe: false }, { rank: 3, name: "Chuka E.", points: 352, isMe: false },
+    { rank: 4, name: "Dami A.", points: 301, isMe: false }, { rank: 5, name: "Efe T.", points: 287, isMe: false },
+  ] },
   group: { kind: "member", groupName: "SOGP Discipleship Group", leaderFirstName: "Ada" },
   shareDayNumber: null,
 };

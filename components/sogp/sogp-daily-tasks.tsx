@@ -177,7 +177,23 @@ export function SogpDailyTasks({
   const track = selectedDay.track;
   const tasks: Array<{ key: string; complete: boolean; node: ReactNode }> = [];
 
-  if (track) {
+  if (data.path === "podcast") {
+    // The podcast path keeps its own pace (Pastor, 20 October): its day is the next podcast day, not this date's track.
+    tasks.push({
+      key: "podcast",
+      complete: true,
+      node: (
+        <TaskRow
+          key="podcast"
+          title="Your podcast day"
+          meta="At your own pace, from your podcast plan"
+          complete={false}
+          href="/dashboard/sogp/listen"
+          action={<Link href="/dashboard/sogp/listen" className={rowAction}>Listen</Link>}
+        />
+      ),
+    });
+  } else if (track) {
     const response = writtenResponseCopy(track.writtenResponseStatus);
     // `accessible` only means the track is unlocked, not that it was opened;
     // passing the quiz is the closest real signal of engagement.
@@ -286,7 +302,9 @@ export function SogpDailyTasks({
     ),
   });
 
-  const doneCount = tasks.filter((task) => task.complete).length;
+  // The podcast row has no date to finish by, so it never counts towards the day.
+  const counted = tasks.filter((task) => task.key !== "podcast");
+  const doneCount = counted.filter((task) => task.complete).length;
   const weekdayDayLabel = new Intl.DateTimeFormat("en-NG", {
     weekday: "long",
     day: "numeric",
@@ -299,7 +317,7 @@ export function SogpDailyTasks({
       <div className="mx-px -mb-1 flex min-w-0 items-center justify-between gap-3">
         <h2 className="m-0 font-[family-name:var(--font-dashboard-heading)] text-[15px] font-medium leading-[22px] text-(--color-text-strong)">{heading}</h2>
         <span className="shrink-0 text-[12.5px] text-(--color-text-muted)">
-          {doneCount} of {tasks.length} done
+          {doneCount} of {counted.length} done
         </span>
       </div>
       <div className="overflow-hidden rounded-[10px] border border-[var(--dashboard-panel-edge,#e2e5ea)] bg-white">
