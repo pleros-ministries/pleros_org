@@ -2625,13 +2625,18 @@ export const bibleReadingPlans = pgTable("bible_reading_plans", {
 export const dailyTeachingReports = pgTable("daily_teaching_reports", {
   userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   reportDate: date("report_date", { mode: "string" }).notNull(),
-  source: text("source").$type<"sogp" | "podcast" | "both">().notNull(),
+  /** What Pleros recorded: 'none' when the day's teaching was Other only (migration 0074). */
+  source: text("source").$type<"sogp" | "podcast" | "both" | "none">().notNull(),
+  /** A teaching from elsewhere (migration 0074): a Sunday service, a sermon on YouTube. */
+  otherTitle: text("other_title"),
   note: text("note"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [
   primaryKey({ columns: [t.userId, t.reportDate] }),
-  check("daily_teaching_reports_source_check", sql`${t.source} in ('sogp', 'podcast', 'both')`),
+  check("daily_teaching_reports_source_check", sql`${t.source} in ('sogp', 'podcast', 'both', 'none')`),
+  check("daily_teaching_reports_other_title_check", sql`${t.otherTitle} is null or char_length(${t.otherTitle}) between 1 and 200`),
+  check("daily_teaching_reports_something_check", sql`${t.source} <> 'none' or ${t.otherTitle} is not null`),
   check("daily_teaching_reports_note_check", sql`${t.note} is null or length(${t.note}) <= 500`),
 ]);
 

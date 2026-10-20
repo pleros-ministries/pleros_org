@@ -519,6 +519,13 @@
    "when": 1792929600000,
    "tag": "0073_natural_assignment_reports",
    "breakpoints": true
+  },
+  {
+   "idx": 74,
+   "version": "7",
+   "when": 1793016000000,
+   "tag": "0074_teaching_other",
+   "breakpoints": true
   }
  ]
 }

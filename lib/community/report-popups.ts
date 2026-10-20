@@ -59,14 +59,21 @@ export function planDay(plan: BiblePlan, dateKey: string): number {
   return Math.max(1, days + 1);
 }
 
-export const TEACHING_SOURCES = [
-  { key: "sogp", label: "SOGP" },
-  { key: "podcast", label: "Podcast" },
-  { key: "both", label: "Both" },
-] as const;
-export type TeachingSource = (typeof TEACHING_SOURCES)[number]["key"];
+/** What Pleros recorded for the day's teaching; 'none' when it was Other only (migration 0074). */
+export type TeachingSource = "sogp" | "podcast" | "both" | "none";
 export const TEACHING_NOTE_MAX = 500;
-export const isTeachingSource = (value: unknown): value is TeachingSource => TEACHING_SOURCES.some(row => row.key === value);
+export const TEACHING_OTHER_MAX = 200;
+export const isTeachingSource = (value: unknown): value is TeachingSource => value === "sogp" || value === "podcast" || value === "both" || value === "none";
+/** The parts someone ticks (Pastor, 20 October: Other besides SOGP and the podcast). */
+export type TeachingParts = { sogp: boolean; podcast: boolean; other: boolean };
+export const teachingSource = (parts: Pick<TeachingParts, "sogp" | "podcast">): TeachingSource => parts.sogp && parts.podcast ? "both" : parts.sogp ? "sogp" : parts.podcast ? "podcast" : "none";
+export const teachingParts = (source: TeachingSource, otherTitle: string | null): TeachingParts => ({ sogp: source === "sogp" || source === "both", podcast: source === "podcast" || source === "both", other: Boolean(otherTitle) });
+/** "SOGP, podcast and Sunday service" for the report row and review. */
+export function teachingLabel(source: TeachingSource, otherTitle: string | null) {
+  const parts = [source === "sogp" || source === "both" ? "SOGP" : null, source === "podcast" || source === "both" ? "podcast" : null, otherTitle].filter((part): part is string => Boolean(part));
+  const text = parts.length > 1 ? `${parts.slice(0, -1).join(", ")} and ${parts.at(-1)}` : parts[0] ?? "";
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
 
 export type EvangelismStyle = "broadcast" | "direct";
 export const isEvangelismStyle = (value: unknown): value is EvangelismStyle => value === "broadcast" || value === "direct";

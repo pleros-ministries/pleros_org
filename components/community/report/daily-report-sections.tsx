@@ -12,7 +12,7 @@ import { activityKindLabel } from "@/lib/community/ministry-activities";
 import { MINISTRY_FIELDS, type ActivityLine } from "@/lib/community/ministry-report";
 import type { MinistryContact } from "@/lib/community/reporting-v3";
 import type { MemberActivity } from "@/lib/db/queries/ministry-activities";
-import { readingEnd, type MinistryEdit } from "@/lib/community/report-popups";
+import { readingEnd, teachingLabel, type MinistryEdit } from "@/lib/community/report-popups";
 import { prayerSessionsLine } from "@/lib/prayer-watch-session";
 import type { BibleDay, TeachingReport } from "@/lib/db/queries/report-popups";
 
@@ -235,7 +235,7 @@ export function DailyReportSections({ today, days, selected, activities, edits =
     : popupsReady ? "Choose a chapters-a-day plan" : "Not recorded";
   const openBible = () => setPopup(plan && reading ? "bibleToday" : popupsReady ? "biblePlan" : "bibleToday");
   const teachingDetail = shown.teaching ?? ([sogpDetail ? `SOGP: ${sogpDetail}` : null, podcastDetail ? `podcast: ${podcastDetail}` : null].filter(Boolean).join(" · ")
-    || (teaching ? `${teaching.source === "both" ? "SOGP and podcast" : teaching.source === "sogp" ? "SOGP" : "Podcast"}${teaching.note ? " · note added" : ""}` : "SOGP or podcast"));
+    || (teaching ? `${teachingLabel(teaching.source, teaching.otherTitle)}${teaching.note ? " · note added" : ""}` : "SOGP, podcast or other"));
   const canFillDevotion = writable && Boolean(devotion);
 
   return <div className={styles.page}>

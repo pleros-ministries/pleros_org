@@ -28,6 +28,6 @@ export async function saveBiblePlanAction(input: { dateKey: string; chaptersPerD
 export async function logPlanReadingAction(input: { dateKey: string; chapters?: number }) {
   return run(userId => logPlanReading(userId, input));
 }
-export async function saveTeachingReportAction(input: { dateKey: string; source: string; note: string }) {
+export async function saveTeachingReportAction(input: { dateKey: string; source: string; otherTitle?: string | null; note: string }) {
   return run(userId => saveTeachingReport(userId, input));
 }

@@ -6,11 +6,11 @@ import { CheckIcon } from "lucide-react";
 
 import { logPlanReadingAction, saveBiblePlanAction, saveTeachingReportAction } from "@/app/(site)/dashboard/community/_actions/report-popup-actions";
 import { BIBLE_BOOKS, getBibleBook } from "@/lib/bible-reading";
-import { BIBLE_DAY_MAX, BIBLE_PLAN_CHOICES, BIBLE_PLAN_MAX, TEACHING_NOTE_MAX, TEACHING_SOURCES, readingEnd, readingLabel, type BiblePosition, type TeachingSource } from "@/lib/community/report-popups";
+import { BIBLE_DAY_MAX, BIBLE_PLAN_CHOICES, BIBLE_PLAN_MAX, TEACHING_NOTE_MAX, TEACHING_OTHER_MAX, readingEnd, readingLabel, teachingLabel, teachingParts, teachingSource, type BiblePosition, type TeachingParts } from "@/lib/community/report-popups";
 import type { BibleDay, TeachingReport } from "@/lib/db/queries/report-popups";
 
 import { BibleReadingInline, PrayerWatchInline } from "./devotion-inline";
-import { ReportSheet, Segmented, Stepper, sheetStyles as styles } from "./report-sheet";
+import { ReportSheet, Stepper, sheetStyles as styles } from "./report-sheet";
 
 const dayMonth = new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" });
 const longDate = (dateKey: string) => dayMonth.format(new Date(`${dateKey}T00:00:00Z`));
@@ -142,30 +142,48 @@ export function TeachingSheet({ dateKey, sogp, podcast, report, available, onClo
   report: TeachingReport | null; available: boolean; onClose: () => void;
 }) {
   const { pending, error, save } = useSheetSave();
-  const [source, setSource] = useState<TeachingSource>(report?.source ?? (sogp && podcast ? "both" : podcast ? "podcast" : "sogp"));
+  // Any mix of SOGP, the podcast and Other (Pastor, 20 October).
+  const [parts, setParts] = useState<TeachingParts>(() => report ? teachingParts(report.source, report.otherTitle)
+    : { sogp: Boolean(sogp) || !podcast, podcast: Boolean(podcast), other: false });
+  const [otherTitle, setOtherTitle] = useState(report?.otherTitle ?? "");
   const [note, setNote] = useState(report?.note ?? "");
   const lines = [
-    source !== "podcast" ? { key: "sogp", title: "SOGP", detail: sogp } : null,
-    source !== "sogp" ? { key: "podcast", title: "Podcast", detail: podcast } : null,
+    parts.sogp ? { key: "sogp", title: "SOGP", detail: sogp } : null,
+    parts.podcast ? { key: "podcast", title: "Podcast", detail: podcast } : null,
   ].filter(line => line !== null);
+  const toggle = (key: keyof TeachingParts) => setParts(current => ({ ...current, [key]: !current[key] }));
+  const other = parts.other ? otherTitle.trim() : "";
+  const ready = (parts.sogp || parts.podcast || parts.other) && (!parts.other || Boolean(other));
+  const input = () => ({ dateKey, source: teachingSource(parts), otherTitle: other || null, note });
 
   return <ReportSheet title="Teaching" subtitle="What did you learn from today?" onClose={onClose}
-    footer={available ? close => <button type="button" className={styles.primary} disabled={pending} onClick={() => {
-      if (!onOptimistic) { save(() => saveTeachingReportAction({ dateKey, source, note }), close); return; }
-      onOptimistic({ teaching: `${source === "both" ? "SOGP and podcast" : source === "sogp" ? "SOGP" : "Podcast"}${note.trim() ? " · note added" : ""}` }, () => saveTeachingReportAction({ dateKey, source, note }));
+    footer={available ? close => <button type="button" className={styles.primary} disabled={pending || !ready} onClick={() => {
+      if (!onOptimistic) { save(() => saveTeachingReportAction(input()), close); return; }
+      onOptimistic({ teaching: `${teachingLabel(teachingSource(parts), other || null)}${note.trim() ? " · note added" : ""}` }, () => saveTeachingReportAction(input()));
       close();
     }}>{pending ? "Saving…" : "Save teaching"}</button> : undefined}>
     {() => <>
-      <Segmented label="Teaching from" options={TEACHING_SOURCES} value={source} onChange={setSource} />
-      <div className={styles.box}>
+      <div className={styles.field}>
+        <span className={styles.label}>Teaching from <em>Pick any</em></span>
+        <div className={styles.chips}>
+          {([["sogp", "SOGP"], ["podcast", "Podcast"], ["other", "Other"]] as const).map(([key, label]) => <button key={key} type="button" className={styles.chip} aria-pressed={parts[key]} onClick={() => toggle(key)}>
+            {parts[key] ? <CheckIcon className="size-3.5" strokeWidth={2.6} aria-hidden="true" /> : null}{label}
+          </button>)}
+        </div>
+      </div>
+      {lines.length ? <div className={styles.box}>
         {lines.map(line => <div key={line.key} className={styles.line}>
           <span className={styles.tick} data-on={line.detail ? "" : undefined} aria-hidden="true">{line.detail ? <CheckIcon className="size-3" strokeWidth={3} /> : null}</span>
           <span className={styles.lineCopy}><span className={styles.lineTitle}>{line.title}</span><span className={styles.lineMeta}>{line.detail ? `${line.detail} · recorded as you ${line.key === "sogp" ? "learned" : "listened"}` : `Nothing recorded yet. It fills in as you ${line.key === "sogp" ? "learn" : "listen"}.`}</span></span>
         </div>)}
-      </div>
+      </div> : null}
+      {parts.other && available ? <label className={styles.field}>
+        <span className={styles.label}>What was the other teaching?</span>
+        <input className={styles.input} maxLength={TEACHING_OTHER_MAX} value={otherTitle} placeholder="e.g. Sunday service, a sermon on YouTube" onChange={event => setOtherTitle(event.target.value)} />
+      </label> : null}
       {available ? <label className={styles.field}>
         <span className={styles.label}>Anything to add? <em>Optional</em></span>
-        <textarea className={styles.textarea} maxLength={TEACHING_NOTE_MAX} value={note} placeholder="A takeaway, a question, or a teaching you watched elsewhere" onChange={event => setNote(event.target.value)} />
+        <textarea className={styles.textarea} maxLength={TEACHING_NOTE_MAX} value={note} placeholder="A takeaway or a question" onChange={event => setNote(event.target.value)} />
       </label> : <p className={styles.hint}>SOGP and the podcast fill in as you learn and listen. You confirm them when you submit.</p>}
       {error ? <p role="alert" className={styles.error}>{error}</p> : null}
     </>}

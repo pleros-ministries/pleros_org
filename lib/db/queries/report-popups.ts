@@ -3,7 +3,7 @@ import "server-only";
 import { and, desc, eq, gte, inArray, lt, sql } from "drizzle-orm";
 
 import { CommunityError } from "@/lib/community/errors";
-import { BIBLE_DAY_MAX, BIBLE_PLAN_MAX, TEACHING_NOTE_MAX, isTeachingSource, planDay, planReading, validPlanStart, type BiblePlan, type TeachingSource } from "@/lib/community/report-popups";
+import { BIBLE_DAY_MAX, BIBLE_PLAN_MAX, TEACHING_NOTE_MAX, TEACHING_OTHER_MAX, isTeachingSource, planDay, planReading, validPlanStart, type BiblePlan, type TeachingSource } from "@/lib/community/report-popups";
 import type { MinistryReportDetails } from "@/lib/community/reporting-v3-input";
 import { db } from "@/lib/db";
 import * as s from "@/lib/db/schema";
@@ -108,23 +108,27 @@ export async function logPlanReading(userId: string, input: { dateKey: unknown; 
 
 // ─── Teaching ──────────────────────────────────────────────────────────────
 
-export type TeachingReport = { source: TeachingSource; note: string | null };
+export type TeachingReport = { source: TeachingSource; otherTitle: string | null; note: string | null };
 
 export async function getTeachingReport(userId: string, dateKey: string): Promise<TeachingReport | null> {
   if (!await reportPopupsReady()) return null;
-  const [row] = await db.select({ source: s.dailyTeachingReports.source, note: s.dailyTeachingReports.note }).from(s.dailyTeachingReports)
+  const [row] = await db.select({ source: s.dailyTeachingReports.source, otherTitle: s.dailyTeachingReports.otherTitle, note: s.dailyTeachingReports.note }).from(s.dailyTeachingReports)
     .where(and(eq(s.dailyTeachingReports.userId, userId), eq(s.dailyTeachingReports.reportDate, dateKey)));
   return row ?? null;
 }
 
-export async function saveTeachingReport(userId: string, input: { dateKey: unknown; source: unknown; note: unknown }) {
+export async function saveTeachingReport(userId: string, input: { dateKey: unknown; source: unknown; otherTitle?: unknown; note: unknown }) {
   await requireReady();
   const dateKey = writableReportDate(input.dateKey);
-  if (!isTeachingSource(input.source)) throw new CommunityError("Choose SOGP, podcast or both.");
+  if (!isTeachingSource(input.source)) throw new CommunityError("Choose SOGP, the podcast or Other.");
+  if (input.otherTitle != null && typeof input.otherTitle !== "string") throw new CommunityError("Enter what the teaching was.");
+  const otherTitle = (input.otherTitle as string | null | undefined)?.replace(/\s+/g, " ").trim() || null;
+  if (otherTitle && otherTitle.length > TEACHING_OTHER_MAX) throw new CommunityError(`Keep the teaching’s name under ${TEACHING_OTHER_MAX} characters.`);
+  if (input.source === "none" && !otherTitle) throw new CommunityError("Say what the other teaching was.");
   if (input.note != null && typeof input.note !== "string") throw new CommunityError("Enter a valid note.");
   const note = (input.note as string | null)?.trim() || null;
   if (note && note.length > TEACHING_NOTE_MAX) throw new CommunityError(`Keep the note under ${TEACHING_NOTE_MAX} characters.`);
-  const row = { source: input.source, note, updatedAt: new Date() };
+  const row = { source: input.source, otherTitle, note, updatedAt: new Date() };
   await db.insert(s.dailyTeachingReports).values({ userId, reportDate: dateKey, ...row }).onConflictDoUpdate({ target: [s.dailyTeachingReports.userId, s.dailyTeachingReports.reportDate], set: row });
 }
 
