@@ -4,6 +4,9 @@ import { getAppSession } from "@/lib/app-session";
 import { getOwnMakeUpView } from "@/lib/db/queries/sogp-review-makeups";
 import { GroupReviewMakeUp } from "@/components/sogp/group-review-make-up";
 import { chooseReviewMakeup } from "@/app/_actions/sogp-group-review-actions";
+
+// Reads the session on every request (Cache Components).
+export const instant = false;
 export default async function MakeUpPage({params}:{params:Promise<{reviewId:string}>}) {
   const session=await getAppSession();if(!session)redirect("/login?returnTo=/dashboard/sogp/reviews");
   const {reviewId}=await params;

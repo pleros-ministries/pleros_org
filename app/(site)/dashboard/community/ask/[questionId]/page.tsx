@@ -8,6 +8,9 @@ import {
 } from "@/lib/community/context";
 import { getQuestionForAsker } from "@/lib/db/queries/ask-pleros";
 
+// Reads the session on every request (Cache Components).
+export const instant = false;
+
 export default async function AskPlerosQuestionRoute({
   params,
 }: {

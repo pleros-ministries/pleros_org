@@ -7,6 +7,9 @@ import { getActiveSogpJourney } from "@/lib/db/queries/sogp-journey";
 import { lagosToday } from "@/lib/sogp/daily-date";
 import { buildSogpDays } from "@/lib/sogp/sogp-days";
 
+// Reads the session on every request (Cache Components).
+export const instant = false;
+
 export const metadata: Metadata = { title: "Your SOGP days" };
 
 export default async function SogpDaysPage() {

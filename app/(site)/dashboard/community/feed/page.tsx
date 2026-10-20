@@ -6,6 +6,9 @@ import { canAccessCommunity, getCommunityContext } from "@/lib/community/context
 import { managesUnit } from "@/lib/community/permissions";
 import { COMMUNITY_FEED_PAGE_SIZE, getCommunityFeed, getCommunitySidebar } from "@/lib/db/queries/community-posts";
 
+// Reads the session on every request (Cache Components).
+export const instant = false;
+
 /** Retained feed behaviour, separate from the Paper Community home. */
 export default async function CommunityFeedRoute() {
   // Session and context load together instead of one roundtrip after the other.

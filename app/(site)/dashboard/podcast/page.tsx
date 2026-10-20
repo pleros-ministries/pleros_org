@@ -5,6 +5,9 @@ import { getAppSession } from "@/lib/app-session";
 import { getPodcastJourney } from "@/lib/db/queries/podcast-journey";
 import { getPodcastLeaderboard } from "@/lib/db/queries/podcast-leaderboard";
 
+// Reads the session on every request (Cache Components).
+export const instant = false;
+
 export default async function DashboardPodcastPage({ searchParams }: { searchParams: Promise<{ date?: string }> }) {
   const { date } = await searchParams;
   const appSession = await getAppSession();

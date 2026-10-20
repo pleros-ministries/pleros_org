@@ -3,6 +3,9 @@ import { redirect } from "next/navigation";
 import { getAppSession } from "@/lib/app-session";
 import { getOwnAttendanceSheet } from "@/lib/db/queries/sogp-group-reviews";
 import { GroupReviewAttendance } from "@/components/sogp/group-review-attendance";
+
+// Reads the session on every request (Cache Components).
+export const instant = false;
 export default async function ReviewAttendancePage({ params }: { params: Promise<{ reviewId: string }> }) {
   const session = await getAppSession();
   if (!session) redirect("/login?returnTo=/dashboard/sogp/reviews");

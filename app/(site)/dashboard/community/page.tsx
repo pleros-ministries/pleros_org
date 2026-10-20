@@ -11,6 +11,9 @@ import { listPrivateMinistryContacts } from "@/lib/db/queries/private-ministry-c
 import { reportingV3SchemaReady } from "@/lib/db/queries/reporting-v3-gate";
 import { listOwnEnrollees } from "@/lib/db/queries/sogp-follow-up-routes";
 
+// Reads the session on every request (Cache Components).
+export const instant = false;
+
 export default async function CommunityRoute() {
   // Session and context load together: the context resolves its own session,
   // so awaiting one after the other costs a full roundtrip for nothing.

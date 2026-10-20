@@ -7,6 +7,9 @@ import {
   getCommunityContext,
 } from "@/lib/community/context";
 
+// Reads the session on every request (Cache Components).
+export const instant = false;
+
 export default async function CommunityMessagesRoute() {
   // Session and context load together instead of one roundtrip after the other.
   const [session, ctx] = await Promise.all([getAppSession(), getCommunityContext()]);

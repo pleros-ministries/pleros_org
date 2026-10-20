@@ -3,6 +3,9 @@ import { redirect } from "next/navigation";
 import { getAppSession } from "@/lib/app-session";
 import { getDiscipleshipDashboard } from "@/lib/db/queries/sogp-discipleship";
 
+// Reads the session on every request (Cache Components).
+export const instant = false;
+
 /**
  * My disciples is retired: each discipleship group's page in Community now
  * hosts its disciples, check-ins and prayer. Old links (notifications,

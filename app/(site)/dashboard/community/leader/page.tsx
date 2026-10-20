@@ -12,6 +12,9 @@ import { getMinistryDay } from "@/lib/db/queries/ministry-activities";
 import { listContactsForStaff } from "@/lib/db/queries/outreach-contacts";
 import { lagosToday, shiftDate } from "@/lib/sogp/daily-date";
 
+// Reads the session on every request (Cache Components).
+export const instant = false;
+
 export default async function CommunityLeaderRoute({
   searchParams,
 }: {

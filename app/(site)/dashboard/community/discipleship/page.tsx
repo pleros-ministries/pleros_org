@@ -4,6 +4,9 @@ import { getAppSession } from "@/lib/app-session";
 import { canAccessCommunity, getCommunityContext } from "@/lib/community/context";
 import { getCommunityDiscipleship } from "@/lib/db/queries/community-discipleship";
 
+// Reads the session on every request (Cache Components).
+export const instant = false;
+
 /**
  * Old entry point for the discipleship spaces. Each group now has its own
  * page, so this opens the right one: `?group=` when it is the viewer's,

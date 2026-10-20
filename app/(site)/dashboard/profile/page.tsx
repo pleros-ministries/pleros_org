@@ -5,6 +5,9 @@ import { db } from "@/lib/db";
 import { dailyReportPreferences } from "@/lib/db/schema";
 import { reportRemindersEnabled } from "@/lib/db/queries/daily-report-preferences";
 import { ProfileSettings } from "@/components/dashboard/profile-settings";
+
+// Reads the session on every request (Cache Components).
+export const instant = false;
 export default async function ProfilePage() {
   const session = await getAppSession(); if (!session) redirect("/login?returnTo=/dashboard/profile");
   const enabled = reportRemindersEnabled();

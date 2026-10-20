@@ -3,6 +3,9 @@ import { redirect } from "next/navigation";
 import { getAppSession } from "@/lib/app-session";
 import { getLeadMakeUpContext } from "@/lib/db/queries/sogp-review-makeups";
 import { GroupReviewMakeUpOffer } from "@/components/sogp/group-review-make-up-offer";
+
+// Reads the session on every request (Cache Components).
+export const instant = false;
 export default async function MakeUpOfferPage({params}:{params:Promise<{reviewId:string}>}) {
   const session=await getAppSession();if(!session)redirect("/login?returnTo=/dashboard/sogp/reviews");
   const {reviewId}=await params;

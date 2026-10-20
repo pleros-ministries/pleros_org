@@ -5,6 +5,9 @@ import { LearningHistoryView } from "@/components/sogp/learning/learning-history
 import { getAppSession } from "@/lib/app-session";
 import { getOwnLearningHistory } from "@/lib/db/queries/own-learning-history";
 
+// Reads the session on every request (Cache Components).
+export const instant = false;
+
 export const metadata: Metadata = { title: "Your history" };
 
 /** The learner's own SOGP history: tracks, quiz scores, responses and group reviews. */

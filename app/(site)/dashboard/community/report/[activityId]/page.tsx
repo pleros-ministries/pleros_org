@@ -29,6 +29,9 @@ import { LiveMinistryForm } from "@/components/community/report/ministry-v3/live
 import { LiveMeetingFlow } from "@/components/community/report/ministry-v3/live-meeting-flow";
 import { reportingV3Enabled } from "@/lib/db/queries/reporting-v3-gate";
 
+// Reads the session on every request (Cache Components).
+export const instant = false;
+
 const CONTACT_LIMIT = 1000;
 
 export default async function EditActivityRoute({

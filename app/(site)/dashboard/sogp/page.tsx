@@ -14,6 +14,9 @@ import {
 import { canOfferJoinAnotherCohort } from "@/lib/sogp/status";
 import { traditionalDateHref } from "@/lib/sogp/learning-view";
 
+// Reads the session on every request (Cache Components).
+export const instant = false;
+
 export default async function SogpDashboardPage({ searchParams }: { searchParams: Promise<{ date?: string }> }) {
   const session = await getAppSession();
   if (!session) redirect("/login?returnTo=/dashboard/sogp");

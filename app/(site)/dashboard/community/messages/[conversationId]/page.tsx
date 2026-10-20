@@ -12,6 +12,9 @@ import {
   listMessages,
 } from "@/lib/db/queries/community-messages";
 
+// Reads the session on every request (Cache Components).
+export const instant = false;
+
 export default async function CommunityConversationRoute({
   params,
 }: {

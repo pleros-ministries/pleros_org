@@ -6,6 +6,9 @@ import { getAppSession } from "@/lib/app-session";
 import { getSogpEnrollmentByUserId } from "@/lib/db/queries/sogp";
 import { getPreSogpJourney } from "@/lib/db/queries/sogp-journey";
 
+// Reads the session on every request (Cache Components).
+export const instant = false;
+
 export default async function PreSogpRoute() {
   const session = await getAppSession();
   if (!session) redirect("/sogp/enrol");

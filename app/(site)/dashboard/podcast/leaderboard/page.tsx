@@ -4,6 +4,9 @@ import { PodcastLeaderboardPage } from "@/components/dashboard/podcast-leaderboa
 import { getAppSession } from "@/lib/app-session";
 import { getPodcastLeaderboard } from "@/lib/db/queries/podcast-leaderboard";
 
+// Reads the session on every request (Cache Components).
+export const instant = false;
+
 export default async function DashboardPodcastLeaderboardPage() {
   const appSession = await getAppSession();
 

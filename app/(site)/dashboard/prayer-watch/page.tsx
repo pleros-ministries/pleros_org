@@ -7,6 +7,9 @@ import { getPrayerWatchAttendanceForMonth } from "@/lib/db/queries/prayer-watch"
 import { isDateKey } from "@/lib/community/ministry-report";
 import { toDateKey } from "@/lib/prayer-watch";
 
+// Reads the session on every request (Cache Components).
+export const instant = false;
+
 export default async function DashboardPrayerWatchPage({ searchParams }: { searchParams: Promise<{ date?: string; tab?: string }> }) {
   const params = await searchParams;
   // After the request data, so the clock is read at request time, never in the prerender.

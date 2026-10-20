@@ -6,6 +6,9 @@ import { getAppSession } from "@/lib/app-session";
 import { getSogpDashboardData } from "@/lib/db/queries/sogp";
 import styles from "@/components/sogp/learning-tools.module.css";
 
+// Reads the session on every request (Cache Components).
+export const instant = false;
+
 export default async function SogpCertificatePage() {
   const session = await getAppSession();
   if (!session) redirect("/sogp/enrol");

@@ -23,6 +23,9 @@ import { getOwnMinistryReportV3 } from "@/lib/db/queries/ministry-report-v3";
 import { ministryEdit, type MinistryEdit } from "@/lib/community/report-popups";
 import type { MemberActivity } from "@/lib/db/queries/ministry-activities";
 
+// Reads the session on every request (Cache Components).
+export const instant = false;
+
 /** Saved evangelism and discipleship reports that reopen in their pop-up; legacy activities keep the older edit page. */
 async function loadMinistryEdits(userId: string, activities: MemberActivity[]): Promise<Record<number, MinistryEdit>> {
   const ids = activities.filter(row => row.kind === "outreach" || row.kind === "follow_up").map(row => row.id);

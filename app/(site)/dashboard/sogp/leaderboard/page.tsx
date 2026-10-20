@@ -5,6 +5,9 @@ import { getAppSession } from "@/lib/app-session";
 import { getSogpEnrollmentByUserId } from "@/lib/db/queries/sogp";
 import { getSogpLeaderboard } from "@/lib/db/queries/sogp-leaderboard";
 
+// Reads the session on every request (Cache Components).
+export const instant = false;
+
 export default async function SogpLeaderboardPage() {
   const session = await getAppSession();
   if (!session) redirect("/login?returnTo=/dashboard/sogp/leaderboard");

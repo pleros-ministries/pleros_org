@@ -3,6 +3,9 @@ import { getAppSession } from "@/lib/app-session";
 import { getOwnFollowUpWelcome } from "@/lib/db/queries/sogp-follow-up-routes";
 import { FollowUpWelcome } from "@/components/sogp/follow-up-invitations";
 
+// Reads the session on every request (Cache Components).
+export const instant = false;
+
 export default async function FollowUpWelcomePage() {
   const session = await getAppSession();
   if (!session) redirect("/login?returnTo=/dashboard/sogp/follow-up/welcome");

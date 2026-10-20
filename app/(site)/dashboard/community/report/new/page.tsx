@@ -18,6 +18,9 @@ import { LiveMeetingFlow } from "@/components/community/report/ministry-v3/live-
 import { listMeetingUnits, listSharedChurchMeetings } from "@/lib/db/queries/shared-church-meetings";
 import Link from "next/link";
 
+// Reads the session on every request (Cache Components).
+export const instant = false;
+
 /** Most people offered to the follow-up step. */
 const CONTACT_LIMIT = 1000;
 

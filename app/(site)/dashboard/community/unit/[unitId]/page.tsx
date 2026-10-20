@@ -13,6 +13,9 @@ import {
   getUnitPosts,
 } from "@/lib/db/queries/community-posts";
 
+// Reads the session on every request (Cache Components).
+export const instant = false;
+
 export default async function CommunityUnitRoute({
   params,
 }: {

@@ -2,6 +2,9 @@ import { redirect } from "next/navigation";
 import { getAppSession } from "@/lib/app-session";
 import { getOwnLearningView } from "@/lib/db/queries/sogp-learning-view";
 import { LearningBoundary } from "@/components/sogp/learning/learning-boundary";
+
+// Reads the session on every request (Cache Components).
+export const instant = false;
 export default async function SogpListeningPage({ searchParams }: { searchParams: Promise<{ day?: string }> }) {
   const session = await getAppSession();
   if (!session) redirect("/login?returnTo=/dashboard/sogp/listen");

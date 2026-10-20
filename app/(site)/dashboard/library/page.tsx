@@ -7,6 +7,9 @@ import { getAppSession } from "@/lib/app-session";
 import { hasAdvancedSogpInterest } from "@/lib/db/queries/advanced-sogp-interest";
 import { getTeachingSeriesCounts } from "@/lib/db/queries/teachings";
 
+// Reads the session on every request (Cache Components).
+export const instant = false;
+
 export const metadata: Metadata = { title: "Library" };
 
 // The archive changes rarely; the public library caches for the same 60s.

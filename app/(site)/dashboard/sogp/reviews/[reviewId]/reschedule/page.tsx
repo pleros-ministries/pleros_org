@@ -4,6 +4,9 @@ import { getOwnAttendanceSheet, getReviewGroups } from "@/lib/db/queries/sogp-gr
 import { GroupReviewSchedule } from "@/components/sogp/group-review-schedule";
 import { rescheduleGroupReview, scheduleGroupReview } from "@/app/_actions/sogp-group-review-actions";
 
+// Reads the session on every request (Cache Components).
+export const instant = false;
+
 const lagosDate = new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Lagos", year: "numeric", month: "2-digit", day: "2-digit" });
 const lagosClock = new Intl.DateTimeFormat("en-GB", { timeZone: "Africa/Lagos", hour: "2-digit", minute: "2-digit", hour12: false });
 

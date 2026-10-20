@@ -21,6 +21,9 @@ import {
 import { lagosToday, shiftDate } from "@/lib/sogp/daily-date";
 import { enumerateDateKeys } from "@/lib/sogp/daily-participation";
 
+// Reads the session on every request (Cache Components).
+export const instant = false;
+
 /** Four weeks of week cards. */
 const HISTORY_DAYS = 28;
 

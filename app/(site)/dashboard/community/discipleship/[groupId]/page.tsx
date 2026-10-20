@@ -10,6 +10,9 @@ import { getCommunityDiscipleship } from "@/lib/db/queries/community-discipleshi
 import { getDiscipleshipDashboard } from "@/lib/db/queries/sogp-discipleship";
 import { getLeaderEpisodeQuestions, getOwnEpisodeQuestions } from "@/lib/db/queries/sogp-episode-questions";
 
+// Reads the session on every request (Cache Components).
+export const instant = false;
+
 export const metadata: Metadata = { title: "Discipleship group" };
 
 const TABS: LeaderTab[] = ["disciples", "discussion", "checkins", "prayer"];

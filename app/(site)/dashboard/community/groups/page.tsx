@@ -16,6 +16,9 @@ import { listPrivateMinistryContacts } from "@/lib/db/queries/private-ministry-c
 import { reportingV3SchemaReady } from "@/lib/db/queries/reporting-v3-gate";
 import { listOwnEnrollees } from "@/lib/db/queries/sogp-follow-up-routes";
 
+// Reads the session on every request (Cache Components).
+export const instant = false;
+
 export default async function CommunityGroupsRoute({ searchParams }: { searchParams: Promise<{ create?: string }> }) {
   const { create } = await searchParams;
   // Session and context load together instead of one roundtrip after the other.

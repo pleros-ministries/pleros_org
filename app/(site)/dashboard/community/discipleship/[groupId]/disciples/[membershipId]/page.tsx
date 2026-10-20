@@ -9,6 +9,9 @@ import { getDiscipleWork } from "@/lib/db/queries/discipleship-work";
 import { getLeaderEpisodeQuestions } from "@/lib/db/queries/sogp-episode-questions";
 import { lagosToday, shiftDate } from "@/lib/sogp/daily-date";
 
+// Reads the session on every request (Cache Components).
+export const instant = false;
+
 export const metadata: Metadata = { title: "Disciple" };
 
 const weekday = new Intl.DateTimeFormat("en-GB", { weekday: "short", timeZone: "UTC" });
