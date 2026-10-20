@@ -90,3 +90,14 @@ a.row:hover { background: #f8f9fb; }
 .boardName { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; line-height: 18px; color: var(--color-text-strong); }
 .boardPts { flex: none; font-family: var(--font-dashboard-heading); font-size: 13px; font-weight: 500; font-variant-numeric: tabular-nums; color: var(--color-text-strong); }
 .boardPts small { font-family: var(--font-dashboard); font-size: 11px; font-weight: 400; color: var(--color-text-muted); }
+
+/* Home's denser leaderboard preview (Pastor, 20 October): smaller rows and header, top three and you. */
+.board[data-dense] .boardHead { gap: 8px; padding: 9px 12px; }
+.board[data-dense] .boardHead h2 { font-size: 14px !important; line-height: 18px; }
+.board[data-dense] .boardIcon { width: 26px; height: 26px; border-radius: 8px; }
+.board[data-dense] .boardList { padding: 3px 5px; }
+.board[data-dense] .boardRow { gap: 8px; min-height: 28px; padding: 0 7px; border-radius: 7px; }
+.board[data-dense] .boardRank { width: 20px; height: 20px; border-radius: 6px; font-size: 11px; }
+.board[data-dense] .boardName, .board[data-dense] .boardPts { font-size: 12.5px; line-height: 16px; }
+.board[data-dense] .boardGap { margin-top: 8px; }
+.board[data-dense] .boardGap::before { top: -9px; }

@@ -50,6 +50,8 @@ export type HomeSogp = {
   };
   leaderboard: { rank: number; points: number } | null;
   /** The cohort's top five and the viewer, for Home's leaderboard preview (Pastor, 20 October). */
+  /** The learner's invite link and code for Home's Invite someone panel (Pastor, 20 October). */
+  invite?: { code: string; url: string; joined: number } | null;
   board?: { top: Array<{ rank: number; name: string; points: number; isMe: boolean }>; me: { rank: number; points: number } | null; total: number } | null;
   group: { kind: "member"; groupName: string; leaderFirstName: string } | { kind: "leader"; groups: number; disciples: number } | { kind: "none" };
   shareDayNumber: number | null;

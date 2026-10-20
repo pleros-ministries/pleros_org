@@ -218,3 +218,19 @@ export async function getSogpReferralsDashboard(
     }),
   };
 }
+
+/** Home's Invite someone panel: the learner's link and code, and how many joined with them. */
+export async function getHomeInvite(userId: string): Promise<{ code: string; url: string; joined: number } | null> {
+  const [head] = await db
+    .select({ id: schema.sogpEnrollments.id })
+    .from(schema.sogpEnrollments)
+    .where(eq(schema.sogpEnrollments.userId, userId))
+    .orderBy(desc(schema.sogpEnrollments.createdAt))
+    .limit(1);
+  if (!head) return null;
+  const [code, [joined]] = await Promise.all([
+    ensureSogpReferralCode(head.id),
+    db.select({ n: count() }).from(schema.sogpEnrollments).where(eq(schema.sogpEnrollments.referredByEnrollmentId, head.id)),
+  ]);
+  return { code, url: buildReferralUrl(resolvePublicSiteUrl(process.env), code), joined: joined?.n ?? 0 };
+}

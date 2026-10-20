@@ -4,9 +4,10 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type ReactNode } from "react";
-import { GiftIcon, Share2Icon, TrophyIcon, UserPlusIcon, UsersRoundIcon } from "lucide-react";
+import { CheckIcon, CopyIcon, GiftIcon, Share2Icon, TrophyIcon, UserPlusIcon, UsersRoundIcon } from "lucide-react";
 import type { DashboardHomeData, HomeLearningCard, HomeReport, HomeSogp, HomeToday } from "@/lib/dashboard/home";
 import { PRAYER_WATCH_YOUTUBE_URL } from "@/lib/prayer-watch";
+import { buildReferralShareMessage } from "@/lib/sogp/referral";
 import { LeaderboardPreview } from "@/components/sogp/learning/leaderboard-preview";
 import { DashboardIcon, StatusPill } from "./primitives";
 import styles from "./dashboard.module.css";
@@ -280,9 +281,10 @@ function GrowTogether({ sogp }: { sogp: HomeSogp }) {
       {sogp.board ? null : <ActionRow href="/dashboard/sogp/leaderboard" icon={<TrophyIcon className="size-4" strokeWidth={2} />} tone={["#fff1c2", "#8a5a00"]} title={sogp.leaderboard ? <>Leaderboard · <span className={styles.homeRank}>#{sogp.leaderboard.rank}</span></> : "Leaderboard"} action="View">
         <span>{sogp.leaderboard ? `${sogp.leaderboard.points} points this cohort` : "See how your cohort is growing"}</span>
       </ActionRow>}
-      <ActionRow href="/dashboard/sogp/referrals" icon={<UserPlusIcon className="size-4" strokeWidth={2} />} tone={["#f6d9de", "#5e2236"]} title="Invite someone" action="Share link">
+      {/* With a link to show, Invite someone has its own panel. */}
+      {sogp.invite ? null : <ActionRow href="/dashboard/sogp/referrals" icon={<UserPlusIcon className="size-4" strokeWidth={2} />} tone={["#f6d9de", "#5e2236"]} title="Invite someone" action="Share link">
         <span>Share your link and walk with them</span>
-      </ActionRow>
+      </ActionRow>}
       {group.kind === "member"
         ? <ActionRow href="/dashboard/community/discipleship" prefetch={false} icon={<UsersRoundIcon className="size-4" strokeWidth={2} />} tone={["#efe7fb", "#56209c"]} title="My group" action="Open"><span>{group.leaderFirstName}&apos;s group</span></ActionRow>
         : group.kind === "leader"
@@ -293,6 +295,40 @@ function GrowTogether({ sogp }: { sogp: HomeSogp }) {
       </ActionRow>
     </ul>
     {sharing ? <ShareLearningProgressDialog open={sharing} onOpenChange={setSharing} track="sogp" dayNumber={sogp.shareDayNumber ?? undefined} /> : null}
+  </section>;
+}
+
+/** Invite someone as its own panel (Pastor, 20 October): the link and code to copy, and Share. Sharing never assigns or invites by itself. */
+function InvitePanel({ invite }: { invite: NonNullable<HomeSogp["invite"]> }) {
+  const [copied, setCopied] = useState<"link" | "code" | null>(null);
+  const copy = async (kind: "link" | "code") => {
+    try { await navigator.clipboard.writeText(kind === "link" ? invite.url : invite.code); setCopied(kind); window.setTimeout(() => setCopied(null), 2000); } catch { setCopied(null); }
+  };
+  const share = async () => {
+    const text = `${buildReferralShareMessage()} ${invite.url}`;
+    try { if (navigator.share) { await navigator.share({ title: "Join me in SOGP", text, url: invite.url }); return; } } catch { return; }
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer");
+  };
+  const copyButton = (kind: "link" | "code") => <button type="button" className={styles.homeInviteCopy} onClick={() => copy(kind)} aria-label={kind === "link" ? "Copy your link" : "Copy your code"}>
+    {copied === kind ? <><CheckIcon className="size-3.5" strokeWidth={2.4} aria-hidden="true" />Copied</> : <><CopyIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" />Copy</>}
+  </button>;
+  return <section className={styles.homeSection} aria-labelledby="home-invite-heading">
+    <div className={styles.homeSectionHeader}>
+      <h2 id="home-invite-heading">Invite someone</h2>
+      <Link href="/dashboard/sogp/referrals" className={styles.textAction}>{invite.joined ? `${invite.joined} joined with you` : "Who joined"}</Link>
+    </div>
+    <div className={`${styles.homePanel} ${styles.homeInvite}`}>
+      <p className={styles.homeInviteLead}>Share your link and walk with them through SOGP.</p>
+      <div className={styles.homeInviteField}>
+        <span className={styles.homeInviteValue}><b>{invite.url.replace(/^https?:\/\//, "")}</b><span>Your link</span></span>
+        {copyButton("link")}
+      </div>
+      <div className={styles.homeInviteField}>
+        <span className={styles.homeInviteValue}><b>{invite.code}</b><span>Your code</span></span>
+        {copyButton("code")}
+      </div>
+      <button type="button" className={styles.homeInviteShare} onClick={share}><Share2Icon className="size-4" strokeWidth={2.2} aria-hidden="true" />Share your link</button>
+    </div>
   </section>;
 }
 
@@ -321,9 +357,10 @@ export function DashboardHomeView({ name, greeting, data }: { name?: string; gre
       {sogp?.today ? <TodaySection today={sogp.today} /> : null}
       {sogp?.progress ? <ProgressSection progress={sogp.progress} /> : null}
       {/* The same leaderboard preview as Learning (Pastor, 20 October), not one row among the others. */}
-      {sogp?.board ? <div className={styles.homeSection}><LeaderboardPreview board={sogp.board} id="home-leaderboard" /></div> : null}
+      {sogp?.board ? <div className={styles.homeSection}><LeaderboardPreview board={sogp.board} id="home-leaderboard" dense /></div> : null}
     </div>
     <div className={styles.homeSide}>
+      {sogp?.invite ? <InvitePanel invite={sogp.invite} /> : null}
       {sogp ? <GrowTogether sogp={sogp} /> : null}
       {data.reports ? <ReportsDestination day={data.day} rows={data.reports} /> : null}
     </div>

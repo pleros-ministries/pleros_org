@@ -377,3 +377,14 @@
 .homeActionCopy .homeRank { font-family: var(--font-dashboard-heading), "Sen", sans-serif; font-size: 14px; color: var(--color-text-strong); }
 .homeActionButton { flex: none; display: inline-flex; align-items: center; height: 32px; padding: 0 12px; border: 0; border-radius: 10px; background: var(--color-community-blue, #2056d6); color: white; font: inherit; font-size: 12.5px; font-weight: 500; text-decoration: none; white-space: nowrap; cursor: pointer; }
 .homeActionButton:hover { filter: brightness(1.06); }
+
+/* Invite someone as its own panel on Home (Pastor, 20 October): the link and code to copy, and Share. */
+.homeInvite { display: grid; gap: 10px; padding: 14px 16px 16px; }
+.homeInviteLead { margin: 0; font-size: 13px; line-height: 19px; color: var(--color-text-muted); }
+.homeInviteField { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 4px 4px 4px 12px; border: 1px solid var(--dashboard-panel-edge, #e2e5ea); border-radius: 10px; background: #f6f7f9; }
+.homeInviteValue { display: grid; flex: 1; min-width: 0; }
+.homeInviteValue b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13.5px; line-height: 18px; font-weight: 500; color: var(--color-text-strong); }
+.homeInviteValue span { font-size: 11.5px; line-height: 15px; color: var(--color-text-muted); }
+.homeInviteCopy { flex: none; display: inline-flex; align-items: center; gap: 5px; height: 34px; padding: 0 11px; border: 1px solid var(--dashboard-panel-edge, #e2e5ea); border-radius: 8px; background: white; color: var(--color-community-blue, #2056d6); font: inherit; font-size: 12.5px; font-weight: 500; cursor: pointer; }
+.homeInviteShare { display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 40px; border: 0; border-radius: 10px; background: var(--color-community-blue, #2056d6); color: white; font: inherit; font-size: 13.5px; font-weight: 500; cursor: pointer; }
+.homeInviteShare:hover, .homeInviteCopy:hover { filter: brightness(1.04); }

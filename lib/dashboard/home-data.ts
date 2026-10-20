@@ -12,6 +12,7 @@ import { getOwnCertificationFacts } from "@/lib/db/queries/sogp-certification-fa
 import { getHomeDiscipleshipSummary } from "@/lib/db/queries/sogp-discipleship";
 import { getActiveSogpJourney } from "@/lib/db/queries/sogp-journey";
 import { getSogpLeaderboard } from "@/lib/db/queries/sogp-leaderboard";
+import { getHomeInvite } from "@/lib/db/queries/sogp-referrals";
 import { getReminderPreferences } from "@/lib/db/queries/notification-preferences";
 import { cohortWeekLabel, homeReportRows, homeSogpToday, type DashboardHomeData, type HomeSogp } from "./home";
 
@@ -20,7 +21,7 @@ export async function getDashboardHomeData(viewer: NonNullable<Awaited<ReturnTyp
   const userId = viewer.session.user.id;
   const day = lagosToday();
   const enrolled = viewer.capabilities.sogpEnrolled;
-  const [course, reports, state, journey, facts, leaderboard, group, welcomePackDone] = await Promise.all([
+  const [course, reports, state, journey, facts, leaderboard, group, welcomePackDone, invite] = await Promise.all([
     viewer.capabilities.sogpEnrolled ? getSogpDashboardData(userId) : Promise.resolve(null),
     viewer.capabilities.reporting ? Promise.all([listActivitiesForDay(userId, day), getDayActivity(userId, day), getOwnDailyDeclarations(userId, day)]).then(([activities, devotional, declarations]) => homeReportRows({
       devotionalCount: activityLines(devotional).filter(line => line.detail !== null).length,
@@ -36,6 +37,7 @@ export async function getDashboardHomeData(viewer: NonNullable<Awaited<ReturnTyp
     enrolled ? getHomeDiscipleshipSummary(userId).catch(() => ({ kind: "none" as const })) : Promise.resolve({ kind: "none" as const }),
     // Unreadable preferences hide the row rather than nag.
     getReminderPreferences(userId).then(prefs => prefs.remindersSavedAt !== null).catch(() => true),
+    enrolled ? getHomeInvite(userId).catch(() => null) : Promise.resolve(null),
   ]);
   const next = course?.tracks.find(track => track.accessible && track.lesson.status === "published" && !track.completed);
   const last = course?.tracks.filter(track => track.accessible && track.lesson.status === "published").at(-1);
@@ -83,6 +85,7 @@ export async function getDashboardHomeData(viewer: NonNullable<Awaited<ReturnTyp
       total: leaderboard.total,
     } : null,
     group,
+    invite,
     shareDayNumber: journey.days.find(row => row.dateKey === day)?.track?.dayNumber ?? lesson?.dayNumber ?? null,
   } : null;
   return {
