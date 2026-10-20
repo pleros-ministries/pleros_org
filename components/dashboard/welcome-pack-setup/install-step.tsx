@@ -146,9 +146,8 @@ export function InstallStep({
       ) : (
         <>
           <p>
-            Use your browser menu to install Pleros. If you opened this from
-            Telegram, Instagram or Facebook, open pleros.org in Chrome or Safari
-            first.
+            Open pleros.org in Chrome or Safari, then choose Install from the
+            browser menu.
           </p>
           {confirmButton}
         </>

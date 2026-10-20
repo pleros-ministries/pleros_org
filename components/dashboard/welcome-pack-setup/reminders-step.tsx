@@ -152,8 +152,8 @@ export function RemindersStep({
         </legend>
         <ReminderCheckbox
           name={REMINDER_FORM_FIELDS.community}
-          label="Messages, replies and community updates"
-          helper="Private messages, Ask Pleros replies, discipleship and Pleros updates."
+          label="Messages and community updates"
+          helper="Messages, replies and news from your groups."
           checked={choices.communityEnabled}
           disabled={preview}
           onChange={(checked) =>
@@ -162,7 +162,7 @@ export function RemindersStep({
         />
         <ReminderCheckbox
           name={REMINDER_FORM_FIELDS.progressNudges}
-          label="Evening nudge when today's teaching is unfinished"
+          label="An evening nudge if today’s teaching isn’t done"
           checked={choices.progressNudgesEnabled}
           disabled={preview}
           onChange={(checked) =>

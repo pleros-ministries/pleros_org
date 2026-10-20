@@ -79,7 +79,7 @@ export function NotificationsStep({
   return (
     <>
       {hasPushOnAnyDevice ? (
-        <p className={SETUP_NOTE}>On for another device. Turn them on here too.</p>
+        <p className={SETUP_NOTE}>On for another device. Turn them on here as well.</p>
       ) : null}
       <button
         type="button"

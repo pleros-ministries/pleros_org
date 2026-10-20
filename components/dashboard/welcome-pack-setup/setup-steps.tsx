@@ -61,7 +61,7 @@ export function SetupSteps({
         <StepCard
           number={1}
           title="Install the Pleros app"
-          description="Open Pleros from your Home Screen, full screen, like any other app."
+          description="Open Pleros in one tap from your home screen."
           done={installed}
         >
           <InstallStep
@@ -76,7 +76,7 @@ export function SetupSteps({
         <StepCard
           number={2}
           title="Turn on notifications"
-          description="Reminders reach each device where you turn them on."
+          description="So reminders reach this phone."
           done={!preview && push.isSubscribed}
         >
           <NotificationsStep
@@ -91,7 +91,7 @@ export function SetupSteps({
         <StepCard
           number={3}
           title="Choose your teaching time"
-          description="One reminder a day, at the time you plan to study."
+          description="When should we remind you to study?"
           done={view.teachingTimeMinutes !== null}
         >
           <TeachingTimeStep
@@ -106,7 +106,7 @@ export function SetupSteps({
         <StepCard
           number={4}
           title="Set your reminders"
-          description="Choose what Pleros reminds you about. You can change this at any time."
+          description="Pick what you’d like to hear about."
           done={view.remindersSaved}
         >
           <RemindersStep
@@ -124,7 +124,7 @@ export function SetupSteps({
           {continueLabel}
         </Link>
         <p className={`font-[var(--font-be-vietnam-pro)] ${SETUP_NOTE}`}>
-          You can change these any time in Profile, under Notifications and reminders.
+          Change these any time in Profile.
         </p>
       </div>
     </div>

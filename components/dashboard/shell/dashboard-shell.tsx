@@ -25,6 +25,7 @@ import frame from "./dashboard-shell.module.css";
 import { compactButton, focusRing } from "./styles";
 import { Breadcrumbs, CrumbLabelProvider } from "./breadcrumbs";
 import { YouBottomBar } from "./you-bottom-bar";
+import { GetAppButton } from "@/components/pwa/get-app-button";
 
 export type DashboardShellViewer = { name: string; roleLabel: string; image?: string | null };
 
@@ -112,7 +113,9 @@ function SignOutSubmit({ compact = false }: { compact?: boolean }) {
 }
 
 function AccountActions({ compact = false }: { compact?: boolean }) {
-  return <div className={frame.accountActions}>
+  return <div className={frame.accountActions} style={compact ? undefined : { flexWrap: "wrap" }}>
+    {/* Download Pleros, always to hand but quiet (Pastor, 20 October); hidden once installed. */}
+    {compact ? null : <GetAppButton tone="quiet" className="w-full" />}
     {/* Full reload after sign-out so no preserved page state survives for the next person. */}
     <form action={async () => { await signOutDashboardAction(); window.location.assign("/login"); }} className="flex flex-1"><SignOutSubmit compact={compact} /></form>
   </div>;
