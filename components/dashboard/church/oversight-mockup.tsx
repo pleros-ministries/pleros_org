@@ -88,8 +88,8 @@ function Rate({ group }: { group: Group }) {
 
 /** A small dot and a word instead of a filled pill. */
 function Mark({ ok, label }: { ok: boolean; label: string }) {
-  return <span className="inline-flex shrink-0 items-center gap-1.5 text-[12px] leading-4" style={{ color: ok ? "var(--color-community-muted)" : "#a15c12" }}>
-    <i className="size-1.5 rounded-full" style={{ background: ok ? "#9aa7c4" : "#d98a1f" }} aria-hidden="true" />{label}
+  return <span className="inline-flex shrink-0 items-center gap-1.5 text-[12px] leading-4" style={{ color: ok ? "var(--color-community-green-ink)" : "#a15c12" }}>
+    <i className="size-1.5 rounded-full" style={{ background: ok ? "var(--color-community-green-ink)" : "#d98a1f" }} aria-hidden="true" />{label}
   </span>;
 }
 
