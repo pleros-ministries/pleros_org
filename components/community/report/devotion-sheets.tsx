@@ -16,6 +16,9 @@ const dayMonth = new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numer
 const longDate = (dateKey: string) => dayMonth.format(new Date(`${dateKey}T00:00:00Z`));
 const chapters = (n: number) => `${n} ${n === 1 ? "chapter" : "chapters"}`;
 
+/** The report page's optimistic save: shows the patch now and puts it back if the save fails. */
+export type OptimisticSave = (patch: { prayer?: string[]; bible?: string; teaching?: string }, action: () => Promise<{ ok: boolean; error?: string }>) => void;
+
 /** Runs a pop-up save, refreshes the page and closes the sheet; keeps the entries on failure. */
 function useSheetSave() {
   const router = useRouter();
@@ -73,9 +76,11 @@ export function BiblePlanSheet({ dateKey, plan, onClose, onSaved }: {
 }
 
 /** The day's reading on the plan: one tap for the planned chapters, or another number from the same place. */
-export function BibleTodaySheet({ dateKey, day, onClose, onChangePlan }: {
+export function BibleTodaySheet({ dateKey, day, onClose, onChangePlan, onOptimistic }: {
   dateKey: string; day: BibleDay & { reading: NonNullable<BibleDay["reading"]>; plan: NonNullable<BibleDay["plan"]> };
   onClose: () => void; onChangePlan: () => void;
+  /** Optimistic (user request, 20 October): the row shows the reading at once and the sheet closes. */
+  onOptimistic?: OptimisticSave;
 }) {
   const { pending, error, save } = useSheetSave();
   const { plan, reading, logged } = day;
@@ -83,7 +88,13 @@ export function BibleTodaySheet({ dateKey, day, onClose, onChangePlan }: {
   const start: BiblePosition = reading.start;
   const end = readingEnd(start, count);
   const label = readingLabel(start, end);
-  const log = (n: number | undefined, close: () => void) => save(() => logPlanReadingAction({ dateKey, chapters: n }), close);
+  const log = (n: number | undefined, close: () => void) => {
+    if (!onOptimistic) { save(() => logPlanReadingAction({ dateKey, chapters: n }), close); return; }
+    const amount = n ?? plan.chaptersPerDay;
+    const to = readingEnd(start, amount);
+    onOptimistic({ bible: `${chapters(amount)}, now at ${to.book} ${to.chapter}` }, () => logPlanReadingAction({ dateKey, chapters: n }));
+    close();
+  };
 
   return <ReportSheet title="Bible reading" subtitle={longDate(dateKey)} onClose={onClose}
     footer={close => <>
@@ -114,15 +125,17 @@ export function BibleFreeSheet({ dateKey, initial, onClose }: { dateKey: string;
   </ReportSheet>;
 }
 
-export function PrayerWatchSheet({ dateKey, attended, onClose }: { dateKey: string; attended: string[]; onClose: () => void }) {
+export function PrayerWatchSheet({ dateKey, attended, onClose, onChange }: { dateKey: string; attended: string[]; onClose: () => void; onChange?: (sessions: string[]) => void }) {
   return <ReportSheet title="Prayer Watch" subtitle={longDate(dateKey)} onClose={onClose}
     footer={close => <button type="button" className={styles.primary} onClick={close}>Done</button>}>
-    {() => <PrayerWatchInline date={dateKey} attended={attended} disabled={false} />}
+    {() => <PrayerWatchInline date={dateKey} attended={attended} disabled={false} onChange={onChange} />}
   </ReportSheet>;
 }
 
 /** Teaching (Pastor: a general Teaching report, SOGP, podcast or both, with optional extra details). */
-export function TeachingSheet({ dateKey, sogp, podcast, report, available, onClose }: {
+export function TeachingSheet({ dateKey, sogp, podcast, report, available, onClose, onOptimistic }: {
+  /** Optimistic (user request, 20 October): the row shows the teaching at once and the sheet closes. */
+  onOptimistic?: OptimisticSave;
   dateKey: string;
   /** What SOGP and the podcast recorded by themselves that day, if anything. */
   sogp: string | null; podcast: string | null;
@@ -137,7 +150,11 @@ export function TeachingSheet({ dateKey, sogp, podcast, report, available, onClo
   ].filter(line => line !== null);
 
   return <ReportSheet title="Teaching" subtitle="What did you learn from today?" onClose={onClose}
-    footer={available ? close => <button type="button" className={styles.primary} disabled={pending} onClick={() => save(() => saveTeachingReportAction({ dateKey, source, note }), close)}>{pending ? "Saving…" : "Save teaching"}</button> : undefined}>
+    footer={available ? close => <button type="button" className={styles.primary} disabled={pending} onClick={() => {
+      if (!onOptimistic) { save(() => saveTeachingReportAction({ dateKey, source, note }), close); return; }
+      onOptimistic({ teaching: `${source === "both" ? "SOGP and podcast" : source === "sogp" ? "SOGP" : "Podcast"}${note.trim() ? " · note added" : ""}` }, () => saveTeachingReportAction({ dateKey, source, note }));
+      close();
+    }}>{pending ? "Saving…" : "Save teaching"}</button> : undefined}>
     {() => <>
       <Segmented label="Teaching from" options={TEACHING_SOURCES} value={source} onChange={setSource} />
       <div className={styles.box}>

@@ -261,9 +261,13 @@ describe("activityLines", () => {
     expect(activityLines(idle).find((line) => line.key === "sogp")?.detail).toBeNull();
   });
 
-  test("an old Prayer Watch record with no session still counts as attended", () => {
+  test("a Prayer Watch record with no session reads as another time", () => {
+    // "Another time" (20 October) is stored as `unspecified`, as older logs are.
     expect(
       activityLines({ ...NO_DAY_ACTIVITY, prayerWatch: ["unspecified"] })[1]?.detail,
-    ).toBe("attended");
+    ).toBe("another time");
+    expect(
+      activityLines({ ...NO_DAY_ACTIVITY, prayerWatch: ["morning", "unspecified"] })[1]?.detail,
+    ).toBe("morning, another time");
   });
 });

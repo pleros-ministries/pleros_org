@@ -248,9 +248,12 @@ export function activityLines(activity: DayActivity): ActivityLine[] {
   const named = SESSION_ORDER.filter((session) =>
     activity.prayerWatch.includes(session),
   );
+  // "Another time" is stored as `unspecified` (user request, 20 October).
+  const another = activity.prayerWatch.includes("unspecified");
+  const parts = [...named, ...(another ? ["another time"] : [])];
   const prayerDetail =
-    named.length > 0
-      ? named.join(", ")
+    parts.length > 0
+      ? parts.join(", ")
       : activity.prayerWatch.length > 0
         ? "attended"
         : null;

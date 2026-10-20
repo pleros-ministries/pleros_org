@@ -1,10 +1,11 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 
 import { saveBibleReadingLogAction, togglePrayerWatchAttendanceAction } from "@/app/_actions/prayer-watch-actions";
 import { BIBLE_BOOKS, getBibleBook } from "@/lib/bible-reading";
 import { PRAYER_WATCH_SESSIONS } from "@/lib/prayer-watch";
+import { PRAYER_WATCH_ANOTHER_TIME } from "@/lib/prayer-watch-session";
 import styles from "./daily-report-sections.module.css";
 
 /**
@@ -13,31 +14,42 @@ import styles from "./daily-report-sections.module.css";
  * Both use the same actions as the Prayer Watch page.
  */
 
-export function PrayerWatchInline({ date, attended, disabled }: { date: string; attended: string[]; disabled: boolean }) {
+/**
+ * Optimistic (user request, 20 October): a tap shows at once and reports up
+ * through `onChange`, so the report row updates without waiting; a failed save
+ * rolls that session back and says so. Chips never lock while saving.
+ */
+export function PrayerWatchInline({ date, attended, disabled, onChange }: { date: string; attended: string[]; disabled: boolean; onChange?: (sessions: string[]) => void }) {
   const router = useRouter();
   const [on, setOn] = useState(() => new Set(attended));
+  // The latest set, so a rollback after several quick taps undoes only its own session.
+  const current = useRef(on);
   const [error, setError] = useState<string | null>(null);
-  const [pending, start] = useTransition();
+  const [, start] = useTransition();
+  const sessions = [...PRAYER_WATCH_SESSIONS.map(session => ({ id: session.id as string, label: session.label, time: session.time })), { id: PRAYER_WATCH_ANOTHER_TIME.id as string, label: PRAYER_WATCH_ANOTHER_TIME.label, time: "Outside these times" }];
+  function apply(next: Set<string>) { current.current = next; setOn(next); onChange?.([...next]); }
   function toggle(session: string) {
-    const was = on.has(session);
-    setOn(current => { const next = new Set(current); if (was) next.delete(session); else next.add(session); return next; });
+    const was = current.current.has(session);
+    const next = new Set(current.current); if (was) next.delete(session); else next.add(session);
+    apply(next);
     setError(null);
     start(async () => {
       const form = new FormData();
       form.set("date", date); form.set("session", session); form.set("attended", String(was));
-      const result = await togglePrayerWatchAttendanceAction({ error: null }, form);
+      const result = await togglePrayerWatchAttendanceAction({ error: null }, form).catch(() => ({ error: "That couldn’t be saved. Try again." }));
       if (result.error) {
         setError(result.error);
-        setOn(current => { const next = new Set(current); if (was) next.add(session); else next.delete(session); return next; });
+        const back = new Set(current.current); if (was) back.add(session); else back.delete(session);
+        apply(back);
         return;
       }
       router.refresh();
     });
   }
   return <div className={styles.inlineForm}>
-    <p className={styles.hint}>Tap each session you joined, live or as a replay.</p>
+    <p className={styles.hint}>Tap each time you prayed, live or as a replay.</p>
     <div className={styles.sessionRow}>
-      {PRAYER_WATCH_SESSIONS.map(session => <button key={session.id} type="button" aria-pressed={on.has(session.id)} disabled={disabled || pending} onClick={() => toggle(session.id)} className={styles.sessionChip}>
+      {sessions.map(session => <button key={session.id} type="button" aria-pressed={on.has(session.id)} disabled={disabled} onClick={() => toggle(session.id)} className={styles.sessionChip} data-wide={session.id === PRAYER_WATCH_ANOTHER_TIME.id || undefined}>
         <span>{session.label}</span><span className={styles.meta}>{session.time}</span>
       </button>)}
     </div>

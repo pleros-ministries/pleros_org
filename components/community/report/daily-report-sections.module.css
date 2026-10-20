@@ -96,6 +96,7 @@ a.row { padding: 8px 14px; }
 .sessionChip[aria-pressed="true"] { border-color: var(--color-community-blue, #2056d6); background: #e4ebfd; color: #2331ae; }
 .sessionChip[aria-pressed="true"] .meta { color: #2331ae; }
 .sessionChip:disabled { opacity: .6; cursor: default; }
+.sessionChip[data-wide] { grid-column: 1 / -1; grid-auto-flow: column; justify-content: center; align-items: baseline; align-content: center; gap: 8px; min-height: 40px; }
 .fieldRow { display: flex; gap: 8px; min-width: 0; }
 .field { display: grid; flex: 1; gap: 5px; min-width: 0; font-size: 13px; font-weight: 500; }
 .field input, .field select { width: 100%; min-width: 0; height: 40px; padding: 0 10px; border: 1px solid var(--color-line); border-radius: 10px; background: white; color: var(--color-text-strong); font: inherit; font-size: 14px; font-weight: 400; }

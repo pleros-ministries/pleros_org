@@ -75,7 +75,7 @@ export function PodcastDailyTasks({
   onSetPrayerComplete: (dateKey: string, complete: boolean) => void;
 }) {
   const [episodePending, startEpisodeTransition] = useTransition();
-  const [prayerPending, startPrayerTransition] = useTransition();
+  const [, startPrayerTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [playing, setPlaying] = useState(false);
   const [started, setStarted] = useState(false);
@@ -277,7 +277,7 @@ export function PodcastDailyTasks({
           </span>
           <DoneButton
             complete={day.prayerWatchComplete}
-            disabled={isFuture || prayerPending}
+            disabled={isFuture}
             onClick={togglePrayer}
           />
         </div>

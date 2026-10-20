@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
+import { useState, useTransition, type ReactNode } from "react";
 import { BookOpenIcon, CheckIcon, ChevronRightIcon, HeartHandshakeIcon, PlusIcon, UsersRoundIcon } from "lucide-react";
 
 import { clearDailyReportDeclaration, declareDailyReport } from "@/app/(site)/dashboard/community/_actions/daily-report-actions";
@@ -11,7 +12,8 @@ import { activityKindLabel } from "@/lib/community/ministry-activities";
 import { MINISTRY_FIELDS, type ActivityLine } from "@/lib/community/ministry-report";
 import type { MinistryContact } from "@/lib/community/reporting-v3";
 import type { MemberActivity } from "@/lib/db/queries/ministry-activities";
-import type { MinistryEdit } from "@/lib/community/report-popups";
+import { readingEnd, type MinistryEdit } from "@/lib/community/report-popups";
+import { prayerSessionsLine } from "@/lib/prayer-watch-session";
 import type { BibleDay, TeachingReport } from "@/lib/db/queries/report-popups";
 
 import { ActivityCard } from "./activity-card";
@@ -22,6 +24,10 @@ import { DiscipleshipSheet, EvangelismSheet } from "./ministry-sheets";
 import { ReportSheet } from "./report-sheet";
 import { useReportAction } from "./use-report-action";
 import styles from "./daily-report-sections.module.css";
+
+/** What a devotion save shows before the page refreshes; undefined fields fall back to the server's data. */
+type DevotionOverride = { date: string; prayer?: string[]; bible?: string; teaching?: string };
+const capitalise = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
 
 /** Matches the review sheet exit in daily-report-sections.module.css. */
 const REVIEW_EXIT_MS = 180;
@@ -127,7 +133,24 @@ export function DailyReportSections({ today, days, selected, activities, edits =
   popupsReady?: boolean;
 }) {
   const { run, pending, error } = useReportAction();
+  const router = useRouter();
   const [popup, setPopup] = useState<Popup | null>(null);
+  // Optimistic devotion (user request, 20 October): what was just saved shows at once, for this day only.
+  const [override, setOverride] = useState<DevotionOverride>({ date: selected });
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const shown = override.date === selected ? override : { date: selected };
+  const [, startSave] = useTransition();
+  /** Shows the patch now, saves in the background, and puts the row back if the save fails. */
+  const optimisticSave = (patch: Omit<DevotionOverride, "date">, action: () => Promise<{ ok: boolean; error?: string }>) => {
+    const before = shown;
+    setOverride({ ...shown, ...patch, date: selected });
+    setSaveError(null);
+    startSave(async () => {
+      const result = await action().catch(() => ({ ok: false, error: "That couldn’t be saved. Try again." }));
+      if (!result.ok) { setOverride(before); setSaveError(result.error ?? "That couldn’t be saved. Try again."); return; }
+      router.refresh();
+    });
+  };
   const [editing, setEditing] = useState<MinistryEdit | null>(null);
   const close = () => setPopup(null);
   const writable = days.includes(selected);
@@ -135,9 +158,10 @@ export function DailyReportSections({ today, days, selected, activities, edits =
   const meetings = activities.filter(activity => activity.kind !== "outreach" && activity.kind !== "follow_up");
   const line = (key: ActivityLine["key"]) => pleros.find(row => row.key === key)?.detail ?? null;
   const sogpDetail = line("sogp"), podcastDetail = line("podcast");
-  const teachingDone = Boolean(sogpDetail || podcastDetail || teaching);
-  const bibleDone = Boolean(devotion?.bible ?? line("bible"));
-  const prayerDone = Boolean(line("prayerWatch"));
+  const teachingDone = Boolean(sogpDetail || podcastDetail || teaching || shown.teaching);
+  const bibleDone = shown.bible !== undefined ? Boolean(shown.bible) : Boolean(devotion?.bible ?? line("bible"));
+  const prayerLine = shown.prayer !== undefined ? prayerSessionsLine(shown.prayer) : line("prayerWatch");
+  const prayerDone = Boolean(prayerLine);
   const devotionDone = [bibleDone, prayerDone, teachingDone].filter(Boolean).length;
   const declared = (key: DailyReportCategory) => (declarations.find(row => row.category === key)?.declaration ?? null) as DailyReportDeclaration | null;
   const statuses: Record<DailyReportCategory, DailyReportStatus> = {
@@ -180,10 +204,11 @@ export function DailyReportSections({ today, days, selected, activities, edits =
     return { ok: true as const };
   }, { onDone: closeReview });
   // The one-tap Done on Bible reading logs the plan's chapters for the day.
-  const tickBible = () => run(async () => {
-    const result = await logPlanReadingAction({ dateKey: selected });
-    return result.ok ? { ok: true as const } : { ok: false as const, error: result.error };
-  });
+  const tickBible = () => {
+    if (!plan || !reading) return;
+    const end = readingEnd(reading.start, plan.chaptersPerDay);
+    optimisticSave({ bible: `${plural(plan.chaptersPerDay, "chapter")}, now at ${end.book} ${end.chapter}` }, () => logPlanReadingAction({ dateKey: selected }));
+  };
 
   const statusFor = (key: DailyReportCategory): { label: string; tone: Tone } => {
     if (key === "devotional") return statuses.devotional !== "missing" ? { label: "Confirmed", tone: "ready" } : { label: `${devotionDone} of 3`, tone: devotionDone === 3 ? "ready" : "todo" };
@@ -200,13 +225,13 @@ export function DailyReportSections({ today, days, selected, activities, edits =
   // ─── Devotion rows ─────────────────────────────────────────────────────────
   const plan = bibleDay?.plan ?? null, reading = bibleDay?.reading ?? null;
   const bibleLogged = bibleDay?.logged ?? devotion?.bible ?? null;
-  const bibleDetail = bibleLogged
+  const bibleDetail = shown.bible ? shown.bible : bibleLogged
     ? `${plural(bibleLogged.chapters, "chapter")}, now at ${bibleLogged.book} ${bibleLogged.chapter}`
     : reading ? `${selected === today ? "Today" : "This day"}: ${reading.label} · ${plan?.chaptersPerDay} a day plan`
     : popupsReady ? "Choose a chapters-a-day plan" : "Not recorded";
   const openBible = () => setPopup(plan && reading ? "bibleToday" : popupsReady ? "biblePlan" : "bibleToday");
-  const teachingDetail = [sogpDetail ? `SOGP: ${sogpDetail}` : null, podcastDetail ? `podcast: ${podcastDetail}` : null].filter(Boolean).join(" · ")
-    || (teaching ? `${teaching.source === "both" ? "SOGP and podcast" : teaching.source === "sogp" ? "SOGP" : "Podcast"}${teaching.note ? " · note added" : ""}` : "SOGP or podcast");
+  const teachingDetail = shown.teaching ?? ([sogpDetail ? `SOGP: ${sogpDetail}` : null, podcastDetail ? `podcast: ${podcastDetail}` : null].filter(Boolean).join(" · ")
+    || (teaching ? `${teaching.source === "both" ? "SOGP and podcast" : teaching.source === "sogp" ? "SOGP" : "Podcast"}${teaching.note ? " · note added" : ""}` : "SOGP or podcast"));
   const canFillDevotion = writable && Boolean(devotion);
 
   return <div className={styles.page}>
@@ -227,6 +252,7 @@ export function DailyReportSections({ today, days, selected, activities, edits =
     </nav> : null}
     {!writable ? <p className={styles.meta}>This day is view only. Reports can be changed for today and the previous seven days.</p> : null}
     {error ? <p role="alert" className={styles.error}>{error}</p> : null}
+    {saveError ? <p role="alert" className={styles.error}>{saveError}</p> : null}
 
     <Card icon={<BookOpenIcon className="size-4" strokeWidth={2} />} tone={["#e4ebfd", "#2331ae"]} title="Devotion"
       status={statusFor("devotional").label} statusTone={statusFor("devotional").tone}
@@ -235,7 +261,7 @@ export function DailyReportSections({ today, days, selected, activities, edits =
         action={canFillDevotion && !bibleDone && plan && reading
           ? <button type="button" className={styles.quick} disabled={pending} onClick={tickBible} aria-label={`Done: I read ${reading.label}`}><CheckIcon className="size-3.5" strokeWidth={2.6} aria-hidden="true" />Done</button>
           : undefined} />
-      <Row tick={prayerDone} title="Prayer Watch" detail={line("prayerWatch") ? `${line("prayerWatch")} session` : "Not recorded"} onOpen={canFillDevotion ? () => setPopup("prayerWatch") : undefined} />
+      <Row tick={prayerDone} title="Prayer Watch" detail={prayerLine ? capitalise(prayerLine) : "Not recorded"} onOpen={canFillDevotion ? () => setPopup("prayerWatch") : undefined} />
       <Row tick={teachingDone} title="Teaching" detail={teachingDetail} onOpen={writable ? () => setPopup("teaching") : undefined} />
     </Card>
 
@@ -269,10 +295,10 @@ export function DailyReportSections({ today, days, selected, activities, edits =
 
     {popup === "biblePlan" ? <BiblePlanSheet dateKey={selected} plan={plan} onClose={close} /> : null}
     {popup === "bibleToday" ? plan && reading && bibleDay
-      ? <BibleTodaySheet dateKey={selected} day={{ ...bibleDay, plan, reading }} onClose={close} onChangePlan={() => setPopup("biblePlan")} />
+      ? <BibleTodaySheet dateKey={selected} day={{ ...bibleDay, plan, reading }} onClose={close} onChangePlan={() => setPopup("biblePlan")} onOptimistic={optimisticSave} />
       : <BibleFreeSheet dateKey={selected} initial={bibleLogged} onClose={close} /> : null}
-    {popup === "prayerWatch" ? <PrayerWatchSheet dateKey={selected} attended={devotion?.prayerWatch ?? []} onClose={close} /> : null}
-    {popup === "teaching" ? <TeachingSheet dateKey={selected} sogp={sogpDetail} podcast={podcastDetail} report={teaching} available={popupsReady} onClose={close} /> : null}
+    {popup === "prayerWatch" ? <PrayerWatchSheet dateKey={selected} attended={shown.prayer ?? devotion?.prayerWatch ?? []} onClose={close} onChange={sessions => setOverride({ ...shown, prayer: sessions, date: selected })} /> : null}
+    {popup === "teaching" ? <TeachingSheet dateKey={selected} sogp={sogpDetail} podcast={podcastDetail} report={teaching} available={popupsReady} onClose={close} onOptimistic={optimisticSave} /> : null}
     {popup === "evangelism" ? <EvangelismSheet dateKey={selected} contacts={contacts} onClose={close} /> : null}
     {popup === "discipleship" ? <DiscipleshipSheet dateKey={selected} contacts={contacts} teachings={teachings} onClose={close} /> : null}
     {editing?.kind === "outreach" ? <EvangelismSheet key={editing.activityId} dateKey={selected} contacts={contacts} initial={editing} onClose={() => setEditing(null)} /> : null}
@@ -288,7 +314,7 @@ export function DailyReportSections({ today, days, selected, activities, edits =
         <p className={styles.meta}>Check it, then send it to your oversight.</p>
         <div className={styles.review}>
           <b>Devotion</b>
-          <p>{devotionDone ? [bibleDone ? `Bible reading (${bibleDetail})` : null, prayerDone ? `Prayer Watch (${line("prayerWatch")})` : null, teachingDone ? `Teaching (${teachingDetail})` : null].filter(Boolean).join(" · ") : `No Bible reading, Prayer Watch or teaching logged ${dayWord}.`}</p>
+          <p>{devotionDone ? [bibleDone ? `Bible reading (${bibleDetail})` : null, prayerDone ? `Prayer Watch (${prayerLine})` : null, teachingDone ? `Teaching (${teachingDetail})` : null].filter(Boolean).join(" · ") : `No Bible reading, Prayer Watch or teaching logged ${dayWord}.`}</p>
         </div>
         <div className={styles.review}>
           <b>Ministry</b>

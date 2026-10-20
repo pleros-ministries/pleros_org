@@ -62,7 +62,7 @@ export async function getMorningPrayerWatchDateKeys(
 export async function logPrayerWatchAttendance(
   userId: string,
   dateKey: string,
-  session: "morning" | "afternoon" | "evening",
+  session: "morning" | "afternoon" | "evening" | "unspecified",
 ) {
   const [row] = await db
     .insert(schema.prayerWatchAttendance)
@@ -82,7 +82,7 @@ export async function logPrayerWatchAttendance(
 export async function removePrayerWatchAttendance(
   userId: string,
   dateKey: string,
-  session: "morning" | "afternoon" | "evening",
+  session: "morning" | "afternoon" | "evening" | "unspecified",
 ) {
   await db
     .delete(schema.prayerWatchAttendance)

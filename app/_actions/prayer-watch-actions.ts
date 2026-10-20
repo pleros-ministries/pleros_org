@@ -10,7 +10,7 @@ import {
   removePrayerWatchAttendance,
 } from "@/lib/db/queries/prayer-watch";
 import { isValidPrayerWatchDateKey, toDateKey } from "@/lib/prayer-watch";
-import { isPrayerWatchSession } from "@/lib/prayer-watch-session";
+import { isLoggablePrayerSession } from "@/lib/prayer-watch-session";
 
 export type PrayerWatchActionState = {
   error: string | null;
@@ -36,7 +36,7 @@ export async function togglePrayerWatchAttendanceAction(
   const wasAttended = formData.get("attended") === "true";
   const sessionId = String(formData.get("session") ?? "");
 
-  if (!isPrayerWatchSession(sessionId)) {
+  if (!isLoggablePrayerSession(sessionId)) {
     return { error: "Choose the Prayer Watch session you attended." };
   }
 
