@@ -486,7 +486,7 @@ export async function deletePrayerRequestAction(input: {
 
 // ─── Episode questions ──────────────────────────────────────────────────────
 
-export async function getEpisodeQuestionRouteAction(): Promise<{ kind: "discipler" | "ask-pleros" }> {
+export async function getEpisodeQuestionRouteAction(): Promise<{ kind: "discipler"; leaderFirstName: string } | { kind: "ask-pleros" }> {
   const session = await getAppSession();
   if (!session) throw new Error("Log in to continue.");
   const { getEpisodeQuestionRoute } = await import("@/lib/db/queries/sogp-episode-questions");

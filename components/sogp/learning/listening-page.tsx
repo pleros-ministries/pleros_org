@@ -9,6 +9,7 @@ import { learningResume, learningWriteNotice, type LearningEpisode, type Learnin
 import { LessonAudioControls } from "@/components/media/lesson-audio-controls";
 import { DashboardIcon } from "@/components/dashboard/v3/primitives";
 import { ChevronRightIcon, HeadphonesIcon, LibraryIcon, ListMusicIcon } from "lucide-react";
+import { useAskAfterTeaching } from "../ask-after-teaching";
 import { DisciplerQuestion } from "../discipler-question";
 import styles from "./learning.module.css";
 
@@ -53,6 +54,8 @@ export function ListeningPage({ data,requestedDay }: { data: LearningViewData;re
   const state = data.state;
   const plan = state?.plan ? readPodcastPlan(state.plan,{ listenedEpisodeGuids: new Set(state.progress.listenedEpisodeGuids),playbackPositionSeconds: new Map(state.progress.playbackPositions.map(row => [row.episodeGuid,row.positionSeconds])) }) : null;
   const day = plan?.days.find(item => item.dayNumber === dayNumber);
+  // "Do you have a question?" once an episode is marked listened (Pastor, 21 October).
+  const ask = useAskAfterTeaching();
   function mark(episodeGuid: string,listened: boolean) {
     startMark(async () => {
       try {
@@ -60,6 +63,8 @@ export function ListeningPage({ data,requestedDay }: { data: LearningViewData;re
         if (!result.ok) { setError(result.error);return; }
         query.setQueryData<LearningViewData>(["sogp","learning-v3"],old => old ? { ...old,state: result.value } : { ...data,state: result.value });
         setError(null);router.refresh();
+        const title = data.episodes.find(row => row.guid === episodeGuid)?.title;
+        if (listened && title) ask.prompt({ guid: episodeGuid, title });
       } catch { setError("The listened mark could not be saved. Try again; your progress is unchanged."); }
     });
   }
@@ -92,6 +97,7 @@ export function ListeningPage({ data,requestedDay }: { data: LearningViewData;re
       })}
       {day.complete ? <Link className={styles.primary} href="/dashboard/sogp">Day completed · Back to Learning</Link> : null}
     </>}
+    {ask.ui}
     {!data.canWrite ? <p className={styles.notice}>{learningWriteNotice(data)}</p> : null}
     {error ? <div className={styles.stack}><p role="alert" className={styles.error}>{error}</p><button type="button" className={styles.secondary} onClick={() => window.location.reload()}>Reload saved progress</button></div> : null}
     {day ? <p className={styles.readyNote}><DashboardIcon name="calendar" size={16} /><span>Missed days wait. {day.episodes.length === 2 ? "Mark both episodes listened" : "Mark the episode listened"} to complete this day.</span></p> : null}

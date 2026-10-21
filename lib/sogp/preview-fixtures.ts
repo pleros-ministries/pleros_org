@@ -125,6 +125,7 @@ const sogpDays: SogpJourneyData["days"] = sogpDates.map((dateKey) => {
     prayerWatchComplete,
     track: {
       id: track.curriculumOrder,
+      lessonId: track.curriculumOrder,
       dayNumber: track.curriculumOrder,
       curriculumLevel: track.curriculumLevel,
       levelPosition: track.levelPosition,

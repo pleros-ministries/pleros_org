@@ -26,7 +26,7 @@ async function ownActiveEnrolment(userId: string) {
 
 /** The asker's active discipleship placement, if any: group plus its lead. */
 async function activePlacement(enrollmentId: number) {
-  const [row] = await db.select({ groupId: s.discipleshipGroups.id, disciplerEnrollmentId: s.discipleshipGroups.leaderEnrollmentId })
+  const [row] = await db.select({ groupId: s.discipleshipGroups.id, disciplerEnrollmentId: s.discipleshipGroups.leaderEnrollmentId, leaderFirstName: s.sogpEnrollments.firstName, leaderName: s.sogpEnrollments.name })
     .from(s.discipleshipMemberships)
     .innerJoin(s.discipleshipGroups, and(eq(s.discipleshipGroups.id, s.discipleshipMemberships.groupId), eq(s.discipleshipGroups.status, "active")))
     .innerJoin(s.sogpEnrollments, and(eq(s.sogpEnrollments.id, s.discipleshipGroups.leaderEnrollmentId), ne(s.sogpEnrollments.status, "withdrawn")))
@@ -35,10 +35,12 @@ async function activePlacement(enrollmentId: number) {
   return row ?? null;
 }
 
-export async function getEpisodeQuestionRoute(userId: string): Promise<{ kind: "discipler" } | { kind: "ask-pleros" }> {
+/** Where a question about a teaching goes: the leader of your group (named, first name only), else Ask Pleros. */
+export async function getEpisodeQuestionRoute(userId: string): Promise<{ kind: "discipler"; leaderFirstName: string } | { kind: "ask-pleros" }> {
   const enrollment = await getSogpEnrollmentByUserId(userId);
   if (!enrollment || enrollment.status === "withdrawn") return { kind: "ask-pleros" };
-  return (await activePlacement(enrollment.id)) ? { kind: "discipler" } : { kind: "ask-pleros" };
+  const placement = await activePlacement(enrollment.id);
+  return placement ? { kind: "discipler", leaderFirstName: firstNameOf(placement.leaderFirstName || placement.leaderName || "your leader") } : { kind: "ask-pleros" };
 }
 
 export async function askEpisodeQuestion(userId: string, raw: unknown) {
@@ -49,7 +51,7 @@ export async function askEpisodeQuestion(userId: string, raw: unknown) {
   const body = cleanText(input.body, BODY_MAX, "Write your question in 2000 characters or fewer.");
   const enrollment = await ownActiveEnrolment(userId);
   const placement = await activePlacement(enrollment.id);
-  if (!placement) throw new CommunityError("Ask Pleros instead — you have no active discipler right now.");
+  if (!placement) throw new CommunityError("Ask Pleros instead: you’re not in a group with a leader right now.");
   const since = new Date(Date.now() - 24 * 3600_000);
   const [{ n }] = await db.select({ n: sql<number>`count(*)::int` }).from(s.discipleshipEpisodeQuestions)
     .where(and(eq(s.discipleshipEpisodeQuestions.askerEnrollmentId, enrollment.id), gte(s.discipleshipEpisodeQuestions.createdAt, since)));

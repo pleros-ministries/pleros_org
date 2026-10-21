@@ -487,6 +487,8 @@ export type SogpJourneyData = {
     prayerWatchComplete: boolean;
     track: null | {
       id: number;
+      /** The lesson behind the track, for asking a question about it. */
+      lessonId: number;
       dayNumber: number;
       curriculumLevel: SogpCurriculumLevel;
       levelPosition: number;
@@ -677,6 +679,7 @@ export async function getActiveSogpJourney(
       track: track
         ? {
             id: track.id,
+            lessonId: track.lesson.id,
             dayNumber: track.dayNumber!,
             curriculumLevel: curriculumLevel!,
             levelPosition: ((track.curriculumOrder - 1) % 6) + 1,

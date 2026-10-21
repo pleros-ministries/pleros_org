@@ -34,7 +34,7 @@ export type HomeToday = {
   /** Today's SOGP day, or null when today isn't one. */
   dayNumber: number | null;
   /** Today's teaching: the traditional track (ticked when listened) or the podcast day (ticked by the player). */
-  teaching: { title: string; href: string; done: boolean; dayNumber: number | null; podcast: boolean } | null;
+  teaching: { title: string; href: string; done: boolean; dayNumber: number | null; podcast: boolean; questionGuid: string | null } | null;
   /** Morning Prayer Watch for today; null outside the cohort's dates. */
   prayerWatch: { complete: boolean } | null;
   /** The traditional path's quiz and written response, marked done when finished; null on the podcast path. */
@@ -79,7 +79,7 @@ type JourneyDay = {
   kind: "weekday" | "weekend" | "review";
   state: "complete" | "missed" | "current" | "future";
   prayerWatchComplete: boolean;
-  track: null | { dayNumber: number; title: string; assessmentComplete: boolean; quizPassed: boolean; audioListened: boolean; accessible: boolean };
+  track: null | { lessonId: number; dayNumber: number; title: string; assessmentComplete: boolean; quizPassed: boolean; audioListened: boolean; accessible: boolean };
   review: null | { title: string; startsAt: string; liveUrl: string | null; recordingUrl: string | null; complete: boolean };
 };
 /** On the podcast path, today's listening comes from the plan (the player ticks it). */
@@ -120,8 +120,8 @@ export function homeSogpToday(days: JourneyDay[], todayKey: string, podcast?: Ho
     complete: reviewDay.complete,
   } : null;
   const track = podcast === undefined && today?.track?.accessible ? today.track : null;
-  const teaching = podcast ? { title: podcast.title, href: podcast.href, done: podcast.done, dayNumber: null, podcast: true }
-    : track ? { title: track.title, href: `/dashboard/sogp/course/day/${track.dayNumber}`, done: track.audioListened, dayNumber: track.dayNumber, podcast: false }
+  const teaching = podcast ? { title: podcast.title, href: podcast.href, done: podcast.done, dayNumber: null, podcast: true, questionGuid: null }
+    : track ? { title: track.title, href: `/dashboard/sogp/course/day/${track.dayNumber}`, done: track.audioListened, dayNumber: track.dayNumber, podcast: false, questionGuid: `sogp-lesson-${track.lessonId}` }
     : null;
   const assessment = track ? { complete: track.assessmentComplete, href: `/dashboard/sogp/course/day/${track.dayNumber}` } : null;
   const checks = today ? [

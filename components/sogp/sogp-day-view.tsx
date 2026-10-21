@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import lesson from "./sogp-lesson.module.css";
 import { BrowserSuspense } from "./browser-suspense";
+import { useAskAfterTeaching } from "./ask-after-teaching";
 import { DisciplerQuestion } from "./discipler-question";
 import { SogpQuiz, sogpQuizQuery } from "./sogp-quiz";
 import { SogpWrittenResponse, sogpResponseQuery } from "./sogp-written-response";
@@ -164,6 +165,8 @@ export function SogpDayView({ dayNumber }: { dayNumber: number }) {
       void queryClient.invalidateQueries({ queryKey: ["sogp", "dashboard"] });
     },
   });
+  // "Do you have a question?" once the teaching is listened to (Pastor, 21 October).
+  const ask = useAskAfterTeaching();
   const listenedMutation = useMutation({
     mutationFn: async (done: boolean) => {
       const response = await fetch(`/api/sogp/course/day/${dayNumber}/progress`, {
@@ -182,7 +185,8 @@ export function SogpDayView({ dayNumber }: { dayNumber: number }) {
     onError: (_error, _done, context) => {
       if (context?.previous) queryClient.setQueryData(["sogp", "day", dayNumber], context.previous);
     },
-    onSuccess() {
+    onSuccess(_data, done) {
+      if (done) ask.prompt({ guid: `sogp-lesson-${data.track.lesson.id}`, title: data.track.lesson.title });
       // Refresh in the background so the toggle frees up at once.
       void queryClient.invalidateQueries({ queryKey: ["sogp", "day", dayNumber] });
       void queryClient.invalidateQueries({ queryKey: ["sogp", "dashboard"] });
@@ -217,7 +221,7 @@ export function SogpDayView({ dayNumber }: { dayNumber: number }) {
       </div>
       <div className={lesson.playerWrap}>
         <button type="button" className={lesson.listenToggle} aria-pressed={listened} disabled={listenedMutation.isPending} onClick={() => listenedMutation.mutate(!listened)}>{listened ? <><Check className="size-3.5" aria-hidden /> Listened</> : "Mark listened"}</button>
-        {data.track.lesson.audioUrl ? <SogpAudioPlayer key={dayNumber} dayNumber={dayNumber} src={data.track.lesson.audioUrl} listened={listened}/> : <p className={lesson.notice}>Teaching audio is being prepared.</p>}
+        {data.track.lesson.audioUrl ? <SogpAudioPlayer key={dayNumber} dayNumber={dayNumber} src={data.track.lesson.audioUrl} listened={listened} onFirstListen={openShare => ask.prompt({ guid: `sogp-lesson-${data.track.lesson.id}`, title: data.track.lesson.title }, openShare)}/> : <p className={lesson.notice}>Teaching audio is being prepared.</p>}
       </div>
       <div className={lesson.lessonTabs} role="tablist" aria-label="Lesson sections">
         {steps.slice(1).map(step => <button key={step.key} type="button" role="tab" id={`tab-${step.key}`} aria-controls={`panel-${step.key}`} aria-selected={tab === step.key} onClick={() => chooseTab(step.key as LessonTab)}>{step.label}<StepMark done={step.done} small /></button>)}
@@ -236,6 +240,7 @@ export function SogpDayView({ dayNumber }: { dayNumber: number }) {
       {/* Secondary tools sit apart from the lesson's own steps (user, 18 October). */}
       <section className={lesson.more} aria-label="More for this lesson">
         <DisciplerQuestion guid={`sogp-lesson-${data.track.lesson.id}`} title={data.track.lesson.title} kind="lesson" />
+        {ask.ui}
         <details className={lesson.curriculum}><summary><span className={lesson.quietIcon}><ListOrdered className="size-4" aria-hidden/></span>All {tracks.length} tracks<ChevronDown className="size-4" aria-hidden/></summary><Curriculum data={data} /></details>
       </section>
     </section>

@@ -8,6 +8,7 @@ import { BookOpenCheckIcon, CheckIcon, ChevronDownIcon, ClipboardCheckIcon, Copy
 import type { DashboardHomeData, HomeLearningCard, HomeReport, HomeSogp, HomeSogpDay, HomeToday } from "@/lib/dashboard/home";
 import { PRAYER_WATCH_YOUTUBE_URL } from "@/lib/prayer-watch";
 import { buildReferralShareMessage } from "@/lib/sogp/referral";
+import { useAskAfterTeaching } from "@/components/sogp/ask-after-teaching";
 import { LeaderboardPreview } from "@/components/sogp/learning/leaderboard-preview";
 import { DashboardIcon, StatusPill } from "./primitives";
 import styles from "./dashboard.module.css";
@@ -197,6 +198,8 @@ function TeachingRow({ teaching }: { teaching: NonNullable<HomeToday["teaching"]
   const [done, setDone] = useState(teaching.done);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // "Do you have a question?" once today's teaching is ticked (Pastor, 21 October).
+  const ask = useAskAfterTeaching();
   async function toggle() {
     if (teaching.dayNumber == null) return;
     const next = !done;
@@ -204,6 +207,7 @@ function TeachingRow({ teaching }: { teaching: NonNullable<HomeToday["teaching"]
     try {
       const response = await fetch(`/api/sogp/course/day/${teaching.dayNumber}/progress`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ signal: "audio", done: next }) });
       if (!response.ok) throw new Error(((await response.json().catch(() => null)) as { error?: string } | null)?.error ?? "That couldn’t be saved");
+      if (next && teaching.questionGuid) ask.prompt({ guid: teaching.questionGuid, title: teaching.title });
       router.refresh();
     } catch (cause) {
       setDone(!next);
@@ -222,6 +226,7 @@ function TeachingRow({ teaching }: { teaching: NonNullable<HomeToday["teaching"]
     {teaching.podcast
       ? <Tick done={done} label={done ? "Today’s episodes listened" : "Ticked when you finish today’s episodes"} />
       : <Tick done={done} pending={pending} onToggle={toggle} label={done ? "Teaching listened. Mark as not listened" : "Mark that you listened to the teaching"} />}
+    {ask.ui}
   </div>;
 }
 

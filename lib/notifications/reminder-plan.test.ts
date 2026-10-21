@@ -77,6 +77,7 @@ function activeDay(
     track: hasTrack
       ? {
           id: 1,
+          lessonId: 1,
           dayNumber: 1,
           curriculumLevel: 1,
           levelPosition: 1,

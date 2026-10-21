@@ -41,8 +41,8 @@ export function SogpLessonStatesPreview() {
   });
   return <QueryClientProvider client={client}>
     <div className={lesson.page}>
-      <Section title="Ask your discipler (learner in a group)"><DisciplerQuestion guid="sogp-lesson-preview" title="Baptism of the Holy Ghost" kind="lesson" previewRoute="discipler" /></Section>
-      <Section title="Ask a question (no discipler)"><DisciplerQuestion guid="sogp-lesson-preview" title="Baptism of the Holy Ghost" kind="lesson" previewRoute="ask" /></Section>
+      <Section title="Ask your leader (learner in a group)"><DisciplerQuestion guid="sogp-lesson-preview" title="Baptism of the Holy Ghost" kind="lesson" previewRoute="discipler" /></Section>
+      <Section title="Ask a question (no leader)"><DisciplerQuestion guid="sogp-lesson-preview" title="Baptism of the Holy Ghost" kind="lesson" previewRoute="ask" /></Section>
       <Section title="Quiz result: passed"><SogpQuiz dayNumber={601} embedded previewResult={{ score: 80, passed: true }} /></Section>
       <Section title="Quiz result: not passed"><SogpQuiz dayNumber={602} embedded previewResult={{ score: 40, passed: false }} /></Section>
       <Section title="Response: draft saved"><SogpWrittenResponse dayNumber={701} embedded /></Section>

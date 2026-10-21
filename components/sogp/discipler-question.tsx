@@ -6,10 +6,12 @@ import { ArrowRight, ChevronDown, MessageCircleMore } from "lucide-react";
 
 import lesson from "./sogp-lesson.module.css";
 
-/** Ask about a lesson or podcast episode: to the active discipler (one private
-    thread for both), else Ask Pleros with the item attached (user, 18 October). */
+/** Ask about a lesson or podcast episode: to the leader of your group (one private
+    thread for both), else Ask Pleros with the item attached (user, 18 October).
+    Learner copy names the leader, never "discipler" (Pastor, 20 October). */
 export function DisciplerQuestion({ guid, title, kind, disabled = false, previewRoute }: { guid: string; title: string; kind: "lesson" | "episode"; disabled?: boolean; /** Visual previews only: skip the server lookup and sending. */ previewRoute?: "discipler" | "ask" }) {
   const [route, setRoute] = useState<"discipler" | "ask" | null>(previewRoute ?? null);
+  const [leader, setLeader] = useState(previewRoute === "discipler" ? "your leader" : "");
   const [open, setOpen] = useState(false);
   const [body, setBody] = useState("");
   const [sent, setSent] = useState(false);
@@ -20,7 +22,11 @@ export function DisciplerQuestion({ guid, title, kind, disabled = false, preview
     let live = true;
     import("@/app/(site)/dashboard/sogp/discipleship/_actions")
       .then(({ getEpisodeQuestionRouteAction }) => getEpisodeQuestionRouteAction())
-      .then(result => { if (live) setRoute(result.kind === "discipler" ? "discipler" : "ask"); }, () => { if (live) setRoute("ask"); });
+      .then(result => {
+        if (!live) return;
+        setRoute(result.kind === "discipler" ? "discipler" : "ask");
+        if (result.kind === "discipler") setLeader(result.leaderFirstName);
+      }, () => { if (live) setRoute("ask"); });
     return () => { live = false; };
   }, [previewRoute]);
   function send() {
@@ -41,11 +47,11 @@ export function DisciplerQuestion({ guid, title, kind, disabled = false, preview
     return <Link className={lesson.quietRow} href={`/dashboard/community/ask?${params.toString()}`}>{chip}<span className={lesson.rowCopy}><span className={lesson.rowTitle}>Ask a question</span><span className={lesson.rowMeta}>Goes to Pleros through Ask Pleros</span></span><ArrowRight className={`size-4 ${lesson.rowEnd}`} aria-hidden/></Link>;
   }
   return <div>
-    <button type="button" className={lesson.quietRow} disabled={!route || disabled} aria-expanded={open} onClick={() => { setOpen(value => !value); setSent(false); }}>{chip}<span className={lesson.rowCopy}><span className={lesson.rowTitle}>Ask your discipler</span><span className={lesson.rowMeta}>{sent ? "Sent. Their reply shows in your group." : "Only you and your discipler see it"}</span></span><ChevronDown className={`size-4 ${lesson.rowEnd}`} style={{ transform: open ? "rotate(180deg)" : undefined }} aria-hidden/></button>
+    <button type="button" className={lesson.quietRow} disabled={!route || disabled} aria-expanded={open} onClick={() => { setOpen(value => !value); setSent(false); }}>{chip}<span className={lesson.rowCopy}><span className={lesson.rowTitle}>{leader ? `Ask ${leader}` : "Ask a question"}</span><span className={lesson.rowMeta}>{sent ? "Sent. Their reply shows in your group." : `Only you and ${leader || "your leader"} see it`}</span></span><ChevronDown className={`size-4 ${lesson.rowEnd}`} style={{ transform: open ? "rotate(180deg)" : undefined }} aria-hidden/></button>
     {open ? <div className={lesson.askBody}>
       <label className={lesson.askLabel}>Your question<textarea className={lesson.textarea} rows={4} maxLength={2000} value={body} disabled={saving} onChange={event => setBody(event.target.value)} placeholder={`What would you like to ask about this ${kind}?`} /></label>
       {error ? <p role="alert" className={lesson.error}>{error}</p> : null}
-      <button type="button" className={lesson.primary} disabled={saving || disabled} onClick={send}>{saving ? "Sending…" : "Send to my discipler"}</button>
+      <button type="button" className={lesson.primary} disabled={saving || disabled} onClick={send}>{saving ? "Sending…" : `Send to ${leader || "your leader"}`}</button>
     </div> : null}
   </div>;
 }

@@ -80,7 +80,7 @@ const sogp: NonNullable<DashboardHomeData["sogp"]> = {
       { number: 5, dateKey: "2026-10-16", weekday: "Fri", dayOfMonth: 16, state: "today", review: false },
     ],
     dayNumber: 5,
-    teaching: { title: "Walk of Faith · day 5", href: "/dashboard/sogp/listen?day=5", done: false, dayNumber: null, podcast: true },
+    teaching: { title: "Walk of Faith · day 5", href: "/dashboard/sogp/listen?day=5", done: false, dayNumber: null, podcast: true, questionGuid: null },
     prayerWatch: { complete: true },
     assessment: null,
     review: { title: "Level 2 group review", when: "Sunday 18 October", href: null, complete: false },

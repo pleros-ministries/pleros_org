@@ -10,10 +10,13 @@ export function SogpAudioPlayer({
   dayNumber,
   src,
   listened,
+  onFirstListen,
 }: {
   dayNumber: number;
   src: string;
   listened: boolean;
+  /** The first time the teaching passes 90%: the page asks its question, then opens sharing. */
+  onFirstListen?: (openShare: () => void) => void;
 }) {
   const notified = useRef(listened);
   const wasAlreadyListened = useRef(listened);
@@ -29,7 +32,10 @@ export function SogpAudioPlayer({
       if (!response.ok) throw new Error("Audio progress could not be saved");
     },
     async onSuccess() {
-      if (!wasAlreadyListened.current) setShareOpen(true);
+      if (!wasAlreadyListened.current) {
+        if (onFirstListen) onFirstListen(() => setShareOpen(true));
+        else setShareOpen(true);
+      }
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["sogp", "day", dayNumber] }),
         queryClient.invalidateQueries({ queryKey: ["sogp", "dashboard"] }),
