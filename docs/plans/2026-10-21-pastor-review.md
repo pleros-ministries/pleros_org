@@ -16,6 +16,8 @@ He also said groups "without order" (not by who they're under) were confusing; S
 
 ## 2. Reports (My reports)
 
+**Done** (migration 0075): Yes / No with compulsory reasons, and meetings as each person's own report. Following the user's answers: an attendee gives people brought; a leader gives start and end time, venue (picked from past ones) and workers and members; outreach meetings are drawn from the day's ministry.
+
 - **Evangelism and Discipleship each get Yes / No** in front of them, every day.
   - **Yes** opens the pop-up we have now.
   - **No** opens a pop-up asking why, and the reason is **compulsory** (for example "It was Sunday; the focus was the service").

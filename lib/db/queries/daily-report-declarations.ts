@@ -41,7 +41,7 @@ export async function declareOwnDailyReport(userId: string, input: { dateKey: st
     await lockDailyReporting(tx, userId, input.dateKey);
     let count = 0;
     if (input.category !== "devotional") {
-      const kinds = input.category === "ministry" ? ["outreach", "follow_up"] as const : ["teaching_meeting", "prayer_meeting", "church_service", "other"] as const;
+      const kinds = input.category === "ministry" ? ["outreach", "follow_up"] as const : ["teaching_meeting", "prayer_meeting", "church_service", "other", "outreach_meeting"] as const;
       const [result] = await tx.select({ count: sql<number>`count(*)::int` }).from(schema.ministryActivities)
         .where(and(eq(schema.ministryActivities.userId, userId), eq(schema.ministryActivities.activityDate, input.dateKey), inArray(schema.ministryActivities.kind, [...kinds])));
       count = result.count;

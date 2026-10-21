@@ -2,11 +2,15 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useTransition, type ReactNode } from "react";
+import { useEffect, useState, useTransition, type ReactNode } from "react";
 import { BookOpenIcon, CheckIcon, ChevronRightIcon, HeartHandshakeIcon, PlusIcon, TargetIcon, UsersRoundIcon } from "lucide-react";
 
 import { clearDailyReportDeclaration, declareDailyReport } from "@/app/(site)/dashboard/community/_actions/daily-report-actions";
 import { logPlanReadingAction } from "@/app/(site)/dashboard/community/_actions/report-popup-actions";
+import { saveMeetingAction, saveNoReasonAction } from "@/app/(site)/dashboard/community/_actions/report-answer-actions";
+import { deleteMinistryActivity } from "@/app/(site)/dashboard/community/_actions/report-actions";
+import { MEETING_LABEL, meetingLine, type NoPart } from "@/lib/community/meeting-report";
+import type { NoReasons, OwnMeetingDetail } from "@/lib/db/queries/report-answers";
 import { dailyCategoryStatus, type DailyReportCategory, type DailyReportDeclaration, type DailyReportStatus } from "@/lib/community/daily-report";
 import { activityKindLabel } from "@/lib/community/ministry-activities";
 import { MINISTRY_FIELDS, type ActivityLine } from "@/lib/community/ministry-report";
@@ -19,9 +23,8 @@ import type { BibleDay, TeachingReport } from "@/lib/db/queries/report-popups";
 import { ActivityCard } from "./activity-card";
 import { dayHref } from "./day-picker";
 import { BibleFreeSheet, BiblePlanSheet, BibleTodaySheet, PrayerWatchSheet, TeachingSheet } from "./devotion-sheets";
-import { LiveMeetingFlow } from "./ministry-v3/live-meeting-flow";
+import { MeetingSheet, NoRow, ReasonSheet, YesNoRow, type MeetingDraft } from "./answer-sheets";
 import { DiscipleshipSheet, EvangelismSheet } from "./ministry-sheets";
-import { ReportSheet } from "./report-sheet";
 import { useReportAction } from "./use-report-action";
 import styles from "./daily-report-sections.module.css";
 
@@ -98,18 +101,20 @@ function AddLabel() {
   return <span className={styles.add} aria-hidden="true"><PlusIcon className="size-4" />Add</span>;
 }
 
-export type ReportMeetingUnits = { id: number; name: string; branchId: number }[];
 type Popup = "biblePlan" | "bibleToday" | "prayerWatch" | "teaching" | "evangelism" | "discipleship" | "meeting";
+const PART_KIND = { evangelism: "outreach", discipleship: "follow_up" } as const;
+const MEETING_KIND_LABEL: Record<string, string> = { teaching_meeting: MEETING_LABEL.teaching, prayer_meeting: MEETING_LABEL.prayer, outreach_meeting: MEETING_LABEL.outreach };
 
 /**
  * My reports as one page (Pastor, 18 October workers' meeting): Devotion,
  * Ministry and Meetings are cards whose rows open pop-ups, never another page.
  * Bible reading follows a chapter-a-day plan with a one-tap Done; Teaching
  * covers SOGP and the podcast; Evangelism is broadcast or one-to-one;
- * Discipleship is ticked. "Review and submit" confirms devotion and marks any
- * empty section as nothing for the day, in one step.
+ * Discipleship is ticked. Evangelism, Discipleship and Meetings are answered
+ * Yes or No, and No needs a reason (Pastor, 21 October); "Review and submit"
+ * confirms devotion once every part is answered.
  */
-export function DailyReportSections({ today, days, selected, activities, edits = {}, pleros, devotion, declarations, meetingDetails, enabled, week = null, inline, contacts = [], units = [], initialMeetings, bibleDay, teaching = null, teachings = [], popupsReady = false, assignment }: {
+export function DailyReportSections({ today, days, selected, activities, edits = {}, pleros, devotion, declarations, meetingDetails, enabled, week = null, inline, contacts = [], noReasons = {}, meetingReports = [], venues = [], bibleDay, teaching = null, teachings = [], popupsReady = false, assignment, preview = false }: {
   today: string; days: string[]; selected: string; activities: MemberActivity[]; pleros: ActivityLine[];
   /** Saved evangelism and discipleship reports that reopen in their pop-up, by activity id. */
   edits?: Record<number, MinistryEdit>;
@@ -122,8 +127,14 @@ export function DailyReportSections({ today, days, selected, activities, edits =
   /** The pop-up forms need the reporting v3 schema; without it the ministry rows link to the step forms. */
   inline: boolean;
   contacts?: MinistryContact[];
-  units?: ReportMeetingUnits;
-  initialMeetings?: Parameters<typeof LiveMeetingFlow>[0]["initialMeetings"];
+  /** Reasons given for a No this day (migration 0075). */
+  noReasons?: NoReasons;
+  /** Meetings reported through the meetings pop-up: led or attended, times, numbers. */
+  meetingReports?: OwnMeetingDetail[];
+  /** Venues of meetings this person led before, to pick from. */
+  venues?: string[];
+  /** Sample data under /preview: answers and meetings show on screen only, and the other pop-ups stay shut. */
+  preview?: boolean;
   /** The Bible reading plan and where it stands on this day (migration 0068). */
   bibleDay?: BibleDay;
   teaching?: TeachingReport | null;
@@ -154,10 +165,21 @@ export function DailyReportSections({ today, days, selected, activities, edits =
     });
   };
   const [editing, setEditing] = useState<MinistryEdit | null>(null);
+  // Optimistic answers (Pastor, 21 October): a No or a meeting shows at once and rolls back if the save fails.
+  const [localNo, setLocalNo] = useState<{ date: string; reasons: Partial<Record<NoPart, string | null>> }>({ date: selected, reasons: {} });
+  const [drafts, setDrafts] = useState<(MeetingDraft & { id: number })[]>([]);
+  const [noSheet, setNoSheet] = useState<NoPart | null>(null);
+  // Saved meetings arrive with the refreshed page, so the drafts standing in for them go.
+  useEffect(() => { setDrafts([]); }, [activities]);
   const close = () => setPopup(null);
+  // A preview never saves, so only the meetings pop-up (which saves through the page) opens.
+  const open = (next: Popup) => { if (!preview || next === "meeting") setPopup(next); };
   const writable = days.includes(selected);
   const ministry = activities.filter(activity => activity.kind === "outreach" || activity.kind === "follow_up");
   const meetings = activities.filter(activity => activity.kind !== "outreach" && activity.kind !== "follow_up");
+  const reasons = localNo.date === selected ? localNo.reasons : {};
+  const reasonOf = (part: NoPart) => part in reasons ? reasons[part] ?? null : noReasons[part] ?? null;
+  const detailOf = (activityId: number) => meetingReports.find(row => row.activityId === activityId);
   const line = (key: ActivityLine["key"]) => pleros.find(row => row.key === key)?.detail ?? null;
   const sogpDetail = line("sogp"), podcastDetail = line("podcast");
   const teachingDone = Boolean(sogpDetail || podcastDetail || teaching || shown.teaching);
@@ -174,11 +196,16 @@ export function DailyReportSections({ today, days, selected, activities, edits =
     meetings: dailyCategoryStatus({ category: "meetings", declaration: declared("meetings"), activityCount: meetings.length, hasDevotionalActivity: false }),
   };
   const submitted = Object.values(statuses).every(status => status !== "missing");
+  // Each part is answered by something saved, a reason for No, or an older "nothing" for the day.
+  const partAnswered = (part: "evangelism" | "discipleship") => ministry.some(row => row.kind === PART_KIND[part]) || Boolean(reasonOf(part)) || statuses.ministry === "nil";
+  const meetingsAnswered = meetings.length > 0 || drafts.length > 0 || Boolean(reasonOf("meetings")) || statuses.meetings === "nil";
+  const ministryAnswered = partAnswered("evangelism") && partAnswered("discipleship");
+  const allAnswered = ministryAnswered && meetingsAnswered;
   // A section counts as ready for review once it has something in it or was marked nothing.
   const ready = {
     devotional: statuses.devotional !== "missing" || devotionDone > 0,
-    ministry: statuses.ministry !== "missing",
-    meetings: statuses.meetings !== "missing",
+    ministry: ministryAnswered,
+    meetings: meetingsAnswered,
   };
   const readyCount = Object.values(ready).filter(Boolean).length;
 
@@ -192,21 +219,39 @@ export function DailyReportSections({ today, days, selected, activities, edits =
   const dayWord = selected === today ? "today" : "this day";
   const addHref = `/dashboard/community/report/new?day=${encodeURIComponent(selected)}`;
 
-  const nothing = (key: DailyReportCategory) => run(() => declareDailyReport({ dateKey: selected, category: key, declaration: "nil" }));
   const undo = (key: DailyReportCategory) => run(() => clearDailyReportDeclaration({ dateKey: selected, category: key }));
-  // Confirm and submit: devotion is confirmed and any empty section becomes "nothing today".
+  // Confirm and submit: every part is already answered Yes or No, so only devotion is confirmed.
   const submit = () => run(async () => {
-    if (statuses.devotional === "missing") {
-      const result = await declareDailyReport({ dateKey: selected, category: "devotional", declaration: "confirmed" });
-      if (!result.ok) return result;
-    }
-    for (const key of ["ministry", "meetings"] as const) {
-      if (statuses[key] !== "missing") continue;
-      const result = await declareDailyReport({ dateKey: selected, category: key, declaration: "nil" });
-      if (!result.ok) return result;
-    }
+    if (statuses.devotional === "missing") return declareDailyReport({ dateKey: selected, category: "devotional", declaration: "confirmed" });
     return { ok: true as const };
   }, { onDone: closeReview });
+  /** Shows the No at once, saves it, and takes it back with a message if the save fails. */
+  const answerNo = (part: NoPart, reason: string) => {
+    const before = reasons;
+    setLocalNo({ date: selected, reasons: { ...reasons, [part]: reason } });
+    setSaveError(null);
+    if (preview) return;
+    startSave(async () => {
+      const result = await saveNoReasonAction({ dateKey: selected, part, reason }).catch(() => ({ ok: false as const, error: "That couldn’t be saved. Try again." }));
+      if (!result.ok) { setLocalNo({ date: selected, reasons: before }); setSaveError(result.error); return; }
+      router.refresh();
+    });
+  };
+  const addMeeting = (draft: MeetingDraft) => {
+    const id = Date.now();
+    setDrafts(list => [...list, { ...draft, id }]);
+    setSaveError(null);
+    if (preview) return;
+    startSave(async () => {
+      const result = await saveMeetingAction({ dateKey: selected, meeting: draft.meeting }).catch(() => ({ ok: false as const, error: "That couldn’t be saved. Try again." }));
+      if (!result.ok) { setDrafts(list => list.filter(row => row.id !== id)); setSaveError(result.error); return; }
+      router.refresh();
+    });
+  };
+  const ministryLine = [
+    ...ministry.filter(row => row.kind === "outreach").slice(0, 1).map(row => `Evangelism: ${numbersLine(row)}`),
+    ...ministry.filter(row => row.kind === "follow_up").slice(0, 1).map(row => `Discipleship: ${numbersLine(row)}`),
+  ].join(" · ") || null;
   // The one-tap Done on Bible reading logs the plan's chapters for the day.
   const tickBible = () => {
     if (!plan || !reading) return;
@@ -216,15 +261,20 @@ export function DailyReportSections({ today, days, selected, activities, edits =
 
   const statusFor = (key: DailyReportCategory): { label: string; tone: Tone } => {
     if (key === "devotional") return statuses.devotional !== "missing" ? { label: "Confirmed", tone: "ready" } : { label: `${devotionDone} of 3`, tone: devotionDone === 3 ? "ready" : "todo" };
-    if (statuses[key] === "nil") return { label: `Nothing ${dayWord}`, tone: "nil" };
-    if (statuses[key] === "reported") return { label: "Ready", tone: "ready" };
-    return { label: "Not filled", tone: "todo" };
+    const answered = key === "ministry" ? ministryAnswered : meetingsAnswered;
+    const something = key === "ministry" ? ministry.length > 0 : meetings.length + drafts.length > 0;
+    if (!answered) return { label: "Not filled", tone: "todo" };
+    return something ? { label: "Ready", tone: "ready" } : { label: `Nothing ${dayWord}`, tone: "nil" };
   };
-  const nilFooter = (key: DailyReportCategory) => writable && enabled && statuses[key] !== "reported"
-    ? statuses[key] === "nil"
-      ? <button type="button" className={styles.quiet} disabled={pending} onClick={() => undo(key)}>Undo “nothing {dayWord}”</button>
-      : <button type="button" className={styles.quiet} disabled={pending} onClick={() => nothing(key)}>Nothing {dayWord}</button>
-    : undefined;
+  /** Evangelism or discipleship: more of it, its No, or the question. */
+  const partRow = (part: "evangelism" | "discipleship") => {
+    const title = part === "evangelism" ? "Evangelism" : "Discipleship";
+    const reason = reasonOf(part);
+    if (ministry.some(row => row.kind === PART_KIND[part])) return writable ? <Row title={title} detail="Add another" onOpen={() => open(part)} end={<AddLabel />} /> : null;
+    if (reason || statuses.ministry === "nil") return <NoRow title={title} reason={reason ?? `Nothing ${dayWord}`} onOpen={writable ? () => setNoSheet(part) : undefined} />;
+    if (!writable) return <Row title={title} detail="Not answered" />;
+    return <YesNoRow title={title} question={part === "evangelism" ? `Did you do any evangelism ${dayWord}?` : `Did you disciple anyone ${dayWord}?`} onNo={() => setNoSheet(part)} onYes={() => open(part)} />;
+  };
 
   // ─── Devotion rows ─────────────────────────────────────────────────────────
   const plan = bibleDay?.plan ?? null, reading = bibleDay?.reading ?? null;
@@ -233,7 +283,7 @@ export function DailyReportSections({ today, days, selected, activities, edits =
     ? `${plural(bibleLogged.chapters, "chapter")}, now at ${bibleLogged.book} ${bibleLogged.chapter}`
     : reading ? `${selected === today ? "Today" : "This day"}: ${reading.label} · ${plan?.chaptersPerDay} a day plan`
     : popupsReady ? "Choose a chapters-a-day plan" : "Not recorded";
-  const openBible = () => setPopup(plan && reading ? "bibleToday" : popupsReady ? "biblePlan" : "bibleToday");
+  const openBible = () => open(plan && reading ? "bibleToday" : popupsReady ? "biblePlan" : "bibleToday");
   const teachingDetail = shown.teaching ?? ([sogpDetail ? `SOGP: ${sogpDetail}` : null, podcastDetail ? `podcast: ${podcastDetail}` : null].filter(Boolean).join(" · ")
     || (teaching ? `${teachingLabel(teaching.source, teaching.otherTitle)}${teaching.note ? " · note added" : ""}` : "SOGP, podcast or other"));
   const canFillDevotion = writable && Boolean(devotion);
@@ -265,25 +315,43 @@ export function DailyReportSections({ today, days, selected, activities, edits =
         action={canFillDevotion && !bibleDone && plan && reading
           ? <button type="button" className={styles.quick} disabled={pending} onClick={tickBible} aria-label={`Done: I read ${reading.label}`}><CheckIcon className="size-3.5" strokeWidth={2.6} aria-hidden="true" />Done</button>
           : undefined} />
-      <Row tick={prayerDone} title="Prayer Watch" detail={prayerLine ? capitalise(prayerLine) : "Not recorded"} onOpen={canFillDevotion ? () => setPopup("prayerWatch") : undefined} />
-      <Row tick={teachingDone} title="Teaching" detail={teachingDetail} onOpen={writable ? () => setPopup("teaching") : undefined} />
+      <Row tick={prayerDone} title="Prayer Watch" detail={prayerLine ? capitalise(prayerLine) : "Not recorded"} onOpen={canFillDevotion ? () => open("prayerWatch") : undefined} />
+      <Row tick={teachingDone} title="Teaching" detail={teachingDetail} onOpen={writable ? () => open("teaching") : undefined} />
     </Card>
 
     <Card icon={<HeartHandshakeIcon className="size-4" strokeWidth={2} />} tone={["#dcefe3", "#1f6b45"]} title="Ministry"
-      status={statusFor("ministry").label} statusTone={statusFor("ministry").tone} footer={nilFooter("ministry")}>
-      {ministry.length ? <ul className={styles.saved}>{ministry.map(activity => <ActivityCard key={activity.id} activity={activity} today={today} canChange={writable} onEdit={inline && edits[activity.id] ? () => setEditing(edits[activity.id]) : undefined} />)}</ul> : null}
-      {writable ? inline ? <>
-        <Row title="Evangelism" detail={ministry.some(row => row.kind === "outreach") ? "Add another" : "Broadcast or one-to-one"} onOpen={() => setPopup("evangelism")} end={<AddLabel />} />
-        <Row title="Discipleship" detail={ministry.some(row => row.kind === "follow_up") ? "Add another" : "Teaching, prayer, check-ins"} onOpen={() => setPopup("discipleship")} end={<AddLabel />} />
-      </> : <Row title="Log ministry" detail="Evangelism or discipleship" href={`${addHref}&category=ministry`} end={<AddLabel />} /> : null}
+      status={statusFor("ministry").label} statusTone={statusFor("ministry").tone}>
+      {ministry.length ? <ul className={styles.saved}>{ministry.map(activity => <ActivityCard key={activity.id} activity={activity} today={today} canChange={writable && !preview} onEdit={inline && edits[activity.id] ? () => setEditing(edits[activity.id]) : undefined} />)}</ul> : null}
+      {inline || !writable ? <>{partRow("evangelism")}{partRow("discipleship")}</>
+        : <Row title="Log ministry" detail="Evangelism or discipleship" href={`${addHref}&category=ministry`} end={<AddLabel />} />}
     </Card>
 
     <Card icon={<UsersRoundIcon className="size-4" strokeWidth={2} />} tone={["#f6d9de", "#7a2e45"]} title="Meetings"
-      status={statusFor("meetings").label} statusTone={statusFor("meetings").tone} footer={nilFooter("meetings")}>
-      {meetings.length ? <ul className={styles.saved}>{meetings.map(activity => <ActivityCard key={activity.id} activity={activity} meetingDetails={meetingDetails.find(row => row.activityId === activity.id)} today={today} canChange={writable} />)}</ul> : null}
-      {writable ? inline
-        ? <Row title={meetings.length ? "Add another meeting" : "Add a meeting"} detail="Teaching, prayer or other" onOpen={() => setPopup("meeting")} end={<AddLabel />} />
-        : <Row title="Log a meeting" detail="Teaching, prayer or other" href={`${addHref}&category=meetings`} end={<AddLabel />} /> : null}
+      status={statusFor("meetings").label} statusTone={statusFor("meetings").tone}>
+      {meetings.filter(activity => !detailOf(activity.id) && activity.kind !== "outreach_meeting").length
+        ? <ul className={styles.saved}>{meetings.filter(activity => !detailOf(activity.id) && activity.kind !== "outreach_meeting").map(activity => <ActivityCard key={activity.id} activity={activity} meetingDetails={meetingDetails.find(row => row.activityId === activity.id)} today={today} canChange={writable && !preview} />)}</ul> : null}
+      {meetings.filter(activity => detailOf(activity.id) || activity.kind === "outreach_meeting").map(activity => {
+        const detail = detailOf(activity.id);
+        return <div key={activity.id} className={styles.row}>
+          <span className={styles.rowCopy} style={{ padding: "8px 0 8px 14px" }}>
+            <span className={styles.rowTitle}>{MEETING_KIND_LABEL[activity.kind] ?? "Meeting"}{detail ? detail.role === "led" ? " · you led it" : " · you attended" : ""}</span>
+            <span className={styles.rowDetail} style={{ whiteSpace: "normal" }}>{detail ? meetingLine({ ...detail, brought: detail.peopleBrought, emphasis: activity.title, venue: activity.location }) : ministryLine ?? "From your ministry"}</span>
+          </span>
+          {writable && !preview ? <button type="button" className={styles.quiet} style={{ marginRight: 14 }} disabled={pending} onClick={() => run(() => deleteMinistryActivity(activity.id))}>Remove</button> : null}
+        </div>;
+      })}
+      {drafts.map(draft => <div key={draft.id} className={styles.row}>
+        <span className={styles.rowCopy} style={{ padding: "8px 14px" }}>
+          <span className={styles.rowTitle}>{MEETING_LABEL[draft.kind]}{draft.kind === "outreach" ? "" : draft.led ? " · you led it" : " · you attended"}</span>
+          <span className={styles.rowDetail}>{preview ? draft.summary : `Saving… ${draft.summary}`}</span>
+        </span>
+      </div>)}
+      {meetings.length || drafts.length
+        ? writable ? <Row title="Add another meeting" detail="Teaching, prayer or outreach" onOpen={() => open("meeting")} end={<AddLabel />} /> : null
+        : reasonOf("meetings") || statuses.meetings === "nil"
+          ? <NoRow title="Meetings" reason={reasonOf("meetings") ?? `Nothing ${dayWord}`} onOpen={writable ? () => setNoSheet("meetings") : undefined} />
+          : writable ? <YesNoRow title={`Did you attend a meeting ${dayWord}?`} question="Teaching, prayer or outreach" onNo={() => setNoSheet("meetings")} onYes={() => open("meeting")} />
+          : <Row title="Meetings" detail="Not answered" />}
     </Card>
 
     {/* Other reports (Pastor, 20 October): optional, never part of the daily report. */}
@@ -303,14 +371,14 @@ export function DailyReportSections({ today, days, selected, activities, edits =
       {submitted
         ? <div className={styles.submitted}><CheckIcon className="size-4" strokeWidth={2.5} aria-hidden="true" />Report submitted for {dayWord}. Add or change anything above.</div>
         : <>
-          <span className={styles.barMeta}>{readyCount} of 3 sections ready</span>
-          <button type="button" className={styles.submit} disabled={pending} onClick={() => setReview("open")}>Review and submit</button>
+          <span className={styles.barMeta}>{allAnswered ? `${readyCount} of 3 sections ready` : "Answer Yes or No for each part"}</span>
+          <button type="button" className={styles.submit} disabled={pending || !allAnswered} onClick={() => setReview("open")}>Review and submit</button>
         </>}
     </div> : null}
 
     {popup === "biblePlan" ? <BiblePlanSheet dateKey={selected} plan={plan} onClose={close} /> : null}
     {popup === "bibleToday" ? plan && reading && bibleDay
-      ? <BibleTodaySheet dateKey={selected} day={{ ...bibleDay, plan, reading }} onClose={close} onChangePlan={() => setPopup("biblePlan")} onOptimistic={optimisticSave} />
+      ? <BibleTodaySheet dateKey={selected} day={{ ...bibleDay, plan, reading }} onClose={close} onChangePlan={() => open("biblePlan")} onOptimistic={optimisticSave} />
       : <BibleFreeSheet dateKey={selected} initial={bibleLogged} onClose={close} /> : null}
     {popup === "prayerWatch" ? <PrayerWatchSheet dateKey={selected} attended={shown.prayer ?? devotion?.prayerWatch ?? []} times={shown.times ?? devotion?.prayerTimes ?? []} onClose={close} onChange={(sessions, times) => setOverride({ ...shown, prayer: sessions, times, date: selected })} /> : null}
     {popup === "teaching" ? <TeachingSheet dateKey={selected} sogp={sogpDetail} podcast={podcastDetail} report={teaching} available={popupsReady} onClose={close} onOptimistic={optimisticSave} /> : null}
@@ -318,9 +386,9 @@ export function DailyReportSections({ today, days, selected, activities, edits =
     {popup === "discipleship" ? <DiscipleshipSheet dateKey={selected} contacts={contacts} teachings={teachings} onClose={close} /> : null}
     {editing?.kind === "outreach" ? <EvangelismSheet key={editing.activityId} dateKey={selected} contacts={contacts} initial={editing} onClose={() => setEditing(null)} /> : null}
     {editing?.kind === "follow_up" ? <DiscipleshipSheet key={editing.activityId} dateKey={selected} contacts={contacts} teachings={teachings} initial={editing} onClose={() => setEditing(null)} /> : null}
-    {popup === "meeting" ? <ReportSheet title={meetings.length ? "Add another meeting" : "Add a meeting"} subtitle="Choose the meeting its leader created, or create it if you led it." onClose={close}>
-      {done => <div className={styles.embedded}><LiveMeetingFlow embedded dateKey={selected} today={today} units={units} contacts={contacts} initialMeetings={initialMeetings} onSaved={done} /></div>}
-    </ReportSheet> : null}
+    {popup === "meeting" ? <MeetingSheet venues={venues} ministry={ministryLine} onSave={addMeeting} onClose={close} /> : null}
+    {noSheet ? <ReasonSheet key={noSheet} part={noSheet} initial={reasonOf(noSheet) ?? undefined} onSave={reason => answerNo(noSheet, reason)}
+      onYes={() => { const part = noSheet; setNoSheet(null); open(part === "meetings" ? "meeting" : part); }} onClose={() => setNoSheet(null)} /> : null}
 
     {review ? <div className={styles.shade} data-closing={review === "closing" || undefined} role="presentation" onClick={event => { if (event.target === event.currentTarget) closeReview(); }}>
       <div className={styles.sheet} role="dialog" aria-modal="true" aria-labelledby="report-review-title">
@@ -333,11 +401,11 @@ export function DailyReportSections({ today, days, selected, activities, edits =
         </div>
         <div className={styles.review}>
           <b>Ministry</b>
-          <p>{ministry.length ? ministry.map(activityLine).join(". ") : `Nothing ${dayWord}`}</p>
+          <p>{[...ministry.map(activityLine), ...(["evangelism", "discipleship"] as const).flatMap(part => reasonOf(part) ? [`No ${part}: ${reasonOf(part)}`] : [])].join(". ") || `Nothing ${dayWord}`}</p>
         </div>
         <div className={styles.review}>
           <b>Meetings</b>
-          <p>{meetings.length ? meetings.map(activityLine).join(". ") : `Nothing ${dayWord}`}</p>
+          <p>{meetings.length ? meetings.map(activityLine).join(". ") : reasonOf("meetings") ? `No meeting: ${reasonOf("meetings")}` : `Nothing ${dayWord}`}</p>
         </div>
         <div className={styles.sheetActions}>
           <button type="button" className={styles.submit} disabled={pending} onClick={submit}>{pending ? "Submitting…" : "Confirm and submit"}</button>

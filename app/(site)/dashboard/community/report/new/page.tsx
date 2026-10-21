@@ -14,8 +14,6 @@ import { dailyReportingEnabled } from "@/lib/db/queries/daily-report-declaration
 import { reportingV3Enabled, reportingV3SchemaReady } from "@/lib/db/queries/reporting-v3-gate";
 import { listReportContactChoices } from "@/lib/db/queries/private-ministry-contacts";
 import { LiveMinistryForm } from "@/components/community/report/ministry-v3/live-ministry-form";
-import { LiveMeetingFlow } from "@/components/community/report/ministry-v3/live-meeting-flow";
-import { listMeetingUnits, listSharedChurchMeetings } from "@/lib/db/queries/shared-church-meetings";
 import Link from "next/link";
 
 // Reads the session on every request (Cache Components).
@@ -41,11 +39,9 @@ export default async function NewActivityRoute({
 
   if (reportingV3Enabled()) {
     const savedContacts = await listReportContactChoices(ctx.userId);
-    if (category === "meetings") {
-      const units = await listMeetingUnits(ctx.userId);
-      return <LiveMeetingFlow dateKey={dateKey} today={today} units={units} contacts={savedContacts} initialMeetings={units.length ? await listSharedChurchMeetings(ctx.userId, units[0].id, dateKey) : []} />;
-    }
-    // Ministry only (evangelism, discipleship); meetings have their own flow from "Log a meeting".
+    // Meetings are reported from My reports' meetings pop-up (Pastor, 21 October).
+    if (category === "meetings") redirect(`/dashboard/community/report${dateKey === today ? "" : `?day=${dateKey}`}`);
+    // Ministry only (evangelism, discipleship).
     return <LiveMinistryForm dateKey={dateKey} today={today} contacts={savedContacts} />;
   }
 

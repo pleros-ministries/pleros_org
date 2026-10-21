@@ -108,6 +108,7 @@ describe("buildMinistryRangeWorkbook", () => {
     follow_up: 0,
     church_service: 0,
     other: 0,
+    outreach_meeting: 0,
   };
   const buffer = buildMinistryRangeWorkbook({
     fromKey: "2026-10-01",

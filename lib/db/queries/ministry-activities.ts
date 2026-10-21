@@ -34,6 +34,7 @@ import {
 } from "@/lib/sogp/daily-participation";
 
 import { clearDeclaredNil, dailyReportingEnabled, lockDailyReporting } from "./daily-report-declarations";
+import { clearNoReason } from "./report-answers";
 import { inUnit } from "./community-scope";
 import { activityMemberUnitName, activityPeopleCount } from "./ministry-sql";
 import {
@@ -484,6 +485,7 @@ export async function saveActivity(input: {
           .onConflictDoUpdate({ target: schema.dailyReportMeetingDetails.activityId, set: { reportingRole: input.meetingDetails.role, taught: input.meetingDetails.taught, actorUserId: userId, updatedAt: new Date() } });
       }
       await clearDeclaredNil(tx, userId, dateKey, activity.kind === "outreach" || activity.kind === "follow_up" ? "ministry" : "meetings");
+      await clearNoReason(tx, userId, dateKey, activity.kind === "outreach" ? "evangelism" : activity.kind === "follow_up" ? "discipleship" : "meetings");
     }
     return { activityId };
   });

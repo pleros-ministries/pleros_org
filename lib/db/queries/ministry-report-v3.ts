@@ -8,6 +8,7 @@ import { inputRecord, parseMinistryReport, reportId, reportRequestKey } from "@/
 import { requireReportingV3, reportingV3SchemaReady } from "./reporting-v3-gate";
 import { requireOwnedReportContacts } from "./private-ministry-contacts";
 import { lockDailyReporting, clearDeclaredNil } from "./daily-report-declarations";
+import { clearNoReason } from "./report-answers";
 import { writableReportDate, writeReportActivity, replaceReportContacts } from "./reporting-v3-store";
 import { reconcileFollowUps } from "./ministry-activities";
 import { writeMinistryDetails } from "./report-popups";
@@ -44,6 +45,7 @@ export async function saveMinistryReportV3(userId: string, value: unknown) {
       await reconcileFollowUps(tx, { userId, activityId, dateKey, followUps: contacts.flatMap(row => row.legacyContactId === null ? [] : [{ contactId: row.legacyContactId, kind: method, outcomes: { saved: false, filled: false, healed: false }, note: null }]) });
     }
     await clearDeclaredNil(tx, userId, dateKey, "ministry");
+    await clearNoReason(tx, userId, dateKey, parsed.activity.kind === "follow_up" ? "discipleship" : "evangelism");
     return { activityId };
   });
 }

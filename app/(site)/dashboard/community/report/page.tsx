@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { DailyReportSections } from "@/components/community/report/daily-report-sections";
 import { reportingV3Enabled } from "@/lib/db/queries/reporting-v3-gate";
 import { listReportContactChoices } from "@/lib/db/queries/private-ministry-contacts";
-import { listMeetingUnits, listSharedChurchMeetings } from "@/lib/db/queries/shared-church-meetings";
+import { getOwnMeetingReports, getOwnNoReasons, listOwnVenues } from "@/lib/db/queries/report-answers";
 import { dailyReportingEnabled, getOwnDailyDeclarations, getOwnMeetingDetails } from "@/lib/db/queries/daily-report-declarations";
 import { getAppSession } from "@/lib/app-session";
 import {
@@ -61,10 +61,9 @@ export default async function MinistryReportRoute({
 
   // The one-page report embeds the ministry and meeting forms, so their choices load here too.
   const inline = reportingV3Enabled() && days.includes(selected);
-  const unitsRead = inline ? listMeetingUnits(ctx.userId).catch(() => []) : Promise.resolve([]);
   const plerosRead = getDayActivity(ctx.userId, selected);
   const activitiesRead = listActivitiesForDay(ctx.userId, selected);
-  const [activities, edits, pleros, declarations, meetingDetails, sharedDetails, week, contacts, units, initialMeetings, popupsReady, bibleDay, teaching, teachings, prayerTimes, assignment] = await Promise.all([
+  const [activities, edits, pleros, declarations, meetingDetails, sharedDetails, week, contacts, noReasons, meetingReports, venues, popupsReady, bibleDay, teaching, teachings, prayerTimes, assignment] = await Promise.all([
     activitiesRead,
     inline ? activitiesRead.then(list => loadMinistryEdits(ctx.userId, list)).catch((): Record<number, MinistryEdit> => ({})) : Promise.resolve<Record<number, MinistryEdit>>({}),
     plerosRead,
@@ -73,8 +72,10 @@ export default async function MinistryReportRoute({
     getOwnSharedMeetingDetails(ctx.userId, selected),
     getOwnReportWeek(ctx.userId, days.slice(0, 7)).catch(() => null),
     inline ? listReportContactChoices(ctx.userId).catch(() => []) : Promise.resolve([]),
-    unitsRead,
-    unitsRead.then(list => list.length ? listSharedChurchMeetings(ctx.userId, list[0].id, selected).catch(() => undefined) : undefined),
+    // Yes or No answers and the meetings pop-up (migration 0075).
+    getOwnNoReasons(ctx.userId, selected).catch(() => ({})),
+    getOwnMeetingReports(ctx.userId, selected).catch(() => []),
+    inline ? listOwnVenues(ctx.userId).catch(() => []) : Promise.resolve([]),
     // Report pop-ups (migration 0068): Bible plan, Teaching note and this week's teachings.
     reportPopupsReady().catch(() => false),
     plerosRead.then(day => getBibleDay(ctx.userId, selected, day.bible)).catch(() => undefined),
@@ -90,8 +91,9 @@ export default async function MinistryReportRoute({
     <DailyReportSections
       inline={inline}
       contacts={contacts}
-      units={units}
-      initialMeetings={initialMeetings}
+      noReasons={noReasons}
+      meetingReports={meetingReports}
+      venues={venues}
       today={today}
       days={days}
       selected={selected}

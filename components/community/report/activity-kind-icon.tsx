@@ -17,6 +17,7 @@ export const ACTIVITY_KIND_ICONS: Record<ActivityKind, LucideIcon> = {
   follow_up: UsersIcon,
   church_service: ChurchIcon,
   other: SparklesIcon,
+  outreach_meeting: MegaphoneIcon,
 };
 
 export function ActivityKindIcon({

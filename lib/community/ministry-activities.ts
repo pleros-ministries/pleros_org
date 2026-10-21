@@ -19,7 +19,8 @@ export type ActivityKind =
   | "prayer_meeting"
   | "follow_up"
   | "church_service"
-  | "other";
+  | "other"
+  | "outreach_meeting";
 
 export type OutreachMode = "online" | "offline" | "both";
 
@@ -130,6 +131,20 @@ export const ALL_ACTIVITY_KINDS: readonly ActivityKindConfig[] = [
     people: "none",
     offered: false,
     shown: ["attendance", "saved", "filled", "healed", "followUps"],
+    required: [],
+  },
+  {
+    // Pastor, 21 October: reported from My reports' meetings pop-up, drawn
+    // from the day's evangelism and discipleship, so it has no numbers of its own.
+    key: "outreach_meeting",
+    label: "Outreach meeting",
+    hint: "Your evangelism or discipleship as a meeting",
+    titleLabel: null,
+    titleRequired: false,
+    asksLocation: false,
+    people: "none",
+    offered: false,
+    shown: [],
     required: [],
   },
 ];

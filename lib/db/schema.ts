@@ -286,6 +286,8 @@ export const ministryActivityKindEnum = pgEnum("ministry_activity_kind", [
   "follow_up",
   "church_service",
   "other",
+  /** Drawn from the day's evangelism and discipleship (migration 0075). */
+  "outreach_meeting",
 ]);
 
 /** How an outreach reached people. */
@@ -2453,6 +2455,44 @@ export const dailyReportDeclarations = pgTable("daily_report_declarations", {
   index("daily_report_declarations_date_idx").on(t.reportDate, t.userId),
   check("daily_report_declaration_category_check", sql`(${t.category} = 'devotional' and ${t.declaration} = 'confirmed') or (${t.category} in ('ministry', 'meetings') and ${t.declaration} = 'nil')`),
   check("daily_report_declaration_actor_check", sql`${t.actorUserId} = ${t.userId}`),
+]);
+
+/**
+ * Why someone answered No to a part of the day's report (Pastor, 21 October;
+ * migration 0075). Both ministry parts No also records the Ministry "nil"
+ * declaration, so report statuses read as before.
+ */
+export const dailyReportNoReasons = pgTable("daily_report_no_reasons", {
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  reportDate: date("report_date", { mode: "string" }).notNull(),
+  part: text("part").$type<"evangelism" | "discipleship" | "meetings">().notNull(),
+  reason: text("reason").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  primaryKey({ name: "daily_report_no_reasons_pk", columns: [t.userId, t.reportDate, t.part] }),
+  index("daily_report_no_reasons_date_idx").on(t.reportDate, t.userId),
+  check("daily_report_no_reasons_part_check", sql`${t.part} in ('evangelism', 'discipleship', 'meetings')`),
+  check("daily_report_no_reasons_reason_check", sql`char_length(trim(${t.reason})) between 3 and 300`),
+]);
+
+/**
+ * A teaching or prayer meeting someone led or attended (migration 0075). The
+ * activity row keeps the canonical numbers: `title` the teaching emphasis,
+ * `location` the venue, `attendance` workers plus members.
+ */
+export const meetingReportDetails = pgTable("meeting_report_details", {
+  activityId: integer("activity_id").primaryKey().references(() => ministryActivities.id, { onDelete: "cascade" }),
+  role: text("role").$type<"led" | "attended">().notNull(),
+  /** Lagos wall-clock times; an end before the start runs into the next day. */
+  startsAt: time("starts_at"),
+  endsAt: time("ends_at"),
+  workers: integer("workers"),
+  members: integer("members"),
+  peopleBrought: integer("people_brought").notNull().default(0),
+}, (t) => [
+  check("meeting_report_details_role_check", sql`${t.role} in ('led', 'attended')`),
+  check("meeting_report_details_brought_check", sql`${t.peopleBrought} between 0 and 50`),
 ]);
 
 /** Companion table leaves legacy ministry_activities reads compatible before migration. */
