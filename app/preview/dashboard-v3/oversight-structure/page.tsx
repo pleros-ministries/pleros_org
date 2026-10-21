@@ -3,6 +3,7 @@ import Link from "next/link";
 import { dashboardFont, dashboardHeadingFont } from "@/components/dashboard/v3/font";
 import styles from "@/components/dashboard/v3/dashboard.module.css";
 import { OversightOtherGroups, OversightStructure } from "@/components/dashboard/church/group-oversight-view";
+import { OversightReportsMockup } from "@/components/dashboard/church/oversight-reports-mockup";
 import type { GroupOversightData, GroupOversightPerson } from "@/lib/db/queries/group-oversight";
 
 export const metadata = { title: "Oversight structure preview", robots: { index: false, follow: false } };
@@ -55,7 +56,7 @@ const DATA: GroupOversightData = {
 /** The real Structure and Every other group views on sample data: `?page=structure|other`, `?role=pastor|branch_pastor`. Nothing saves. */
 export default async function OversightStructurePreview({ searchParams }: { searchParams: Promise<{ page?: string; role?: string }> }) {
   const params = await searchParams;
-  const page = params.page === "other" ? "other" : "structure";
+  const page = params.page === "other" || params.page === "reports" || params.page === "reports-other" ? params.page : "structure";
   const role = params.role === "branch_pastor" ? "branch_pastor" : "pastor";
   const data: GroupOversightData = role === "pastor" ? DATA : { ...DATA, role: "branch_pastor", scopeLabel: "Ibadan branch" };
   const tab = (label: string, href: string, on: boolean) => <Link href={href} className={on ? "font-medium text-(--color-community-ink)" : "underline"}>{label}</Link>;
@@ -68,7 +69,10 @@ export default async function OversightStructurePreview({ searchParams }: { sear
       </span>
     </div>
     <div className="mx-auto w-full max-w-[640px] px-4 pt-[18px] pb-7 [&_h1]:text-[21px] [&_h1]:leading-[28px] [&_h1]:font-medium">
-      {page === "other" ? <OversightOtherGroups data={data} /> : <OversightStructure data={data} updates={3} />}
+      {page === "other" ? <OversightOtherGroups data={data} />
+        // Mockup of the Reports tab (`?page=reports`), not built yet.
+        : page === "reports" || page === "reports-other" ? <OversightReportsMockup data={data} page={page === "reports" ? "reports" : "other"} role={role} />
+        : <OversightStructure data={data} updates={3} />}
     </div>
   </div>;
 }
