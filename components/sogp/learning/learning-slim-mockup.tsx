@@ -25,7 +25,7 @@ export const LEARNING_FIELDS: Record<LearningArt, { field: string; ink: string }
   "pre-sogp": { field: "#f4d2ea", ink: "#5a1e4a" },
   sogp: { field: "#fcd9c7", ink: "#6e2a17" },
   advanced: { field: "#e6dbfb", ink: "#3e1876" },
-  podcast: { field: "#f8d1d9", ink: "#5e2236" },
+  podcast: { field: "#d3dfeb", ink: "#1f3a55" },
   library: { field: "#f3e0c4", ink: "#4d3a26" },
 };
 
