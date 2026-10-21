@@ -11,16 +11,16 @@ import { getSogpDashboardData } from "@/lib/db/queries/sogp";
 import { getHomeDiscipleshipSummary } from "@/lib/db/queries/sogp-discipleship";
 import { getActiveSogpJourney } from "@/lib/db/queries/sogp-journey";
 import type { SogpLearningState } from "@/lib/db/queries/sogp-learning";
-import { getSogpLeaderboard } from "@/lib/db/queries/sogp-leaderboard";
 import { lagosToday } from "@/lib/sogp/daily-date";
+import { SOGP_LEVELS } from "@/lib/sogp/curriculum";
 import { learningResume } from "@/lib/sogp/learning-view";
 import { buildSogpDays } from "@/lib/sogp/sogp-days";
 
-import { cohortWeekLabel, homeSogpToday, type HomeWeekDay } from "./home";
+import { cohortWeekLabel, homeSogpToday } from "./home";
 
 const LEVEL_NAMES: Record<number, string> = { 1: "Gospel", 2: "Foundations", 3: "Walk of faith", 4: "Purpose" };
-const releaseFormat = new Intl.DateTimeFormat("en-GB", { weekday: "long", hour: "numeric", minute: "2-digit", hour12: true, timeZone: "Africa/Lagos" });
 const weekdayFormat = new Intl.DateTimeFormat("en-GB", { weekday: "short", timeZone: "UTC" });
+const opensFormat = new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "Africa/Lagos" });
 
 export type LearningHubData = {
   /** null before the learner has chosen a path. */
@@ -32,13 +32,12 @@ export type LearningHubData = {
   card: { eyebrow: string; title: string; progress: string; done: number; total: number; href: string; action: string; level: number };
   /** Lessons from earlier days not yet done. Optional: today's lesson is never blocked by them. */
   catchUp: { count: number; days: string[]; href: string } | null;
-  week: HomeWeekDay[] | null;
-  upNext: Array<{ key: string; number: number; title: string; meta: string; href: string | null; current: boolean }>;
   review: { title: string; when: string } | null;
   certificate: { available: boolean };
-  leaderboard: { top: Array<{ rank: number; name: string; points: number; isMe: boolean }>; me: { rank: number; points: number } | null; total: number } | null;
   discipler: { firstName: string } | null;
   doneCount: number;
+  /** The four levels on the traditional path, for the SOGP page (Pastor, 21 October); empty on the podcast path. */
+  levels: Array<{ level: number; title: string; done: number; total: number; state: "done" | "now" | "later"; opens: string | null }>;
   /** The learner asked to hear when Advanced SOGP opens (migration 0065). */
   advancedInterest: boolean;
   /** The learning path, Welcome Pack → Pre-SOGP → SOGP (Pastor review, 18 October). */
@@ -71,10 +70,9 @@ async function preSogpCounts(userId: string, cohortId: number) {
 export async function getLearningHubData(userId: string, state: SogpLearningState | null): Promise<LearningHubData | null> {
   const day = lagosToday();
   // Certification facts are left to the readiness page: they repeat every read below.
-  const [course, journey, leaderboard, group, advancedInterest] = await Promise.all([
+  const [course, journey, group, advancedInterest] = await Promise.all([
     getSogpDashboardData(userId),
     getActiveSogpJourney(userId).catch(() => null),
-    getSogpLeaderboard(userId).catch(() => null),
     getHomeDiscipleshipSummary(userId).catch(() => ({ kind: "none" as const })),
     hasAdvancedSogpInterest(userId).catch(() => false),
   ]);
@@ -127,14 +125,13 @@ export async function getLearningHubData(userId: string, state: SogpLearningStat
     href: `/dashboard/sogp/course/day/${missed[0]!.track!.dayNumber}`,
   } : null;
 
-  const upNext = podcast ? [] : published.filter(track => !track.completed).slice(0, 3).map(track => ({
-    key: `track-${track.id}`,
-    number: track.dayNumber,
-    title: track.lesson.title,
-    meta: track.accessible ? (track.id === next?.id ? "Ready now · lesson, quiz, written response" : "Ready") : `Opens ${releaseFormat.format(new Date(track.releaseAt))}`,
-    href: track.accessible ? `/dashboard/sogp/course/day/${track.dayNumber}` : null,
-    current: track.id === next?.id,
-  }));
+  const levels = podcast ? [] : SOGP_LEVELS.map(definition => {
+    const tracks = published.filter(track => track.curriculumLevel === definition.level);
+    const done = tracks.filter(track => track.completed).length;
+    const firstRelease = tracks.map(track => new Date(track.releaseAt).getTime()).sort((a, b) => a - b)[0];
+    const state: "done" | "now" | "later" = tracks.length && done === tracks.length ? "done" : tracks.some(track => track.accessible) ? "now" : "later";
+    return { level: definition.level, title: definition.title, done, total: tracks.length || definition.tracks.length, state, opens: state === "later" && firstRelease ? opensFormat.format(new Date(firstRelease)) : null };
+  });
 
   return {
     path,
@@ -144,17 +141,11 @@ export async function getLearningHubData(userId: string, state: SogpLearningStat
     weekLabel: journey ? cohortWeekLabel(journey.cohort.startsAt, journey.cohort.endsAt, day) : null,
     card,
     catchUp,
-    week: today?.week ?? null,
-    upNext,
     review: today?.review ? { title: today.review.title, when: today.review.when } : null,
     certificate: { available: Boolean(course.certificate && !course.certificate.revokedAt) },
-    leaderboard: leaderboard ? {
-      top: leaderboard.top.slice(0, 5).map(row => ({ rank: row.rank, name: row.name, points: row.points, isMe: row.isMe })),
-      me: leaderboard.me ? { rank: leaderboard.me.rank, points: leaderboard.me.points } : null,
-      total: leaderboard.total,
-    } : null,
     discipler: group.kind === "member" ? { firstName: group.leaderFirstName } : null,
     doneCount,
+    levels,
     advancedInterest,
     journey: {
       welcomePackDone,

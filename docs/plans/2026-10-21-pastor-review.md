@@ -43,6 +43,8 @@ He also said groups "without order" (not by who they're under) were confusing; S
 
 ## 4. Learning (`/dashboard/sogp`)
 
+**Done:** Learning is slimmed to your current learning plus Other learning cards (with their own art), and the SOGP page (`/dashboard/sogp/school`) holds the certificate, levels, After SOGP and the Your learning tools. Still to do: the "Ask a question" prompt after each teaching, and choosing the next phase.
+
 - **Only what you're learning now:** the learning card, and perhaps the SOGP-day calendar, with a link back to Home for details.
 - **Remove:** the leaderboard, Every day, Up next, Your learning (change path, history, rules), group reviews.
 - **Keep certificates**, more visible.

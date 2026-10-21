@@ -8,9 +8,10 @@ import { getActiveSogpJourney } from "./sogp-journey";
 import { learningResume } from "@/lib/sogp/learning-view";
 
 /** Facts only. Neither a new eligibility formula nor a certificate issuer. */
-export async function getOwnCertificationFacts(userId:string) {
+export async function getOwnCertificationFacts(userId:string,loadedState?:Awaited<ReturnType<typeof getOwnSogpLearning>>) {
+  // A page that already holds the learning state passes it in: a second read queues behind the learner lock.
   const [dashboard,state,enrollments]=await Promise.all([
-    getSogpDashboardData(userId),getOwnSogpLearning(userId),
+    getSogpDashboardData(userId),loadedState!==undefined?Promise.resolve(loadedState):getOwnSogpLearning(userId),
     db.select({id:s.sogpEnrollments.id}).from(s.sogpEnrollments).where(eq(s.sogpEnrollments.userId,userId)),
   ]);
   if(!dashboard||!enrollments.length)return null;

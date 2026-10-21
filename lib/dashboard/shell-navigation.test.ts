@@ -79,10 +79,13 @@ describe("connected dashboard navigation", () => {
   test("deep dashboard screens return to their actual parent instead of a generic root", () => {
     // The You tabs are roots like Community's: no focused header.
     for (const tab of ["/dashboard/sogp", "/dashboard/library", "/dashboard/partner", "/dashboard/profile", "/dashboard/community/report"]) expect(dashboardFocusForPath(tab)).toBeNull();
-    expect(dashboardParentForPath("/dashboard/sogp/plan")).toEqual({ href: "/dashboard/sogp", label: "Back to Learning" });
+    // SOGP's tools step back to the SOGP page, which steps back to Learning (Pastor, 21 October).
+    expect(dashboardParentForPath("/dashboard/sogp/plan")).toEqual({ href: "/dashboard/sogp/school", label: "Back to SOGP" });
+    expect(dashboardParentForPath("/dashboard/sogp/school")).toEqual({ href: "/dashboard/sogp", label: "Back to Learning" });
+    expect(dashboardParentForPath("/dashboard/sogp/listen")).toEqual({ href: "/dashboard/sogp", label: "Back to Learning" });
     // Trails under You start at You; Community trails stop at their bottom-bar tab.
     expect(dashboardTrailForPath("/dashboard/sogp/course/day/4/quiz").map(crumb => crumb.label)).toEqual(["You", "Learning", "Lesson"]);
-    expect(dashboardTrailForPath("/dashboard/sogp/days").map(crumb => crumb.label)).toEqual(["You", "Learning"]);
+    expect(dashboardTrailForPath("/dashboard/sogp/days").map(crumb => crumb.label)).toEqual(["You", "Learning", "SOGP"]);
     expect(dashboardTrailForPath("/dashboard/library/teachings").map(crumb => crumb.label)).toEqual(["You", "Library"]);
     expect(dashboardParentForPath("/dashboard/podcast")).toEqual({ href: "/dashboard/library", label: "Back to Library" });
     expect(dashboardParentForPath("/dashboard/prayer-watch")).toEqual({ href: "/dashboard/sogp", label: "Back to Learning" });

@@ -46,6 +46,9 @@ const YOU: DashboardParent = { href: "/dashboard", label: "Back to You" };
 const COMMUNITY: DashboardParent = { href: "/dashboard/community", label: "Back to Community" };
 const GROUPS: DashboardParent = { href: "/dashboard/community/groups", label: "Back to Groups" };
 const MY_SOGP: DashboardParent = { href: "/dashboard/sogp", label: "Back to Learning" };
+/** The SOGP page (Pastor, 21 October): SOGP's tools step back to it rather than to Learning. */
+const SOGP_PAGE: DashboardParent = { href: "/dashboard/sogp/school", label: "Back to SOGP" };
+const SOGP_TOOLS = new Set(["days", "path", "plan", "follow-up", "readiness", "certificate", "traditional", "history"]);
 const LIBRARY: DashboardParent = { href: "/dashboard/library", label: "Back to Library" };
 const REPORTS: DashboardParent = { href: "/dashboard/community/report", label: "Back to My reports" };
 
@@ -67,7 +70,8 @@ const DASHBOARD_FOCUS: Array<[RegExp, (match: RegExpMatchArray) => DashboardFocu
   [/^\/dashboard\/sogp\/course\/day\/\d+$/, () => ({ title: "Lesson", back: MY_SOGP })],
   [/^\/dashboard\/sogp\/reviews\/schedule$/, () => ({ title: "Schedule group review", back: { href: "/dashboard/sogp/reviews", label: "Back to group reviews" } })],
   [/^\/dashboard\/sogp\/reviews\/\d+\/(attendance|make-up-offer|make-up)$/, m => ({ title: m[1] === "attendance" ? "Confirm attendance" : m[1] === "make-up-offer" ? "Offer a make-up" : "Make up a review", back: { href: "/dashboard/sogp/reviews", label: "Back to group reviews" } })],
-  [/^\/dashboard\/sogp\/reviews$/, () => ({ title: "Group reviews", back: MY_SOGP })],
+  [/^\/dashboard\/sogp\/reviews$/, () => ({ title: "Group reviews", back: SOGP_PAGE })],
+  [/^\/dashboard\/sogp\/school$/, () => ({ title: "School of God’s Purpose", back: MY_SOGP })],
   [/^\/dashboard\/sogp\/follow-up\/(request|welcome)$/, m => ({ title: m[1] === "request" ? "Follow-up request" : "Welcome to SOGP", back: { href: "/dashboard/sogp/follow-up", label: "Back to your follow-up person" } })],
   [/^\/dashboard\/profile\/reminders$/, () => ({ title: "Notifications and reminders", back: { href: "/dashboard/profile", label: "Back to Profile" } })],
   [/^\/dashboard\/community\/enrollees\/(\d+)\/invite$/, m => ({ title: "Invite to a group", back: { href: `/dashboard/community/enrollees/${m[1]}`, label: "Back to enrollee" } })],
@@ -77,7 +81,7 @@ const DASHBOARD_FOCUS: Array<[RegExp, (match: RegExpMatchArray) => DashboardFocu
   [/^\/dashboard\/sogp\/invitations\/\d+$/, () => ({ title: "Group invitation", back: COMMUNITY })],
   [/^\/dashboard\/sogp\/(days|path|plan|listen|follow-up|readiness|referrals|leaderboard|certificate|traditional|history)$/, m => ({
     title: ({ days: "Your SOGP days", history: "Your history", path: "Change path or pace", plan: "Edit full plan", listen: "Today’s listening", "follow-up": "Your follow-up person", readiness: "Certification", referrals: "Invite someone", leaderboard: "Leaderboard", certificate: "Certificate", traditional: "Calendar and assessments" } as Record<string, string>)[m[1]],
-    back: MY_SOGP,
+    back: SOGP_TOOLS.has(m[1]!) ? SOGP_PAGE : MY_SOGP,
   })],
   [/^\/dashboard\/sogp\/.+$/, () => ({ title: "Learning", back: MY_SOGP })],
   // Contacts

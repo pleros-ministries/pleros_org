@@ -1,15 +1,15 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
-import { AwardIcon, CalendarCheckIcon, CalendarDaysIcon, ChevronRightIcon, GemIcon, GiftIcon, HistoryIcon, SunIcon, MessageCircleQuestionIcon, PlayIcon, RefreshCcwIcon, RepeatIcon, TrophyIcon } from "lucide-react";
+import { ChevronRightIcon, PlayIcon, RefreshCcwIcon } from "lucide-react";
 
-import { AdvancedSogpNotify } from "@/components/dashboard/library/advanced-sogp-notify";
+import groupStyles from "@/components/community/discipleship/discipleship-group.module.css";
 import type { LearningHubData } from "@/lib/dashboard/learning-hub";
 import type { LearningViewData } from "@/lib/sogp/learning-view";
 
-import { LeaderboardPreview } from "./leaderboard-preview";
 import styles from "./learning-hub.module.css";
+import { OtherLearning, otherLearningTiles } from "./other-learning";
+import { SOGP_PAGE } from "./sogp-school";
 
-/** Each SOGP level's card art and colours, as on the You home's learning card. */
 /** Each level's art; `wide` is the 3:1 cut that covers wide cards without a seam (as on Home). */
 const LEVEL_ART: Record<number, { image: string; wide: string; field: string; ink: string }> = {
   1: { image: "my-learning-background-v5.webp", wide: "my-learning-background-v5-wide.webp", field: "#2056d6", ink: "#2056d6" },
@@ -20,25 +20,12 @@ const LEVEL_ART: Record<number, { image: string; wide: string; field: string; in
 
 const initials = (name: string) => name.trim().split(/\s+/).slice(0, 2).map(part => part[0] ?? "").join("").toUpperCase();
 
-function Tool({ href, icon, tone, title, meta }: { href: string; icon: React.ReactNode; tone: [string, string]; title: string; meta: string }) {
-  return <Link href={href} className={styles.tool}>
-    <span className={styles.toolIcon} style={{ background: tone[0], color: tone[1] }} aria-hidden="true">{icon}</span>
-    <b>{title}</b>
-    <span>{meta}</span>
-  </Link>;
-}
-
-function Step({ href, icon, tone, title, meta, status }: { href: string; icon: React.ReactNode; tone: [string, string]; title: string; meta: string; status: "done" | "now" | "open" | null }) {
-  return <li><Link href={href} className={styles.row}>
-    <span className={styles.stepIcon} style={{ background: tone[0], color: tone[1] }} aria-hidden="true">{icon}</span>
-    <span className={styles.rowCopy}><span className={styles.rowTitle} style={{ fontWeight: 500 }}>{title}</span><span className={styles.rowMeta}>{meta}</span></span>
-    {status ? <span className={styles.stepTag} data-status={status}>{status === "done" ? "Done" : status === "now" ? "Now" : "Open"}</span> : <ChevronRightIcon className="size-4 shrink-0 text-[#a6abb2]" strokeWidth={2} />}
-  </Link></li>;
-}
-
 /**
- * Learning: resume, an optional catch-up (missed lessons never block
- * today's), this week, what's next, a leaderboard preview and the tools.
+ * Learning (Pastor, 21 October): only what you're learning now. Your current
+ * learning is a class of its own, named above the card playing from it, and
+ * opens the SOGP page; Home keeps today's tasks. Everything else is Other
+ * learning, as cards. Path, history, reviews and the certificate live on the
+ * SOGP page.
  */
 export function LearningHub({ hub, learning }: { hub: LearningHubData; learning: LearningViewData }) {
   const art = LEVEL_ART[hub.card.level] ?? LEVEL_ART[1]!;
@@ -79,15 +66,18 @@ export function LearningHub({ hub, learning }: { hub: LearningHubData; learning:
         <span className={styles.rowCopy}><span className={styles.rowTitle} style={{ fontWeight: 500 }}>{learning.followUp!.name.split(" ")[0]} invited you</span><span className={styles.rowMeta}>Keep them as the person who looks after you, or ask for someone else</span></span>
         <ChevronRightIcon className="size-4 shrink-0 text-[#a6abb2]" strokeWidth={2} />
       </Link> : null}
+
+      <div><h1>Learning</h1>{hub.cohortTitle ? <p className={groupStyles.sub}>{[hub.cohortTitle, hub.weekLabel].filter(Boolean).join(" · ")}</p> : null}</div>
+
+      {/* Your current learning, a class of its own: its name heads the card playing from it. */}
+      <div className={styles.sectionTitle}>
+        <h2>School of God’s Purpose</h2>
+        <Link href={SOGP_PAGE} className="inline-flex items-center gap-0.5">Open<ChevronRightIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" /></Link>
+      </div>
       {resume}
 
       {hub.state === "preparing" ? <p className={styles.notice}>Your cohort hasn’t started yet. Pre-SOGP is open now, and your first teachings unlock on the start date.</p> : null}
       {hub.state === "completed" ? <p className={styles.notice}>{finished ? "You’ve finished every track. Keep growing below." : "Your cohort has ended. Your history and any remaining lessons stay open here."}</p> : null}
-      {hub.state === "completed" ? <div className={styles.panel} style={{ padding: 14, background: "#f6f3ff", borderColor: "#e3d8f8", display: "grid", gap: 6 }}>
-        <b style={{ fontFamily: "var(--font-dashboard-heading)", fontSize: 15, fontWeight: 500, color: "#3e1876" }}>Advanced SOGP is coming</b>
-        <span style={{ fontSize: 12.5, lineHeight: "18px", color: "#56209c" }}>Deeper formation for those who’ve finished SOGP. We’ll announce it in Pleros updates the moment it opens.</span>
-        <AdvancedSogpNotify initialRegistered={hub.advancedInterest} variant="panel" />
-      </div> : null}
 
       {hub.catchUp && hub.state === "active" ? <div className={styles.catch}>
         <span className={styles.catchIcon} aria-hidden="true"><RefreshCcwIcon className="size-4" strokeWidth={2.2} /></span>
@@ -98,81 +88,10 @@ export function LearningHub({ hub, learning }: { hub: LearningHubData; learning:
         <Link href={hub.catchUp.href} className={styles.btn}>Catch up</Link>
       </div> : null}
 
-      {hub.week ? <>
-        <div className={styles.sectionTitle}><h2>This week</h2>{hub.weekLabel ? <span>{hub.weekLabel}</span> : null}</div>
-        <div className={styles.week} aria-label="This week">
-          {hub.week.map(day => <div key={day.dateKey} className={styles.day}>
-            <i data-state={day.state} aria-label={`${day.weekday}: ${day.state}`}>{day.state === "complete" ? "✓" : day.state === "missed" ? "!" : day.isToday ? "•" : ""}</i>
-            {day.weekday.slice(0, 1)}
-          </div>)}
-        </div>
-      </> : null}
+      {hub.state === "active" ? <Link href="/dashboard" className={`${groupStyles.quiet} -mt-1 inline-flex items-center gap-0.5 justify-self-start`}>Today’s tasks are on Home<ChevronRightIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" /></Link> : null}
 
-      {hub.leaderboard && hub.leaderboard.top.length ? <LeaderboardPreview board={hub.leaderboard} id="hub-leaderboard" /> : null}
-
-      {hub.review ? <div className={styles.panel}><div className={styles.row}>
-        <span className={styles.num} aria-hidden="true"><CalendarCheckIcon className="size-3.5" strokeWidth={2.2} /></span>
-        <span className={styles.rowCopy}><span className={styles.rowTitle} style={{ fontWeight: 500 }}>{hub.review.title}</span><span className={styles.rowMeta}>Group review · {hub.review.when}</span></span>
-      </div></div> : null}
-
-      {/* The path from welcome to purpose (Pastor review, 18 October). */}
-      <div className={styles.sectionTitle}><h2>Your path</h2></div>
-      <div className={styles.panel}><ul className={styles.list}>
-        <Step href="/dashboard/welcomepack" icon={<GiftIcon className="size-4" strokeWidth={2} />} tone={["#fde3cf", "#7a3a10"]} title="Welcome Pack" meta={hub.journey.welcomePackDone ? "Gifts, orientation and reminders" : "Finish setting up your gifts and reminders"} status={hub.journey.welcomePackDone ? "done" : "open"} />
-        <Step href="/dashboard/pre-sogp" icon={<PlayIcon className="size-4" fill="currentColor" strokeWidth={0} />} tone={["#f6e4ac", "#5a4508"]} title="Pre-SOGP" meta={hub.journey.preSogp.total ? `Foundation videos · ${Math.min(hub.journey.preSogp.done, hub.journey.preSogp.total)} of ${hub.journey.preSogp.total}` : "Foundation videos"} status={hub.journey.preSogp.total && hub.journey.preSogp.done >= hub.journey.preSogp.total ? "done" : hub.state === "preparing" ? "now" : "open"} />
-        <Step href={hub.journey.days ? "/dashboard/sogp/days" : hub.card.href} icon={<GemIcon className="size-4" strokeWidth={2} />} tone={["#e4ebfd", "#2331ae"]} title="School of God’s Purpose" meta={hub.journey.days ? (hub.journey.days.current ? `Your ${hub.journey.days.total} days · day ${hub.journey.days.current}` : `Your ${hub.journey.days.total} days`) : hub.paceLabel} status={finished || hub.state === "completed" ? "done" : hub.state === "active" ? "now" : null} />
-      </ul></div>
-
-      <div className={styles.sectionTitle}><h2>Every day</h2></div>
-      <div className={styles.panel}><ul className={styles.list}>
-        <Step href="/dashboard/prayer-watch" icon={<SunIcon className="size-4" strokeWidth={2} />} tone={["#fff1c2", "#8a5a00"]} title="Prayer Watch" meta={hub.journey.prayerToday ? "Done today" : "Join the watch today"} status={null} />
-        {hub.journey.days ? <Step href="/dashboard/sogp/days" icon={<CalendarDaysIcon className="size-4" strokeWidth={2} />} tone={["#e6ecfc", "#1f3260"]} title={`Your ${hub.journey.days.total} days`} meta={`${hub.journey.days.teaching} teaching days and ${hub.journey.days.reviews} review ${hub.journey.days.reviews === 1 ? "day" : "days"}`} status={null} /> : null}
-      </ul></div>
-    </div>
-
-    <div className={styles.column}>
-      {hub.upNext.length ? <>
-        <div className={styles.sectionTitle}><h2>Up next</h2><Link href={hub.journey.days ? "/dashboard/sogp/days" : "/dashboard/sogp/traditional"}>{hub.journey.days ? `Your ${hub.journey.days.total} days` : "Full calendar"}</Link></div>
-        <div className={styles.panel}><ul className={styles.list}>
-          {hub.upNext.map(item => <li key={item.key}>{item.href
-            ? <Link href={item.href} className={styles.row}><span className={styles.num} data-current={item.current || undefined}>{item.number}</span><span className={styles.rowCopy}><span className={styles.rowTitle}>{item.title}</span><span className={styles.rowMeta}>{item.meta}</span></span><ChevronRightIcon className="size-4 shrink-0 text-[#a6abb2]" strokeWidth={2} /></Link>
-            : <div className={styles.row}><span className={styles.num}>{item.number}</span><span className={styles.rowCopy}><span className={styles.rowTitle}>{item.title}</span><span className={styles.rowMeta}>{item.meta}</span></span></div>}</li>)}
-        </ul></div>
-      </> : null}
-
-      <div className={styles.sectionTitle}><h2>Your learning</h2></div>
-      <div className={styles.tools}>
-        <Tool href="/dashboard/sogp/path" icon={<RepeatIcon className="size-4" strokeWidth={2.2} />} tone={["#e4ebfd", "#2331ae"]} title="Change path or pace" meta={hub.paceLabel} />
-        <Tool href="/dashboard/sogp/history" icon={<HistoryIcon className="size-4" strokeWidth={2.2} />} tone={["#efe7fb", "#56209c"]} title="History" meta={podcast ? `${hub.card.done} episodes listened` : `${hub.doneCount} ${hub.doneCount === 1 ? "track" : "tracks"} done`} />
-        <Tool href={hub.discipler ? "/dashboard/community/discipleship" : "/dashboard/community/ask"} icon={<MessageCircleQuestionIcon className="size-4" strokeWidth={2.2} />} tone={["#fde3cf", "#7a3a10"]} title={hub.discipler ? `Ask ${hub.discipler.firstName}` : "Ask Pleros"} meta={hub.discipler ? "Questions about your teachings" : "Questions about your teachings"} />
-        <Tool href={hub.certificate.available ? "/dashboard/sogp/certificate" : "/dashboard/sogp/readiness"} icon={<AwardIcon className="size-4" strokeWidth={2.2} />} tone={["#f6e4ac", "#5a4508"]} title="Certificate" meta={hub.certificate.available ? "Ready to download" : "See what’s left to qualify"} />
-        <Tool href="/dashboard/sogp/reviews" icon={<CalendarCheckIcon className="size-4" strokeWidth={2.2} />} tone={["#e6ecfc", "#1f3260"]} title="Group reviews" meta={hub.review ? hub.review.when : "Weekly, with your group"} />
-        <Tool href="/dashboard/sogp/leaderboard" icon={<TrophyIcon className="size-4" strokeWidth={2.2} />} tone={["#fff1c2", "#8a5a00"]} title="Leaderboard" meta={hub.leaderboard?.me ? `You’re #${hub.leaderboard.me.rank}` : "Your cohort’s points"} />
-      </div>
-
-      <div className={styles.sectionTitle}><h2>People</h2></div>
-      <div className={styles.panel}><ul className={styles.list}>
-        <li><Link href={learning.followUp ? "/dashboard/sogp/follow-up/welcome" : "/dashboard/sogp/follow-up"} className={styles.row}>
-          <span className={styles.avatar} aria-hidden="true">{learning.followUp ? initials(learning.followUp.name) : "?"}</span>
-          <span className={styles.rowCopy}><span className={styles.rowTitle} style={{ fontWeight: 500 }}>{learning.followUp?.name ?? "Your follow-up person"}</span><span className={styles.rowMeta}>{learning.followUp ? "Your follow-up person" : "Assigned soon. You can start learning now"}</span></span>
-          <ChevronRightIcon className="size-4 shrink-0 text-[#a6abb2]" strokeWidth={2} />
-        </Link></li>
-        <li><Link href="/dashboard/sogp/referrals" className={styles.row}>
-          <span className={styles.avatar} style={{ background: "#f6d9de", color: "#5e2236" }} aria-hidden="true">+</span>
-          <span className={styles.rowCopy}><span className={styles.rowTitle} style={{ fontWeight: 500 }}>Invite someone to SOGP</span><span className={styles.rowMeta}>Your referral code and link</span></span>
-          <ChevronRightIcon className="size-4 shrink-0 text-[#a6abb2]" strokeWidth={2} />
-        </Link></li>
-      </ul></div>
-
-      <details className={styles.panel}>
-        <summary className={styles.row} style={{ cursor: "pointer", listStyle: "none" }}><span className={styles.rowCopy}><span className={styles.rowTitle} style={{ fontWeight: 500 }}>More learning tools</span><span className={styles.rowMeta}>Calendar and assessments, Pre-SOGP, issued certificate</span></span></summary>
-        <ul className={styles.list}>
-          <li><Link href="/dashboard/sogp/traditional" className={styles.row}><span className={styles.rowCopy}><span className={styles.rowTitle} style={{ fontWeight: 500 }}>Calendar and assessments</span></span></Link></li>
-          {podcast ? <li><Link href="/dashboard/sogp/plan" className={styles.row}><span className={styles.rowCopy}><span className={styles.rowTitle} style={{ fontWeight: 500 }}>Your tracklist</span></span></Link></li> : null}
-          <li><Link href="/dashboard/pre-sogp" className={styles.row}><span className={styles.rowCopy}><span className={styles.rowTitle} style={{ fontWeight: 500 }}>Pre-SOGP resources</span></span></Link></li>
-          <li><Link href="/dashboard/sogp/certificate" className={styles.row}><span className={styles.rowCopy}><span className={styles.rowTitle} style={{ fontWeight: 500 }}>Issued certificate</span></span></Link></li>
-        </ul>
-      </details>
+      <div className={styles.sectionTitle}><h2>Other learning</h2></div>
+      <OtherLearning tiles={otherLearningTiles(hub)} />
     </div>
   </div>;
 }
