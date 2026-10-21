@@ -5,6 +5,7 @@ import { ChevronLeftIcon, ChevronRightIcon, LayersIcon } from "lucide-react";
 
 import styles from "@/components/community/discipleship/discipleship-group.module.css";
 import { Initials } from "@/components/community/discipleship/shared";
+import { groupIcon } from "@/components/community/groups/group-hero";
 import type { GroupOversightData } from "@/lib/db/queries/group-oversight";
 
 import { GroupList, groupsOf } from "./group-oversight-view";
@@ -39,7 +40,18 @@ export function OversightStructureMockup({ data, page, role }: { data: GroupOver
     <OversightHeader sub={`${data.scopeLabel} · ${plural(data.people.length, "person")}`} updates={3} />
 
     <div className={styles.sectionTitle}><h2>Groups you lead</h2><span className={styles.rowMeta}>{plural(own.length, "group")}</span></div>
-    <GroupList groups={own} openFirst {...shared} />
+    {/* No nesting: each group opens its own page, where its members are. */}
+    <div className={styles.panel}><ul className={styles.list}>
+      {own.map((group, index) => {
+        const done = group.members.filter(member => member.reportedToday).length;
+        return <li key={group.id}><Link href="#" className={styles.row}>
+          <span className="size-10 shrink-0 rounded-[10px] bg-cover bg-center" style={{ backgroundColor: index % 2 ? "#e6ecfc" : "#e3d8f8", ...groupIcon(index % 2 ? "leading-slate" : "leading") }} aria-hidden />
+          <span className={styles.rowCopy}><span className={styles.rowTitle}>{group.name}</span><span className={styles.rowMeta}>{plural(group.members.length, "member")}</span></span>
+          <span className="shrink-0 text-right text-[12px] leading-4" style={{ color: done === group.members.length ? "var(--color-community-muted)" : "#a15c12" }}>{done} of {group.members.length}<br /><span className="text-[var(--color-community-muted)]">reported</span></span>
+          <ChevronRightIcon className={`${styles.chev} size-4`} strokeWidth={2} />
+        </Link></li>;
+      })}
+    </ul></div>
 
     {leaders.length ? <>
       <div className={styles.sectionTitle}><h2>Your members who lead</h2><span className={styles.rowMeta}>{plural(leaders.length, "person")}</span></div>
@@ -66,7 +78,7 @@ export function OversightStructureMockup({ data, page, role }: { data: GroupOver
       </div>
     </> : null}
 
-    <p className={styles.note}>Open a group to see its members. “Their groups” shows the groups that person leads.</p>
+    <p className={styles.note}>Open a group for its members. “Their groups” shows the groups that person leads.</p>
     {role === "pastor" ? <Link href="#" className={`${styles.quiet} -mt-1 ml-0.5`}>Branch setup</Link> : null}
   </div>;
 }
