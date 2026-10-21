@@ -99,6 +99,7 @@ const DASHBOARD_FOCUS: Array<[RegExp, (match: RegExpMatchArray) => DashboardFocu
   // Oversight (Pastor, Branch Pastor) inside Community, with Overview · Reports · Structure tabs
   // (tab roots, no crumb). Setup screens keep their /dashboard/church routes and step back to
   // Structure; unit leaders and workers keep /dashboard/church and /dashboard/church/reports.
+  [/^\/dashboard\/community\/oversight\/reports\/other-groups$/, () => ({ title: "Every other group", back: { href: "/dashboard/community/oversight/reports", label: "Back to Reports" } })],
   [/^\/dashboard\/community\/oversight\/(branches(?:\/\d+)?|questions|other-groups)$/, m => ({ title: m[1] === "questions" ? "Questions waiting" : m[1] === "branches" ? "Branches" : m[1] === "other-groups" ? "Every other group" : "Branch", back: { href: "/dashboard/community/oversight", label: "Back to Oversight" } })],
   [/^\/dashboard\/church$/, () => ({ title: "My church", back: COMMUNITY })],
   [/^\/dashboard\/church\/reports$/, () => ({ title: "Church reports", back: COMMUNITY })],

@@ -38,7 +38,7 @@ const AMBER = "#a15c12";
 type ViewGroup = { id: number; name: string; leaderName: string | null; members: GroupOversightPerson[] };
 
 /** The focus person's groups, the groups their members lead, and (Pastor and branch pastors) every other group in view. */
-export function groupsOf(data: GroupOversightData) {
+function groupsOf(data: GroupOversightData) {
   const inTree = data.people.filter(person => person.depth != null);
   const directIds = new Set(inTree.filter(person => person.depth === 1).map(person => person.userId));
   const own: ViewGroup[] = data.groups.map(group => ({ id: group.id, name: group.name, leaderName: null, members: inTree.filter(person => person.groupId === group.id && person.depth === 1) }));
@@ -80,7 +80,7 @@ function Dot({ ok, label }: { ok: boolean; label: string }) {
 }
 
 /** The day's report in a few words: only what's missing is named. Nil counts as in. */
-export function ReportLine({ person }: { person: GroupOversightPerson }) {
+function ReportLine({ person }: { person: GroupOversightPerson }) {
   const parts = [["devotional", "Devotion"], ["ministry", "Ministry"], ["meetings", "Meetings"]] as const;
   const missing = parts.filter(([key]) => person.statuses?.[key] === "missing").map(([, label]) => label);
   const label = !missing.length ? "All in" : missing.length === parts.length ? "Not reported"
@@ -131,7 +131,7 @@ function GroupBranch({ group, index, open: startOpen, mode, day, remind, tab }: 
   </li>;
 }
 
-export function GroupList({ groups, offset = 0, openFirst = false, ...rest }: { groups: ViewGroup[]; offset?: number; openFirst?: boolean; mode: "structure" | "reports"; day: string; remind: boolean; tab: string }) {
+function GroupList({ groups, offset = 0, openFirst = false, ...rest }: { groups: ViewGroup[]; offset?: number; openFirst?: boolean; mode: "structure" | "reports"; day: string; remind: boolean; tab: string }) {
   return <div className={styles.panel}><ul className={styles.list}>
     {groups.map((group, index) => <GroupBranch key={group.id} group={group} index={index + offset} open={openFirst && index === 0} {...rest} />)}
   </ul></div>;
@@ -231,33 +231,79 @@ export function OversightOtherGroups({ data }: { data: GroupOversightData }) {
 const dayChip = (day: string, today: string, index: number) => index === 0 ? "Today" : index === 1 ? "Yesterday"
   : new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "numeric", timeZone: "UTC" }).format(new Date(`${day}T00:00:00Z`)).replace(",", "");
 
-/** Reports: a day picker, then the groups you lead or the groups under them, each member's report in a few words. */
+export const OTHER_REPORTS_PATH = `${OVERSIGHT_PATH}/reports/other-groups`;
+const missingFirst = (a: GroupOversightPerson, b: GroupOversightPerson) => Number(reported(a)) - Number(reported(b)) || a.name.localeCompare(b.name);
+
+function DayChips({ path, days, today, data }: { path: string; days: string[]; today: string; data: GroupOversightData }) {
+  return <div className="flex gap-1.5 overflow-x-auto pb-0.5" aria-label="Report day">
+    {days.map((day, index) => <Link key={day} href={withUnder(path, data.under?.userId, day === today ? "" : `day=${day}`)} scroll={false}
+      aria-current={day === data.day ? "date" : undefined} className={`${styles.btn} ${styles.mini} shrink-0 no-underline`} data-primary={day === data.day ? "" : undefined}>{dayChip(day, today, index)}</Link>)}
+  </div>;
+}
+
+/**
+ * Reports (Pastor, 21 October; option A of two mockups): no groups to open.
+ * The members of your groups in one list with the day's report, the ones
+ * still to report first; leaders carry "Their groups", the unreported Remind.
+ * Every other group is one panel opening its own page.
+ */
 export function OversightReports({ data, updates, days, today, remind }: { data: GroupOversightData; updates: number; days: string[]; today: string; remind: boolean }) {
-  const { own, under, other } = groupsOf(data);
-  const [scope, setScope] = useState<"mine" | "under">(own.length || !other.length ? "mine" : "under");
-  const groups = scope === "mine" ? own : [...under, ...other];
-  const people = groups.flatMap(group => group.members);
+  const { own, other } = groupsOf(data);
+  const who = data.under ? first(data.under.name) : null;
+  const members = data.people.filter(person => person.depth === 1).sort(missingFirst);
+  const missing = members.filter(person => !reported(person)).length;
+  const otherPeople = other.flatMap(group => group.members);
   const tab = `${OVERSIGHT_PATH}/reports`;
+  const dayQuery = data.day === today ? "" : `day=${data.day}`;
+  const canRemind = remind && data.day === today;
   return <div className={styles.page}>
     <Header data={data} updates={updates} />
-    <Trail data={data} tab={tab} extra={`day=${data.day}`} />
-    <div className="flex gap-1.5 overflow-x-auto pb-0.5" aria-label="Report day">
-      {days.map((day, index) => <Link key={day} href={withUnder(tab, data.under?.userId, day === today ? "" : `day=${day}`)} scroll={false}
-        aria-current={day === data.day ? "date" : undefined} className={`${styles.btn} ${styles.mini} shrink-0 no-underline`} data-primary={day === data.day ? "" : undefined}>{dayChip(day, today, index)}</Link>)}
-    </div>
-    <div className="grid grid-cols-2 rounded-[10px] bg-[#eceef2] p-[3px]" role="tablist" aria-label="Whose reports">
-      {([["mine", data.under ? `Groups ${first(data.under.name)} leads` : "Groups you lead"], ["under", "Groups under them"]] as const).map(([key, label]) => <button key={key} type="button" role="tab" aria-selected={scope === key} onClick={() => setScope(key)}
-        className={`inline-flex h-8 min-w-0 items-center justify-center rounded-[7px] px-1 text-[13px] font-medium ${scope === key ? "bg-white text-[var(--color-community-ink)] shadow-[0_1px_2px_rgb(0_0_0/8%)]" : "text-[var(--color-community-muted)]"}`}><span className="truncate">{label}</span></button>)}
-    </div>
+    <Trail data={data} tab={tab} extra={dayQuery} />
+    <DayChips path={tab} days={days} today={today} data={data} />
     <div className={styles.strip}>
-      <div><span>Reported</span><strong>{people.filter(reported).length}/{people.length}</strong></div>
-      <div><span>Need a report</span><strong style={{ color: people.some(person => !reported(person)) ? "#92400e" : undefined }}>{people.filter(person => !reported(person)).length}</strong></div>
-      <div><span>Groups</span><strong>{groups.length}</strong></div>
+      <div><span>Reported</span><strong>{members.length - missing}/{members.length}</strong></div>
+      <div><span>Need a report</span><strong style={{ color: missing ? "#92400e" : undefined }}>{missing}</strong></div>
+      <div><span>{who ? "Groups" : "Your groups"}</span><strong>{own.length}</strong></div>
     </div>
-    {groups.length
-      ? <GroupList key={`${scope}-${data.day}`} groups={groups} openFirst mode="reports" day={data.day} remind={remind && data.day === today} tab={tab} />
-      : <p className={`${styles.panel} ${styles.empty}`}>{scope === "mine" ? "No groups yet." : "No groups under them yet."}</p>}
-    <p className={styles.note}>Open a group for each member’s report. “Their groups” takes you into the groups that person leads.</p>
+    <div className={styles.sectionTitle}><h2>{who ? `${who}’s members` : "Your members"}</h2><span className={styles.rowMeta}>{plural(members.length, "person")}</span></div>
+    {members.length ? <div className={styles.panel}><ul className={styles.list}>
+      {members.map(person => <li key={person.userId}><div className={styles.row}>
+        <Initials name={person.name} />
+        <Link href={reportHref(person.userId, data.day)} className={`${styles.rowCopy} gap-1 text-inherit no-underline`}>
+          <span className={styles.rowTitle}>{person.name}</span>
+          <ReportLine person={person} />
+        </Link>
+        {person.leadsMembers
+          ? <Link href={withUnder(tab, person.userId, dayQuery)} className={`${styles.btn} ${styles.mini}`} aria-label={`Open ${person.name}’s groups`}>Their groups<ChevronRightIcon className="-mr-1 size-3.5" strokeWidth={2.2} aria-hidden="true" /></Link>
+          : !reported(person) && canRemind ? <Remind userId={person.userId} day={data.day} /> : null}
+      </div></li>)}
+    </ul></div> : <p className={`${styles.panel} ${styles.empty}`}>No one in {who ? `${who}’s` : "your"} groups yet. Invite people from {who ? "their" : "your"} group’s page.</p>}
+    {!who && other.length ? <>
+      <div className={styles.sectionTitle}><h2>{data.role === "pastor" ? "Across the church" : "Across your branches"}</h2></div>
+      <div className={styles.panel}>
+        <Link href={`${OTHER_REPORTS_PATH}${dayQuery ? `?${dayQuery}` : ""}`} className={styles.row}>
+          <span className="grid size-10 shrink-0 place-items-center rounded-[10px] bg-[#e4ebfd] text-[#2331ae]" aria-hidden="true"><LayersIcon className="size-[18px]" strokeWidth={2} /></span>
+          <span className={styles.rowCopy}><span className={styles.rowTitle}>{otherGroupsTitle(data)}</span><span className={styles.rowMeta}>{plural(other.length, "group")} · {plural(otherPeople.length, "person")}</span></span>
+          <Rate members={otherPeople} />
+          <ChevronRightIcon className={`${styles.chev} size-4`} strokeWidth={2} />
+        </Link>
+      </div>
+    </> : null}
+    <p className={styles.note}>Tap someone for their full report. “Their groups” shows the reports of the people that person leads.</p>
+  </div>;
+}
+
+/** The day's reports for every other group: its own page, so Reports stays short. Groups open to their members' reports. */
+export function OversightOtherReports({ data, days, today }: { data: GroupOversightData; days: string[]; today: string }) {
+  const { other } = groupsOf(data);
+  const people = other.flatMap(group => group.members);
+  return <div className={styles.page}>
+    <CrumbLabel href={OTHER_REPORTS_PATH} label={otherGroupsTitle(data)} />
+    <div className={styles.heading}><div><h1>{otherGroupsTitle(data)}</h1><p className={styles.sub}>{people.filter(reported).length} of {plural(people.length, "person")} reported · by leader</p></div></div>
+    <DayChips path={OTHER_REPORTS_PATH} days={days} today={today} data={data} />
+    {other.length ? <GroupList key={data.day} groups={other} mode="reports" day={data.day} remind={false} tab={`${OVERSIGHT_PATH}/reports`} />
+      : <p className={`${styles.panel} ${styles.empty}`}>No other groups yet. Groups appear here once their leaders invite people.</p>}
+    <p className={styles.note}>Open a group for each member’s report.</p>
   </div>;
 }
 

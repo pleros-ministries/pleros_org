@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { dashboardFont, dashboardHeadingFont } from "@/components/dashboard/v3/font";
 import styles from "@/components/dashboard/v3/dashboard.module.css";
-import { OversightOtherGroups, OversightStructure } from "@/components/dashboard/church/group-oversight-view";
+import { OversightOtherGroups, OversightOtherReports, OversightReports, OversightStructure } from "@/components/dashboard/church/group-oversight-view";
 
 import { sampleFor } from "./sample";
 
@@ -11,10 +11,12 @@ export const metadata = { title: "Oversight structure preview", robots: { index:
 // Reads searchParams on every request (Cache Components).
 export const instant = false;
 
-/** The real Structure and Every other group views on sample data: `?page=structure|other`, `?role=pastor|branch_pastor`. Nothing saves. */
+const DAYS = ["2026-10-21", "2026-10-20", "2026-10-19", "2026-10-18", "2026-10-17"];
+
+/** The real Structure, Reports and Every other group views on sample data: `?page=structure|other|reports|reports-other`, `?role=pastor|branch_pastor`. Nothing saves. */
 export default async function OversightStructurePreview({ searchParams }: { searchParams: Promise<{ page?: string; role?: string }> }) {
   const params = await searchParams;
-  const page = params.page === "other" ? "other" : "structure";
+  const page = params.page === "other" || params.page === "reports" || params.page === "reports-other" ? params.page : "structure";
   const role = params.role === "branch_pastor" ? "branch_pastor" : "pastor";
   const data = sampleFor(role);
   const tab = (label: string, href: string, on: boolean) => <Link href={href} className={on ? "font-medium text-(--color-community-ink)" : "underline"}>{label}</Link>;
@@ -27,7 +29,10 @@ export default async function OversightStructurePreview({ searchParams }: { sear
       </span>
     </div>
     <div className="mx-auto w-full max-w-[640px] px-4 pt-[18px] pb-7 [&_h1]:text-[21px] [&_h1]:leading-[28px] [&_h1]:font-medium">
-      {page === "other" ? <OversightOtherGroups data={data} /> : <OversightStructure data={data} updates={3} />}
+      {page === "other" ? <OversightOtherGroups data={data} />
+        : page === "reports" ? <OversightReports data={data} updates={3} days={DAYS} today={DAYS[0]!} remind={false} />
+        : page === "reports-other" ? <OversightOtherReports data={data} days={DAYS} today={DAYS[0]!} />
+        : <OversightStructure data={data} updates={3} />}
     </div>
   </div>;
 }
