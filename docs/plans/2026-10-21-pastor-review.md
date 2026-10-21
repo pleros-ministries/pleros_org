@@ -10,7 +10,7 @@ Source: `~/Music/pleros-meetings/Pleros Dashboard Review - 21 Oct 2026.m4a` (tra
 | No list of every other group on Structure: one link to its own page, "not my discipleship responsibility, only administrative" | Done (`067bca5`) |
 | "Groups led by those I lead": the names of the people I lead, then click into their groups | Done (`067bca5`, "Your members who lead" with Their groups) |
 | Reports follow the same order | Done (`ade0e0e`, option A) |
-| **Updates show other people's groups' items; it should be "step by step"**: only his own people, not things further down | **To do.** Today Updates names direct people one by one and adds one update per group further down. Drop the further-down group updates. |
+| **Updates show other people's groups' items; it should be "step by step"**: only his own people, not things further down | Done (`4e2b14b`): only the people you lead directly |
 
 He also said groups "without order" (not by who they're under) were confusing; Structure and Reports now go one level at a time.
 
