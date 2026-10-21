@@ -44,9 +44,9 @@ const DATA: GroupOversightData = {
 
 const UPDATES: OversightUpdate[] = [
   { key: "questions:p1", kind: "question", title: "2 questions waiting over 3 days", detail: "Tolu’s group", href: "#", at: "2026-10-16T05:40:00Z", done: false },
-  { key: "group-joined:4-9", kind: "joined", title: "1 person joined Grace’s group", detail: "Grace's evening group", href: "#", at: "2026-10-20T08:30:00Z", done: false },
+  { key: "joined:9", kind: "joined", title: "Amaka joined Online SOGP members", detail: "", href: "#", at: "2026-10-20T08:30:00Z", done: false },
   { key: "quiet:p3", kind: "silent", title: "Kunle hasn’t reported in 3 days", detail: "Campus fellowship", href: "#", at: null, done: false },
-  { key: "group-quiet:3", kind: "silent", title: "1 person hasn’t reported in 3 days · 1 behind in SOGP", detail: "Tolu’s Hall C Bible study", href: "#", at: null, done: true },
+  { key: "quiet:p2", kind: "risk", title: "Efe is falling behind in SOGP", detail: "Campus fellowship", href: "#", at: null, done: true },
 ];
 
 /** The real Oversight views on sample data (no sign-in needed): `?tab=reports|updates`. Nothing here saves. */

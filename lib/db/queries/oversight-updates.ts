@@ -25,8 +25,6 @@ export type OversightUpdate = {
   /** When it started, for ordering and the time line; null when only the day is known. */
   at: string | null;
   done: boolean;
-  /** How many people it covers, so the biggest undated ones come first. */
-  weight?: number;
 };
 
 /** A quiet person or an at-risk one comes back as new a week after it was ticked off. */
@@ -49,7 +47,11 @@ async function loadDones(viewerId: string) {
 }
 
 export async function getOversightUpdates(viewerId: string, data: GroupOversightData): Promise<OversightUpdate[]> {
-  const ids = data.people.map(person => person.userId);
+  const focus = data.under?.userId ?? viewerId;
+  // Step by step (Pastor, 21 October): only the people you lead directly, named
+  // one by one. Anything further down is their leader's to follow up.
+  const direct = data.people.filter(person => person.overseerId === focus);
+  const ids = direct.map(person => person.userId);
   const byId = new Map(data.people.map(person => [person.userId, person]));
   const since = new Date(Date.now() - JOINED_DAYS * 86_400_000);
   const [dones, joined] = await Promise.all([
@@ -60,38 +62,18 @@ export async function getOversightUpdates(viewerId: string, data: GroupOversight
   ]);
   const doneAt = new Map(dones.map(row => [row.key, row.doneAt.getTime()]));
   const recurring = (key: string) => (doneAt.get(key) ?? 0) > Date.now() - RECUR_MS;
-  const placeOf = (userId: string) => {
-    const person = byId.get(userId);
-    if (!person?.groupName) return "";
-    return person.overseerId === (data.under?.userId ?? viewerId) ? person.groupName : `${person.overseerName ? `${first(person.overseerName)}’s ` : ""}${person.groupName}`;
-  };
   const reportHref = (userId: string) => `/dashboard/church/${encodeURIComponent(userId)}`;
 
-  const focus = data.under?.userId ?? viewerId;
   const updates: OversightUpdate[] = [];
-  // The people you lead directly are named one by one; further down, each group
-  // is one update for its leader's overseer, so a Pastor's list stays workable.
-  const direct = data.people.filter(person => person.overseerId === focus);
-  const further = new Map<number, { leaderId: string; leaderName: string; groupName: string; silent: number; risk: number; joined: number; lastJoin: number; lastJoinAt: string | null }>();
-  const groupOf = (person: (typeof data.people)[number]) => {
-    if (person.groupId == null || !person.overseerId) return null;
-    const group = further.get(person.groupId) ?? { leaderId: person.overseerId, leaderName: person.overseerName ?? "Member", groupName: person.groupName ?? "group", silent: 0, risk: 0, joined: 0, lastJoin: 0, lastJoinAt: null };
-    further.set(person.groupId, group);
-    return group;
-  };
+  const directIds = new Set(ids);
   for (const person of direct) {
     if (person.silentDays < 3 && !person.atRisk) continue;
     const key = `quiet:${person.userId}`;
     const parts = [person.silentDays >= 3 ? `hasn’t reported in ${person.silentDays} days` : null, person.atRisk ? "is falling behind in SOGP" : null].filter(Boolean);
-    updates.push({ key, kind: person.silentDays >= 3 ? "silent" : "risk", title: `${first(person.name)} ${parts.join(" and ")}`, detail: placeOf(person.userId), href: reportHref(person.userId), at: null, done: recurring(key) });
+    updates.push({ key, kind: person.silentDays >= 3 ? "silent" : "risk", title: `${first(person.name)} ${parts.join(" and ")}`, detail: person.groupName ?? "", href: reportHref(person.userId), at: null, done: recurring(key) });
   }
-  for (const person of data.people) {
-    // Someone in no group (a top-level leader in the Pastor's view) has no overseer to report to.
-    if (person.overseerId === focus || person.groupId == null) continue;
-    if (person.silentDays >= 3) groupOf(person)!.silent += 1;
-    if (person.atRisk) groupOf(person)!.risk += 1;
-  }
-  for (const row of data.waiting) {
+  // Questions waiting on a leader you lead directly, never on someone further down.
+  for (const row of data.waiting.filter(row => directIds.has(row.userId))) {
     const key = `questions:${row.userId}`;
     const at = new Date(Date.now() - row.oldestDays * 86_400_000).toISOString();
     updates.push({ key, kind: "question", title: `${plural(row.waiting, "question")} waiting over 3 days`, detail: `${first(row.name)}’s group`, href: `${OVERSIGHT_PATH}/questions`, at, done: recurring(key) });
@@ -99,40 +81,15 @@ export async function getOversightUpdates(viewerId: string, data: GroupOversight
   for (const row of joined) {
     const person = row.userId ? byId.get(row.userId) : undefined;
     if (!person) continue;
-    if (person.overseerId === focus) {
-      const key = `joined:${row.id}`;
-      updates.push({ key, kind: "joined", title: `${first(person.name)} joined ${person.groupName ?? "your group"}`, detail: "", href: reportHref(person.userId), at: row.joinedAt.toISOString(), done: doneAt.has(key) });
-      continue;
-    }
-    const group = groupOf(person);
-    if (!group) continue;
-    group.joined += 1;
-    if (row.id > group.lastJoin) { group.lastJoin = row.id; group.lastJoinAt = row.joinedAt.toISOString(); }
-  }
-  for (const [groupId, group] of further) {
-    const href = `${OVERSIGHT_PATH}/reports?under=${encodeURIComponent(group.leaderId)}`;
-    const detail = `${first(group.leaderName)}’s ${group.groupName}`;
-    if (group.silent || group.risk) {
-      // One update per group for both, so a big church's list stays short.
-      const key = `group-quiet:${groupId}`;
-      const parts = [
-        group.silent ? `${group.silent === 1 ? "1 person hasn’t" : `${group.silent} people haven’t`} reported in 3 days` : null,
-        group.risk ? `${group.risk} behind in SOGP` : null,
-      ].filter(Boolean);
-      updates.push({ key, kind: group.silent ? "silent" : "risk", title: parts.join(" · "), detail, href, at: null, done: recurring(key), weight: group.silent + group.risk });
-    }
-    if (group.joined) {
-      // The latest join names the update, so someone new joining brings it back.
-      const key = `group-joined:${groupId}-${group.lastJoin}`;
-      updates.push({ key, kind: "joined", title: group.joined === 1 ? `1 person joined ${first(group.leaderName)}’s group` : `${group.joined} people joined ${first(group.leaderName)}’s group`, detail: group.groupName, href: `${OVERSIGHT_PATH}?under=${encodeURIComponent(group.leaderId)}`, at: group.lastJoinAt, done: doneAt.has(key) });
-    }
+    const key = `joined:${row.id}`;
+    updates.push({ key, kind: "joined", title: `${first(person.name)} joined ${person.groupName ?? "your group"}`, detail: "", href: reportHref(person.userId), at: row.joinedAt.toISOString(), done: doneAt.has(key) });
   }
   // Oldest first, so they can be worked through in order; undated ones (today's state) last.
-  return updates.sort((a, b) => (a.at ?? "9") < (b.at ?? "9") ? -1 : (a.at ?? "9") > (b.at ?? "9") ? 1 : (b.weight ?? 1) - (a.weight ?? 1) || a.title.localeCompare(b.title));
+  return updates.sort((a, b) => (a.at ?? "9") < (b.at ?? "9") ? -1 : (a.at ?? "9") > (b.at ?? "9") ? 1 : a.title.localeCompare(b.title));
 }
 
 export async function markOversightUpdateDone(viewerId: string, key: string, done: boolean) {
-  if (!/^(quiet|questions|joined|group-quiet|group-joined):[\w-]{1,80}$/.test(key)) throw new CommunityError("That update can’t be ticked off.");
+  if (!/^(quiet|questions|joined):[\w-]{1,80}$/.test(key)) throw new CommunityError("That update can’t be ticked off.");
   try {
     if (done) {
       await db.insert(s.oversightUpdateDones).values({ userId: viewerId, updateKey: key })

@@ -353,7 +353,7 @@ export function OversightUpdates({ data, updates: initial }: { data: GroupOversi
         </span>
       </div></li>;
     })}</ul></div> : <p className={`${styles.panel} ${styles.empty}`}>{view === "todo" ? "You’re all caught up." : "Nothing ticked off yet."}</p>}
-    <p className={styles.note}>Oldest first, so you can work through them in order. Tap Done when you’ve dealt with one. Someone who is still quiet or behind a week later comes back.</p>
+    <p className={styles.note}>Only the people you lead: anything further down is for their leader. Oldest first; tap Done when you’ve dealt with one. Someone still quiet or behind a week later comes back.</p>
   </div>;
 }
 
