@@ -1,23 +1,36 @@
-/* Other learning cards (Pastor, 21 October): the group cards' size and art rules.
-   Phones use each artwork's compact square cut; from 640px the 3:2 wide cut covers
-   the card, anchored bottom-right. Each field colour is sampled from its art so no
-   seam of a different colour shows where the image ends. */
+/* Other learning cards (Pastor, 21 October; user, 21 October: smaller art, snug in the
+   corner at every size). The card is its field colour under the app's paper grain; the
+   artwork is only its object, cut snug (`<key>-tile-192/384.webp`) and set at a fixed
+   size in the bottom-right corner, its top and left edges feathered into the field so
+   no seam shows. The object never grows with the card. */
 .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-.card { position: relative; display: grid; align-content: space-between; gap: 10px; min-height: 132px; padding: 12px 14px; border-radius: var(--dashboard-card-radius, 16px); color: inherit; text-decoration: none; background-repeat: no-repeat; background-position: right bottom; background-size: cover; }
+.card { --art-size: 96px; position: relative; isolation: isolate; display: grid; align-content: space-between; gap: 10px; min-height: 124px; overflow: hidden; padding: 12px 14px; border-radius: var(--dashboard-card-radius, 16px); color: inherit; text-decoration: none; }
 /* An odd last card takes the full row, so the grid never ends on a gap. */
 .card:last-child:nth-child(odd) { grid-column: 1 / -1; }
+
+.art { position: absolute; right: 0; bottom: 0; z-index: -1; width: var(--art-size); height: var(--art-size); background-image: image-set(var(--art-1x) 1x, var(--art-2x) 2x); background-size: cover; background-position: right bottom;
+  /* Only the field margin on the top and left fades out, so the object stays whole. */
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 32%), linear-gradient(to bottom, transparent, #000 32%); -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(to right, transparent, #000 32%), linear-gradient(to bottom, transparent, #000 32%); mask-composite: intersect; }
+/* The app's paper grain over field and art alike, so they read as one surface. */
+.card::after { content: ""; position: absolute; inset: 0; z-index: 0; background: url("/assets/dashboard/learning-cards/grain-384.webp") 0 0 / 192px; mix-blend-mode: overlay; opacity: .5; pointer-events: none; }
+
+.top, .meta { position: relative; z-index: 1; }
 .tag { justify-self: start; display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 999px; background: rgb(255 255 255 / 60%); font-size: 11.5px; line-height: 16px; font-weight: 500; white-space: nowrap; }
 /* Like the group cards: tag and title at the top-left, one short line at the bottom-left, clear of the art. */
-.top { display: grid; gap: 8px; min-width: 0; max-width: 64%; }
+.top { display: grid; gap: 8px; min-width: 0; max-width: calc(100% - var(--art-size) * .3); }
 .top h3 { margin: 0; font-size: 14px; line-height: 19px; font-weight: 500; overflow-wrap: anywhere; }
-.meta { max-width: 50%; font-size: 12px; line-height: 16px; opacity: .82; }
+.meta { max-width: calc(100% - var(--art-size) * .72); font-size: 12px; line-height: 16px; opacity: .82; }
 .card:focus-visible { outline: 2px solid var(--color-brand-blue); outline-offset: 3px; }
 
-.card[data-art] { background-image: image-set(var(--art-compact-1x) 1x, var(--art-compact-2x) 2x); }
-.card:last-child:nth-child(odd)[data-art] { background-image: image-set(var(--art-wide-1x) 1x, var(--art-wide-2x) 2x); }
+/* The smallest phones (like the group cards at this width): a smaller object and line. */
+@media (max-width: 359px) {
+  .card { --art-size: 80px; padding-inline: 12px; }
+  .top h3 { font-size: 13px; }
+  .meta { font-size: 11.5px; }
+}
 @media (min-width: 640px) {
   .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .card { min-height: 150px; }
+  .card { --art-size: 108px; min-height: 140px; }
   .card:last-child:nth-child(odd) { grid-column: auto; }
-  .card[data-art], .card:last-child:nth-child(odd)[data-art] { background-image: image-set(var(--art-wide-1x) 1x, var(--art-wide-2x) 2x); }
 }

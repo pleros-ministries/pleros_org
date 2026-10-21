@@ -19,28 +19,26 @@ import styles from "./learning-hub.module.css";
 export type LearningArt = "welcome" | "pre-sogp" | "sogp" | "advanced" | "podcast" | "library";
 type Tile = { art: LearningArt; title: string; meta?: string; tag: string; href: string };
 
-/** Each field colour is sampled from its art, so the card shows no seam. */
+/** Each field colour is sampled from its art, so the feathered object meets the card with no seam. */
 export const LEARNING_FIELDS: Record<LearningArt, { field: string; ink: string }> = {
-  welcome: { field: "#fbdec3", ink: "#6b3410" },
-  "pre-sogp": { field: "#f7e6b1", ink: "#5a4508" },
-  sogp: { field: "#d3e0fc", ink: "#1f3260" },
+  welcome: { field: "#d1e7fc", ink: "#123f6e" },
+  "pre-sogp": { field: "#f6e6b1", ink: "#5a4508" },
+  sogp: { field: "#fcd9c7", ink: "#6e2a17" },
   advanced: { field: "#e6dbfb", ink: "#3e1876" },
-  podcast: { field: "#f9ebc2", ink: "#5b4a10" },
-  library: { field: "#f1c7c6", ink: "#5e2236" },
+  podcast: { field: "#f8d1d9", ink: "#5e2236" },
+  library: { field: "#f3e0c4", ink: "#4d3a26" },
 };
 
 const art = (key: LearningArt): CSSProperties => ({
   backgroundColor: LEARNING_FIELDS[key].field, color: LEARNING_FIELDS[key].ink,
-  ["--art-compact-1x" as string]: `url("/assets/dashboard/learning-cards/${key}-compact-320.webp")`,
-  ["--art-compact-2x" as string]: `url("/assets/dashboard/learning-cards/${key}-compact-640.webp")`,
-  ["--art-wide-1x" as string]: `url("/assets/dashboard/learning-cards/${key}-wide-480.webp")`,
-  ["--art-wide-2x" as string]: `url("/assets/dashboard/learning-cards/${key}-wide-960.webp")`,
+  ["--art-1x" as string]: `url("/assets/dashboard/learning-cards/${key}-tile-192.webp")`,
+  ["--art-2x" as string]: `url("/assets/dashboard/learning-cards/${key}-tile-384.webp")`,
 });
 
 const OTHER: Tile[] = [
   { art: "welcome", title: "Welcome Pack", meta: "Gifts and orientation", tag: "Done", href: "#" },
   { art: "pre-sogp", title: "Pre-SOGP", meta: "10 videos", tag: "Done", href: "#" },
-  { art: "advanced", title: "Advanced SOGP", tag: "Coming soon", href: "#" },
+  { art: "advanced", title: "Advanced SOGP", meta: "After SOGP", tag: "Coming soon", href: "#" },
   { art: "podcast", title: "Podcast", meta: "At your own pace", tag: "Any time", href: "#" },
   { art: "library", title: "Library", meta: "Teachings and series", tag: "Any time", href: "#" },
 ];
@@ -66,11 +64,12 @@ export function LearningSlimMockup() {
       </div>
       <Link href="#" className={styles.resume}>Resume learning <PlayIcon className="size-4" fill="currentColor" strokeWidth={0} /></Link>
     </section>
-    <Link href="#" className={`${groupStyles.quiet} -mt-1 inline-flex items-center gap-0.5 justify-self-start`}>Today’s tasks and your progress are on Home<ChevronRightIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" /></Link>
+    <Link href="#" className={`${groupStyles.quiet} -mt-1 inline-flex items-center gap-0.5 justify-self-start`}>Today’s tasks are on Home<ChevronRightIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" /></Link>
 
     <div className={groupStyles.sectionTitle}><h2>Other learning</h2></div>
     <div className={cards.grid}>
-      {OTHER.map(tile => <Link key={tile.art} href={tile.href} className={cards.card} data-art={tile.art} style={art(tile.art)}>
+      {OTHER.map(tile => <Link key={tile.art} href={tile.href} className={cards.card} style={art(tile.art)}>
+        <span className={cards.art} aria-hidden="true" />
         <span className={cards.top}><span className={cards.tag}>{tile.tag}</span><h3>{tile.title}</h3></span>
         {tile.meta ? <span className={cards.meta}>{tile.meta}</span> : null}
       </Link>)}
