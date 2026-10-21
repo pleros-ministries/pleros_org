@@ -22,7 +22,7 @@ type Tile = { art: LearningArt; title: string; meta?: string; tag: string; href:
 /** Each field colour is sampled from its art, so the feathered object meets the card with no seam. */
 export const LEARNING_FIELDS: Record<LearningArt, { field: string; ink: string }> = {
   welcome: { field: "#d1e7fc", ink: "#123f6e" },
-  "pre-sogp": { field: "#f6e6b1", ink: "#5a4508" },
+  "pre-sogp": { field: "#f4d2ea", ink: "#5a1e4a" },
   sogp: { field: "#fcd9c7", ink: "#6e2a17" },
   advanced: { field: "#e6dbfb", ink: "#3e1876" },
   podcast: { field: "#f8d1d9", ink: "#5e2236" },
