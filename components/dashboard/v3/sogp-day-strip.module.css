@@ -1,0 +1,20 @@
+/* Today's calendar as your SOGP days (Pastor, 21 October): the big number is the SOGP
+   day, the weekday and date sit under it. One week shows; the rest open below. */
+.strip { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; margin: 10px 0 0; padding: 0; list-style: none; }
+.day { display: grid; justify-items: center; gap: 2px; min-width: 0; padding: 7px 0 6px; border-radius: 12px; color: var(--color-text-muted); }
+.day b { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--color-surface-muted, #f1f2f5); color: var(--color-text); font-family: var(--font-dashboard-heading); font-size: 14px; line-height: 20px; font-weight: 500; font-variant-numeric: tabular-nums; }
+.day span { font-size: 10.5px; line-height: 14px; white-space: nowrap; letter-spacing: 0; }
+/* Done in soft blue, as on Learning: never pale green across a month of days. */
+.day[data-state="done"] b { background: #e4ebfd; color: #2331ae; }
+.day[data-state="missed"] b { background: #f7e4cd; color: #92400e; }
+.day[data-state="later"] b { color: var(--color-text-muted); }
+.day[data-today] { background: var(--status-blue-bg); color: var(--status-blue-text); }
+.day[data-today] b { background: white; color: var(--color-brand-blue); box-shadow: inset 0 0 0 2px var(--color-brand-blue); }
+.day[data-review] b { border-radius: 10px; }
+.more { display: flex; align-items: center; justify-content: center; gap: 4px; width: 100%; height: 36px; margin: 4px 0 0; padding: 0; border: 0; background: none; color: var(--color-brand-blue); font: inherit; font-size: 12.5px; font-weight: 500; cursor: pointer; }
+.more svg { transition: transform 180ms var(--ease-out); }
+.more[aria-expanded="true"] svg { transform: rotate(180deg); }
+.weeks { display: grid; gap: 2px; padding-bottom: 6px; }
+.weekLabel { margin: 8px 2px 0; font-size: 11.5px; line-height: 16px; color: var(--color-text-muted); }
+.divider { height: 1px; margin: 4px 0 0; background: var(--color-line); }
+@media (prefers-reduced-motion: reduce) { .more svg { transition: none; } }
