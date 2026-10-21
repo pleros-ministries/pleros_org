@@ -8,6 +8,8 @@ import {
   durationLabel, meetingLine, meetingMinutes, type MeetingKind, type NoPart,
 } from "@/lib/community/meeting-report";
 
+import { SOGP_TRACKS } from "@/lib/sogp/curriculum";
+
 import { ReportSheet, Segmented, Stepper, sheetStyles as sheet } from "./report-sheet";
 import styles from "./daily-report-sections.module.css";
 
@@ -79,6 +81,8 @@ function VenuePicker({ venues, value, onChange }: { venues: string[]; value: str
   </div>;
 }
 
+/** SOGP track titles short enough to show whole in the field on a phone. */
+const SHORT_TRACKS = SOGP_TRACKS.map(track => track.title).filter(title => title.length <= 22);
 const digits = (text: string) => text.replace(/\D/g, "").slice(0, String(ATTENDANCE_MAX).length);
 const KIND_CHOICES = [
   ["teaching", BookOpenIcon, "#e4ebfd", "#2331ae", "A Bible study, class or teaching"],
@@ -106,6 +110,8 @@ export function MeetingSheet({ venues, ministry, onSave, onClose }: {
   const [workers, setWorkers] = useState("");
   const [members, setMembers] = useState("");
   const [note, setNote] = useState("");
+  // An SOGP track as the example emphasis, so it reads familiar; picked once when the pop-up opens.
+  const [example] = useState(() => SHORT_TRACKS[Math.floor(Math.random() * SHORT_TRACKS.length)] ?? "The Walk of Faith");
 
   if (!kind) return <ReportSheet title="Which meeting?" onClose={onClose}>
     {() => <div className="grid gap-2.5">
@@ -143,7 +149,7 @@ export function MeetingSheet({ venues, ministry, onSave, onClose }: {
       <Segmented label="Your part" options={[{ key: "attended", label: "I attended" }, { key: "led", label: "I led it" }]} value={role} onChange={setRole} />
       {led ? <>
         {kind === "teaching" ? <label className={sheet.field}><span className={sheet.label}>Teaching emphasis</span>
-          <input className={sheet.input} maxLength={EMPHASIS_MAX} value={emphasis} onChange={event => setEmphasis(event.target.value)} placeholder="For example, Faith that works" />
+          <input className={sheet.input} maxLength={EMPHASIS_MAX} value={emphasis} onChange={event => setEmphasis(event.target.value)} placeholder={`For example, ${example}`} />
         </label> : null}
         <div className={sheet.field}>
           <div className="flex gap-2.5">
