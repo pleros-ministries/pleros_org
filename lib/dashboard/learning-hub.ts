@@ -97,7 +97,7 @@ export async function getLearningHubData(userId: string, state: SogpLearningStat
   const published = course.tracks.filter((track): track is typeof track & { dayNumber: number } => track.lesson.status === "published" && track.dayNumber != null);
   const doneCount = published.filter(track => track.completed).length;
   const next = published.find(track => track.accessible && !track.completed) ?? null;
-  const today = journey ? homeSogpToday(journey.days, day, !podcast) : null;
+  const today = journey ? homeSogpToday(journey.days, day, podcast ? null : undefined) : null;
 
   let card: LearningHubData["card"];
   if (podcast) {

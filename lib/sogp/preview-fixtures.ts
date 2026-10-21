@@ -134,6 +134,7 @@ const sogpDays: SogpJourneyData["days"] = sogpDates.map((dateKey) => {
         : null,
       assessmentComplete,
       quizPassed: assessmentComplete,
+      audioListened: assessmentComplete,
       writtenResponseStatus: assessmentComplete ? "approved" : null,
       accessible,
       lockedReason: accessible

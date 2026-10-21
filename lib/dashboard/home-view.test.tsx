@@ -75,11 +75,17 @@ const sogp: NonNullable<DashboardHomeData["sogp"]> = {
   weekLabel: "Week 2 of 4",
   today: {
     dateKey: "2026-10-16", dateLabel: "Friday 16 October", done: 1, total: 2,
-    week: [{ dateKey: "2026-10-15", weekday: "Thu", dayOfMonth: 15, state: "missed", isToday: false, hasReview: false }, { dateKey: "2026-10-16", weekday: "Fri", dayOfMonth: 16, state: "current", isToday: true, hasReview: false }],
+    sogpDays: [
+      { number: 4, dateKey: "2026-10-15", weekday: "Thu", dayOfMonth: 15, state: "missed", review: false },
+      { number: 5, dateKey: "2026-10-16", weekday: "Fri", dayOfMonth: 16, state: "today", review: false },
+    ],
+    dayNumber: 5,
+    teaching: { title: "Walk of Faith · day 5", href: "/dashboard/sogp/listen?day=5", done: false, dayNumber: null, podcast: true },
     prayerWatch: { complete: true },
+    assessment: null,
     review: { title: "Level 2 group review", when: "Sunday 18 October", href: null, complete: false },
   },
-  progress: { learningLabel: "Episodes", learningDone: 7, learningTotal: 30, prayerPercent: 83, prayerRequired: 80, reviewsSatisfied: 1, reviewsOwed: 4, checksPassed: 1 },
+  progress: { teaching: { done: 7, total: 30, unit: "episodes" }, prayer: { percent: 83, required: 80 }, assessment: null },
   leaderboard: { rank: 7, points: 240 },
   group: { kind: "member", groupName: "SOGP Discipleship Group", leaderFirstName: "Tolu" },
   shareDayNumber: 4,
@@ -93,8 +99,12 @@ test("the SOGP sections bring the old dashboard's day, checklist, progress and t
   expect(html).toContain("1 of 2 done");
   expect(html).toContain("5:30 am Prayer Watch");
   expect(html).toContain('aria-pressed="true"');
-  expect(html).toContain("7 of 30");
-  expect(html).toContain("1 of 3 checks");
+  // Today is your SOGP days and the three ticks (Pastor, 21 October); podcast learners have no assessment.
+  expect(html).toContain("Day 5 of 2");
+  expect(html).toContain("Teaching");
+  expect(html).not.toContain("Assessment");
+  expect(html).toContain("Share what you learnt");
+  expect(html).toContain("of 30 episodes");
   expect(html).toContain('href="/dashboard/sogp/leaderboard"');
   expect(html).toContain("#7");
   expect(html).toContain("Tolu&#x27;s group");

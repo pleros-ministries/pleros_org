@@ -84,6 +84,7 @@ function activeDay(
           audioUrl: null,
           assessmentComplete: options.complete ?? false,
           quizPassed: options.complete ?? false,
+          audioListened: options.complete ?? false,
           writtenResponseStatus: null,
           accessible: options.accessible ?? true,
           lockedReason: null,

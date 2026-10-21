@@ -30,6 +30,8 @@ He also said groups "without order" (not by who they're under) were confusing; S
 
 ## 3. You Home
 
+**Done:** Today is your SOGP days (28, from the cohort's first day) with Teaching, Prayer Watch and Assessment (traditional only), then Share what you learnt; the review left Today; Your progress counts the same three; the Welcome Pack row moved lower.
+
 - **Today stays, but its calendar changes.** Not a Mon–Sun calendar: your SOGP days.
   - The big number is the SOGP day ("Day 7"), with the weekday and date under it.
   - Show one week, with a way to open all the days.

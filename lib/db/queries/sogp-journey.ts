@@ -494,6 +494,8 @@ export type SogpJourneyData = {
       audioUrl: string | null;
       assessmentComplete: boolean;
       quizPassed: boolean;
+      /** The teaching's audio was listened to, from the player or Home's Teaching tick. */
+      audioListened: boolean;
       writtenResponseStatus: string | null;
       accessible: boolean;
       lockedReason: string | null;
@@ -682,6 +684,7 @@ export async function getActiveSogpJourney(
             audioUrl: track.lesson.audioUrl,
             assessmentComplete,
             quizPassed: track.progress.quizPassed,
+            audioListened: track.progress.audioListened,
             writtenResponseStatus: writtenStatus ?? null,
             accessible,
             lockedReason,

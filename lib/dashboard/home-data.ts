@@ -67,16 +67,16 @@ export async function getDashboardHomeData(viewer: NonNullable<Awaited<ReturnTyp
   const sogp: HomeSogp | null = journey ? {
     cohortTitle: journey.cohort.title,
     weekLabel: cohortWeekLabel(journey.cohort.startsAt, journey.cohort.endsAt, day),
-    today: homeSogpToday(journey.days, day, !podcast),
+    // On the podcast path, today's teaching is the plan's day, ticked by the player.
+    today: homeSogpToday(journey.days, day, podcast
+      ? card?.kind === "podcast" ? { title: `${card.series} · day ${card.dayNumber}`, href: card.href, done: card.episodes.every(episode => episode.listened) } : null
+      : undefined),
     progress: facts ? {
-      learningLabel: facts.podcast ? "Episodes" : "Teachings",
-      learningDone: facts.learningDone,
-      learningTotal: facts.learningTotal,
-      prayerPercent: facts.prayer.percent,
-      prayerRequired: facts.prayer.required,
-      reviewsSatisfied: facts.reviews.attended + facts.reviews.madeUp,
-      reviewsOwed: facts.reviews.owed,
-      checksPassed: [facts.learningPass, facts.prayer.pass, facts.reviews.reviewPass].filter(Boolean).length,
+      teaching: facts.podcast
+        ? { done: facts.learningDone, total: facts.learningTotal, unit: "episodes" }
+        : { done: journey.days.filter(row => row.track?.audioListened).length, total: journey.days.filter(row => row.track).length, unit: "days" },
+      prayer: { percent: facts.prayer.percent, required: facts.prayer.required },
+      assessment: facts.podcast ? null : { done: facts.learningDone, total: facts.learningTotal },
     } : null,
     leaderboard: leaderboard?.me ? { rank: leaderboard.me.rank, points: leaderboard.me.points } : null,
     board: leaderboard && leaderboard.top.length ? {
