@@ -38,7 +38,7 @@ const AMBER = "#a15c12";
 type ViewGroup = { id: number; name: string; leaderName: string | null; members: GroupOversightPerson[] };
 
 /** The focus person's groups, the groups their members lead, and (Pastor and branch pastors) every other group in view. */
-function groupsOf(data: GroupOversightData) {
+export function groupsOf(data: GroupOversightData) {
   const inTree = data.people.filter(person => person.depth != null);
   const directIds = new Set(inTree.filter(person => person.depth === 1).map(person => person.userId));
   const own: ViewGroup[] = data.groups.map(group => ({ id: group.id, name: group.name, leaderName: null, members: inTree.filter(person => person.groupId === group.id && person.depth === 1) }));
@@ -131,7 +131,7 @@ function GroupBranch({ group, index, open: startOpen, mode, day, remind, tab }: 
   </li>;
 }
 
-function GroupList({ groups, offset = 0, openFirst = false, ...rest }: { groups: ViewGroup[]; offset?: number; openFirst?: boolean; mode: "structure" | "reports"; day: string; remind: boolean; tab: string }) {
+export function GroupList({ groups, offset = 0, openFirst = false, ...rest }: { groups: ViewGroup[]; offset?: number; openFirst?: boolean; mode: "structure" | "reports"; day: string; remind: boolean; tab: string }) {
   return <div className={styles.panel}><ul className={styles.list}>
     {groups.map((group, index) => <GroupBranch key={group.id} group={group} index={index + offset} open={openFirst && index === 0} {...rest} />)}
   </ul></div>;
