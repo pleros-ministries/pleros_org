@@ -2,19 +2,19 @@
 
 import Link from "next/link";
 import { useOptimistic, useState, useTransition } from "react";
-import { BellIcon, BellOffIcon, CheckIcon, ChevronDownIcon, ChevronRightIcon, ClipboardCheckIcon, LockIcon, MessageCircleQuestionIcon, UserPlusIcon } from "lucide-react";
+import { BellIcon, BellOffIcon, CheckIcon, ChevronDownIcon, ChevronRightIcon, ClipboardCheckIcon, LayersIcon, LockIcon, MessageCircleQuestionIcon, UserPlusIcon } from "lucide-react";
 
 import { remindChurchMember } from "@/app/(site)/dashboard/church/actions";
 import { setOversightUpdateDone } from "@/app/(site)/dashboard/community/_actions/oversight-actions";
 import styles from "@/components/community/discipleship/discipleship-group.module.css";
 import { Initials } from "@/components/community/discipleship/shared";
+import { CrumbLabel } from "@/components/dashboard/shell/breadcrumbs";
 import { groupIcon } from "@/components/community/groups/group-hero";
 import { MessageButton } from "@/components/community/messages/message-button";
 import type { GroupOversightData, GroupOversightPerson } from "@/lib/db/queries/group-oversight";
 import type { OversightUpdate } from "@/lib/db/queries/oversight-updates";
 
 import { OversightHeader } from "./oversight-nav";
-import { Mark as BranchMark, short } from "./oversight-view";
 
 /**
  * Oversight as Structure, Reports and Updates (Pastor, 20 October; built from
@@ -38,7 +38,7 @@ const AMBER = "#a15c12";
 type ViewGroup = { id: number; name: string; leaderName: string | null; members: GroupOversightPerson[] };
 
 /** The focus person's groups, the groups their members lead, and (Pastor and branch pastors) every other group in view. */
-export function groupsOf(data: GroupOversightData) {
+function groupsOf(data: GroupOversightData) {
   const inTree = data.people.filter(person => person.depth != null);
   const directIds = new Set(inTree.filter(person => person.depth === 1).map(person => person.userId));
   const own: ViewGroup[] = data.groups.map(group => ({ id: group.id, name: group.name, leaderName: null, members: inTree.filter(person => person.groupId === group.id && person.depth === 1) }));
@@ -131,7 +131,7 @@ function GroupBranch({ group, index, open: startOpen, mode, day, remind, tab }: 
   </li>;
 }
 
-export function GroupList({ groups, offset = 0, openFirst = false, ...rest }: { groups: ViewGroup[]; offset?: number; openFirst?: boolean; mode: "structure" | "reports"; day: string; remind: boolean; tab: string }) {
+function GroupList({ groups, offset = 0, openFirst = false, ...rest }: { groups: ViewGroup[]; offset?: number; openFirst?: boolean; mode: "structure" | "reports"; day: string; remind: boolean; tab: string }) {
   return <div className={styles.panel}><ul className={styles.list}>
     {groups.map((group, index) => <GroupBranch key={group.id} group={group} index={index + offset} open={openFirst && index === 0} {...rest} />)}
   </ul></div>;
@@ -157,38 +157,74 @@ function Header({ data, updates }: { data: GroupOversightData; updates: number }
   return <OversightHeader sub={sub} updates={updates} under={data.under?.userId} />;
 }
 
-/** Structure: the groups you lead, the groups led by those you lead, and the wider view for the Pastor and branch pastors. */
+export const OTHER_GROUPS_PATH = `${OVERSIGHT_PATH}/other-groups`;
+const otherGroupsTitle = (data: GroupOversightData) => data.role === "pastor" ? "Every other group" : "Other groups in your branches";
+
+/**
+ * Structure (Pastor, 21 October): one level only. The groups you lead are
+ * rows opening their own pages; the members who lead groups are people rows
+ * with "Their groups"; every other group is one panel opening its own page.
+ */
 export function OversightStructure({ data, updates }: { data: GroupOversightData; updates: number }) {
-  const { own, under, other } = groupsOf(data);
+  const { own, other } = groupsOf(data);
   const who = data.under ? first(data.under.name) : null;
-  const shared = { mode: "structure" as const, day: data.day, remind: false, tab: OVERSIGHT_PATH };
+  const leaders = data.people.filter(person => person.depth === 1 && person.leadsMembers > 0);
+  const otherPeople = other.reduce((n, group) => n + group.members.length, 0);
   return <div className={styles.page}>
     <Header data={data} updates={updates} />
     <Trail data={data} tab={OVERSIGHT_PATH} />
     {own.length ? <>
       <div className={styles.sectionTitle}><h2>{who ? `Groups ${who} leads` : "Groups you lead"}</h2><span className={styles.rowMeta}>{plural(own.length, "group")}</span></div>
-      <GroupList groups={own} openFirst {...shared} />
+      {/* Someone else's group pages are theirs alone, so their groups open in place. */}
+      {who ? <GroupList groups={own} mode="structure" day={data.day} remind={false} tab={OVERSIGHT_PATH} />
+        : <div className={styles.panel}><ul className={styles.list}>
+          {own.map((group, index) => <li key={group.id}><Link href={`/dashboard/community/discipleship/${group.id}`} prefetch={false} className={styles.row}>
+            <GroupIcon index={index} />
+            <span className={styles.rowCopy}><span className={styles.rowTitle}>{group.name}</span><span className={styles.rowMeta}>{plural(group.members.length, "member")}</span></span>
+            <Rate members={group.members} />
+            <ChevronRightIcon className={`${styles.chev} size-4`} strokeWidth={2} />
+          </Link></li>)}
+        </ul></div>}
     </> : null}
-    {under.length ? <>
-      <div className={styles.sectionTitle}><h2>Groups led by those {who ?? "you"} lead{who ? "s" : ""}</h2><span className={styles.rowMeta}>{plural(under.length, "group")}</span></div>
-      <GroupList groups={under} offset={1} {...shared} />
-    </> : null}
-    {other.length ? <>
-      <div className={styles.sectionTitle}><h2>{data.role === "pastor" ? "Every other group" : "Other groups in your branches"}</h2><span className={styles.rowMeta}>{plural(other.length, "group")}</span></div>
-      <GroupList groups={other} {...shared} />
-    </> : null}
-    {!own.length && !under.length && !other.length ? <p className={`${styles.panel} ${styles.empty}`}>No groups yet.</p> : null}
-    {!data.under && data.branches.length ? <>
-      <div className={styles.sectionTitle}><h2>{data.role === "pastor" ? "Branches" : "Your branches"}</h2>{data.role === "pastor" ? <Link href={`${OVERSIGHT_PATH}/branches`} className={styles.quiet}>Manage</Link> : null}</div>
+    {leaders.length ? <>
+      <div className={styles.sectionTitle}><h2>{who ? `${who}’s members who lead` : "Your members who lead"}</h2><span className={styles.rowMeta}>{plural(leaders.length, "person")}</span></div>
       <div className={styles.panel}><ul className={styles.list}>
-        {data.branches.map((branch, index) => <li key={branch.id}><Link href={`${OVERSIGHT_PATH}/branches/${branch.id}`} className={styles.row}>
-          <BranchMark text={short(branch.name)} index={index} />
-          <span className={styles.rowCopy}><span className={styles.rowTitle}>{branch.name}</span><span className={styles.rowMeta}>{[branch.pastors.join(", ") || "No branch pastor", plural(branch.people, "person")].join(" · ")}</span></span>
-          <ChevronRightIcon className={`${styles.chev} size-4`} strokeWidth={2} />
-        </Link></li>)}
+        {leaders.map(person => <li key={person.userId}><div className={styles.row}>
+          <Initials name={person.name} />
+          <Link href={reportHref(person.userId)} className={`${styles.rowCopy} text-inherit no-underline`}>
+            <span className={styles.rowTitle}>{person.name}</span>
+            <span className={styles.rowMeta} style={{ whiteSpace: "normal" }}>Leads {plural(person.leadsMembers, "person")}{person.groupName ? ` · in ${person.groupName}` : ""}</span>
+          </Link>
+          <Link href={withUnder(OVERSIGHT_PATH, person.userId)} className={`${styles.btn} ${styles.mini}`} aria-label={`Open ${person.name}’s groups`}>Their groups<ChevronRightIcon className="-mr-1 size-3.5" strokeWidth={2.2} aria-hidden="true" /></Link>
+        </div></li>)}
       </ul></div>
     </> : null}
-    <p className={styles.note}>Open a group to see its members. “Their groups” takes you into the groups that person leads.</p>
+    {!who && other.length ? <>
+      <div className={styles.sectionTitle}><h2>{data.role === "pastor" ? "Across the church" : "Across your branches"}</h2></div>
+      <div className={styles.panel}>
+        <Link href={OTHER_GROUPS_PATH} className={styles.row}>
+          <span className="grid size-10 shrink-0 place-items-center rounded-[10px] bg-[#e4ebfd] text-[#2331ae]" aria-hidden="true"><LayersIcon className="size-[18px]" strokeWidth={2} /></span>
+          <span className={styles.rowCopy}><span className={styles.rowTitle}>{otherGroupsTitle(data)}</span><span className={styles.rowMeta}>{plural(other.length, "group")} · {plural(otherPeople, "person")}</span></span>
+          <ChevronRightIcon className={`${styles.chev} size-4`} strokeWidth={2} />
+        </Link>
+      </div>
+    </> : null}
+    {!own.length && !leaders.length && !other.length ? <p className={`${styles.panel} ${styles.empty}`}>No groups yet.</p> : null}
+    <p className={styles.note}>Open a group for its members. “Their groups” shows the groups that person leads.</p>
+    {!who && data.role === "pastor" ? <Link href={`${OVERSIGHT_PATH}/branches`} className={`${styles.quiet} -mt-1 ml-0.5`}>Branch setup</Link> : null}
+  </div>;
+}
+
+/** Every other group (Pastor) or the other groups in your branches: its own page, so Structure stays short. */
+export function OversightOtherGroups({ data }: { data: GroupOversightData }) {
+  const { other } = groupsOf(data);
+  const people = other.reduce((n, group) => n + group.members.length, 0);
+  return <div className={styles.page}>
+    <CrumbLabel href={OTHER_GROUPS_PATH} label={otherGroupsTitle(data)} />
+    <div className={styles.heading}><div><h1>{otherGroupsTitle(data)}</h1><p className={styles.sub}>{plural(other.length, "group")} · {plural(people, "person")} · by leader</p></div></div>
+    {other.length ? <GroupList groups={other} mode="structure" day={data.day} remind={false} tab={OVERSIGHT_PATH} />
+      : <p className={`${styles.panel} ${styles.empty}`}>No other groups yet. Groups appear here once their leaders invite people.</p>}
+    <p className={styles.note}>Open a group to see its members. “Their groups” shows the groups that person leads.</p>
   </div>;
 }
 

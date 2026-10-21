@@ -78,7 +78,11 @@ Pastor, 19 October; plan in `docs/plans/groups-as-oversight.md`. Groups replace 
   - Unit, worker and leader rows stay in the database until a later migration drops them.
 - Every new group invitation (by name, from My enrollees, or a follow-up assignment) sends a `group_invitation` notification and push (migration 0070, applied 20 October), opening `/dashboard/sogp/invitations/[id]`. It carries the leader's first name and the group name; the push names the leader only. The 12 invitations pending on 20 October were backfilled in-app only, with no push.
 - Oversight has three tabs (Pastor, 20 October; `components/dashboard/church/group-oversight-view.tsx`):
-  - Structure (`/dashboard/community/oversight`): Groups you lead, Groups led by those you lead and, for the Pastor and branch pastors, the other groups in view, then branches. A group opens one level, to its members, never deeper. "Their groups" opens `?under=` with a back link to the person above.
+  - Structure (`/dashboard/community/oversight`; Pastor, 21 October), with no nesting:
+    - Groups you lead are rows opening each group's own page.
+    - "Your members who lead" lists the members of your groups who lead people, each with a "Their groups" button opening `?under=` (a back link returns to the person above). Under someone else, their groups still open in place to their members, because only a group's leader and members can open its page.
+    - For the Pastor and branch pastors, "Every other group" ("Other groups in your branches") is one panel opening `…/oversight/other-groups`, where those groups are listed by leader and open to their members.
+    - The branches list is gone; the Pastor reaches branch setup from a quiet "Branch setup" link at the foot of Structure.
   - Reports (`…/reports?day=`): today or one of the previous seven days. Each member's line names only what's missing ("All in", "Ministry missing", "Not reported"; nil counts as in). Done marks are green, missing ones amber.
   - Updates (`…/updates`): the old "Needs you", oldest first, ticked off with Done (`oversight_update_dones`, migration 0072, applied 20 October; `lib/db/queries/oversight-updates.ts`). People you lead directly are named one by one; further down there is one update per group. A ticked quiet or at-risk update comes back after a week if it still holds.
   - The Pastor's branch setup moved to `…/branches`; `…/structure` redirects to Oversight.
