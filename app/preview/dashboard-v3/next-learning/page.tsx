@@ -6,7 +6,6 @@ import hubStyles from "@/components/sogp/learning/learning-hub.module.css";
 import { LearningHub } from "@/components/sogp/learning/learning-hub";
 import { OwnJourneyBuilder, SeriesPicker } from "@/components/sogp/next-learning/episode-pickers";
 import { NextLearningChooser, type NextOption } from "@/components/sogp/next-learning/next-learning-chooser";
-import { NextLessonView } from "@/components/sogp/next-learning/next-lesson-view";
 import type { LearningHubData } from "@/lib/dashboard/learning-hub";
 import type { LearningViewData } from "@/lib/sogp/learning-view";
 
@@ -23,26 +22,18 @@ const FINISHED: LearningHubData = {
   card: { ...SAMPLE_HUB.card, done: 24, total: 24 }, next: { canChoose: true, card: null },
 };
 const CHOSEN: LearningHubData = { ...FINISHED, next: { canChoose: true, card: { kind: "podcast", title: "30-day Foundations", dayNumber: 3, totalDays: 30, listened: 2, finished: false, episodeTitle: "The Place of the Gospel in Your Life (Part 3)", todayListened: false } } };
-const CHOSEN_LESSON: LearningHubData = { ...FINISHED, next: { canChoose: true, card: { kind: "lesson", lessonId: 1, title: "Commitment: How to Fulfil Purpose", done: 1, total: 3 } } };
 
 const OPTIONS: NextOption[] = [
   { key: "foundations", art: "podcast", title: "The Foundations podcast", detail: "The Place of the Gospel, The Reality and Pursuit of God’s Purpose, and How to Fulfil it", meta: "30 days · one episode a day", pick: { kind: "foundations" } },
   { key: "series", art: "library", title: "A series from the Library", detail: "Pick a teaching series and listen through it, one episode a day", meta: "Choose the series next", href: "?screen=series" },
   { key: "own", art: "sogp", title: "Your own podcast journey", detail: "Pick the episodes you want, in the order you want, one a day", meta: "Choose your episodes next", href: "?screen=own" },
-  { key: "lesson", art: "pre-sogp", title: "Commitment: How to Fulfil Purpose", detail: "A teaching SOGP doesn’t include", meta: "Listen, notes and a quiz", pick: { kind: "lesson", lessonId: 1 } },
 ];
 
 const SERIES = ["Walk of Faith", "Favour in the Newness of Life", "Our Supernatural Nature in Christ", "The Reality of God’s Purpose", "Kingdom Living", "Grace to Grow", "Prayer that Works", "Hearing God", "The Love Walk"]
   .map((title, index) => ({ id: `s${index}`, title, description: index % 2 ? null : "A teaching series from the Library.", episodes: 4 + index, listened: index % 3, current: false }));
 const EPISODES = Array.from({ length: 20 }, (_, index) => ({ guid: `e${index}`, title: `${["Walk of Faith", "Hearing God", "Grace to Grow", "Kingdom Living"][index % 4]} (Part ${Math.floor(index / 4) + 1})`, duration: "00:24:10" }));
-const LESSON = {
-  id: 1, title: "Commitment: How to Fulfil Purpose", audioUrl: null,
-  notesContent: "<h2>Commitment</h2><p>Sample notes for the preview. The real teaching’s notes show here, with its audio above and the quiz in the next tab.</p><p>Sample paragraph two, long enough to read as notes rather than a holding message.</p>",
-  progress: { audioListened: true, notesRead: false, quizPassed: false }, bestScore: null,
-  questions: [{ id: 1, questionType: "multiple_choice" as const, questionText: "Sample question one?", options: ["Option A", "Option B", "Option C"] }],
-};
 
-const SCREENS = { learning: "1 Finished", choose: "2 Choose", series: "3 Series", own: "4 Own journey", chosen: "5 Chosen", lesson: "6 Teaching" } as const;
+const SCREENS = { learning: "1 Finished", choose: "2 Choose", series: "3 Series", own: "4 Own journey", chosen: "5 Chosen" } as const;
 type Screen = keyof typeof SCREENS;
 
 export default async function NextLearningPreview({ searchParams }: { searchParams: Promise<{ screen?: string }> }) {
@@ -59,7 +50,6 @@ export default async function NextLearningPreview({ searchParams }: { searchPara
       : screen === "choose" ? column(<NextLearningChooser options={OPTIONS} advancedInterest={false} preview />)
       : screen === "series" ? column(<SeriesPicker series={SERIES} preview />)
       : screen === "own" ? column(<OwnJourneyBuilder episodes={EPISODES} initial={["e0", "e4"]} max={120} preview />)
-      : screen === "chosen" ? <><LearningHub hub={CHOSEN} learning={learning} /><LearningHub hub={CHOSEN_LESSON} learning={learning} /></>
-      : <NextLessonView data={LESSON} preview={{ kind: "ask-pleros" }} />}
+      : <LearningHub hub={CHOSEN} learning={learning} />}
   </div>;
 }

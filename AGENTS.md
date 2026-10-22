@@ -91,8 +91,8 @@ Pastor, 19 October; plan in `docs/plans/groups-as-oversight.md`. Groups replace 
 ### After SOGP: what's next
 
 - Someone who has finished SOGP (every published track, or their podcast plan), or whose cohort has ended, chooses their next learning at `/dashboard/sogp/next` (Pastor, 21 October). Withdrawn learners can't. The choice becomes the current learning at the top of Learning, and SOGP moves into Other learning; history and the certificate are untouched.
-- Offer only what exists: the Foundations podcast, a Library series, your own podcast journey (episodes you pick, one a day in your order, up to 120; user, 21 October), and teachings SOGP doesn't use that are published with audio and a quiz (today only "Commitment: How to Fulfil Purpose"; PPC Levels 4 and 5 are placeholders and stay hidden until they have audio and a quiz). Advanced SOGP shows as coming soon with Notify me.
-- Podcast choices reuse `podcast_journeys` (track `foundations`, `series:<id>` or `own`) and restart Day 1 today; `next_learning` (migration 0076) records that a podcast or a teaching is the next learning, and `podcast_journey_episodes` holds your own journey. Teaching progress uses `student_progress` and `quiz_attempts`; correct answers never reach the browser.
+- Offer podcast journeys only: the Foundations podcast, a Library series, and your own podcast journey (episodes you pick, one a day in your order, up to 120; user, 21 October). Separate teachings, such as the PPC teaching SOGP leaves out, are not offered (user, 22 October). Advanced SOGP shows as coming soon with Notify me.
+- Choices reuse `podcast_journeys` (track `foundations`, `series:<id>` or `own`) and restart Day 1 today; `next_learning` (migration 0076) records that a podcast journey is the next learning (its `lesson` kind is unused), and `podcast_journey_episodes` holds your own journey.
 
 ### SOGP discipleship groups
 

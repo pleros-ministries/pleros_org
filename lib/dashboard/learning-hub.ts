@@ -87,7 +87,7 @@ export async function getLearningHubData(userId: string, state: SogpLearningStat
   const [welcomePackDone, preSogp, nextCard] = await Promise.all([
     getReminderPreferences(userId).then(prefs => prefs.remindersSavedAt !== null).catch(() => false),
     preSogpCounts(userId, course.cohort.id).catch(() => ({ done: 0, total: 0 })),
-    nextChoice ? getNextLearningCard(userId, nextChoice).catch(() => null) : null,
+    nextChoice ? getNextLearningCard(userId).catch(() => null) : null,
   ]);
 
   const podcast = Boolean(state?.path && state.path !== "traditional" && state.plan);

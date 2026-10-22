@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, asc, eq, exists, isNotNull, ne, notExists, sql } from "drizzle-orm";
+import { asc, eq, sql } from "drizzle-orm";
 
 import { fetchAnchorEpisodes, type RssEpisode } from "@/lib/anchor-rss";
 import { db } from "@/lib/db";
@@ -22,12 +22,12 @@ import { getMorningPrayerWatchDateKeys } from "./prayer-watch";
 /**
  * The next phase after SOGP (Pastor, 21 October; migration 0076). Someone who
  * has finished SOGP chooses what they learn next, and it becomes their current
- * learning on Learning. Only what exists is offered: podcast journeys (the
- * Foundations plan, a Library series or episodes they pick) and teachings
- * SOGP doesn't use that have audio and a quiz.
+ * learning on Learning: a podcast journey (the Foundations plan, a Library
+ * series or episodes they pick). Separate teachings aren't offered (user,
+ * 22 October); the table's `lesson` kind stays unused.
  */
 
-export type NextLearningChoice = { kind: "podcast"; lessonId: null } | { kind: "lesson"; lessonId: number };
+export type NextLearningChoice = { kind: "podcast" };
 
 /** Postgres "relation does not exist": migration 0076 isn't applied yet. */
 function missingTable(error: unknown) {
@@ -37,27 +37,12 @@ function missingTable(error: unknown) {
 
 export async function getNextLearning(userId: string): Promise<NextLearningChoice | null> {
   try {
-    const [row] = await db.select({ kind: s.nextLearning.kind, lessonId: s.nextLearning.lessonId }).from(s.nextLearning).where(eq(s.nextLearning.userId, userId)).limit(1);
-    if (!row) return null;
-    return row.kind === "lesson" && row.lessonId != null ? { kind: "lesson", lessonId: row.lessonId } : { kind: "podcast", lessonId: null };
+    const [row] = await db.select({ kind: s.nextLearning.kind }).from(s.nextLearning).where(eq(s.nextLearning.userId, userId)).limit(1);
+    return row?.kind === "podcast" ? { kind: "podcast" } : null;
   } catch (error) {
     if (missingTable(error)) return null;
     throw error;
   }
-}
-
-/** Teachings to offer: published, with audio and a quiz, and not taught in any SOGP cohort. */
-export async function getNextLessonOptions() {
-  return db.select({ id: s.lessons.id, title: s.lessons.title, levelId: s.lessons.levelId })
-    .from(s.lessons)
-    .where(and(
-      eq(s.lessons.status, "published"),
-      isNotNull(s.lessons.audioUrl),
-      ne(s.lessons.audioUrl, ""),
-      exists(db.select({ one: sql`1` }).from(s.quizQuestions).where(eq(s.quizQuestions.lessonId, s.lessons.id))),
-      notExists(db.select({ one: sql`1` }).from(s.sogpCohortTracks).where(eq(s.sogpCohortTracks.lessonId, s.lessons.id))),
-    ))
-    .orderBy(asc(s.lessons.levelId), asc(s.lessons.lessonNumber));
 }
 
 /** Podcast choices restart the journey at Day 1 today; listened episodes stay ticked. */
@@ -69,11 +54,6 @@ export async function chooseNextPodcast(userId: string, track: string) {
     await tx.insert(s.nextLearning).values({ userId, kind: "podcast", lessonId: null })
       .onConflictDoUpdate({ target: s.nextLearning.userId, set: { kind: "podcast", lessonId: null, chosenAt: sql`now()` } });
   });
-}
-
-export async function chooseNextLesson(userId: string, lessonId: number) {
-  await db.insert(s.nextLearning).values({ userId, kind: "lesson", lessonId })
-    .onConflictDoUpdate({ target: s.nextLearning.userId, set: { kind: "lesson", lessonId, chosenAt: sql`now()` } });
 }
 
 export async function getOwnJourneyGuids(userId: string): Promise<string[]> {
@@ -107,20 +87,10 @@ export function ownJourneyEpisodes(guids: readonly string[], episodes: readonly 
   return guids.map(guid => byGuid.get(guid)).filter((episode): episode is RssEpisode => Boolean(episode));
 }
 
-export type NextLearningCard =
-  | { kind: "podcast"; title: string; dayNumber: number; totalDays: number; listened: number; finished: boolean; episodeTitle: string | null; todayListened: boolean }
-  | { kind: "lesson"; lessonId: number; title: string; done: number; total: number };
+export type NextLearningCard = { kind: "podcast"; title: string; dayNumber: number; totalDays: number; listened: number; finished: boolean; episodeTitle: string | null; todayListened: boolean };
 
 /** What Learning shows for the chosen next learning. */
-export async function getNextLearningCard(userId: string, choice: NextLearningChoice): Promise<NextLearningCard | null> {
-  if (choice.kind === "lesson") {
-    const [lesson] = await db.select({ title: s.lessons.title }).from(s.lessons).where(eq(s.lessons.id, choice.lessonId)).limit(1);
-    if (!lesson) return null;
-    const [progress] = await db.select().from(s.studentProgress)
-      .where(and(eq(s.studentProgress.userId, userId), eq(s.studentProgress.lessonId, choice.lessonId))).limit(1);
-    const steps = [progress?.audioListened, progress?.notesRead, progress?.quizPassed];
-    return { kind: "lesson", lessonId: choice.lessonId, title: lesson.title, done: steps.filter(Boolean).length, total: steps.length };
-  }
+export async function getNextLearningCard(userId: string): Promise<NextLearningCard | null> {
   const today = toLagosDateKey(new Date());
   const journey = await ensurePodcastJourney(userId, today);
   const [episodes, listened, own, prayer] = await Promise.all([
@@ -140,36 +110,4 @@ export async function getNextLearningCard(userId: string, choice: NextLearningCh
   const summary = summarisePodcastJourney(days, today);
   const day = days[summary.dayNumber - 1];
   return { kind: "podcast", title: resolved.title, ...summary, episodeTitle: day?.episode?.title ?? null, todayListened: day?.episodeListened ?? false };
-}
-
-export type NextLesson = {
-  id: number;
-  title: string;
-  audioUrl: string | null;
-  notesContent: string | null;
-  progress: { audioListened: boolean; notesRead: boolean; quizPassed: boolean };
-  bestScore: number | null;
-  questions: Array<{ id: number; questionType: "multiple_choice" | "short_text"; questionText: string; options: string[] | null }>;
-};
-
-/** The chosen teaching, only when it is the learner's chosen next learning. Correct answers never leave the server. */
-export async function getChosenNextLesson(userId: string, lessonId: number): Promise<NextLesson | null> {
-  const choice = await getNextLearning(userId);
-  if (choice?.kind !== "lesson" || choice.lessonId !== lessonId) return null;
-  const [lesson] = await db.select({ id: s.lessons.id, title: s.lessons.title, audioUrl: s.lessons.audioUrl, notesContent: s.lessons.notesContent })
-    .from(s.lessons).where(eq(s.lessons.id, lessonId)).limit(1);
-  if (!lesson) return null;
-  const [[progress], questions, [best]] = await Promise.all([
-    db.select().from(s.studentProgress).where(and(eq(s.studentProgress.userId, userId), eq(s.studentProgress.lessonId, lessonId))).limit(1),
-    db.select({ id: s.quizQuestions.id, questionType: s.quizQuestions.questionType, questionText: s.quizQuestions.questionText, options: s.quizQuestions.options })
-      .from(s.quizQuestions).where(eq(s.quizQuestions.lessonId, lessonId)).orderBy(asc(s.quizQuestions.sortOrder)),
-    db.select({ score: sql<number | null>`max(${s.quizAttempts.score})` }).from(s.quizAttempts)
-      .where(and(eq(s.quizAttempts.userId, userId), eq(s.quizAttempts.lessonId, lessonId))),
-  ]);
-  return {
-    ...lesson,
-    progress: { audioListened: progress?.audioListened ?? false, notesRead: progress?.notesRead ?? false, quizPassed: progress?.quizPassed ?? false },
-    bestScore: best?.score ?? null,
-    questions: questions.map(question => ({ ...question, options: (question.options as string[] | null) ?? null })),
-  };
 }

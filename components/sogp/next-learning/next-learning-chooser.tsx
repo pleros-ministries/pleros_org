@@ -18,7 +18,7 @@ import { ReportSheet, sheetStyles as sheet } from "@/components/community/report
 
 export type NextOption = {
   key: string;
-  art: "podcast" | "sogp" | "library" | "pre-sogp" | "advanced";
+  art: "podcast" | "sogp" | "library" | "advanced";
   title: string;
   detail: string;
   meta: string;
@@ -112,7 +112,7 @@ export function NextLearningChooser({ options, advancedInterest, preview = false
         <button type="button" className={`${sheet.primary} ${sheet.fit}`} disabled={pending} onClick={start}>{pending ? "Starting…" : "Start"}</button>
       </>}>
       {() => <>
-        <p className={sheet.muted}>{picked.pick?.kind === "lesson" ? "Listen, read the notes and take the quiz at your own pace." : "Day 1 starts today, one episode a day. Missed days wait for you, as in SOGP."}</p>
+        <p className={sheet.muted}>Day 1 starts today, one episode a day. Missed days wait for you, as in SOGP.</p>
         {error ? <p role="alert" className={sheet.error}>{error}</p> : null}
       </>}
     </ReportSheet> : null}

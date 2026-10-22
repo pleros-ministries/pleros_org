@@ -35,10 +35,10 @@ export function LearningHub({ hub, learning }: { hub: LearningHubData; learning:
   const finished = hub.card.total > 0 && hub.doneCount >= hub.card.total && !podcast;
   // After SOGP (Pastor, 21 October): the chosen next learning becomes the current learning.
   const next = hub.next.card;
-  const nextArt = LEVEL_ART[next?.kind === "lesson" ? 3 : 1]!;
+  const nextArt = LEVEL_ART[1]!;
   const nextStyle = { "--hub-art": `url("/assets/dashboard/learning-card/${nextArt.image}")`, "--hub-art-wide": `url("/assets/dashboard/learning-card/${nextArt.wide}")`, "--hub-field": nextArt.field, "--hub-ink": nextArt.ink } as CSSProperties;
 
-  const resume = next?.kind === "podcast"
+  const resume = next
     ? <section className={styles.card} aria-label="Resume learning" style={nextStyle}>
       <div className={styles.cardTop}><span>{next.finished ? "Journey complete" : `Day ${next.dayNumber}`}</span><span className={styles.pace}>Podcast</span></div>
       <div>
@@ -49,16 +49,6 @@ export function LearningHub({ hub, learning }: { hub: LearningHubData; learning:
       {next.finished
         ? <Link href="/dashboard/sogp/next" className={styles.resume}>Choose what’s next <ChevronRightIcon className="size-4" strokeWidth={2.2} /></Link>
         : <Link href="/dashboard/podcast" className={styles.resume}>{next.todayListened ? `Open day ${next.dayNumber}` : `Listen to day ${next.dayNumber}`} <PlayIcon className="size-4" fill="currentColor" strokeWidth={0} /></Link>}
-    </section>
-    : next?.kind === "lesson"
-    ? <section className={styles.card} aria-label="Resume learning" style={nextStyle}>
-      <div className={styles.cardTop}><span>Teaching</span><span className={styles.pace}>Listen · notes · quiz</span></div>
-      <div>
-        <h2>{next.title}</h2>
-        <span className={styles.cardMeta}>{next.done === next.total ? "All three steps done" : `${next.done} of ${next.total} steps done`}</span>
-        <div className={styles.meter} aria-hidden="true"><i style={{ width: `${Math.round((next.done / next.total) * 100)}%` }} /></div>
-      </div>
-      <Link href={`/dashboard/sogp/lesson/${next.lessonId}`} className={styles.resume}>{next.done === next.total ? "Open the teaching" : next.done ? "Continue" : "Start the teaching"} <PlayIcon className="size-4" fill="currentColor" strokeWidth={0} /></Link>
     </section>
     : hub.state === "start"
     ? <section className={styles.card} style={{ "--hub-art": `url("/assets/dashboard/learning-card/${art.image}")`, "--hub-art-wide": `url("/assets/dashboard/learning-card/${art.wide}")`, "--hub-field": art.field, "--hub-ink": art.ink } as CSSProperties}>
