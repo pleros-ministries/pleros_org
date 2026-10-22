@@ -8,7 +8,6 @@ import type { CommunityContext } from "@/lib/community/context";
 import type { DiscipleshipAccess } from "@/lib/community/discipleship-access";
 import {
   evaluateCanMessage,
-  isMinor,
   type MessagingRelation,
 } from "@/lib/community/messaging";
 import { firstNameOf, joinMonthLabel } from "@/lib/community/visibility";
@@ -62,7 +61,6 @@ async function findJoinedGroup(userId: string) {
       leaderUserId: leaderEnrollment.userId,
       leaderName: leaderEnrollment.name,
       leaderFirstName: leaderEnrollment.firstName,
-      leaderBirthYear: leaderEnrollment.birthYear,
     })
     .from(schema.discipleshipMemberships)
     .innerJoin(
@@ -120,7 +118,6 @@ async function listActiveDisciples(groupId: number) {
       userId: schema.sogpEnrollments.userId,
       name: schema.sogpEnrollments.name,
       firstName: schema.sogpEnrollments.firstName,
-      birthYear: schema.sogpEnrollments.birthYear,
       joinedAt: schema.discipleshipMemberships.joinedAt,
     })
     .from(schema.discipleshipMemberships)
@@ -140,35 +137,27 @@ async function listActiveDisciples(groupId: number) {
     .orderBy(asc(schema.discipleshipMemberships.joinedAt));
 }
 
-const NO_LINK: MessagingRelation = {
-  blockedEitherWay: false,
-  senderGuidesRecipient: false,
-  recipientGuidesSender: false,
-};
+const NO_LINK: MessagingRelation = { blockedEitherWay: false };
 
 /**
  * Whether to offer a Message button, using the same rule as sending. Blocks
- * and unit-leader links are not known here, so the server action still has
- * the final say when the conversation is opened.
+ * are not known here, so the server action still has the final say when the
+ * conversation is opened.
  */
 function messageIdFor(
   viewer: CommunityContext,
-  other: { userId: string; birthYear: number | null },
+  other: { userId: string },
   relation: MessagingRelation,
 ): string | null {
   const decision = evaluateCanMessage(
     {
       userId: viewer.userId,
       inCommunity: true,
-      isAdmin: viewer.isAdmin,
-      isMinor: viewer.isMinor,
       messagingBlocked: viewer.messagingBlocked,
     },
     {
       userId: other.userId,
       inCommunity: true,
-      isAdmin: false,
-      isMinor: isMinor(other.birthYear),
       messagingBlocked: false,
     },
     relation,
@@ -210,11 +199,8 @@ export async function getCommunityDiscipleship(
             ),
             messageUserId: messageIdFor(
               viewer,
-              {
-                userId: joinedRow.leaderUserId,
-                birthYear: joinedRow.leaderBirthYear,
-              },
-              { ...NO_LINK, recipientGuidesSender: true },
+              { userId: joinedRow.leaderUserId },
+              NO_LINK,
             ),
           },
           fellowDisciples: fellowRows
@@ -227,7 +213,7 @@ export async function getCommunityDiscipleship(
       groupName: ledRow.name,
       paused: ledRow.status === "archived",
       disciples: (discipleRowsByGroup[index] ?? []).map((row) =>
-        toPeer(row, { ...NO_LINK, senderGuidesRecipient: true }),
+        toPeer(row, NO_LINK),
       ),
     })),
   };
@@ -279,7 +265,7 @@ export async function getOwnDisciplerSummary(viewer: CommunityContext): Promise<
   if (!row) return null;
   return {
     firstName: firstNameOf(row.leaderFirstName || row.leaderName),
-    canMessage: messageIdFor(viewer, { userId: row.leaderUserId, birthYear: row.leaderBirthYear }, { ...NO_LINK, recipientGuidesSender: true }) !== null,
+    canMessage: messageIdFor(viewer, { userId: row.leaderUserId }, NO_LINK) !== null,
   };
 }
 

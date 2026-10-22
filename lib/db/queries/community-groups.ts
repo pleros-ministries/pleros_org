@@ -23,7 +23,6 @@ import {
   type GroupRole,
   type GroupStatus,
 } from "@/lib/community/groups";
-import { minorBirthYearFloor } from "@/lib/community/messaging";
 import { firstNameOf, joinMonthLabel } from "@/lib/community/visibility";
 
 /**
@@ -267,12 +266,6 @@ export async function getGroupDetail(
           status: members.status,
           createdAt: members.createdAt,
           name: schema.users.name,
-          // Server-side only: decides whether the member can be messaged.
-          isMinor: sql<boolean>`exists (
-            select 1 from ${schema.sogpEnrollments}
-            where ${schema.sogpEnrollments.userId} = ${members.userId}
-              and ${schema.sogpEnrollments.birthYear} >= ${minorBirthYearFloor()}
-          )`,
         })
         .from(members)
         .innerJoin(schema.users, eq(schema.users.id, members.userId))
@@ -322,12 +315,7 @@ export async function getGroupDetail(
           joinedMonth: joinMonthLabel(row.createdAt),
           isYou,
           messageUserId:
-            !isYou &&
-            !viewer.isMinor &&
-            !viewer.messagingBlocked &&
-            !row.isMinor
-              ? row.userId
-              : null,
+            !isYou && !viewer.messagingBlocked ? row.userId : null,
           manageable:
             !isYou &&
             canManage &&

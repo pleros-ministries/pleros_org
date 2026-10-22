@@ -7,7 +7,6 @@ import * as schema from "@/lib/db/schema";
 import { transactionDb } from "@/lib/db/transaction";
 import { discipleshipJoinBlockMessage } from "@/lib/sogp/discipleship";
 import { fuzzyNameScore } from "@/lib/community/fuzzy-name";
-import { minorBirthYearFloor } from "@/lib/community/messaging";
 import { fullNameOf } from "@/lib/community/visibility";
 import { nameSearch } from "@/lib/db/name-search";
 import { notifyGroupInvitation } from "@/lib/community/notify";
@@ -240,8 +239,8 @@ export type InviteCandidate = { enrollmentId: number; name: string; state: "free
 
 /**
  * Leaders add people to a group by name (groups as oversight, 19 October).
- * Full names, as the new-message picker shows them; under-18s are never
- * listed, and whose group someone is in stays private ("In a group").
+ * Full names, as the new-message picker shows them; whose group someone is in
+ * stays private ("In a group").
  */
 export async function searchGroupInvitees(input: { leaderUserId: string; leaderEnrollmentId: number; groupId: number; term: string }): Promise<InviteCandidate[]> {
   const group = await requireActiveLedGroup(input.leaderEnrollmentId, input.groupId);
@@ -256,7 +255,6 @@ export async function searchGroupInvitees(input: { leaderUserId: string; leaderE
       search.loose,
       ne(schema.sogpEnrollments.userId, input.leaderUserId),
       ne(schema.sogpEnrollments.status, "withdrawn"),
-      sql`not exists (select 1 from ${schema.sogpEnrollments} as minor_check where minor_check.user_id = ${schema.sogpEnrollments.userId} and minor_check.birth_year >= ${minorBirthYearFloor()})`,
     ))
     .orderBy(search.rank, asc(schema.sogpEnrollments.name), desc(schema.sogpEnrollments.createdAt))
     .limit(300);

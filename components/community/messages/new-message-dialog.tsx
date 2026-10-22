@@ -17,7 +17,7 @@ import {
 import { Avatar } from "../avatar";
 import { useOpenConversation } from "./use-open-conversation";
 
-type MemberResults = { members: MessageContact[]; canSearch: boolean };
+type MemberResults = { members: MessageContact[] };
 
 async function fetchMembers(query: string): Promise<MemberResults> {
   const res = await fetch(
@@ -55,7 +55,6 @@ export function NewMessageDialog({
   });
 
   const members = data?.members ?? [];
-  const canSearch = data?.canSearch ?? true;
 
   return (
     <Dialog
@@ -69,29 +68,25 @@ export function NewMessageDialog({
         <DialogHeader>
           <DialogTitle className="text-lg font-medium">New message</DialogTitle>
           <DialogDescription className="text-sm">
-            {canSearch
-              ? "Search by name, or pick someone below."
-              : "You can message your group leader, your discipler and the Pleros team."}
+            Search by name, or pick someone below.
           </DialogDescription>
         </DialogHeader>
 
-        {canSearch ? (
-          <label className="relative block">
-            <span className="sr-only">Search members by name</span>
-            <SearchIcon
-              className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--color-community-muted)]"
-              strokeWidth={2}
-            />
-            <input
-              value={input}
-              onChange={(event) => setInput(event.target.value)}
-              placeholder="First name"
-              autoFocus
-              maxLength={40}
-              className="h-[38px] w-full rounded-xl border border-[var(--color-community-edge)] pl-9 pr-3 text-base outline-none focus:border-[var(--color-community-edge-strong)]"
-            />
-          </label>
-        ) : null}
+        <label className="relative block">
+          <span className="sr-only">Search members by name</span>
+          <SearchIcon
+            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--color-community-muted)]"
+            strokeWidth={2}
+          />
+          <input
+            value={input}
+            onChange={(event) => setInput(event.target.value)}
+            placeholder="First name"
+            autoFocus
+            maxLength={40}
+            className="h-[38px] w-full rounded-xl border border-[var(--color-community-edge)] pl-9 pr-3 text-base outline-none focus:border-[var(--color-community-edge-strong)]"
+          />
+        </label>
 
         {chat.error ? (
           <p role="alert" className="text-[13px] text-red-700">
@@ -110,9 +105,7 @@ export function NewMessageDialog({
                 ? "Searching…"
                 : searching
                   ? "No one found with that name."
-                  : canSearch
-                    ? "Type at least two letters to search."
-                    : "No contacts available yet."}
+                  : "Type at least two letters to search."}
             </p>
           ) : (
             <ul className="grid gap-0.5">

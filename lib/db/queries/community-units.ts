@@ -3,8 +3,6 @@ import { and, asc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
 import type { CommunityContext } from "@/lib/community/context";
-import { isMinor } from "@/lib/community/messaging";
-import { managesUnit } from "@/lib/community/permissions";
 import { buildUnitName, canonicalRegionKey } from "@/lib/community/units";
 import {
   firstNameOf,
@@ -175,19 +173,14 @@ export type UnitDetail = {
 
 /**
  * Whether the viewer may start a private conversation with a unit member.
- * Adults message each other freely; a conversation involving an under-18
- * needs the other person to manage this unit (its pastor or leader) or be an
- * admin. The server
- * action re-checks this (plus blocks and discipler links) before anything is sent.
+ * Members message each other freely; the server action re-checks this (plus
+ * blocks) before anything is sent.
  */
 function canMessageUnitMember(
   viewer: CommunityContext,
-  unitId: number,
-  member: { userId: string; isLeader: boolean; isMinor: boolean },
+  member: { userId: string },
 ): boolean {
   if (member.userId === viewer.userId || viewer.messagingBlocked) return false;
-  if (member.isMinor && !managesUnit(viewer, unitId)) return false;
-  if (viewer.isMinor && !member.isLeader) return false;
   return true;
 }
 
@@ -209,7 +202,6 @@ export async function getUnitDetail(
       name: schema.sogpEnrollments.name,
       firstName: schema.sogpEnrollments.firstName,
       userId: schema.sogpEnrollments.userId,
-      birthYear: schema.sogpEnrollments.birthYear,
       enrollmentId: schema.sogpEnrollments.id,
       enrollmentStatus: schema.sogpEnrollments.status,
       cohortStatus: schema.sogpCohorts.status,
@@ -259,12 +251,7 @@ export async function getUnitDetail(
       enrollmentStatus: row.enrollmentStatus,
       preparationDaysComplete: prepCounts.get(row.enrollmentId) ?? 0,
       messageUserId:
-        viewer &&
-        canMessageUnitMember(viewer, unitId, {
-          userId: row.userId,
-          isLeader: row.role === "leader",
-          isMinor: isMinor(row.birthYear),
-        })
+        viewer && canMessageUnitMember(viewer, { userId: row.userId })
           ? row.userId
           : null,
     }),

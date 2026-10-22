@@ -22,7 +22,6 @@ import {
   FEED_TOP_WINDOW_DAYS,
   type FeedView,
 } from "@/lib/community/feed-view";
-import { minorBirthYearFloor } from "@/lib/community/messaging";
 import { normalisePostInput, type PostKind } from "@/lib/community/post-input";
 import {
   assertCanCreatePost,
@@ -143,12 +142,6 @@ function feedColumns(ctx: CommunityContext) {
       where ${schema.communityPostComments.postId} = ${schema.communityPosts.id}
         and ${schema.communityPostComments.status} <> 'removed'
     )::int`,
-    // Server-side only: decides whether the author can be messaged.
-    authorIsMinor: sql<boolean>`exists (
-      select 1 from ${schema.sogpEnrollments}
-      where ${schema.sogpEnrollments.userId} = ${schema.communityPosts.authorId}
-        and ${schema.sogpEnrollments.birthYear} >= ${minorBirthYearFloor()}
-    )`,
   } as const;
 }
 
@@ -167,7 +160,6 @@ type FeedRow = {
   reactionCount: number;
   reactedByMe: boolean;
   commentCount: number;
-  authorIsMinor: boolean;
 };
 
 function mapFeedRow(
@@ -220,9 +212,7 @@ function mapFeedRow(
     messageUserId:
       row.post.authorKind !== "ministry" &&
       row.post.authorId !== ctx.userId &&
-      !ctx.isMinor &&
-      !ctx.messagingBlocked &&
-      !row.authorIsMinor
+      !ctx.messagingBlocked
         ? row.post.authorId
         : null,
   };

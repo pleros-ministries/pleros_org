@@ -62,7 +62,7 @@ describe.skipIf(!process.env.PLEROS_REPORTING_REHEARSAL_ROOT)("slice 2 real tran
   beforeEach(async () => {
     vi.stubEnv("DASHBOARD_REPORTING_V3", "1");
     vi.stubEnv("DASHBOARD_REPORTING_V3_SCHEMA", "1");
-    identity.ctx = { userId: "w", isAdmin: false, enrollmentId: 1, enrolledAt: new Date(), unit: null, membershipRole: null, isUnitLeader: false, managedUnitIds: [], isMinor: false, postingBlocked: false, messagingBlocked: false };
+    identity.ctx = { userId: "w", isAdmin: false, enrollmentId: 1, enrolledAt: new Date(), unit: null, membershipRole: null, isUnitLeader: false, managedUnitIds: [], postingBlocked: false, messagingBlocked: false };
     await runtime.db.execute(sql`truncate users, church_branches restart identity cascade;
       insert into users values ('p','Synthetic Pastor'),('b','Synthetic Branch Pastor'),('u','Synthetic Unit leader'),('w','Synthetic Worker'),('w2','Synthetic Peer'),('outside','Synthetic Outside'),('admin','Synthetic Admin');
       insert into church_branches(id,name) values(1,'A'),(2,'B');
@@ -90,7 +90,7 @@ describe.skipIf(!process.env.PLEROS_REPORTING_REHEARSAL_ROOT)("slice 2 real tran
     const actions = await import("@/app/(site)/dashboard/community/_actions/reporting-v3-actions");
     identity.ctx = null;
     expect((await actions.createPrivateContactAction(contactInput)).ok).toBe(false);
-    identity.ctx = { userId: "w", isAdmin: false, enrollmentId: 1, enrolledAt: new Date(), unit: null, membershipRole: null, isUnitLeader: false, managedUnitIds: [], isMinor: false, postingBlocked: false, messagingBlocked: false };
+    identity.ctx = { userId: "w", isAdmin: false, enrollmentId: 1, enrolledAt: new Date(), unit: null, membershipRole: null, isUnitLeader: false, managedUnitIds: [], postingBlocked: false, messagingBlocked: false };
     expect((await actions.createPrivateContactAction({ ...contactInput, userId: "outside" })).ok).toBe(true);
     expect((await contacts.listPrivateMinistryContacts("w")).length).toBe(1);
     expect(await contacts.listPrivateMinistryContacts("outside")).toEqual([]);

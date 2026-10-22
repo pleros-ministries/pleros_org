@@ -17,9 +17,6 @@ import { fullestName, nameSearch } from "@/lib/db/name-search";
 
 export type HandoverCandidate = { userId: string; name: string; region: string | null };
 
-// Year of birth only: anyone who could still be 17 this year is left out.
-const adultThisYear = sql`(${s.sogpEnrollments.birthYear} is null or ${s.sogpEnrollments.birthYear} <= extract(year from now())::int - 18)`;
-
 /** Members who can take over follow-up: active SOGP enrollees and pastors, by full name. */
 export async function searchHandoverCandidates(callerUserId: string, enrollmentId: number, rawTerm: unknown): Promise<HandoverCandidate[]> {
   const term = typeof rawTerm === "string" ? rawTerm.trim().slice(0, 60) : "";
@@ -35,7 +32,7 @@ export async function searchHandoverCandidates(callerUserId: string, enrollmentI
       search.loose,
       ne(s.users.id, callerUserId),
       enrollee ? ne(s.users.id, enrollee.userId) : undefined,
-      or(eq(s.users.role, "pastor"), eq(s.users.isPastor, true), and(sql`${s.sogpEnrollments.id} is not null`, adultThisYear)),
+      or(eq(s.users.role, "pastor"), eq(s.users.isPastor, true), sql`${s.sogpEnrollments.id} is not null`),
     ))
     .orderBy(search.rank, asc(s.users.name), asc(s.users.id))
     .limit(400);
@@ -66,7 +63,7 @@ export async function handOverEnrollee(callerUserId: string, enrollmentId: numbe
   if (!target) throw new CommunityError("That person could not be found.");
   if (target.role !== "pastor" && !target.isPastor) {
     const [active] = await db.select({ id: s.sogpEnrollments.id }).from(s.sogpEnrollments)
-      .where(and(eq(s.sogpEnrollments.userId, newOwnerUserId), ne(s.sogpEnrollments.status, "withdrawn"), adultThisYear)).limit(1);
+      .where(and(eq(s.sogpEnrollments.userId, newOwnerUserId), ne(s.sogpEnrollments.status, "withdrawn"))).limit(1);
     if (!active) throw new CommunityError("Choose an active Pleros member.");
   }
   // The owner check and the move are one statement, so two people cannot both hand the same enrollee on.

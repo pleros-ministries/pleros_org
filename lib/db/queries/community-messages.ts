@@ -21,10 +21,8 @@ import type { CommunityContext } from "@/lib/community/context";
 import {
   DM_PAGE_SIZE,
   evaluateCanMessage,
-  isMinor,
   messageDenialCopy,
   messagePreview,
-  minorBirthYearFloor,
   pairKey,
   type MessageDecision,
   type MessagingParty,
@@ -52,8 +50,6 @@ type MemberProfile = {
   firstName: string;
   /** Group name, or the team label for an admin without an enrolment. */
   unitName: string | null;
-  units: Array<{ unitId: number; isLeader: boolean }>;
-  enrollmentIds: number[];
 };
 
 async function loadMemberProfiles(
@@ -70,9 +66,6 @@ async function loadMemberProfiles(
       role: schema.users.role,
       enrollmentId: schema.sogpEnrollments.id,
       firstName: schema.sogpEnrollments.firstName,
-      birthYear: schema.sogpEnrollments.birthYear,
-      unitId: schema.unitMembers.unitId,
-      unitRole: schema.unitMembers.role,
       unitName: schema.units.name,
       messagingBlocked: schema.communityRestrictions.messagingBlocked,
     })
@@ -93,9 +86,8 @@ async function loadMemberProfiles(
     .where(inArray(schema.users.id, ids))
     .orderBy(schema.sogpEnrollments.createdAt);
 
-  // A learner can hold several enrolments: the oldest names them, any one
-  // makes them a member, and the latest year of birth is the safest reading.
-  const latestBirthYear = new Map<string, number>();
+  // A learner can hold several enrolments: the oldest names them and any one
+  // makes them a member.
   for (const row of rows) {
     let profile = profiles.get(row.userId);
     if (!profile) {
@@ -104,44 +96,23 @@ async function loadMemberProfiles(
         party: {
           userId: row.userId,
           inCommunity: isAdmin,
-          isAdmin,
-          isMinor: false,
           messagingBlocked: row.messagingBlocked ?? false,
         },
         firstName: firstNameOf(row.firstName || row.name),
         unitName: row.unitName ?? (isAdmin ? TEAM_LABEL : null),
-        units: [],
-        enrollmentIds: [],
       };
       profiles.set(row.userId, profile);
     }
     if (row.enrollmentId == null) continue;
 
     profile.party.inCommunity = true;
-    profile.enrollmentIds.push(row.enrollmentId);
-    if (row.unitId != null) {
-      profile.units.push({
-        unitId: row.unitId,
-        isLeader: row.unitRole === "leader",
-      });
-    }
-    if (row.birthYear != null) {
-      latestBirthYear.set(
-        row.userId,
-        Math.max(latestBirthYear.get(row.userId) ?? row.birthYear, row.birthYear),
-      );
-    }
-  }
-  for (const [userId, year] of latestBirthYear) {
-    profiles.get(userId)!.party.isMinor = isMinor(year);
   }
 
-  // The pastor assigned to a region is part of the community and leads its
-  // unit for messaging purposes, with or without an enrolment of their own.
+  // The pastor assigned to a region is part of the community, with or without
+  // an enrolment of their own.
   const regions = await db
     .select({
       userId: schema.pastorRegions.pastorUserId,
-      unitId: schema.pastorRegions.unitId,
     })
     .from(schema.pastorRegions)
     .where(inArray(schema.pastorRegions.pastorUserId, ids));
@@ -149,60 +120,9 @@ async function loadMemberProfiles(
     const profile = profiles.get(region.userId);
     if (!profile) continue;
     profile.party.inCommunity = true;
-    profile.units.push({ unitId: region.unitId, isLeader: true });
     if (profile.unitName == null) profile.unitName = PASTOR_LABEL;
   }
   return profiles;
-}
-
-/** Active discipler links between two members, in either direction. */
-async function loadDisciplerLinks(a: MemberProfile, b: MemberProfile) {
-  const none = { aDisciplesB: false, bDisciplesA: false };
-  if (a.enrollmentIds.length === 0 || b.enrollmentIds.length === 0) return none;
-
-  const rows = await db
-    .select({
-      leaderEnrollmentId: schema.discipleshipGroups.leaderEnrollmentId,
-    })
-    .from(schema.discipleshipMemberships)
-    .innerJoin(
-      schema.discipleshipGroups,
-      eq(schema.discipleshipGroups.id, schema.discipleshipMemberships.groupId),
-    )
-    .where(
-      and(
-        eq(schema.discipleshipMemberships.status, "active"),
-        eq(schema.discipleshipGroups.status, "active"),
-        or(
-          and(
-            inArray(schema.discipleshipGroups.leaderEnrollmentId, a.enrollmentIds),
-            inArray(
-              schema.discipleshipMemberships.discipleEnrollmentId,
-              b.enrollmentIds,
-            ),
-          ),
-          and(
-            inArray(schema.discipleshipGroups.leaderEnrollmentId, b.enrollmentIds),
-            inArray(
-              schema.discipleshipMemberships.discipleEnrollmentId,
-              a.enrollmentIds,
-            ),
-          ),
-        ),
-      ),
-    );
-
-  return {
-    aDisciplesB: rows.some((r) => a.enrollmentIds.includes(r.leaderEnrollmentId)),
-    bDisciplesA: rows.some((r) => b.enrollmentIds.includes(r.leaderEnrollmentId)),
-  };
-}
-
-function leadsUnitOf(leader: MemberProfile, member: MemberProfile): boolean {
-  return leader.units.some(
-    (unit) =>
-      unit.isLeader && member.units.some((other) => other.unitId === unit.unitId),
-  );
 }
 
 async function loadRelation(
@@ -211,38 +131,25 @@ async function loadRelation(
 ): Promise<MessagingRelation> {
   const senderId = sender.party.userId;
   const recipientId = recipient.party.userId;
-  // Guide links only matter when an under-18 is involved.
-  const needsGuides = sender.party.isMinor || recipient.party.isMinor;
 
-  const [blocks, links] = await Promise.all([
-    db
-      .select({ id: schema.userBlocks.id })
-      .from(schema.userBlocks)
-      .where(
-        or(
-          and(
-            eq(schema.userBlocks.blockerId, senderId),
-            eq(schema.userBlocks.blockedId, recipientId),
-          ),
-          and(
-            eq(schema.userBlocks.blockerId, recipientId),
-            eq(schema.userBlocks.blockedId, senderId),
-          ),
+  const blocks = await db
+    .select({ id: schema.userBlocks.id })
+    .from(schema.userBlocks)
+    .where(
+      or(
+        and(
+          eq(schema.userBlocks.blockerId, senderId),
+          eq(schema.userBlocks.blockedId, recipientId),
         ),
-      )
-      .limit(1),
-    needsGuides
-      ? loadDisciplerLinks(sender, recipient)
-      : Promise.resolve({ aDisciplesB: false, bDisciplesA: false }),
-  ]);
+        and(
+          eq(schema.userBlocks.blockerId, recipientId),
+          eq(schema.userBlocks.blockedId, senderId),
+        ),
+      ),
+    )
+    .limit(1);
 
-  return {
-    blockedEitherWay: blocks.length > 0,
-    senderGuidesRecipient:
-      needsGuides && (leadsUnitOf(sender, recipient) || links.aDisciplesB),
-    recipientGuidesSender:
-      needsGuides && (leadsUnitOf(recipient, sender) || links.bDisciplesA),
-  };
+  return { blockedEitherWay: blocks.length > 0 };
 }
 
 export type MessagingCheck = {
@@ -887,17 +794,13 @@ export async function listSuggestedContacts(
   return [...contacts.values()];
 }
 
-/**
- * First-name search across enrolled adults, listed by full name. Under-18s are
- * never listed, and an under-18 viewer gets no search at all — only their
- * suggested contacts.
- */
+/** First-name search across enrolled members, listed by full name. */
 export async function searchMembers(
   ctx: CommunityContext,
   query: string,
 ): Promise<MessageContact[]> {
   const term = query.trim().slice(0, 40);
-  if (term.length < 2 || ctx.isMinor) return [];
+  if (term.length < 2) return [];
 
   // Fuzzy (user request, 18 October): narrow loosely in SQL by the first two
   // (three for longer words) letters of each typed word anywhere in the name, then score in code so
@@ -922,11 +825,6 @@ export async function searchMembers(
         and(
           ne(schema.sogpEnrollments.userId, ctx.userId),
           search.loose,
-          sql`not exists (
-            select 1 from ${schema.sogpEnrollments} as minor_check
-            where minor_check.user_id = ${schema.sogpEnrollments.userId}
-              and minor_check.birth_year >= ${minorBirthYearFloor()}
-          )`,
         ),
       )
       .orderBy(search.rank, asc(schema.sogpEnrollments.name), asc(schema.sogpEnrollments.id))

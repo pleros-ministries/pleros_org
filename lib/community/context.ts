@@ -1,11 +1,10 @@
 import { cache } from "react";
-import { eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
 import { getAppSession } from "@/lib/app-session";
 import { hasAdminAccess } from "@/lib/app-role";
-import { isMinor } from "@/lib/community/messaging";
 
 export type CommunityContext = {
   userId: string;
@@ -22,8 +21,6 @@ export type CommunityContext = {
   isUnitLeader: boolean;
   /** Location groups this user is the assigned pastor for (`pastor_regions`). */
   managedUnitIds: number[];
-  /** Under 18 by year of birth; limits who they exchange private messages with. */
-  isMinor: boolean;
   /** Admin restrictions after misuse. */
   postingBlocked: boolean;
   messagingBlocked: boolean;
@@ -59,7 +56,6 @@ async function loadCommunityContext(): Promise<CommunityContext | null> {
     membershipRole: row?.membershipRole ?? null,
     isUnitLeader: row?.membershipRole === "leader",
     managedUnitIds: managedUnits.map((unit) => unit.unitId),
-    isMinor: isMinor(row?.latestBirthYear ?? null),
     postingBlocked: row?.postingBlocked ?? false,
     messagingBlocked: row?.messagingBlocked ?? false,
   };
@@ -77,12 +73,6 @@ function loadMembershipRow(userId: string) {
       unitTelegramUrl: schema.units.telegramUrl,
       postingBlocked: schema.communityRestrictions.postingBlocked,
       messagingBlocked: schema.communityRestrictions.messagingBlocked,
-      // A learner can hold several enrolments; the latest year is the safest reading.
-      latestBirthYear: sql<number | null>`(
-        select max(${schema.sogpEnrollments.birthYear})
-        from ${schema.sogpEnrollments}
-        where ${schema.sogpEnrollments.userId} = ${userId}
-      )`,
     })
     .from(schema.users)
     .leftJoin(

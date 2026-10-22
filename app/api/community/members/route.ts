@@ -31,5 +31,5 @@ export async function GET(request: Request) {
       ? await searchMembers(ctx, query)
       : await listSuggestedContacts(ctx);
 
-  return NextResponse.json({ members, canSearch: !ctx.isMinor });
+  return NextResponse.json({ members });
 }

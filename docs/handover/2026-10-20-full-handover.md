@@ -300,7 +300,7 @@ psql "${DATABASE_URL_UNPOOLED:-$DATABASE_URL}" -f apply.sql
 - **Notifications and push:** names and counts only. Never message, check-in, prayer, quiz or answer text, and never a discipleship post's title. Nothing goes to Telegram except the private ops signup alert.
 - **Ask Pleros anonymity is structural.** Staff reads never select the asker, and mutes are never listed.
 - **Saved contacts:** a person's contacts go only to that person, the pastor of their location group, and admins. Never their leader.
-- **Under-18s:** never listed in name searches. Never send age to the client.
+- **Age:** no age restrictions anywhere (user, 22 October). Still never send age to the client.
 - **Search:** names only, never email.
 - **Videos and screenshots:** no real member names in demo or training material that leaves the machine.
 

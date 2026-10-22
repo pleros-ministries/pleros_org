@@ -4,7 +4,7 @@ import { and, desc, eq, inArray, isNull, lt, sql } from "drizzle-orm";
 
 import { churchBranchIds } from "@/lib/church/permissions";
 import { getCommunityContext } from "@/lib/community/context";
-import { evaluateCanMessage, isMinor } from "@/lib/community/messaging";
+import { evaluateCanMessage } from "@/lib/community/messaging";
 import { db } from "@/lib/db";
 import { fullestName } from "@/lib/db/name-search";
 import * as s from "@/lib/db/schema";
@@ -71,15 +71,15 @@ export type GroupOversightData = {
 const reported = (statuses: ReportStatuses | undefined) => Boolean(statuses && Object.values(statuses).some(status => status !== "missing"));
 
 async function loadNames(ids: string[]) {
-  if (!ids.length) return new Map<string, { name: string; birthYear: number | null }>();
+  if (!ids.length) return new Map<string, { name: string }>();
   const [users, enrolments] = await Promise.all([
     db.select({ id: s.users.id, name: s.users.name }).from(s.users).where(inArray(s.users.id, ids)),
-    db.select({ userId: s.sogpEnrollments.userId, name: s.sogpEnrollments.name, birthYear: s.sogpEnrollments.birthYear })
+    db.select({ userId: s.sogpEnrollments.userId, name: s.sogpEnrollments.name })
       .from(s.sogpEnrollments).where(inArray(s.sogpEnrollments.userId, ids)).orderBy(desc(s.sogpEnrollments.createdAt)),
   ]);
-  const latest = new Map<string, { name: string; birthYear: number | null }>();
-  for (const row of enrolments) if (!latest.has(row.userId)) latest.set(row.userId, { name: row.name, birthYear: row.birthYear });
-  return new Map(users.map(user => [user.id, { name: fullestName(user.name, latest.get(user.id)?.name) || "Member", birthYear: latest.get(user.id)?.birthYear ?? null }]));
+  const latest = new Map<string, { name: string }>();
+  for (const row of enrolments) if (!latest.has(row.userId)) latest.set(row.userId, { name: row.name });
+  return new Map(users.map(user => [user.id, { name: fullestName(user.name, latest.get(user.id)?.name) || "Member" }]));
 }
 
 /** Each person's branch: their latest enrolment's placement, else their church membership. */
@@ -186,9 +186,9 @@ export async function getGroupOversight(viewerId: string, options: { under?: str
   const canMessage = (userId: string) => {
     if (!ctx || userId === viewerId) return null;
     return evaluateCanMessage(
-      { userId: ctx.userId, inCommunity: true, isAdmin: ctx.isAdmin, isMinor: ctx.isMinor, messagingBlocked: ctx.messagingBlocked },
-      { userId, inCommunity: true, isAdmin: false, isMinor: isMinor(names.get(userId)?.birthYear ?? null), messagingBlocked: false },
-      { blockedEitherWay: false, senderGuidesRecipient: false, recipientGuidesSender: false },
+      { userId: ctx.userId, inCommunity: true, messagingBlocked: ctx.messagingBlocked },
+      { userId, inCommunity: true, messagingBlocked: false },
+      { blockedEitherWay: false },
     ).ok ? userId : null;
   };
   const groupName = new Map(groupRows.map(row => [row.id, row.name]));

@@ -4,7 +4,6 @@ import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
 import type { CommunityContext } from "@/lib/community/context";
 import { CommunityError, POSTING_PAUSED_COPY } from "@/lib/community/errors";
-import { minorBirthYearFloor } from "@/lib/community/messaging";
 import { assertCanComment } from "@/lib/community/rate-limit";
 import {
   canCommentOnPostRow,
@@ -59,12 +58,6 @@ export async function listComments(
         where ${schema.commentReactions.commentId} = ${schema.communityPostComments.id}
           and ${schema.commentReactions.userId} = ${ctx.userId}
       )`,
-      // Server-side only: decides whether the author can be messaged.
-      authorIsMinor: sql<boolean>`exists (
-        select 1 from ${schema.sogpEnrollments}
-        where ${schema.sogpEnrollments.userId} = ${schema.communityPostComments.authorId}
-          and ${schema.sogpEnrollments.birthYear} >= ${minorBirthYearFloor()}
-      )`,
     })
     .from(schema.communityPostComments)
     .innerJoin(
@@ -94,9 +87,7 @@ export async function listComments(
     messageUserId:
       row.comment.status === "visible" &&
       row.comment.authorId !== ctx.userId &&
-      !ctx.isMinor &&
-      !ctx.messagingBlocked &&
-      !row.authorIsMinor
+      !ctx.messagingBlocked
         ? row.comment.authorId
         : null,
   }));
