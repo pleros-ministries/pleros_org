@@ -46,7 +46,7 @@ const levelDefinitions = [
   },
   {
     level: 3,
-    title: "Redemption and lived faith",
+    title: "Redemption and the new creation",
     description: "Redemption, the Church, the new creation, and the walk of faith.",
     sources: [
       [2, 7, "Christology"],
@@ -59,7 +59,7 @@ const levelDefinitions = [
   },
   {
     level: 4,
-    title: "Practical life and assignment",
+    title: "Practical walk and assignment",
     description: "Prayer, authority, healing, assignment, and supernatural life.",
     sources: [
       [3, 4, "The Life of Prayer"],

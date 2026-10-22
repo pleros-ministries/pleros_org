@@ -17,8 +17,8 @@ export const SAMPLE_HUB: LearningHubData = {
   levels: [
     { level: 1, title: "Gospel foundations and the Spirit", done: 6, total: 6, state: "done", opens: null },
     { level: 2, title: "Doctrinal foundations", done: 3, total: 6, state: "now", opens: null },
-    { level: 3, title: "Redemption and lived faith", done: 0, total: 6, state: "later", opens: "Mon 26 Oct" },
-    { level: 4, title: "Practical life and assignment", done: 0, total: 6, state: "later", opens: "Mon 2 Nov" },
+    { level: 3, title: "Redemption and the new creation", done: 0, total: 6, state: "later", opens: "Mon 26 Oct" },
+    { level: 4, title: "Practical walk and assignment", done: 0, total: 6, state: "later", opens: "Mon 2 Nov" },
   ],
   advancedInterest: false,
   next: { canChoose: false, finished: false, card: null },
