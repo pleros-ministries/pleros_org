@@ -23,7 +23,7 @@ const FIELDS: Record<LearningArt, { field: string; ink: string }> = {
   library: { field: "#f3e0c4", ink: "#4d3a26" },
 };
 
-const artStyle = (key: LearningArt): CSSProperties => ({
+export const artStyle = (key: LearningArt): CSSProperties => ({
   backgroundColor: FIELDS[key].field, color: FIELDS[key].ink,
   ["--art-1x" as string]: `url("/assets/dashboard/learning-cards/${key}-tile-192.webp")`,
   ["--art-2x" as string]: `url("/assets/dashboard/learning-cards/${key}-tile-384.webp")`,

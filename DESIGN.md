@@ -197,6 +197,7 @@ Most of these classes come from `components/community/discipleship/discipleship-
   - The art is never stretched over the card. Each card is its field colour, and the object is a snug tile (`<key>-tile-192/384.webp` in `public/assets/dashboard/learning-cards/`, cut by `scripts/cut-learning-card-tiles.py`) set at a fixed size in the bottom-right corner: 96px, 80px below 360px, 108px from 640px. Only its top and left field margin fades out, so it stays snug at every width with no seam.
   - The app's paper grain (`grain-384.webp`, cut from the approved art) lies over the whole card, so field and object read as one surface.
   - Tag and title sit top-left, one short line bottom-left, as on the group cards. Prompts: `docs/handover/codex-prompts/5`, `6` and `7`.
+- **The SOGP page** (`/dashboard/sogp/school`, user, 22 October) uses the learning-card family too: the SOGP card heads it in its coral field with the gem at 132px; the certificate is three counts (22px Sen, amber only where something is missing); the four levels are 2×2 tiles (4 across from 640px) in their own level art on its dark field; After SOGP is a lilac card. It sits in Learning's frame (16px gutter).
 - **Text over art is always live text**, never baked in.
 - **No second blue hero:** only the My learning card is blue. Other illustrated tiles take their own complementary palette.
 
