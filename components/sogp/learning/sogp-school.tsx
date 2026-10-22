@@ -56,7 +56,7 @@ export function SogpSchool({ hub, facts, followUp }: { hub: LearningHubData; fac
     : hub.state === "start" ? { href: "/dashboard/sogp/path", label: "Choose how you’ll learn" }
     : finished && hub.next.canChoose ? { href: "/dashboard/sogp/next", label: "Choose what’s next" }
     : { href: hub.card.href, label: hub.card.action };
-  const line = [days?.current ? `Day ${days.current} of ${days.total}` : null, podcast ? hub.card.progress : `${hub.doneCount} of ${hub.card.total || 24} teachings`].filter(Boolean).join(" · ");
+  const line = [days?.current ? `Day ${days.current} of ${days.total}` : null, podcast ? `${hub.card.done} of ${hub.card.total} episodes` : `${hub.doneCount} of ${hub.card.total || 24} teachings`].filter(Boolean).join(" · ");
   const left = facts ? [!facts.learningPass, !facts.prayer.pass, !facts.reviews.reviewPass].filter(Boolean).length : 0;
 
   // Learning's frame, for the same 16px gutter and column width.
