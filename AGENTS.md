@@ -105,6 +105,7 @@ Pastor, 19 October; plan in `docs/plans/groups-as-oversight.md`. Groups replace 
 - Accountability tools: preset-only encouragement nudges (plus a ≤200-char personal line, one per disciple per Lagos day via a `notification_checkpoints` key), a private discipler follow-up log (`discipleship_contact_logs`; WhatsApp taps log automatically), disciple prayer requests (Prayed/Answered with optional testimony, hidden when the disciple leaves), and check-in suggestions built from the teachings released in the last 7 days for the group's majority cohort.
 - The daily `/api/cron/sogp-reminders` cron (05:20 WAT) runs `runDiscipleshipCron`: it alerts disciplers only on status transitions into at-risk/not-active or back on track (tracked in `last_known_status`) and sends a Monday digest per group (named when the leader runs more than one); the same cron prunes old reminder checkpoints, and neither job's failure blocks the other. Push text never contains check-in or prayer text; a group's name reaches only its own leader.
 - Admins pause/restore groups one at a time from `/admin/community`; a restore never reopens a closed group. Never post discipleship data to Telegram.
+- A leader's group page lists invites sent by name that haven't been answered, under the members ("Invited, not joined yet", user, 22 October), with when each was sent and Withdraw (optimistic, rolled back with a message). Link joins have no invite, so they aren't listed. Names only.
 
 ### Learner reminders and notification preferences
 

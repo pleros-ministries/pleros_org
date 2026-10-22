@@ -285,3 +285,22 @@ export async function searchGroupInvitees(input: { leaderUserId: string; leaderE
     state: groupOf.get(row.userId) === group.id ? "in_this_group" : invited.has(row.userId) ? "invited" : groupOf.has(row.userId) ? "in_a_group" : "free",
   }));
 }
+
+export type PendingGroupInvitation = { id: number; name: string; createdAt: string };
+
+/**
+ * Invites sent by name to one group and not yet answered, newest first (user,
+ * 22 October: leaders need to see who hasn't joined). Bounded to the group's
+ * own leader; names only.
+ */
+export async function listPendingGroupInvitations(leaderUserId: string, groupId: number): Promise<PendingGroupInvitation[]> {
+  const rows = await invitationQuery()
+    .where(and(
+      eq(schema.discipleshipGroupInvitations.groupId, groupId),
+      eq(schema.discipleshipGroups.leaderUserId, leaderUserId),
+      eq(schema.discipleshipGroupInvitations.status, "pending"),
+    ))
+    .orderBy(desc(schema.discipleshipGroupInvitations.createdAt))
+    .limit(100);
+  return rows.map(row => ({ id: row.id, name: row.recipientName, createdAt: iso(row.createdAt)! }));
+}

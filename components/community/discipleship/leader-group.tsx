@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { CalendarCheckIcon, ChevronRightIcon, LinkIcon, PencilIcon, PlusIcon, UserPlusIcon, XCircleIcon } from "lucide-react";
 
+import { withdrawGroupInvitation } from "@/app/_actions/sogp-invitation-actions";
 import {
   closeDiscipleshipGroupAction,
   regenerateInviteLinkAction,
@@ -15,6 +16,7 @@ import { LeaderEpisodeQuestionList } from "@/components/sogp/discipleship-episod
 import { LeaderPrayerList } from "@/components/sogp/discipleship-prayer";
 import type { FeedPost } from "@/lib/db/queries/community-posts";
 import type { LeaderEpisodeQuestion } from "@/lib/db/queries/sogp-episode-questions";
+import type { PendingGroupInvitation } from "@/lib/db/queries/sogp-group-invitations";
 import type { DiscipleSummary, DiscipleshipDashboardData } from "@/lib/db/queries/sogp-discipleship";
 import { DISCIPLESHIP_GROUP_NAME_MAX, evaluateCloseDiscipleshipGroup } from "@/lib/sogp/discipleship";
 
@@ -48,9 +50,11 @@ function discipleMeta(disciple: DiscipleSummary) {
  * first), discussion, check-ins and prayer requests, with the invite and
  * group settings in the hero. Each disciple opens their own page.
  */
-export function LeaderGroupView({ data, episodeQuestions, colourway, initialTab, initialPanel = null, addByName = true, discussion }: {
+export function LeaderGroupView({ data, episodeQuestions, pendingInvites = [], colourway, initialTab, initialPanel = null, addByName = true, discussion }: {
   data: DiscipleshipDashboardData;
   episodeQuestions: LeaderEpisodeQuestion[];
+  /** Invites sent by name that haven't been answered yet. */
+  pendingInvites?: PendingGroupInvitation[];
   colourway?: "slate";
   initialTab: LeaderTab;
   /** Opens the invite panel on arrival. */
@@ -64,6 +68,9 @@ export function LeaderGroupView({ data, episodeQuestions, colourway, initialTab,
   const paused = group.status === "archived";
   const disciples = [...group.disciples].sort(byNeed);
   const hasDisciples = disciples.length > 0;
+  // Withdrawn here drop out at once; the server's list replaces them on the next refresh.
+  const [withdrawn, setWithdrawn] = useState<Set<number>>(() => new Set());
+  const invited = pendingInvites.filter(invite => !withdrawn.has(invite.id));
   // An empty group already shows the invite panel in place, so don't open a second one.
   const [panel, setPanel] = useState<"invite" | "rename" | null>(initialPanel === "invite" && !hasDisciples ? null : initialPanel);
   const tabs: Array<{ key: LeaderTab; label: string; count?: number }> = [
@@ -103,7 +110,7 @@ export function LeaderGroupView({ data, episodeQuestions, colourway, initialTab,
       colourway={colourway}
       tag={paused ? "Paused" : "You lead"}
       title={group.name}
-      meta={hasDisciples ? `${disciples.length} ${disciples.length === 1 ? "member" : "members"}` : "No members yet"}
+      meta={[hasDisciples ? `${disciples.length} ${disciples.length === 1 ? "member" : "members"}` : "No members yet", invited.length ? `${invited.length} invited` : null].filter(Boolean).join(" · ")}
       // The ··· menu always sits beside a primary action: Invite once people have
       // joined, otherwise Add a contact (the invite link fills the page below).
       actions={paused ? null : <>
@@ -141,6 +148,7 @@ export function LeaderGroupView({ data, episodeQuestions, colourway, initialTab,
       <div className={styles.sectionTitle}><h2>Invite someone</h2></div>
       <InvitePanel group={group} leaderFirstName={data.viewer.firstName} empty addByName={addByName} />
     </>) : null}
+    {tab === "disciples" && !paused && invited.length ? <PendingInvites invites={invited} onWithdrawn={id => setWithdrawn(current => new Set(current).add(id))} onRestored={id => setWithdrawn(current => { const next = new Set(current); next.delete(id); return next; })} /> : null}
 
     {tab === "discussion" ? <>
       <FeedComposer key={`composer-${group.id}`} viewerName={discussion.viewerName} unitName={null} target={{ scope: "discipleship", id: group.id }} officialReach="all" postingBlocked={discussion.postingBlocked} />
@@ -164,6 +172,51 @@ export function LeaderGroupView({ data, episodeQuestions, colourway, initialTab,
       <LeaderPrayerList requests={group.prayerRequests} preview={false} />
     </div> : null}
   </div>;
+}
+
+const invitedDay = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", timeZone: "Africa/Lagos" });
+function invitedWhen(iso: string) {
+  const days = Math.floor((Date.now() - new Date(iso).getTime()) / 86_400_000);
+  return days < 1 ? "Invited today" : days === 1 ? "Invited yesterday" : days < 7 ? `Invited ${days} days ago` : `Invited ${invitedDay.format(new Date(iso))}`;
+}
+
+/**
+ * Invited by name, not joined yet (user, 22 October): who and when, with
+ * Withdraw. Withdrawing shows at once and comes back with a message if it
+ * fails. Link invites aren't per person, so they aren't listed.
+ */
+function PendingInvites({ invites, onWithdrawn, onRestored }: { invites: PendingGroupInvitation[]; onWithdrawn: (id: number) => void; onRestored: (id: number) => void }) {
+  const router = useRouter();
+  const [confirm, setConfirm] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const withdraw = (invite: PendingGroupInvitation) => {
+    setConfirm(null); setError(null);
+    onWithdrawn(invite.id);
+    void withdrawGroupInvitation(invite.id)
+      .catch(() => ({ ok: false as const, error: "Couldn’t withdraw that. Check your connection and try again." }))
+      .then(result => {
+        if (result.ok) { router.refresh(); return; }
+        onRestored(invite.id);
+        setError(`${invite.name}: ${result.error}`);
+      });
+  };
+  return <>
+    <div className={styles.sectionTitle}><h2>Invited, not joined yet</h2><span className="text-[12.5px] text-(--color-community-muted) tabular-nums">{invites.length}</span></div>
+    <div className={styles.panel}><ul className={styles.list}>
+      {invites.map(invite => <li key={invite.id} className={`${styles.row} items-center`}>
+        <Initials name={invite.name} />
+        <span className={styles.rowCopy}><span className={styles.rowTitle} style={{ whiteSpace: "normal" }}>{invite.name}</span><span className={styles.rowMeta}>{invitedWhen(invite.createdAt)}</span></span>
+        {confirm === invite.id
+          ? <span className="flex shrink-0 items-center gap-3">
+            <button type="button" className={styles.quiet} onClick={() => setConfirm(null)}>Keep</button>
+            <button type="button" className={styles.btn} onClick={() => withdraw(invite)}>Withdraw</button>
+          </span>
+          : <button type="button" className={`${styles.btn} shrink-0`} onClick={() => setConfirm(invite.id)} aria-label={`Withdraw the invite to ${invite.name}`}>Withdraw</button>}
+      </li>)}
+    </ul></div>
+    {error ? <p role="alert" className={styles.error}>{error}</p> : null}
+    <p className={styles.note}>People you invite by name wait here until they accept. Anyone with your group link joins without an invite, so they don’t show.</p>
+  </>;
 }
 
 function RenameForm({ group, onDone }: { group: { id: number; name: string }; onDone: () => void }) {

@@ -9,6 +9,7 @@ import { canAccessCommunity, getCommunityContext } from "@/lib/community/context
 import { getCommunityDiscipleship } from "@/lib/db/queries/community-discipleship";
 import { getDiscipleshipDashboard } from "@/lib/db/queries/sogp-discipleship";
 import { getLeaderEpisodeQuestions, getOwnEpisodeQuestions } from "@/lib/db/queries/sogp-episode-questions";
+import { listPendingGroupInvitations } from "@/lib/db/queries/sogp-group-invitations";
 
 // Reads the session on every request (Cache Components).
 export const instant = false;
@@ -55,9 +56,10 @@ export default async function DiscipleshipGroupRoute({ params, searchParams }: {
   // their first group for any other id, so a mismatch means it isn't theirs.
   const led = community.leading.filter(group => !group.paused);
   if (!community.leading.some(group => group.groupId === groupId)) notFound();
-  const [data, episodeQuestions] = await Promise.all([
+  const [data, episodeQuestions, pendingInvites] = await Promise.all([
     getDiscipleshipDashboard(session.user.id, groupId),
     getLeaderEpisodeQuestions(session.user.id, groupId).catch(() => []),
+    listPendingGroupInvitations(session.user.id, groupId).catch(() => []),
   ]);
   if (!data || data.selectedGroup.id !== groupId) notFound();
 
@@ -65,6 +67,7 @@ export default async function DiscipleshipGroupRoute({ params, searchParams }: {
     <LeaderGroupView
       data={data}
       episodeQuestions={episodeQuestions}
+      pendingInvites={pendingInvites}
       colourway={led.findIndex(group => group.groupId === groupId) % 2 === 1 ? "slate" : undefined}
       initialTab={TABS.includes(tab as LeaderTab) ? tab as LeaderTab : "disciples"}
       initialPanel={panel === "invite" ? panel : null}
