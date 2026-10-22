@@ -21,6 +21,7 @@ export const SAMPLE_HUB: LearningHubData = {
     { level: 4, title: "Practical life and assignment", done: 0, total: 6, state: "later", opens: "Mon 2 Nov" },
   ],
   advancedInterest: false,
+  next: { canChoose: false, card: null },
   journey: { welcomePackDone: true, preSogp: { done: 10, total: 10 }, days: { current: 9, total: 28, teaching: 24, reviews: 4 }, prayerToday: true },
 };
 

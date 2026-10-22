@@ -17,6 +17,8 @@ import {
   PODCAST_FOUNDATIONS_TRACK,
   PODCAST_LATEST_TITLE,
   PODCAST_LATEST_TRACK,
+  PODCAST_OWN_TITLE,
+  PODCAST_OWN_TRACK,
   podcastSeriesTrack,
   type PodcastSeriesOption,
 } from "@/lib/podcast-journey";
@@ -88,6 +90,7 @@ function PickerBody({
   currentTrack,
   initialTrack,
   catalogue,
+  ownEpisodes,
   listened,
   previewMode,
   onChosen,
@@ -96,6 +99,7 @@ function PickerBody({
   currentTrack: string;
   initialTrack: string;
   catalogue: readonly PodcastSeriesOption[];
+  ownEpisodes: readonly RssEpisode[];
   listened: ReadonlySet<string>;
   previewMode: boolean;
   onChosen: (track: string) => void;
@@ -116,6 +120,17 @@ function PickerBody({
               "The Gospel, God’s purpose and how to pursue it, one episode a day.",
             meta: listenedMeta(foundations, listened),
             recommended: true,
+          },
+        ]
+      : []),
+    // Only once you've made one, from What's next after SOGP (user, 21 October).
+    ...(ownEpisodes.length
+      ? [
+          {
+            track: PODCAST_OWN_TRACK,
+            title: PODCAST_OWN_TITLE,
+            description: "The episodes you picked, one a day in your order.",
+            meta: listenedMeta(ownEpisodes, listened),
           },
         ]
       : []),
@@ -233,6 +248,7 @@ export function PodcastTrackPicker({
   currentTrack,
   initialTrack,
   catalogue,
+  ownEpisodes = [],
   listened,
   previewMode,
   onChosen,
@@ -243,6 +259,7 @@ export function PodcastTrackPicker({
   /** The option selected when the picker opens. */
   initialTrack: string;
   catalogue: readonly PodcastSeriesOption[];
+  ownEpisodes?: readonly RssEpisode[];
   listened: ReadonlySet<string>;
   previewMode: boolean;
   /** Runs once the choice is saved, or straight away in preview. */
@@ -256,6 +273,7 @@ export function PodcastTrackPicker({
           currentTrack={currentTrack}
           initialTrack={initialTrack}
           catalogue={catalogue}
+          ownEpisodes={ownEpisodes}
           listened={listened}
           previewMode={previewMode}
           onChosen={onChosen}

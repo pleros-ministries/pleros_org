@@ -12,6 +12,8 @@ import {
   isPodcastTrackAvailable,
   parsePodcastTrack,
   PODCAST_FOUNDATIONS_DAYS,
+  PODCAST_OWN_TITLE,
+  PODCAST_OWN_TRACK,
   podcastSeriesTrack,
   resolvePodcastJourney,
   summarisePodcastJourney,
@@ -169,6 +171,19 @@ const feed = [
 const catalogue = buildPodcastSeriesCatalogue(feed);
 
 describe("podcast journeys", () => {
+  test("plays your own journey in your order, and falls back to Foundations when it is empty", () => {
+    const picked = [feed[3]!, feed[0]!];
+    const own = resolvePodcastJourney({ track: PODCAST_OWN_TRACK, startedOn: "2026-10-22", catalogue, ownEpisodes: picked });
+    expect(own).toMatchObject({ kind: "plan", track: PODCAST_OWN_TRACK, title: PODCAST_OWN_TITLE, fellBack: false });
+    expect(own.kind === "plan" && own.episodes.map((item) => item.guid)).toEqual(picked.map((item) => item.guid));
+    expect(parsePodcastTrack(PODCAST_OWN_TRACK)).toEqual({ kind: "own" });
+
+    const empty = resolvePodcastJourney({ track: PODCAST_OWN_TRACK, startedOn: "2026-10-22", catalogue });
+    expect(empty).toMatchObject({ kind: "plan", track: "foundations", fellBack: true });
+    // Only the server action, which reads your saved episodes, may choose it.
+    expect(isPodcastTrackAvailable(PODCAST_OWN_TRACK, catalogue)).toBe(false);
+  });
+
   test("lists each series in teaching order, Part 1 first", () => {
     expect(catalogue.map((item) => item.title)).toEqual([
       "The Place of the Gospel in Your Life",

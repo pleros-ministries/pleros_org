@@ -360,6 +360,7 @@ export function PodcastProgressPage({
   leaderboard,
   track,
   startedOn,
+  ownEpisodeGuids = [],
 }: {
   episodes: RssEpisode[];
   listenedEpisodeGuids: string[];
@@ -375,6 +376,8 @@ export function PodcastProgressPage({
   track: string;
   /** Day 1 of that journey in Lagos time. */
   startedOn: string;
+  /** Your own journey's episodes, in order (migration 0076); empty when you haven't made one. */
+  ownEpisodeGuids?: string[];
 }) {
   const [query, setQuery] = useState("");
   const [localListenedGuids, setLocalListenedGuids] = useState(listenedEpisodeGuids);
@@ -395,10 +398,12 @@ export function PodcastProgressPage({
     : episodes;
   const episodeGroups = groupPodcastEpisodesBySeries(filteredEpisodes);
   const catalogue = buildPodcastSeriesCatalogue(episodes);
+  const ownEpisodes = ownEpisodeGuids.flatMap((guid) => episodes.find((episode) => episode.guid === guid) ?? []);
   const journey = resolvePodcastJourney({
     track: localTrack,
     startedOn: localStartedOn,
     catalogue,
+    ownEpisodes,
   });
   // One local state feeds the calendar, the day's tasks and the full list, so
   // a tick in any of them shows in the others at once.
@@ -578,6 +583,7 @@ export function PodcastProgressPage({
         currentTrack={journey.track}
         initialTrack={picker.initialTrack}
         catalogue={catalogue}
+        ownEpisodes={ownEpisodes}
         listened={listened}
         previewMode={previewMode}
         onChosen={handleTrackChosen}

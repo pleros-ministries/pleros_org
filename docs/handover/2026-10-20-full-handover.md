@@ -285,6 +285,8 @@ psql "${DATABASE_URL_UNPOOLED:-$DATABASE_URL}" -f apply.sql
 | 0072_oversight_update_dones | 78 | Done state for Oversight Updates |
 | 0073_natural_assignment_reports | 79 | Natural assignment goals and to-dos |
 | 0074_teaching_other | 80 | Teaching's Other (`other_title`, source `none`) |
+| 0075_report_yes_no_meetings | 81 | Yes/No reasons, meeting details, `outreach_meeting` |
+| 0076_next_learning | 82 | What's next after SOGP; your own podcast journey |
 
 - **Live data changes outside the app:** on 19 October, `community_groups` id 3 was closed. Nothing else.
 - **Scripts against server-only code** (read-only probes):

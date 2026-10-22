@@ -36,6 +36,8 @@ export function otherLearningTiles(hub: LearningHubData): Tile[] {
   const preDone = pre.total > 0 && pre.done >= pre.total;
   const podcastPath = hub.path === "podcast_one" || hub.path === "podcast_two";
   return [
+    // Once a next learning is chosen, SOGP joins Other learning (Pastor, 21 October).
+    ...(hub.next.card ? [{ art: "sogp" as const, title: "School of God’s Purpose", tag: "Done", meta: hub.certificate.available ? "Certificate ready" : "Your history", href: "/dashboard/sogp/school" }] : []),
     { art: "welcome", title: "Welcome Pack", tag: hub.journey.welcomePackDone ? "Done" : "To finish", meta: "Gifts and orientation", href: "/dashboard/welcomepack" },
     { art: "pre-sogp", title: "Pre-SOGP", tag: preDone ? "Done" : hub.state === "preparing" ? "Now" : "Open", meta: pre.total ? `${Math.min(pre.done, pre.total)} of ${pre.total} videos` : "Foundation videos", href: "/dashboard/pre-sogp" },
     { art: "advanced", title: "Advanced SOGP", tag: hub.advancedInterest ? "We’ll tell you" : "Coming soon", meta: "After SOGP", href: "/dashboard/library" },

@@ -957,6 +957,28 @@ export const podcastJourneys = pgTable("podcast_journeys", {
     .defaultNow(),
 });
 
+/** The episodes a listener picked for their own journey (track `own`), one a day in order (migration 0076). */
+export const podcastJourneyEpisodes = pgTable("podcast_journey_episodes", {
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  position: integer("position").notNull(),
+  episodeGuid: text("episode_guid").notNull(),
+}, (t) => [
+  primaryKey({ name: "podcast_journey_episodes_pk", columns: [t.userId, t.position] }),
+  uniqueIndex("podcast_journey_episodes_unique").on(t.userId, t.episodeGuid),
+]);
+
+/**
+ * What someone learns after SOGP (Pastor, 21 October; migration 0076):
+ * `podcast` makes their podcast journey the current learning, `lesson` one
+ * teaching with notes and a quiz. Progress stays in the existing tables.
+ */
+export const nextLearning = pgTable("next_learning", {
+  userId: text("user_id").primaryKey().references(() => users.id, { onDelete: "cascade" }),
+  kind: text("kind").$type<"podcast" | "lesson">().notNull(),
+  lessonId: integer("lesson_id").references(() => lessons.id, { onDelete: "cascade" }),
+  chosenAt: timestamp("chosen_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 // ─── Contact submissions ────────────────────────────────────────────────────
 
 export const contactSubmissions = pgTable(

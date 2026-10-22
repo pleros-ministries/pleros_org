@@ -33,8 +33,34 @@ export function LearningHub({ hub, learning }: { hub: LearningHubData; learning:
   const podcast = hub.path === "podcast_one" || hub.path === "podcast_two";
   // Every published track done: the card celebrates instead of resuming.
   const finished = hub.card.total > 0 && hub.doneCount >= hub.card.total && !podcast;
+  // After SOGP (Pastor, 21 October): the chosen next learning becomes the current learning.
+  const next = hub.next.card;
+  const nextArt = LEVEL_ART[next?.kind === "lesson" ? 3 : 1]!;
+  const nextStyle = { "--hub-art": `url("/assets/dashboard/learning-card/${nextArt.image}")`, "--hub-art-wide": `url("/assets/dashboard/learning-card/${nextArt.wide}")`, "--hub-field": nextArt.field, "--hub-ink": nextArt.ink } as CSSProperties;
 
-  const resume = hub.state === "start"
+  const resume = next?.kind === "podcast"
+    ? <section className={styles.card} aria-label="Resume learning" style={nextStyle}>
+      <div className={styles.cardTop}><span>{next.finished ? "Journey complete" : `Day ${next.dayNumber}`}</span><span className={styles.pace}>Podcast</span></div>
+      <div>
+        <h2>{next.finished ? "You’ve finished this journey" : next.episodeTitle ?? next.title}</h2>
+        <span className={styles.cardMeta}>{next.listened} of {next.totalDays} listened · day {next.dayNumber} of {next.totalDays}</span>
+        <div className={styles.meter} aria-hidden="true"><i style={{ width: `${next.totalDays ? Math.min(100, Math.round((next.listened / next.totalDays) * 100)) : 0}%` }} /></div>
+      </div>
+      {next.finished
+        ? <Link href="/dashboard/sogp/next" className={styles.resume}>Choose what’s next <ChevronRightIcon className="size-4" strokeWidth={2.2} /></Link>
+        : <Link href="/dashboard/podcast" className={styles.resume}>{next.todayListened ? `Open day ${next.dayNumber}` : `Listen to day ${next.dayNumber}`} <PlayIcon className="size-4" fill="currentColor" strokeWidth={0} /></Link>}
+    </section>
+    : next?.kind === "lesson"
+    ? <section className={styles.card} aria-label="Resume learning" style={nextStyle}>
+      <div className={styles.cardTop}><span>Teaching</span><span className={styles.pace}>Listen · notes · quiz</span></div>
+      <div>
+        <h2>{next.title}</h2>
+        <span className={styles.cardMeta}>{next.done === next.total ? "All three steps done" : `${next.done} of ${next.total} steps done`}</span>
+        <div className={styles.meter} aria-hidden="true"><i style={{ width: `${Math.round((next.done / next.total) * 100)}%` }} /></div>
+      </div>
+      <Link href={`/dashboard/sogp/lesson/${next.lessonId}`} className={styles.resume}>{next.done === next.total ? "Open the teaching" : next.done ? "Continue" : "Start the teaching"} <PlayIcon className="size-4" fill="currentColor" strokeWidth={0} /></Link>
+    </section>
+    : hub.state === "start"
     ? <section className={styles.card} style={{ "--hub-art": `url("/assets/dashboard/learning-card/${art.image}")`, "--hub-art-wide": `url("/assets/dashboard/learning-card/${art.wide}")`, "--hub-field": art.field, "--hub-ink": art.ink } as CSSProperties}>
       <div className={styles.cardTop}><span>{hub.cohortTitle ?? "SOGP"}</span></div>
       <div><h2>Choose how you’ll learn</h2><span className={styles.cardMeta}>A lesson a day, or podcasts at your own pace</span></div>
@@ -42,8 +68,10 @@ export function LearningHub({ hub, learning }: { hub: LearningHubData; learning:
     </section>
     : finished ? <section className={styles.card} aria-label="SOGP finished" style={{ "--hub-art": `url("/assets/dashboard/learning-card/${LEVEL_ART[2]!.image}")`, "--hub-art-wide": `url("/assets/dashboard/learning-card/${LEVEL_ART[2]!.wide}")`, "--hub-field": LEVEL_ART[2]!.field, "--hub-ink": LEVEL_ART[2]!.ink } as CSSProperties}>
       <div className={styles.cardTop}><span>{hub.cohortTitle ?? "SOGP"} · Completed</span></div>
-      <div><h2>You’ve finished SOGP</h2><span className={styles.cardMeta}>{hub.doneCount} tracks complete</span></div>
-      <Link href={hub.certificate.available ? "/dashboard/sogp/certificate" : "/dashboard/sogp/readiness"} className={styles.resume}>{hub.certificate.available ? "View your certificate" : "Check your certificate"} <ChevronRightIcon className="size-4" strokeWidth={2.2} /></Link>
+      <div><h2>You’ve finished SOGP</h2><span className={styles.cardMeta}>{hub.doneCount} tracks{hub.certificate.available ? " · certificate ready" : " complete"}</span></div>
+      {hub.next.canChoose
+        ? <Link href="/dashboard/sogp/next" className={styles.resume}>Choose what’s next <ChevronRightIcon className="size-4" strokeWidth={2.2} /></Link>
+        : <Link href={hub.certificate.available ? "/dashboard/sogp/certificate" : "/dashboard/sogp/readiness"} className={styles.resume}>{hub.certificate.available ? "View your certificate" : "Check your certificate"} <ChevronRightIcon className="size-4" strokeWidth={2.2} /></Link>}
     </section>
     : <section className={styles.card} aria-label="Resume learning" style={{ "--hub-art": `url("/assets/dashboard/learning-card/${art.image}")`, "--hub-art-wide": `url("/assets/dashboard/learning-card/${art.wide}")`, "--hub-field": art.field, "--hub-ink": art.ink } as CSSProperties}>
       <div className={styles.cardTop}><span>{hub.card.eyebrow}</span><span className={styles.pace}>{hub.paceLabel}</span></div>
@@ -67,19 +95,20 @@ export function LearningHub({ hub, learning }: { hub: LearningHubData; learning:
         <ChevronRightIcon className="size-4 shrink-0 text-[#a6abb2]" strokeWidth={2} />
       </Link> : null}
 
-      <div><h1>Learning</h1>{hub.cohortTitle ? <p className={groupStyles.sub}>{[hub.cohortTitle, hub.weekLabel].filter(Boolean).join(" · ")}</p> : null}</div>
+      <div><h1>Learning</h1>{next ? <p className={groupStyles.sub}>Your next learning, after SOGP</p> : hub.cohortTitle ? <p className={groupStyles.sub}>{[hub.cohortTitle, hub.weekLabel].filter(Boolean).join(" · ")}</p> : null}</div>
 
       {/* Your current learning, a class of its own: its name heads the card playing from it. */}
       <div className={styles.sectionTitle}>
-        <h2>School of God’s Purpose</h2>
-        <Link href={SOGP_PAGE} className="inline-flex items-center gap-0.5">Open<ChevronRightIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" /></Link>
+        <h2>{next ? next.title : "School of God’s Purpose"}</h2>
+        <Link href={next ? "/dashboard/sogp/next" : SOGP_PAGE} className="inline-flex items-center gap-0.5">{next ? "Change" : "Open"}<ChevronRightIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" /></Link>
       </div>
       {resume}
 
       {hub.state === "preparing" ? <p className={styles.notice}>Your cohort hasn’t started yet. Pre-SOGP is open now, and your first teachings unlock on the start date.</p> : null}
-      {hub.state === "completed" ? <p className={styles.notice}>{finished ? "You’ve finished every track. Keep growing below." : "Your cohort has ended. Your history and any remaining lessons stay open here."}</p> : null}
+      {next ? null : hub.next.canChoose ? <p className={styles.notice}>{finished ? "Choose your next teachings so you always have something to learn and share. It becomes your current learning here." : <>Your cohort has ended. Your history and any remaining lessons stay open. <Link href="/dashboard/sogp/next" className={groupStyles.quiet}>Choose what’s next</Link></>}</p>
+        : hub.state === "completed" ? <p className={styles.notice}>Your cohort has ended. Your history and any remaining lessons stay open here.</p> : null}
 
-      {hub.catchUp && hub.state === "active" ? <div className={styles.catch}>
+      {hub.catchUp && hub.state === "active" && !next ? <div className={styles.catch}>
         <span className={styles.catchIcon} aria-hidden="true"><RefreshCcwIcon className="size-4" strokeWidth={2.2} /></span>
         <span className={styles.rowCopy}>
           <span className={styles.rowTitle} style={{ fontWeight: 500 }}>{hub.catchUp.count} {hub.catchUp.count === 1 ? "lesson" : "lessons"} from earlier</span>

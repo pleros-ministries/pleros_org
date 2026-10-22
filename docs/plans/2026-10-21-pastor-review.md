@@ -45,14 +45,14 @@ He also said groups "without order" (not by who they're under) were confusing; S
 
 ## 4. Learning (`/dashboard/sogp`)
 
-**Done:** Learning is slimmed to your current learning plus Other learning cards (with their own art), and the SOGP page (`/dashboard/sogp/school`) holds the certificate, levels, After SOGP and the Your learning tools. The "Ask a question" prompt after each teaching is done too. Still to do: choosing the next phase.
+**Done:** Learning is slimmed to your current learning plus Other learning cards (with their own art), and the SOGP page (`/dashboard/sogp/school`) holds the certificate, levels, After SOGP and the Your learning tools. The "Ask a question" prompt after each teaching is done too, and so is choosing the next phase (`/dashboard/sogp/next`, 22 October).
 
 - **Only what you're learning now:** the learning card, and perhaps the SOGP-day calendar, with a link back to Home for details.
 - **Remove:** the leaderboard, Every day, Up next, Your learning (change path, history, rules), group reviews.
 - **Keep certificates**, more visible.
 - **"Other learning" as cards**, the size of the group cards: Welcome Pack, Pre-SOGP, SOGP, Advanced SOGP, Podcast, Library.
 - **After every teaching: "Do you have a question? Ask a question"** should pop up.
-- **Later: the next phase.** Someone who has finished SOGP chooses their next set of teachings (for example the remaining PPC teachings on the traditional path) from the SOGP card, so they always have something to learn, share and post.
+- **Done (22 October): the next phase.** Someone who has finished SOGP chooses their next set of teachings (for example the remaining PPC teachings on the traditional path) from the SOGP card, so they always have something to learn, share and post.
 
 ## 5. People and data (not code)
 

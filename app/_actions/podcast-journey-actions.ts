@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { fetchAnchorEpisodes } from "@/lib/anchor-rss";
 import { getDashboardActionSession } from "@/lib/dashboard-action-session";
+import { getOwnJourneyGuids } from "@/lib/db/queries/next-learning";
 import {
   setPodcastLeaderboardVisible,
   setPodcastTrack,
@@ -11,6 +12,7 @@ import {
 import {
   buildPodcastSeriesCatalogue,
   isPodcastTrackAvailable,
+  PODCAST_OWN_TRACK,
 } from "@/lib/podcast-journey";
 import { toLagosDateKey } from "@/lib/sogp/formation-progress";
 
@@ -30,7 +32,9 @@ export async function choosePodcastTrackAction(
   if (!session) return { ok: false, error: SIGNED_OUT };
 
   const catalogue = buildPodcastSeriesCatalogue(await fetchAnchorEpisodes());
-  if (typeof track !== "string" || !isPodcastTrackAvailable(track, catalogue)) {
+  // Your own journey is available once you've made one.
+  const ownReady = track === PODCAST_OWN_TRACK && (await getOwnJourneyGuids(session.user.id)).length > 0;
+  if (typeof track !== "string" || (!ownReady && !isPodcastTrackAvailable(track, catalogue))) {
     return {
       ok: false,
       error: "That journey isn’t available right now. Choose another one.",

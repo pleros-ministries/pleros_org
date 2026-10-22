@@ -37,10 +37,16 @@ export type PodcastDay = {
 export type PodcastTrack =
   | { kind: "foundations" }
   | { kind: "latest" }
-  | { kind: "series"; seriesId: string };
+  | { kind: "series"; seriesId: string }
+  | { kind: "own" };
 
 export const PODCAST_FOUNDATIONS_TRACK = "foundations";
 export const PODCAST_LATEST_TRACK = "latest";
+/** Episodes the listener picked, one a day in their order (`podcast_journey_episodes`, migration 0076). */
+export const PODCAST_OWN_TRACK = "own";
+export const PODCAST_OWN_TITLE = "Your own journey";
+/** The most episodes an own journey holds: four months, one a day. */
+export const PODCAST_OWN_MAX = 120;
 const PODCAST_SERIES_TRACK_PREFIX = "series:";
 
 export const PODCAST_FOUNDATIONS_TITLE = "30-day Foundations";
@@ -298,6 +304,7 @@ export function podcastSeriesTrack(seriesId: string) {
 /** Unknown values read as the recommended plan. */
 export function parsePodcastTrack(value: string | null | undefined): PodcastTrack {
   if (value === PODCAST_LATEST_TRACK) return { kind: "latest" };
+  if (value === PODCAST_OWN_TRACK) return { kind: "own" };
   if (value?.startsWith(PODCAST_SERIES_TRACK_PREFIX)) {
     const seriesId = value.slice(PODCAST_SERIES_TRACK_PREFIX.length);
     if (seriesId) return { kind: "series", seriesId };
@@ -386,10 +393,13 @@ export function resolvePodcastJourney({
   track,
   startedOn,
   catalogue,
+  ownEpisodes = [],
 }: {
   track: string;
   startedOn: string;
   catalogue: readonly PodcastSeriesOption[];
+  /** The listener's own journey, already in their order; episodes no longer in the feed are left out. */
+  ownEpisodes?: readonly RssEpisode[];
 }): ResolvedPodcastJourney {
   const parsed = parsePodcastTrack(track);
   const latest = {
@@ -399,6 +409,18 @@ export function resolvePodcastJourney({
   };
 
   if (parsed.kind === "latest") return { ...latest, fellBack: false };
+
+  if (parsed.kind === "own" && ownEpisodes.length) {
+    return {
+      kind: "plan",
+      track: PODCAST_OWN_TRACK,
+      title: PODCAST_OWN_TITLE,
+      recommended: false,
+      startedOn,
+      episodes: [...ownEpisodes],
+      fellBack: false,
+    };
+  }
 
   if (parsed.kind === "series") {
     const series = catalogue.find((item) => item.id === parsed.seriesId);

@@ -10,6 +10,7 @@ import { getReminderPreferences } from "@/lib/db/queries/notification-preference
 import { getSogpDashboardData } from "@/lib/db/queries/sogp";
 import { getHomeDiscipleshipSummary } from "@/lib/db/queries/sogp-discipleship";
 import { getActiveSogpJourney } from "@/lib/db/queries/sogp-journey";
+import { getNextLearning, getNextLearningCard, type NextLearningCard } from "@/lib/db/queries/next-learning";
 import type { SogpLearningState } from "@/lib/db/queries/sogp-learning";
 import { lagosToday } from "@/lib/sogp/daily-date";
 import { SOGP_LEVELS } from "@/lib/sogp/curriculum";
@@ -40,6 +41,11 @@ export type LearningHubData = {
   levels: Array<{ level: number; title: string; done: number; total: number; state: "done" | "now" | "later"; opens: string | null }>;
   /** The learner asked to hear when Advanced SOGP opens (migration 0065). */
   advancedInterest: boolean;
+  /**
+   * After SOGP (Pastor, 21 October): `canChoose` once SOGP is finished or the
+   * cohort has ended; `card` is the chosen next learning, which then heads Learning.
+   */
+  next: { canChoose: boolean; card: NextLearningCard | null };
   /** The learning path, Welcome Pack → Pre-SOGP → SOGP (Pastor review, 18 October). */
   journey: {
     welcomePackDone: boolean;
@@ -70,16 +76,18 @@ async function preSogpCounts(userId: string, cohortId: number) {
 export async function getLearningHubData(userId: string, state: SogpLearningState | null): Promise<LearningHubData | null> {
   const day = lagosToday();
   // Certification facts are left to the readiness page: they repeat every read below.
-  const [course, journey, group, advancedInterest] = await Promise.all([
+  const [course, journey, group, advancedInterest, nextChoice] = await Promise.all([
     getSogpDashboardData(userId),
     getActiveSogpJourney(userId).catch(() => null),
     getHomeDiscipleshipSummary(userId).catch(() => ({ kind: "none" as const })),
     hasAdvancedSogpInterest(userId).catch(() => false),
+    getNextLearning(userId).catch(() => null),
   ]);
   if (!course) return null;
-  const [welcomePackDone, preSogp] = await Promise.all([
+  const [welcomePackDone, preSogp, nextCard] = await Promise.all([
     getReminderPreferences(userId).then(prefs => prefs.remindersSavedAt !== null).catch(() => false),
     preSogpCounts(userId, course.cohort.id).catch(() => ({ done: 0, total: 0 })),
+    nextChoice ? getNextLearningCard(userId, nextChoice).catch(() => null) : null,
   ]);
 
   const podcast = Boolean(state?.path && state.path !== "traditional" && state.plan);
@@ -133,6 +141,10 @@ export async function getLearningHubData(userId: string, state: SogpLearningStat
     return { level: definition.level, title: definition.title, done, total: tracks.length || definition.tracks.length, state, opens: state === "later" && firstRelease ? opensFormat.format(new Date(firstRelease)) : null };
   });
 
+  // Every published track done, a finished podcast plan, or an ended cohort.
+  const finishedSogp = (!podcast && published.length > 0 && doneCount >= published.length) || (podcast && card.eyebrow === "Plan complete");
+  const canChooseNext = learnerState !== "withdrawn" && (finishedSogp || learnerState === "completed");
+
   return {
     path,
     paceLabel,
@@ -147,6 +159,7 @@ export async function getLearningHubData(userId: string, state: SogpLearningStat
     doneCount,
     levels,
     advancedInterest,
+    next: { canChoose: canChooseNext, card: canChooseNext ? nextCard : null },
     journey: {
       welcomePackDone,
       preSogp,

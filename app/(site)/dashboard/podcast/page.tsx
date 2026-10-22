@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import { PodcastProgressPage } from "@/components/dashboard/podcast-progress-page";
 import { getAppSession } from "@/lib/app-session";
+import { getOwnJourneyGuids } from "@/lib/db/queries/next-learning";
 import { getPodcastJourney } from "@/lib/db/queries/podcast-journey";
 import { getPodcastLeaderboard } from "@/lib/db/queries/podcast-leaderboard";
 
@@ -16,9 +17,10 @@ export default async function DashboardPodcastPage({ searchParams }: { searchPar
     redirect("/login?returnTo=/dashboard/podcast");
   }
 
-  const [journey, leaderboard] = await Promise.all([
+  const [journey, leaderboard, ownEpisodeGuids] = await Promise.all([
     getPodcastJourney(appSession.user.id),
     getPodcastLeaderboard(appSession.user.id),
+    getOwnJourneyGuids(appSession.user.id).catch(() => []),
   ]);
 
   return (
@@ -34,6 +36,7 @@ export default async function DashboardPodcastPage({ searchParams }: { searchPar
       leaderboard={leaderboard}
       track={journey.track}
       startedOn={journey.startedOn}
+      ownEpisodeGuids={ownEpisodeGuids}
     />
   );
 }

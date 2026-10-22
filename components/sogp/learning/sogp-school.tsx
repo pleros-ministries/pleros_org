@@ -103,11 +103,11 @@ export function SogpSchool({ hub, facts, followUp }: { hub: LearningHubData; fac
     {/* The next phase (Pastor): after the first SOGP, choose the next set of teachings. */}
     <div className={styles.sectionTitle}><h2>After SOGP</h2></div>
     <div className={styles.panel}>
-      <Link href="/dashboard/library" className={styles.row}>
+      <Link href={hub.next.canChoose ? "/dashboard/sogp/next" : "/dashboard/library"} className={styles.row}>
         <Chip tone={["#eceef2", "#6b7280"]}><SparklesIcon className="size-[18px]" strokeWidth={2} /></Chip>
         <span className={styles.rowCopy}>
-          <span className={styles.rowTitle}>Choose your next teachings</span>
-          <span className={styles.rowMeta} style={{ whiteSpace: "normal" }}>{hub.state === "completed" ? "Advanced SOGP is coming. Until then, keep growing in the Library" : `Opens when you finish your ${days?.total ?? 28} days, so you always have something to learn and share`}</span>
+          <span className={styles.rowTitle}>{hub.next.card ? "Change your next learning" : "Choose your next teachings"}</span>
+          <span className={styles.rowMeta} style={{ whiteSpace: "normal" }}>{hub.next.card ? `Now: ${hub.next.card.title}` : hub.next.canChoose ? "A podcast journey, a series or a teaching, so you always have something to learn and share" : `Opens when you finish your ${days?.total ?? 28} days, so you always have something to learn and share`}</span>
         </span>
         <ChevronRightIcon className={`${styles.chev} size-4`} strokeWidth={2} />
       </Link>
