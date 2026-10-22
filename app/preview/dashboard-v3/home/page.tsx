@@ -27,7 +27,7 @@ const sogp: DashboardHomeData["sogp"] = {
   cohortTitle: "SOGP October 2026",
   weekLabel: "Week 2 of 4",
   today: {
-    dateKey: "2026-10-21", dateLabel: "Wednesday 21 October", done: 1, total: 3,
+    dateKey: "2026-10-21", dateLabel: "Wednesday 21 October", done: 1, total: 3, ended: null,
     // 28 SOGP days from Monday 12 October; today is day 10, day 4 was missed.
     sogpDays: Array.from({ length: 28 }, (_, index) => {
       const dateKey = new Date(Date.UTC(2026, 9, 12 + index)).toISOString().slice(0, 10);

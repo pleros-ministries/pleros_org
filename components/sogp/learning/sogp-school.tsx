@@ -107,7 +107,7 @@ export function SogpSchool({ hub, facts, followUp }: { hub: LearningHubData; fac
         <Chip tone={["#eceef2", "#6b7280"]}><SparklesIcon className="size-[18px]" strokeWidth={2} /></Chip>
         <span className={styles.rowCopy}>
           <span className={styles.rowTitle}>{hub.next.card ? "Change your next learning" : "Choose your next teachings"}</span>
-          <span className={styles.rowMeta} style={{ whiteSpace: "normal" }}>{hub.next.card ? `Now: ${hub.next.card.title}` : hub.next.canChoose ? "A podcast journey, a series or a teaching, so you always have something to learn and share" : `Opens when you finish your ${days?.total ?? 28} days, so you always have something to learn and share`}</span>
+          <span className={styles.rowMeta} style={{ whiteSpace: "normal" }}>{hub.next.card ? `Now: ${hub.next.card.title}` : hub.next.canChoose ? "A podcast journey, a series or your own episodes, so you always have something to learn and share" : `Opens when you finish your ${days?.total ?? 28} days, so you always have something to learn and share`}</span>
         </span>
         <ChevronRightIcon className={`${styles.chev} size-4`} strokeWidth={2} />
       </Link>

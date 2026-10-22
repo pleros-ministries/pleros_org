@@ -42,6 +42,6 @@ export default async function NextLearningPage() {
   ];
 
   return <div className={styles.page}><div className={styles.column}>
-    <NextLearningChooser options={options} advancedInterest={hub.advancedInterest} />
+    <NextLearningChooser options={options} advancedInterest={hub.advancedInterest} finished={hub.next.finished} />
   </div></div>;
 }

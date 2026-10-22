@@ -45,7 +45,7 @@ export type LearningHubData = {
    * After SOGP (Pastor, 21 October): `canChoose` once SOGP is finished or the
    * cohort has ended; `card` is the chosen next learning, which then heads Learning.
    */
-  next: { canChoose: boolean; card: NextLearningCard | null };
+  next: { canChoose: boolean; finished: boolean; card: NextLearningCard | null };
   /** The learning path, Welcome Pack → Pre-SOGP → SOGP (Pastor review, 18 October). */
   journey: {
     welcomePackDone: boolean;
@@ -159,7 +159,7 @@ export async function getLearningHubData(userId: string, state: SogpLearningStat
     doneCount,
     levels,
     advancedInterest,
-    next: { canChoose: canChooseNext, card: canChooseNext ? nextCard : null },
+    next: { canChoose: canChooseNext, finished: finishedSogp, card: canChooseNext ? nextCard : null },
     journey: {
       welcomePackDone,
       preSogp,

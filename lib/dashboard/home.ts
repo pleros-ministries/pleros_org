@@ -33,6 +33,12 @@ export type HomeToday = {
   sogpDays: HomeSogpDay[];
   /** Today's SOGP day, or null when today isn't one. */
   dayNumber: number | null;
+  /**
+   * The cohort's days are over (user, 22 October: Home lost the calendar once
+   * September's cohort ended). Home keeps the days, and Teaching and
+   * Assessment become the first day still to catch up.
+   */
+  ended: { lastLabel: string; toCatchUp: number } | null;
   /** Today's teaching: the traditional track (ticked when listened) or the podcast day (ticked by the player). */
   teaching: { title: string; href: string; done: boolean; dayNumber: number | null; podcast: boolean; questionGuid: string | null } | null;
   /** Morning Prayer Watch for today; null outside the cohort's dates. */
@@ -94,8 +100,10 @@ export type HomePodcastTeaching = { title: string; href: string; done: boolean }
  */
 export function homeSogpToday(days: JourneyDay[], todayKey: string, podcast?: HomePodcastTeaching): HomeToday | null {
   const byDate = new Map(days.map(day => [day.dateKey, day]));
-  // Before or after the cohort's dates there is no day to keep, so the section stays hidden.
-  if (!byDate.has(todayKey)) return null;
+  const lastKey = days.map(day => day.dateKey).sort().at(-1);
+  // Before the cohort starts there is nothing to keep. After it ends the days stay, to catch up.
+  const after = !byDate.has(todayKey) && lastKey !== undefined && todayKey > lastKey;
+  if (!byDate.has(todayKey) && !after) return null;
   const weekdayFormat = new Intl.DateTimeFormat("en-GB", { weekday: "short", timeZone: "UTC" });
   const plan = buildSogpDays(days.map(day => ({
     dateKey: day.dateKey, kind: day.kind, prayerWatchComplete: day.prayerWatchComplete,
@@ -119,7 +127,9 @@ export function homeSogpToday(days: JourneyDay[], todayKey: string, podcast?: Ho
     href: today?.review ? reviewDay.recordingUrl ?? reviewDay.liveUrl : null,
     complete: reviewDay.complete,
   } : null;
-  const track = podcast === undefined && today?.track?.accessible ? today.track : null;
+  // After the cohort, the first teaching day not yet listened to and assessed.
+  const behind = after && podcast === undefined ? days.filter(day => day.track?.accessible && !(day.track.audioListened && day.track.assessmentComplete)) : [];
+  const track = podcast === undefined ? (after ? behind[0]?.track ?? null : today?.track?.accessible ? today.track : null) : null;
   const teaching = podcast ? { title: podcast.title, href: podcast.href, done: podcast.done, dayNumber: null, podcast: true, questionGuid: null }
     : track ? { title: track.title, href: `/dashboard/sogp/course/day/${track.dayNumber}`, done: track.audioListened, dayNumber: track.dayNumber, podcast: false, questionGuid: `sogp-lesson-${track.lessonId}` }
     : null;
@@ -128,12 +138,16 @@ export function homeSogpToday(days: JourneyDay[], todayKey: string, podcast?: Ho
     ...(teaching ? [teaching.done] : []),
     today.prayerWatchComplete,
     ...(assessment ? [assessment.complete] : []),
+  ] : after ? [
+    ...(teaching ? [teaching.done] : []),
+    ...(assessment ? [assessment.complete] : []),
   ] : [];
   return {
     dateKey: todayKey,
     dateLabel: new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" }).format(new Date(`${todayKey}T00:00:00.000Z`)),
     sogpDays,
     dayNumber: sogpDays.find(day => day.dateKey === todayKey)?.number ?? null,
+    ended: after ? { lastLabel: new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "numeric", month: "long", timeZone: "UTC" }).format(new Date(`${lastKey}T00:00:00.000Z`)), toCatchUp: behind.length } : null,
     teaching,
     prayerWatch: today ? { complete: today.prayerWatchComplete } : null,
     assessment,

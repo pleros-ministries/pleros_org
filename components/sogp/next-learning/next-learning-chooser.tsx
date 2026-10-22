@@ -30,7 +30,7 @@ export type NextOption = {
 
 const thumb = (art: NextOption["art"]): CSSProperties => ({ backgroundImage: `image-set(url("/assets/dashboard/learning-cards/${art}-tile-192.webp") 1x, url("/assets/dashboard/learning-cards/${art}-tile-384.webp") 2x)` });
 
-export function NextLearningChooser({ options, advancedInterest, preview = false }: { options: NextOption[]; advancedInterest: boolean; preview?: boolean }) {
+export function NextLearningChooser({ options, advancedInterest, finished, preview = false }: { options: NextOption[]; advancedInterest: boolean; /** False when the cohort ended before every teaching was done. */ finished: boolean; preview?: boolean }) {
   const router = useRouter();
   const [choice, setChoice] = useState<string | null>(null);
   const [confirm, setConfirm] = useState(false);
@@ -68,7 +68,7 @@ export function NextLearningChooser({ options, advancedInterest, preview = false
   };
 
   return <div className="grid gap-3.5">
-    <div><h1>What’s next?</h1><p className={groupStyles.sub}>You’ve finished SOGP. Choose what you’ll learn next</p></div>
+    <div><h1>What’s next?</h1><p className={groupStyles.sub}>{finished ? "You’ve finished SOGP. Choose what you’ll learn next" : "Your SOGP cohort has ended. Choose what you’ll learn next"}</p></div>
     <div className={groupStyles.panel}><ul className={groupStyles.list} role="radiogroup" aria-label="Your next learning">
       {options.map(option => {
         const on = choice === option.key;

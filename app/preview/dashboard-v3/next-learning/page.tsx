@@ -19,9 +19,9 @@ export const instant = false;
 /** The real screens for choosing what's next after SOGP, on sample data. Nothing saves. */
 const FINISHED: LearningHubData = {
   ...SAMPLE_HUB, state: "completed", weekLabel: null, doneCount: 24, certificate: { available: true },
-  card: { ...SAMPLE_HUB.card, done: 24, total: 24 }, next: { canChoose: true, card: null },
+  card: { ...SAMPLE_HUB.card, done: 24, total: 24 }, next: { canChoose: true, finished: true, card: null },
 };
-const CHOSEN: LearningHubData = { ...FINISHED, next: { canChoose: true, card: { kind: "podcast", title: "30-day Foundations", dayNumber: 3, totalDays: 30, listened: 2, finished: false, episodeTitle: "The Place of the Gospel in Your Life (Part 3)", todayListened: false } } };
+const CHOSEN: LearningHubData = { ...FINISHED, next: { canChoose: true, finished: true, card: { kind: "podcast", title: "30-day Foundations", dayNumber: 3, totalDays: 30, listened: 2, finished: false, episodeTitle: "The Place of the Gospel in Your Life (Part 3)", todayListened: false } } };
 
 const OPTIONS: NextOption[] = [
   { key: "foundations", art: "podcast", title: "The Foundations podcast", detail: "The Place of the Gospel, The Reality and Pursuit of God’s Purpose, and How to Fulfil it", meta: "30 days · one episode a day", pick: { kind: "foundations" } },
@@ -47,7 +47,7 @@ export default async function NextLearningPreview({ searchParams }: { searchPara
       <span className="flex flex-wrap gap-x-3">{(Object.keys(SCREENS) as Screen[]).map(key => <Link key={key} href={`?screen=${key}`} className={key === screen ? "font-medium text-(--color-community-ink)" : "underline"}>{SCREENS[key]}</Link>)}</span>
     </div>
     {screen === "learning" ? <LearningHub hub={FINISHED} learning={learning} />
-      : screen === "choose" ? column(<NextLearningChooser options={OPTIONS} advancedInterest={false} preview />)
+      : screen === "choose" ? column(<NextLearningChooser options={OPTIONS} advancedInterest={false} finished preview />)
       : screen === "series" ? column(<SeriesPicker series={SERIES} preview />)
       : screen === "own" ? column(<OwnJourneyBuilder episodes={EPISODES} initial={["e0", "e4"]} max={120} preview />)
       : <LearningHub hub={CHOSEN} learning={learning} />}

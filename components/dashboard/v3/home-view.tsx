@@ -276,12 +276,14 @@ function TodaySection({ today, shareDayNumber }: { today: HomeToday; shareDayNum
   const weeks = Array.from({ length: Math.ceil(days.length / 7) }, (_, index) => days.slice(index * 7, index * 7 + 7));
   return <section className={styles.homeSection} aria-labelledby="home-today-heading">
     <div className={styles.homeSectionHeader}>
-      <h2 id="home-today-heading">Today</h2>
+      <h2 id="home-today-heading">{today.ended ? "Your SOGP days" : "Today"}</h2>
       {today.total > 0 ? <span className={styles.metadata}>{today.done} of {today.total} done</span> : null}
     </div>
     <div className={styles.homePanel}>
       <div className={styles.homeTodayHead}>
-        <span className={styles.rowTitle}>{today.dayNumber ? `Day ${today.dayNumber} of ${days.length} · ` : ""}{today.dateLabel}</span>
+        <span className={styles.rowTitle}>{today.ended
+          ? `Finished ${today.ended.lastLabel} · ${today.ended.toCatchUp ? `${today.ended.toCatchUp} ${today.ended.toCatchUp === 1 ? "day" : "days"} to catch up` : "all caught up"}`
+          : <>{today.dayNumber ? `Day ${today.dayNumber} of ${days.length} · ` : ""}{today.dateLabel}</>}</span>
       </div>
       {days.length ? <>
         {open ? <div className={strip.weeks}>{weeks.map((week, index) => <DayWeek key={index} label={`Week ${index + 1}`} days={week} />)}</div>
@@ -291,7 +293,7 @@ function TodaySection({ today, shareDayNumber }: { today: HomeToday; shareDayNum
         </button> : null}
         <div className={strip.divider} />
       </> : null}
-      {today.teaching ? <TeachingRow teaching={today.teaching} /> : null}
+      {today.teaching ? <TeachingRow teaching={today.ended && today.teaching.dayNumber ? { ...today.teaching, title: `Track ${today.teaching.dayNumber} · ${today.teaching.title}` } : today.teaching} /> : null}
       {today.prayerWatch ? <PrayerWatchRow today={today} /> : null}
       {today.assessment ? <div className={styles.homeTaskRow}>
         <span className={styles.homeReportIcon} data-tone="lilac"><ClipboardCheckIcon className="size-4" strokeWidth={2} /></span>
