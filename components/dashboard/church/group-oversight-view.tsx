@@ -35,18 +35,18 @@ const withUnder = (path: string, under: string | null | undefined, extra = "") =
 const reported = (person: GroupOversightPerson) => Object.values(person.statuses ?? {}).some(status => status !== "missing");
 const AMBER = "#a15c12";
 
-type ViewGroup = { id: number; name: string; leaderName: string | null; members: GroupOversightPerson[] };
+type ViewGroup = { id: number; name: string; leaderId: string | null; leaderName: string | null; members: GroupOversightPerson[] };
 
 /** The focus person's groups, the groups their members lead, and (Pastor and branch pastors) every other group in view. */
 function groupsOf(data: GroupOversightData) {
   const inTree = data.people.filter(person => person.depth != null);
   const directIds = new Set(inTree.filter(person => person.depth === 1).map(person => person.userId));
-  const own: ViewGroup[] = data.groups.map(group => ({ id: group.id, name: group.name, leaderName: null, members: inTree.filter(person => person.groupId === group.id && person.depth === 1) }));
+  const own: ViewGroup[] = data.groups.map(group => ({ id: group.id, name: group.name, leaderId: data.under?.userId ?? null, leaderName: null, members: inTree.filter(person => person.groupId === group.id && person.depth === 1) }));
   const collect = (people: GroupOversightPerson[]) => {
     const map = new Map<number, ViewGroup>();
     for (const person of people) {
       if (person.groupId == null) continue;
-      const group = map.get(person.groupId) ?? { id: person.groupId, name: person.groupName ?? "Group", leaderName: person.overseerName, members: [] };
+      const group = map.get(person.groupId) ?? { id: person.groupId, name: person.groupName ?? "Group", leaderId: person.overseerId, leaderName: person.overseerName, members: [] };
       group.members.push(person);
       map.set(person.groupId, group);
     }
@@ -160,43 +160,49 @@ function Header({ data, updates }: { data: GroupOversightData; updates: number }
 export const OTHER_GROUPS_PATH = `${OVERSIGHT_PATH}/other-groups`;
 const otherGroupsTitle = (data: GroupOversightData) => data.role === "pastor" ? "Every other group" : "Other groups in your branches";
 
+/** A group opens on Structure as its own view: its leader's tree, scoped to it. */
+const groupHref = (group: ViewGroup) => withUnder(OVERSIGHT_PATH, group.leaderId, `group=${group.id}`);
+
+/** A group row: its name, who leads it and its count. Groups, not people (Pastor, 22 October). */
+function GroupRow({ group, index, href }: { group: ViewGroup; index: number; href: string }) {
+  return <li><Link href={href} prefetch={false} className={styles.row}>
+    <GroupIcon index={index} />
+    <span className={`${styles.rowCopy} gap-0.5`}>
+      <span className={styles.rowTitle} style={{ whiteSpace: "normal" }}>{group.name}</span>
+      <span className={styles.rowMeta} style={{ whiteSpace: "normal" }}>{group.leaderName ? `Led by ${group.leaderName} · ` : ""}{plural(group.members.length, "member")}</span>
+    </span>
+    <Rate members={group.members} />
+    <ChevronRightIcon className={`${styles.chev} size-4`} strokeWidth={2} />
+  </Link></li>;
+}
+
 /**
- * Structure (Pastor, 21 October): one level only. The groups you lead are
- * rows opening their own pages; the members who lead groups are people rows
- * with "Their groups"; every other group is one panel opening its own page.
+ * Structure (Pastor, 21 October; groups, not people, 22 October): "we are not
+ * dealing with people, except in reports". The groups you lead, then the
+ * groups under you, each named with its leader and opening to its members and
+ * the groups under it, one level at a time. Every other group is one panel
+ * opening its own page. People's reports stay on Reports.
  */
-export function OversightStructure({ data, updates }: { data: GroupOversightData; updates: number }) {
-  const { own, other } = groupsOf(data);
+export function OversightStructure({ data, updates, groupId = null }: { data: GroupOversightData; updates: number; groupId?: number | null }) {
+  const { own, under, other } = groupsOf(data);
   const who = data.under ? first(data.under.name) : null;
-  const leaders = data.people.filter(person => person.depth === 1 && person.leadsMembers > 0);
+  const opened = groupId != null ? own.find(group => group.id === groupId) ?? null : null;
+  if (opened) return <OversightGroup data={data} group={opened} under={under} />;
   const otherPeople = other.reduce((n, group) => n + group.members.length, 0);
   return <div className={styles.page}>
     <Header data={data} updates={updates} />
     <Trail data={data} tab={OVERSIGHT_PATH} />
     {own.length ? <>
       <div className={styles.sectionTitle}><h2>{who ? `Groups ${who} leads` : "Groups you lead"}</h2><span className={styles.rowMeta}>{plural(own.length, "group")}</span></div>
-      {/* Someone else's group pages are theirs alone, so their groups open in place. */}
-      {who ? <GroupList groups={own} mode="structure" day={data.day} remind={false} tab={OVERSIGHT_PATH} />
-        : <div className={styles.panel}><ul className={styles.list}>
-          {own.map((group, index) => <li key={group.id}><Link href={`/dashboard/community/discipleship/${group.id}`} prefetch={false} className={styles.row}>
-            <GroupIcon index={index} />
-            <span className={styles.rowCopy}><span className={styles.rowTitle}>{group.name}</span><span className={styles.rowMeta}>{plural(group.members.length, "member")}</span></span>
-            <Rate members={group.members} />
-            <ChevronRightIcon className={`${styles.chev} size-4`} strokeWidth={2} />
-          </Link></li>)}
-        </ul></div>}
-    </> : null}
-    {leaders.length ? <>
-      <div className={styles.sectionTitle}><h2>{who ? `${who}’s members who lead` : "Your members who lead"}</h2><span className={styles.rowMeta}>{plural(leaders.length, "person")}</span></div>
       <div className={styles.panel}><ul className={styles.list}>
-        {leaders.map(person => <li key={person.userId}><div className={styles.row}>
-          <Initials name={person.name} />
-          <Link href={reportHref(person.userId)} className={`${styles.rowCopy} text-inherit no-underline`}>
-            <span className={styles.rowTitle}>{person.name}</span>
-            <span className={styles.rowMeta} style={{ whiteSpace: "normal" }}>Leads {plural(person.leadsMembers, "person")}{person.groupName ? ` · in ${person.groupName}` : ""}</span>
-          </Link>
-          <Link href={withUnder(OVERSIGHT_PATH, person.userId)} className={`${styles.btn} ${styles.mini}`} aria-label={`Open ${person.name}’s groups`}>Their groups<ChevronRightIcon className="-mr-1 size-3.5" strokeWidth={2.2} aria-hidden="true" /></Link>
-        </div></li>)}
+        {/* Your own groups open their pages; someone else's open here, scoped to the group. */}
+        {own.map((group, index) => <GroupRow key={group.id} group={group} index={index} href={who ? groupHref(group) : `/dashboard/community/discipleship/${group.id}`} />)}
+      </ul></div>
+    </> : null}
+    {under.length ? <>
+      <div className={styles.sectionTitle}><h2>{who ? `Groups under ${who}` : "Groups under you"}</h2><span className={styles.rowMeta}>{plural(under.length, "group")}</span></div>
+      <div className={styles.panel}><ul className={styles.list}>
+        {under.map((group, index) => <GroupRow key={group.id} group={group} index={index + own.length} href={groupHref(group)} />)}
       </ul></div>
     </> : null}
     {!who && other.length ? <>
@@ -209,9 +215,41 @@ export function OversightStructure({ data, updates }: { data: GroupOversightData
         </Link>
       </div>
     </> : null}
-    {!own.length && !leaders.length && !other.length ? <p className={`${styles.panel} ${styles.empty}`}>No groups yet.</p> : null}
-    <p className={styles.note}>Open a group for its members. “Their groups” shows the groups that person leads.</p>
+    {!own.length && !under.length && !other.length ? <p className={`${styles.panel} ${styles.empty}`}>No groups yet.</p> : null}
+    <p className={styles.note}>Open a group for its members and the groups under it. People’s own reports are on Reports.</p>
     {!who && data.role === "pastor" ? <Link href={`${OVERSIGHT_PATH}/branches`} className={`${styles.quiet} -mt-1 ml-0.5`}>Branch setup</Link> : null}
+  </div>;
+}
+
+/** One group under you, opened from Structure: its members with the day's report, then the groups under it. */
+function OversightGroup({ data, group, under }: { data: GroupOversightData; group: ViewGroup; under: ViewGroup[] }) {
+  const memberIds = new Set(group.members.map(person => person.userId));
+  const below = under.filter(item => item.leaderId && memberIds.has(item.leaderId));
+  const done = group.members.filter(reported).length;
+  const back = data.under?.backTo;
+  return <div className={styles.page}>
+    <Link href={withUnder(OVERSIGHT_PATH, back?.userId)} className={`${styles.quiet} inline-flex items-center gap-1`}>
+      <ChevronRightIcon className="size-3.5 rotate-180" strokeWidth={2.2} aria-hidden="true" />{back ? `Back to ${first(back.name)}’s groups` : "Back to Structure"}
+    </Link>
+    <div className={styles.heading}><div>
+      <h1>{group.name}</h1>
+      <p className={styles.sub}>{data.under ? `Led by ${data.under.name} · ` : ""}{plural(group.members.length, "member")}{group.members.length ? ` · ${done} of ${group.members.length} reported` : ""}</p>
+    </div></div>
+    <div className={styles.sectionTitle}><h2>Members</h2></div>
+    {group.members.length ? <div className={styles.panel}><ul className={styles.list}>
+      {group.members.map(person => <li key={person.userId}><Link href={reportHref(person.userId)} className={styles.row}>
+        <Initials name={person.name} />
+        <span className={`${styles.rowCopy} gap-1`}><span className={styles.rowTitle}>{person.name}</span><ReportLine person={person} /></span>
+        <ChevronRightIcon className={`${styles.chev} size-4`} strokeWidth={2} />
+      </Link></li>)}
+    </ul></div> : <p className={`${styles.panel} ${styles.empty}`}>No one in this group yet.</p>}
+    {below.length ? <>
+      <div className={styles.sectionTitle}><h2>Groups under it</h2><span className={styles.rowMeta}>{plural(below.length, "group")}</span></div>
+      <div className={styles.panel}><ul className={styles.list}>
+        {below.map((item, index) => <GroupRow key={item.id} group={item} index={index + 1} href={groupHref(item)} />)}
+      </ul></div>
+    </> : null}
+    <p className={styles.note}>A member opens their report. A group under it opens the same way, one level at a time.</p>
   </div>;
 }
 

@@ -8,8 +8,8 @@ The Pastor's priority for now: **get leaders on board and submitting their own r
 
 | Ask | Status |
 |---|---|
-| Structure is about groups, not people: "we are not dealing with people, except in reports". Instead of a person ("Fenedik") with Their groups, show the group with its leader's name ("FCC Oshogbo Leaders · led by Fenedik · 6 members"), and the group opens | To do (mockup) |
-| A person's name opening their report from Structure confused him; on Structure a tap should open the group | To do (with the above) |
+| Structure is about groups, not people: "we are not dealing with people, except in reports". Instead of a person ("Fenedik") with Their groups, show the group with its leader's name ("FCC Oshogbo Leaders · led by Fenedik · 6 members"), and the group opens | Done ("Groups under you", each opening to its members and the groups under it) |
+| A person's name opening their report from Structure confused him; on Structure a tap should open the group | Done |
 | Groups are editable: rename, remove people, delete a group made by mistake | Already there (rename, Remove from group, Close group). Worth a "Delete" wording check |
 | Some groups show fewer people than expected (FCC Choir: one person; Kwara: only Grace). Invites not yet accepted | Helped by pending invites on the group page (`dd984cea`). Rollout, not code |
 
