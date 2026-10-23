@@ -31,7 +31,7 @@ He walked leaders through My reports and is happy with it ("they have done a fan
 | **Share what you learnt** comes out of Today into its own standout card, about half the size of the My learning card: "Share what you learnt today", a clear call to act | Done |
 | The SOGP days: "Day 11", but he can't tap days 1, 2, 3 to see what he should have learnt that day and check it's right. Make past days tappable | Done (every day opens a sheet of what it held) |
 | He still doesn't "feel the vibe" of the days strip (interpreted; unclear in the recording) | Ask for specifics with the mockup |
-| Speed: a 1–2 second lag on some screens. Wants it gone | To do (measure first) |
+| Speed: a 1–2 second lag on some screens. Wants it gone | Cause found: functions ran in Frankfurt against a database in Virginia. Now run beside it (`iad1`), and Oversight makes fewer sequential reads. Confirm after deploy |
 
 ## 4. Learning: continuous phases
 

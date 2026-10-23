@@ -1,5 +1,6 @@
 {
   "installCommand": "npm ci",
+  "regions": ["iad1"],
   "crons": [
     {
       "path": "/api/cron/sogp-reminders",

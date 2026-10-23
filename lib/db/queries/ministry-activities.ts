@@ -1111,15 +1111,14 @@ export async function getDisciplesMinistryDay(
 /** Canonical devotional facts for a pre-authorized roster, queried in bounded batches. */
 export async function getDayActivitiesForUsers(userIds: string[], dateKey: string): Promise<Map<string, DayActivity>> {
   const ids = [...new Set(userIds)];
-  const result = new Map<string, DayActivity>();
-  for (let offset = 0; offset < ids.length; offset += NARROW_LIMIT) {
-    const chunk = ids.slice(offset, offset + NARROW_LIMIT);
-    const enrollments = await db.selectDistinctOn([schema.sogpEnrollments.userId], {
-      userId: schema.sogpEnrollments.userId, enrollmentId: schema.sogpEnrollments.id, cohortId: schema.sogpEnrollments.cohortId,
-    }).from(schema.sogpEnrollments).where(inArray(schema.sogpEnrollments.userId, chunk)).orderBy(schema.sogpEnrollments.userId, desc(schema.sogpEnrollments.createdAt));
-    const byUser = new Map(enrollments.map((row) => [row.userId, row]));
-    const members = chunk.map((userId) => ({ userId, enrollmentId: byUser.get(userId)?.enrollmentId ?? null, cohortId: byUser.get(userId)?.cohortId ?? null }));
-    for (const [userId, activity] of await loadDayActivity(members, dateKey)) result.set(userId, activity);
-  }
-  return result;
+  if (!ids.length) return new Map();
+  // One pass for everyone (Pastor, 22 October: speed). Batches of 50 ran one after
+  // another, two or three round trips each; loadDayActivity reads the whole day
+  // once instead when there are more than NARROW_LIMIT people.
+  const enrollments = await db.selectDistinctOn([schema.sogpEnrollments.userId], {
+    userId: schema.sogpEnrollments.userId, enrollmentId: schema.sogpEnrollments.id, cohortId: schema.sogpEnrollments.cohortId,
+  }).from(schema.sogpEnrollments).where(inArray(schema.sogpEnrollments.userId, ids)).orderBy(schema.sogpEnrollments.userId, desc(schema.sogpEnrollments.createdAt));
+  const byUser = new Map(enrollments.map((row) => [row.userId, row]));
+  const members = ids.map((userId) => ({ userId, enrollmentId: byUser.get(userId)?.enrollmentId ?? null, cohortId: byUser.get(userId)?.cohortId ?? null }));
+  return loadDayActivity(members, dateKey);
 }

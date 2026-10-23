@@ -195,6 +195,7 @@ All the rules are in `AGENTS.md` under "Groups as oversight", and the plan in `d
 - **Oversight:** people are capped at 2000. Report statuses for the Pastor's whole view take about 2 seconds from a laptop and are fast in production. Watch this as groups grow.
 - **Updates scale:** they're aggregated per group further down, so the Pastor's list stays short.
 - **Episode search** filters on the client: no requests while typing.
+- **Functions run beside the database** (`"regions": ["iad1"]` in `vercel.json`, 23 October). They had been running in Frankfurt (`fra1`) against a Neon database in us-east-1, so every query crossed the Atlantic (about 90–100 ms each) and a page's 10 or more sequential reads added the 1–2 second lag the Pastor felt. Check with an API route's `x-vercel-id` header (`iad1::iad1::…` once deployed). Keep sequential reads few: Oversight's devotion lookup now reads everyone in one pass, and its first reads start together.
 - **Neon HTTP** can't do transactions. Use `transactionDb` (the Pool client) for atomic writes; queries in one transaction run in sequence.
 
 ## 7. Illustrations: how they're made (Codex)

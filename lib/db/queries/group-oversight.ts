@@ -103,19 +103,26 @@ async function loadBranches(ids: string[]) {
  * to one person in the viewer's oversight and the people below them.
  */
 export async function getGroupOversight(viewerId: string, options: { under?: string | null; day?: string | null } = {}): Promise<GroupOversightData | null> {
-  const church = await getChurchAssignment(viewerId);
+  const under = options.under && options.under !== viewerId ? options.under : null;
+  const focus = under ?? viewerId;
+  // The first reads start together (speed, 22 October): the viewer's role, the
+  // permission check, the focus tree and, on their own view, everyone's groups
+  // (used only by the Pastor and branch pastors; one read either way).
+  const [church, allowed, descendants, everyonePeople] = await Promise.all([
+    getChurchAssignment(viewerId),
+    under ? canOversee(viewerId, under) : true,
+    listDescendants(focus),
+    under ? null : listGroupPeople(),
+  ]);
   const role = church?.role === "pastor" ? "pastor" : church?.role === "branch_pastor" ? "branch_pastor" : "leader";
   const viewerBranches = role === "branch_pastor" ? churchBranchIds(church) : [];
-  const under = options.under && options.under !== viewerId ? options.under : null;
-  if (under && !(await canOversee(viewerId, under))) return null;
-  const focus = under ?? viewerId;
+  if (!allowed) return null;
 
   // Who is in view: the focus person's tree, widened for the Pastor and branch pastors.
-  const descendants = await listDescendants(focus);
   let edges: TreeEdge[] = descendants;
   let extraIds: string[] = [];
-  if (!under && role !== "leader") {
-    const everyone = await listGroupPeople();
+  if (!under && role !== "leader" && everyonePeople) {
+    const everyone = everyonePeople;
     const own = new Set(descendants.map(edge => edge.userId));
     const wider = everyone.edges.filter(edge => !own.has(edge.userId)).map(edge => ({ ...edge, depth: -1 }));
     edges = [...descendants, ...wider];
@@ -143,7 +150,7 @@ export async function getGroupOversight(viewerId: string, options: { under?: str
   const overseerIds = [...new Set(ids.map(id => edgeOf.get(id)?.overseerId).filter((id): id is string => Boolean(id)))];
   const groupIds = [...new Set(ids.map(id => edgeOf.get(id)?.groupId).filter((id): id is number => id != null))];
 
-  const [names, groupRows, leadRows, riskRows, days, focusGroups, waitingRows, branchRows, learnerRows, ctx, dayStatuses, underEdge] = await Promise.all([
+  const [names, groupRows, leadRows, riskRows, days, focusGroups, waitingRows, branchRows, learnerRows, ctx, dayStatuses, underEdge, memberOfRows] = await Promise.all([
     loadNames([...new Set([...ids, ...overseerIds, focus])]),
     groupIds.length ? db.select({ id: s.discipleshipGroups.id, name: s.discipleshipGroups.name }).from(s.discipleshipGroups).where(inArray(s.discipleshipGroups.id, groupIds)) : [],
     ids.length ? db.select({ leaderId: s.discipleshipGroups.leaderUserId, n: sql<number>`count(*)::int` })
@@ -172,16 +179,23 @@ export async function getGroupOversight(viewerId: string, options: { under?: str
       .from(s.discipleshipMemberships).innerJoin(s.discipleshipGroups, eq(s.discipleshipGroups.id, s.discipleshipMemberships.groupId))
       .where(and(eq(s.discipleshipMemberships.memberUserId, under), eq(s.discipleshipMemberships.status, "active"), inArray(s.discipleshipGroups.status, ["active", "archived"])))
       .limit(1).then(rows => rows[0]?.overseerId ?? null) : null,
+    // The group the viewer is in and its leader, read alongside the rest.
+    under ? [] : db
+      .select({
+        groupId: s.discipleshipGroups.id, groupName: s.discipleshipGroups.name, leaderUserId: s.discipleshipGroups.leaderUserId, leaderName: s.users.name,
+        // The leader's latest enrolment name, so fullestName picks as loadNames does.
+        leaderEnrolledName: sql<string | null>`(select e.name from ${s.sogpEnrollments} e where e.user_id = ${s.discipleshipGroups.leaderUserId} order by e.created_at desc limit 1)`,
+      })
+      .from(s.discipleshipMemberships)
+      .innerJoin(s.discipleshipGroups, eq(s.discipleshipGroups.id, s.discipleshipMemberships.groupId))
+      .leftJoin(s.users, eq(s.users.id, s.discipleshipGroups.leaderUserId))
+      .where(and(eq(s.discipleshipMemberships.memberUserId, viewerId), eq(s.discipleshipMemberships.status, "active"), inArray(s.discipleshipGroups.status, ["active", "archived"])))
+      .limit(1),
   ]);
   const backId = underEdge && underEdge !== viewerId && await canOversee(viewerId, underEdge) ? underEdge : null;
   const backName = backId ? names.get(backId)?.name ?? (await loadNames([backId])).get(backId)?.name ?? "Member" : null;
-  const [memberOf] = under ? [] : await db
-    .select({ groupId: s.discipleshipGroups.id, groupName: s.discipleshipGroups.name, leaderUserId: s.discipleshipGroups.leaderUserId })
-    .from(s.discipleshipMemberships)
-    .innerJoin(s.discipleshipGroups, eq(s.discipleshipGroups.id, s.discipleshipMemberships.groupId))
-    .where(and(eq(s.discipleshipMemberships.memberUserId, viewerId), eq(s.discipleshipMemberships.status, "active"), inArray(s.discipleshipGroups.status, ["active", "archived"])))
-    .limit(1);
-  const overseerName = memberOf?.leaderUserId ? (await loadNames([memberOf.leaderUserId])).get(memberOf.leaderUserId)?.name ?? "Member" : null;
+  const [memberOf] = memberOfRows;
+  const overseerName = memberOf?.leaderUserId ? fullestName(memberOf.leaderName ?? "", memberOf.leaderEnrolledName ?? undefined) || "Member" : null;
 
   const canMessage = (userId: string) => {
     if (!ctx || userId === viewerId) return null;
