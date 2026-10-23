@@ -6,7 +6,8 @@ import { homeDesktopNavGroups } from "@/lib/site-homepage-content";
 
 /**
  * The dashboard's own footer (Pastor, 20 October): the Pleros wordmark back to
- * the website, the About links, and "Download Pleros" always to hand. The full
+ * the website, the About links and Partnership, and "Download Pleros"
+ * always to hand (it hides inside the installed app). The full
  * site footer stays on the public pages.
  */
 export function DashboardFooter() {
@@ -24,6 +25,8 @@ export function DashboardFooter() {
         <p className="site-footer-heading">{about.label}</p>
         <nav className="flex flex-wrap gap-x-5 gap-y-1">
           {about.links.map(link => <Link key={link.href} href={link.href} className="site-footer-link">{link.label}</Link>)}
+          {/* Partnership belongs down here too (Pastor, 22 October). */}
+          {about.links.some(link => link.href === "/partner") ? null : <Link href="/partner" className="site-footer-link">Partnership</Link>}
         </nav>
       </div> : null}
       <p className="site-footer-copy border-t border-white/28 pt-4">© 2026 Pleros Ministries &amp; Missions. All rights reserved</p>

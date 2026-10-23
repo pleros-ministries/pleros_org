@@ -18,7 +18,9 @@
 .liveFrame { min-width: 0; }
 .routeMain { min-width: 0; touch-action: pan-y pinch-zoom; }
 .routeViewport { overflow: clip; }
-.routePage { min-height: calc(100dvh - var(--dashboard-topbar-offset)); }
+/* The large viewport, not the dynamic one: on phones dvh changes as the address bar shows and
+   hides, which moved the bottom bar on short pages such as Profile (Pastor, 22 October). */
+.routePage { min-height: calc(100vh - var(--dashboard-topbar-offset)); min-height: calc(100lvh - var(--dashboard-topbar-offset)); }
 /* You pages are a column so the bottom bar rests at the bottom of short pages (18 October). */
 .routePage[data-area="you"] { display: flex; flex-direction: column; }
 .routePage[data-area="you"] > nav[aria-label="You"] { margin-top: auto; }

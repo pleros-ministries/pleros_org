@@ -50,8 +50,8 @@ Not urgent ("so we don't complicate it"), but the direction: SOGP is a continuou
 
 | Ask | Status |
 |---|---|
-| Footer: add Partnership, and Download Pleros (it hides in the installed app, which is right) | To do |
-| Profile: on scroll the bottom bar rises up on phones, unlike any other page | To do (bug) |
+| Footer: add Partnership, and Download Pleros (it hides in the installed app, which is right) | Done (Download was already there) |
+| Profile: on scroll the bottom bar rises up on phones, unlike any other page | Likely fixed (short pages now use the large viewport height); confirm on a phone |
 
 ## Suggested order
 
