@@ -198,6 +198,7 @@ Most of these classes come from `components/community/discipleship/discipleship-
   - The app's paper grain (`grain-384.webp`, cut from the approved art) lies over the whole card, so field and object read as one surface.
   - Tag and title sit top-left, one short line bottom-left, as on the group cards. Prompts: `docs/handover/codex-prompts/5`, `6` and `7`.
 - **The SOGP page** (`/dashboard/sogp/school`, user, 22 October) uses the learning-card family too: the SOGP card heads it in its coral field with the gem at 132px; the certificate is three counts (22px Sen, amber only where something is missing); the four levels are 2×2 tiles (4 across from 640px) in their own level art on its dark field; After SOGP is a lilac card. It sits in Learning's frame (16px gutter).
+- **Share what you learnt today** (You Home, Pastor, 22 October) is its own card under the learning card, about half its height, in the share chip's warm sand (#f6ecd9 on #5a3d0c): never a second blue hero.
 - **Text over art is always live text**, never baked in.
 - **No second blue hero:** only the My learning card is blue. Other illustrated tiles take their own complementary palette.
 

@@ -76,8 +76,8 @@ const sogp: NonNullable<DashboardHomeData["sogp"]> = {
   today: {
     dateKey: "2026-10-16", dateLabel: "Friday 16 October", done: 1, total: 2, ended: null,
     sogpDays: [
-      { number: 4, dateKey: "2026-10-15", weekday: "Thu", dayOfMonth: 15, state: "missed", review: false },
-      { number: 5, dateKey: "2026-10-16", weekday: "Fri", dayOfMonth: 16, state: "today", review: false },
+      { number: 4, dateKey: "2026-10-15", weekday: "Thu", dayOfMonth: 15, state: "missed", review: false, detail: { teaching: null, prayed: false, reviewTitle: null } },
+      { number: 5, dateKey: "2026-10-16", weekday: "Fri", dayOfMonth: 16, state: "today", review: false, detail: { teaching: null, prayed: false, reviewTitle: null } },
     ],
     dayNumber: 5,
     teaching: { title: "Walk of Faith · day 5", href: "/dashboard/sogp/listen?day=5", done: false, dayNumber: null, podcast: true, questionGuid: null },

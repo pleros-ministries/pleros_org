@@ -25,7 +25,15 @@ export type HomeLearningCard =
   | { kind: "podcast"; pace: 1 | 2; href: string; series: string; episodes: { part: string; duration: string; durationSeconds: number; positionSeconds: number; listened: boolean }[]; dayNumber: number };
 
 /** One SOGP day on Home's Today (Pastor, 21 October): numbered through the cohort, teaching and review days alike. */
-export type HomeSogpDay = { number: number; dateKey: string; weekday: string; dayOfMonth: number; state: "done" | "missed" | "today" | "later"; review: boolean };
+export type HomeSogpDay = {
+  number: number; dateKey: string; weekday: string; dayOfMonth: number; state: "done" | "missed" | "today" | "later"; review: boolean;
+  /** What the day held, for its sheet when tapped (Pastor, 22 October: "is it telling me the truth about day 11?"). */
+  detail: {
+    teaching: { title: string; href: string | null; listened: boolean; assessed: boolean } | null;
+    prayed: boolean;
+    reviewTitle: string | null;
+  };
+};
 export type HomeToday = {
   dateKey: string;
   dateLabel: string;
@@ -117,6 +125,15 @@ export function homeSogpToday(days: JourneyDay[], todayKey: string, podcast?: Ho
     dayOfMonth: Number(day.dateKey.slice(8)),
     state: day.isToday ? "today" : day.complete ? "done" : day.past ? "missed" : "later",
     review: day.kind === "review",
+    detail: (() => {
+      const source = byDate.get(day.dateKey);
+      const track = podcast === undefined ? source?.track ?? null : null;
+      return {
+        teaching: track ? { title: track.title, href: track.accessible ? `/dashboard/sogp/course/day/${track.dayNumber}` : null, listened: track.audioListened, assessed: track.assessmentComplete } : null,
+        prayed: source?.prayerWatchComplete ?? false,
+        reviewTitle: source?.review?.title ?? null,
+      };
+    })(),
   }));
   const today = byDate.get(todayKey);
   const nextReview = days.find(day => day.dateKey >= todayKey && day.review && !day.review.complete)?.review ?? null;

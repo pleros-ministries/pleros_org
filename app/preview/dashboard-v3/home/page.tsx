@@ -32,7 +32,8 @@ const sogp: DashboardHomeData["sogp"] = {
     sogpDays: Array.from({ length: 28 }, (_, index) => {
       const dateKey = new Date(Date.UTC(2026, 9, 12 + index)).toISOString().slice(0, 10);
       const number = index + 1;
-      return { number, dateKey, weekday: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][index % 7]!, dayOfMonth: Number(dateKey.slice(8)), state: number === 10 ? "today" as const : number === 4 ? "missed" as const : number < 10 ? "done" as const : "later" as const, review: number % 7 === 0 };
+      return { number, dateKey, weekday: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][index % 7]!, dayOfMonth: Number(dateKey.slice(8)), state: number === 10 ? "today" as const : number === 4 ? "missed" as const : number < 10 ? "done" as const : "later" as const, review: number % 7 === 0,
+        detail: { teaching: number % 7 === 0 ? null : { title: `Sample teaching ${number}`, href: number <= 10 ? "#" : null, listened: number < 10 && number !== 4, assessed: number < 9 && number !== 4 }, prayed: number < 10, reviewTitle: number % 7 === 0 ? `Week ${number / 7} group review` : null } };
     }),
     dayNumber: 10,
     teaching: { title: "Biblical Origin and Ontology", href: "#", done: false, dayNumber: 10, podcast: false, questionGuid: "sogp-lesson-preview" },

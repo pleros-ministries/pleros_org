@@ -372,3 +372,12 @@
 .homeInviteCopy { flex: none; display: inline-flex; align-items: center; gap: 5px; height: 34px; padding: 0 11px; border: 1px solid var(--dashboard-panel-edge, #e2e5ea); border-radius: 8px; background: white; color: var(--color-community-blue, #2056d6); font: inherit; font-size: 12.5px; font-weight: 500; cursor: pointer; }
 .homeInviteShare { display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 40px; border: 0; border-radius: 10px; background: var(--color-community-blue, #2056d6); color: white; font: inherit; font-size: 13.5px; font-weight: 500; cursor: pointer; }
 .homeInviteShare:hover, .homeInviteCopy:hover { filter: brightness(1.04); }
+
+/* Share what you learnt today (Pastor, 22 October): its own card under the learning card, about half
+   its height, in the warm sand of the share chip. Never a second blue hero. */
+.homeShareCard { position: relative; display: grid; align-content: space-between; gap: 12px; min-height: 104px; margin-top: 14px; padding: 16px; overflow: hidden; border-radius: var(--dashboard-card-radius, 16px); background: #f6ecd9; color: #5a3d0c; }
+.homeShareCard h2 { margin: 0; font-family: var(--font-dashboard-heading); font-size: 17px; line-height: 24px; font-weight: 500; letter-spacing: var(--dashboard-tracking-heading, -0.02em); }
+.homeShareLine { font-size: 12.5px; line-height: 18px; opacity: .85; }
+.homeShareButton { display: inline-flex; justify-self: start; align-items: center; gap: 8px; height: 36px; padding: 0 14px; border: 0; border-radius: 10px; background: white; color: #5a3d0c; font: inherit; font-size: 13px; font-weight: 500; cursor: pointer; box-shadow: 0 1px 2px rgb(0 0 0 / 8%); }
+.homeShareButton:focus-visible { outline: 2px solid var(--color-brand-blue); outline-offset: 2px; }
+.homeShareMark { position: absolute; right: -12px; bottom: -12px; display: grid; place-items: center; width: 96px; height: 96px; border-radius: 50%; background: rgb(255 255 255 / 45%); opacity: .8; }
