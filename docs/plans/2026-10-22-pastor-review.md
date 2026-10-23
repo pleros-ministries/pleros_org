@@ -22,7 +22,7 @@ He walked leaders through My reports and is happy with it ("they have done a fan
 | Ask | Status |
 |---|---|
 | Prayer Watch: the sessions say "live or as a replay", so "Missed a session? Add when you prayed" is wrong. It should invite **other times of prayer**: "Add other times of prayer" | Done |
-| No reasons: drop "I was unwell". Now "Took a concession for health reasons" and "Took a concession for travel" (wording interpreted; the recording is unclear here) | Done |
+| No reasons: drop "I was unwell". Now "Health reasons" and "Travel reasons" (user, 23 October) | Done |
 
 ## 3. You Home
 

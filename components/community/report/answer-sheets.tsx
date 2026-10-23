@@ -43,10 +43,17 @@ export function NoRow({ title, reason, onOpen }: { title: string; reason: string
 
 const NO_TITLES: Record<NoPart, string> = { evangelism: "Why no evangelism today?", discipleship: "Why no discipleship today?", meetings: "Why no meeting today?" };
 const NO_EXAMPLES: Record<NoPart, string[]> = {
-  // A concession, not a confession (Pastor, 22 October).
-  evangelism: ["It was Sunday; the focus was the service", "Took a concession for health reasons", "Took a concession for travel"],
-  discipleship: ["It was Sunday; the focus was the service", "Took a concession for health reasons", "Took a concession for travel"],
+  // Plain reasons, not confessions (Pastor, 22 October; user, 23 October).
+  evangelism: ["Health reasons", "Travel reasons"],
+  discipleship: ["Health reasons", "Travel reasons"],
   meetings: ["There was no meeting today", "I couldn’t attend"],
+};
+
+/** Says what to write, in the person's own words (user, 23 October). */
+const NO_PLACEHOLDERS: Record<NoPart, string> = {
+  evangelism: "In a few words, what kept you from evangelism today?",
+  discipleship: "In a few words, what kept you from discipling someone today?",
+  meetings: "In a few words, why no meeting today?",
 };
 
 /** A No needs a reason. `onYes` takes the No back and opens the Yes pop-up instead. */
@@ -62,7 +69,7 @@ export function ReasonSheet({ part, initial, onSave, onYes, onClose }: {
     {() => <>
       <div className={sheet.chips}>{NO_EXAMPLES[part].map(example => <button key={example} type="button" className={sheet.chip} aria-pressed={reason === example} onClick={() => setReason(example)}>{example}</button>)}</div>
       <label className={sheet.field}><span className={sheet.label}>Reason</span>
-        <textarea className={sheet.textarea} maxLength={NO_REASON_MAX} value={reason} onChange={event => setReason(event.target.value)} placeholder="For example, it was Sunday and the focus was the service" />
+        <textarea className={sheet.textarea} maxLength={NO_REASON_MAX} value={reason} onChange={event => setReason(event.target.value)} placeholder={NO_PLACEHOLDERS[part]} />
       </label>
       {onYes ? <button type="button" className={sheet.quiet} style={{ justifySelf: "start" }} onClick={onYes}>Change to Yes</button> : null}
     </>}
