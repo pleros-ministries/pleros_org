@@ -41,7 +41,7 @@ export default async function ReportYesNoPreview({ searchParams }: { searchParam
     <div className="mx-auto w-full max-w-[640px] px-4 pt-[18px] pb-7 [&_h1]:text-[21px] [&_h1]:leading-[28px] [&_h1]:font-medium">
       <DailyReportSections key={`${answered}-${used}`} preview inline enabled={false} today={today} days={reportableDateKeys(today)} selected={today}
         activities={activities} declarations={[]} meetingDetails={[]} pleros={[]}
-        noReasons={answered ? { discipleship: "I was travelling" } : {}}
+        noReasons={answered ? { discipleship: "Took a concession for travel" } : {}}
         meetingReports={answered ? [{ activityId: 2, role: "led", startsAt: "18:00", endsAt: "19:30", workers: 3, members: 20, peopleBrought: 0 }] : []}
         venues={used ? SAMPLE_VENUES : []} />
     </div>

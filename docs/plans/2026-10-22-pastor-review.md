@@ -21,8 +21,8 @@ He walked leaders through My reports and is happy with it ("they have done a fan
 
 | Ask | Status |
 |---|---|
-| Prayer Watch: the sessions say "live or as a replay", so "Missed a session? Add when you prayed" is wrong. It should invite **other times of prayer**: "Add other times of prayer" | To do (copy) |
-| No reasons: drop "I was unwell". Something like "Took a concession: health reasons" and "Took a concession: travel reasons" (interpreted; the recording is unclear here) | To do (copy, confirm wording) |
+| Prayer Watch: the sessions say "live or as a replay", so "Missed a session? Add when you prayed" is wrong. It should invite **other times of prayer**: "Add other times of prayer" | Done |
+| No reasons: drop "I was unwell". Now "Took a concession for health reasons" and "Took a concession for travel" (wording interpreted; the recording is unclear here) | Done |
 
 ## 3. You Home
 
@@ -41,7 +41,7 @@ Not urgent ("so we don't complicate it"), but the direction: SOGP is a continuou
 
 | Ask | Status |
 |---|---|
-| **Needs you** fills the page with five people. It should be notification-style: small icons with counts (messages, check-ins, invitations, people who need attention) that you tap | To do (mockup) |
+| **Needs you** fills the page with five people. It becomes the **third count card** on Community Home, replacing the one there now (user, 22 October): a count you tap, notification-style, not a list | To do (mockup) |
 | Breadcrumbs: from Community Home, a group shows Community › Groups › Group, and Back lands on Groups, where he never was. With Needs you gone, Community Home is the groups, so drop the Groups step | To do |
 | Groups you lead cards get a ··· menu on Community Home: rename, delete | To do |
 | Location groups show their members to everyone: a privacy worry. Make the location group opt-in ("join your location group", leave any time); only people who joined see each other. Possibly a feed for your location instead | To do (mockup) |

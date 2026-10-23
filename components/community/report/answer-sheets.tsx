@@ -43,8 +43,9 @@ export function NoRow({ title, reason, onOpen }: { title: string; reason: string
 
 const NO_TITLES: Record<NoPart, string> = { evangelism: "Why no evangelism today?", discipleship: "Why no discipleship today?", meetings: "Why no meeting today?" };
 const NO_EXAMPLES: Record<NoPart, string[]> = {
-  evangelism: ["It was Sunday; the focus was the service", "I was unwell", "I was travelling"],
-  discipleship: ["It was Sunday; the focus was the service", "I was unwell", "I was travelling"],
+  // A concession, not a confession (Pastor, 22 October).
+  evangelism: ["It was Sunday; the focus was the service", "Took a concession for health reasons", "Took a concession for travel"],
+  discipleship: ["It was Sunday; the focus was the service", "Took a concession for health reasons", "Took a concession for travel"],
   meetings: ["There was no meeting today", "I couldn’t attend"],
 };
 

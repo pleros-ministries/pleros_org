@@ -85,8 +85,9 @@ export function PrayerWatchInline({ date, attended, times: initialTimes = [], di
       </button>)}
     </div>
     <div className={styles.otherTimes}>
-      <span className={styles.otherTitle}>Prayed at another time?</span>
-      <span className={styles.meta}>Missed a session? Add when you prayed.</span>
+      {/* Replays count above, so this is for other times of prayer, not missed sessions (Pastor, 22 October). */}
+      <span className={styles.otherTitle}>Add other times of prayer</span>
+      <span className={styles.meta}>Any time you prayed besides the sessions above.</span>
       {times.length || untimed ? <div className={styles.timeChips}>
         {times.map(time => <button key={time} type="button" className={styles.timeChip} disabled={disabled} onClick={() => changeTime(time, true)} aria-label={`Remove ${prayerTimeLabel(time)}`}>{prayerTimeLabel(time)}<span aria-hidden="true">×</span></button>)}
         {untimed ? <button type="button" className={styles.timeChip} disabled={disabled} onClick={() => toggle(another)} aria-label="Remove another time">Another time<span aria-hidden="true">×</span></button> : null}
