@@ -96,9 +96,10 @@ const DASHBOARD_FOCUS: Array<[RegExp, (match: RegExpMatchArray) => DashboardFocu
   [/^\/dashboard\/community\/report\/.+$/, () => ({ title: "My reports", back: REPORTS })],
   // Community deep screens. Groups left the bottom bar (18 October), so it steps back to Community.
   [/^\/dashboard\/community\/groups$/, () => ({ title: "Groups", back: COMMUNITY })],
-  [/^\/dashboard\/community\/groups\/new$/, () => ({ title: "New group", back: GROUPS })],
+  // Community Home is the groups (Pastor, 22 October), so groups step back to it, with no Groups step.
+  [/^\/dashboard\/community\/groups\/new$/, () => ({ title: "New group", back: COMMUNITY })],
   [/^\/dashboard\/community\/discipleship\/(\d+)\/disciples\/\d+$/, m => ({ title: "Disciple", back: { href: `/dashboard/community/discipleship/${m[1]}`, label: "Back to group" } })],
-  [/^\/dashboard\/community\/(unit\/\d+|groups\/\d+|discipleship\/\d+|discipleship)$/, () => ({ title: "Group", back: GROUPS })],
+  [/^\/dashboard\/community\/(unit\/\d+|groups\/\d+|discipleship\/\d+|discipleship)$/, () => ({ title: "Group", back: COMMUNITY })],
   [/^\/dashboard\/community\/post\/\d+$/, () => ({ title: "Post", back: { href: "/dashboard/community/feed", label: "Back to Feed" } })],
   [/^\/dashboard\/community\/messages\/\d+$/, () => ({ title: "Conversation", back: { href: "/dashboard/community/messages", label: "Back to Inbox" } })],
   [/^\/dashboard\/community\/ask\/\d+$/, () => ({ title: "Your question", back: { href: "/dashboard/community/ask", label: "Back to Ask Pleros" } })],

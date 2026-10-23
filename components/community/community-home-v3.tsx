@@ -2,37 +2,12 @@ import Link from "next/link";
 import { DashboardIcon } from "@/components/dashboard/v3/primitives";
 import type { CommunityHomeData } from "@/lib/db/queries/community-home";
 import styles from "./community-home-v3.module.css";
-import discipleStyles from "./discipleship/discipleship-group.module.css";
-import { Initials } from "./discipleship/shared";
+import { GroupCard } from "./community-home-cards";
+import { CommunityCounts, LedGroupCards } from "./community-home-parts";
 import { PeopleToBringInPanel, type PeopleToBringIn } from "./people/people-to-bring-in";
 
 type IconName = Parameters<typeof DashboardIcon>[0]["name"];
-export type GroupArt = "location" | "discipleship" | "leading" | "public" | "private";
-
-/* Background art lives in public/assets/dashboard/community-groups/: a 3:2 cut
-   for wider tiles and a compact square cut for phones, each at 1x and 2x. */
-const groupTag: Record<GroupArt, string> = { location: "Location", discipleship: "Discipleship", leading: "You lead", public: "Public", private: "Private" };
-
-function CountCard({ href, count, label, description, icon, tone, capped }: { href: string | null; count: number; label: string; description: string; icon: IconName; tone: "blue" | "amber" | "green"; capped?: boolean }) {
-  // One column of the divided strip: a quiet icon + label, the number beneath.
-  const body = <>
-    <span className={styles.countHead}><DashboardIcon name={icon} size={16} strokeWidth={1.9} /><span>{label}</span></span>
-    <b>{count}{capped ? "+" : ""}</b>
-  </>;
-  return href && count > 0
-    ? <Link href={href} prefetch={false} className={styles.count} data-tone={tone} data-active aria-label={`${count}${capped ? " or more" : ""} ${description}`}>{body}</Link>
-    : <div className={styles.count} data-tone={tone} aria-label={`${count} ${description}`}>{body}</div>;
-}
-
-/** Groups you lead share one illustration in two colourways, alternated oldest-first so neighbours differ. No light green (user preference). */
-export const leadColourways = ["lilac", "slate"] as const;
-
-export function GroupCard({ href, art, title, meta, prefetch, colourway, tag }: { href: string; art: GroupArt; title: string; meta: string; prefetch?: false; colourway?: string; tag?: string }) {
-  return <Link href={href} prefetch={prefetch} className={styles.groupCard} data-art={art} data-colourway={colourway} title={title}>
-    <span className={styles.groupTop}><span className={styles.groupTag}>{tag ?? groupTag[art]}</span><h3>{title}</h3></span>
-    <span className={styles.groupMeta}>{meta}</span>
-  </Link>;
-}
+export { GroupCard, leadColourways, type GroupArt } from "./community-home-cards";
 
 function OversightRow({ href, title, description, icon, tone, prefetch }: { href: string; title: string; description: string; icon: IconName; tone: string; prefetch?: false }) {
   return <Link href={href} prefetch={prefetch} className={styles.oversightRow}>
@@ -60,14 +35,8 @@ function OversightGroups({ data }: { data: CommunityHomeData }) {
     </section> : null}
     <section className={styles.block} aria-labelledby="community-led-groups">
       <div className={styles.blockHeading}><h2 id="community-led-groups">Groups you lead</h2>{data.joinedGroup || data.locationGroup ? null : <Link href="/dashboard/community/groups">See all</Link>}</div>
-      <div className={styles.groupGrid}>
-        {data.ledGroups.map((group, index) => <GroupCard key={`led-${group.groupId}`} href={`/dashboard/community/discipleship/${group.groupId}`} prefetch={false} art="leading" colourway={leadColourways[index % leadColourways.length]} title={group.groupName} meta={group.discipleCount ? `${group.discipleCount} ${group.discipleCount === 1 ? "person" : "people"}` : "Invite someone"} />)}
-        {data.managedLocations.map(unit => <GroupCard key={`unit-${unit.id}`} href={`/dashboard/community/unit/${unit.id}`} art="location" tag="You look after" title={unit.name} meta="Location group" />)}
-        <Link href={newGroupHref} prefetch={false} className={styles.newGroup}>
-          <span className={styles.newGroupIcon}><DashboardIcon name="plus" size={16} /></span>
-          New group
-        </Link>
-      </div>
+      <LedGroupCards groups={data.ledGroups} newGroupHref={newGroupHref}
+        extra={data.managedLocations.map(unit => <GroupCard key={`unit-${unit.id}`} href={`/dashboard/community/unit/${unit.id}`} art="location" tag="You look after" title={unit.name} meta="Location group" />)} />
     </section>
     {data.memberGroups.length ? <section className={styles.block} aria-labelledby="community-other-groups">
       <div className={styles.blockHeading}><h2 id="community-other-groups">Interest groups</h2><Link href="/dashboard/community/groups">See all</Link></div>
@@ -80,35 +49,20 @@ function OversightGroups({ data }: { data: CommunityHomeData }) {
 
 export function CommunityHomeV3({ data, people = null }: { data: CommunityHomeData; people?: PeopleToBringIn | null }) {
   const firstInvitation = data.invitations[0];
-  const firstResponse = data.responses[0];
   return <div className={styles.home} data-community-home-v3>
     <header className={styles.heading}>
       <h1>Your Pleros Community</h1>
     </header>
 
-    <div className={styles.counts} aria-label="Waiting for you">
-      <CountCard href="/dashboard/community/messages" count={data.unreadConversations} label="Messages" description={data.unreadConversations === 1 ? "unread message" : "unread messages"} icon="chat" tone="blue" />
-      <CountCard href={firstResponse ? (data.responses.length > 1 ? "/dashboard/community/discipleship" : firstResponse.href) : null} count={data.responses.length} capped={data.responses.length >= 3} label="Check-ins" description={data.responses.length === 1 ? "check-in to answer" : "check-ins to answer"} icon="clipboardcheck" tone="amber" />
-      <CountCard href={firstInvitation ? `/dashboard/sogp/invitations/${firstInvitation.id}` : null} count={data.invitations.length} label="Invitations" description={data.invitations.length === 1 ? "group invitation" : "group invitations"} icon="mail" tone="green" />
-    </div>
+    {/* Needs you is the third count, dropping down to the people (Pastor, 22 October). */}
+    <CommunityCounts data={data} updatesHref={data.church ? "/dashboard/community/oversight/updates" : null} />
 
-    {data.needsYou.length ? <section className={styles.block} aria-labelledby="community-needs-you">
-      <div className={styles.blockHeading}><h2 id="community-needs-you">Needs you</h2></div>
-      <div className={discipleStyles.panel}>
-        <ul className={discipleStyles.list}>
-          {data.needsYou.slice(0, 5).map(item => <li key={item.key}>
-            <Link href={item.href} prefetch={false} className={discipleStyles.row}>
-              <Initials name={item.name} status={item.tone === "off" ? "unresponsive" : item.tone === "risk" ? "at_risk" : undefined} />
-              <span className={discipleStyles.rowCopy}>
-                <span className={discipleStyles.rowTitle} style={{ fontWeight: 500 }}>{item.firstName}</span>
-                <span className={discipleStyles.rowMeta}>{item.detail}{data.showGroupNames && item.groupName ? ` · ${item.groupName}` : ""}</span>
-              </span>
-              <span className={`${discipleStyles.btn} ${discipleStyles.mini}`} data-primary={item.tone === "off" ? "" : undefined}>{item.action}</span>
-            </Link>
-          </li>)}
-        </ul>
-      </div>
-    </section> : null}
+    {/* With Invitations off the counts, a waiting invitation shows here only when there is one. */}
+    {firstInvitation ? <Link href={`/dashboard/sogp/invitations/${firstInvitation.id}`} prefetch={false} className={`${styles.oversightRow} mt-3`}>
+      <span className={styles.oversightIcon} data-tone="blue"><DashboardIcon name="mail" size={16} strokeWidth={2} /></span>
+      <span className={styles.copy}><span className={styles.oversightTitle}>{data.invitations.length === 1 ? "You’re invited to a group" : `${data.invitations.length} group invitations`}</span><span className={styles.meta}>Open to accept or decline</span></span>
+      <DashboardIcon name="right" size={16} />
+    </Link> : null}
 
     <OversightGroups data={data} />
 

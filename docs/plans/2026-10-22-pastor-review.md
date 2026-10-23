@@ -41,9 +41,9 @@ Not urgent ("so we don't complicate it"), but the direction: SOGP is a continuou
 
 | Ask | Status |
 |---|---|
-| **Needs you** fills the page with five people. It becomes the **third count card** on Community Home, replacing the one there now (user, 22 October): a count you tap, notification-style, not a list | To do (mockup) |
-| Breadcrumbs: from Community Home, a group shows Community › Groups › Group, and Back lands on Groups, where he never was. With Needs you gone, Community Home is the groups, so drop the Groups step | To do |
-| Groups you lead cards get a ··· menu on Community Home: rename, delete | To do |
+| **Needs you** fills the page with five people. It becomes the **third count card** on Community Home, replacing the one there now (user, 22 October): a count you tap, notification-style, not a list | Done (it drops down to the people) |
+| Breadcrumbs: from Community Home, a group shows Community › Groups › Group, and Back lands on Groups, where he never was. With Needs you gone, Community Home is the groups, so drop the Groups step | Done |
+| Groups you lead cards get a ··· menu on Community Home: rename, delete | Done (rename, invite, delete) |
 | Location groups show their members to everyone: a privacy worry. Make the location group opt-in ("join your location group", leave any time); only people who joined see each other. Possibly a feed for your location instead | To do (mockup) |
 
 ## 6. Shell and footer

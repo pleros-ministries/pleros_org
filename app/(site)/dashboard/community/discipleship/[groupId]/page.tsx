@@ -70,7 +70,7 @@ export default async function DiscipleshipGroupRoute({ params, searchParams }: {
       pendingInvites={pendingInvites}
       colourway={led.findIndex(group => group.groupId === groupId) % 2 === 1 ? "slate" : undefined}
       initialTab={TABS.includes(tab as LeaderTab) ? tab as LeaderTab : "disciples"}
-      initialPanel={panel === "invite" ? panel : null}
+      initialPanel={panel === "invite" || panel === "rename" ? panel : null}
       discussion={discussion}
     />
   </SogpQueryProvider>;

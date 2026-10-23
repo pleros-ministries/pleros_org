@@ -18,7 +18,7 @@ describe("connected dashboard navigation", () => {
     }
     // My disciples is retired: Groups lists every discipleship group.
     expect(sections.find(section => section.key === "community")?.items.some(item => item.key === "disciples")).toBe(false);
-    expect(dashboardParentForPath("/dashboard/community/discipleship/42")).toEqual({ href: "/dashboard/community/groups", label: "Back to Groups" });
+    expect(dashboardParentForPath("/dashboard/community/discipleship/42")).toEqual({ href: "/dashboard/community", label: "Back to Community" });
     expect(dashboardParentForPath("/dashboard/community/discipleship/42/disciples/7")).toEqual({ href: "/dashboard/community/discipleship/42", label: "Back to group" });
     expect(sections.find(section => section.key === "oversight")?.items.some(item => item.key === "disciples") ?? false).toBe(false);
   });

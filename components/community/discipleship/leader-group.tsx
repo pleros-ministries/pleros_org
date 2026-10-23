@@ -57,8 +57,8 @@ export function LeaderGroupView({ data, episodeQuestions, pendingInvites = [], c
   pendingInvites?: PendingGroupInvitation[];
   colourway?: "slate";
   initialTab: LeaderTab;
-  /** Opens the invite panel on arrival. */
-  initialPanel?: "invite" | null;
+  /** Opens the invite panel or the rename form on arrival (Community Home's card menu). */
+  initialPanel?: "invite" | "rename" | null;
   /** Groups as oversight: leaders also add people by name. */
   addByName?: boolean;
   discussion: { viewerName: string; postingBlocked: boolean; initialPosts?: FeedPost[]; initialNextOffset?: number | null };
