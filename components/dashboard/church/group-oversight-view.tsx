@@ -163,25 +163,12 @@ const otherGroupsTitle = (data: GroupOversightData) => data.role === "pastor" ? 
 /** A group opens on Structure as its own view: its leader's tree, scoped to it. */
 const groupHref = (group: ViewGroup) => withUnder(OVERSIGHT_PATH, group.leaderId, `group=${group.id}`);
 
-/** A group row: its name, who leads it and its count. Groups, not people (Pastor, 22 October). */
-function GroupRow({ group, index, href }: { group: ViewGroup; index: number; href: string }) {
-  return <li><Link href={href} prefetch={false} className={styles.row}>
-    <GroupIcon index={index} />
-    <span className={`${styles.rowCopy} gap-0.5`}>
-      <span className={styles.rowTitle} style={{ whiteSpace: "normal" }}>{group.name}</span>
-      <span className={styles.rowMeta} style={{ whiteSpace: "normal" }}>{group.leaderName ? `Led by ${group.leaderName} · ` : ""}{plural(group.members.length, "member")}</span>
-    </span>
-    <Rate members={group.members} />
-    <ChevronRightIcon className={`${styles.chev} size-4`} strokeWidth={2} />
-  </Link></li>;
-}
-
 /**
  * A group your members lead opens in place, a drop-down of its members and
  * their day (Pastor, 22 October), never straight to a page. Only "Groups its
  * members lead" goes a level deeper.
  */
-function MemberLedGroup({ group, index }: { group: ViewGroup; index: number }) {
+function MemberLedGroup({ group, index, pageHref }: { group: ViewGroup; index: number; /** Your own group: its page, where you run it. */ pageHref?: string }) {
   const [open, setOpen] = useState(false);
   // Whether any member leads a group of their own; the group's own view lists them.
   const below = group.members.some(person => person.leadsMembers > 0);
@@ -203,9 +190,10 @@ function MemberLedGroup({ group, index }: { group: ViewGroup; index: number }) {
           <ChevronRightIcon className={`${styles.chev} size-4`} strokeWidth={2} />
         </Link></li>)}
       </ul> : <p className={styles.empty}>No one in this group yet.</p>}
-      {below ? <Link href={groupHref(group)} prefetch={false} className={`${styles.quiet} inline-flex items-center gap-0.5 px-4 pb-3`} style={{ paddingLeft: 30 }}>
-        Groups its members lead<ChevronRightIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" />
-      </Link> : null}
+      {below || pageHref ? <span className="flex flex-wrap gap-x-4 gap-y-1 px-4 pb-3" style={{ paddingLeft: 30 }}>
+        {pageHref ? <Link href={pageHref} prefetch={false} className={`${styles.quiet} inline-flex items-center gap-0.5`}>Open the group page<ChevronRightIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" /></Link> : null}
+        {below ? <Link href={groupHref(group)} prefetch={false} className={`${styles.quiet} inline-flex items-center gap-0.5`}>Groups its members lead<ChevronRightIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" /></Link> : null}
+      </span> : null}
     </div> : null}
   </li>;
 }
@@ -229,8 +217,8 @@ export function OversightStructure({ data, updates, groupId = null }: { data: Gr
     {own.length ? <>
       <div className={styles.sectionTitle}><h2>{who ? `Groups ${who} leads` : "Groups you lead"}</h2><span className={styles.rowMeta}>{plural(own.length, "group")}</span></div>
       <div className={styles.panel}><ul className={styles.list}>
-        {/* Your own groups open their pages; someone else's open here, scoped to the group. */}
-        {own.map((group, index) => <GroupRow key={group.id} group={group} index={index} href={who ? groupHref(group) : `/dashboard/community/discipleship/${group.id}`} />)}
+        {/* Every group drops down to its members (user, 23 October); your own also link to their page. */}
+        {own.map((group, index) => <MemberLedGroup key={group.id} group={group} index={index} pageHref={who ? undefined : `/dashboard/community/discipleship/${group.id}`} />)}
       </ul></div>
     </> : null}
     {under.length ? <>
