@@ -200,7 +200,7 @@ export function OversightStructure({ data, updates, groupId = null }: { data: Gr
       </ul></div>
     </> : null}
     {under.length ? <>
-      <div className={styles.sectionTitle}><h2>{who ? `Groups under ${who}` : "Groups under you"}</h2><span className={styles.rowMeta}>{plural(under.length, "group")}</span></div>
+      <div className={styles.sectionTitle}><h2>{who ? `Groups ${who}’s members lead` : "Groups your members lead"}</h2><span className={styles.rowMeta}>{plural(under.length, "group")}</span></div>
       <div className={styles.panel}><ul className={styles.list}>
         {under.map((group, index) => <GroupRow key={group.id} group={group} index={index + own.length} href={groupHref(group)} />)}
       </ul></div>
@@ -216,7 +216,7 @@ export function OversightStructure({ data, updates, groupId = null }: { data: Gr
       </div>
     </> : null}
     {!own.length && !under.length && !other.length ? <p className={`${styles.panel} ${styles.empty}`}>No groups yet.</p> : null}
-    <p className={styles.note}>Open a group for its members and the groups under it. People’s own reports are on Reports.</p>
+    <p className={styles.note}>Open a group for its members and the groups they lead. People’s own reports are on Reports.</p>
     {!who && data.role === "pastor" ? <Link href={`${OVERSIGHT_PATH}/branches`} className={`${styles.quiet} -mt-1 ml-0.5`}>Branch setup</Link> : null}
   </div>;
 }
@@ -244,12 +244,12 @@ function OversightGroup({ data, group, under }: { data: GroupOversightData; grou
       </Link></li>)}
     </ul></div> : <p className={`${styles.panel} ${styles.empty}`}>No one in this group yet.</p>}
     {below.length ? <>
-      <div className={styles.sectionTitle}><h2>Groups under it</h2><span className={styles.rowMeta}>{plural(below.length, "group")}</span></div>
+      <div className={styles.sectionTitle}><h2>Groups its members lead</h2><span className={styles.rowMeta}>{plural(below.length, "group")}</span></div>
       <div className={styles.panel}><ul className={styles.list}>
         {below.map((item, index) => <GroupRow key={item.id} group={item} index={index + 1} href={groupHref(item)} />)}
       </ul></div>
     </> : null}
-    <p className={styles.note}>A member opens their report. A group under it opens the same way, one level at a time.</p>
+    <p className={styles.note}>A member opens their report. A group they lead opens the same way, one level at a time.</p>
   </div>;
 }
 
