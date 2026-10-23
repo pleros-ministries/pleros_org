@@ -177,6 +177,40 @@ function GroupRow({ group, index, href }: { group: ViewGroup; index: number; hre
 }
 
 /**
+ * A group your members lead opens in place, a drop-down of its members and
+ * their day (Pastor, 22 October), never straight to a page. Only "Groups its
+ * members lead" goes a level deeper.
+ */
+function MemberLedGroup({ group, index }: { group: ViewGroup; index: number }) {
+  const [open, setOpen] = useState(false);
+  // Whether any member leads a group of their own; the group's own view lists them.
+  const below = group.members.some(person => person.leadsMembers > 0);
+  return <li>
+    <button type="button" className={`${styles.row} w-full text-left`} aria-expanded={open} onClick={() => setOpen(value => !value)}>
+      <GroupIcon index={index} />
+      <span className={`${styles.rowCopy} gap-0.5`}>
+        <span className={styles.rowTitle} style={{ whiteSpace: "normal" }}>{group.name}</span>
+        <span className={styles.rowMeta} style={{ whiteSpace: "normal" }}>{group.leaderName ? `Led by ${group.leaderName} · ` : ""}{plural(group.members.length, "member")}</span>
+      </span>
+      <Rate members={group.members} />
+      <ChevronDownIcon className={`${styles.chev} size-4 transition-transform ${open ? "rotate-180" : ""}`} strokeWidth={2} />
+    </button>
+    {open ? <div style={{ borderTop: "1px solid var(--color-line, #e7e9ec)" }}>
+      {group.members.length ? <ul className={styles.list}>
+        {group.members.map(person => <li key={person.userId}><Link href={reportHref(person.userId)} className={styles.row} style={{ paddingLeft: 30 }}>
+          <Initials name={person.name} />
+          <span className={`${styles.rowCopy} gap-1`}><span className={styles.rowTitle}>{person.name}</span><ReportLine person={person} /></span>
+          <ChevronRightIcon className={`${styles.chev} size-4`} strokeWidth={2} />
+        </Link></li>)}
+      </ul> : <p className={styles.empty}>No one in this group yet.</p>}
+      {below ? <Link href={groupHref(group)} prefetch={false} className={`${styles.quiet} inline-flex items-center gap-0.5 px-4 pb-3`} style={{ paddingLeft: 30 }}>
+        Groups its members lead<ChevronRightIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" />
+      </Link> : null}
+    </div> : null}
+  </li>;
+}
+
+/**
  * Structure (Pastor, 21 October; groups, not people, 22 October): "we are not
  * dealing with people, except in reports". The groups you lead, then the
  * groups under you, each named with its leader and opening to its members and
@@ -202,7 +236,7 @@ export function OversightStructure({ data, updates, groupId = null }: { data: Gr
     {under.length ? <>
       <div className={styles.sectionTitle}><h2>{who ? `Groups ${who}’s members lead` : "Groups your members lead"}</h2><span className={styles.rowMeta}>{plural(under.length, "group")}</span></div>
       <div className={styles.panel}><ul className={styles.list}>
-        {under.map((group, index) => <GroupRow key={group.id} group={group} index={index + own.length} href={groupHref(group)} />)}
+        {under.map((group, index) => <MemberLedGroup key={group.id} group={group} index={index + own.length} />)}
       </ul></div>
     </> : null}
     {!who && other.length ? <>
@@ -216,7 +250,7 @@ export function OversightStructure({ data, updates, groupId = null }: { data: Gr
       </div>
     </> : null}
     {!own.length && !under.length && !other.length ? <p className={`${styles.panel} ${styles.empty}`}>No groups yet.</p> : null}
-    <p className={styles.note}>Open a group for its members and the groups they lead. People’s own reports are on Reports.</p>
+    <p className={styles.note}>Tap a group to see its members. People’s own reports are on Reports.</p>
     {!who && data.role === "pastor" ? <Link href={`${OVERSIGHT_PATH}/branches`} className={`${styles.quiet} -mt-1 ml-0.5`}>Branch setup</Link> : null}
   </div>;
 }
@@ -246,10 +280,10 @@ function OversightGroup({ data, group, under }: { data: GroupOversightData; grou
     {below.length ? <>
       <div className={styles.sectionTitle}><h2>Groups its members lead</h2><span className={styles.rowMeta}>{plural(below.length, "group")}</span></div>
       <div className={styles.panel}><ul className={styles.list}>
-        {below.map((item, index) => <GroupRow key={item.id} group={item} index={index + 1} href={groupHref(item)} />)}
+        {below.map((item, index) => <MemberLedGroup key={item.id} group={item} index={index + 1} />)}
       </ul></div>
     </> : null}
-    <p className={styles.note}>A member opens their report. A group they lead opens the same way, one level at a time.</p>
+    <p className={styles.note}>A member opens their report. A group they lead opens in place, the same way.</p>
   </div>;
 }
 
