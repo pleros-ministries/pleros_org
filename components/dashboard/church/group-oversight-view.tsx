@@ -199,6 +199,46 @@ function MemberLedGroup({ group, index, pageHref }: { group: ViewGroup; index: n
 }
 
 /**
+ * The people you lead who lead groups (user, 24 October): their names first;
+ * a name drops down to the groups they lead, and a group opens to its members.
+ */
+function LeadersOfGroups({ groups, offset = 0 }: { groups: ViewGroup[]; offset?: number }) {
+  const leaders = [...groups.reduce((map, group) => {
+    const key = group.leaderId ?? `group-${group.id}`;
+    map.set(key, [...(map.get(key) ?? []), group]);
+    return map;
+  }, new Map<string, ViewGroup[]>()).values()];
+  return <div className={styles.panel}><ul className={styles.list}>
+    {leaders.map((led, index) => <LeaderRow key={led[0]!.leaderId ?? led[0]!.id} groups={led} offset={offset + index} />)}
+  </ul></div>;
+}
+
+function LeaderRow({ groups, offset }: { groups: ViewGroup[]; offset: number }) {
+  const [open, setOpen] = useState(false);
+  const name = groups[0]!.leaderName ?? "Member";
+  const members = groups.flatMap(group => group.members);
+  return <li>
+    <button type="button" className={`${styles.row} w-full text-left`} aria-expanded={open} onClick={() => setOpen(value => !value)}>
+      <Initials name={name} />
+      <span className={`${styles.rowCopy} gap-0.5`}>
+        <span className={styles.rowTitle} style={{ whiteSpace: "normal" }}>{name}</span>
+        <span className={styles.rowMeta} style={{ whiteSpace: "normal" }}>Leads {plural(groups.length, "group")} · {plural(members.length, "member")}</span>
+      </span>
+      <Rate members={members} />
+      <ChevronDownIcon className={`${styles.chev} size-4 transition-transform ${open ? "rotate-180" : ""}`} strokeWidth={2} />
+    </button>
+    {open ? <ul className={styles.list} style={{ borderTop: "1px solid var(--color-line, #e7e9ec)" }}>
+      {groups.map((group, index) => <li key={group.id}><Link href={groupHref(group)} prefetch={false} className={styles.row} style={{ paddingLeft: 30 }}>
+        <GroupIcon index={offset + index} />
+        <span className={`${styles.rowCopy} gap-0.5`}><span className={styles.rowTitle} style={{ whiteSpace: "normal" }}>{group.name}</span><span className={styles.rowMeta}>{plural(group.members.length, "member")}</span></span>
+        <Rate members={group.members} />
+        <ChevronRightIcon className={`${styles.chev} size-4`} strokeWidth={2} />
+      </Link></li>)}
+    </ul> : null}
+  </li>;
+}
+
+/**
  * Structure (Pastor, 21 October; groups, not people, 22 October): "we are not
  * dealing with people, except in reports". The groups you lead, then the
  * groups under you, each named with its leader and opening to its members and
@@ -222,13 +262,11 @@ export function OversightStructure({ data, updates, groupId = null }: { data: Gr
       </ul></div>
     </> : null}
     {under.length ? <>
-      <div className={styles.sectionTitle}><h2>{who ? `Groups ${who}’s members lead` : "Groups your members lead"}</h2><span className={styles.rowMeta}>{plural(under.length, "group")}</span></div>
-      <div className={styles.panel}><ul className={styles.list}>
-        {under.map((group, index) => <MemberLedGroup key={group.id} group={group} index={index + own.length} />)}
-      </ul></div>
+      <div className={styles.sectionTitle}><h2>{who ? `Groups ${who}’s members lead` : "Groups your members lead"}</h2><span className={styles.rowMeta}>{plural(new Set(under.map(group => group.leaderId)).size, "leader")} · {plural(under.length, "group")}</span></div>
+      <LeadersOfGroups groups={under} offset={own.length} />
     </> : null}
     {!who && other.length ? <>
-      <div className={styles.sectionTitle}><h2>{data.role === "pastor" ? "Across the church" : "Across your branches"}</h2></div>
+      <div className={styles.sectionTitle}><h2>{data.role === "pastor" ? "Across Pleros" : "Across your branches"}</h2></div>
       <div className={styles.panel}>
         <Link href={OTHER_GROUPS_PATH} className={styles.row}>
           <span className="grid size-10 shrink-0 place-items-center rounded-[10px] bg-[#e4ebfd] text-[#2331ae]" aria-hidden="true"><LayersIcon className="size-[18px]" strokeWidth={2} /></span>
@@ -238,7 +276,7 @@ export function OversightStructure({ data, updates, groupId = null }: { data: Gr
       </div>
     </> : null}
     {!own.length && !under.length && !other.length ? <p className={`${styles.panel} ${styles.empty}`}>No groups yet.</p> : null}
-    <p className={styles.note}>Tap a group to see its members. People’s own reports are on Reports.</p>
+    <p className={styles.note}>Tap a group to see its members, and a leader to see their groups. People’s own reports are on Reports.</p>
     {!who && data.role === "pastor" ? <Link href={`${OVERSIGHT_PATH}/branches`} className={`${styles.quiet} -mt-1 ml-0.5`}>Branch setup</Link> : null}
   </div>;
 }
@@ -267,9 +305,7 @@ function OversightGroup({ data, group, under }: { data: GroupOversightData; grou
     </ul></div> : <p className={`${styles.panel} ${styles.empty}`}>No one in this group yet.</p>}
     {below.length ? <>
       <div className={styles.sectionTitle}><h2>Groups its members lead</h2><span className={styles.rowMeta}>{plural(below.length, "group")}</span></div>
-      <div className={styles.panel}><ul className={styles.list}>
-        {below.map((item, index) => <MemberLedGroup key={item.id} group={item} index={index + 1} />)}
-      </ul></div>
+      <LeadersOfGroups groups={below} offset={1} />
     </> : null}
     <p className={styles.note}>A member opens their report. A group they lead opens in place, the same way.</p>
   </div>;
@@ -339,7 +375,7 @@ export function OversightReports({ data, updates, days, today, remind }: { data:
       </div></li>)}
     </ul></div> : <p className={`${styles.panel} ${styles.empty}`}>No one in {who ? `${who}’s` : "your"} groups yet. Invite people from {who ? "their" : "your"} group’s page.</p>}
     {!who && other.length ? <>
-      <div className={styles.sectionTitle}><h2>{data.role === "pastor" ? "Across the church" : "Across your branches"}</h2></div>
+      <div className={styles.sectionTitle}><h2>{data.role === "pastor" ? "Across Pleros" : "Across your branches"}</h2></div>
       <div className={styles.panel}>
         <Link href={`${OTHER_REPORTS_PATH}${dayQuery ? `?${dayQuery}` : ""}`} className={styles.row}>
           <span className="grid size-10 shrink-0 place-items-center rounded-[10px] bg-[#e4ebfd] text-[#2331ae]" aria-hidden="true"><LayersIcon className="size-[18px]" strokeWidth={2} /></span>
