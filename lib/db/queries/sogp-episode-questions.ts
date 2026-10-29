@@ -1,5 +1,5 @@
 import "server-only";
-import { and, desc, eq, gte, ne, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gte, ne, sql } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 import * as s from "@/lib/db/schema";
@@ -25,32 +25,43 @@ async function ownActiveEnrolment(userId: string) {
 }
 
 /** The asker's active discipleship placement, if any: group plus its lead. */
-async function activePlacement(enrollmentId: number) {
-  const [row] = await db.select({ groupId: s.discipleshipGroups.id, disciplerEnrollmentId: s.discipleshipGroups.leaderEnrollmentId, leaderFirstName: s.sogpEnrollments.firstName, leaderName: s.sogpEnrollments.name })
+/** Every group the learner is in with a leader, oldest first (multi-group membership, 29 October). */
+async function activePlacements(enrollmentId: number) {
+  return db.select({ groupId: s.discipleshipGroups.id, disciplerEnrollmentId: s.discipleshipGroups.leaderEnrollmentId, leaderFirstName: s.sogpEnrollments.firstName, leaderName: s.sogpEnrollments.name })
     .from(s.discipleshipMemberships)
     .innerJoin(s.discipleshipGroups, and(eq(s.discipleshipGroups.id, s.discipleshipMemberships.groupId), eq(s.discipleshipGroups.status, "active")))
     .innerJoin(s.sogpEnrollments, and(eq(s.sogpEnrollments.id, s.discipleshipGroups.leaderEnrollmentId), ne(s.sogpEnrollments.status, "withdrawn")))
     .where(and(eq(s.discipleshipMemberships.discipleEnrollmentId, enrollmentId), eq(s.discipleshipMemberships.status, "active")))
-    .limit(1);
-  return row ?? null;
+    .orderBy(asc(s.discipleshipMemberships.joinedAt));
 }
 
-/** Where a question about a teaching goes: the leader of your group (named, first name only), else Ask Pleros. */
-export async function getEpisodeQuestionRoute(userId: string): Promise<{ kind: "discipler"; leaderFirstName: string } | { kind: "ask-pleros" }> {
+export type EpisodeQuestionRoute =
+  | { kind: "discipler"; leaderFirstName: string; leaders: Array<{ groupId: number; firstName: string }> }
+  | { kind: "ask-pleros" };
+
+/**
+ * Where a question about a teaching goes: a leader of a group you're in (first
+ * names only), else Ask Pleros. With several groups the person chooses; the
+ * first is the group they joined first.
+ */
+export async function getEpisodeQuestionRoute(userId: string): Promise<EpisodeQuestionRoute> {
   const enrollment = await getSogpEnrollmentByUserId(userId);
   if (!enrollment || enrollment.status === "withdrawn") return { kind: "ask-pleros" };
-  const placement = await activePlacement(enrollment.id);
-  return placement ? { kind: "discipler", leaderFirstName: firstNameOf(placement.leaderFirstName || placement.leaderName || "your leader") } : { kind: "ask-pleros" };
+  const placements = await activePlacements(enrollment.id);
+  const leaders = placements.map(row => ({ groupId: row.groupId, firstName: firstNameOf(row.leaderFirstName || row.leaderName || "your leader") }));
+  return leaders.length ? { kind: "discipler", leaderFirstName: leaders[0]!.firstName, leaders } : { kind: "ask-pleros" };
 }
 
 export async function askEpisodeQuestion(userId: string, raw: unknown) {
   if (!raw || typeof raw !== "object") throw new CommunityError("Write your question first.");
-  const input = raw as { episodeGuid?: unknown; episodeTitle?: unknown; body?: unknown };
+  const input = raw as { episodeGuid?: unknown; episodeTitle?: unknown; body?: unknown; groupId?: unknown };
   const episodeGuid = cleanText(input.episodeGuid, GUID_MAX, "This episode is not available for questions.");
   const episodeTitle = cleanText(input.episodeTitle, TITLE_MAX, "This episode is not available for questions.");
   const body = cleanText(input.body, BODY_MAX, "Write your question in 2000 characters or fewer.");
   const enrollment = await ownActiveEnrolment(userId);
-  const placement = await activePlacement(enrollment.id);
+  const placements = await activePlacements(enrollment.id);
+  // The leader they chose, else their first group's.
+  const placement = placements.find(row => row.groupId === input.groupId) ?? placements[0];
   if (!placement) throw new CommunityError("Ask Pleros instead: you’re not in a group with a leader right now.");
   const since = new Date(Date.now() - 24 * 3600_000);
   const [{ n }] = await db.select({ n: sql<number>`count(*)::int` }).from(s.discipleshipEpisodeQuestions)

@@ -87,7 +87,8 @@ export function StatusStrip({ disciples }: { disciples: DiscipleSummary[] }) {
 /** The group's own invite link: copy, share on WhatsApp, the leader's number consent and a fresh link. */
 const CANDIDATE_NOTE: Record<InviteCandidate["state"], string> = {
   free: "Not in a group yet",
-  in_a_group: "In a group · accepting moves them to yours",
+  in_a_group: "In another group · they’d stay in it too",
+  full: "In five groups, the most anyone can be in",
   in_this_group: "Already in this group",
   invited: "Invited · waiting for them to accept",
 };
@@ -137,7 +138,7 @@ function AddByName({ groupId }: { groupId: number }) {
       return <li key={person.enrollmentId} className={styles.row}>
         <Initials name={person.name} />
         <span className={styles.rowCopy}><span className={styles.rowTitle}>{person.name}</span><span className={styles.rowMeta}>{done ? CANDIDATE_NOTE.invited : CANDIDATE_NOTE[person.state]}</span></span>
-        {person.state === "in_this_group" ? null : <button type="button" className={`${styles.btn} ${styles.mini}`} data-primary={done ? undefined : ""} disabled={done || sending} onClick={() => invite(person)}>{done ? "Invited" : "Invite"}</button>}
+        {person.state === "in_this_group" || person.state === "full" ? null : <button type="button" className={`${styles.btn} ${styles.mini}`} data-primary={done ? undefined : ""} disabled={done || sending} onClick={() => invite(person)}>{done ? "Invited" : "Invite"}</button>}
       </li>;
     })}</ul> : <p className={`${styles.empty} m-0 border-t border-(--color-line) px-3.5 py-3`}>No one matches “{term.trim()}”.</p> : null}
   </div>;

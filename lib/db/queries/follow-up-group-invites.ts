@@ -33,11 +33,12 @@ export async function inviteIntoOwnersGroup(input: { enrollmentId: number; owner
   const group = groups.find(row => row.isDefault && row.status === "active");
   if (!group) return false;
 
+  // Already in this group (they may be in others too: multi-group membership).
   const [member] = await db.select({ groupId: s.discipleshipMemberships.groupId })
     .from(s.discipleshipMemberships)
-    .where(and(eq(s.discipleshipMemberships.memberUserId, recipient.userId), eq(s.discipleshipMemberships.status, "active")))
+    .where(and(eq(s.discipleshipMemberships.memberUserId, recipient.userId), eq(s.discipleshipMemberships.groupId, group.id), eq(s.discipleshipMemberships.status, "active")))
     .limit(1);
-  if (member?.groupId === group.id) return false;
+  if (member) return false;
 
   // A follow-up invitation from an earlier owner is superseded by this one.
   await db.update(s.discipleshipGroupInvitations)

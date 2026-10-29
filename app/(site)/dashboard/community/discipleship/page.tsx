@@ -20,9 +20,9 @@ export default async function CommunityDiscipleshipRoute({ searchParams }: { sea
   const data = await getCommunityDiscipleship(ctx);
   const { group } = await searchParams;
   const requested = group && /^\d{1,9}$/.test(group) ? Number(group) : null;
-  const ids = [data.joined?.groupId, ...data.leading.map(item => item.groupId)].filter((id): id is number => id != null);
+  const ids = [...data.joinedGroups.map(item => item.groupId), ...data.leading.map(item => item.groupId)];
   const target = (requested !== null && ids.includes(requested) ? requested : null)
-    ?? data.joined?.groupId
+    ?? data.joinedGroups[0]?.groupId
     ?? data.leading.find(item => !item.paused && item.disciples.length > 0)?.groupId
     ?? data.leading[0]?.groupId;
   if (target != null) redirect(`/dashboard/community/discipleship/${target}`);

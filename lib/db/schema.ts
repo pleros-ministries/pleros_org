@@ -2321,13 +2321,9 @@ export const discipleshipMemberships = pgTable(
     lastKnownStatus: text("last_known_status"),
   },
   (t) => [
-    // One active discipler per enrolment; ended memberships stay as history.
-    uniqueIndex("discipleship_memberships_active_disciple_idx")
-      .on(t.discipleEnrollmentId)
-      .where(sql`${t.status} = 'active'`),
-    // One overseer per person (user decision, 19 October; migration 0069).
-    uniqueIndex("discipleship_memberships_active_member_idx")
-      .on(t.memberUserId)
+    // Several groups per person (user, 29 October; migration 0077), once in each group.
+    uniqueIndex("discipleship_memberships_active_group_member_idx")
+      .on(t.groupId, t.memberUserId)
       .where(sql`${t.status} = 'active'`),
     index("discipleship_memberships_member_idx").on(t.memberUserId, t.status),
     index("discipleship_memberships_group_status_idx").on(t.groupId, t.status),

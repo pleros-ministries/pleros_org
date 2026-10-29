@@ -359,6 +359,7 @@ export const discipleshipPreviewData: DiscipleshipDashboardData = {
     },
   },
   myDiscipler: {
+    groupId: 91,
     groupName: "Kemi's discipleship group",
     leaderFirstName: "Kemi",
     leaderName: "Kemi Balogun",

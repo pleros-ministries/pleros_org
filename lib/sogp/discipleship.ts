@@ -143,22 +143,27 @@ export function discipleshipGroupBlockMessage(reason: DiscipleshipGroupBlock): s
 export type DiscipleshipJoinBlock =
   | "own_group"
   | "already_in_group"
+  | "group_limit"
   | "circular"
   | "archived";
+
+/** How many groups one person can be in (user, 29 October). */
+export const DISCIPLESHIP_GROUPS_JOINED_MAX = 5;
 
 export type DiscipleshipJoinDecision =
   | { ok: true }
   | { ok: false; reason: DiscipleshipJoinBlock };
 
 /**
- * Whether a learner may join a group. One level only: each learner has at most
- * one active discipler, and a discipler cannot join their own disciple's group.
+ * Whether a learner may join a group (multi-group membership, 29 October): up
+ * to five groups, each once; never their own group, and never a group whose
+ * leader they already oversee.
  */
 export function evaluateDiscipleshipJoin(input: {
   viewerEnrollmentId: number;
-  group: { leaderEnrollmentId: number; status: DiscipleshipGroupStatus };
-  /** Group id of the viewer's current active membership, if any. */
-  viewerActiveGroupId: number | null;
+  group: { id?: number; leaderEnrollmentId: number; status: DiscipleshipGroupStatus };
+  /** Group ids of the viewer's active memberships. */
+  viewerActiveGroupIds: number[];
   /** True when the group's leader is currently the viewer's disciple. */
   leaderIsViewersDisciple: boolean;
 }): DiscipleshipJoinDecision {
@@ -166,8 +171,11 @@ export function evaluateDiscipleshipJoin(input: {
   if (input.group.leaderEnrollmentId === input.viewerEnrollmentId) {
     return { ok: false, reason: "own_group" };
   }
-  if (input.viewerActiveGroupId !== null) {
+  if (input.group.id != null && input.viewerActiveGroupIds.includes(input.group.id)) {
     return { ok: false, reason: "already_in_group" };
+  }
+  if (input.viewerActiveGroupIds.length >= DISCIPLESHIP_GROUPS_JOINED_MAX) {
+    return { ok: false, reason: "group_limit" };
   }
   if (input.leaderIsViewersDisciple) return { ok: false, reason: "circular" };
   return { ok: true };
@@ -175,8 +183,8 @@ export function evaluateDiscipleshipJoin(input: {
 
 const JOIN_BLOCK_COPY: Record<DiscipleshipJoinBlock, string> = {
   own_group: "This is your own discipleship group. Share the link with the people you're walking with.",
-  already_in_group:
-    "You're already in a discipleship group. Leave your current group first if you'd like to join this one.",
+  already_in_group: "You're already in this group.",
+  group_limit: `You're in ${DISCIPLESHIP_GROUPS_JOINED_MAX} groups, the most you can be in. Leave one first if you'd like to join this one.`,
   circular: "You already oversee this group's leader, so you can't join their group.",
   archived: "This discipleship group is no longer active.",
 };

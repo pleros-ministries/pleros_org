@@ -24,12 +24,12 @@ export async function acceptFollowUpOwner(): Promise<Result> {
 }
 
 /** Recipient accepts or declines; actor comes from the session only. */
-export async function answerGroupInvitation(input: { invitationId: number; accept: boolean; sharesPhone: boolean; move?: boolean }): Promise<Result<{ status: "accepted" | "declined" }>> {
+export async function answerGroupInvitation(input: { invitationId: number; accept: boolean; sharesPhone: boolean }): Promise<Result<{ status: "accepted" | "declined" }>> {
   const session = await getDashboardActionSession();
   if (!session) return { ok: false, error: "Sign in to respond." };
   if (!Number.isInteger(input.invitationId)) return { ok: false, error: "This invitation isn't available." };
   try {
-    const result = await respondToInvitation({ userId: session.user.id, invitationId: input.invitationId, accept: input.accept === true, sharesPhone: input.sharesPhone === true, move: input.move === true });
+    const result = await respondToInvitation({ userId: session.user.id, invitationId: input.invitationId, accept: input.accept === true, sharesPhone: input.sharesPhone === true });
     if (result.ok) refresh();
     return result;
   } catch { return { ok: false, error: "Your response could not be saved. Try again." }; }

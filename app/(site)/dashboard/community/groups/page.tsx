@@ -49,7 +49,7 @@ export default async function CommunityGroupsRoute({ searchParams }: { searchPar
     <GroupsDirectory
       groups={groups}
       locationGroups={locationGroups}
-      discipleship={discipleship ? { joined: discipleship.joined, leading: discipleship.leading.filter((group) => !group.paused) } : null}
+      discipleship={discipleship ? { joinedGroups: discipleship.joinedGroups, leading: discipleship.leading.filter((group) => !group.paused) } : null}
       people={{ contacts, enrollees: enrollees ? { total: enrollees.length, free: enrollees.filter(row => !row.group).length } : null }}
     />
   );

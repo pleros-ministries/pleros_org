@@ -39,24 +39,32 @@ type ViewGroup = { id: number; name: string; leaderId: string | null; leaderName
 
 /** The focus person's groups, the groups their members lead, and (Pastor and branch pastors) every other group in view. */
 function groupsOf(data: GroupOversightData) {
+  // Someone in several groups (multi-group membership, 29 October) appears in each of them, and counts once in totals.
   const inTree = data.people.filter(person => person.depth != null);
-  const directIds = new Set(inTree.filter(person => person.depth === 1).map(person => person.userId));
-  const own: ViewGroup[] = data.groups.map(group => ({ id: group.id, name: group.name, leaderId: data.under?.userId ?? null, leaderName: null, members: inTree.filter(person => person.groupId === group.id && person.depth === 1) }));
-  const collect = (people: GroupOversightPerson[]) => {
+  const directIds = new Set(inTree.filter(person => person.memberships.some(item => item.depth === 1)).map(person => person.userId));
+  const own: ViewGroup[] = data.groups.map(group => ({ id: group.id, name: group.name, leaderId: data.under?.userId ?? null, leaderName: null,
+    members: inTree.filter(person => person.memberships.some(item => item.groupId === group.id && item.depth === 1)) }));
+  const collect = (people: GroupOversightPerson[], keep: (item: GroupOversightPerson["memberships"][number]) => boolean) => {
     const map = new Map<number, ViewGroup>();
-    for (const person of people) {
-      if (person.groupId == null) continue;
-      const group = map.get(person.groupId) ?? { id: person.groupId, name: person.groupName ?? "Group", leaderId: person.overseerId, leaderName: person.overseerName, members: [] };
-      group.members.push(person);
-      map.set(person.groupId, group);
+    for (const person of people) for (const item of person.memberships) {
+      if (!keep(item)) continue;
+      const group = map.get(item.groupId) ?? { id: item.groupId, name: item.groupName ?? "Group", leaderId: item.overseerId, leaderName: item.overseerName, members: [] };
+      if (!group.members.includes(person)) group.members.push(person);
+      map.set(item.groupId, group);
     }
     return [...map.values()].sort((a, b) => (a.leaderName ?? "").localeCompare(b.leaderName ?? "") || a.name.localeCompare(b.name));
   };
-  const under = collect(inTree.filter(person => person.overseerId && directIds.has(person.overseerId)));
+  const under = collect(inTree, item => directIds.has(item.overseerId));
   // The wider view: groups whose leader isn't a member of a group in view; deeper ones open through "Their groups".
-  const inView = new Set(data.people.filter(person => person.groupId != null).map(person => person.userId));
-  const other = collect(data.people.filter(person => person.depth == null && person.overseerId && !inView.has(person.overseerId)));
+  const inView = new Set(data.people.filter(person => person.memberships.length).map(person => person.userId));
+  const other = collect(data.people.filter(person => person.depth == null), item => !inView.has(item.overseerId));
   return { own, under, other };
+}
+
+/** "Also in …" for someone who sits in other groups too, so a leader knows they're shared. */
+function alsoIn(person: GroupOversightPerson, groupId: number) {
+  const others = [...new Set(person.memberships.filter(item => item.groupId !== groupId).map(item => item.groupName ?? "another group"))];
+  return others.length ? `Also in ${others.length > 1 ? `${others.length} other groups` : others[0]}` : null;
 }
 
 function GroupIcon({ index }: { index: number }) {
@@ -186,7 +194,7 @@ function MemberLedGroup({ group, index, pageHref }: { group: ViewGroup; index: n
       {group.members.length ? <ul className={styles.list}>
         {group.members.map(person => <li key={person.userId}><Link href={reportHref(person.userId)} className={styles.row} style={{ paddingLeft: 30 }}>
           <Initials name={person.name} />
-          <span className={`${styles.rowCopy} gap-1`}><span className={styles.rowTitle}>{person.name}</span><ReportLine person={person} /></span>
+          <span className={`${styles.rowCopy} gap-1`}><span className={styles.rowTitle}>{person.name}</span><ReportLine person={person} />{alsoIn(person, group.id) ? <span className={styles.rowMeta}>{alsoIn(person, group.id)}</span> : null}</span>
           <ChevronRightIcon className={`${styles.chev} size-4`} strokeWidth={2} />
         </Link></li>)}
       </ul> : <p className={styles.empty}>No one in this group yet.</p>}
@@ -299,7 +307,7 @@ function OversightGroup({ data, group, under }: { data: GroupOversightData; grou
     {group.members.length ? <div className={styles.panel}><ul className={styles.list}>
       {group.members.map(person => <li key={person.userId}><Link href={reportHref(person.userId)} className={styles.row}>
         <Initials name={person.name} />
-        <span className={`${styles.rowCopy} gap-1`}><span className={styles.rowTitle}>{person.name}</span><ReportLine person={person} /></span>
+        <span className={`${styles.rowCopy} gap-1`}><span className={styles.rowTitle}>{person.name}</span><ReportLine person={person} />{alsoIn(person, group.id) ? <span className={styles.rowMeta}>{alsoIn(person, group.id)}</span> : null}</span>
         <ChevronRightIcon className={`${styles.chev} size-4`} strokeWidth={2} />
       </Link></li>)}
     </ul></div> : <p className={`${styles.panel} ${styles.empty}`}>No one in this group yet.</p>}

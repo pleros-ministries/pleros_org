@@ -26,15 +26,16 @@ function OversightRow({ href, title, description, icon, tone, prefetch }: { href
 function OversightGroups({ data }: { data: CommunityHomeData }) {
   const newGroupHref = data.ledGroups.length ? "/dashboard/community/groups/new" : "/dashboard/sogp/discipleship";
   return <>
-    {data.joinedGroup || data.locationGroup ? <section className={styles.block} aria-labelledby="community-your-group">
+    {data.joinedGroups.length || data.locationGroup ? <section className={styles.block} aria-labelledby="community-your-group">
       <div className={styles.blockHeading}><h2 id="community-your-group">Groups you’re under</h2><Link href="/dashboard/community/groups">See all</Link></div>
       <div className={styles.groupGrid}>
-        {data.joinedGroup ? <GroupCard href={`/dashboard/community/discipleship/${data.joinedGroup.groupId}`} prefetch={false} art="discipleship" tag="Your group" title={data.joinedGroup.groupName} meta={`Led by ${data.joinedGroup.leaderFirstName}`} /> : null}
+        {/* Every group you're in (multi-group membership, 29 October). */}
+        {data.joinedGroups.map(group => <GroupCard key={`joined-${group.groupId}`} href={`/dashboard/community/discipleship/${group.groupId}`} prefetch={false} art="discipleship" tag="Your group" title={group.groupName} meta={`Led by ${group.leaderFirstName}`} />)}
         {data.locationGroup ? <GroupCard href={`/dashboard/community/unit/${data.locationGroup.id}`} art="location" title={data.locationGroup.name} meta="Your location group" /> : null}
       </div>
     </section> : null}
     <section className={styles.block} aria-labelledby="community-led-groups">
-      <div className={styles.blockHeading}><h2 id="community-led-groups">Groups you lead</h2>{data.joinedGroup || data.locationGroup ? null : <Link href="/dashboard/community/groups">See all</Link>}</div>
+      <div className={styles.blockHeading}><h2 id="community-led-groups">Groups you lead</h2>{data.joinedGroups.length || data.locationGroup ? null : <Link href="/dashboard/community/groups">See all</Link>}</div>
       <LedGroupCards groups={data.ledGroups} newGroupHref={newGroupHref}
         extra={data.managedLocations.map(unit => <GroupCard key={`unit-${unit.id}`} href={`/dashboard/community/unit/${unit.id}`} art="location" tag="You look after" title={unit.name} meta="Location group" />)} />
     </section>

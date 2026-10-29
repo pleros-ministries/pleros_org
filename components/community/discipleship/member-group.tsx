@@ -30,7 +30,7 @@ type Tab = "checkins" | "discussion" | "prayer" | "members";
  * discussion and its members. Answers and requests are only ever theirs.
  */
 export function MemberGroupView({ joined, discipler, ownEpisodeQuestions, discussion, initialTab }: {
-  joined: NonNullable<CommunityDiscipleship["joined"]>;
+  joined: CommunityDiscipleship["joinedGroups"][number];
   discipler: DisciplerView;
   ownEpisodeQuestions: OwnEpisodeQuestion[];
   discussion: { viewerName: string; postingBlocked: boolean; initialPosts?: FeedPost[]; initialNextOffset?: number | null };
@@ -98,10 +98,11 @@ export function MemberGroupView({ joined, discipler, ownEpisodeQuestions, discus
     </div> : null}
 
     <div className={`${styles.panel} ${styles.tools}`}>
-      <SharePhoneToggle id="disciple-shares-phone" label={`Let ${lead} contact me on WhatsApp`} initial={discipler.sharesPhone} onChange={sharesPhone => setDiscipleSharesPhoneAction({ sharesPhone })} />
+      <SharePhoneToggle id="disciple-shares-phone" label={`Let ${lead} contact me on WhatsApp`} initial={discipler.sharesPhone} onChange={sharesPhone => setDiscipleSharesPhoneAction({ groupId: joined.groupId, sharesPhone })} />
       <button type="button" className={styles.danger} disabled={leave.pending} onClick={() => {
-        if (window.confirm(`Leave ${lead}'s group? They will no longer see your progress or answers.`)) {
-          leave.run(() => leaveDiscipleshipGroupAction(), () => router.replace("/dashboard/community/groups"));
+        // Leaves this group only; the others stay (multi-group membership, 29 October).
+        if (window.confirm(`Leave ${joined.groupName}? ${lead} won’t look after you in it any more. Your other groups don’t change.`)) {
+          leave.run(() => leaveDiscipleshipGroupAction({ groupId: joined.groupId }), () => router.replace("/dashboard/community"));
         }
       }}>Leave group</button>
       {leave.error ? <p role="alert" className={styles.error}>{leave.error}</p> : null}

@@ -781,7 +781,7 @@ function DisciplerSection({
           label={`Let ${discipler.leaderFirstName} contact me on WhatsApp`}
           initial={discipler.sharesPhone}
           preview={preview}
-          onChange={(sharesPhone) => setDiscipleSharesPhoneAction({ sharesPhone })}
+          onChange={(sharesPhone) => setDiscipleSharesPhoneAction({ groupId: discipler.groupId, sharesPhone })}
         />
         <button
           type="button"
@@ -789,10 +789,10 @@ function DisciplerSection({
           onClick={() => {
             if (
               window.confirm(
-                `Leave ${discipler.leaderFirstName}'s group? They will no longer see your progress or answers.`,
+                `Leave ${discipler.groupName}? ${discipler.leaderFirstName} won’t look after you in it any more. Your other groups don’t change.`,
               )
             ) {
-              leave.run(() => leaveDiscipleshipGroupAction());
+              leave.run(() => leaveDiscipleshipGroupAction({ groupId: discipler.groupId }));
             }
           }}
           className="text-xs font-medium text-(--color-text-muted) underline-offset-4 hover:text-red-700 hover:underline disabled:opacity-60"

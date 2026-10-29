@@ -141,7 +141,7 @@ export async function getCommunityHome() {
     // A location group they look after sits with the groups they lead, not the ones they're under.
     locationGroup: ctx.unit && !ctx.isUnitLeader && !ctx.managedUnitIds.includes(ctx.unit.id) ? ctx.unit : null,
     managedLocations,
-    joinedGroup: discipleship.joined,
+    joinedGroups: discipleship.joinedGroups,
     ledGroups: discipleship.leading.filter(group => !group.paused),
     memberGroups: groups,
   };

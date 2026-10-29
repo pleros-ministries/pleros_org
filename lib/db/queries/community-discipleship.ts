@@ -11,6 +11,7 @@ import {
   type MessagingRelation,
 } from "@/lib/community/messaging";
 import { firstNameOf, joinMonthLabel } from "@/lib/community/visibility";
+import { DISCIPLESHIP_GROUPS_JOINED_MAX } from "@/lib/sogp/discipleship";
 
 /**
  * A learner's discipleship relationships as shown inside the community: who
@@ -28,15 +29,17 @@ export type DiscipleshipPeer = {
   messageUserId: string | null;
 };
 
+export type JoinedDiscipleshipGroup = {
+  groupId: number;
+  groupName: string;
+  joinedMonth: string;
+  discipler: { firstName: string; messageUserId: string | null };
+  fellowDisciples: DiscipleshipPeer[];
+};
+
 export type CommunityDiscipleship = {
-  /** The group the viewer belongs to as a disciple. */
-  joined: {
-    groupId: number;
-    groupName: string;
-    joinedMonth: string;
-    discipler: { firstName: string; messageUserId: string | null };
-    fellowDisciples: DiscipleshipPeer[];
-  } | null;
+  /** Every group the viewer is in, oldest first (multi-group membership, 29 October: up to five). */
+  joinedGroups: JoinedDiscipleshipGroup[];
   /**
    * The open groups the viewer leads, oldest first; empty until the first is
    * created. A group its leader has closed never appears.
@@ -51,9 +54,9 @@ export type CommunityDiscipleship = {
 
 const leaderEnrollment = alias(schema.sogpEnrollments, "leader_enrollment");
 
-/** The viewer's active membership in someone else's group, with its discipler. */
-async function findJoinedGroup(userId: string) {
-  const [row] = await db
+/** Every group the viewer is in, with its leader, oldest first (multi-group membership, 29 October). */
+async function findJoinedGroups(userId: string) {
+  return db
     .select({
       groupId: schema.discipleshipGroups.id,
       groupName: schema.discipleshipGroups.name,
@@ -85,9 +88,13 @@ async function findJoinedGroup(userId: string) {
         eq(schema.discipleshipGroups.status, "active"),
       ),
     )
-    .orderBy(desc(schema.discipleshipMemberships.joinedAt))
-    .limit(1);
-  return row ?? null;
+    .orderBy(asc(schema.discipleshipMemberships.joinedAt))
+    .limit(DISCIPLESHIP_GROUPS_JOINED_MAX);
+}
+
+/** Their first group, for one-line summaries. */
+async function findJoinedGroup(userId: string) {
+  return (await findJoinedGroups(userId))[0] ?? null;
 }
 
 /** The open groups the viewer leads (active or paused), oldest first. */
@@ -168,13 +175,13 @@ function messageIdFor(
 export async function getCommunityDiscipleship(
   viewer: CommunityContext,
 ): Promise<CommunityDiscipleship> {
-  const [joinedRow, ledRows] = await Promise.all([
-    findJoinedGroup(viewer.userId),
+  const [joinedRows, ledRows] = await Promise.all([
+    findJoinedGroups(viewer.userId),
     listLedGroups(viewer.userId),
   ]);
-  // Bounded by the limit on groups one learner leads.
-  const [fellowRows, discipleRowsByGroup] = await Promise.all([
-    joinedRow ? listActiveDisciples(joinedRow.groupId) : Promise.resolve([]),
+  // Bounded by the limits on groups one learner leads and is in.
+  const [fellowRowsByGroup, discipleRowsByGroup] = await Promise.all([
+    Promise.all(joinedRows.map((row) => listActiveDisciples(row.groupId))),
     Promise.all(ledRows.map((row) => listActiveDisciples(row.id))),
   ]);
 
@@ -188,26 +195,18 @@ export async function getCommunityDiscipleship(
   });
 
   return {
-    joined: joinedRow
-      ? {
-          groupId: joinedRow.groupId,
-          groupName: joinedRow.groupName,
-          joinedMonth: joinMonthLabel(joinedRow.joinedAt),
-          discipler: {
-            firstName: firstNameOf(
-              joinedRow.leaderFirstName || joinedRow.leaderName,
-            ),
-            messageUserId: messageIdFor(
-              viewer,
-              { userId: joinedRow.leaderUserId },
-              NO_LINK,
-            ),
-          },
-          fellowDisciples: fellowRows
-            .filter((row) => row.userId !== viewer.userId)
-            .map((row) => toPeer(row, NO_LINK)),
-        }
-      : null,
+    joinedGroups: joinedRows.map((joinedRow, index) => ({
+      groupId: joinedRow.groupId,
+      groupName: joinedRow.groupName,
+      joinedMonth: joinMonthLabel(joinedRow.joinedAt),
+      discipler: {
+        firstName: firstNameOf(joinedRow.leaderFirstName || joinedRow.leaderName),
+        messageUserId: messageIdFor(viewer, { userId: joinedRow.leaderUserId }, NO_LINK),
+      },
+      fellowDisciples: (fellowRowsByGroup[index] ?? [])
+        .filter((row) => row.userId !== viewer.userId)
+        .map((row) => toPeer(row, NO_LINK)),
+    })),
     leading: ledRows.map((ledRow, index) => ({
       groupId: ledRow.id,
       groupName: ledRow.name,
@@ -220,8 +219,8 @@ export async function getCommunityDiscipleship(
 }
 
 export type CommunityHomeDiscipleship = {
-  /** The group the viewer is in, and the first name of its leader (their overseer). */
-  joined: { groupId: number; groupName: string; leaderFirstName: string } | null;
+  /** Every group the viewer is in, with each leader's first name (multi-group membership). */
+  joinedGroups: Array<{ groupId: number; groupName: string; leaderFirstName: string }>;
   leading: Array<{ groupId: number; groupName: string; paused: boolean; discipleCount: number }>;
   discipleCount: number;
 };
@@ -231,8 +230,8 @@ export type CommunityHomeDiscipleship = {
  * a total only, so it must not load every disciple and fellow-disciple row.
  */
 export async function getCommunityHomeDiscipleship(userId: string): Promise<CommunityHomeDiscipleship> {
-  const [joinedRow, ledRows, countedRows] = await Promise.all([
-    findJoinedGroup(userId),
+  const [joinedRows, ledRows, countedRows] = await Promise.all([
+    findJoinedGroups(userId),
     listLedGroups(userId),
     db
       .select({ groupId: schema.discipleshipGroups.id, n: count() })
@@ -248,7 +247,7 @@ export async function getCommunityHomeDiscipleship(userId: string): Promise<Comm
   ]);
   const countByGroup = new Map(countedRows.map(row => [row.groupId, row.n]));
   return {
-    joined: joinedRow ? { groupId: joinedRow.groupId, groupName: joinedRow.groupName, leaderFirstName: firstNameOf(joinedRow.leaderFirstName || joinedRow.leaderName) } : null,
+    joinedGroups: joinedRows.map(row => ({ groupId: row.groupId, groupName: row.groupName, leaderFirstName: firstNameOf(row.leaderFirstName || row.leaderName) })),
     leading: ledRows.map(row => ({
       groupId: row.id,
       groupName: row.name,

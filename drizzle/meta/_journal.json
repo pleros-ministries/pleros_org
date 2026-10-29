@@ -540,6 +540,13 @@
    "when": 1793188800000,
    "tag": "0076_next_learning",
    "breakpoints": true
+  },
+  {
+   "idx": 77,
+   "version": "7",
+   "when": 1793275200000,
+   "tag": "0077_multi_group_membership",
+   "breakpoints": true
   }
  ]
 }

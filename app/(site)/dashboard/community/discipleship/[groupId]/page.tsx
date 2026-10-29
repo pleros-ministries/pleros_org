@@ -41,14 +41,15 @@ export default async function DiscipleshipGroupRoute({ params, searchParams }: {
   const discussion = { viewerName: session.user.name ?? "You", postingBlocked: ctx.postingBlocked };
 
   // The group the viewer belongs to as a disciple.
-  if (community.joined?.groupId === groupId) {
+  const joined = community.joinedGroups.find(item => item.groupId === groupId);
+  if (joined) {
     const [data, ownEpisodeQuestions] = await Promise.all([
-      getDiscipleshipDashboard(session.user.id),
+      getDiscipleshipDashboard(session.user.id, null, groupId),
       getOwnEpisodeQuestions(session.user.id).catch(() => []),
     ]);
     if (!data?.myDiscipler) notFound();
     return <SogpQueryProvider>
-      <MemberGroupView joined={community.joined} discipler={data.myDiscipler} ownEpisodeQuestions={ownEpisodeQuestions} discussion={discussion} initialTab={tab} />
+      <MemberGroupView joined={joined} discipler={data.myDiscipler} ownEpisodeQuestions={ownEpisodeQuestions} discussion={discussion} initialTab={tab} />
     </SogpQueryProvider>;
   }
 

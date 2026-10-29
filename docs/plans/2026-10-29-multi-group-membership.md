@@ -18,7 +18,7 @@ A person can be in more than one group. This replaces the "one overseer per pers
 - **Oversight view** (`lib/db/queries/group-oversight.ts`): `edgeOf` keeps one edge per person (one group, one overseer, one depth); `memberOf` is the one group you're in.
 - **Member side:** `getCommunityDiscipleship().joined`, `getDiscipleshipDashboard().myDiscipler`, Community Home's `joinedGroup`, the invitation's `currentGroup`, the member group page: each holds a single group.
 
-## Migration 0077 (shown before applying; not applied)
+## Migration 0077 (applied 29 October as id 83)
 
 ```sql
 -- Multi-group membership (user, 29 October): a person may be active in several
@@ -51,3 +51,7 @@ No data changes: every existing membership stays as it is.
 2. Community Home's "Groups you're under" with two groups.
 3. The member group page with "Leave this group".
 4. Oversight Structure for a leader whose member also sits in another leader's group.
+
+## Built (29 October)
+
+All of the above, plus: invite search marks people already in another group ("they'd stay in it too") and hides Invite for anyone in five; the follow-up invite checks the specific group. Not changed: the inline "Ask your leader" on lesson pages still goes to the first group's leader (the question pop-up after a teaching lets them choose), and Oversight's "back" from someone's groups steps to one of their leaders.

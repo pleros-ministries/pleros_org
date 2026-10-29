@@ -324,7 +324,11 @@ async function countActiveMembers(groupId: number) {
   return { n: row?.n ?? 0 };
 }
 
-async function getActiveMembership(discipleEnrollmentId: number) {
+/**
+ * The learner's active membership: in `groupId` when given, else their oldest
+ * (multi-group membership, 29 October: someone can be in up to five groups).
+ */
+async function getActiveMembership(discipleEnrollmentId: number, groupId?: number) {
   const [membership] = await db
     .select()
     .from(schema.discipleshipMemberships)
@@ -332,10 +336,22 @@ async function getActiveMembership(discipleEnrollmentId: number) {
       and(
         eq(schema.discipleshipMemberships.discipleEnrollmentId, discipleEnrollmentId),
         eq(schema.discipleshipMemberships.status, "active"),
+        groupId != null ? eq(schema.discipleshipMemberships.groupId, groupId) : undefined,
       ),
     )
+    .orderBy(asc(schema.discipleshipMemberships.joinedAt))
     .limit(1);
   return membership ?? null;
+}
+
+/** Every group the learner is in, oldest first. */
+async function getActiveGroupIds(executor: Pick<typeof db, "select">, discipleEnrollmentId: number) {
+  const rows = await executor
+    .select({ groupId: schema.discipleshipMemberships.groupId })
+    .from(schema.discipleshipMemberships)
+    .where(and(eq(schema.discipleshipMemberships.discipleEnrollmentId, discipleEnrollmentId), eq(schema.discipleshipMemberships.status, "active")))
+    .orderBy(asc(schema.discipleshipMemberships.joinedAt));
+  return rows.map(row => row.groupId);
 }
 
 /** True when `discipleEnrollmentId` is currently in the group led by `leaderEnrollmentId`. */
@@ -362,21 +378,23 @@ export async function evaluateJoinForViewer(
   invite: DiscipleshipInvite,
   viewerEnrollmentId: number,
 ): Promise<DiscipleshipJoinDecision> {
-  const [membership, leaderIsViewersDisciple] = await Promise.all([
-    getActiveMembership(viewerEnrollmentId),
+  const [groupIds, leaderIsViewersDisciple] = await Promise.all([
+    getActiveGroupIds(db, viewerEnrollmentId),
     isActiveDiscipleOf(invite.leaderEnrollmentId, viewerEnrollmentId),
   ]);
   return evaluateDiscipleshipJoin({
     viewerEnrollmentId,
-    group: { leaderEnrollmentId: invite.leaderEnrollmentId, status: invite.status },
-    viewerActiveGroupId: membership?.groupId ?? null,
+    group: { id: invite.groupId, leaderEnrollmentId: invite.leaderEnrollmentId, status: invite.status },
+    viewerActiveGroupIds: groupIds,
     leaderIsViewersDisciple,
   });
 }
 
 /**
  * Locks the group and applies every join rule inside the caller's transaction;
- * the partial unique index guards one active discipler. Groups have no size cap. Shared by invite links and in-app invitations.
+ * the partial unique index guards one active membership per group. Joining
+ * adds the group and keeps the others (multi-group membership, 29 October).
+ * Groups have no size cap. Shared by invite links and in-app invitations.
  */
 export async function joinGroupInTransaction(
   tx: Tx,
@@ -384,11 +402,6 @@ export async function joinGroupInTransaction(
     groupId: number;
     viewerEnrollmentId: number;
     sharesPhone: boolean;
-    /**
-     * The person confirmed leaving their current group for this one (groups as
-     * oversight, 19 October: one overseer, so accepting moves them).
-     */
-    moveFromCurrent?: boolean;
   },
 ): Promise<DiscipleshipJoinDecision> {
   // One lock for every change to who oversees whom, so two joins can't build a loop between them.
@@ -405,17 +418,8 @@ export async function joinGroupInTransaction(
     .for("update");
   if (!group) throw new DiscipleshipError("This invite link isn't valid.");
 
-  const [[viewerMembership], [circular], [viewer]] = await Promise.all([
-    tx
-      .select({ id: schema.discipleshipMemberships.id, groupId: schema.discipleshipMemberships.groupId })
-      .from(schema.discipleshipMemberships)
-      .where(
-        and(
-          eq(schema.discipleshipMemberships.discipleEnrollmentId, input.viewerEnrollmentId),
-          eq(schema.discipleshipMemberships.status, "active"),
-        ),
-      )
-      .limit(1),
+  const [viewerGroupIds, [circular], [viewer]] = await Promise.all([
+    getActiveGroupIds(tx, input.viewerEnrollmentId),
     tx
       .select({ id: schema.discipleshipMemberships.id })
       .from(schema.discipleshipMemberships)
@@ -438,11 +442,10 @@ export async function joinGroupInTransaction(
       .limit(1),
   ]);
 
-  const moving = Boolean(input.moveFromCurrent && viewerMembership && viewerMembership.groupId !== group.id);
   const decision = evaluateDiscipleshipJoin({
     viewerEnrollmentId: input.viewerEnrollmentId,
     group,
-    viewerActiveGroupId: moving ? null : viewerMembership?.groupId ?? null,
+    viewerActiveGroupIds: viewerGroupIds,
     leaderIsViewersDisciple: Boolean(circular),
   });
   if (!decision.ok) return decision;
@@ -451,12 +454,6 @@ export async function joinGroupInTransaction(
     return { ok: false, reason: "circular" };
   }
 
-  if (moving) {
-    await tx
-      .update(schema.discipleshipMemberships)
-      .set({ status: "left", endedAt: new Date() })
-      .where(and(eq(schema.discipleshipMemberships.id, viewerMembership!.id), eq(schema.discipleshipMemberships.status, "active")));
-  }
   await tx.insert(schema.discipleshipMemberships).values({
     groupId: group.id,
     discipleEnrollmentId: input.viewerEnrollmentId,
@@ -484,7 +481,7 @@ export async function joinDiscipleshipGroup(input: {
       return decision.ok ? { ok: true as const, invite } : decision;
     });
   } catch (error) {
-    // A concurrent join for the same learner lost the partial unique index race.
+    // A concurrent join of the same group lost the partial unique index race.
     if ((error as { code?: string }).code === "23505") {
       return { ok: false, reason: "already_in_group" };
     }
@@ -494,16 +491,20 @@ export async function joinDiscipleshipGroup(input: {
 
 // ─── Membership and settings mutations ──────────────────────────────────────
 
-export async function leaveDiscipleshipGroup(discipleEnrollmentId: number) {
-  await db
+/** Leaves one group; the others stay (multi-group membership, 29 October). Returns that group's leader to tell. */
+export async function leaveDiscipleshipGroup(discipleEnrollmentId: number, groupId: number) {
+  const [left] = await db
     .update(schema.discipleshipMemberships)
     .set({ status: "left", endedAt: new Date() })
     .where(
       and(
         eq(schema.discipleshipMemberships.discipleEnrollmentId, discipleEnrollmentId),
+        eq(schema.discipleshipMemberships.groupId, groupId),
         eq(schema.discipleshipMemberships.status, "active"),
       ),
-    );
+    )
+    .returning({ groupId: schema.discipleshipMemberships.groupId });
+  return left ? { leaderUserId: await getLeaderUserIdForGroup(left.groupId) } : null;
 }
 
 export async function removeDisciple(input: {
@@ -522,8 +523,10 @@ export async function removeDisciple(input: {
     );
 }
 
+/** WhatsApp consent is per group for members too (multi-group membership): one leader may reach them and not another. */
 export async function setDiscipleSharesPhone(input: {
   discipleEnrollmentId: number;
+  groupId: number;
   sharesPhone: boolean;
 }) {
   await db
@@ -532,6 +535,7 @@ export async function setDiscipleSharesPhone(input: {
     .where(
       and(
         eq(schema.discipleshipMemberships.discipleEnrollmentId, input.discipleEnrollmentId),
+        eq(schema.discipleshipMemberships.groupId, input.groupId),
         eq(schema.discipleshipMemberships.status, "active"),
       ),
     );
@@ -610,8 +614,10 @@ export async function upsertDiscipleshipResponse(input: {
   promptId: number;
   body: string;
 }) {
-  const membership = await getActiveMembership(input.discipleEnrollmentId);
-  if (!membership) throw new DiscipleshipError("You're not in a discipleship group.");
+  // The check-in's own group decides which membership answers it.
+  const [promptGroup] = await db.select({ groupId: schema.discipleshipPrompts.groupId }).from(schema.discipleshipPrompts).where(eq(schema.discipleshipPrompts.id, input.promptId)).limit(1);
+  const membership = promptGroup ? await getActiveMembership(input.discipleEnrollmentId, promptGroup.groupId) : null;
+  if (!membership) throw new DiscipleshipError("You're not in this check-in's group.");
 
   const [prompt] = await db
     .select({ id: schema.discipleshipPrompts.id, leaderUserId: schema.sogpEnrollments.userId })
@@ -773,6 +779,7 @@ export type LeaderPrompt = {
 };
 
 export type DisciplerView = {
+  groupId: number;
   groupName: string;
   leaderFirstName: string;
   leaderName: string;
@@ -939,6 +946,8 @@ async function countActiveMembersByGroup(groupIds: number[]) {
 export async function getDiscipleshipDashboard(
   userId: string,
   requestedGroupId?: number | null,
+  /** A group the viewer is in, for `myDiscipler` (multi-group membership); their oldest when not given. */
+  memberGroupId?: number | null,
 ): Promise<DiscipleshipDashboardData | null> {
   const [enrollment] = await db
     .select()
@@ -964,7 +973,7 @@ export async function getDiscipleshipDashboard(
     countActiveMembersByGroup(groups.map((candidate) => candidate.id)),
     getDiscipleSummaries(group.id),
     getLeaderPrompts(group.id),
-    getDisciplerView(enrollment.id),
+    getDisciplerView(enrollment.id, memberGroupId),
     getGroupPrayerRequests(group.id),
     getPromptSuggestions(group.id, enrollment.cohortId),
     getDiscipleParticipationRange(group.id),
@@ -1298,7 +1307,8 @@ async function getLeaderPrompts(groupId: number): Promise<LeaderPrompt[]> {
   }));
 }
 
-async function getDisciplerView(discipleEnrollmentId: number): Promise<DisciplerView | null> {
+/** The member's view of one group they're in: `groupId` when given, else their oldest. */
+async function getDisciplerView(discipleEnrollmentId: number, groupId?: number | null): Promise<DisciplerView | null> {
   const [row] = await db
     .select({
       groupId: schema.discipleshipGroups.id,
@@ -1326,8 +1336,10 @@ async function getDisciplerView(discipleEnrollmentId: number): Promise<Discipler
         eq(schema.discipleshipMemberships.discipleEnrollmentId, discipleEnrollmentId),
         eq(schema.discipleshipMemberships.status, "active"),
         eq(schema.discipleshipGroups.status, "active"),
+        groupId != null ? eq(schema.discipleshipGroups.id, groupId) : undefined,
       ),
     )
+    .orderBy(asc(schema.discipleshipMemberships.joinedAt))
     .limit(1);
   if (!row) return null;
 
@@ -1366,6 +1378,7 @@ async function getDisciplerView(discipleEnrollmentId: number): Promise<Discipler
 
   const leaderFirstName = firstNameOf(row.leaderFirstName || row.leaderName);
   return {
+    groupId: row.groupId,
     groupName: row.groupName,
     leaderFirstName,
     leaderName: row.leaderName,
@@ -1678,8 +1691,10 @@ async function getLeaderUserIdForGroup(groupId: number) {
 export async function createPrayerRequest(input: {
   discipleEnrollmentId: number;
   body: string;
+  /** The group it's shared in; the oldest group when not given. */
+  groupId?: number;
 }) {
-  const membership = await getActiveMembership(input.discipleEnrollmentId);
+  const membership = await getActiveMembership(input.discipleEnrollmentId, input.groupId);
   if (!membership) throw new DiscipleshipError("Join a discipleship group to share prayer requests.");
   await db.insert(schema.discipleshipPrayerRequests).values({
     groupId: membership.groupId,
@@ -1764,8 +1779,8 @@ export async function markPrayerRequestAnswered(input: {
     .returning({ groupId: schema.discipleshipPrayerRequests.groupId });
   if (!updated) throw new DiscipleshipError("This prayer request isn't available.");
 
-  const membership = await getActiveMembership(input.discipleEnrollmentId);
-  const stillInGroup = membership?.groupId === updated.groupId;
+  const membership = await getActiveMembership(input.discipleEnrollmentId, updated.groupId);
+  const stillInGroup = Boolean(membership);
   return { leaderUserId: stillInGroup ? await getLeaderUserIdForGroup(updated.groupId) : null };
 }
 

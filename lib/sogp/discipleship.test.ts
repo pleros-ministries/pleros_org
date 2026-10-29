@@ -128,8 +128,8 @@ describe("evaluateCloseDiscipleshipGroup", () => {
 describe("evaluateDiscipleshipJoin", () => {
   const base = {
     viewerEnrollmentId: 2,
-    group: { leaderEnrollmentId: 1, status: "active" as const },
-    viewerActiveGroupId: null,
+    group: { id: 4, leaderEnrollmentId: 1, status: "active" as const },
+    viewerActiveGroupIds: [] as number[],
     leaderIsViewersDisciple: false,
   };
 
@@ -156,10 +156,21 @@ describe("evaluateDiscipleshipJoin", () => {
     });
   });
 
-  test("blocks a second active discipler", () => {
-    expect(evaluateDiscipleshipJoin({ ...base, viewerActiveGroupId: 9 })).toEqual({
+  test("adds a group alongside the ones you're in (multi-group, 29 October)", () => {
+    expect(evaluateDiscipleshipJoin({ ...base, viewerActiveGroupIds: [9, 10] })).toEqual({ ok: true });
+  });
+
+  test("blocks joining a group you're already in", () => {
+    expect(evaluateDiscipleshipJoin({ ...base, viewerActiveGroupIds: [4] })).toEqual({
       ok: false,
       reason: "already_in_group",
+    });
+  });
+
+  test("blocks a sixth group", () => {
+    expect(evaluateDiscipleshipJoin({ ...base, viewerActiveGroupIds: [5, 6, 7, 8, 9] })).toEqual({
+      ok: false,
+      reason: "group_limit",
     });
   });
 

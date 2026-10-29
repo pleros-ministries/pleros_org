@@ -10,7 +10,7 @@ import homeStyles from "../community-home-v3.module.css";
 import { PeopleToBringInPanel, type PeopleToBringIn } from "../people/people-to-bring-in";
 
 export type DirectoryDiscipleship = {
-  joined: { groupId: number; groupName: string } | null;
+  joinedGroups: Array<{ groupId: number; groupName: string; leaderFirstName: string }>;
   leading: Array<{ groupId: number; groupName: string; discipleCount: number }>;
 };
 
@@ -47,7 +47,7 @@ export function GroupsDirectory({
 
   // Under: the group whose leader oversees you, your location group, groups you're simply a member of.
   const under = [
-    discipleship?.joined ? <GroupCard key="joined" href={`/dashboard/community/discipleship/${discipleship.joined.groupId}`} prefetch={false} art="discipleship" tag="Your group" title={discipleship.joined.groupName} meta="You’re a member" /> : null,
+    ...(discipleship?.joinedGroups ?? []).map(group => <GroupCard key={`joined-${group.groupId}`} href={`/dashboard/community/discipleship/${group.groupId}`} prefetch={false} art="discipleship" tag="Your group" title={group.groupName} meta={`Led by ${group.leaderFirstName}`} />),
     ...locationGroups.filter(group => group.relation === "member").map(group => <GroupCard key={`unit-${group.id}`} href={`/dashboard/community/unit/${group.id}`} art="location" title={group.name} meta="Your location group" />),
     ...mine.filter(group => group.viewerRole !== "owner" && group.viewerRole !== "moderator").map(group => <GroupCard key={group.id} href={`/dashboard/community/groups/${group.id}`} art={group.privacy === "private" ? "private" : "public"} title={group.name} meta={`${group.memberCount} member${group.memberCount === 1 ? "" : "s"}`} />),
   ].filter(Boolean);

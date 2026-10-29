@@ -15,7 +15,7 @@ const part: Status = { devotional: "reported", ministry: "missing", meetings: "n
 const none: Status = { devotional: "missing", ministry: "missing", meetings: "missing" };
 
 function person(userId: string, name: string, statuses: Status, group: [number, string, string, string] | null, depth: number | null, leads = 0, silentDays = 0): GroupOversightPerson {
-  return { userId, name, overseerId: group?.[2] ?? null, overseerName: group?.[3] ?? null, groupId: group?.[0] ?? null, groupName: group?.[1] ?? null, depth, branchId: null, leadsMembers: leads, atRisk: false, statuses, reportedToday: statuses !== none, silentDays, messageUserId: null };
+  return { userId, name, overseerId: group?.[2] ?? null, overseerName: group?.[3] ?? null, groupId: group?.[0] ?? null, groupName: group?.[1] ?? null, memberships: group ? [{ groupId: group[0], groupName: group[1], overseerId: group[2], overseerName: group[3], depth }] : [], depth, branchId: null, leadsMembers: leads, atRisk: false, statuses, reportedToday: statuses !== none, silentDays, messageUserId: null };
 }
 
 const campus: [number, string, string, string] = [1, "Campus fellowship", "me", "You"];

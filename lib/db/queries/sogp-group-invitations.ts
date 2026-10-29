@@ -5,7 +5,7 @@ import { alias } from "drizzle-orm/pg-core";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
 import { transactionDb } from "@/lib/db/transaction";
-import { discipleshipJoinBlockMessage } from "@/lib/sogp/discipleship";
+import { DISCIPLESHIP_GROUPS_JOINED_MAX, discipleshipJoinBlockMessage } from "@/lib/sogp/discipleship";
 import { fuzzyNameScore } from "@/lib/community/fuzzy-name";
 import { fullNameOf } from "@/lib/community/visibility";
 import { nameSearch } from "@/lib/db/name-search";
@@ -99,9 +99,9 @@ type InvitationRow = Awaited<ReturnType<typeof invitationQuery>>[number];
 
 /** Recipient view: leader name and group only. No contact details travel either way. */
 export type ReceivedInvitation = {
-  id: number; status: InvitationStatus; origin: "referral" | "in_app"; createdAt: string;
+  id: number; groupId: number; status: InvitationStatus; origin: "referral" | "in_app"; createdAt: string;
   groupName: string; leaderName: string; groupAvailable: boolean;
-  /** The recipient's own current group, so accepting can say it moves them (one overseer). */
+  /** A group the recipient is already in (their oldest), so accepting can say they keep it. */
   currentGroup: { id: number; name: string; leaderName: string } | null;
 };
 /** Sender view: the recipient's name only; email/phone stay out of the payload. */
@@ -114,7 +114,7 @@ const iso = (value: Date | string | null) => (value ? new Date(value).toISOStrin
 
 function received(row: InvitationRow, current: ReceivedInvitation["currentGroup"] = null): ReceivedInvitation {
   return {
-    id: row.id, status: row.status, origin: row.origin, createdAt: iso(row.createdAt)!,
+    id: row.id, groupId: row.groupId, status: row.status, origin: row.origin, createdAt: iso(row.createdAt)!,
     groupName: row.groupName, leaderName: row.leaderName, groupAvailable: row.groupStatus === "active",
     currentGroup: current && current.id !== row.groupId ? current : null,
   };
@@ -177,8 +177,6 @@ export async function respondToInvitation(input: {
   invitationId: number;
   accept: boolean;
   sharesPhone: boolean;
-  /** Confirmed leaving their current group (the invitation page warns first). */
-  move?: boolean;
 }): Promise<{ ok: true; status: "accepted" | "declined" } | { ok: false; error: string }> {
   try {
     return await transactionDb.transaction(async tx => {
@@ -205,9 +203,9 @@ export async function respondToInvitation(input: {
           groupId: invitation.groupId,
           viewerEnrollmentId: invitation.recipientEnrollmentId,
           sharesPhone: input.sharesPhone,
-          moveFromCurrent: input.move === true,
         });
-        if (!decision.ok) return { ok: false as const, error: decision.reason === "already_in_group" ? "You're in another group. Confirm the move to join this one." : discipleshipJoinBlockMessage(decision.reason) };
+        // Accepting adds the group and keeps the others (multi-group membership, 29 October).
+        if (!decision.ok) return { ok: false as const, error: discipleshipJoinBlockMessage(decision.reason) };
       }
       const status = input.accept ? "accepted" as const : "declined" as const;
       await tx
@@ -235,7 +233,7 @@ export async function withdrawInvitation(leaderEnrollmentId: number, invitationI
   return updated.length > 0;
 }
 
-export type InviteCandidate = { enrollmentId: number; name: string; state: "free" | "in_a_group" | "in_this_group" | "invited" };
+export type InviteCandidate = { enrollmentId: number; name: string; state: "free" | "in_a_group" | "full" | "in_this_group" | "invited" };
 
 /**
  * Leaders add people to a group by name (groups as oversight, 19 October).
@@ -277,13 +275,18 @@ export async function searchGroupInvitees(input: { leaderUserId: string; leaderE
       .from(schema.discipleshipGroupInvitations)
       .where(and(eq(schema.discipleshipGroupInvitations.groupId, group.id), eq(schema.discipleshipGroupInvitations.status, "pending"), inArray(schema.discipleshipGroupInvitations.recipientUserId, ids))),
   ]);
-  const groupOf = new Map(memberships.flatMap(row => row.userId ? [[row.userId, row.groupId] as const] : []));
+  // Someone can be in several groups (multi-group membership, 29 October).
+  const groupsOf = new Map<string, number[]>();
+  for (const row of memberships) if (row.userId) groupsOf.set(row.userId, [...(groupsOf.get(row.userId) ?? []), row.groupId]);
   const invited = new Set(pending.map(row => row.userId));
-  return top.map(row => ({
-    enrollmentId: row.enrollmentId,
-    name: row.name,
-    state: groupOf.get(row.userId) === group.id ? "in_this_group" : invited.has(row.userId) ? "invited" : groupOf.has(row.userId) ? "in_a_group" : "free",
-  }));
+  return top.map(row => {
+    const theirs = groupsOf.get(row.userId) ?? [];
+    return {
+      enrollmentId: row.enrollmentId,
+      name: row.name,
+      state: theirs.includes(group.id) ? "in_this_group" : invited.has(row.userId) ? "invited" : theirs.length >= DISCIPLESHIP_GROUPS_JOINED_MAX ? "full" : theirs.length ? "in_a_group" : "free",
+    };
+  });
 }
 
 export type PendingGroupInvitation = { id: number; name: string; createdAt: string };

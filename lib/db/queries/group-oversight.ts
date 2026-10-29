@@ -29,10 +29,12 @@ const PEOPLE_LIMIT = 2000;
 export type GroupOversightPerson = {
   userId: string;
   name: string;
+  /** Their nearest group in view; `memberships` holds every group they're in (multi-group membership, 29 October). */
   overseerId: string | null;
   overseerName: string | null;
   groupId: number | null;
   groupName: string | null;
+  memberships: Array<{ groupId: number; groupName: string | null; overseerId: string; overseerName: string | null; depth: number | null }>;
   /** Steps below the focus person; null in the Pastor's and branch pastor's wider view. */
   depth: number | null;
   branchId: number | null;
@@ -143,12 +145,16 @@ export async function getGroupOversight(viewerId: string, options: { under?: str
     if (!led) return null;
   }
 
-  const edgeOf = new Map(edges.map(edge => [edge.userId, edge]));
+  // A person can sit in several groups: keep every edge, and their nearest as the main one.
+  const edgesOf = new Map<string, TreeEdge[]>();
+  for (const edge of edges) edgesOf.set(edge.userId, [...(edgesOf.get(edge.userId) ?? []), edge]);
+  const nearest = (list: TreeEdge[]) => [...list].sort((a, b) => (a.depth > 0 ? a.depth : 99) - (b.depth > 0 ? b.depth : 99))[0];
+  const edgeOf = new Map([...edgesOf].map(([userId, list]) => [userId, nearest(list)!]));
   const today = lagosToday();
   const day = options.day && /^\d{4}-\d{2}-\d{2}$/.test(options.day) && options.day <= today && options.day >= shiftDate(today, -7) ? options.day : today;
   const waitCutoff = new Date(Date.now() - QUESTION_WAIT_DAYS * DAY_MS);
-  const overseerIds = [...new Set(ids.map(id => edgeOf.get(id)?.overseerId).filter((id): id is string => Boolean(id)))];
-  const groupIds = [...new Set(ids.map(id => edgeOf.get(id)?.groupId).filter((id): id is number => id != null))];
+  const overseerIds = [...new Set(ids.flatMap(id => (edgesOf.get(id) ?? []).map(edge => edge.overseerId)).filter((id): id is string => Boolean(id)))];
+  const groupIds = [...new Set(ids.flatMap(id => (edgesOf.get(id) ?? []).map(edge => edge.groupId)).filter((id): id is number => id != null))];
 
   const [names, groupRows, leadRows, riskRows, days, focusGroups, waitingRows, branchRows, learnerRows, ctx, dayStatuses, underEdge, memberOfRows] = await Promise.all([
     loadNames([...new Set([...ids, ...overseerIds, focus])]),
@@ -221,6 +227,9 @@ export async function getGroupOversight(viewerId: string, options: { under?: str
       overseerName: edge ? names.get(edge.overseerId)?.name ?? null : null,
       groupId: edge?.groupId ?? null,
       groupName: edge ? groupName.get(edge.groupId) ?? null : null,
+      memberships: [...new Map((edgesOf.get(userId) ?? []).map(item => [`${item.groupId}:${item.overseerId}`, item])).values()].map(item => ({
+        groupId: item.groupId, groupName: groupName.get(item.groupId) ?? null, overseerId: item.overseerId, overseerName: names.get(item.overseerId)?.name ?? null, depth: item.depth > 0 ? item.depth : null,
+      })),
       depth: edge && edge.depth > 0 ? edge.depth : null,
       branchId: branchOf.get(userId) ?? null,
       leadsMembers: leads.get(userId) ?? 0,
@@ -233,7 +242,7 @@ export async function getGroupOversight(viewerId: string, options: { under?: str
   }).sort((a, b) => (a.depth ?? 99) - (b.depth ?? 99) || a.name.localeCompare(b.name));
 
   const groups = focusGroups.map(group => {
-    const members = people.filter(person => person.groupId === group.id && person.overseerId === focus);
+    const members = people.filter(person => person.memberships.some(item => item.groupId === group.id && item.overseerId === focus));
     return { id: group.id, name: group.name, members: members.length, reportedToday: members.filter(person => person.reportedToday).length };
   });
   const waiting = waitingRows.flatMap(row => row.leaderId ? [{

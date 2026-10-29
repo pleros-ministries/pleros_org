@@ -7,7 +7,7 @@ const part: Status = { devotional: "reported", ministry: "missing", meetings: "n
 const none: Status = { devotional: "missing", ministry: "missing", meetings: "missing" };
 
 function person(userId: string, name: string, statuses: Status, group: [number, string, string, string], depth: number | null, leads = 0): GroupOversightPerson {
-  return { userId, name, overseerId: group[2], overseerName: group[3], groupId: group[0], groupName: group[1], depth, branchId: null, leadsMembers: leads, atRisk: false, statuses, reportedToday: statuses !== none, silentDays: 0, messageUserId: null };
+  return { userId, name, overseerId: group[2], overseerName: group[3], groupId: group[0], groupName: group[1], memberships: [{ groupId: group[0], groupName: group[1], overseerId: group[2], overseerName: group[3], depth }], depth, branchId: null, leadsMembers: leads, atRisk: false, statuses, reportedToday: statuses !== none, silentDays: 0, messageUserId: null };
 }
 
 const sunday: [number, string, string, string] = [1, "Sunday workers", "me", "You"];

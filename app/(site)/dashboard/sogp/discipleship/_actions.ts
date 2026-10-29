@@ -199,10 +199,12 @@ export async function joinDiscipleshipGroupAction(input: {
   });
 }
 
-export async function leaveDiscipleshipGroupAction(): Promise<DiscipleshipActionResult> {
+/** Leaves one group; the others stay (multi-group membership, 29 October). */
+export async function leaveDiscipleshipGroupAction(input: { groupId: number }): Promise<DiscipleshipActionResult> {
   return run(async () => {
     const learner = await requireEnrolledLearner();
-    await leaveDiscipleshipGroup(learner.enrollment.id);
+    if (!Number.isInteger(input?.groupId)) throw new DiscipleshipError("Choose the group to leave.");
+    if (!(await leaveDiscipleshipGroup(learner.enrollment.id, input.groupId))) throw new DiscipleshipError("You're not in this group any more.");
   });
 }
 
@@ -219,12 +221,15 @@ export async function removeDiscipleAction(input: {
 }
 
 export async function setDiscipleSharesPhoneAction(input: {
+  groupId: number;
   sharesPhone: boolean;
 }): Promise<DiscipleshipActionResult> {
   return run(async () => {
     const learner = await requireEnrolledLearner();
+    if (!Number.isInteger(input?.groupId)) throw new DiscipleshipError("Choose the group first.");
     await setDiscipleSharesPhone({
       discipleEnrollmentId: learner.enrollment.id,
+      groupId: input.groupId,
       sharesPhone: Boolean(input.sharesPhone),
     });
   });
@@ -401,6 +406,8 @@ export async function logWhatsAppContactAction(input: {
 
 export async function createPrayerRequestAction(input: {
   body: string;
+  /** The group it's shared in (multi-group membership); the oldest group when not given. */
+  groupId?: number;
 }): Promise<DiscipleshipActionResult> {
   return run(async () => {
     const body = clean(input.body, DISCIPLESHIP_PRAYER_MAX_LENGTH);
@@ -409,6 +416,7 @@ export async function createPrayerRequestAction(input: {
     const { leaderUserId } = await createPrayerRequest({
       discipleEnrollmentId: learner.enrollment.id,
       body,
+      groupId: Number.isInteger(input.groupId) ? input.groupId : undefined,
     });
     if (leaderUserId) {
       after(() =>
@@ -486,7 +494,7 @@ export async function deletePrayerRequestAction(input: {
 
 // ─── Episode questions ──────────────────────────────────────────────────────
 
-export async function getEpisodeQuestionRouteAction(): Promise<{ kind: "discipler"; leaderFirstName: string } | { kind: "ask-pleros" }> {
+export async function getEpisodeQuestionRouteAction(): Promise<import("@/lib/db/queries/sogp-episode-questions").EpisodeQuestionRoute> {
   const session = await getAppSession();
   if (!session) throw new Error("Log in to continue.");
   const { getEpisodeQuestionRoute } = await import("@/lib/db/queries/sogp-episode-questions");
@@ -497,6 +505,8 @@ export async function askEpisodeQuestionAction(input: {
   episodeGuid: string;
   episodeTitle: string;
   body: string;
+  /** Which of their groups' leaders gets it (multi-group membership); their first group's when not given. */
+  groupId?: number;
 }): Promise<DiscipleshipActionResult> {
   return run(async () => {
     const learner = await requireEnrolledLearner();
