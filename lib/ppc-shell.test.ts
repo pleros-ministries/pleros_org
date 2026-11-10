@@ -69,6 +69,12 @@ describe("ppc shell helpers", () => {
         roles: ["super_admin", "admin"],
       },
       {
+        label: "Giving",
+        path: "/giving",
+        icon: "giving",
+        roles: ["super_admin", "admin"],
+      },
+      {
         label: "Pastors",
         path: "/pastors",
         icon: "pastors",
@@ -136,6 +142,7 @@ describe("ppc shell helpers", () => {
       "/community",
       "/questions",
       "/ministry",
+      "/giving",
       "/pastors",
       "/my-enrollees",
       "/staff",
@@ -153,6 +160,7 @@ describe("ppc shell helpers", () => {
       "/community",
       "/questions",
       "/ministry",
+      "/giving",
       "/pastors",
       "/my-enrollees",
       "/staff",

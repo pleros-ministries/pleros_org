@@ -16,6 +16,7 @@ import {
   recordContactSubmissionNotificationResult,
   updateContactSubmissionStatus,
 } from "@/lib/db/queries/contact-submissions";
+import { listAdminNotificationEmails } from "@/lib/db/queries/admin-recipients";
 import { sendContactSubmissionNotification } from "@/lib/email/send";
 import { resolvePublicSiteUrl } from "@/lib/welcome-campaign";
 
@@ -90,7 +91,8 @@ export async function submitContactFormAction(
   });
 
   const siteUrl = resolvePublicSiteUrl(process.env);
-  const notificationResult = await sendContactSubmissionNotification({
+  const recipients = await listAdminNotificationEmails();
+  const notificationResult = await sendContactSubmissionNotification(recipients, {
     fullName: created.fullName,
     email: created.email,
     phone: created.phone,

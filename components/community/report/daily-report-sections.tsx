@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useTransition, type ReactNode } from "react";
+import { useState, useTransition, type ReactNode } from "react";
 import { BookOpenIcon, CheckIcon, ChevronRightIcon, HeartHandshakeIcon, PlusIcon, TargetIcon, UsersRoundIcon } from "lucide-react";
 
 import { clearDailyReportDeclaration, declareDailyReport } from "@/app/(site)/dashboard/community/_actions/daily-report-actions";
@@ -167,10 +167,13 @@ export function DailyReportSections({ today, days, selected, activities, edits =
   const [editing, setEditing] = useState<MinistryEdit | null>(null);
   // Optimistic answers (Pastor, 21 October): a No or a meeting shows at once and rolls back if the save fails.
   const [localNo, setLocalNo] = useState<{ date: string; reasons: Partial<Record<NoPart, string | null>> }>({ date: selected, reasons: {} });
-  const [drafts, setDrafts] = useState<(MeetingDraft & { id: number })[]>([]);
+  // Saved meetings arrive with the refreshed page, so the drafts standing in for them
+  // belong to the meetings list they were made against and go when it changes.
+  const [draftState, setDraftState] = useState<{ source: typeof activities; list: (MeetingDraft & { id: number })[] }>({ source: activities, list: [] });
+  const drafts = draftState.source === activities ? draftState.list : [];
+  const setDrafts = (update: (list: (MeetingDraft & { id: number })[]) => (MeetingDraft & { id: number })[]) =>
+    setDraftState(state => ({ source: activities, list: update(state.source === activities ? state.list : []) }));
   const [noSheet, setNoSheet] = useState<NoPart | null>(null);
-  // Saved meetings arrive with the refreshed page, so the drafts standing in for them go.
-  useEffect(() => { setDrafts([]); }, [activities]);
   const close = () => setPopup(null);
   // A preview never saves, so only the meetings pop-up (which saves through the page) opens.
   const open = (next: Popup) => { if (!preview || next === "meeting") setPopup(next); };

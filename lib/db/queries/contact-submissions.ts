@@ -3,6 +3,8 @@ import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { buildContactStatusUpdate, type ContactSubmissionStatus } from "@/lib/contact-submissions";
 
+import type { StaffNotificationResult } from "@/lib/email/send";
+
 import * as schema from "../schema";
 
 export async function createContactSubmission(input: {
@@ -87,9 +89,7 @@ export async function updateContactSubmissionStatus(
 
 export async function recordContactSubmissionNotificationResult(
   submissionId: number,
-  result:
-    | { ok: true }
-    | { ok: false; reason: "missing_contact_inbox" | "email_unavailable" | "send_failed" },
+  result: StaffNotificationResult,
 ) {
   const [updated] = await db
     .update(schema.contactSubmissions)

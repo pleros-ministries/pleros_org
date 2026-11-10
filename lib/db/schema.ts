@@ -10,6 +10,7 @@ import {
   timestamp,
   jsonb,
   serial,
+  bigint,
   uniqueIndex,
   index,
   pgEnum,
@@ -2916,4 +2917,29 @@ export const discipleshipGroupInvitations = pgTable("discipleship_group_invitati
   index("discipleship_group_invitations_group_idx").on(t.groupId, t.status),
   check("discipleship_group_invitations_origin_check", sql`${t.origin} in ('referral','in_app')`),
   check("discipleship_group_invitations_status_check", sql`${t.status} in ('pending','accepted','declined','withdrawn')`),
+]);
+
+/**
+ * Partner gifts (user, 10 November; migration 0078): reported from the
+ * dashboard Partner tab (bank, cash, other) or, for online gifts Paystack
+ * confirms while signed in, recorded once per reference. Only admins read
+ * them (/admin/giving). Minor units.
+ */
+export const partnerGifts = pgTable("partner_gifts", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  amountMinor: bigint("amount_minor", { mode: "number" }).notNull(),
+  currency: text("currency").notNull(),
+  channel: text("channel").notNull(),
+  givenOn: date("given_on", { mode: "string" }).notNull(),
+  note: text("note"),
+  paystackReference: text("paystack_reference"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [
+  index("partner_gifts_user_idx").on(t.userId, t.givenOn),
+  uniqueIndex("partner_gifts_paystack_reference_idx").on(t.paystackReference),
+  check("partner_gifts_amount_check", sql`${t.amountMinor} > 0`),
+  check("partner_gifts_currency_check", sql`${t.currency} in ('NGN','USD')`),
+  check("partner_gifts_channel_check", sql`${t.channel} in ('bank','online','cash','other')`),
+  check("partner_gifts_note_len", sql`${t.note} is null or char_length(${t.note}) <= 280`),
 ]);

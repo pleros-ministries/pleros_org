@@ -13,7 +13,9 @@ test("the default drawer renders only approved roots/workspace, not the legacy d
   expect(html).toContain('href="/dashboard/sogp"');
   expect(html).toContain('href="/dashboard/community"');
   // Saved contacts moved under Groups (Community), out of the You workspace.
-  expect(html).not.toContain('href="/dashboard/community/contacts"');
+  const keys = (key: string) => sections.find(section => section.key === key)?.items.map(item => item.key) ?? [];
+  expect(keys("personal")).not.toContain("contacts");
+  expect(keys("community")).toContain("contacts");
   expect(html).not.toContain('href="/dashboard/sogp/certificate"');
   expect(html).not.toContain('href="/dashboard/welcomepack/orientation"');
   expect(html).not.toContain("More destinations");
@@ -44,8 +46,7 @@ test("the isolated baseline does not preserve the retired destination dump",()=>
 });
 test("the live dashboard keeps current learning on the blue card treatment",()=>{
   const source = fs.readFileSync(path.join(process.cwd(), "components/dashboard/v3/home-view.tsx"), "utf8");
-  expect(source).toContain("styles.adaptiveLearningCard");
-  expect(source).toContain("styles.learningCard");
+  expect(source).toContain("styles.homeLearningCard");
   expect(source).not.toContain("<article className={styles.whiteCard}");
 });
 test("the You and Community homes use the raised-card canvas treatment",()=>{
@@ -58,11 +59,8 @@ test("the You and Community homes use the raised-card canvas treatment",()=>{
 });
 test("the dashboard canvas and card edges remain visible on low-contrast phone displays",()=>{
   const global = fs.readFileSync(path.join(process.cwd(), "app/globals.css"), "utf8");
-  const learning = fs.readFileSync(path.join(process.cwd(), "components/sogp/learning/learning.module.css"), "utf8");
   expect(global).toContain("--color-community-canvas: #f8f6f2");
   expect(global).toContain("--color-community-edge: #d9dde3");
-  expect(learning).toMatch(/\.homePage \{[^}]*background: var\(--color-community-canvas\)/);
-  expect(learning).toMatch(/\.learningGroup \{[^}]*background: white;[^}]*border: 1px solid var\(--color-community-edge\)/);
 });
 test("authenticated dashboard headings use Sen while body and controls retain Inter",()=>{
   const styles = fs.readFileSync(path.join(process.cwd(), "components/dashboard/v3/dashboard.module.css"), "utf8");

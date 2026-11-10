@@ -8,13 +8,17 @@ import { partnerPayOnlineCopy } from "@/lib/partner-page-content";
 import { cn } from "@/lib/utils";
 import { validateEmail, validateFirstName } from "@/lib/welcome-flow";
 
-type CurrencyCode = keyof typeof partnerPayOnlineCopy.currencies;
+export type CurrencyCode = keyof typeof partnerPayOnlineCopy.currencies;
 
 type FormStatus = "idle" | "submitting" | "verifying" | "success" | "error";
 
-export function PaystackDonateForm() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+/**
+ * The Paystack giving flow, shared by the public Partner page and the
+ * dashboard's Pay online sheet so both validate and verify the same way.
+ */
+export function usePaystackDonation(initial?: { name?: string; email?: string }) {
+  const [name, setName] = useState(initial?.name ?? "");
+  const [email, setEmail] = useState(initial?.email ?? "");
   const [amount, setAmount] = useState("");
   const [currency, setCurrency] = useState<CurrencyCode>("NGN");
   const [status, setStatus] = useState<FormStatus>("idle");
@@ -111,6 +115,18 @@ export function PaystackDonateForm() {
       setError(partnerPayOnlineCopy.genericErrorMessage);
     }
   }
+
+  return {
+    name, setName, email, setEmail, amount, setAmount, currency, setCurrency,
+    status, error, isBusy, handleSubmit,
+  };
+}
+
+export function PaystackDonateForm() {
+  const {
+    name, setName, email, setEmail, amount, setAmount, currency, setCurrency,
+    status, error, isBusy, handleSubmit,
+  } = usePaystackDonation();
 
   if (status === "success") {
     return (

@@ -62,10 +62,11 @@ describe("activityFields", () => {
     expect(activityKindLabel("follow_up")).toBe("Discipleship");
   });
 
-  test("church service and something else are kept only for older activities", () => {
+  test("church service, something else and outreach meetings are not offered in the form", () => {
     expect(ALL_ACTIVITY_KINDS.filter((kind) => !kind.offered).map((kind) => kind.key)).toEqual([
       "church_service",
       "other",
+      "outreach_meeting",
     ]);
     // Older activities still read and add up.
     expect(activityKindLabel("church_service")).toBe("Church service");
