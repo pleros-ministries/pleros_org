@@ -12,5 +12,5 @@ export const metadata: Metadata = { title: "Partner with us" };
 export default async function DashboardPartnerPage() {
   const session = await getAppSession();
   if (!session) redirect("/login?returnTo=/dashboard/partner");
-  return <PartnerHome />;
+  return <PartnerHome name={session.user.name ?? ""} email={session.user.email ?? ""} />;
 }

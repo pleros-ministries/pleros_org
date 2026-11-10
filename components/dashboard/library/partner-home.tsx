@@ -6,13 +6,16 @@ import { BanknoteIcon, CreditCardIcon, MessageCircleHeartIcon } from "lucide-rea
 import { partnerBankAccount, partnerImpactItems } from "@/lib/partner-page-content";
 
 import styles from "./library.module.css";
+import { PartnerPaySheet } from "./partner-pay-sheet";
 
 /**
- * Partner (Pastor review, 18 October): its own You tab. Giving goes through
- * the public Partner page's existing channels; no new payment flow here.
+ * Partner (Pastor review, 18 October): its own You tab. Giving uses the public
+ * Partner page's channels; Pay online and Give now open its Paystack form in a
+ * bottom sheet rather than leaving the dashboard (user, 10 November).
  */
-export function PartnerHome() {
+export function PartnerHome({ name, email }: { name: string; email: string }) {
   const [copied, setCopied] = useState(false);
+  const [paying, setPaying] = useState(false);
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(partnerBankAccount.accountNumber);
@@ -29,15 +32,15 @@ export function PartnerHome() {
     <section className={styles.dest} data-art style={{ "--dest-field": "#b84f35", "--dest-ink": "#a8432c", "--dest-art": "url(\"/assets/dashboard/learning-card/my-learning-level-3.webp\")", minHeight: 170 } as CSSProperties}>
       <span style={{ fontSize: 12, opacity: .92 }}>Pleros Ministries &amp; Missions</span>
       <div><h2 style={{ fontSize: 20, lineHeight: "26px" }}>Help more people find God’s purpose</h2><p style={{ opacity: .92 }}>Every gift funds SOGP, the podcast and outreach.</p></div>
-      <a href="/partner#partner" className={styles.give}>Give now</a>
+      <button type="button" className={styles.give} onClick={() => setPaying(true)}>Give now</button>
     </section>
 
     <div className={styles.section}><h2>Ways to give</h2></div>
     <div className={styles.panel}>
-      <a href="/partner#partner" className={styles.row}>
+      <button type="button" className={styles.row} onClick={() => setPaying(true)}>
         <span className={styles.icon} style={{ background: "#e4ebfd", color: "#2331ae" }} aria-hidden="true"><CreditCardIcon className="size-4" strokeWidth={2} /></span>
         <span className={styles.copy}><b>Pay online</b><span>Card in Naira or US Dollars</span></span>
-      </a>
+      </button>
       <div className={styles.row}>
         <span className={styles.icon} style={{ background: "#fde3cf", color: "#7a3a10" }} aria-hidden="true"><BanknoteIcon className="size-4" strokeWidth={2} /></span>
         <span className={styles.copy}><b>Bank transfer</b><span>{partnerBankAccount.bankName} · {partnerBankAccount.accountNumber}</span><span>{partnerBankAccount.accountName}</span></span>
@@ -52,5 +55,7 @@ export function PartnerHome() {
         <span className={styles.copy}><b>{item}</b></span>
       </div>)}
     </div>
+
+    {paying ? <PartnerPaySheet name={name} email={email} onClose={() => setPaying(false)} /> : null}
   </div>;
 }
