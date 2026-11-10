@@ -72,14 +72,3 @@ export function staffAskerView(input: {
 export function staffAskerLabel(view: StaffAskerView): string {
   return view.anonymous ? "Anonymous" : view.name;
 }
-
-/** The shared inbox for new questions: its own address, else the contact-form inbox. */
-export function resolveAskPlerosInbox(
-  env: Record<string, string | undefined>,
-): string | null {
-  return (
-    env.ASK_PLEROS_INBOX_EMAIL?.trim() ||
-    env.CONTACT_INBOX_EMAIL?.trim() ||
-    null
-  );
-}

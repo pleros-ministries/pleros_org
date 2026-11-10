@@ -2,13 +2,13 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 
 import { contactSubmissionNotificationHtml } from "./templates";
 
-const sendEmail = vi.fn();
+const sendBatch = vi.fn();
 const isEmailEnabled = vi.fn();
 
 vi.mock("./resend", () => ({
   resend: {
-    emails: {
-      send: sendEmail,
+    batch: {
+      send: sendBatch,
     },
   },
   isEmailEnabled,
@@ -17,7 +17,6 @@ vi.mock("./resend", () => ({
 describe("contact submission email", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    delete process.env.CONTACT_INBOX_EMAIL;
   });
 
   test("template includes sender details, message, location, and admin link", () => {
@@ -57,48 +56,69 @@ describe("contact submission email", () => {
     expect(html).not.toContain("<script>alert(1)</script>");
   });
 
-  test("returns a clear result when the contact inbox is missing", async () => {
+  const submission = {
+    adminUrl: "https://pleros-org.vercel.app/admin/contact?submission=18",
+    email: "ada@example.com",
+    fullName: "Ada Lovelace",
+    location: "Lagos",
+    message: "Please tell me more about the ministry.",
+    phone: "+234 555 0101",
+    submittedAt: "2026-06-08T12:30:00.000Z",
+  };
+
+  test("sends each admin and super admin their own copy, replying to the sender", async () => {
     isEmailEnabled.mockReturnValue(true);
+    sendBatch.mockResolvedValue({ data: {}, error: null });
     const { sendContactSubmissionNotification } = await import("./send");
 
     await expect(
-      sendContactSubmissionNotification({
-        adminUrl: "https://pleros-org.vercel.app/admin/contact?submission=18",
-        email: "ada@example.com",
-        fullName: "Ada Lovelace",
-        location: "Lagos",
-        message: "Please tell me more about the ministry.",
-        phone: "+234 555 0101",
-        submittedAt: "2026-06-08T12:30:00.000Z",
-      }),
-    ).resolves.toEqual({
-      ok: false,
-      reason: "missing_contact_inbox",
-    });
+      sendContactSubmissionNotification(
+        ["Admin@pleros.org", "super@pleros.org", "admin@pleros.org"],
+        submission,
+      ),
+    ).resolves.toEqual({ ok: true });
 
-    expect(sendEmail).not.toHaveBeenCalled();
+    expect(sendBatch).toHaveBeenCalledTimes(1);
+    const emails = sendBatch.mock.calls[0][0];
+    expect(emails.map((email: { to: string }) => email.to)).toEqual([
+      "admin@pleros.org",
+      "super@pleros.org",
+    ]);
+    expect(emails[0].replyTo).toBe("ada@example.com");
+    expect(emails[0].subject).toBe("New contact submission from Ada Lovelace");
+  });
+
+  test("returns a clear result when there are no admins", async () => {
+    isEmailEnabled.mockReturnValue(true);
+    const { sendContactSubmissionNotification } = await import("./send");
+
+    await expect(sendContactSubmissionNotification([], submission)).resolves.toEqual({
+      ok: false,
+      reason: "no_recipients",
+    });
+    expect(sendBatch).not.toHaveBeenCalled();
+  });
+
+  test("reports a failure Resend returns rather than throws", async () => {
+    isEmailEnabled.mockReturnValue(true);
+    sendBatch.mockResolvedValue({ data: null, error: { message: "rate limited" } });
+    const { sendContactSubmissionNotification } = await import("./send");
+
+    await expect(
+      sendContactSubmissionNotification(["admin@pleros.org"], submission),
+    ).resolves.toEqual({ ok: false, reason: "send_failed" });
   });
 
   test("fails gracefully when email delivery is unavailable", async () => {
-    process.env.CONTACT_INBOX_EMAIL = "team@pleros.org";
     isEmailEnabled.mockReturnValue(false);
     const { sendContactSubmissionNotification } = await import("./send");
 
     await expect(
-      sendContactSubmissionNotification({
-        adminUrl: "https://pleros-org.vercel.app/admin/contact?submission=18",
-        email: "ada@example.com",
-        fullName: "Ada Lovelace",
-        location: null,
-        message: "Please tell me more about the ministry.",
-        phone: "+234 555 0101",
-        submittedAt: "2026-06-08T12:30:00.000Z",
-      }),
+      sendContactSubmissionNotification(["admin@pleros.org"], submission),
     ).resolves.toEqual({
       ok: false,
       reason: "email_unavailable",
     });
-
-    expect(sendEmail).not.toHaveBeenCalled();
+    expect(sendBatch).not.toHaveBeenCalled();
   });
 });

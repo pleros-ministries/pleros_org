@@ -42,11 +42,9 @@ const timeFmt = new Intl.DateTimeFormat("en-GB", {
 export function AdminQuestionsPage({
   questions,
   selected,
-  inboxConfigured,
 }: {
   questions: StaffQuestionSummary[];
   selected: StaffQuestion | null;
-  inboxConfigured: boolean;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -96,14 +94,6 @@ export function AdminQuestionsPage({
           email.
         </p>
       </header>
-
-      {inboxConfigured ? null : (
-        <p className="rounded-sm border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
-          No inbox address is set, so new questions are not being emailed. Set
-          ASK_PLEROS_INBOX_EMAIL (or CONTACT_INBOX_EMAIL) to receive them.
-          Questions still arrive on this page.
-        </p>
-      )}
 
       <div className="flex gap-4 border-b border-zinc-200">
         {STATUS_TABS.map((item) => {

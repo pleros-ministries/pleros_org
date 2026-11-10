@@ -26,6 +26,7 @@ import {
   markQuestionReadByAsker,
   revealQuestionAsker,
 } from "@/lib/db/queries/ask-pleros";
+import { listAdminNotificationEmails } from "@/lib/db/queries/admin-recipients";
 import { sendAskPlerosStaffNotification } from "@/lib/email/send";
 import { resolvePublicSiteUrl } from "@/lib/welcome-campaign";
 
@@ -71,15 +72,18 @@ async function assertWithinLimits(askerId: string, kind: "question" | "followUp"
 }
 
 /**
- * Emails the shared inbox. It reads the question back through the staff view,
+ * Emails every admin and super admin. It reads the question back through the staff view,
  * so the email can only ever contain what staff are allowed to see.
  */
 function emailStaff(questionId: number, message: string, isFollowUp: boolean) {
   after(() =>
     (async () => {
-      const question = await getQuestionForStaff(questionId);
+      const [question, recipients] = await Promise.all([
+        getQuestionForStaff(questionId),
+        listAdminNotificationEmails(),
+      ]);
       if (!question) return;
-      const result = await sendAskPlerosStaffNotification({
+      const result = await sendAskPlerosStaffNotification(recipients, {
         askerLabel: staffAskerLabel(question.asker),
         groupName: question.asker.anonymous ? null : question.asker.groupName,
         message,
@@ -88,7 +92,7 @@ function emailStaff(questionId: number, message: string, isFollowUp: boolean) {
         episodeTitle: question.episodeTitle,
         adminUrl: `${resolvePublicSiteUrl(process.env)}/admin/questions?question=${questionId}`,
       });
-      if (!result.ok && result.reason !== "missing_inbox") {
+      if (!result.ok) {
         console.error("Ask Pleros staff email not sent:", result.reason);
       }
     })().catch((error) =>

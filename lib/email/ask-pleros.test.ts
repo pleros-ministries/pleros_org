@@ -3,13 +3,13 @@ import { beforeEach, describe, expect, test, vi } from "vitest";
 import { staffAskerLabel, staffAskerView } from "../community/ask-pleros";
 import { askPlerosStaffNotificationHtml, plerosReplyHtml } from "./templates";
 
-const sendEmail = vi.fn();
+const sendBatch = vi.fn();
 const isEmailEnabled = vi.fn();
 
 vi.mock("./resend", () => ({
   resend: {
-    emails: {
-      send: sendEmail,
+    batch: {
+      send: sendBatch,
     },
   },
   isEmailEnabled,
@@ -20,8 +20,6 @@ const adminUrl = "https://pleros.org/admin/questions?question=7";
 describe("Ask Pleros staff email", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    delete process.env.ASK_PLEROS_INBOX_EMAIL;
-    delete process.env.CONTACT_INBOX_EMAIL;
   });
 
   test("an anonymous question's email carries nothing about the asker", () => {
@@ -63,33 +61,37 @@ describe("Ask Pleros staff email", () => {
     expect(html).not.toContain("<script>");
   });
 
-  test("sends to the Ask Pleros inbox with no reply-to and an anonymous subject", async () => {
-    process.env.ASK_PLEROS_INBOX_EMAIL = "ask@pleros.org";
-    process.env.CONTACT_INBOX_EMAIL = "team@pleros.org";
+  test("sends each admin their own copy with no reply-to and an anonymous subject", async () => {
     isEmailEnabled.mockReturnValue(true);
-    sendEmail.mockResolvedValue({});
+    sendBatch.mockResolvedValue({ data: {}, error: null });
     const { sendAskPlerosStaffNotification } = await import("./send");
 
-    const result = await sendAskPlerosStaffNotification({
-      askerLabel: "Anonymous",
-      groupName: null,
-      message: "How do I forgive someone?",
-      isFollowUp: false,
-      isAnonymous: true,
-      adminUrl,
-    });
+    const result = await sendAskPlerosStaffNotification(
+      ["admin@pleros.org", "super@pleros.org"],
+      {
+        askerLabel: "Anonymous",
+        groupName: null,
+        message: "How do I forgive someone?",
+        isFollowUp: false,
+        isAnonymous: true,
+        adminUrl,
+      },
+    );
 
     expect(result).toEqual({ ok: true });
-    expect(sendEmail).toHaveBeenCalledTimes(1);
-    const sent = sendEmail.mock.calls[0][0];
-    expect(sent.to).toBe("ask@pleros.org");
-    expect(sent.subject).toBe("New anonymous question for Pleros");
-    expect(sent.replyTo).toBeUndefined();
+    expect(sendBatch).toHaveBeenCalledTimes(1);
+    const emails = sendBatch.mock.calls[0][0];
+    expect(emails.map((email: { to: string }) => email.to)).toEqual([
+      "admin@pleros.org",
+      "super@pleros.org",
+    ]);
+    expect(emails[0].subject).toBe("New anonymous question for Pleros");
+    expect(emails[0].replyTo).toBeUndefined();
   });
 
-  test("falls back to the contact inbox, and reports when there is none", async () => {
+  test("names the asker in the subject, and reports when there are no admins", async () => {
     isEmailEnabled.mockReturnValue(true);
-    sendEmail.mockResolvedValue({});
+    sendBatch.mockResolvedValue({ data: {}, error: null });
     const { sendAskPlerosStaffNotification } = await import("./send");
     const input = {
       askerLabel: "Ada Grace Nwosu",
@@ -100,16 +102,16 @@ describe("Ask Pleros staff email", () => {
       adminUrl,
     };
 
-    expect(await sendAskPlerosStaffNotification(input)).toEqual({
+    expect(await sendAskPlerosStaffNotification([], input)).toEqual({
       ok: false,
-      reason: "missing_inbox",
+      reason: "no_recipients",
     });
-    expect(sendEmail).not.toHaveBeenCalled();
+    expect(sendBatch).not.toHaveBeenCalled();
 
-    process.env.CONTACT_INBOX_EMAIL = "team@pleros.org";
-    expect(await sendAskPlerosStaffNotification(input)).toEqual({ ok: true });
-    expect(sendEmail.mock.calls[0][0].to).toBe("team@pleros.org");
-    expect(sendEmail.mock.calls[0][0].subject).toBe(
+    expect(await sendAskPlerosStaffNotification(["admin@pleros.org"], input)).toEqual({
+      ok: true,
+    });
+    expect(sendBatch.mock.calls[0][0][0].subject).toBe(
       "New question for Pleros from Ada Grace Nwosu",
     );
   });

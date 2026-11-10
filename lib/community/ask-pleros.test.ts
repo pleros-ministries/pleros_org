@@ -5,7 +5,6 @@ import {
   STAFF_REPLY_MAX,
   normaliseQuestionBody,
   parseAnonymityChoice,
-  resolveAskPlerosInbox,
   staffAskerLabel,
   staffAskerView,
 } from "./ask-pleros";
@@ -77,24 +76,5 @@ describe("normaliseQuestionBody", () => {
     expect(
       normaliseQuestionBody("x".repeat(STAFF_REPLY_MAX + 1), STAFF_REPLY_MAX).ok,
     ).toBe(false);
-  });
-});
-
-describe("resolveAskPlerosInbox", () => {
-  test("prefers its own inbox, then the contact inbox", () => {
-    expect(
-      resolveAskPlerosInbox({
-        ASK_PLEROS_INBOX_EMAIL: " ask@pleros.org ",
-        CONTACT_INBOX_EMAIL: "team@pleros.org",
-      }),
-    ).toBe("ask@pleros.org");
-    expect(resolveAskPlerosInbox({ CONTACT_INBOX_EMAIL: "team@pleros.org" })).toBe(
-      "team@pleros.org",
-    );
-  });
-
-  test("is null when neither is set", () => {
-    expect(resolveAskPlerosInbox({})).toBeNull();
-    expect(resolveAskPlerosInbox({ ASK_PLEROS_INBOX_EMAIL: "  " })).toBeNull();
   });
 });

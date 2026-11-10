@@ -1,4 +1,4 @@
-import { resolveAskPlerosInbox } from "../community/ask-pleros";
+import { chunk, RESEND_BATCH_MAX, uniqueRecipients } from "./recipients";
 import { resend, isEmailEnabled } from "./resend";
 import {
   askPlerosStaffNotificationHtml,
@@ -223,47 +223,55 @@ export async function sendWelcomePackExtrasUnlockedEmail(opts: {
   });
 }
 
-export async function sendContactSubmissionNotification(opts: {
-  fullName: string;
-  email: string;
-  phone: string;
-  location: string | null;
-  message: string;
-  submittedAt: string;
-  adminUrl: string;
-}) {
-  const to = process.env.CONTACT_INBOX_EMAIL?.trim();
+export type StaffNotificationResult =
+  | { ok: true }
+  | { ok: false; reason: "no_recipients" | "email_unavailable" | "send_failed" };
 
-  if (!to) {
-    return {
-      ok: false as const,
-      reason: "missing_contact_inbox" as const,
-    };
-  }
-
-  if (!isEmailEnabled() || !resend) {
-    return {
-      ok: false as const,
-      reason: "email_unavailable" as const,
-    };
-  }
+/**
+ * Sends one copy of a staff notification to each recipient, so no one sees
+ * anyone else's address. Resend reports failures in its result rather than
+ * throwing, so both are checked.
+ */
+async function sendToEachStaff(
+  recipients: readonly string[],
+  message: { from: string; subject: string; html: string; replyTo?: string },
+): Promise<StaffNotificationResult> {
+  const to = uniqueRecipients(recipients);
+  if (!to.length) return { ok: false, reason: "no_recipients" };
+  if (!isEmailEnabled() || !resend) return { ok: false, reason: "email_unavailable" };
 
   try {
-    await resend.emails.send({
-      from: process.env.EMAIL_FROM_PLEROS ?? FROM,
-      to,
-      replyTo: opts.email,
-      subject: `New contact submission from ${opts.fullName}`,
-      html: contactSubmissionNotificationHtml(opts),
-    });
-
-    return { ok: true as const };
+    for (const batch of chunk(to, RESEND_BATCH_MAX)) {
+      const result = await resend.batch.send(
+        batch.map((address) => ({ ...message, to: address })),
+      );
+      if (result?.error) return { ok: false, reason: "send_failed" };
+    }
+    return { ok: true };
   } catch {
-    return {
-      ok: false as const,
-      reason: "send_failed" as const,
-    };
+    return { ok: false, reason: "send_failed" };
   }
+}
+
+/** Emails every admin and super admin about a new contact-form message. */
+export async function sendContactSubmissionNotification(
+  recipients: readonly string[],
+  opts: {
+    fullName: string;
+    email: string;
+    phone: string;
+    location: string | null;
+    message: string;
+    submittedAt: string;
+    adminUrl: string;
+  },
+): Promise<StaffNotificationResult> {
+  return sendToEachStaff(recipients, {
+    from: process.env.EMAIL_FROM_PLEROS ?? FROM,
+    replyTo: opts.email,
+    subject: `New contact submission from ${opts.fullName}`,
+    html: contactSubmissionNotificationHtml(opts),
+  });
 }
 
 export async function sendSogpEnrollmentEmail(opts: {
@@ -325,45 +333,33 @@ export async function sendSogpAuthCodeEmail(opts: {
 }
 
 /**
- * Emails the shared Ask Pleros inbox about a new question or follow-up. No
+ * Emails every admin and super admin about a new question or follow-up. No
  * reply-to is set: answers go through the admin area so they are recorded and
  * so an anonymous asker's address is never needed.
  */
-export async function sendAskPlerosStaffNotification(opts: {
-  askerLabel: string;
-  groupName: string | null;
-  message: string;
-  isFollowUp: boolean;
-  isAnonymous: boolean;
-  episodeTitle?: string | null;
-  adminUrl: string;
-}) {
-  const to = resolveAskPlerosInbox(process.env);
-
-  if (!to) {
-    return { ok: false as const, reason: "missing_inbox" as const };
-  }
-  if (!isEmailEnabled() || !resend) {
-    return { ok: false as const, reason: "email_unavailable" as const };
-  }
-
+export async function sendAskPlerosStaffNotification(
+  recipients: readonly string[],
+  opts: {
+    askerLabel: string;
+    groupName: string | null;
+    message: string;
+    isFollowUp: boolean;
+    isAnonymous: boolean;
+    episodeTitle?: string | null;
+    adminUrl: string;
+  },
+): Promise<StaffNotificationResult> {
   const subject = opts.isFollowUp
     ? "Follow-up on a question for Pleros"
     : opts.isAnonymous
       ? "New anonymous question for Pleros"
       : `New question for Pleros from ${opts.askerLabel}`;
 
-  try {
-    await resend.emails.send({
-      from: process.env.EMAIL_FROM_PLEROS ?? FROM,
-      to,
-      subject,
-      html: askPlerosStaffNotificationHtml(opts),
-    });
-    return { ok: true as const };
-  } catch {
-    return { ok: false as const, reason: "send_failed" as const };
-  }
+  return sendToEachStaff(recipients, {
+    from: process.env.EMAIL_FROM_PLEROS ?? FROM,
+    subject,
+    html: askPlerosStaffNotificationHtml(opts),
+  });
 }
 
 /** Tells the asker that Pleros has replied; the email carries no question or answer text. */

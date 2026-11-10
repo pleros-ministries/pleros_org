@@ -1,6 +1,5 @@
 import { AdminQuestionsPage } from "@/components/community/admin-questions-page";
 import { requireAdmin } from "@/lib/auth/require-role";
-import { resolveAskPlerosInbox } from "@/lib/community/ask-pleros";
 import {
   getQuestionForStaff,
   listQuestionsForStaff,
@@ -27,7 +26,6 @@ export default async function AdminQuestionsRoute({
       key={selected?.id ?? "none"}
       questions={questions}
       selected={selected}
-      inboxConfigured={resolveAskPlerosInbox(process.env) !== null}
     />
   );
 }
