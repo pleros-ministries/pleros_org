@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 
+import { getAppSession } from "@/lib/app-session";
+import { recordPaystackGift } from "@/lib/db/queries/partner-gifts";
+import { isGiftCurrency, localIsoDate } from "@/lib/partner-gifts";
+
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => null)) as
     | { reference?: string }
@@ -25,7 +29,7 @@ export async function POST(request: Request) {
 
     const json = (await response.json().catch(() => null)) as {
       status?: boolean;
-      data?: { status?: string };
+      data?: { status?: string; amount?: number; currency?: string; paid_at?: string | null };
     } | null;
 
     if (!json?.status || json.data?.status !== "success") {
@@ -34,6 +38,8 @@ export async function POST(request: Request) {
         { status: 402 },
       );
     }
+
+    await recordOnlineGift(reference, json.data);
 
     return NextResponse.json({ verified: true });
   } catch (error) {
@@ -44,5 +50,21 @@ export async function POST(request: Request) {
       },
       { status: 500 },
     );
+  }
+}
+
+/**
+ * A signed-in giver's confirmed online gift goes into their own record on the
+ * dashboard Partner tab (user, 10 November). Never fails the verify.
+ */
+async function recordOnlineGift(reference: string, data: { amount?: number; currency?: string; paid_at?: string | null }) {
+  try {
+    const session = await getAppSession();
+    if (!session || !isGiftCurrency(data.currency)) return;
+    if (!Number.isInteger(data.amount) || !data.amount || data.amount <= 0) return;
+    const paidOn = data.paid_at && !Number.isNaN(Date.parse(data.paid_at)) ? data.paid_at.slice(0, 10) : localIsoDate();
+    await recordPaystackGift(session.user.id, { reference, amountMinor: data.amount, currency: data.currency, givenOn: paidOn });
+  } catch (error) {
+    console.error("Recording online gift failed:", error);
   }
 }

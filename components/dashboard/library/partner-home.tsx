@@ -1,19 +1,25 @@
 "use client";
 
 import { useState, type CSSProperties } from "react";
+import { useRouter } from "next/navigation";
 import { BanknoteIcon, CreditCardIcon, MessageCircleHeartIcon } from "lucide-react";
 
-import { partnerBankAccount, partnerImpactItems } from "@/lib/partner-page-content";
+import { partnerBankAccount, partnerImpactItems, partnerReasons } from "@/lib/partner-page-content";
+import type { PartnerGift } from "@/lib/partner-gifts";
 
 import styles from "./library.module.css";
+import { PartnerGifts } from "./partner-gifts";
 import { PartnerPaySheet } from "./partner-pay-sheet";
 
 /**
  * Partner (Pastor review, 18 October): its own You tab. Giving uses the public
  * Partner page's channels; Pay online and Give now open its Paystack form in a
- * bottom sheet rather than leaving the dashboard (user, 10 November).
+ * bottom sheet rather than leaving the dashboard (user, 10 November). Why
+ * partner with Pleros carries the public page's reasons, and Your gifts is the
+ * giver's own record (user, 10 November).
  */
-export function PartnerHome({ name, email }: { name: string; email: string }) {
+export function PartnerHome({ name, email, gifts, preview = false }: { name: string; email: string; gifts: PartnerGift[]; preview?: boolean }) {
+  const router = useRouter();
   const [copied, setCopied] = useState(false);
   const [paying, setPaying] = useState(false);
   const copy = async () => {
@@ -35,6 +41,14 @@ export function PartnerHome({ name, email }: { name: string; email: string }) {
       <button type="button" className={styles.give} onClick={() => setPaying(true)}>Give now</button>
     </section>
 
+    <div className={styles.section}><h2>Why partner with Pleros</h2></div>
+    <div className={styles.panel}>
+      {partnerReasons.map(reason => <div key={reason.step} className={`${styles.row} ${styles.reason}`}>
+        <span className={styles.step} aria-hidden="true">{reason.step}</span>
+        <span className={styles.copy}><b>{reason.dashboardTitle}</b><span>{reason.description}</span></span>
+      </div>)}
+    </div>
+
     <div className={styles.section}><h2>Ways to give</h2></div>
     <div className={styles.panel}>
       <button type="button" className={styles.row} onClick={() => setPaying(true)}>
@@ -48,6 +62,8 @@ export function PartnerHome({ name, email }: { name: string; email: string }) {
       </div>
     </div>
 
+    <PartnerGifts initialGifts={gifts} preview={preview} />
+
     <div className={styles.section}><h2>What your gift does</h2></div>
     <div className={styles.panel}>
       {partnerImpactItems.map(item => <div key={item} className={styles.row}>
@@ -56,6 +72,6 @@ export function PartnerHome({ name, email }: { name: string; email: string }) {
       </div>)}
     </div>
 
-    {paying ? <PartnerPaySheet name={name} email={email} onClose={() => setPaying(false)} /> : null}
+    {paying ? <PartnerPaySheet name={name} email={email} onPaid={() => router.refresh()} onClose={() => setPaying(false)} /> : null}
   </div>;
 }

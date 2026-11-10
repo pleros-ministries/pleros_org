@@ -1,6 +1,6 @@
 "use client";
 
-import { useId } from "react";
+import { useEffect, useId, useRef } from "react";
 
 import { ReportSheet, Segmented, sheetStyles } from "@/components/community/report/report-sheet";
 import { usePaystackDonation, type CurrencyCode } from "@/components/home/paystack-donate-form";
@@ -12,9 +12,14 @@ const currencyOptions = (Object.keys(partnerPayOnlineCopy.currencies) as Currenc
  * Pay online from the dashboard's Partner tab (user, 10 November): the same
  * Paystack flow as the public Partner page, in a bottom sheet so giving
  * never leaves the dashboard. Name and email start from the signed-in account.
+ * A confirmed gift is added to Your gifts by the verify route.
  */
-export function PartnerPaySheet({ name, email, onClose }: { name: string; email: string; onClose: () => void }) {
+export function PartnerPaySheet({ name, email, onPaid, onClose }: { name: string; email: string; onPaid?: () => void; onClose: () => void }) {
   const pay = usePaystackDonation({ name, email });
+  // A confirmed gift is recorded on the server; refresh Your gifts to show it.
+  const paid = useRef(onPaid);
+  useEffect(() => { paid.current = onPaid; });
+  useEffect(() => { if (pay.status === "success") paid.current?.(); }, [pay.status]);
   const ids = useId();
   const symbol = partnerPayOnlineCopy.currencies[pay.currency].symbol;
 

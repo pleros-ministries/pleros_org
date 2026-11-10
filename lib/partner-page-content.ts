@@ -9,22 +9,26 @@ export const partnerPageHero = {
 export const partnerWhatsappHref =
   "#partner" as const;
 
+/** `dashboardTitle` is the sentence-case title the dashboard Partner tab uses. */
 export const partnerReasons = [
   {
     step: "1",
     title: "Advance the Gospel",
+    dashboardTitle: "Advance the Gospel",
     description:
       "Your partnership helps spread the Gospel through our online and offline outreaches.",
   },
   {
     step: "2",
     title: "Raise Disciples",
+    dashboardTitle: "Raise disciples",
     description:
       "Together, we equip believers to grow spiritually, discover purpose, and walk in God’s purpose for their lives.",
   },
   {
     step: "3",
     title: "Extend the Influence of Truth",
+    dashboardTitle: "Extend the influence of truth",
     description:
       "Your support enables us to reach more nations, plant seeds of truth, and help many fulfil God’s purpose.",
   },
