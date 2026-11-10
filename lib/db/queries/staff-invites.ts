@@ -83,9 +83,15 @@ export async function listStaffUsers() {
 }
 
 /** Direct role edit — used to grant an existing account staff access, or to
- * demote one (e.g. removing pastor access) back to "student". */
+ * demote one (e.g. removing pastor access) back to "student". `isPastor` only
+ * means something for admins, so any other role clears it; otherwise a removed
+ * pastor keeps appearing in every pastor list and picker. */
 export async function setUserStaffRole(userId: string, role: AppRole) {
-  await db.update(schema.users).set({ role }).where(eq(schema.users.id, userId));
+  const keepsPastorFlag = role === "admin" || role === "super_admin";
+  await db
+    .update(schema.users)
+    .set(keepsPastorFlag ? { role } : { role, isPastor: false })
+    .where(eq(schema.users.id, userId));
 }
 
 export async function listStaffInvites() {
