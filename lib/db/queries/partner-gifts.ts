@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, desc, eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 import * as s from "@/lib/db/schema";
@@ -19,53 +19,41 @@ export class PartnerGiftsUnavailableError extends Error {
   }
 }
 
-const columns = {
-  id: s.partnerGifts.id,
-  amountMinor: s.partnerGifts.amountMinor,
-  currency: s.partnerGifts.currency,
-  channel: s.partnerGifts.channel,
-  givenOn: s.partnerGifts.givenOn,
-  note: s.partnerGifts.note,
-};
-
-function toGift(row: { id: number; amountMinor: number; currency: string; channel: string; givenOn: string; note: string | null }): PartnerGift | null {
-  if (!isGiftCurrency(row.currency) || !isGiftChannel(row.channel)) return null;
-  return { ...row, currency: row.currency, channel: row.channel };
+/** Records a reported gift. Only admins read these back. */
+export async function addPartnerGift(userId: string, gift: ValidGift): Promise<void> {
+  try {
+    await db.insert(s.partnerGifts).values({ userId, ...gift });
+  } catch (error) {
+    if (missingTable(error)) throw new PartnerGiftsUnavailableError();
+    throw error;
+  }
 }
 
-/** The giver's own gifts, newest first. Empty before migration 0078. */
-export async function listPartnerGifts(userId: string): Promise<PartnerGift[]> {
+export type AdminPartnerGift = PartnerGift & { name: string; email: string; online: boolean; reportedAt: Date };
+
+/** Every reported and online gift with the giver, newest first (admin only). Empty before migration 0078. */
+export async function listAllPartnerGifts(): Promise<AdminPartnerGift[]> {
   try {
-    const rows = await db.select(columns).from(s.partnerGifts)
-      .where(eq(s.partnerGifts.userId, userId))
+    const rows = await db.select({
+      id: s.partnerGifts.id,
+      amountMinor: s.partnerGifts.amountMinor,
+      currency: s.partnerGifts.currency,
+      channel: s.partnerGifts.channel,
+      givenOn: s.partnerGifts.givenOn,
+      note: s.partnerGifts.note,
+      paystackReference: s.partnerGifts.paystackReference,
+      reportedAt: s.partnerGifts.createdAt,
+      name: s.users.name,
+      email: s.users.email,
+    }).from(s.partnerGifts)
+      .innerJoin(s.users, eq(s.users.id, s.partnerGifts.userId))
       .orderBy(desc(s.partnerGifts.givenOn), desc(s.partnerGifts.id));
-    return rows.map(toGift).filter((gift): gift is PartnerGift => gift !== null);
+    return rows.flatMap(({ paystackReference, ...row }) => {
+      if (!isGiftCurrency(row.currency) || !isGiftChannel(row.channel)) return [];
+      return [{ ...row, currency: row.currency, channel: row.channel, online: paystackReference !== null }];
+    });
   } catch (error) {
     if (missingTable(error)) return [];
-    throw error;
-  }
-}
-
-/** Records a hand-added gift and returns the saved row. */
-export async function addPartnerGift(userId: string, gift: ValidGift): Promise<PartnerGift> {
-  try {
-    const [row] = await db.insert(s.partnerGifts).values({ userId, ...gift }).returning(columns);
-    return toGift(row)!;
-  } catch (error) {
-    if (missingTable(error)) throw new PartnerGiftsUnavailableError();
-    throw error;
-  }
-}
-
-/** Removes one of the giver's own gifts. True when a row went. */
-export async function removePartnerGift(userId: string, id: number): Promise<boolean> {
-  try {
-    const rows = await db.delete(s.partnerGifts)
-      .where(and(eq(s.partnerGifts.id, id), eq(s.partnerGifts.userId, userId)))
-      .returning({ id: s.partnerGifts.id });
-    return rows.length > 0;
-  } catch (error) {
-    if (missingTable(error)) throw new PartnerGiftsUnavailableError();
     throw error;
   }
 }

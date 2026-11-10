@@ -13,7 +13,8 @@ export type PpcShellIcon =
   | "notifications"
   | "learning"
   | "waitlist"
-  | "pastors";
+  | "pastors"
+  | "giving";
 
 export type PpcShellNavItem = {
   label: string;
@@ -83,6 +84,12 @@ export const PPC_SHELL_NAV_ITEMS: PpcShellNavItem[] = [
     label: "Ministry reports",
     path: "/ministry",
     icon: "review",
+    roles: ["super_admin", "admin"],
+  },
+  {
+    label: "Giving",
+    path: "/giving",
+    icon: "giving",
     roles: ["super_admin", "admin"],
   },
   {
@@ -327,6 +334,13 @@ export function getPpcShellContext(pathname: string): PpcShellContext {
     return {
       label: "Q&A inbox",
       description: "Student threads and staff replies",
+    };
+  }
+
+  if (logicalPath === "/giving") {
+    return {
+      label: "Giving",
+      description: "Reported and online gifts",
     };
   }
 

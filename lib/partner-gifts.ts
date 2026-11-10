@@ -1,7 +1,8 @@
 /**
- * Partner gifts (user, 10 November): the giver's own record of what they have
- * given. Pure helpers shared by the dashboard sheet, the server action and the
- * Paystack verify route. Amounts are kept in minor units (kobo or cents).
+ * Partner gifts (user, 10 November): what givers report, or Paystack confirms.
+ * Only admins see them. Pure helpers shared by the Report giving sheet, the
+ * server action, the admin page and the Paystack verify route. Amounts are in
+ * minor units (kobo or cents).
  */
 
 export const giftCurrencies = ["NGN", "USD"] as const;
@@ -87,11 +88,6 @@ export function validateGiftInput(input: GiftInput, today = localIsoDate()): { o
   const note = input.note?.trim() || null;
   if (note && note.length > GIFT_NOTE_MAX) return { ok: false, error: `Keep the note under ${GIFT_NOTE_MAX} characters.` };
   return { ok: true, gift: { amountMinor, currency: input.currency, channel: input.channel, givenOn: input.givenOn, note } };
-}
-
-/** Newest first; gifts on the same day keep the newest id first. */
-export function sortGifts<T extends Pick<PartnerGift, "id" | "givenOn">>(gifts: readonly T[]): T[] {
-  return [...gifts].sort((a, b) => (a.givenOn === b.givenOn ? b.id - a.id : a.givenOn < b.givenOn ? 1 : -1));
 }
 
 /** Totals per currency for the year of `today`, in currency order. Never adds Naira to Dollars. */

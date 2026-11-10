@@ -37,15 +37,9 @@ button.give { border: 0; font-family: inherit; cursor: pointer; }
 .give { justify-self: start; display: inline-flex; align-items: center; height: 36px; padding: 0 14px; border-radius: 11px; background: white; color: var(--dest-ink); font-size: 13.5px; font-weight: 500; text-decoration: none; }
 .note { margin: 2px 2px 0; font-size: 12px; line-height: 17px; color: var(--color-text-muted); }
 
-/* Partner tab: Why partner with Pleros, and Your gifts (user, 10 November). */
+/* Partner tab: Why partner with Pleros, and Report giving (user, 10 November). */
 .reason { align-items: flex-start; }
 .step { display: grid; flex: none; place-items: center; width: 28px; height: 28px; margin-top: 1px; border-radius: 50%; background: #f6d9cf; color: #a8432c; font-family: var(--font-dashboard-heading); font-size: 13px; font-weight: 500; font-variant-numeric: tabular-nums; }
 .reason .copy span { font-size: 12.5px; line-height: 18px; }
 .compact { display: inline-flex; flex: none; align-items: center; height: 32px; padding: 0 12px; border: 1px solid var(--dashboard-panel-edge, #e2e5ea); border-radius: 10px; background: white; color: var(--color-community-blue); font: inherit; font-size: 12.5px; font-weight: 500; cursor: pointer; }
 .compact:hover { border-color: #c9cfd8; }
-.iconBtn { display: grid; flex: none; place-items: center; width: 36px; height: 36px; margin: -4px -8px -4px 0; border: 0; border-radius: 10px; background: none; color: var(--color-text-muted); cursor: pointer; }
-.iconBtn:hover { background: #f1f2f5; color: var(--color-text-strong); }
-.empty { padding: 16px 14px; font-size: 13px; line-height: 20px; color: var(--color-text-muted); }
-button.more { justify-content: center; min-height: 40px; padding-block: 8px; color: var(--color-community-blue); font-size: 12.5px; font-weight: 500; }
-.alert { margin: 0 2px; font-size: 13px; line-height: 20px; color: var(--destructive); }
-.row[aria-busy] { opacity: .7; }

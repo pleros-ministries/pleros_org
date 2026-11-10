@@ -1,25 +1,22 @@
 "use client";
 
 import { useState, type CSSProperties } from "react";
-import { useRouter } from "next/navigation";
 import { BanknoteIcon, CreditCardIcon, MessageCircleHeartIcon } from "lucide-react";
 
 import { partnerBankAccount, partnerImpactItems, partnerReasons } from "@/lib/partner-page-content";
-import type { PartnerGift } from "@/lib/partner-gifts";
 
 import styles from "./library.module.css";
-import { PartnerGifts } from "./partner-gifts";
+import { ReportGiving } from "./partner-gifts";
 import { PartnerPaySheet } from "./partner-pay-sheet";
 
 /**
  * Partner (Pastor review, 18 October): its own You tab. Giving uses the public
  * Partner page's channels; Pay online and Give now open its Paystack form in a
  * bottom sheet rather than leaving the dashboard (user, 10 November). Why
- * partner with Pleros carries the public page's reasons, and Your gifts is the
- * giver's own record (user, 10 November).
+ * partner with Pleros carries the public page's reasons, and Report giving
+ * tells Pleros about a gift; only admins see the reports (user, 10 November).
  */
-export function PartnerHome({ name, email, gifts, preview = false }: { name: string; email: string; gifts: PartnerGift[]; preview?: boolean }) {
-  const router = useRouter();
+export function PartnerHome({ name, email, preview = false }: { name: string; email: string; preview?: boolean }) {
   const [copied, setCopied] = useState(false);
   const [paying, setPaying] = useState(false);
   const copy = async () => {
@@ -62,7 +59,7 @@ export function PartnerHome({ name, email, gifts, preview = false }: { name: str
       </div>
     </div>
 
-    <PartnerGifts initialGifts={gifts} preview={preview} />
+    <ReportGiving preview={preview} />
 
     <div className={styles.section}><h2>What your gift does</h2></div>
     <div className={styles.panel}>
@@ -72,6 +69,6 @@ export function PartnerHome({ name, email, gifts, preview = false }: { name: str
       </div>)}
     </div>
 
-    {paying ? <PartnerPaySheet name={name} email={email} onPaid={() => router.refresh()} onClose={() => setPaying(false)} /> : null}
+    {paying ? <PartnerPaySheet name={name} email={email} onClose={() => setPaying(false)} /> : null}
   </div>;
 }

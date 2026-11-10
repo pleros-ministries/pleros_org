@@ -54,8 +54,8 @@ export async function POST(request: Request) {
 }
 
 /**
- * A signed-in giver's confirmed online gift goes into their own record on the
- * dashboard Partner tab (user, 10 November). Never fails the verify.
+ * A signed-in giver's confirmed online gift is recorded for the admin Giving
+ * page (user, 10 November). Never fails the verify.
  */
 async function recordOnlineGift(reference: string, data: { amount?: number; currency?: string; paid_at?: string | null }) {
   try {

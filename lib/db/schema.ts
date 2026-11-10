@@ -2920,9 +2920,10 @@ export const discipleshipGroupInvitations = pgTable("discipleship_group_invitati
 ]);
 
 /**
- * Partner gifts (user, 10 November; migration 0078): a giver's own record of
- * what they have given. Added by hand (bank, cash, other) or, for online gifts
- * Paystack confirms while signed in, once per reference. Minor units.
+ * Partner gifts (user, 10 November; migration 0078): reported from the
+ * dashboard Partner tab (bank, cash, other) or, for online gifts Paystack
+ * confirms while signed in, recorded once per reference. Only admins read
+ * them (/admin/giving). Minor units.
  */
 export const partnerGifts = pgTable("partner_gifts", {
   id: serial("id").primaryKey(),

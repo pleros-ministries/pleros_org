@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { formatGiftAmount, parseGiftAmount, sortGifts, validateGiftInput, yearTotals } from "./partner-gifts";
+import { formatGiftAmount, parseGiftAmount, validateGiftInput, yearTotals } from "./partner-gifts";
 
 describe("parseGiftAmount", () => {
   it("reads whole and decimal amounts with separators", () => {
@@ -40,16 +40,13 @@ describe("validateGiftInput", () => {
   });
 });
 
-describe("sortGifts and yearTotals", () => {
+describe("yearTotals", () => {
   const gifts = [
     { id: 1, amountMinor: 100, currency: "NGN" as const, givenOn: "2026-01-02" },
     { id: 3, amountMinor: 200, currency: "USD" as const, givenOn: "2026-05-01" },
     { id: 2, amountMinor: 300, currency: "NGN" as const, givenOn: "2026-05-01" },
     { id: 4, amountMinor: 900, currency: "NGN" as const, givenOn: "2025-12-31" },
   ];
-  it("sorts newest day first, then newest id", () => {
-    expect(sortGifts(gifts).map(g => g.id)).toEqual([3, 2, 1, 4]);
-  });
   it("totals this year per currency", () => {
     expect(yearTotals(gifts, "2026-11-10")).toEqual([
       { currency: "NGN", amountMinor: 400 }, { currency: "USD", amountMinor: 200 },

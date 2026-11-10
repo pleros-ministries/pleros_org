@@ -25,6 +25,7 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Users,
+  HandCoins,
 } from "lucide-react";
 
 import type { AppSession } from "@/lib/app-session";
@@ -80,6 +81,7 @@ const iconMap: Record<PpcShellIcon, React.ComponentType<{ className?: string }>>
   learning: NotebookPen,
   waitlist: ClipboardList,
   pastors: Users,
+  giving: HandCoins,
 };
 
 const PREFETCHED_ADMIN_PATHS = new Set([

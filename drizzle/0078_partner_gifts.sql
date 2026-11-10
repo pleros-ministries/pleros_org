@@ -1,7 +1,7 @@
--- Partner gifts (user, 10 November): a giver's own record of what they have
--- given to Pleros. People add bank transfers, cash and other gifts by hand;
--- online gifts confirmed by Paystack are added for signed-in givers, once per
--- reference. Amounts are in minor units (kobo or cents). No data changes.
+-- Partner gifts (user, 10 November): gifts people report from the dashboard
+-- Partner tab (bank transfer, cash, other), plus online gifts Paystack confirms
+-- for signed-in givers, once per reference. Only admins read them back
+-- (/admin/giving). Amounts are in minor units (kobo or cents). No data changes.
 CREATE TABLE "partner_gifts" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"user_id" text NOT NULL,
