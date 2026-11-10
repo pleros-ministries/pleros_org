@@ -18,12 +18,7 @@ const emptyDraft = (): Draft => ({ amount: "", currency: "NGN", channel: "bank",
 
 const genericError = "Couldn't send that. Check your connection and try again.";
 
-/**
- * Report giving on the Partner tab (user, 10 November): a giver tells Pleros
- * about a gift made by transfer, cash or otherwise. Only admins see the
- * reports (`/admin/giving`); the giver gets a quiet confirmation, shown at
- * once, and the sheet reopens with their words if sending fails.
- */
+
 export function ReportGiving({ preview = false }: { preview?: boolean }) {
   const [draft, setDraft] = useState<Draft | null>(null);
   const [error, setError] = useState<string | null>(null);

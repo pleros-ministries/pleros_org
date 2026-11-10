@@ -91,57 +91,6 @@ export function PartnerPageView() {
         </div>
       </section>
 
-      <section className="bg-[var(--color-surface-muted)] px-[1.25rem] py-[4.25rem] md:px-8 md:py-16 xl:px-10">
-        <div className="mx-auto grid max-w-[58rem] gap-8 md:gap-10">
-          <div className="grid gap-2 text-center">
-            <p className="font-[var(--font-be-vietnam-pro)] text-[0.6875rem] font-semibold uppercase tracking-[0.22em] text-[var(--color-brand-blue)] md:text-[0.8125rem]">
-              Partnership
-            </p>
-            <h2 className="site-section-heading">Why partner with Pleros</h2>
-            <p className="site-section-intro mx-auto max-w-[33rem] text-[var(--color-text-muted)]">
-              Partnership is a practical way to join the work God is doing
-              through Pleros across teaching, discipleship, outreach, and
-              digital ministry.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5">
-            {partnerReasons.map((reason) => (
-              <PartnerReasonCard key={reason.title} {...reason} />
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-[var(--color-brand-blue)] px-[1.25rem] py-[4.25rem] text-white md:px-8 md:py-16 xl:px-10">
-        <div className="mx-auto grid max-w-[58rem] gap-8 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:items-start md:gap-10">
-          <div className="grid gap-3">
-            <p className="font-[var(--font-be-vietnam-pro)] text-[0.6875rem] font-semibold uppercase tracking-[0.22em] text-[var(--color-brand-lime)] md:text-[0.8125rem]">
-              Stewardship
-            </p>
-            <h2 className="site-section-heading text-white">
-              What your partnership makes possible
-            </h2>
-            <p className="site-section-intro text-white/80">
-              Every gift helps strengthen real ministry work that reaches
-              people, supports growth, and keeps Gospel resources moving.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-1">
-            {partnerImpactItems.map((item) => (
-              <div
-                key={item}
-                className="rounded-[1.125rem] border border-[#3955ff]/65 bg-[#10229f] px-4 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]"
-              >
-                <p className="font-[var(--font-sen)] text-[1.00rem] leading-[1.02] tracking-[-0.04em] text-white">
-                  {item}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       <section id="partner" className="bg-[var(--color-surface-muted)] px-[1.25rem] py-[4.25rem] md:px-8 md:py-16 xl:px-10">
         <div className="mx-auto grid max-w-[58rem] gap-8 md:gap-10">
@@ -217,6 +166,59 @@ export function PartnerPageView() {
           </div>
         </div>
       </section>
+
+      <section className="bg-[var(--color-surface-muted)] px-[1.25rem] py-[4.25rem] md:px-8 md:py-16 xl:px-10">
+        <div className="mx-auto grid max-w-[58rem] gap-8 md:gap-10">
+          <div className="grid gap-2 text-center">
+            <p className="font-[var(--font-be-vietnam-pro)] text-[0.6875rem] font-semibold uppercase tracking-[0.22em] text-[var(--color-brand-blue)] md:text-[0.8125rem]">
+              Partnership
+            </p>
+            <h2 className="site-section-heading">Why partner with Pleros</h2>
+            <p className="site-section-intro mx-auto max-w-[33rem] text-[var(--color-text-muted)]">
+              Partnership is a practical way to join the work God is doing
+              through Pleros across teaching, discipleship, outreach, and
+              digital ministry.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-5">
+            {partnerReasons.map((reason) => (
+              <PartnerReasonCard key={reason.title} {...reason} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-[var(--color-brand-blue)] px-[1.25rem] py-[4.25rem] text-white md:px-8 md:py-16 xl:px-10">
+        <div className="mx-auto grid max-w-[58rem] gap-8 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)] md:items-start md:gap-10">
+          <div className="grid gap-3">
+            <p className="font-[var(--font-be-vietnam-pro)] text-[0.6875rem] font-semibold uppercase tracking-[0.22em] text-[var(--color-brand-lime)] md:text-[0.8125rem]">
+              Stewardship
+            </p>
+            <h2 className="site-section-heading text-white">
+              What your partnership makes possible
+            </h2>
+            <p className="site-section-intro text-white/80">
+              Every gift helps strengthen real ministry work that reaches
+              people, supports growth, and keeps Gospel resources moving.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-1">
+            {partnerImpactItems.map((item) => (
+              <div
+                key={item}
+                className="rounded-[1.125rem] border border-[#3955ff]/65 bg-[#10229f] px-4 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]"
+              >
+                <p className="font-[var(--font-sen)] text-[1.00rem] leading-[1.02] tracking-[-0.04em] text-white">
+                  {item}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
 
       <HomepageCommunitySection />
       <HomepageFooter />
