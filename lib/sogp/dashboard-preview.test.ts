@@ -69,7 +69,8 @@ describe("SOGP dashboard previews", () => {
     expect(sogpPage).toContain("SOGP");
 
     // Header: the Learning hub's h1 with a short muted line (18 October retouch).
-    expect(sogpPage).toContain("<h1>Calendar and assessments</h1>");
+    // The heading follows the learner's path (20 October).
+    expect(sogpPage).toContain('<h1>{data.path === "podcast" ? "Your calendar" : "Calendar and assessments"}</h1>');
 
     // Tasks section: a single white, decluttered block driven by SogpDailyTasks.
     expect(sogpPage).toContain("<SogpDailyTasks");
