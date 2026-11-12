@@ -15,6 +15,8 @@ import { PartnerPaySheet } from "./partner-pay-sheet";
  * bottom sheet rather than leaving the dashboard (user, 10 November). Why
  * partner with Pleros carries the public page's reasons, and Report giving
  * tells Pleros about a gift; only admins see the reports (user, 10 November).
+ * Order (user, 12 November): Give now, Ways to give, Report giving, Why partner
+ * with Pleros, then What your gift does.
  */
 export function PartnerHome({ name, email, preview = false }: { name: string; email: string; preview?: boolean }) {
   const [copied, setCopied] = useState(false);
@@ -38,14 +40,6 @@ export function PartnerHome({ name, email, preview = false }: { name: string; em
       <button type="button" className={styles.give} onClick={() => setPaying(true)}>Give now</button>
     </section>
 
-    <div className={styles.section}><h2>Why partner with Pleros</h2></div>
-    <div className={styles.panel}>
-      {partnerReasons.map(reason => <div key={reason.step} className={`${styles.row} ${styles.reason}`}>
-        <span className={styles.step} aria-hidden="true">{reason.step}</span>
-        <span className={styles.copy}><b>{reason.dashboardTitle}</b><span>{reason.description}</span></span>
-      </div>)}
-    </div>
-
     <div className={styles.section}><h2>Ways to give</h2></div>
     <div className={styles.panel}>
       <button type="button" className={styles.row} onClick={() => setPaying(true)}>
@@ -60,6 +54,14 @@ export function PartnerHome({ name, email, preview = false }: { name: string; em
     </div>
 
     <ReportGiving preview={preview} />
+
+    <div className={styles.section}><h2>Why partner with Pleros</h2></div>
+    <div className={styles.panel}>
+      {partnerReasons.map(reason => <div key={reason.step} className={`${styles.row} ${styles.reason}`}>
+        <span className={styles.step} aria-hidden="true">{reason.step}</span>
+        <span className={styles.copy}><b>{reason.dashboardTitle}</b><span>{reason.description}</span></span>
+      </div>)}
+    </div>
 
     <div className={styles.section}><h2>What your gift does</h2></div>
     <div className={styles.panel}>
