@@ -3,7 +3,7 @@
 import { useState, type CSSProperties } from "react";
 import { BanknoteIcon, CreditCardIcon, MessageCircleHeartIcon } from "lucide-react";
 
-import { partnerBankAccount, partnerImpactItems, partnerReasons } from "@/lib/partner-page-content";
+import { partnerBankAccount, partnerGiveCard, partnerImpactItems, partnerImpactTitle, partnerReasons } from "@/lib/partner-page-content";
 
 import styles from "./library.module.css";
 import { ReportGiving } from "./partner-gifts";
@@ -34,9 +34,9 @@ export function PartnerHome({ name, email, preview = false }: { name: string; em
       <p>Give towards the Gospel</p>
     </header>
 
-    <section className={styles.dest} data-art style={{ "--dest-field": "#b84f35", "--dest-ink": "#a8432c", "--dest-art": "url(\"/assets/dashboard/learning-card/my-learning-level-3.webp\")", minHeight: 170 } as CSSProperties}>
-      <span style={{ fontSize: 12, opacity: .92 }}>Pleros Ministries &amp; Missions</span>
-      <div><h2 style={{ fontSize: 20, lineHeight: "26px" }}>Help more people find God’s purpose</h2><p style={{ opacity: .92 }}>Every gift funds SOGP, the podcast and outreach.</p></div>
+    <section className={styles.dest} data-art style={{ "--dest-field": "#b84f35", "--dest-ink": "#a8432c", "--dest-art": `url("${partnerGiveCard.art}")`, minHeight: 170 } as CSSProperties}>
+      <span style={{ fontSize: 12, opacity: .92 }}>{partnerGiveCard.tag}</span>
+      <div><h2 style={{ fontSize: 20, lineHeight: "26px" }}>{partnerGiveCard.title}</h2><p style={{ opacity: .92 }}>{partnerGiveCard.line}</p></div>
       <button type="button" className={styles.give} onClick={() => setPaying(true)}>Give now</button>
     </section>
 
@@ -63,7 +63,7 @@ export function PartnerHome({ name, email, preview = false }: { name: string; em
       </div>)}
     </div>
 
-    <div className={styles.section}><h2>What your gift does</h2></div>
+    <div className={styles.section}><h2>{partnerImpactTitle}</h2></div>
     <div className={styles.panel}>
       {partnerImpactItems.map(item => <div key={item} className={styles.row}>
         <span className={styles.icon} style={{ background: "#efe7fb", color: "#56209c" }} aria-hidden="true"><MessageCircleHeartIcon className="size-4" strokeWidth={2} /></span>

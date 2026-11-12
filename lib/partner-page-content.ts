@@ -34,6 +34,16 @@ export const partnerReasons = [
   },
 ] as const;
 
+/** The coral Give now card that heads giving on both Partner pages (user, 12 November). */
+export const partnerGiveCard = {
+  tag: "Pleros Ministries & Missions",
+  title: "Help more people find God’s purpose",
+  line: "Every gift funds SOGP, the podcast and outreach.",
+  art: "/assets/dashboard/learning-card/my-learning-level-3.webp",
+} as const;
+
+export const partnerImpactTitle = "What your gift does";
+
 export const partnerImpactItems = [
   "Teaching & Discipleship Programmes",
   "Missionary Outreach & Evangelism",
