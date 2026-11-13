@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useState, useTransition } from "react";
+import Link from "next/link";
 import { CheckIcon, LockIcon } from "lucide-react";
 
 import { ReportSheet, Segmented, sheetStyles } from "@/components/community/report/report-sheet";
@@ -19,7 +20,8 @@ const emptyDraft = (): Draft => ({ amount: "", currency: "NGN", channel: "bank",
 const genericError = "Couldn't send that. Check your connection and try again.";
 
 
-export function ReportGiving({ preview = false }: { preview?: boolean }) {
+/** With `loginHref` (the public Partner page) the row links there instead of opening the sheet. */
+export function ReportGiving({ preview = false, loginHref }: { preview?: boolean; loginHref?: string }) {
   const [draft, setDraft] = useState<Draft | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [reported, setReported] = useState<string | null>(null);
@@ -49,12 +51,14 @@ export function ReportGiving({ preview = false }: { preview?: boolean }) {
       <div className={styles.row}>
         <span className={styles.copy}>
           <b>{reported ? "Thank you for your gift" : "Given by transfer or cash?"}</b>
-          <span>{reported ? `We’ve let Pleros know about ${reported}.` : "Let Pleros know so your gift can be recognised."}</span>
+          <span>{reported ? `We’ve let Pleros know about ${reported}.` : loginHref ? "Log in to let Pleros know so your gift can be recognised." : "Let Pleros know so your gift can be recognised."}</span>
         </span>
-        <button type="button" className={styles.compact} onClick={open}>{reported ? "Report another" : "Report giving"}</button>
+        {loginHref
+          ? <Link href={loginHref} className={styles.compact}>Report giving</Link>
+          : <button type="button" className={styles.compact} onClick={open}>{reported ? "Report another" : "Report giving"}</button>}
       </div>
     </div>
-    <p className={styles.note}><LockIcon className="mr-1 inline size-3 align-[-1px]" aria-hidden="true" />Only Pleros admins see what you report. Online gifts are recorded for you.</p>
+    <p className={styles.note}><LockIcon className="mr-1 inline size-3 align-[-1px]" aria-hidden="true" />Only Pleros admins see what you report.{loginHref ? null : " Online gifts are recorded for you."}</p>
 
     {draft ? <GivingSheet initial={draft} error={error} onSend={send} onClose={() => { setDraft(null); setError(null); }} /> : null}
   </>;
