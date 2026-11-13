@@ -19,6 +19,21 @@ import { PartnerPaySheet } from "./partner-pay-sheet";
  * with Pleros, then What your gift does.
  */
 export function PartnerHome({ name, email, preview = false }: { name: string; email: string; preview?: boolean }) {
+  return <div className={styles.page}>
+    <header className={styles.heading}>
+      <h1>Partner with us</h1>
+      <p>Give towards the Gospel</p>
+    </header>
+    <PartnerGiving name={name} email={email} preview={preview} />
+  </div>;
+}
+
+/**
+ * Give now down, shared with the public Partner page (user, 13 November: the
+ * same design there). Without `signedIn`, Report giving links to this tab,
+ * whose guard asks visitors to log in.
+ */
+export function PartnerGiving({ name, email, preview = false, signedIn = true }: { name: string; email: string; preview?: boolean; signedIn?: boolean }) {
   const [copied, setCopied] = useState(false);
   const [paying, setPaying] = useState(false);
   const copy = async () => {
@@ -28,12 +43,7 @@ export function PartnerHome({ name, email, preview = false }: { name: string; em
       window.setTimeout(() => setCopied(false), 2000);
     } catch { /* The number stays visible to copy by hand. */ }
   };
-  return <div className={styles.page}>
-    <header className={styles.heading}>
-      <h1>Partner with us</h1>
-      <p>Give towards the Gospel</p>
-    </header>
-
+  return <>
     <section className={styles.dest} data-art style={{ "--dest-field": "#b84f35", "--dest-ink": "#a8432c", "--dest-art": `url("${partnerGiveCard.art}")`, minHeight: 170 } as CSSProperties}>
       <span style={{ fontSize: 12, opacity: .92 }}>{partnerGiveCard.tag}</span>
       <div><h2 style={{ fontSize: 20, lineHeight: "26px" }}>{partnerGiveCard.title}</h2><p style={{ opacity: .92 }}>{partnerGiveCard.line}</p></div>
@@ -53,7 +63,7 @@ export function PartnerHome({ name, email, preview = false }: { name: string; em
       </div>
     </div>
 
-    <ReportGiving preview={preview} />
+    <ReportGiving preview={preview} loginHref={signedIn ? undefined : "/dashboard/partner"} />
 
     <div className={styles.section}><h2>Why partner with Pleros</h2></div>
     <div className={styles.panel}>
@@ -72,5 +82,5 @@ export function PartnerHome({ name, email, preview = false }: { name: string; em
     </div>
 
     {paying ? <PartnerPaySheet name={name} email={email} onClose={() => setPaying(false)} /> : null}
-  </div>;
+  </>;
 }

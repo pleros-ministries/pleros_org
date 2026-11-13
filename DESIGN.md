@@ -254,5 +254,5 @@ Never violet for Meetings, and never the status-pill amber for a section.
   - Sen headings and Be Vietnam Pro body with safe fallbacks;
   - MSO support;
   - no emoji.
-- **Partner page (`/partner`):** below the hero and intro it follows the dashboard Partner tab (user, 12 November): the coral Give now card, Ways to give (Pay online opens the Paystack form in place, Bank transfer with Copy), Report giving (links to the dashboard tab, which asks visitors to log in), Why partner with Pleros, then What your gift does. Same cards and order as the dashboard at public sizes (`components/home/partner-giving-sections.tsx`); the card copy lives once in `lib/partner-page-content.ts`.
+- **Partner page (`/partner`):** below the hero and intro it is the dashboard Partner tab itself (user, 13 November: the same design): `PartnerGiving` from `components/dashboard/library/partner-home.tsx`, in the dashboard fonts and cards on the warm canvas, wrapped by `components/home/partner-giving-sections.tsx`. Give now and Pay online open the dashboard's Pay online sheet; Report giving links to `/dashboard/partner`, which asks visitors to log in. Change it in one place and both pages follow.
 - **Prayer Watch times:** Morning 5:30 am, Afternoon 12:30 pm, Evening 8:30 pm. They show as a connected low-radius strip.

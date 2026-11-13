@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { describe, expect, test } from "vitest";
 
 describe("partner page", () => {
-  test("uses a dedicated public route and follows the dashboard Partner tab from giving down", () => {
+  test("uses a dedicated public route and shows the dashboard Partner tab from giving down", () => {
     const routePath = join(process.cwd(), "app", "(site)", "partner", "page.tsx");
     const viewPath = join(
       process.cwd(),
@@ -28,19 +28,24 @@ describe("partner page", () => {
 
     expect(routeSource).toContain("PartnerPageView");
     expect(viewSource).toContain("<PartnerGivingSections />");
-    // From giving down it follows the dashboard Partner tab (user, 12 November).
+    // From giving down it is the dashboard Partner tab itself (user, 13 November).
+    const homeSource = readFileSync(
+      join(process.cwd(), "components", "dashboard", "library", "partner-home.tsx"),
+      "utf8",
+    );
+    expect(sectionsSource).toContain("<PartnerGiving");
+    expect(sectionsSource).toContain("signedIn={false}");
     const order = [
       "Give now</button>",
-      "<h2 className={styles.heading}>Ways to give</h2>",
-      "<h2 className={styles.heading}>Report giving</h2>",
-      "<h2 className={styles.heading}>Why partner with Pleros</h2>",
-      "<h2 className={styles.heading}>{partnerImpactTitle}</h2>",
-    ].map((marker) => sectionsSource.indexOf(marker));
+      "<h2>Ways to give</h2>",
+      "<ReportGiving",
+      "<h2>Why partner with Pleros</h2>",
+      "<h2>{partnerImpactTitle}</h2>",
+    ].map((marker) => homeSource.indexOf(marker));
     expect(order.every((index) => index >= 0)).toBe(true);
     expect([...order].sort((x, y) => x - y)).toEqual(order);
+    expect(homeSource).toContain('"/dashboard/partner"');
     expect(sectionsSource).toContain('id="partner"');
-    expect(sectionsSource).toContain('href="/dashboard/partner"');
-    expect(sectionsSource).toContain("PaystackDonateForm");
     expect(contentSource).toContain('partnerImpactTitle = "What your gift does"');
     expect(contentSource).toContain("Advance the Gospel");
     expect(contentSource).toContain("Raise Disciples");
@@ -54,7 +59,6 @@ describe("partner page", () => {
     expect(contentSource).toContain("Providus Bank");
     expect(contentSource).toContain("PLEROS MINISTRIES AND MISSIONS");
     expect(contentSource).toContain("1310000564");
-    expect(sectionsSource).toContain("partnerBankAccount");
-    expect(sectionsSource).toContain("CopyToClipboardButton");
+    expect(homeSource).toContain("partnerBankAccount");
   });
 });
