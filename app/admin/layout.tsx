@@ -24,7 +24,9 @@ const PUBLIC_ADMIN_PATHS = new Set([
 function isPublicAdminPath(pathname: string) {
   return (
     PUBLIC_ADMIN_PATHS.has(pathname) ||
-    pathname.startsWith("/admin/setup/claim/")
+    pathname.startsWith("/admin/setup/claim/") ||
+    // Open link for leaders, no sign-in (user decision, 17 November).
+    pathname === "/admin/sogp-distribution"
   );
 }
 
@@ -41,7 +43,7 @@ export default async function AdminRootLayout({ children }: { children: React.Re
     churchAssignment?.role === "pastor" ||
     churchAssignment?.role === "branch_pastor";
 
-  if (session?.user.role === "student" && !isChurchAdmin) {
+  if (session?.user.role === "student" && !isChurchAdmin && !isPublicAdminPage) {
     redirect("/ppc");
   }
 
