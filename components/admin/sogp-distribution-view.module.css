@@ -32,6 +32,42 @@
   line-height: 28px;
 }
 
+.strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  margin: 16px 0 0;
+  background: var(--edge);
+  border: 1px solid var(--edge);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.strip > div {
+  background: #fff;
+  padding: 8px 10px;
+  min-width: 0;
+}
+
+.strip dd {
+  margin: 0;
+  font-family: var(--font-dashboard-heading), system-ui, sans-serif;
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 28px;
+  font-variant-numeric: tabular-nums;
+}
+
+.strip dt {
+  font-size: 11.5px;
+  line-height: 15px;
+  color: var(--muted);
+}
+
+.strip > div[data-warn] dd {
+  color: var(--amber);
+}
+
 .tools {
   display: flex;
   flex-direction: column;

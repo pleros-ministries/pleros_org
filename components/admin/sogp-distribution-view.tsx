@@ -70,6 +70,15 @@ export function SogpDistributionView({ groups }: { groups: DistributionGroup[] }
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState<Set<number>>(() => new Set());
 
+  const kpis = useMemo(() => {
+    const enrolees = groups.flatMap((g) => g.enrolees);
+    return [
+      ["Leaders", groups.length, false],
+      ["Enrolees", enrolees.length, false],
+      ["No WhatsApp consent", enrolees.filter((e) => !e.whatsappConsent).length, true],
+    ] as [string, number, boolean][];
+  }, [groups]);
+
   const q = query.trim().toLowerCase();
   const visible = useMemo(
     () =>
@@ -107,6 +116,15 @@ export function SogpDistributionView({ groups }: { groups: DistributionGroup[] }
   return (
     <main className={styles.page}>
       <h1 className={styles.title}>SOGP group distribution</h1>
+
+      <dl className={styles.strip}>
+        {kpis.map(([label, value, warn]) => (
+          <div key={label} data-warn={warn && value > 0 ? "" : undefined}>
+            <dd>{value}</dd>
+            <dt>{label}</dt>
+          </div>
+        ))}
+      </dl>
 
       <div className={styles.tools}>
         <Chips
