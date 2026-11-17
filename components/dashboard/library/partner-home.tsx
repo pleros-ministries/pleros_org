@@ -33,7 +33,7 @@ export function PartnerHome({ name, email, preview = false }: { name: string; em
  * same design there). Without `signedIn`, Report giving links to this tab,
  * whose guard asks visitors to log in.
  */
-export function PartnerGiving({ name, email, preview = false, signedIn = true }: { name: string; email: string; preview?: boolean; signedIn?: boolean }) {
+export function PartnerGiving({ name, email, preview = false, signedIn = true, giveCard = true }: { name: string; email: string; preview?: boolean; signedIn?: boolean; giveCard?: boolean }) {
   const [copied, setCopied] = useState(false);
   const [paying, setPaying] = useState(false);
   const copy = async () => {
@@ -44,11 +44,11 @@ export function PartnerGiving({ name, email, preview = false, signedIn = true }:
     } catch { /* The number stays visible to copy by hand. */ }
   };
   return <>
-    <section className={styles.dest} data-art style={{ "--dest-field": "#b84f35", "--dest-ink": "#a8432c", "--dest-art": `url("${partnerGiveCard.art}")`, minHeight: 170 } as CSSProperties}>
+    {giveCard ? <section className={styles.dest} data-art style={{ "--dest-field": "#b84f35", "--dest-ink": "#a8432c", "--dest-art": `url("${partnerGiveCard.art}")`, minHeight: 170 } as CSSProperties}>
       <span style={{ fontSize: 12, opacity: .92 }}>{partnerGiveCard.tag}</span>
       <div><h2 style={{ fontSize: 20, lineHeight: "26px" }}>{partnerGiveCard.title}</h2><p style={{ opacity: .92 }}>{partnerGiveCard.line}</p></div>
       <button type="button" className={styles.give} onClick={() => setPaying(true)}>Give now</button>
-    </section>
+    </section> : null}
 
     <div className={styles.section}><h2>Ways to give</h2></div>
     <div className={styles.panel}>
