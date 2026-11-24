@@ -17,7 +17,7 @@ export function sogpRoad(start: StartLevel) {
   return { rows: [...rows, { label: "Level 4", title: "Practical walk and assignment", when: "Coming soon", soon: true }, { label: "Then", title: "Advanced SOGP", when: "After level 4", soon: true }], finish: addDays(weeks * 7 - 1) };
 }
 
-const dayDate = (date: Date) => date.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
+const dayDate = (date: Date) => date.toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
 /** "24–30 Nov", or "28 Nov – 4 Dec" across months. */
 export function dateRange(from: Date, to: Date) {
   const sameMonth = from.getUTCMonth() === to.getUTCMonth();

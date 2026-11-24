@@ -57,7 +57,7 @@ function Card({ top, pace, title, line, action, href, play }: { top: string; pac
   return <section className={hub.card} style={BLUE}>
     <div className={hub.cardTop}><span>{top}</span>{pace ? <span className={hub.pace}>{pace}</span> : null}</div>
     <div><h2>{title}</h2><span className={`${hub.cardMeta} ${mock.narrowMeta}`}>{line}</span></div>
-    <Link href={href} className={hub.resume}>{action}{play ? <PlayIcon className="size-4" fill="currentColor" strokeWidth={0} /> : <ArrowRightIcon className="size-4" strokeWidth={2.2} />}</Link>
+    <Link href={href} className={`${hub.resume} ${mock.resumeFit}`}>{action}{play ? <PlayIcon className="size-4" fill="currentColor" strokeWidth={0} /> : <ArrowRightIcon className="size-4" strokeWidth={2.2} />}</Link>
   </section>;
 }
 
