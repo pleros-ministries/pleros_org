@@ -34,7 +34,9 @@ const q = (selector: string) => () => document.querySelector(selector);
 const byText = (selector: string, text: string) => () => [...document.querySelectorAll(selector)].find(node => node.textContent?.includes(text)) ?? null;
 const footerButton = q('[class*="learning-paths-module"][class*="__footer"] button');
 
-function stepsFor(path: TourPath | null, arrival: "direct" | "link"): Step[] {
+type PlanMode = "suggested" | "own";
+
+function stepsFor(path: TourPath | null, arrival: "direct" | "link", mode: PlanMode | null = null): Step[] {
   const welcome: Step = arrival === "link"
     ? { id: "welcome", screen: "home", kind: "sheet", advance: "next", title: "Welcome to Pleros, Sam", body: "You joined Ada’s group. Ada leads your group and will walk with you. First, let’s set up how you’ll learn. It takes about a minute." }
     : { id: "welcome", screen: "home", kind: "sheet", advance: "next", title: "Welcome to Pleros, Sam", body: "Let’s set up how you’ll learn. It takes about a minute, and you can change it later." };
@@ -64,9 +66,19 @@ function stepsFor(path: TourPath | null, arrival: "direct" | "link"): Step[] {
       { id: "pace", screen: "choose", kind: "spot", find: q('[aria-labelledby="pace"]'), advance: "tap", title: "Choose your pace", body: "15 minutes is one episode a day. 30 minutes is two.", tap: "Tap a pace" },
       { id: "finish", screen: "choose", kind: "spot", find: byText("p", "episodes over 30 days"), advance: "next", title: "Where it leads", body: "Thirty days of episodes, then SOGP from level 1." },
       { id: "go", screen: "choose", kind: "spot", find: footerButton, advance: "tap-nav", to: "plan-podcast", title: "Now your plan", body: "Your path saves now, so you won’t lose it.", tap: "Tap Build my podcast plan" },
-      { id: "tabs", screen: "plan-podcast", kind: "spot", find: q('[role="tablist"][aria-label="Plan"]'), advance: "next", title: "Ours, or your own", body: "Take our suggested plan, or build your own from any series." },
-      { id: "order", screen: "plan-podcast", kind: "spot", find: q('[class*="learning-paths-module"][class*="__box"]'), advance: "next", title: "What you’ll hear", body: "Each series in order, with the days it falls on." },
-      { id: "use", screen: "plan-podcast", kind: "spot", find: byText("button", "Use this plan"), advance: "tap-nav", to: learning, title: "Start listening", body: "You can still swap or reorder episodes later.", tap: "Tap Use this plan" },
+      { id: "tabs", screen: "plan-podcast", kind: "spot", find: q('[role="tablist"][aria-label="Plan"]'), advance: "tap", title: "Ours, or your own", body: "Take our suggested plan in one tap, or build your own from any series.", tap: "Tap one" },
+      // The steps after follow the tab they tap (user, 24 November: show Build my own too).
+      ...(mode === "own" ? [
+        { id: "own-search", screen: "plan-podcast", kind: "spot", find: q('label[class*="learning-paths-module"][class*="__search"]'), advance: "next", title: "Find a series", body: "Search by series or episode." },
+        { id: "own-add", screen: "plan-podcast", kind: "spot", find: byText("button", "Add all"), advance: "tap", title: "Add a whole series", body: "Or open a series and tick single episodes.", tap: "Tap Add all" },
+        { id: "own-tray", screen: "plan-podcast", kind: "spot", find: q('[class*="learning-paths-module"][class*="__tray"]'), advance: "next", title: "Your plan so far", body: "How many of your 60 episodes you’ve picked, and how many days that makes." },
+        { id: "own-order", screen: "plan-podcast", kind: "spot", find: byText("button", "Put them in order"), advance: "tap", title: "Put them in order", body: "Add more any time first. When you’re happy, set the order.", tap: "Tap Put them in order" },
+        { id: "own-move", screen: "plan-podcast", kind: "spot", find: q('[class*="learning-paths-module"][class*="__day"]'), advance: "next", title: "Make the order yours", body: "Two episodes a day. Move any episode earlier or later." },
+        { id: "own-start", screen: "plan-podcast", kind: "spot", find: byText("button", "Start my plan"), advance: "tap-nav", to: learning, title: "Start listening", body: "You can still swap or reorder episodes later.", tap: "Tap Start my plan" },
+      ] satisfies Step[] : [
+        { id: "order", screen: "plan-podcast", kind: "spot", find: q('[class*="learning-paths-module"][class*="__box"]'), advance: "next", title: "What you’ll hear", body: "Each series in order, with the days it falls on." },
+        { id: "use", screen: "plan-podcast", kind: "spot", find: byText("button", "Use this plan"), advance: "tap-nav", to: learning, title: "Start listening", body: "You can still swap or reorder episodes later.", tap: "Tap Use this plan" },
+      ] satisfies Step[]),
     ],
     doctrinal: [
       { id: "journey", screen: "choose", kind: "spot", find: byText("p", "Choose a series or single teachings"), advance: "next", title: "Your own journey", body: "You’ll pick teachings from the Library, one a day. It counts toward your certificate." },
@@ -91,8 +103,8 @@ export function TourOverlay() {
   const screen = (params.get("screen") ?? "home") as Screen;
   const arrival = params.get("arrival") === "link" ? "link" : "direct";
   // Moving between screens is an in-page navigation, so this state carries across them.
-  const [state, setState] = useState<{ index: number; path: TourPath | null; closed: boolean }>(() => ({ index: 0, path: (params.get("path") as TourPath | null) ?? null, closed: false }));
-  const steps = useMemo(() => stepsFor(state.path, arrival), [state.path, arrival]);
+  const [state, setState] = useState<{ index: number; path: TourPath | null; mode: PlanMode | null; closed: boolean }>(() => ({ index: 0, path: (params.get("path") as TourPath | null) ?? null, mode: null, closed: false }));
+  const steps = useMemo(() => stepsFor(state.path, arrival, state.mode), [state.path, arrival, state.mode]);
   const step = steps[state.index];
   const [rect, setRect] = useState<DOMRect | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -144,6 +156,13 @@ export function TourOverlay() {
         setTimeout(() => setState(current => ({ ...current, path: picked, index: current.index + 1 })), 420);
         return;
       }
+      if (step.id === "tabs") {
+        const tab = (event.target as Element).closest('[role="tab"]');
+        if (!tab) return;
+        const mode: PlanMode = tab.textContent?.includes("Build my own") ? "own" : "suggested";
+        setTimeout(() => setState(current => ({ ...current, mode, index: current.index + 1 })), 420);
+        return;
+      }
       if (step.id === "pace" && !(event.target as Element).closest('[role="radio"]')) return;
       if (step.advance === "tap-nav") {
         // The mockup never saves: the tap goes where the real button would.
@@ -165,7 +184,7 @@ export function TourOverlay() {
 
   if (state.closed || !step) return null;
   // Before a path is picked, count against the shortest branch; the total settles once they pick.
-  const count = state.path ? steps.length : stepsFor("sogp", arrival).length;
+  const count = state.path ? (state.path === "podcast" && !state.mode ? stepsFor("podcast", arrival, "suggested").length : steps.length) : stepsFor("sogp", arrival).length;
   const progress = <span className={styles.count}>{state.index + 1} of {count}</span>;
 
   if (step.kind === "sheet") {
