@@ -5,33 +5,49 @@ import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { chooseSogpPathAction, editSogpPlanAction } from "@/app/_actions/sogp-learning-actions";
 import { moveRemainingEpisode, podcastSuggestion, learningWriteNotice, type LearningViewData } from "@/lib/sogp/learning-view";
+import { isPlanPath, isTeachingKey } from "@/lib/sogp/learning-input";
+import { JourneyBuilder, PodcastBuilder } from "./plan-builder";
 import { DashboardIcon } from "@/components/dashboard/v3/primitives";
 import { GripVerticalIcon, LockIcon } from "lucide-react";
 import styles from "./learning.module.css";
-import { PlanPreviewStep, SuggestedTracklistStep, TracklistReadyStep } from "./plan-onboarding";
 
 function seconds(duration: string | undefined) {
   const parts = (duration ?? "").split(":").map(Number);
   return parts.length > 1 && !parts.some(Number.isNaN) ? parts.reduce((total, value) => total * 60 + value, 0) : 0;
 }
 
-export function PlanEditor({ data,requestedPath }: { data: LearningViewData;requestedPath?: "podcast_one" | "podcast_two" }) {
+type PlanPathRequest = "podcast_one" | "podcast_two" | "doctrinal";
+
+/**
+ * A first plan opens its builder (user, 24 November): Podcast takes a suggested
+ * plan or your own picks, a doctrinal journey picks from the Library. An
+ * existing plan opens the editor below.
+ */
+export function PlanEditor({ data,requestedPath }: { data: LearningViewData;requestedPath?: PlanPathRequest }) {
+  const path = requestedPath ?? (isPlanPath(data.state?.path) ? data.state.path : undefined);
+  const plan = data.state?.plan;
+  const kindMatches = !plan || [...plan.episodeGuids,...plan.historyEpisodeGuids].every(guid => isTeachingKey(guid) === (path === "doctrinal"));
+  if (path && (!plan || !kindMatches)) return path === "doctrinal" ? <JourneyBuilder data={data} /> : <PodcastBuilder data={data} path={path} />;
+  return <PlanEdit data={data} requestedPath={path === "doctrinal" ? undefined : path} />;
+}
+
+function PlanEdit({ data: allData,requestedPath }: { data: LearningViewData;requestedPath?: "podcast_one" | "podcast_two" }) {
+  // A doctrinal journey edits Library teachings; a podcast plan edits episodes (migration 0079).
+  const teachingPlan = allData.state?.path === "doctrinal";
+  const data = { ...allData,episodes: allData.episodes.filter(episode => isTeachingKey(episode.guid) === teachingPlan) };
   const router = useRouter();
   const query = useQueryClient();
   const [base] = useState(() => ({ revision: data.state?.revision ?? 0,guids: [...(data.state?.plan?.episodeGuids ?? [])] }));
   const pace = data.state?.plan?.episodesPerDay ?? (requestedPath === "podcast_two" ? 2 : 1);
   const existingPlan = data.state?.plan !== null && data.state?.plan !== undefined;
-  // A first podcast plan starts from the optional Purpose suggestion (Paper onboarding steps).
-  const [suggested] = useState(() => existingPlan ? [] : podcastSuggestion(data.episodes,pace));
-  const [stage,setStage] = useState<"preview" | "suggested" | "edit" | "ready">(() => existingPlan || !suggested.length ? "edit" : "preview");
-  const [draft,setDraft] = useState<string[]>(() => existingPlan ? base.guids : suggested);
+  const [draft,setDraft] = useState<string[]>(() => base.guids);
   const [search,setSearch] = useState("");
   const [planSearch,setPlanSearch] = useState("");
   const [filter,setFilter] = useState("all");
   const [editingSlot,setEditingSlot] = useState<string | null>(null);
   const [showAllDays,setShowAllDays] = useState(false);
   const [previewing,setPreviewing] = useState<string | null>(null);
-  const [showLibrary,setShowLibrary] = useState(() => !existingPlan && !suggested.length);
+  const [showLibrary,setShowLibrary] = useState(false);
   const [error,setError] = useState<string | null>(null);
   const [saving,startSave] = useTransition();
   const dirty = existingPlan && JSON.stringify(base.guids) !== JSON.stringify(draft);
@@ -71,10 +87,6 @@ export function PlanEditor({ data,requestedPath }: { data: LearningViewData;requ
       } catch { setError("Your plan could not be saved. Your draft is still here; try again."); }
     });
   }
-  const episodeMap = new Map(data.episodes.map(episode => [episode.guid,episode]));
-  if (stage === "preview") return <PlanPreviewStep pace={pace} guids={draft} episodes={episodeMap} onNext={() => setStage("suggested")} />;
-  if (stage === "suggested") return <SuggestedTracklistStep pace={pace} guids={draft} episodes={episodeMap} onUse={() => setStage("ready")} onEdit={() => { setShowLibrary(false);setStage("edit"); }} />;
-  if (stage === "ready") return <TracklistReadyStep pace={pace} guids={draft} episodes={episodeMap} saving={saving} canWrite={data.canWrite} error={error ?? (!data.canWrite ? learningWriteNotice(data) : null)} onEdit={() => { setShowLibrary(false);setStage("edit"); }} onStart={() => save(true)} />;
   // The same slots as before (search matches, else the first two days until expanded), grouped by day.
   const visibleDays: { day: number; slots: number[] }[] = [];
   draft.forEach((guid,index) => {
@@ -128,6 +140,6 @@ export function PlanEditor({ data,requestedPath }: { data: LearningViewData;requ
       <ul className={styles.libraryList}>{library.map(episode => <li key={episode.guid}><div className={styles.libraryRow}><label className={styles.episodeLabel}><input type="checkbox" checked={queued.has(episode.guid)} disabled={saving || listened.has(episode.guid) || archived.has(episode.guid)} onChange={event => { if (event.target.checked) setDraft([...draft,episode.guid]);else remove(draft.indexOf(episode.guid)); }} /><span><strong>{episode.title}</strong><span className={styles.meta}>Podcast · {episode.duration || "Duration unavailable"}{listened.has(episode.guid) ? " · Already listened" : ""}</span></span></label>{episode.audioUrl ? <button type="button" className={styles.episodeMenu} aria-label={`${previewing === episode.guid ? "Close preview of" : "Preview"} ${episode.title}`} aria-pressed={previewing === episode.guid} onClick={() => setPreviewing(previewing === episode.guid ? null : episode.guid)}><DashboardIcon name={previewing === episode.guid ? "pause" : "play"} size={24} /></button> : null}</div>{previewing === episode.guid ? <audio controls autoPlay preload="none" src={episode.audioUrl} className={styles.previewAudio} /> : null}</li>)}</ul>
       <p className={styles.meta}>Keep scrolling to explore the library. Your current plan stays active until you save.</p>
     </section>}
-    <div className={styles.footer}>{showLibrary ? <p className={`${styles.meta} ${styles.centre}`}>{draft.length} selected · Full plan is editable</p> : <p className={styles.readyNote}><DashboardIcon name="lock" size={16} /><span>Completed listens cannot be moved or replaced. Playback positions stay with their episodes.</span></p>}{!data.canWrite ? <p className={styles.muted}>{learningWriteNotice(data)}</p> : null}{error ? <p role="alert" className={styles.error}>{error}</p> : null}{showLibrary ? <button type="button" className={styles.primary} onClick={() => { if (!draft.length && !existingPlan) { setError("Choose at least one episode to continue.");return; }setShowLibrary(false);setError(null); }}>Review selected episodes<DashboardIcon name="arrow" /></button> : existingPlan ? <button type="button" className={styles.primary} disabled={saving || !data.canWrite} onClick={() => save()}>{saving ? "Saving…" : "Save plan changes"}<DashboardIcon name="check" /></button> : <button type="button" className={styles.primary} disabled={!draft.length} onClick={() => { setError(null);setStage("ready"); }}>Review my tracklist<DashboardIcon name="arrow" /></button>}</div>
+    <div className={styles.footer}>{showLibrary ? <p className={`${styles.meta} ${styles.centre}`}>{draft.length} selected · Full plan is editable</p> : <p className={styles.readyNote}><DashboardIcon name="lock" size={16} /><span>Completed listens cannot be moved or replaced. Playback positions stay with their episodes.</span></p>}{!data.canWrite ? <p className={styles.muted}>{learningWriteNotice(data)}</p> : null}{error ? <p role="alert" className={styles.error}>{error}</p> : null}{showLibrary ? <button type="button" className={styles.primary} onClick={() => { if (!draft.length && !existingPlan) { setError("Choose at least one episode to continue.");return; }setShowLibrary(false);setError(null); }}>Review selected episodes<DashboardIcon name="arrow" /></button> : existingPlan ? <button type="button" className={styles.primary} disabled={saving || !data.canWrite} onClick={() => save()}>{saving ? "Saving…" : "Save plan changes"}<DashboardIcon name="check" /></button> : null}</div>
   </section>;
 }

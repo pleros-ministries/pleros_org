@@ -2770,15 +2770,16 @@ export const churchMeetingReports = pgTable("church_meeting_reports", {
 /** Explicit learner choices only: reads and migration never populate this table. */
 export const sogpLearningPreferences = pgTable("sogp_learning_preferences", {
   userId: text("user_id").primaryKey().references(() => users.id, { onDelete: "cascade" }),
-  path: text("path").$type<"traditional" | "podcast_one" | "podcast_two">().notNull(),
+  // "doctrinal" (migration 0079): a plan of Library teachings, one a day, under "teaching:<id>" keys.
+  path: text("path").$type<"traditional" | "podcast_one" | "podcast_two" | "doctrinal">().notNull(),
   episodesPerDay: integer("episodes_per_day").notNull(),
   hasPodcastPlan: boolean("has_podcast_plan").notNull().default(false),
   revision: integer("revision").notNull().default(1),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 }, t => [
-  check("sogp_learning_preferences_path_check", sql`${t.path} in ('traditional','podcast_one','podcast_two')`),
-  check("sogp_learning_preferences_pace_check", sql`${t.episodesPerDay} in (1,2) and (${t.path} = 'traditional' or (${t.path} = 'podcast_one' and ${t.episodesPerDay} = 1) or (${t.path} = 'podcast_two' and ${t.episodesPerDay} = 2))`),
+  check("sogp_learning_preferences_path_check", sql`${t.path} in ('traditional','podcast_one','podcast_two','doctrinal')`),
+  check("sogp_learning_preferences_pace_check", sql`${t.episodesPerDay} in (1,2) and (${t.path} = 'traditional' or (${t.path} in ('podcast_one','doctrinal') and ${t.episodesPerDay} = 1) or (${t.path} = 'podcast_two' and ${t.episodesPerDay} = 2))`),
   check("sogp_learning_preferences_revision_check", sql`${t.revision} > 0`),
 ]);
 
