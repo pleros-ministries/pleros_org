@@ -28,6 +28,7 @@ export const distributionLeaders: DistributionLeader[] = [
   { enrollmentId: 69, role: "General Leader", location: "Lagos" },
   { enrollmentId: 141, role: "General Leader", location: "Lagos" },
   { enrollmentId: 40, role: "General Leader", location: "Osogbo" },
+  { enrollmentId: 500, role: "General Leader", location: "Sagamu" }, // added by the user, 24 November
   { enrollmentId: 58, role: "Worker", location: "Calabar" },
   { enrollmentId: 34, role: "Worker", location: "Ibadan" },
   { enrollmentId: 41, role: "Worker", location: "Ibadan" },
@@ -59,7 +60,7 @@ export const distributionLeaders: DistributionLeader[] = [
   { enrollmentId: 172, role: "Added by you", location: "Sagamu" },
 ];
 export const distributionAssignments: DistributionAssignment[] = [
-  [499, 129, "placed"], // Timileyin Fadare → Aduragbemi Aleem (user, 24 November)
+  [499, 129, "placed"], // placed by the user, 24 November
   [401, 25, "pastor", "elsewhere"],
   [354, 25, "placed"],
   [78, 33, "placed", "elsewhere"],
@@ -308,13 +309,13 @@ export const distributionAssignments: DistributionAssignment[] = [
   [209, 172, "placed", "elsewhere"],
   [348, 79],
   [186, 172, "placed"],
-  [115, 116],
+  [115, 500, "placed"],
   [243, 172, "placed"],
-  [95, 116],
+  [95, 500, "placed"],
   [182, 172, "placed"],
-  [351, 116],
+  [351, 500, "placed"],
   [250, 172, "placed"],
-  [256, 116],
+  [256, 500, "placed"],
   [478, 170],
   [138, 170],
   [299, 170],
@@ -336,9 +337,9 @@ export const distributionAssignments: DistributionAssignment[] = [
   [251, 208],
   [414, 170, "placed"],
   [219, 170, "placed"],
-  [96, 116, "placed"],
+  [96, 500, "placed"],
   [444, 33, "placed", "elsewhere"],
-  [168, 31, "placed"], // Timilehin Odujeko can no longer lead (feedback, 24 November)
+  [168, 31, "placed"], // can no longer lead (feedback, 24 November)
   [236, 119, "placed", "elsewhere"],
   [164, 101, "placed", "pastor"],
   [418, 172, "pastor", "elsewhere"],
