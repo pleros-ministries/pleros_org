@@ -50,7 +50,7 @@ export function ChooserMock() {
     // The card stays a card; its details open in their own panel under it (user, 24 November).
     return <div className={styles.pathSlot}>
       <div className={styles.path} data-on={on} style={look(key)}>
-        <button type="button" role="radio" aria-checked={on} className={styles.pathHead} onClick={() => setPath(key)}>
+        <button type="button" aria-pressed={on} aria-expanded={on} className={styles.pathHead} onClick={() => setPath(on ? null : key)}>
           <span className={styles.pathArt} aria-hidden="true" />
           <span className={styles.pathTitle}>{title}<span className={styles.check} aria-hidden="true"><CheckIcon className="size-3" strokeWidth={3} /></span></span>
           <span className={styles.pathLine}>{line}</span>
@@ -63,7 +63,7 @@ export function ChooserMock() {
 
   return <section className={`${learn.page} ${learn.choicePage}`}>
     <header className={learn.header}><h1>Choose a learning path</h1><p className={styles.lede}>See where each one leads. You can change later</p></header>
-    <div role="radiogroup" aria-label="Learning path" className={styles.paths}>
+    <div role="group" aria-label="Learning path" className={styles.paths}>
       {card("sogp", "SOGP", "A teaching, quiz and written response each day", "1 hr a day · 3 levels", <>
         <span className={styles.askLabel} id="start-level">Where are you starting?</span>
         <div role="radiogroup" aria-labelledby="start-level" className={styles.choices} data-count="3">

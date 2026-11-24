@@ -9,14 +9,15 @@ import { longDate, sogpLevels, type StartLevel } from "./sample";
 
 /**
  * SOGP's road by level (user, 24 November): how many tracks, when the level
- * starts and ends, and the tracks themselves. The first level is open; any
- * other opens with a tap.
+ * starts and ends, and the tracks themselves. An open level stands alone (user,
+ * 24 November); tap it again to see every level.
  */
 export function LevelRoad({ start, compact = false }: { start: StartLevel; compact?: boolean }) {
   const { stops, tracks, finish } = sogpLevels(start, SOGP_LEVELS);
   const [open, setOpen] = useState<number | null>(start);
   return <div className="grid gap-2">
-    <ol className={styles.levels}>{stops.map((stop, index) => {
+    <ol className={styles.levels}>{stops.filter(stop => open === null || open === stop.level).map(stop => {
+      const index = stops.indexOf(stop);
       const expanded = open === stop.level;
       return <li key={stop.level} data-state={stop.soon ? "soon" : index === 0 ? "now" : "later"}>
         <button type="button" className={styles.levelHead} aria-expanded={expanded} onClick={() => setOpen(expanded ? null : stop.level)}>
@@ -32,7 +33,7 @@ export function LevelRoad({ start, compact = false }: { start: StartLevel; compa
         </div></div>
       </li>;
     })}
-      <li data-state="soon"><div className={styles.levelHead} style={{ cursor: "default" }}><span className={styles.levelName}>Then<span className={styles.when}> · Advanced SOGP</span></span><span className={styles.when}>After level 4</span><span /></div></li>
+      {open === null ? <li data-state="soon"><div className={styles.levelHead} style={{ cursor: "default" }}><span className={styles.levelName}>Then<span className={styles.when}> · Advanced SOGP</span></span><span className={styles.when}>After level 4</span><span /></div></li> : null}
     </ol>
     {compact ? null : <p className={styles.lede}>{tracks} tracks · done by <b style={{ fontWeight: 500, color: "var(--color-text-strong)" }}>{longDate(finish)}</b> at a track a day</p>}
   </div>;

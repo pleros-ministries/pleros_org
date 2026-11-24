@@ -131,3 +131,8 @@
 .trackList li[data-review] { color: var(--color-text-muted); }
 .trackNo { color: var(--color-text-muted); font-size: 11.5px; font-variant-numeric: tabular-nums; }
 @media (prefers-reduced-motion: reduce) { .levelChevron { transition: none; } }
+
+/* Rows fade in when the road changes between one level and all of them. */
+@keyframes roadIn { from { opacity: 0; transform: translateY(-4px); } }
+.levels > li { animation: roadIn 220ms var(--ease-out); }
+@media (prefers-reduced-motion: reduce) { .levels > li { animation: none; } }
