@@ -43,7 +43,7 @@ function stepsFor(path: TourPath | null, arrival: "direct" | "link", mode: PlanM
   const common: Step[] = [
     welcome,
     { id: "start", screen: "home", kind: "spot", find: byText("a", "Choose a learning path"), advance: "tap-nav", to: "choose", title: "Start here", body: "Your learning lives in this card.", tap: "Tap Choose a learning path" },
-    { id: "paths", screen: "choose", kind: "spot", find: q('[aria-label="Learning path"]'), advance: "next", title: "Three ways to learn", body: "SOGP is the full school, a teaching a day. Podcast is shorter episodes. A doctrinal journey is teachings you pick from the Library." },
+    { id: "paths", screen: "choose", kind: "spot", find: q('[aria-label="Learning path"]'), advance: "next", title: "Three ways to learn", body: "The doctrinal path is SOGP’s teachings, one a day. Podcast is shorter episodes. A personalised path is teachings you pick from the Library." },
     { id: "pick", screen: "choose", kind: "spot", find: q('[aria-label="Learning path"]'), advance: "tap", title: "Pick the one that fits your days", body: "Each one shows where it leads before you commit.", tap: "Tap a path" },
   ];
   if (!path) return common;
@@ -81,20 +81,20 @@ function stepsFor(path: TourPath | null, arrival: "direct" | "link", mode: PlanM
       ] satisfies Step[]),
     ],
     doctrinal: [
-      { id: "journey", screen: "choose", kind: "spot", find: byText("p", "Choose a series or single teachings"), advance: "next", title: "Your own journey", body: "You’ll pick teachings from the Library, one a day. It counts toward your certificate." },
+      { id: "journey", screen: "choose", kind: "spot", find: byText("p", "Choose a series or single teachings"), advance: "next", title: "Your personalised path", body: "You’ll pick teachings from the Library, one a day. It counts toward your certificate." },
       { id: "go", screen: "choose", kind: "spot", find: footerButton, advance: "tap-nav", to: "plan-doctrinal", title: "Into the Library", body: "Your path saves now, so you won’t lose it.", tap: "Tap Choose my teachings" },
       { id: "search", screen: "plan-doctrinal", kind: "spot", find: q('label[class*="learning-paths-module"][class*="__search"]'), advance: "next", title: "Find a teaching", body: "Search by title or series." },
       { id: "add", screen: "plan-doctrinal", kind: "spot", find: byText("button", "Add all"), advance: "tap", title: "Add a whole series", body: "Or open a series and tick single teachings.", tap: "Tap Add all" },
-      { id: "tray", screen: "plan-doctrinal", kind: "spot", find: q('[class*="learning-paths-module"][class*="__tray"]'), advance: "next", title: "Your journey so far", body: "How many teachings, how many days, and when you’ll finish." },
+      { id: "tray", screen: "plan-doctrinal", kind: "spot", find: q('[class*="learning-paths-module"][class*="__tray"]'), advance: "next", title: "Your path so far", body: "How many teachings, how many days, and when you’ll finish." },
       { id: "order", screen: "plan-doctrinal", kind: "spot", find: byText("button", "Put them in order"), advance: "tap", title: "Put them in order", body: "One last look before you start.", tap: "Tap Put them in order" },
       { id: "move", screen: "plan-doctrinal", kind: "spot", find: q('[class*="learning-paths-module"][class*="__dayItem"]'), advance: "next", title: "Make the order yours", body: "Move any teaching earlier or later." },
-      { id: "start-plan", screen: "plan-doctrinal", kind: "spot", find: byText("button", "Start my plan"), advance: "tap-nav", to: learning, title: "Start your journey", body: "You can add more from the Library any time.", tap: "Tap Start my plan" },
+      { id: "start-plan", screen: "plan-doctrinal", kind: "spot", find: byText("button", "Start my plan"), advance: "tap-nav", to: learning, title: "Start your path", body: "You can add more from the Library any time.", tap: "Tap Start my plan" },
     ],
   };
   return [...common, ...branch[path], ...end];
 }
 
-const PATH_OF: Array<[string, TourPath]> = [["Choose doctrinal journey", "doctrinal"], ["Podcast", "podcast"], ["SOGP", "sogp"]];
+const PATH_OF: Array<[string, TourPath]> = [["Personalised path", "doctrinal"], ["Choose doctrinal journey", "doctrinal"], ["Podcast", "podcast"], ["Doctrinal path", "sogp"], ["SOGP", "sogp"]];
 
 export function TourOverlay() {
   const router = useRouter();
