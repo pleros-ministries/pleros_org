@@ -51,6 +51,8 @@ export function PathChooser({ data }: { data: LearningViewData }) {
   const taught = data.traditional.levels.filter(level => level.tracks.length);
   const firstOpen = taught.find(level => level.open && level.done < level.tracks.length) ?? taught[0];
   const [level, setLevel] = useState<number>(firstOpen?.level ?? 1);
+  // Read once when the chooser opens, so dates stay stable across renders.
+  const [openedAt] = useState(() => Date.now());
   const [confirming, setConfirming] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saving, startSave] = useTransition();
@@ -129,7 +131,7 @@ export function PathChooser({ data }: { data: LearningViewData }) {
     </> : null}
   </> : <p className={styles.lede}>Your teachings open with your cohort, a track a day with a group review at the end of each level.</p>;
 
-  const finishPodcast = (days: number) => longDate.format(new Date(Date.now() + (days - 1) * 86_400_000));
+  const finishPodcast = (days: number) => longDate.format(new Date(openedAt + (days - 1) * 86_400_000));
   const podcastBody = <>
     <span className={styles.ask} id="pace">Choose your pace</span>
     <div role="radiogroup" aria-labelledby="pace" className={styles.choices}>

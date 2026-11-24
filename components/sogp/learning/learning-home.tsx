@@ -1,11 +1,7 @@
 "use client";
 import Link from "next/link";
-import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
-import { useQueryClient } from "@tanstack/react-query";
-import { learningResume, learningWriteNotice, type LearningViewData } from "@/lib/sogp/learning-view";
+import { learningResume, type LearningViewData } from "@/lib/sogp/learning-view";
 import { DashboardIcon } from "@/components/dashboard/v3/primitives";
-import { BookOpenIcon, HeadphonesIcon } from "lucide-react";
 import styles from "./learning.module.css";
 
 export function LearningHome({ data }: { data: LearningViewData }) {
