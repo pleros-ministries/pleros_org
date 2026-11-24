@@ -43,7 +43,7 @@ function stepsFor(path: TourPath | null, arrival: "direct" | "link", mode: PlanM
   const common: Step[] = [
     welcome,
     { id: "start", screen: "home", kind: "spot", find: byText("a", "Choose a learning path"), advance: "tap-nav", to: "choose", title: "Start here", body: "Your learning lives in this card.", tap: "Tap Choose a learning path" },
-    { id: "paths", screen: "choose", kind: "spot", find: q('[aria-label="Learning path"]'), advance: "next", title: "Three ways to learn", body: "The doctrinal path is SOGP’s teachings, one a day. Podcast is shorter episodes. A personalised path is teachings you pick from the Library." },
+    { id: "paths", screen: "choose", kind: "spot", find: q('[aria-label="Learning path"]'), advance: "next", title: "Three ways through SOGP", body: "The doctrinal path is a track a day, with a quiz and a written response. Podcast is shorter episodes. A personalised path is teachings you pick from the Library." },
     { id: "pick", screen: "choose", kind: "spot", find: q('[aria-label="Learning path"]'), advance: "tap", title: "Pick the one that fits your days", body: "Each one shows where it leads before you commit.", tap: "Tap a path" },
   ];
   if (!path) return common;
@@ -64,7 +64,7 @@ function stepsFor(path: TourPath | null, arrival: "direct" | "link", mode: PlanM
     ],
     podcast: [
       { id: "pace", screen: "choose", kind: "spot", find: q('[aria-labelledby="pace"]'), advance: "tap", title: "Choose your pace", body: "15 minutes is one episode a day. 30 minutes is two.", tap: "Tap a pace" },
-      { id: "finish", screen: "choose", kind: "spot", find: byText("p", "episodes over 30 days"), advance: "next", title: "Where it leads", body: "Thirty days of episodes, then SOGP from level 1." },
+      { id: "finish", screen: "choose", kind: "spot", find: byText("p", "episodes over 30 days"), advance: "next", title: "Where it leads", body: "Thirty days of episodes, then the doctrinal path from level 1." },
       { id: "go", screen: "choose", kind: "spot", find: footerButton, advance: "tap-nav", to: "plan-podcast", title: "Now your plan", body: "Your path saves now, so you won’t lose it.", tap: "Tap Build my podcast plan" },
       { id: "tabs", screen: "plan-podcast", kind: "spot", find: q('[role="tablist"][aria-label="Plan"]'), advance: "tap", title: "Ours, or your own", body: "Take our suggested plan in one tap, or build your own from any series.", tap: "Tap one" },
       // The steps after follow the tab they tap (user, 24 November: show Build my own too).
