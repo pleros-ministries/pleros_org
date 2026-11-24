@@ -22,6 +22,7 @@ Consolidated 2026-10-13. Keep this file short, current, pattern-focused, and fre
 - Use sentence case and UK English in user-facing copy. Preserve technical identifiers, routes, schemas, events, and third-party names.
 - Verify UI work in the visible browser at relevant mobile and desktop widths; tests alone are not proof of the rendered flow.
 - After meaningful corrections or newly proven patterns, update the relevant section here instead of appending a dated diary entry.
+- SOGP allocation review: exclude consent-form respondents (Yes or No), show groups/removals and current + pending + new workload. Prefer older/same-year leaders locally then remotely; pin explicit pairings by ID and prioritise nominated gender-specific pools. Obtain gender confirmation, explain unanswered group-join invitations and age exceptions before decisions, and retain confirmed identity exclusions. Final presentations freeze agreed allocations, separate retained invitations from new allocations, and show directed workload exceptions. Review before live assignments; inspect schema names before queries.
 
 ## Project setup
 
