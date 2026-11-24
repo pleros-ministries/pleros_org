@@ -217,7 +217,7 @@ export function JourneyBuilder({ data }: { data: LearningViewData }) {
   const [chosen, setChosen] = useState<string[]>([]);
   const [review, setReview] = useState<string[] | null>(null);
   const { save, saving, error } = useSavePlan(data, "doctrinal");
-  const eyebrow = "Doctrinal journey · one a day";
+  const eyebrow = "Personalised path · one a day";
   if (review) return <Review order={review} setOrder={update => setReview(list => update(list ?? []))} items={items} perDay={1} eyebrow={eyebrow} unit="teaching" saving={saving} error={error} onBack={() => setReview(null)} onStart={() => save(review)} />;
   return <section className={learn.page} style={{ paddingBottom: 0 }}>
     <header className={learn.header}><p className={learn.eyebrow}>{eyebrow}</p><h1>Choose your teachings</h1><p className={styles.lede}>From the Library. Add a whole series or single teachings</p></header>

@@ -45,7 +45,7 @@ export function SogpSchool({ hub, facts, followUp }: { hub: LearningHubData; fac
 
   const tools: Array<{ href: string; icon: ReactNode; title: string; meta: string }> = [
     { href: "/dashboard/sogp/path", icon: <RepeatIcon />, title: "Change path or pace", meta: hub.paceLabel },
-    ...(podcast ? [{ href: "/dashboard/sogp/plan", icon: <ListMusicIcon />, title: doctrinal ? "Your teachings" : "Your tracklist", meta: doctrinal ? "The teachings in your journey" : "The episodes in your plan" }] : []),
+    ...(podcast ? [{ href: "/dashboard/sogp/plan", icon: <ListMusicIcon />, title: doctrinal ? "Your teachings" : "Your tracklist", meta: doctrinal ? "The teachings in your path" : "The episodes in your plan" }] : []),
     { href: "/dashboard/sogp/history", icon: <HistoryIcon />, title: "History", meta: podcast ? `${hub.card.done} ${unit} listened` : `${hub.doneCount} ${hub.doneCount === 1 ? "teaching" : "teachings"} done` },
     { href: "/dashboard/sogp/reviews", icon: <CalendarCheckIcon />, title: "Group reviews", meta: hub.review ? `Next: ${hub.review.when}` : "Weekly, with your group" },
     { href: hub.discipler ? "/dashboard/community/discipleship" : "/dashboard/community/ask", icon: <MessageCircleQuestionIcon />, title: "Ask about a teaching", meta: hub.discipler ? `${hub.discipler.firstName} answers` : "Pleros answers" },
@@ -70,7 +70,7 @@ export function SogpSchool({ hub, facts, followUp }: { hub: LearningHubData; fac
     <section className={`${cards.card} ${page.hero}`} style={artStyle("sogp")} aria-label="School of God’s Purpose">
       <span className={cards.art} aria-hidden="true" />
       <span className={`${cards.top} ${page.heroTop}`}>
-        <span className={cards.tag}>{[hub.cohortTitle, doctrinal ? "Doctrinal journey" : podcast ? "Podcast" : "SOGP"].filter(Boolean).join(" · ")}</span>
+        <span className={cards.tag}>{[hub.cohortTitle, doctrinal ? "Personalised path" : podcast ? "Podcast" : "Doctrinal path"].filter(Boolean).join(" · ")}</span>
         <h1>School of God’s Purpose</h1>
         <span className={page.heroLine}>{hub.state === "withdrawn" ? "Your enrolment is withdrawn. Your history stays here." : line}</span>
       </span>
@@ -108,7 +108,7 @@ export function SogpSchool({ hub, facts, followUp }: { hub: LearningHubData; fac
     </div>
 
     {podcast ? <>
-      <div className={styles.sectionTitle}><h2>{doctrinal ? "Your doctrinal journey" : "Your podcast plan"}</h2></div>
+      <div className={styles.sectionTitle}><h2>{doctrinal ? "Your personalised path" : "Your podcast plan"}</h2></div>
       <div className={styles.panel}><Link href={hub.card.href} className={styles.row}>
         <Chip tone={["#e6ecfc", "#1f3260"]}><ListMusicIcon className="size-[18px]" strokeWidth={2} /></Chip>
         <span className={styles.rowCopy}><span className={styles.rowTitle}>{hub.card.title}</span><span className={styles.rowMeta} style={{ whiteSpace: "normal" }}>{hub.card.progress}</span></span>

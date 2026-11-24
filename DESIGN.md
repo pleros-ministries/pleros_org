@@ -201,7 +201,7 @@ Most of these classes come from `components/community/discipleship/discipleship-
 - **Share what you learnt today** (You Home, Pastor, 22 October) is its own card under the learning card, about half its height, in the share chip's warm sand (#f6ecd9 on #5a3d0c): never a second blue hero.
 - **Text over art is always live text**, never baked in.
 - **Choosing a learning path** (user, 24 November; `path-chooser.tsx`, mockup `/preview/dashboard-v3/learning-path-onboarding`):
-  - Three cards in the learning-card family: SOGP (coral, gem), Podcast (sky, headphones), Choose doctrinal journey (sand, cassettes). Each has a title, one line and one fact chip, and nothing more.
+  - Three cards in the learning-card family: Doctrinal path (coral, gem), Podcast (sky, headphones), Personalised path (sand, cassettes). Each has a title, one line and one fact chip, and nothing more.
   - Tapping a card opens its details in a separate white panel under it, never inside the card; tapping again closes it. The chosen card keeps an ink outline and a check.
   - Choices inside a panel read as choices: tiles with a radio dot, or a lock when not yet open. SOGP shows only the chosen level's tracks, with plain dates ("24 Nov", no weekday) in a quieter grey, then one closing line. Never a dotted timeline.
 - **Your path** on Learning (user, 24 November): the dashboard's own vocabulary, never a timeline: a three-count strip, a panel of rows, and one note.

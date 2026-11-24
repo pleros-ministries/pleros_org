@@ -2,7 +2,9 @@ import { CommunityError } from "@/lib/community/errors";
 export type SogpLearningPath = "traditional" | "podcast_one" | "podcast_two" | "doctrinal";
 
 /**
- * Choose doctrinal journey (user and Pastor, 24 November): Library teachings,
+ * The Personalised path (named "Choose doctrinal journey" until 24 November;
+ * the stored value stays "doctrinal", and "traditional" is the Doctrinal path):
+ * Library teachings,
  * one a day, kept in the same plan, listen and playback tables as podcast
  * episodes under "teaching:<id>" keys (migration 0079).
  */
@@ -23,7 +25,7 @@ export function learningRevision(value: unknown) {
   return value;
 }
 export function learningPath(value: unknown): SogpLearningPath {
-  if (value !== "traditional" && value !== "podcast_one" && value !== "podcast_two" && value !== "doctrinal") throw new CommunityError("Choose SOGP, a podcast pace or a doctrinal journey.");
+  if (value !== "traditional" && value !== "podcast_one" && value !== "podcast_two" && value !== "doctrinal") throw new CommunityError("Choose the doctrinal path, a podcast pace or a personalised path.");
   return value;
 }
 export function learningGuid(value: unknown) {

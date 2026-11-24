@@ -91,7 +91,7 @@ export async function chooseOwnSogpPath(userId: string, value: unknown): Promise
       if (!plan) {
         // The path saves on its own first; the plan follows when it's built (user, 24 November).
         const guids = Array.isArray(input.episodeGuids) ? input.episodeGuids : [];
-        if (teachings && guids.length > 120) throw new CommunityError("A doctrinal journey holds up to 120 teachings.");
+        if (teachings && guids.length > 120) throw new CommunityError("A personalised path holds up to 120 teachings.");
         if (guids.length) {
           plan = domain(() => createPodcastPlan(guids as string[],pace));
           if (plan.episodeGuids.some(guid => !catalogue?.has(guid) || isTeachingKey(guid) !== teachings)) throw new CommunityError(teachings ? "One of those teachings is not in the Library. Your choice is unchanged." : "One of those episodes is not available. Your choice is unchanged.");
