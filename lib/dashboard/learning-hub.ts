@@ -22,7 +22,6 @@ import { buildSogpDays } from "@/lib/sogp/sogp-days";
 import { cohortWeekLabel, homeSogpToday } from "./home";
 
 const SOGP_SCHOOL = "/dashboard/sogp/school";
-const LEVEL_NAMES: Record<number, string> = { 1: "Gospel", 2: "Foundations", 3: "Walk of faith", 4: "Purpose" };
 const weekdayFormat = new Intl.DateTimeFormat("en-GB", { weekday: "short", timeZone: "UTC" });
 const opensFormat = new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "Africa/Lagos" });
 
@@ -158,7 +157,8 @@ export async function getLearningHubData(userId: string, state: SogpLearningStat
     const track = next ?? published.at(-1) ?? null;
     const level = track?.curriculumLevel ?? 1;
     card = track
-      ? { eyebrow: `Level ${level} · ${LEVEL_NAMES[level] ?? "SOGP"}`, title: track.lesson.title, progress: `Track ${track.dayNumber} of ${published.length} · ${doneCount} done`, done: doneCount, total: published.length, href: `/dashboard/sogp/course/day/${track.dayNumber}`, action: next ? `Resume track ${track.dayNumber}` : "Review your last track", level }
+      ? { // The level alone; its name doesn't need saying on the card (user, 24 November).
+      eyebrow: `Level ${level}`, title: track.lesson.title, progress: `Track ${track.dayNumber} of ${published.length} · ${doneCount} done`, done: doneCount, total: published.length, href: `/dashboard/sogp/course/day/${track.dayNumber}`, action: next ? `Resume track ${track.dayNumber}` : "Review your last track", level }
       : { eyebrow: "Traditional", title: "Your teachings open soon", progress: "Nothing released yet", done: 0, total: 0, href: "/dashboard/sogp/traditional", action: "Open your calendar", level: 1 };
   }
 

@@ -8,7 +8,7 @@ export const SAMPLE_HUB: LearningHubData = {
   state: "active",
   cohortTitle: "SOGP October 2026",
   weekLabel: "Week 2 of 4",
-  card: { eyebrow: "Level 2 · Foundations", title: "Biblical Origin and Ontology", progress: "Track 10 of 24 · 9 done", done: 9, total: 24, href: "#", action: "Resume track 10", level: 2 },
+  card: { eyebrow: "Level 2", title: "Biblical Origin and Ontology", progress: "Track 10 of 24 · 9 done", done: 9, total: 24, href: "#", action: "Resume track 10", level: 2 },
   catchUp: null,
   review: { title: "Week 2 review", when: "Sunday 25 October" },
   certificate: { available: false },
