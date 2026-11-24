@@ -192,14 +192,20 @@ Most of these classes come from `components/community/discipleship/discipleship-
   - a centred icon for 40px list tiles (`-icon-96/192.webp`).
 - **Delivery:** served with `image-set()` at 1x and 2x, from `public/assets/dashboard/community-groups/` and `public/assets/dashboard/learning-card/`.
 - **No seams:** above a width threshold (measured on the container, not the window) a card switches to the 3:1 `-wide` cut on `background-size: cover`, anchored bottom-right. Work the threshold out; don't guess it. The compact 3:2 art at `auto 114%` of a card H tall, nudged 22px right, covers widths up to 1.14·H·1.5 − 22px. So Home (min 252px tall) switches at 400px, and the Learning hub (220px) at 350px. Otherwise the base colour shows as a strip where the art stops; this happened on the Learning hub at 399px, fixed 20 October.
-- **Learning cards (Other learning)** are a third family (user, 21 October): one object per card on a light pastel field, in the same clay and grain style.
-  - Objects and fields: Welcome Pack a gift (sky blue), Pre-SOGP a compass (dusty mauve), SOGP a gem (coral-apricot), Advanced SOGP a mountain path (lilac), Podcast headphones (slate), Library cassette tapes (warm sand).
+- **Learning cards** are a third family (user, 21 October): one object per card on a light pastel field, in the same clay and grain style. Other learning itself was retired on 24 November; the family now heads the SOGP page and the learning path chooser.
+  - Objects and fields: Welcome Pack a gift (sky blue), Pre-SOGP a compass (dusty mauve), SOGP a gem (coral-apricot), Advanced SOGP a mountain path (lilac), Podcast headphones (slate on the SOGP page; a brighter sky, #d4e8fc on #16406e, in the path chooser and plan builder, using `podcast-sky-tile-*`, because the slate read gloomy, user 24 November), Library cassette tapes (warm sand).
   - The art is never stretched over the card. Each card is its field colour, and the object is a snug tile (`<key>-tile-192/384.webp` in `public/assets/dashboard/learning-cards/`, cut by `scripts/cut-learning-card-tiles.py`) set at a fixed size in the bottom-right corner: 96px, 80px below 360px, 108px from 640px. Only its top and left field margin fades out, so it stays snug at every width with no seam.
   - The app's paper grain (`grain-384.webp`, cut from the approved art) lies over the whole card, so field and object read as one surface.
   - Tag and title sit top-left, one short line bottom-left, as on the group cards. Prompts: `docs/handover/codex-prompts/5`, `6` and `7`.
 - **The SOGP page** (`/dashboard/sogp/school`, user, 22 October) uses the learning-card family too: the SOGP card heads it in its coral field with the gem at 132px; the certificate is three counts (22px Sen, amber only where something is missing); the four levels are 2×2 tiles (4 across from 640px) in their own level art on its dark field; After SOGP is a lilac card. It sits in Learning's frame (16px gutter).
 - **Share what you learnt today** (You Home, Pastor, 22 October) is its own card under the learning card, about half its height, in the share chip's warm sand (#f6ecd9 on #5a3d0c): never a second blue hero.
 - **Text over art is always live text**, never baked in.
+- **Choosing a learning path** (user, 24 November; `path-chooser.tsx`, mockup `/preview/dashboard-v3/learning-path-onboarding`):
+  - Three cards in the learning-card family: SOGP (coral, gem), Podcast (sky, headphones), Choose doctrinal journey (sand, cassettes). Each has a title, one line and one fact chip, and nothing more.
+  - Tapping a card opens its details in a separate white panel under it, never inside the card; tapping again closes it. The chosen card keeps an ink outline and a check.
+  - Choices inside a panel read as choices: tiles with a radio dot, or a lock when not yet open. SOGP shows only the chosen level's tracks, with plain dates ("24 Nov", no weekday) in a quieter grey, then one closing line. Never a dotted timeline.
+- **Your path** on Learning (user, 24 November): the dashboard's own vocabulary, never a timeline: a three-count strip, a panel of rows, and one note.
+- **Learning card line and button:** the card's line stays within about 62% of the card so it clears the lit doorway; the button sizes to its label on one line.
 - **No second blue hero:** only the My learning card is blue. Other illustrated tiles take their own complementary palette.
 
 ### Interaction
