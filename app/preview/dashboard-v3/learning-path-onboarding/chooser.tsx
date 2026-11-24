@@ -46,14 +46,17 @@ export function ChooserMock() {
 
   const card = (key: PathKey, title: string, line: string, fact: string, body: React.ReactNode) => {
     const on = path === key;
-    return <div className={styles.path} data-on={on} style={look(key)}>
-      <button type="button" role="radio" aria-checked={on} className={styles.pathHead} onClick={() => setPath(key)}>
-        <span className={styles.pathArt} aria-hidden="true" />
-        <span className={styles.pathTitle}>{title}<span className={styles.check} aria-hidden="true"><CheckIcon className="size-3" strokeWidth={3} /></span></span>
-        <span className={styles.pathLine}>{line}</span>
-        <span className={styles.pathFact}>{fact}</span>
-      </button>
-      <div className={styles.more} inert={!on}><div className={styles.moreInner}><div className={styles.moreBody}>{body}</div></div></div>
+    // The card stays a card; its details open in their own panel under it (user, 24 November).
+    return <div className={styles.pathSlot}>
+      <div className={styles.path} data-on={on} style={look(key)}>
+        <button type="button" role="radio" aria-checked={on} className={styles.pathHead} onClick={() => setPath(key)}>
+          <span className={styles.pathArt} aria-hidden="true" />
+          <span className={styles.pathTitle}>{title}<span className={styles.check} aria-hidden="true"><CheckIcon className="size-3" strokeWidth={3} /></span></span>
+          <span className={styles.pathLine}>{line}</span>
+          <span className={styles.pathFact}>{fact}</span>
+        </button>
+      </div>
+      <div className={styles.more} data-open={on} inert={!on}><div className={styles.moreInner}><div className={styles.moreBody}>{body}</div></div></div>
     </div>;
   };
 

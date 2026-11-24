@@ -16,12 +16,13 @@
 .check { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 99px; background: var(--ink); color: var(--field); transform: scale(.4); opacity: 0; transition: transform 200ms var(--ease-out), opacity 200ms var(--ease-out); }
 .path[data-on="true"] .check { transform: scale(1); opacity: 1; }
 
-/* The chosen card opens to its details. Height eases with grid rows; the contents fade and rise. */
-.more { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 260ms var(--ease-out); }
-.path[data-on="true"] .more { grid-template-rows: 1fr; }
+/* The chosen card's details open in their own white panel under it, not inside the card.
+   Height eases with grid rows; the panel fades and rises into place. */
+.pathSlot { display: grid; }
+.more { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 280ms var(--ease-out); }
 .moreInner { min-height: 0; overflow: hidden; }
-.moreBody { display: grid; gap: 10px; margin: 0 10px 10px; padding: 12px; border-radius: 12px; background: rgb(255 255 255 / 78%); color: var(--color-text-strong); opacity: 0; transform: translateY(-6px); transition: opacity 200ms var(--ease-out), transform 260ms var(--ease-out); }
-.path[data-on="true"] .moreBody { opacity: 1; transform: none; transition-delay: 60ms; }
+.moreBody { display: grid; gap: 10px; margin-top: 8px; padding: 14px; border: 1px solid var(--dashboard-panel-edge, #e2e5ea); border-radius: var(--dashboard-panel-radius, 10px); background: white; color: var(--color-text-strong); opacity: 0; transform: translateY(-8px); transition: opacity 200ms var(--ease-out), transform 280ms var(--ease-out); }
+.more[data-open="true"] .moreBody { opacity: 1; transform: none; transition-delay: 60ms; }
 @media (prefers-reduced-motion: reduce) { .more, .moreBody, .check, .path { transition: none; } }
 
 .askLabel { font-size: 12.5px; line-height: 18px; font-weight: 500; }
