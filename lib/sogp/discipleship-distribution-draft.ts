@@ -61,14 +61,14 @@ export const distributionLeaders: DistributionLeader[] = [
   { enrollmentId: 172, role: "Added by you", location: "Sagamu" },
 ];
 export const distributionAssignments: DistributionAssignment[] = [
-  [499, 25, "placed"], // Timileyin Fadare → Daniel Adeyemo (user, 17 November)
+  [499, 129, "placed"], // Timileyin Fadare → Aduragbemi Aleem (user, 24 November)
   [401, 25, "pastor", "elsewhere"],
   [354, 25, "placed"],
   [78, 33, "placed", "elsewhere"],
   [151, 25, "placed", "elsewhere"],
   [240, 33, "placed", "elsewhere"],
   [392, 25, "elsewhere"],
-  [150, 25, "pastor"],
+  [150, 129, "placed"],
   [267, 49, "nearby"],
   [245, 49, "nearby"],
   [484, 49, "pastor", "elsewhere"],
