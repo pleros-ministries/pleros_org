@@ -22,6 +22,7 @@ export const SAMPLE_HUB: LearningHubData = {
   ],
   advancedInterest: false,
   next: { canChoose: false, finished: false, card: null },
+  summary: null,
   journey: { welcomePackDone: true, preSogp: { done: 10, total: 10 }, days: { current: 9, total: 28, teaching: 24, reviews: 4 }, prayerToday: true },
 };
 

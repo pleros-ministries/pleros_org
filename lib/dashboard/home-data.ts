@@ -6,7 +6,8 @@ import { getDayActivity, listActivitiesForDay } from "@/lib/db/queries/ministry-
 import { getSogpDashboardData } from "@/lib/db/queries/sogp";
 import { getOwnSogpLearning } from "@/lib/db/queries/sogp-learning";
 import { learningResume } from "@/lib/sogp/learning-view";
-import { fetchAnchorEpisodes } from "@/lib/anchor-rss";
+import { getLearningCatalogue } from "@/lib/db/queries/learning-catalogue";
+import { isPlanPath } from "@/lib/sogp/learning-input";
 import { lagosToday } from "@/lib/sogp/daily-date";
 import { getOwnCertificationFacts } from "@/lib/db/queries/sogp-certification-facts";
 import { getHomeDiscipleshipSummary } from "@/lib/db/queries/sogp-discipleship";
@@ -43,23 +44,32 @@ export async function getDashboardHomeData(viewer: NonNullable<Awaited<ReturnTyp
   const last = course?.tracks.filter(track => track.accessible && track.lesson.status === "published").at(-1);
   const lesson = next ?? last;
   const waiting = learningResume(state);
-  const podcast = state?.path !== "traditional" && state?.plan;
+  const podcast = isPlanPath(state?.path) && state?.plan;
+  const doctrinal = state?.path === "doctrinal";
+  // A plan path saved before its plan (user, 24 November).
+  const planless = Boolean(state?.revision && isPlanPath(state.path) && !state.plan);
   const planned = podcast ? new Set([...state.plan!.episodeGuids,...state.plan!.historyEpisodeGuids]) : null;
   // Real facts only: course completion for traditional, saved listens/positions for podcasts.
   let card: DashboardHomeData["card"];
   if (!course || !state?.revision && !course.tracks.some(track => track.completed)) {
     card = { kind: "start", href: course ? "/dashboard/sogp/path" : "/sogp/enrol" };
+  } else if (planless) {
+    card = doctrinal
+      ? { kind: "start", href: "/dashboard/sogp/plan?path=doctrinal", meta: "Doctrinal journey", title: "Choose your teachings", summary: "Your path is saved. Pick teachings from the Library next", action: "Choose teachings" }
+      : { kind: "start", href: `/dashboard/sogp/plan?path=${state!.path}`, meta: state!.path === "podcast_two" ? "30 min/day · Podcast" : "15 min/day · Podcast", title: "Finish building your plan", summary: "Your path is saved. Take our plan or pick your own episodes", action: "Build my plan" };
   } else if (podcast && waiting) {
-    const catalogue = new Map((await fetchAnchorEpisodes().catch(() => [])).map(row => [row.guid, row]));
+    const catalogue = new Map((await getLearningCatalogue().catch(() => [])).map(row => [row.guid, row]));
     const positions = new Map(state.progress.playbackPositions.map(row => [row.episodeGuid, row.positionSeconds]));
     const listenedSet = new Set(state.progress.listenedEpisodeGuids);
     const parsed = waiting.episodeGuids.map(guid => {
       const item = catalogue.get(guid), title = item?.title ?? "Episode";
       const match = /^(.*?)\s*\((Part\s+\d+)\)\s*$/i.exec(title);
       const durationSeconds = (item?.duration ?? "").split(":").map(Number).reduce((total, value) => Number.isNaN(value) ? total : total * 60 + value, 0);
+      // A doctrinal journey's item is a whole teaching, named as it is.
+      if (doctrinal) return { series: title, part: title, duration: item?.duration ?? "", durationSeconds, positionSeconds: positions.get(guid) ?? 0, listened: listenedSet.has(guid) };
       return { series: match?.[1] ?? title, part: match?.[2] ?? title, duration: item?.duration ?? "", durationSeconds, positionSeconds: positions.get(guid) ?? 0, listened: listenedSet.has(guid) };
     });
-    card = { kind: "podcast", pace: state.plan!.episodesPerDay, href: `/dashboard/sogp/listen?day=${waiting.dayNumber}`, series: parsed[0]?.series ?? "Your podcast plan", dayNumber: waiting.dayNumber,
+    card = { kind: "podcast", doctrinal, pace: state.plan!.episodesPerDay, href: `/dashboard/sogp/listen?day=${waiting.dayNumber}`, series: parsed[0]?.series ?? "Your podcast plan", dayNumber: waiting.dayNumber,
       episodes: parsed.map(({ part, duration, durationSeconds, positionSeconds, listened }) => ({ part, duration, durationSeconds, positionSeconds, listened })) };
   } else if (!podcast && lesson) {
     card = { kind: "traditional", title: lesson.lesson.title, level: lesson.curriculumLevel, href: `/dashboard/sogp/course/day/${lesson.dayNumber}`, completed: course.tracks.filter(track => track.completed).length, total: course.tracks.length };
@@ -68,7 +78,8 @@ export async function getDashboardHomeData(viewer: NonNullable<Awaited<ReturnTyp
     cohortTitle: journey.cohort.title,
     weekLabel: cohortWeekLabel(journey.cohort.startsAt, journey.cohort.endsAt, day),
     // On the podcast path, today's teaching is the plan's day, ticked by the player.
-    today: homeSogpToday(journey.days, day, podcast
+    // Your SOGP days wait until a path is chosen, so a new enrolee isn't told to catch up (fix 2).
+    today: card?.kind === "start" ? null : homeSogpToday(journey.days, day, podcast
       ? card?.kind === "podcast" ? { title: `${card.series} · day ${card.dayNumber}`, href: card.href, done: card.episodes.every(episode => episode.listened) } : null
       : undefined),
     progress: facts ? {
@@ -97,7 +108,7 @@ export async function getDashboardHomeData(viewer: NonNullable<Awaited<ReturnTyp
       action: waiting ? "Resume listening" : "Edit your plan",
       completed: state.progress.listenedEpisodeGuids.filter(guid => planned!.has(guid)).length,
       total: planned!.size,enrolled: true,unit: "episodes",
-      pathLabel: state.path === "podcast_two" ? "30 min/day · Podcast path" : "15 min/day · Podcast path",
+      pathLabel: doctrinal ? "One a day · Doctrinal journey" : state.path === "podcast_two" ? "30 min/day · Podcast path" : "15 min/day · Podcast path",
     } : {
       title: lesson?.lesson.title ?? (course ? "Your SOGP journey" : "Start SOGP"),
       href: lesson ? `/dashboard/sogp/course/day/${lesson.dayNumber}` : course ? "/dashboard/sogp" : "/sogp/enrol",

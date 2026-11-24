@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { chooseSogpPathAction, editSogpPlanAction } from "@/app/_actions/sogp-learning-actions";
 import { moveRemainingEpisode, podcastSuggestion, learningWriteNotice, type LearningViewData } from "@/lib/sogp/learning-view";
+import { isTeachingKey } from "@/lib/sogp/learning-input";
 import { DashboardIcon } from "@/components/dashboard/v3/primitives";
 import { GripVerticalIcon, LockIcon } from "lucide-react";
 import styles from "./learning.module.css";
@@ -15,7 +16,10 @@ function seconds(duration: string | undefined) {
   return parts.length > 1 && !parts.some(Number.isNaN) ? parts.reduce((total, value) => total * 60 + value, 0) : 0;
 }
 
-export function PlanEditor({ data,requestedPath }: { data: LearningViewData;requestedPath?: "podcast_one" | "podcast_two" }) {
+export function PlanEditor({ data: allData,requestedPath }: { data: LearningViewData;requestedPath?: "podcast_one" | "podcast_two" }) {
+  // A doctrinal journey edits Library teachings; a podcast plan edits episodes (migration 0079).
+  const teachingPlan = allData.state?.path === "doctrinal";
+  const data = { ...allData,episodes: allData.episodes.filter(episode => isTeachingKey(episode.guid) === teachingPlan) };
   const router = useRouter();
   const query = useQueryClient();
   const [base] = useState(() => ({ revision: data.state?.revision ?? 0,guids: [...(data.state?.plan?.episodeGuids ?? [])] }));

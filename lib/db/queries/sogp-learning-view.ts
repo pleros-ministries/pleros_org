@@ -2,7 +2,7 @@ import "server-only";
 import { getSogpDashboardData } from "./sogp";
 import { getOwnSogpLearning } from "./sogp-learning";
 import { sogpLearningWritesEnabled } from "./sogp-learning-gate";
-import { fetchAnchorEpisodes } from "@/lib/anchor-rss";
+import { getLearningCatalogue } from "./learning-catalogue";
 import type { LearningViewData } from "@/lib/sogp/learning-view";
 import { db } from "@/lib/db";
 import { pastorAssignments,sogpFollowUpRoutes,users } from "@/lib/db/schema";
@@ -12,7 +12,7 @@ import { and,eq } from "drizzle-orm";
 export async function getOwnLearningView(userId: string): Promise<LearningViewData | null> {
   const dashboard = await getSogpDashboardData(userId);
   if (!dashboard) return null;
-  const [state, episodes] = await Promise.all([getOwnSogpLearning(userId),fetchAnchorEpisodes()]);
+  const [state, episodes] = await Promise.all([getOwnSogpLearning(userId),getLearningCatalogue()]);
   const published = dashboard.tracks.filter(track => track.lesson.status === "published");
   const next = published.find(track => track.accessible && !track.completed && track.dayNumber !== null);
   // The route only describes the owner it assigned; a later admin change reads as "Current follow-up".
@@ -21,7 +21,7 @@ export async function getOwnLearningView(userId: string): Promise<LearningViewDa
     .where(eq(pastorAssignments.enrollmentId,dashboard.enrollment.id)).limit(1);
   return {
     state,
-    episodes: episodes.map(({ guid,title,duration,audioUrl }) => ({ guid,title,duration,audioUrl })),
+    episodes,
     canWrite: sogpLearningWritesEnabled() && dashboard.learnerState !== "withdrawn",
     writeBlockReason: dashboard.learnerState === "withdrawn" ? "withdrawn" : sogpLearningWritesEnabled() ? null : "not_enabled",
     followUp: followUp ?? null,

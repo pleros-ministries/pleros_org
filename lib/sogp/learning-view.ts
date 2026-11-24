@@ -2,7 +2,8 @@ import type { SogpLearningState } from "@/lib/db/queries/sogp-learning";
 import { readPodcastPlan, type PodcastPace } from "./podcast-plan";
 import suggestions from "./podcast-suggestions.json";
 
-export type LearningEpisode = { guid: string; title: string; duration: string; audioUrl: string };
+/** A podcast episode, or a Library teaching keyed "teaching:<id>" with its series (doctrinal journey). */
+export type LearningEpisode = { guid: string; title: string; duration: string; audioUrl: string; series?: string };
 export type LearningViewData = {
   state: SogpLearningState | null;
   episodes: LearningEpisode[];

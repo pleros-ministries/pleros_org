@@ -2,7 +2,7 @@
 import { DashboardIcon, StatusPill } from "@/components/dashboard/v3/primitives";
 import { readPodcastPlan, switchPodcastPace } from "@/lib/sogp/podcast-plan";
 import type { LearningViewData } from "@/lib/sogp/learning-view";
-import type { SogpLearningPath } from "@/lib/sogp/learning-input";
+import { isTeachingKey, type SogpLearningPath } from "@/lib/sogp/learning-input";
 import styles from "./learning.module.css";
 
 const clock = (seconds: number) => `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
@@ -20,7 +20,7 @@ export function PaceSwitchConfirm({ data, target, saving, error, onConfirm, onCa
   const remaining = read.days.flatMap(day => day.episodes).filter(episode => !episode.listened);
   const listened = [...plan.episodeGuids, ...plan.historyEpisodeGuids].filter(guid => progress.listenedEpisodeGuids.has(guid)).length;
   const days = read.days.filter(day => !day.complete).length;
-  const episodes = new Map(data.episodes.map(episode => [episode.guid, episode]));
+  const episodes = new Map(data.episodes.filter(episode => !isTeachingKey(episode.guid)).map(episode => [episode.guid, episode]));
   const labels = ["Next learning day", "Then", "After that"];
   return <section className={styles.page}>
     <header className={styles.header}><p className={styles.eyebrow}>Preview before switching</p><h1>{nextPace === 1 ? "A little more space" : "A little more each day"}</h1><p className={styles.muted}>{nextPace === 1 ? "Move from two episodes to one each day." : "Move from one episode to two each day."} Only your remaining episodes are regrouped.</p></header>
