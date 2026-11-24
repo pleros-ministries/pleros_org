@@ -137,7 +137,7 @@ export const distributionAssignments: DistributionAssignment[] = [
   [275, 36],
   [408, 36],
   [153, 165],
-  [61, 165, "elsewhere"],
+  [61, 33, "placed", "elsewhere"],
   [207, 165],
   [363, 165],
   [122, 165],
