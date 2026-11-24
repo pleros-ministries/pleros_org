@@ -4,12 +4,13 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useUploadThing } from "@/lib/upload/uploadthing-client";
-import { BellIcon, ChevronRightIcon, KeyRoundIcon } from "lucide-react";
+import { BellIcon, ChevronRightIcon, CompassIcon, KeyRoundIcon } from "lucide-react";
+import { TOUR_REPLAY_EVENT } from "./tour/learning-tour";
 import { saveProfile } from "@/app/(site)/dashboard/profile/actions";
 import { compactButton, primaryButton } from "./shell/styles";
 import { inputClass } from "@/components/community/report/styles";
 
-export function ProfileSettings({ initialName, initialImage, reportPreferences }: { initialName: string; initialImage: string | null; reportPreferences: boolean; pushEnabled?: boolean }) {
+export function ProfileSettings({ initialName, initialImage, reportPreferences, canReplayTour = false }: { initialName: string; initialImage: string | null; reportPreferences: boolean; pushEnabled?: boolean; canReplayTour?: boolean }) {
   const router = useRouter(); const [name, setName] = useState(initialName); const [image, setImage] = useState(initialImage);
   const [message, setMessage] = useState<string | null>(null); const [pending, start] = useTransition();
   const { startUpload, isUploading } = useUploadThing("profilePhoto", { onUploadError: () => setMessage("Photo upload failed. Try again.") });
@@ -32,6 +33,8 @@ export function ProfileSettings({ initialName, initialImage, reportPreferences }
     <h2 className="m-0 mt-2 text-[15px] font-medium">Settings</h2>
     <ul className={`${panel} m-0 list-none overflow-hidden p-0`}>
       <li><Link href="/dashboard/profile/reminders" className={row}><span className={chip} style={{ background: "#e4ebfd", color: "#2331ae" }}><BellIcon className="size-4" strokeWidth={2.2} /></span><span className="grid min-w-0 flex-1"><span className="text-[13.5px] font-medium">Notifications and reminders</span><span className="text-[12px] text-(--color-text-muted)">{reportPreferences ? "Prayer Watch, teaching time, daily report" : "Prayer Watch, teaching time, the app"}</span></span><ChevronRightIcon className="size-4 shrink-0 text-[#a6abb2]" /></Link></li>
+      {/* Replay the guided tour (user, 24 November); the tour itself lives in the dashboard shell. */}
+      {canReplayTour ? <li><button type="button" className={`${row} w-full border-0 bg-transparent text-left`} onClick={() => window.dispatchEvent(new CustomEvent(TOUR_REPLAY_EVENT))}><span className={chip} style={{ background: "#fcd9c7", color: "#6e2a17" }}><CompassIcon className="size-4" strokeWidth={2.2} /></span><span className="grid min-w-0 flex-1"><span className="text-[13.5px] font-medium">Replay the tour</span><span className="text-[12px] text-(--color-text-muted)">How to choose and follow your learning path</span></span><ChevronRightIcon className="size-4 shrink-0 text-[#a6abb2]" /></button></li> : null}
       <li><Link href="/forgot-password" className={row}><span className={chip} style={{ background: "#eceef2", color: "#4a5568" }}><KeyRoundIcon className="size-4" strokeWidth={2.2} /></span><span className="grid min-w-0 flex-1"><span className="text-[13.5px] font-medium">Reset password</span><span className="text-[12px] text-(--color-text-muted)">We email you a six-digit code</span></span><ChevronRightIcon className="size-4 shrink-0 text-[#a6abb2]" /></Link></li>
     </ul>
   </div>;

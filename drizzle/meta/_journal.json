@@ -561,6 +561,13 @@
    "when": 1793448000000,
    "tag": "0079_doctrinal_journey_path",
    "breakpoints": true
+  },
+  {
+   "idx": 80,
+   "version": "7",
+   "when": 1793534400000,
+   "tag": "0080_learning_tour_progress",
+   "breakpoints": true
   }
  ]
 }

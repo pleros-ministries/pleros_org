@@ -100,6 +100,14 @@ Pastor, 19 October; plan in `docs/plans/groups-as-oversight.md`. Groups replace 
 - The doctrinal journey counts toward the certificate like a podcast plan (user, 24 November).
 - Learning shows **Your path** under the card (`summary` in `getLearningHubData`): three counts, a panel of rows (SOGP levels with tracks and dates; or the next few days) and one note. **Other learning is retired** (user, 24 November); the learning-card art helpers stay in `other-learning.tsx` for the SOGP page.
 
+### The guided tour (user, 24 November)
+
+- New learners get a guided tour of choosing and setting up their learning path (`components/dashboard/tour/learning-tour.tsx`, steps in `lib/sogp/learning-tour.ts`, mockup `/preview/dashboard-v3/guided-tour`, videos in `docs/dashboard-demo/videos/pleros-guided-tour-*.mp4`).
+- It starts once for an enrolled learner with no learning path yet: a welcome sheet on Home (naming the leader after a group-link join), then spotlight steps over the real pages. Learners who chose a path before the tour existed don't get it unless they replay it from Profile ("Replay the tour").
+- Steps follow whichever path they tap (Doctrinal, Podcast with Suggested or Build my own, Personalised) through Learning ("Your path") and Home's Today to "You're all set". Tap steps wait for the learner's own tap, and that tap does the real thing (saving the path or plan); the tour follows to the next page, skips ahead when their tap lands further on, and steps back if a save fails and the page doesn't change.
+- Targets are `data-tour` attributes on the real components; keep them when changing those screens.
+- Progress lives in `learning_tour_progress` (migration 0080): status active/done/skipped, step, path and plan mode, so it resumes on any device and never shows again once done or skipped. Off the tour's pages, a "Continue the tour" pill leads back.
+
 ### After SOGP: what's next
 
 - Someone who has finished SOGP (every published track, or their podcast plan), or whose cohort has ended, chooses their next learning at `/dashboard/sogp/next` (Pastor, 21 October). Withdrawn learners can't. The choice becomes the current learning at the top of Learning ; SOGP stays reachable from its page (`/dashboard/sogp/school`), and history and the certificate are untouched. Other learning, where SOGP used to move, was retired on 24 November.

@@ -145,7 +145,7 @@ function LearningDestination({ card, fallback, hubHref }: {
       </div>
       <span>{Math.round(percent)}%</span>
     </div> : null}
-    <Link className={styles.homeLearningAction} href={door.href}>
+    <Link className={styles.homeLearningAction} href={door.href} data-tour="home-learning">
       {door.action}
       <DashboardIcon name="arrow" />
     </Link>
@@ -310,7 +310,7 @@ function TodaySection({ today }: { today: HomeToday }) {
   const at = today.dayNumber ?? days.filter(day => day.dateKey <= today.dateKey).at(-1)?.number ?? 1;
   const weekStart = Math.floor((at - 1) / 7) * 7;
   const weeks = Array.from({ length: Math.ceil(days.length / 7) }, (_, index) => days.slice(index * 7, index * 7 + 7));
-  return <section className={styles.homeSection} aria-labelledby="home-today-heading">
+  return <section className={styles.homeSection} aria-labelledby="home-today-heading" data-tour="home-today">
     <div className={styles.homeSectionHeader}>
       <h2 id="home-today-heading">{today.ended ? "Your SOGP days" : "Today"}</h2>
       {today.total > 0 ? <span className={styles.metadata}>{today.done} of {today.total} done</span> : null}
