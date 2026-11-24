@@ -188,7 +188,7 @@ export function PodcastBuilder({ data, path }: { data: LearningViewData; path: "
         <span className={styles.art} aria-hidden="true" />
         <span className={styles.planMeta}>Foundations plan</span>
         <span className={styles.planBig}>{suggested.length} episodes · {days} days</span>
-        <span className={styles.planMeta}>Done by {doneBy(days)}, then SOGP from level 1</span>
+        <span className={styles.planMeta}>Done by {doneBy(days)}, then the doctrinal path from level 1</span>
       </div>
       <h2 className="text-[15px] font-medium">In this order</h2>
       <div className={styles.box} data-tour="plan-order">{inOrder.map(group => <div key={`${group.title}-${group.first}`} className={styles.series}><div className={styles.seriesRow}>
@@ -217,7 +217,7 @@ export function JourneyBuilder({ data }: { data: LearningViewData }) {
   const [chosen, setChosen] = useState<string[]>([]);
   const [review, setReview] = useState<string[] | null>(null);
   const { save, saving, error } = useSavePlan(data, "doctrinal");
-  const eyebrow = "Doctrinal journey · one a day";
+  const eyebrow = "Personalised path · one a day";
   if (review) return <Review order={review} setOrder={update => setReview(list => update(list ?? []))} items={items} perDay={1} eyebrow={eyebrow} unit="teaching" saving={saving} error={error} onBack={() => setReview(null)} onStart={() => save(review)} />;
   return <section className={learn.page} style={{ paddingBottom: 0 }}>
     <header className={learn.header}><p className={learn.eyebrow}>{eyebrow}</p><h1>Choose your teachings</h1><p className={styles.lede}>From the Library. Add a whole series or single teachings</p></header>

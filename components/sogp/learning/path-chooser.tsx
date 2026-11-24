@@ -137,8 +137,8 @@ export function PathChooser({ data }: { data: LearningViewData }) {
     <div role="radiogroup" aria-labelledby="pace" className={styles.choices} data-tour="pace">
       {([[1, "15 min a day", "1 episode"], [2, "30 min a day", "2 episodes"]] as const).map(([value, label, sub]) => <button key={value} type="button" role="radio" aria-checked={pace === value} className={styles.choice} onClick={() => { setPace(value); setError(null); }}><strong>{label}</strong><span>{sub}</span></button>)}
     </div>
-    {pace ? <p className={styles.lede} data-tour="pace-finish">{pace * 30} episodes over 30 days, done by <b>{finishPodcast(30)}</b>. Then SOGP from level 1.</p> : null}
-    {pace && planHoldsTeachings ? <p className={styles.lede}>Your doctrinal journey’s order is set aside. Your listens stay.</p> : null}
+    {pace ? <p className={styles.lede} data-tour="pace-finish">{pace * 30} episodes over 30 days, done by <b>{finishPodcast(30)}</b>. Then the doctrinal path from level 1.</p> : null}
+    {pace && planHoldsTeachings ? <p className={styles.lede}>Your personalised path’s order is set aside. Your listens stay.</p> : null}
   </>;
 
   const doctrinalBody = <>
@@ -150,9 +150,9 @@ export function PathChooser({ data }: { data: LearningViewData }) {
   return <section className={`${learn.page} ${learn.choicePage}`}>
     <header className={learn.header}><h1>Choose a learning path</h1><p className={styles.lede}>{current ? "You keep everything you’ve done. Switching only changes what comes next" : "See where each one leads. You can change later"}</p></header>
     <div role="group" aria-label="Learning path" className={styles.paths} data-tour="paths">
-      {card("sogp", "SOGP", "A teaching, quiz and written response each day", `1 hr a day · ${taught.length || 3} levels`, sogpBody)}
+      {card("sogp", "Doctrinal path", "A teaching, quiz and written response each day", `1 hr a day · ${taught.length || 3} levels`, sogpBody)}
       {card("podcast", "Podcast", "Short episodes at your own pace", "15 or 30 min a day", podcastBody)}
-      {card("doctrinal", "Choose doctrinal journey", "The doctrinal series you want, in your order", "One a day · up to 120", doctrinalBody)}
+      {card("doctrinal", "Personalised path", "The doctrinal series you want, in your order", "One a day · up to 120", doctrinalBody)}
     </div>
     {!data.canWrite ? <p className={learn.muted}>{learningWriteNotice(data)}</p> : null}
     <div className={styles.footer}>

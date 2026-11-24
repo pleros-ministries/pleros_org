@@ -21,7 +21,7 @@ const LEVEL_ART: Record<number, { image: string; wide: string; field: string; in
 const PACE: Record<NonNullable<LearningHubData["path"]>, string> = { traditional: "1 hr a day", podcast_one: "15 min a day", podcast_two: "30 min a day", doctrinal: "One a day" };
 
 /** What heads Learning for each path. */
-const PATH_NAMES: Record<NonNullable<LearningHubData["path"]>, string> = { traditional: "School of God’s Purpose", podcast_one: "Podcast", podcast_two: "Podcast", doctrinal: "Doctrinal journey" };
+const PATH_NAMES: Record<NonNullable<LearningHubData["path"]>, string> = { traditional: "Doctrinal path", podcast_one: "Podcast", podcast_two: "Podcast", doctrinal: "Personalised path" };
 
 /**
  * Your path (user, 24 November): three counts, a few rows and one note, in the
@@ -80,7 +80,7 @@ export function LearningHub({ hub, learning }: { hub: LearningHubData; learning:
     : hub.state === "start"
     ? <section data-tour="learning-card" className={styles.card} style={{ "--hub-art": `url("/assets/dashboard/learning-card/${art.image}")`, "--hub-art-wide": `url("/assets/dashboard/learning-card/${art.wide}")`, "--hub-field": art.field, "--hub-ink": art.ink } as CSSProperties}>
       <div className={styles.cardTop}><span>{hub.cohortTitle ?? "SOGP"}</span></div>
-      <div><h2>Choose a learning path</h2><span className={styles.cardMeta}>SOGP, podcasts, or a doctrinal journey</span></div>
+      <div><h2>Choose a learning path</h2><span className={styles.cardMeta}>Doctrinal, podcast or your own personalised path</span></div>
       <Link href="/dashboard/sogp/path" className={styles.resume}>Choose a path <ChevronRightIcon className="size-4" strokeWidth={2.2} /></Link>
     </section>
     : finished ? <section data-tour="learning-card" className={styles.card} aria-label="SOGP finished" style={{ "--hub-art": `url("/assets/dashboard/learning-card/${LEVEL_ART[2]!.image}")`, "--hub-art-wide": `url("/assets/dashboard/learning-card/${LEVEL_ART[2]!.wide}")`, "--hub-field": LEVEL_ART[2]!.field, "--hub-ink": LEVEL_ART[2]!.ink } as CSSProperties}>

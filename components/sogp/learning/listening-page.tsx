@@ -70,7 +70,7 @@ export function ListeningPage({ data,requestedDay }: { data: LearningViewData;re
   }
   const listenedCount = day ? day.episodes.filter(episode => episode.listened).length : 0;
   return <section className={styles.page}>
-    <header className={styles.header}><p className={styles.eyebrow}>{state?.path === "doctrinal" ? "Doctrinal journey · one a day" : `Podcast · ${state?.plan?.episodesPerDay === 2 ? "30" : "15"} min/day`}</p><h1>{day ? state?.path === "doctrinal" ? "Today’s teaching" : day.episodes.length === 2 ? "Your two episodes" : "Your next episode" : "Your listening plan"}</h1>{day ? <p className={styles.muted}>Day {day.dayNumber}{dayLength(day.episodes.map(item => data.episodes.find(row => row.guid === item.episodeGuid)?.duration))}</p> : null}</header>
+    <header className={styles.header}><p className={styles.eyebrow}>{state?.path === "doctrinal" ? "Personalised path · one a day" : `Podcast · ${state?.plan?.episodesPerDay === 2 ? "30" : "15"} min/day`}</p><h1>{day ? state?.path === "doctrinal" ? "Today’s teaching" : day.episodes.length === 2 ? "Your two episodes" : "Your next episode" : "Your listening plan"}</h1>{day ? <p className={styles.muted}>Day {day.dayNumber}{dayLength(day.episodes.map(item => data.episodes.find(row => row.guid === item.episodeGuid)?.duration))}</p> : null}</header>
     {!day ? <div className={styles.empty}>
       <span className={styles.chip} aria-hidden="true"><HeadphonesIcon className="size-4" strokeWidth={2} /></span>
       <h2>Nothing to listen to here</h2>

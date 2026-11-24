@@ -59,7 +59,7 @@ function learningDoor(card: HomeLearningCard | undefined, fallback: DashboardHom
     const episodeLabel = card.episodes.length === 1 ? "episode" : "episodes";
     return {
       href: card.href,
-      meta: card.doctrinal ? "One a day · Doctrinal journey" : `${card.pace === 2 ? "30" : "15"} min/day · Podcast path`,
+      meta: card.doctrinal ? "One a day · Personalised path" : `${card.pace === 2 ? "30" : "15"} min/day · Podcast path`,
       title: `Day ${card.dayNumber} is waiting for you`,
       summary: card.doctrinal ? card.series : `${listened} of ${card.episodes.length} ${episodeLabel} marked listened`,
       action: active?.positionSeconds ? "Resume learning" : "Start learning",

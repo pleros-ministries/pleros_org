@@ -120,7 +120,7 @@ export async function getLearningHubData(userId: string, state: SogpLearningStat
   const path = state?.revision ? state.path : course.tracks.some(track => track.completed) ? "traditional" : null;
   // A plan path saved before its plan is built (user, 24 November).
   const planless = isPlanPath(path) && !state?.plan;
-  const paceLabel = path === "podcast_two" ? "30 min/day · Podcast" : path === "podcast_one" ? "15 min/day · Podcast" : path === "doctrinal" ? "One a day · Doctrinal journey" : "1 hr/day · SOGP";
+  const paceLabel = path === "podcast_two" ? "30 min/day · Podcast" : path === "podcast_one" ? "15 min/day · Podcast" : path === "doctrinal" ? "One a day · Personalised path" : "1 hr/day · Doctrinal path";
   // Cohort status isn't kept current, so the cohort's own dates decide the phase.
   const now = Date.now();
   const starts = new Date(course.cohort.startsAt).getTime();
@@ -143,11 +143,11 @@ export async function getLearningHubData(userId: string, state: SogpLearningStat
   const catalogue = podcast ? new Map((await getLearningCatalogue().catch(() => [])).map(row => [row.guid, row])) : new Map<string, { title: string; series?: string }>();
   if (planless) {
     card = doctrinal
-      ? { eyebrow: "Doctrinal journey", title: "Choose your teachings", progress: "Your path is saved. Pick teachings from the Library next", done: 0, total: 0, href: "/dashboard/sogp/plan?path=doctrinal", action: "Choose teachings", level: 1 }
+      ? { eyebrow: "Personalised path", title: "Choose your teachings", progress: "Your path is saved. Pick teachings from the Library next", done: 0, total: 0, href: "/dashboard/sogp/plan?path=doctrinal", action: "Choose teachings", level: 1 }
       : { eyebrow: "Podcast", title: "Finish building your plan", progress: `Your path is saved. Pick your ${path === "podcast_two" ? 60 : 30} episodes, or take ours`, done: 0, total: 0, href: `/dashboard/sogp/plan?path=${path}`, action: "Build my plan", level: 1 };
   } else if (podcast) {
     const waiting = learningResume(state);
-    const first = waiting ? catalogue.get(waiting.episodeGuids[0]!)?.title ?? (doctrinal ? "Your doctrinal journey" : "Your podcast plan") : "";
+    const first = waiting ? catalogue.get(waiting.episodeGuids[0]!)?.title ?? (doctrinal ? "Your personalised path" : "Your podcast plan") : "";
     const listened = state!.progress.listenedEpisodeGuids.length;
     const planned = new Set([...state!.plan!.episodeGuids, ...state!.plan!.historyEpisodeGuids]).size;
     card = waiting
@@ -200,7 +200,7 @@ export async function getLearningHubData(userId: string, state: SogpLearningStat
         return { title, meta, end: dayMonth.format(addDays(day, index)), href: `/dashboard/sogp/listen?day=${entry.dayNumber}`, muted: false };
       }),
       more: left.length > 3 ? { label: `See all ${left.length}`, href: "/dashboard/sogp/plan" } : null,
-      note: doctrinal ? "Add teachings from the Library at any time." : path === "podcast_two" || path === "podcast_one" ? "When your plan is done, SOGP follows from level 1." : null,
+      note: doctrinal ? "Add teachings from the Library at any time." : path === "podcast_two" || path === "podcast_one" ? "When your plan is done, the doctrinal path follows from level 1." : null,
       empty: left.length ? null : "Your plan is done. Choose what’s next.",
     };
   } else if (path === "traditional") {
