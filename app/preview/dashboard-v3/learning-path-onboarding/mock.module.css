@@ -136,3 +136,8 @@
 @keyframes roadIn { from { opacity: 0; transform: translateY(-4px); } }
 .levels > li { animation: roadIn 220ms var(--ease-out); }
 @media (prefers-reduced-motion: reduce) { .levels > li { animation: none; } }
+
+/* The track list runs the panel's full width, not indented under the dot (user, 24 November),
+   and its dates step back so the titles lead. */
+.trackList { margin-left: -22px; }
+.trackList .when { color: #9aa0a8; font-size: 11.5px; }
