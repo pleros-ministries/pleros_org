@@ -17,6 +17,9 @@ const LEVEL_ART: Record<number, { image: string; wide: string; field: string; in
   4: { image: "my-learning-level-4.webp", wide: "my-learning-level-4-wide.webp", field: "#56298a", ink: "#4a2275" },
 };
 
+/** The daily time, folded into the card's one top line (user, 24 November); the path itself is named under Your path. */
+const PACE: Record<NonNullable<LearningHubData["path"]>, string> = { traditional: "1 hr a day", podcast_one: "15 min a day", podcast_two: "30 min a day", doctrinal: "One a day" };
+
 /** What heads Learning for each path. */
 const PATH_NAMES: Record<NonNullable<LearningHubData["path"]>, string> = { traditional: "School of God’s Purpose", podcast_one: "Podcast", podcast_two: "Podcast", doctrinal: "Doctrinal journey" };
 
@@ -64,7 +67,7 @@ export function LearningHub({ hub, learning }: { hub: LearningHubData; learning:
 
   const resume = next
     ? <section className={styles.card} aria-label="Resume learning" style={nextStyle}>
-      <div className={styles.cardTop}><span>{next.finished ? "Journey complete" : `Day ${next.dayNumber}`}</span><span className={styles.pace}>Podcast</span></div>
+      <div className={styles.cardTop}><span>{next.finished ? "Journey complete" : `Day ${next.dayNumber} · Podcast`}</span></div>
       <div>
         <h2>{next.finished ? "You’ve finished this journey" : next.episodeTitle ?? next.title}</h2>
         <span className={styles.cardMeta}>{next.listened} of {next.totalDays} listened · day {next.dayNumber} of {next.totalDays}</span>
@@ -88,7 +91,7 @@ export function LearningHub({ hub, learning }: { hub: LearningHubData; learning:
         : <Link href={hub.certificate.available ? "/dashboard/sogp/certificate" : "/dashboard/sogp/readiness"} className={styles.resume}>{hub.certificate.available ? "View your certificate" : "Check your certificate"} <ChevronRightIcon className="size-4" strokeWidth={2.2} /></Link>}
     </section>
     : <section className={styles.card} aria-label="Resume learning" style={{ "--hub-art": `url("/assets/dashboard/learning-card/${art.image}")`, "--hub-art-wide": `url("/assets/dashboard/learning-card/${art.wide}")`, "--hub-field": art.field, "--hub-ink": art.ink } as CSSProperties}>
-      <div className={styles.cardTop}><span>{hub.card.eyebrow}</span><span className={styles.pace}>{hub.paceLabel}</span></div>
+      <div className={styles.cardTop}><span>{[hub.card.eyebrow, hub.path ? PACE[hub.path] : null].filter(Boolean).join(" · ")}</span></div>
       <div>
         <h2>{hub.card.title}</h2>
         <span className={styles.cardMeta}>{hub.card.progress}</span>

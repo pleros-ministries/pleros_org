@@ -145,7 +145,7 @@ export async function getLearningHubData(userId: string, state: SogpLearningStat
   if (planless) {
     card = doctrinal
       ? { eyebrow: "Doctrinal journey", title: "Choose your teachings", progress: "Your path is saved. Pick teachings from the Library next", done: 0, total: 0, href: "/dashboard/sogp/plan?path=doctrinal", action: "Choose teachings", level: 1 }
-      : { eyebrow: paceLabel, title: "Finish building your plan", progress: `Your path is saved. Pick your ${path === "podcast_two" ? 60 : 30} episodes, or take ours`, done: 0, total: 0, href: `/dashboard/sogp/plan?path=${path}`, action: "Build my plan", level: 1 };
+      : { eyebrow: "Podcast", title: "Finish building your plan", progress: `Your path is saved. Pick your ${path === "podcast_two" ? 60 : 30} episodes, or take ours`, done: 0, total: 0, href: `/dashboard/sogp/plan?path=${path}`, action: "Build my plan", level: 1 };
   } else if (podcast) {
     const waiting = learningResume(state);
     const first = waiting ? catalogue.get(waiting.episodeGuids[0]!)?.title ?? (doctrinal ? "Your doctrinal journey" : "Your podcast plan") : "";
