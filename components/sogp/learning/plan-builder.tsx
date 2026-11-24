@@ -188,7 +188,7 @@ export function PodcastBuilder({ data, path }: { data: LearningViewData; path: "
         <span className={styles.art} aria-hidden="true" />
         <span className={styles.planMeta}>Foundations plan</span>
         <span className={styles.planBig}>{suggested.length} episodes · {days} days</span>
-        <span className={styles.planMeta}>Done by {doneBy(days)}, then SOGP from level 1</span>
+        <span className={styles.planMeta}>Done by {doneBy(days)}, then the doctrinal path from level 1</span>
       </div>
       <h2 className="text-[15px] font-medium">In this order</h2>
       <div className={styles.box}>{inOrder.map(group => <div key={`${group.title}-${group.first}`} className={styles.series}><div className={styles.seriesRow}>

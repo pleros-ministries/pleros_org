@@ -200,7 +200,7 @@ export async function getLearningHubData(userId: string, state: SogpLearningStat
         return { title, meta, end: dayMonth.format(addDays(day, index)), href: `/dashboard/sogp/listen?day=${entry.dayNumber}`, muted: false };
       }),
       more: left.length > 3 ? { label: `See all ${left.length}`, href: "/dashboard/sogp/plan" } : null,
-      note: doctrinal ? "Add teachings from the Library at any time." : path === "podcast_two" || path === "podcast_one" ? "When your plan is done, SOGP follows from level 1." : null,
+      note: doctrinal ? "Add teachings from the Library at any time." : path === "podcast_two" || path === "podcast_one" ? "When your plan is done, the doctrinal path follows from level 1." : null,
       empty: left.length ? null : "Your plan is done. Choose what’s next.",
     };
   } else if (path === "traditional") {
