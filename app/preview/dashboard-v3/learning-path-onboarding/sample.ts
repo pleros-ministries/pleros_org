@@ -5,13 +5,16 @@ export const addDays = (days: number) => new Date(TODAY.getTime() + days * 86_40
 export const shortDate = (date: Date) => date.toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
 export const longDate = (date: Date) => date.toLocaleDateString("en-GB", { day: "numeric", month: "long", timeZone: "UTC" });
 
-export const LEVELS = ["Gospel foundations", "Doctrinal foundations", "Redemption and the new creation", "Practical walk and assignment"] as const;
+/** Levels taught so far. Level 4 hasn't been taught yet, so the path is 1–3 then Advanced SOGP (user, 24 November). */
+export const LEVELS = ["Gospel foundations", "Doctrinal foundations", "Redemption and the new creation"] as const;
+export type StartLevel = 1 | 2 | 3;
 
 /** SOGP: one level a week (six teachings and a group review), then Advanced SOGP. */
-export function sogpRoad(start: 1 | 2 | 3 | 4) {
+export function sogpRoad(start: StartLevel) {
+  const weeks = LEVELS.length + 1 - start;
   const rows = LEVELS.slice(start - 1).map((title, index) => ({ label: `Level ${start + index}`, title, when: index === 0 ? "This week" : `From ${shortDate(addDays(index * 7))}` }));
-  const finish = addDays((5 - start) * 7 - 1);
-  return { rows: [...rows, { label: "Then", title: "Advanced SOGP", when: `From ${shortDate(addDays((5 - start) * 7))}` }], finish };
+  // Level 4 shows as coming soon (user, 24 November); Advanced SOGP follows it.
+  return { rows: [...rows, { label: "Level 4", title: "Practical walk and assignment", when: "Coming soon", soon: true }, { label: "Then", title: "Advanced SOGP", when: "After level 4", soon: true }], finish: addDays(weeks * 7 - 1) };
 }
 
 /** Podcast: 30 days at either pace, then SOGP from level 1 (Pastor, 18 November). */

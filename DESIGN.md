@@ -206,7 +206,12 @@ Most of these classes come from `components/community/discipleship/discipleship-
 
 - **Pop-ups:** bottom sheets (`ReportSheet`) on phones. My reports never sends you to another page to fill a part.
 - **Optimistic saves:** update local state at once, run the server action, replace with the saved truth, or roll back and show the error in the sheet or page (`role="alert"`). Use temporary negative ids for rows not yet saved, and disable editing them until they are.
-- **Motion:** use the `--ease-out` and `--ease-drawer` tokens, and animate transform and opacity only. Anything that animates in animates out the same way (hold it mounted with `data-closing`). Never swap layout markup at the start of a size change.
+- **Motion** (loosened by the user, 24 November: be inventive):
+  - Use motion to explain what changed: a chosen card opening to its details, a count filling as you add things, a check popping in, a list item sliding to its new place. Reach for it wherever it makes a step feel alive, not only where it's required.
+  - Any property may animate when it reads well: height through `grid-template-rows` (0fr → 1fr), colour, shadow, clip-path, size, layout (View Transitions, FLIP). Prefer transform and opacity for anything that runs often or on long lists, and keep it smooth on a mid-range phone.
+  - Use the `--ease-out` and `--ease-drawer` tokens. Keep it quick: about 150–300ms for most UI, up to about 450ms for a larger reveal.
+  - Anything that animates in animates out the same way (hold it mounted with `data-closing`). Never swap layout markup at the start of a size change.
+  - Always honour `prefers-reduced-motion`: drop the movement and keep the end state.
 - **Tabs that are routes** (Oversight) are `Link`s with `scroll={false}` and idle prefetch (`useIdlePrefetch`). In-page toggles are buttons with `role="tab"`.
 - **Search in pickers:**
   - names only, never email;

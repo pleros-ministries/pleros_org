@@ -28,15 +28,15 @@
 
 /* Choices inside a card: tiles with a visible radio dot, so they read as things to pick. */
 .choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-.choices[data-count="4"] { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.choices[data-count="3"] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .choice { display: grid; gap: 2px; min-height: 36px; padding: 10px 10px 10px 34px; position: relative; border: 1px solid var(--dashboard-panel-edge, #e2e5ea); border-radius: 10px; background: white; color: var(--color-text-strong); font: inherit; text-align: left; cursor: pointer; transition: border-color 150ms var(--ease-out), background-color 150ms var(--ease-out); }
 .choice::before { content: ""; position: absolute; left: 11px; top: 12px; width: 14px; height: 14px; border-radius: 99px; border: 1.5px solid #a6abb2; background: white; transition: border-color 150ms var(--ease-out), box-shadow 150ms var(--ease-out); }
 .choice[aria-checked="true"] { border-color: var(--color-community-blue, #2056d6); background: #f3f6fe; }
 .choice[aria-checked="true"]::before { border-color: var(--color-community-blue, #2056d6); box-shadow: inset 0 0 0 3px white, inset 0 0 0 8px var(--color-community-blue, #2056d6); }
 .choice strong { font-size: 13px; line-height: 18px; font-weight: 500; }
 .choice span { font-size: 12px; line-height: 16px; color: var(--color-text-muted); }
-.choices[data-count="4"] .choice { padding: 8px 4px 8px; text-align: center; place-items: center; }
-.choices[data-count="4"] .choice::before { display: none; }
+.choices[data-count="3"] .choice { padding: 8px 4px 8px; text-align: center; place-items: center; }
+.choices[data-count="3"] .choice::before { display: none; }
 
 /* The road: where this path leads, with dates. */
 .road { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
@@ -105,3 +105,10 @@
 /* The card's line stays clear of the art's lit doorway on phones. */
 .narrowMeta { display: block; max-width: min(62%, 300px); }
 .roadPanel { display: grid; gap: 6px; padding: 12px 14px; border: 1px solid var(--dashboard-panel-edge, #e2e5ea); border-radius: var(--dashboard-panel-radius, 10px); background: white; }
+
+/* Not taught yet: a hollow dot and muted text. */
+.road li[data-state="soon"] { color: var(--color-text-muted); }
+.road li[data-state="soon"]::before { background: white; box-shadow: inset 0 0 0 1.5px #c9ced6; }
+
+/* Library series open in place, with the same eased height. */
+.more[data-open="true"] { grid-template-rows: 1fr; }

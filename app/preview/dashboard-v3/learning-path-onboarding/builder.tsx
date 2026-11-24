@@ -9,7 +9,7 @@ import learn from "@/components/sogp/learning/learning.module.css";
 import styles from "./mock.module.css";
 import { EPISODES, SERIES, longDate, podcastRoad, suggestedPlan } from "./sample";
 
-const podcastArt = { "--art-1x": `url("/assets/dashboard/learning-cards/podcast-tile-192.webp")`, "--art-2x": `url("/assets/dashboard/learning-cards/podcast-tile-384.webp")` } as CSSProperties;
+const podcastArt = { "--art-1x": `url("/assets/dashboard/learning-cards/podcast-sky-tile-192.webp")`, "--art-2x": `url("/assets/dashboard/learning-cards/podcast-sky-tile-384.webp")` } as CSSProperties;
 
 /**
  * Round 2 of building a podcast plan (user, 24 November): take the suggested
