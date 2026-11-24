@@ -51,7 +51,6 @@ export const distributionLeaders: DistributionLeader[] = [
   { enrollmentId: 105, role: "Worker", location: "Osogbo" },
   { enrollmentId: 355, role: "Worker", location: "Osogbo" },
   { enrollmentId: 79, role: "Worker", location: "Osogbo" },
-  { enrollmentId: 116, role: "Worker", location: "Sagamu" },
   { enrollmentId: 170, role: "Worker", location: "Sagamu" },
   { enrollmentId: 468, role: "Member", location: "Calabar" },
   { enrollmentId: 195, role: "Member", location: "Lagos" },
