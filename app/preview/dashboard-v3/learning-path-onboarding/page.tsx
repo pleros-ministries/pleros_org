@@ -11,10 +11,11 @@ import { getAllTeachings } from "@/lib/db/queries/teachings";
 
 import { BuilderMock } from "./builder";
 import { JourneyMock, type LibrarySeries } from "./journey";
-import { LevelRoad } from "./level-road";
 import { ChooserMock } from "./chooser";
 import mock from "./mock.module.css";
-import { longDate, podcastRoad, shortDate, addDays, sogpRoad } from "./sample";
+import { SOGP_LEVELS } from "@/lib/sogp/curriculum";
+
+import { EPISODES, addDays, podcastRoad, shortDate, sogpLevels, suggestedPlan } from "./sample";
 
 export const metadata = { title: "Learning path onboarding preview", robots: { index: false, follow: false } };
 
@@ -44,10 +45,10 @@ const NOTES: Record<Screen, string[]> = {
   learning: ["Learning asks for a path first. Other learning is gone.", "The card’s line is narrower on phones so it stays clear of the lit doorway."],
   choose: ["Three paths, each in its own colour and art: SOGP, Podcast, Choose doctrinal journey. SOGP runs levels 1–3, then Advanced SOGP; level 4 isn’t taught yet.", "Choosing a card opens a panel under it (not inside it) showing where the path leads and when you’d finish (the Pastor’s “target set before me”).", "SOGP asks where you’re starting, then shows each level’s tracks and dates; tap a level to see its tracks. Podcast asks for a pace with two tiles you can see are choices.", "The path is saved when you continue."],
   build: ["Two ways in: the suggested plan in one tap, or Build my own from whole series or single episodes, with a running count.", "Review shows the plan day by day; move any episode up or down."],
-  "done-sogp": ["Every path ends here, on Learning, with today’s step on the card and Your road under it."],
-  "done-podcast": ["Your road shows the podcast plan, then SOGP from level 1, as the Pastor described."],
+  "done-sogp": ["Every path ends here, on Learning, with today’s step on the card and Your path under it."],
+  "done-podcast": ["Your path shows the plan in counts, the next few days, then SOGP from level 1, as the Pastor described."],
   journey: ["The Teachings Library sits inside the picker (real Library titles, read only). Open a series, add it whole or tick single teachings.", "The tray shows how many days the journey runs and when it ends. Then put the teachings in order."],
-  "done-own": ["Every path ends on Learning: day 1 of the journey on the card, and Your road under it."],
+  "done-own": ["Every path ends on Learning: day 1 of the journey on the card, and Your path under it."],
   left: ["Someone who chose Podcast and left keeps the path. The card says “Finish building your plan”, so it can’t be mistaken for listening."],
 };
 
@@ -61,14 +62,24 @@ function Card({ top, pace, title, line, action, href, play }: { top: string; pac
   </section>;
 }
 
-function RoadPanel({ title, rows = [], foot, children }: { title: string; rows?: { label: string; title: string; when: string; soon?: boolean }[]; foot?: ReactNode; children?: ReactNode }) {
+type Row = { title: string; meta: string; end?: string; muted?: boolean };
+
+/**
+ * Your path on Learning, in the dashboard's own vocabulary (user, 24 November):
+ * a three-count strip, then a panel of rows, then one note. No timeline.
+ */
+function PathSummary({ counts, listTitle, rows, more, note, empty }: { counts: [string, string | number][]; listTitle: string; rows: Row[]; more?: string; note?: ReactNode; empty?: string }) {
   return <>
-    <div className={hub.sectionTitle}><h2>{title}</h2><Link href="?screen=choose" className="inline-flex items-center gap-0.5">Change path<ChevronRightIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" /></Link></div>
-    <div className={mock.roadPanel}>
-      {children}
-      {rows.length ? <ol className={mock.road}>{rows.map((row, index) => <li key={row.label + row.title} data-state={row.soon ? "soon" : index === 0 ? "now" : "later"}><span><b>{row.label}</b> · {row.title}</span><span className={mock.when}>{row.when}</span></li>)}</ol> : null}
-      {foot ? <p className={mock.lede}>{foot}</p> : null}
-    </div>
+    <div className={groupStyles.sectionTitle}><h2>Your path</h2><Link href="?screen=choose" className={`${groupStyles.quiet} inline-flex items-center gap-0.5`}>Change path<ChevronRightIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" /></Link></div>
+    <div className={groupStyles.strip}>{counts.map(([label, value]) => <div key={label}><span>{label}</span><strong>{value}</strong></div>)}</div>
+    <div className={groupStyles.sectionTitle}><h2>{listTitle}</h2>{more ? <Link href="#" className={groupStyles.quiet}>{more}</Link> : null}</div>
+    <div className={groupStyles.panel}>{rows.length ? <ul className={groupStyles.list}>{rows.map(row => <li key={row.title + row.meta}>
+      <Link href="#" className={groupStyles.row} style={row.muted ? { color: "var(--color-community-muted)" } : undefined}>
+        <span className={groupStyles.rowCopy}><span className={groupStyles.rowTitle}>{row.title}</span><span className={groupStyles.rowMeta}>{row.meta}</span></span>
+        {row.end ? <span className={groupStyles.rowMeta}>{row.end}</span> : null}
+        <ChevronRightIcon className={`${groupStyles.chev} size-4`} strokeWidth={2} aria-hidden="true" />
+      </Link></li>)}</ul> : <p className={groupStyles.empty}>{empty}</p>}</div>
+    {note ? <p className={groupStyles.note}>{note}</p> : null}
   </>;
 }
 
@@ -79,7 +90,6 @@ function Learning({ sub, children }: { sub: string; children: ReactNode }) {
   </div></div>;
 }
 
-const strong = (text: string) => <b style={{ fontWeight: 500, color: "var(--color-text-strong)" }}>{text}</b>;
 
 /** The Library catalogue grouped by series, in Library order. Read only; teaching titles are public. */
 async function libraryBySeries(): Promise<LibrarySeries[]> {
@@ -87,7 +97,7 @@ async function libraryBySeries(): Promise<LibrarySeries[]> {
   const groups = new Map<string, LibrarySeries>();
   for (const row of rows) {
     const group = groups.get(row.series) ?? { series: row.series, teachings: [] };
-    group.teachings.push({ id: String(row.id), title: row.title, duration: row.duration ? `${Math.floor(row.duration / 60)}:${String(row.duration % 60).padStart(2, "0")}` : "" });
+    group.teachings.push({ id: String(row.id), title: row.title.replace(/\s+[-–]\s+[A-Z][a-z]{2,4}\.?\s+\d{1,2},\s+\d{4}$/, ""), duration: row.duration ? `${Math.floor(row.duration / 60)}:${String(row.duration % 60).padStart(2, "0")}` : "" });
     groups.set(row.series, group);
   }
   return [...groups.values()];
@@ -97,8 +107,13 @@ export default async function LearningPathOnboardingPreview({ searchParams }: { 
   const query = await searchParams;
   const screen: Screen = query.screen && query.screen in SCREENS ? query.screen as Screen : "home";
   const pace = query.pace === "one" ? 1 : 2;
-  const sogp = sogpRoad(1), podcast = podcastRoad(2);
-  const library = screen === "journey" ? await libraryBySeries() : [];
+  const podcast = podcastRoad(2);
+  const library = screen === "journey" || screen === "done-own" ? await libraryBySeries() : [];
+  const levels = sogpLevels(1, SOGP_LEVELS);
+  const plan = suggestedPlan(60);
+  const podcastDays = [0, 1, 2].map(day => plan.slice(day * 2, day * 2 + 2));
+  const seriesName = (guid: string) => EPISODES.get(guid)!.title.replace(/\s*\(Part \d+\)$/, "");
+  const journeyDays = library.flatMap(group => group.teachings.map(item => ({ title: item.title, series: group.series }))).slice(0, 3);
 
   const view = screen === "home" ? <div className={hub.page}><div className={hub.column}>
       <h1>Good morning, Sam</h1>
@@ -112,19 +127,26 @@ export default async function LearningPathOnboardingPreview({ searchParams }: { 
     : screen === "journey" ? <JourneyMock library={library} />
     : screen === "done-sogp" ? <Learning sub="SOGP · 1 hr a day">
       <Card top="Level 1 · Day 1" pace="1 hr a day" title="Gospel: The Word of Truth" line="Teaching, quiz and written response" action="Start today’s teaching" href="#" play />
-      <RoadPanel title="Your road"><LevelRoad start={1} /></RoadPanel>
+      <PathSummary counts={[["Tracks", levels.tracks], ["Levels", 3], ["Done by", shortDate(levels.finish)]]} listTitle="Levels"
+        rows={[...levels.stops.map(stop => ({ title: `Level ${stop.level}`, meta: `${stop.trackCount} tracks · ${stop.soon ? "Coming soon" : stop.range}`, end: stop.level === 1 ? "Now" : undefined, muted: stop.soon })), { title: "Advanced SOGP", meta: "After level 4", muted: true }]}
+        note="A track a day, with a group review at the end of each level." />
     </Learning>
     : screen === "done-podcast" ? <Learning sub="Podcast · 30 min a day">
       <Card top="Day 1 of 30" pace="30 min a day" title="The Reality of God’s Purpose" line="Parts 1 and 2 · about 30 min" action="Listen to day 1" href="#" play />
-      <RoadPanel title="Your road" rows={podcast.rows} foot={<>Plan done by {strong(longDate(podcast.finish))}.</>} />
+      <PathSummary counts={[["Episodes", 60], ["Days", 30], ["Done by", shortDate(podcast.finish)]]} listTitle="Coming up" more="See all 30 days"
+        rows={podcastDays.map((guids, day) => ({ title: seriesName(guids[0]!), meta: `Day ${day + 1} · ${guids.map(guid => `Part ${EPISODES.get(guid)!.part}`).join(" and ")}`, end: shortDate(addDays(day)) }))}
+        note={<>Then SOGP from level 1, from {shortDate(addDays(30))}.</>} />
     </Learning>
     : screen === "done-own" ? <Learning sub="Doctrinal journey">
-      <Card top="Day 1 of 24" pace="One a day" title="Your first teaching" line="From the series you chose, in your order" action="Listen to day 1" href="#" play />
-      <RoadPanel title="Your road" rows={[{ label: "Days 1–24", title: "Your 24 teachings", when: "This month" }, { label: "Then", title: "Add more, or choose another path", when: `From ${shortDate(addDays(24))}` }]} foot={<>Journey done by {strong(longDate(addDays(23)))}.</>} />
+      <Card top="Day 1 of 24" pace="One a day" title={journeyDays[0]?.title ?? "Your first teaching"} line={journeyDays[0] ? `${journeyDays[0].series} · from the Library` : "From the series you chose"} action="Listen to day 1" href="#" play />
+      <PathSummary counts={[["Teachings", 24], ["Days", 24], ["Done by", shortDate(addDays(23))]]} listTitle="Coming up" more="See all 24"
+        rows={journeyDays.map((item, day) => ({ title: item.title, meta: `Day ${day + 1} · ${item.series}`, end: shortDate(addDays(day)) }))}
+        note="Add more teachings from the Library at any time." />
     </Learning>
     : <Learning sub="Podcast · 30 min a day">
       <Card top="Podcast · 30 min a day" title="Finish building your plan" line="Your path is saved. Pick your 60 episodes, or take ours" action="Build my plan" href="?screen=build&pace=two" />
-      <RoadPanel title="Your road" rows={[{ label: "Next", title: "Build your 30-day plan", when: "Today" }, ...podcast.rows.slice(1)]} />
+      <PathSummary counts={[["Episodes", "0 of 60"], ["Days", 30], ["Pace", "30 min"]]} listTitle="Coming up" rows={[]}
+        empty="Your plan is empty. Take the suggested plan or pick your own episodes." />
     </Learning>;
 
   return <div className={`${dashboardFont.className} ${dashboardFont.variable} ${dashboardHeadingFont.variable} ${styles.root} min-h-dvh bg-[var(--color-community-canvas,#f8f6f2)] [&_h1]:text-[21px] [&_h1]:leading-[28px] [&_h1]:font-medium`} data-dashboard-v3>

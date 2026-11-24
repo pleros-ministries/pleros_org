@@ -116,11 +116,6 @@
 
 /* ---------- SOGP road by level (user, 24 November): tracks and dates, not level names ---------- */
 .levels { display: grid; margin: 0; padding: 0; list-style: none; }
-.levels > li { position: relative; padding-left: 22px; }
-.levels > li::before { content: ""; position: absolute; left: 3px; top: 14px; width: 9px; height: 9px; border-radius: 99px; background: #c9ced6; }
-.levels > li[data-state="now"]::before { background: var(--color-community-blue, #2056d6); box-shadow: 0 0 0 3px #dbe5fb; }
-.levels > li[data-state="soon"]::before { background: white; box-shadow: inset 0 0 0 1.5px #c9ced6; }
-.levels > li:not(:last-child)::after { content: ""; position: absolute; left: 7px; top: 27px; bottom: -11px; width: 1px; background: #dfe2e7; }
 .levels > li[data-state="soon"] { color: var(--color-text-muted); }
 .levelHead { display: grid; grid-template-columns: 1fr auto 16px; align-items: center; gap: 8px; width: 100%; min-height: 36px; padding: 0; border: 0; background: none; color: inherit; font: inherit; font-size: 13px; text-align: left; cursor: pointer; }
 .levelName { font-weight: 500; }
@@ -140,9 +135,12 @@
 /* The track list runs the panel's full width, not indented under the dot (user, 24 November),
    and its dates step back so the titles lead. */
 /* The dot's indent lives on the header, so the list below starts at the panel edge. */
-.levels > li { padding-left: 0; }
-.levelHead { padding-left: 22px; }
 .trackList .when { color: #9aa0a8; font-size: 11.5px; }
 
 /* The card's button sizes to its label on one line; the hub's fixed 62% width wrapped longer labels. */
 .resumeFit { width: auto; min-width: 180px; max-width: 100%; justify-self: start; gap: 16px; white-space: nowrap; }
+
+/* Levels are plain rows with hairlines between them, like the dashboard's lists (user, 24 November: no timeline). */
+.levels > li + li { border-top: 1px solid var(--color-line, #e7e9ec); }
+.levelHead { min-height: 44px; }
+.levelMeta { font-size: 12px; color: var(--color-text-muted); }

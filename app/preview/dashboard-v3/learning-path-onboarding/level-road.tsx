@@ -21,8 +21,8 @@ export function LevelRoad({ start, compact = false }: { start: StartLevel; compa
       const expanded = open === stop.level;
       return <li key={stop.level} data-state={stop.soon ? "soon" : index === 0 ? "now" : "later"}>
         <button type="button" className={styles.levelHead} aria-expanded={expanded} onClick={() => setOpen(expanded ? null : stop.level)}>
-          <span className={styles.levelName}>Level {stop.level}<span className={styles.when}> · {stop.trackCount} tracks</span></span>
-          <span className={styles.when}>{stop.soon ? "Coming soon" : stop.range}</span>
+          <span className="grid"><span className={styles.levelName}>Level {stop.level}</span><span className={styles.levelMeta}>{stop.trackCount} tracks · {stop.soon ? "Coming soon" : stop.range}</span></span>
+          <span className={styles.levelMeta}>{index === 0 && !stop.soon ? "Start" : ""}</span>
           <ChevronDownIcon className={styles.levelChevron} strokeWidth={2} aria-hidden="true" />
         </button>
         <div className={styles.more} data-open={expanded} inert={!expanded}><div className={styles.moreInner}>
@@ -33,7 +33,7 @@ export function LevelRoad({ start, compact = false }: { start: StartLevel; compa
         </div></div>
       </li>;
     })}
-      {open === null ? <li data-state="soon"><div className={styles.levelHead} style={{ cursor: "default" }}><span className={styles.levelName}>Then<span className={styles.when}> · Advanced SOGP</span></span><span className={styles.when}>After level 4</span><span /></div></li> : null}
+      {open === null ? <li data-state="soon"><div className={styles.levelHead} style={{ cursor: "default" }}><span className="grid"><span className={styles.levelName}>Advanced SOGP</span><span className={styles.levelMeta}>After level 4</span></span><span /><span /></div></li> : null}
     </ol>
     {compact ? null : <p className={styles.lede}>{tracks} tracks · done by <b style={{ fontWeight: 500, color: "var(--color-text-strong)" }}>{longDate(finish)}</b> at a track a day</p>}
   </div>;
