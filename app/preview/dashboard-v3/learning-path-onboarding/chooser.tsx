@@ -7,7 +7,8 @@ import { DashboardIcon } from "@/components/dashboard/v3/primitives";
 import learn from "@/components/sogp/learning/learning.module.css";
 
 import styles from "./mock.module.css";
-import { longDate, podcastRoad, sogpRoad, type StartLevel } from "./sample";
+import { LevelRoad } from "./level-road";
+import { longDate, podcastRoad, type StartLevel } from "./sample";
 
 type PathKey = "sogp" | "podcast" | "own";
 
@@ -39,7 +40,7 @@ export function ChooserMock() {
   const [path, setPath] = useState<PathKey | null>(null);
   const [level, setLevel] = useState<StartLevel>(1);
   const [pace, setPace] = useState<1 | 2 | null>(null);
-  const sogp = sogpRoad(level), podcast = podcastRoad(pace ?? 2);
+  const podcast = podcastRoad(pace ?? 2);
   const ready = path === "sogp" || path === "own" || (path === "podcast" && pace !== null);
   const next = path === "sogp" ? "?screen=done-sogp" : path === "podcast" ? `?screen=build&pace=${pace === 1 ? "one" : "two"}` : "?screen=journey";
   const action = path === "sogp" ? `Start level ${level}` : path === "podcast" ? "Build my podcast plan" : path === "own" ? "Choose my teachings" : "Continue";
@@ -68,7 +69,7 @@ export function ChooserMock() {
         <div role="radiogroup" aria-labelledby="start-level" className={styles.choices} data-count="3">
           {([1, 2, 3] as const).map(value => <button key={value} type="button" role="radio" aria-checked={level === value} className={styles.choice} onClick={() => setLevel(value)}><strong>Level {value}</strong></button>)}
         </div>
-        <Road rows={sogp.rows} finish={sogp.finish} finishLabel="Level 3 done" />
+        <LevelRoad key={level} start={level} />
       </>)}
       {card("podcast", "Podcast", "Short episodes at your own pace", "15 or 30 min a day", <>
         <span className={styles.askLabel} id="pace">Choose your pace</span>

@@ -17,6 +17,35 @@ export function sogpRoad(start: StartLevel) {
   return { rows: [...rows, { label: "Level 4", title: "Practical walk and assignment", when: "Coming soon", soon: true }, { label: "Then", title: "Advanced SOGP", when: "After level 4", soon: true }], finish: addDays(weeks * 7 - 1) };
 }
 
+const dayDate = (date: Date) => date.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" });
+/** "24–30 Nov", or "28 Nov – 4 Dec" across months. */
+export function dateRange(from: Date, to: Date) {
+  const sameMonth = from.getUTCMonth() === to.getUTCMonth();
+  return sameMonth ? `${from.getUTCDate()}–${shortDate(to)}` : `${shortDate(from)} – ${shortDate(to)}`;
+}
+
+export type LevelStop = { level: number; trackCount: number; range: string | null; soon: boolean; tracks: { title: string; when: string | null }[]; review: string | null };
+
+/**
+ * The road by level (user, 24 November): track count and start–end dates, each
+ * opening to its tracks with the day each falls on. A level is a week: a track
+ * a day for six days, then the group review. Level 4 isn't taught yet.
+ */
+export function sogpLevels(start: StartLevel, curriculum: { level: number; tracks: { title: string }[] }[]) {
+  const stops: LevelStop[] = curriculum.filter(level => level.level >= start).map(level => {
+    const soon = level.level === 4;
+    const week = level.level - start;
+    return {
+      level: level.level, trackCount: level.tracks.length, soon,
+      range: soon ? null : dateRange(addDays(week * 7), addDays(week * 7 + 6)),
+      tracks: level.tracks.map((track, index) => ({ title: track.title, when: soon ? null : dayDate(addDays(week * 7 + index)) })),
+      review: soon ? null : dayDate(addDays(week * 7 + 6)),
+    };
+  });
+  const taught = stops.filter(stop => !stop.soon);
+  return { stops, tracks: taught.reduce((sum, stop) => sum + stop.trackCount, 0), finish: addDays(taught.length * 7 - 1) };
+}
+
 /** Podcast: 30 days at either pace, then SOGP from level 1 (Pastor, 18 November). */
 export function podcastRoad(pace: 1 | 2) {
   const finish = addDays(29);
