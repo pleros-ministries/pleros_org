@@ -23,6 +23,7 @@ This file is loaded by every Claude session in this repo. Keep it short: the det
 ## Non-negotiables
 
 - **Ship each piece through a pull request.** `main` is protected: direct pushes are rejected, and a PR needs `build-and-test` to pass before it can merge (auto-merge is off). Conventional commit subjects (`feat:`, `fix:`, `style:`, `copy:`, `docs:`, `perf:`), a short body explaining why, and the Co-Authored-By line. Stage only your own paths; another session may be editing the same checkout.
+- **Work in this checkout.** For small changes, branch from `main` here; don't create a separate git worktree (user, 24 November).
 - **Always commit `docs/ai_scratchpad.md`** when it has changes, even ones an earlier session left (user, 24 November).
 - **No production flags.** Build the behaviour on main and delete the old path in the same change.
 - **Migrations:**
