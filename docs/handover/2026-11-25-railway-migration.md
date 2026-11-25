@@ -57,5 +57,5 @@ Then compare row counts table by table, including `drizzle.__drizzle_migrations`
 2. Add `pleros.org` and `ppc.pleros.org` as custom domains on `web`, then point the Cloudflare DNS records at Railway's targets (DNS only, not proxied, until certificates issue).
 3. Add the Railway domain to Google OAuth's redirect URIs only if a non-`pleros.org` URL is used for testing.
 4. Re-point the Telegram webhook if it uses a hostname other than `pleros.org`.
-5. Pause the Vercel project. In a follow-up PR, delete `vercel.json` and the `process.env.VERCEL` check in `next.config.ts`.
+5. Pause the Vercel projects (done 25 November, both `pleros-org-eoh3` and `pleros-org`). `vercel.json` is deleted; its welcome-video cache headers now live in `next.config.ts`. The Vercel GitHub app's access to `pleros_org` is being removed so its checks stop appearing on PRs.
 6. Keep Neon read-only for two weeks as a fallback, then delete it.
