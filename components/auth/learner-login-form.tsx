@@ -9,6 +9,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth/auth-client";
 
+/** Say what actually went wrong: a wrong password, too many tries, or something else. */
+function passwordLoginError(status: number | undefined) {
+  if (status === 429) return "Too many attempts. Wait a minute, then try again.";
+  if (status === 401) return "Email or password is incorrect.";
+  if (status === 403) return "Verify your email first. Check your inbox for the link.";
+  return "Couldn't sign you in. Check your email address and try again.";
+}
+
 export function LearnerLoginForm({
   returnTo,
   alreadyEnrolledNotice = false,
@@ -36,9 +44,9 @@ export function LearnerLoginForm({
     setError(null);
     setPending(true);
     try {
-      const result = await authClient.signIn.email({ email, password });
+      const result = await authClient.signIn.email({ email: email.trim(), password });
       if (result.error) {
-        setError("Email or password is incorrect.");
+        setError(passwordLoginError(result.error.status));
         return;
       }
       finish();
