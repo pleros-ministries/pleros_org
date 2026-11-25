@@ -59,6 +59,9 @@ export function proxy(request: NextRequest) {
   );
 }
 
+// Pages only. Static files, image requests and API routes never need the PPC rewrite,
+// the dashboard gate or the pathname header, and running the proxy for every JS chunk,
+// font and image was most of our function invocations on Vercel.
 export const config = {
-  matcher: ["/:path*"],
+  matcher: ["/((?!api/|_next/static/|_next/image|.*\\.[a-zA-Z0-9]+$).*)"],
 };
