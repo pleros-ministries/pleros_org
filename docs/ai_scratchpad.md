@@ -200,3 +200,9 @@ Consolidated 2026-10-13. Keep this file short, current, pattern-focused, and fre
 - Back navigation such as `Back to oversight` is a plain text link with a left arrow, without button borders/backgrounds. Preserve requested mobile heading line breaks with a wide enough measure.
 - Keep FCC first-time worshipper fields, validation, and per-location Sheet headers aligned; capture WhatsApp number and home address.
 - Scope reset/minimal-state requests narrowly; a requested minimal home reset removes route-specific pages/components and leaves `app/page.tsx` minimal.
+
+## Hosting (Railway, from 25 November 2026)
+
+- Production runs on Railway: a Docker standalone build, Postgres over the private network, and cron services that call the app at `web.railway.internal:3000`. The runbook is `docs/handover/2026-11-25-railway-migration.md`.
+- A Railway cron keeps firing after its deployment is removed. Pause it by removing its schedule or deleting the service, never by removing the deployment.
+- Never run production crons against a database copy: they send real pushes to real people.
