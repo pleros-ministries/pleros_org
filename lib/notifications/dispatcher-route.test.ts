@@ -112,11 +112,11 @@ describe("push sending", () => {
 describe("anonymous subscribers", () => {
   test("the unscheduled public route is left as it was", () => {
     // Scheduled sends to public-site subscribers are a separate decision, so
-    // this route still exists and is still not in vercel.json. The old
-    // prayer-watch-reminder route was deleted; the dispatcher owns those sends.
-    const crons = (
-      JSON.parse(source("vercel.json")) as { crons: Array<{ path: string }> }
-    ).crons.map((cron) => cron.path);
+    // this route still exists and is still not scheduled. The crons are Railway
+    // cron services listed in the runbook. The old prayer-watch-reminder route was
+    // deleted; the dispatcher owns those sends.
+    const runbook = source("docs/handover/2026-11-25-railway-migration.md");
+    const crons = [...runbook.matchAll(/\/api\/cron\/[a-z-]+/g)].map((match) => match[0]);
 
     for (const name of ["new-video-check"]) {
       expect(
