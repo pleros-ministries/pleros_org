@@ -21,10 +21,10 @@ Production then (measured 25 November): Postgres 33 MB on Neon, 552 accounts, 11
 |---|---|
 | `Postgres` | Railway Postgres 17 with a volume. The app reaches it at `postgres.railway.internal`. |
 | `web` | This repo, `main` branch only. No PR environments. |
-| `cron-reminders` | Image `curlimages/curl`, schedule `*/5 * * * *`, command `curl -fsS -H "Authorization: Bearer $CRON_SECRET" https://pleros.org/api/cron/reminder-dispatch` |
-| `cron-daily` | Same, schedule `20 4 * * *`, path `/api/cron/sogp-reminders` |
+| `cron-reminders` | Image `alpine:3.20`, schedule `*/5 * * * *`, start command `sh -c 'wget -qO- -T 290 --header="Authorization: Bearer $CRON_SECRET" http://web.railway.internal:3000/api/cron/reminder-dispatch'`, variable `CRON_SECRET=${{web.CRON_SECRET}}` |
+| `cron-daily` | Same, schedule `20 4 * * *` (05:20 in Lagos), path `/api/cron/sogp-reminders` |
 
-Set a hard usage limit of $15 under Workspace → Usage.
+Usage limits are a $20 hard limit and a $15 email alert, under Workspace → Usage.
 
 ## Variables on `web`
 
@@ -40,6 +40,16 @@ pg_restore --no-owner --no-acl -d "$RAILWAY_PUBLIC_URL" pleros.dump
 ```
 
 Then compare row counts table by table, including `drizzle.__drizzle_migrations`. For the final cutover, stop writes first (pause the Vercel deployment), dump again and restore into a fresh database.
+
+## What happened at cutover (25 November, about 08:00 UTC)
+
+- Final dump at 07:56 UTC. DNS switched in Cloudflare at about 08:04: `pleros.org` and `www.pleros.org` are DNS-only CNAMEs to Railway, with Railway's `_railway-verify` TXT records. Let's Encrypt certificates were issued within minutes. The email records (Resend, SES, DMARC) are unchanged.
+- Railway serves both hosts directly. The old Vercel redirect from `pleros.org` to `www` is gone; auth trusts both origins. The Telegram webhook (`https://pleros.org/api/telegram/sogp/webhook`) needed no change.
+- Railway injects `PORT=8080`. The service sets `PORT=3000` to match its domains.
+- **Vercel's cron jobs had silently stopped around 18 November**, so no reminders, Prayer Watch pushes or daily digests went out for a week. Railway's cron services restored them.
+- **Removing a cron service's deployment doesn't stop its schedule.** Railway starts a fresh run from the latest image on every tick. To pause a cron, remove its schedule or delete the service and apply the change.
+- A test run at 07:50 UTC and a run during the restore at 08:00 UTC each sent the same new-podcast alert, so up to 8 members got it twice. Nothing else was duplicated.
+- Sessions created on Neon between the final dump and the DNS switch (three) were lost; those people sign in again.
 
 ## Cutover checklist
 
