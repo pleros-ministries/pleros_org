@@ -68,7 +68,7 @@ a.row:hover { background: #f8f9fb; }
 .boardRow[data-me] .boardName { color: var(--color-community-blue, #2056d6); font-weight: 500; }
 .boardGap { position: relative; margin-top: 10px; }
 .boardGap::before { content: "···"; position: absolute; top: -12px; left: 0; right: 0; text-align: center; font-size: 10px; line-height: 10px; letter-spacing: 2px; color: #a6abb2; }
-.boardRank { display: grid; flex: none; place-items: center; width: 24px; height: 24px; border-radius: 7px; background: #f1f2f5; color: var(--color-text-muted); font-size: 11.5px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.boardRank { display: grid; flex: none; place-items: center; width: 24px; height: 24px; border-radius: 7px; background: #f1f2f5; color: var(--color-text-muted); font-size: 11.5px; font-weight: 500; font-variant-numeric: tabular-nums; }
 .boardRank[data-rank="1"] { background: #fde68a; color: #7a5200; }
 .boardRank[data-rank="2"] { background: #e5e7eb; color: #4b5260; }
 .boardRank[data-rank="3"] { background: #f6d5b8; color: #7a3a10; }
