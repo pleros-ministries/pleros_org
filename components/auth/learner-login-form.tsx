@@ -2,7 +2,6 @@
 
 import { Eye, EyeOff, LoaderCircle, Mail } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -24,7 +23,6 @@ export function LearnerLoginForm({
   returnTo: string;
   alreadyEnrolledNotice?: boolean;
 }) {
-  const router = useRouter();
   const [mode, setMode] = useState<"password" | "code">("password");
   const [codeSent, setCodeSent] = useState(false);
   const [email, setEmail] = useState("");
@@ -34,9 +32,10 @@ export function LearnerLoginForm({
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // A full page load, not a client move: the router may hold a prefetch of the
+  // dashboard made while signed out, which sends you straight back to /login.
   const finish = () => {
-    router.replace(returnTo);
-    router.refresh();
+    window.location.assign(returnTo);
   };
 
   async function passwordLogin(event: React.FormEvent<HTMLFormElement>) {
