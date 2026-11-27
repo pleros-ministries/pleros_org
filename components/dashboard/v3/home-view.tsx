@@ -32,8 +32,8 @@ function learningDoor(card: HomeLearningCard | undefined, fallback: DashboardHom
     return {
       href: card.href,
       meta: card.meta ?? "SOGP",
-      title: card.title ?? "Make room to grow",
-      summary: card.summary ?? "Pick a path and see where it takes you",
+      title: card.title ?? "Start your SOGP journey",
+      summary: card.summary ?? "Pick a path you can keep up with",
       action: card.action ?? "Choose your SOGP path",
       value: 0,
       total: 0,
@@ -55,12 +55,16 @@ function learningDoor(card: HomeLearningCard | undefined, fallback: DashboardHom
   if (card?.kind === "podcast") {
     const listened = card.episodes.filter(episode => episode.listened).length;
     const active = card.episodes.find(episode => !episode.listened);
-    const episodeLabel = card.episodes.length === 1 ? "episode" : "episodes";
+    // What's on today, short: the bar under it shows how much is listened (user, 27 November).
+    const numbers = card.episodes.map(episode => /^Part (\d+)$/.exec(episode.part)?.[1]);
+    const today = numbers.every(Boolean)
+      ? `${numbers.length === 1 ? "Part" : "Parts"} ${numbers.join(" and ")} today`
+      : `${card.episodes.length} ${card.episodes.length === 1 ? "episode" : "episodes"} today`;
     return {
       href: card.href,
       meta: card.doctrinal ? "One a day · Personalised path" : `${card.pace === 2 ? "30" : "15"} min/day · Podcast path`,
       title: card.series,
-      summary: card.doctrinal ? "Today’s teaching" : `${card.episodes.map(episode => episode.part).join(" and ")} · ${listened} of ${card.episodes.length} ${episodeLabel} listened`,
+      summary: card.doctrinal ? "Today’s teaching" : today,
       action: active?.positionSeconds ? "Resume learning" : "Start learning",
       value: listened,
       total: card.episodes.length,
@@ -146,7 +150,7 @@ function LearningDestination({ card, fallback, hubHref }: {
     </div> : null}
     <Link className={styles.homeLearningAction} href={door.href} data-tour="home-learning">
       {door.action}
-      <DashboardIcon name="arrow" />
+      <DashboardIcon name="arrow" size={16} strokeWidth={2} />
     </Link>
   </section>;
 }

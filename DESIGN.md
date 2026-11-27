@@ -213,7 +213,7 @@ Most of these classes come from `components/community/discipleship/discipleship-
   - Tapping a day opens what it held, or what's planned, in a quiet #f6f7f9 panel under the calendar that folds open and shut (`grid-template-rows`); never a sheet. Each line says its state in words.
   - Home folds it to this week with "See all of November"; the other weeks unfold in place.
   - Dates are the date: never "Day 10 of 28" or "Day 4 of 30". Plans count episodes ("Episode 19 of 30") and say how they fall across months ("6 in what's left of November and 24 in December").
-- **Learning card line and button:** the card's line stays within about 62% of the card so it clears the lit doorway; the button sizes to its label on one line.
+- **Learning card line and button:** the card's line stays within about 62% of the card so it clears the lit doorway; the button sizes to its label on one line. The button sits on the card's bottom edge, level with the art's base, so the card never shows an empty band; its arrow is 16px beside the 14px label (user, 27 November). Before a path is chosen, the card reads "Start your SOGP journey", "Pick a path you can keep up with" and "Choose your SOGP path".
 - **No second blue hero:** only the My learning card is blue. Other illustrated tiles take their own complementary palette.
 
 ### Interaction
