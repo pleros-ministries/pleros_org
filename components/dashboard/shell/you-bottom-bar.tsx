@@ -38,8 +38,9 @@ function isActive(pathname: string, item: YouItem) {
  * Partner and Profile. Grounded like Community's bar, on phones and tablets
  * only; the desktop sidebar lists the same places.
  */
-export function YouBottomBar({ learningHref }: { learningHref: string }) {
-  const pathname = usePathname() ?? "/dashboard";
+export function YouBottomBar({ learningHref, current }: { learningHref: string; /** The demo's page, as its dashboard path. */ current?: string }) {
+  const routed = usePathname();
+  const pathname = current ?? routed ?? "/dashboard";
   // Every You tab is loaded in the background so switching between them is instant.
   useIdlePrefetch(["/dashboard", learningHref, "/dashboard/library", "/dashboard/partner", "/dashboard/profile"]);
   if (OWN_BOTTOM.test(pathname)) return null;

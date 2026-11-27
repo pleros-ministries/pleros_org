@@ -126,7 +126,8 @@ test("Home previews this month’s board for everyone, with you after the top th
   ], me: { rank: 4, points: 120 }, total: 19, points: 120 };
   const html = renderToStaticMarkup(<DashboardHomeView greeting="Hello" data={{ ...data, leaderboard }} />);
 
-  expect(html).toContain("You’re #4 of 19 in November · 120 pts");
+  expect(html).toContain("November leaderboard");
+  expect(html).toContain("You’re #4 of 19 · 120 pts");
   expect(html).toContain('href="/dashboard/leaderboard"');
   expect(html).not.toContain("cohort");
   expect(html).toContain(">You<");

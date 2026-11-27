@@ -71,6 +71,16 @@ function sampleMonth(todayKey: string, podcast: boolean): HomeSogp["month"] {
   return { key, name: new Date(Date.UTC(year, month - 1, 1)).toLocaleDateString("en-GB", { month: "long", timeZone: "UTC" }), todayKey, daysLeft: length - today + 1, daysSoFar: today, podcast, days };
 }
 
+const sampleInvite = { code: "SAM24", url: "https://pleros.org/sogp/enrol?ref=SAM24", joined: 0 };
+/** This month's board, sample first names only. */
+function sampleBoard(): NonNullable<DashboardHomeData["leaderboard"]> {
+  const month = new Date(start).toLocaleDateString("en-GB", { month: "long", timeZone: "Africa/Lagos" });
+  return { month, total: 162, points: 0, me: null, top: [
+    { rank: 1, name: "Ada", points: 410, isMe: false }, { rank: 2, name: "Bola", points: 388, isMe: false }, { rank: 3, name: "Chuka", points: 352, isMe: false },
+    { rank: 4, name: "Dami", points: 301, isMe: false }, { rank: 5, name: "Efe", points: 287, isMe: false },
+  ] };
+}
+
 /** Home, before a path (Choose a learning path) and after one (today's steps). */
 function sogpToday(path: TourPath): HomeSogp {
   const today = new Date(start).toISOString().slice(0, 10);
@@ -93,10 +103,11 @@ function sogpToday(path: TourPath): HomeSogp {
 
 export function home(path: TourPath | null): DashboardHomeData {
   const learning = { title: "", href: "#", action: "", completed: 0, total: 0, enrolled: true };
-  if (!path) return { day: new Date(start).toISOString().slice(0, 10), reports: null, card: { kind: "start", href: "?screen=choose" }, sogp: null, learning, welcomePack: { done: false } };
+  // A new learner's Home, as the real one: cohort and week, their group, invite and the month's board.
+  if (!path) return { day: new Date(start).toISOString().slice(0, 10), reports: null, card: { kind: "start", href: "?screen=choose" }, sogp: { ...sogpToday("sogp"), today: null, month: null, invite: sampleInvite }, leaderboard: sampleBoard(), learning, welcomePack: { done: false } };
   const card: DashboardHomeData["card"] = path === "sogp"
     ? { kind: "traditional", title: "Gospel: The Word of Truth", href: "#", completed: 0, total: 18, level: 1 }
     : { kind: "podcast", doctrinal: path === "doctrinal", pace: path === "podcast" ? 2 : 1, href: "#", series: path === "podcast" ? "The Reality of God’s Purpose" : "Understanding the Gospel", dayNumber: 1,
       episodes: (path === "podcast" ? [1, 2] : [1]).map(part => ({ part: `Part ${part}`, duration: "15:33", durationSeconds: 933, positionSeconds: 0, listened: false })) };
-  return { day: new Date(start).toISOString().slice(0, 10), reports: null, card, sogp: sogpToday(path), learning, welcomePack: { done: false } };
+  return { day: new Date(start).toISOString().slice(0, 10), reports: null, card, sogp: { ...sogpToday(path), invite: sampleInvite }, leaderboard: sampleBoard(), learning, welcomePack: { done: false } };
 }

@@ -1,7 +1,16 @@
 /* /demo: a quiet bar above the real screens, and the step picker sheet. Above the tour (80–82). */
-.bar { position: sticky; top: 0; z-index: 85; display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; padding: 4px 16px; background: var(--dashboard-topbar-bg, #051480); color: white; }
+.top { position: sticky; top: 0; z-index: 85; }
+/* The dashboard's live top bar (dashboard-shell.module.css .liveHeader). */
+.top > header { position: static; max-width: none; margin: 0; width: 100%; height: 44px; background: var(--dashboard-topbar-bg, #051480); color: white; border-bottom: 0; }
+.top > header > button { color: white; }
+.top > header nav button { color: rgb(255 255 255 / 72%); }
+.top > header nav button[aria-current] { color: white; }
+.top > header nav button[aria-current]::after { bottom: 0; width: 22px; height: 2px; border-radius: 2px; background: #d8ff65; }
+.page { display: flex; flex-direction: column; min-height: calc(100dvh - 76px); }
+.content { flex: 1 0 auto; min-width: 0; }
+.bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 32px; padding: 2px 16px; background: #1d2433; color: white; }
 .label { font-size: 12px; line-height: 16px; color: rgb(255 255 255 / 0.78); }
-.barButton { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 10px; border-radius: 10px; border: 1px solid rgb(255 255 255 / 0.28); background: rgb(255 255 255 / 0.08); color: white; font: inherit; font-size: 12.5px; font-weight: 500; white-space: nowrap; cursor: pointer; transition: background-color 150ms var(--ease-out); }
+.barButton { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: 10px; border: 1px solid rgb(255 255 255 / 0.28); background: rgb(255 255 255 / 0.08); color: white; font: inherit; font-size: 12.5px; font-weight: 500; white-space: nowrap; cursor: pointer; transition: background-color 150ms var(--ease-out); }
 .barButton:hover { background: rgb(255 255 255 / 0.16); }
 .notice { position: fixed; left: 16px; right: 16px; bottom: 88px; z-index: 86; margin: 0 auto; max-width: 360px; padding: 10px 14px; border-radius: 10px; background: #1d2433; color: white; font-size: 13px; line-height: 20px; text-align: center; animation: rise 200ms var(--ease-out); }
 
