@@ -168,9 +168,9 @@ export type CohortMoveResult = {
  * Move enrolments into the target cohort in place, atomically. Everything
  * hanging off the enrolment (pastor, unit, Fullness tag, referral code,
  * discipleship) comes along. Pre-SOGP ticks are dropped because they point at
- * the old cohort's days and would otherwise count as progress in the new one;
- * the leaderboard alias is per cohort, so it is cleared too. Enrolments that
- * cannot move are reported back rather than failing the batch.
+ * the old cohort's days and would otherwise count as progress in the new one.
+ * The leaderboard name belongs to the person, not the cohort, so it stays.
+ * Enrolments that cannot move are reported back rather than failing the batch.
  */
 export async function moveEnrollmentsToCohort(input: {
   enrollmentIds: number[];
@@ -273,7 +273,7 @@ export async function moveEnrollmentsToCohort(input: {
       .where(inArray(schema.sogpPreparationCompletions.enrollmentId, movableIds));
     await tx
       .update(schema.sogpEnrollments)
-      .set({ cohortId: target.id, status: "enrolled", leaderboardAlias: null, updatedAt: now })
+      .set({ cohortId: target.id, status: "enrolled", updatedAt: now })
       .where(inArray(schema.sogpEnrollments.id, movableIds));
     await tx
       .insert(transfers)

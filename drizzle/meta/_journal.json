@@ -568,6 +568,13 @@
    "when": 1793620800000,
    "tag": "0081_lesson_audio_listened_at",
    "breakpoints": true
+  },
+  {
+   "idx": 82,
+   "version": "7",
+   "when": 1793707200000,
+   "tag": "0082_leaderboard_profiles",
+   "breakpoints": true
   }
  ]
 }

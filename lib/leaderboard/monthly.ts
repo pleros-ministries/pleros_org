@@ -16,6 +16,22 @@ export const MONTHLY_POINTS = {
 } as const;
 
 export const PRAYER_SESSIONS_PER_DAY = 3;
+
+/** A leaderboard name: 2 to 24 letters or numbers; spaces, - and _ are fine too. */
+export const LEADERBOARD_ALIAS_PATTERN = /^[\p{L}\p{N} _-]+$/u;
+export const LEADERBOARD_ALIAS_HELP = "Use 2 to 24 letters or numbers. Spaces, - and _ are fine too.";
+
+/**
+ * The name to save: trimmed, with runs of spaces closed up; null to go back to
+ * your first name; undefined when it breaks the rules.
+ */
+export function normaliseLeaderboardAlias(raw: string | null | undefined): string | null | undefined {
+  if (raw == null) return null;
+  if (typeof raw !== "string") return undefined;
+  const alias = raw.trim().replace(/\s+/g, " ");
+  if (!alias) return null;
+  return alias.length >= 2 && alias.length <= 24 && LEADERBOARD_ALIAS_PATTERN.test(alias) ? alias : undefined;
+}
 /** Prayer Watch and Bible reading count when recorded within this many days, as reports allow. */
 export const LATE_RECORD_DAYS = 7;
 export const MONTHLY_MAX_LISTED = 100;
@@ -128,6 +144,74 @@ export function denseRankFor(points: number, visiblePoints: readonly number[]) {
   return new Set(visiblePoints.filter((value) => value > points)).size + 1;
 }
 
+/** One person's month as read from the database. */
+export type MonthlyPerson = {
+  userId: string;
+  /** Their first name; peers never see more. */
+  firstName: string;
+  alias: string | null;
+  hidden: boolean;
+  counts: MonthlyCounts;
+};
+
+/**
+ * The board for one viewer: everyone with points this month who hasn't hidden
+ * themselves, best first, at most `MONTHLY_MAX_LISTED`, named by their
+ * leaderboard name or first name. No user ids leave this function; the
+ * viewer's row is marked `isMe`. A hidden viewer keeps a private rank.
+ */
+export function buildMonthlyLeaderboard(input: {
+  month: MonthWindow;
+  people: readonly MonthlyPerson[];
+  viewerId: string;
+  /** The viewer's own name and settings when they have no activity row. */
+  viewer: { firstName: string; alias: string | null; hidden: boolean };
+}): MonthlyLeaderboardData {
+  const scored = input.people.map((person) => {
+    const breakdown = scoreMonth(person.counts);
+    return { person, breakdown, points: breakdown.total, name: person.alias ?? person.firstName };
+  });
+  const visible = scored.filter(({ person, points }) => points > 0 && !person.hidden);
+  const ranked = rankByPoints(visible.map((row) => ({ name: row.name, points: row.points, isMe: row.person.userId === input.viewerId })));
+
+  const own = scored.find(({ person }) => person.userId === input.viewerId);
+  const counts = own?.person.counts ?? EMPTY_MONTHLY_COUNTS;
+  const breakdown = own?.breakdown ?? scoreMonth(counts);
+  const hidden = own?.person.hidden ?? input.viewer.hidden;
+  const rank = breakdown.total > 0
+    ? hidden ? denseRankFor(breakdown.total, visible.map((row) => row.points)) : ranked.find((row) => row.isMe)!.rank
+    : null;
+
+  return {
+    month: input.month,
+    top: ranked.slice(0, MONTHLY_MAX_LISTED).map(({ rank: place, name, points, isMe }) => ({ rank: place, name, points, isMe })),
+    total: ranked.length,
+    me: {
+      rank,
+      points: breakdown.total,
+      counts,
+      breakdown,
+      firstName: own?.person.firstName ?? input.viewer.firstName,
+      alias: own?.person.alias ?? input.viewer.alias,
+      hidden,
+    },
+  };
+}
+
+/**
+ * The board's top few for a preview (Home, the Podcast page), and you. A
+ * hidden viewer sees the board without themselves; `points` is theirs either way.
+ */
+export function previewMonthlyLeaderboard(data: MonthlyLeaderboardData, size = 5) {
+  return {
+    month: data.month.name,
+    top: data.top.slice(0, size),
+    me: data.me.rank && !data.me.hidden ? { rank: data.me.rank, points: data.me.points } : null,
+    total: data.total,
+    points: data.me.points,
+  };
+}
+
 /**
  * The board as the viewer sees it after hiding, showing or renaming
  * themselves, so those saves show at once. Everyone else keeps their place.
@@ -142,7 +226,8 @@ export function placeViewer(data: MonthlyLeaderboardData, view: { hidden: boolea
     return {
       rows: rankByPoints(others).map((row) => ({ ...row, isMe: false })),
       outside: null,
-      myRank: me.points > 0 ? denseRankFor(me.points, others.map((row) => row.points)) : null,
+      // A dense rank is the same whether or not you're listed.
+      myRank: me.points > 0 ? me.rank ?? denseRankFor(me.points, others.map((row) => row.points)) : null,
       total: othersTotal,
     };
   }
@@ -152,9 +237,10 @@ export function placeViewer(data: MonthlyLeaderboardData, view: { hidden: boolea
   const rows = ranked.slice(0, MONTHLY_MAX_LISTED);
   return {
     rows,
-    // Further down than the board lists: shown after a gap.
-    outside: rows.includes(mine) ? null : mine,
-    myRank: mine.rank,
+    // Further down than the board lists: shown after a gap, at the rank the
+    // whole board gives it (the listed rows are only its top).
+    outside: rows.includes(mine) ? null : { ...mine, rank: me.rank ?? mine.rank },
+    myRank: rows.includes(mine) ? mine.rank : me.rank ?? mine.rank,
     total: othersTotal + 1,
   };
 }

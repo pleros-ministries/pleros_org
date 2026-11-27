@@ -1,12 +1,11 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { ChevronRightIcon, PenLineIcon, UserPlusIcon, UsersRoundIcon } from "lucide-react";
+import { ChevronRightIcon, PenLineIcon, TrophyIcon, UserPlusIcon, UsersRoundIcon } from "lucide-react";
 import Link from "next/link";
 
 import type { SogpJourneyData } from "@/lib/db/queries/sogp-journey";
 
-import { LeaderboardWidget } from "./leaderboard-widget";
 import { ShareLearningProgressDialog } from "./share-learning-progress-dialog";
 
 function progressPercent(completed: number, total: number) {
@@ -138,9 +137,17 @@ export function SogpOtherDetails({
               tone={["#cfe6fb", "#0e3f73"]}
             />
           </li>
+          <li>
+            {/* One board for everyone, for the month (Pastor, 25 November 2026). */}
+            <DetailRow
+              title="Leaderboard"
+              description="This month’s board, for everyone."
+              href={preview ? "/preview/dashboard-v3/monthly-leaderboard" : "/dashboard/leaderboard"}
+              icon={<TrophyIcon className="size-4" strokeWidth={2.2} />}
+              tone={["#fff1c2", "#8a5a00"]}
+            />
+          </li>
         </ul>
-
-        {preview ? null : <LeaderboardWidget />}
 
       </div>
 

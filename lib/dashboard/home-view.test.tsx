@@ -87,13 +87,12 @@ const sogp: NonNullable<DashboardHomeData["sogp"]> = {
     "2026-10-16": { dateKey: "2026-10-16", learning: { title: "Walk of Faith", meta: "Part 5", done: false }, prayer: 1, bible: false },
   } },
   progress: { teaching: { done: 7, total: 30, unit: "episodes" }, prayer: { percent: 83, required: 80 }, assessment: null },
-  leaderboard: { rank: 7, points: 240 },
   group: { kind: "member", groupName: "SOGP Discipleship Group", leaderFirstName: "Tolu" },
   shareDayNumber: 4,
 };
 
 test("the SOGP sections bring the old dashboard's day, checklist, progress and tiles onto the home", () => {
-  const html = renderToStaticMarkup(<DashboardHomeView name="Ada" greeting="Good evening" data={{ ...data, sogp }} />);
+  const html = renderToStaticMarkup(<DashboardHomeView name="Ada" greeting="Good evening" data={{ ...data, sogp, leaderboard: { month: "October", top: [], me: null, total: 0, points: 0 } }} />);
 
   expect(html).toContain("SOGP October 2026 · Week 2 of 4");
   expect(html).toContain("Friday 16 October");
@@ -109,12 +108,28 @@ test("the SOGP sections bring the old dashboard's day, checklist, progress and t
   expect(html).not.toContain("Assessment");
   expect(html).toContain("Share what you learnt");
   expect(html).toContain("of 30 episodes");
-  expect(html).toContain('href="/dashboard/sogp/leaderboard"');
-  expect(html).toContain("#7");
+  // Before anyone has points this month, the board is a quiet row.
+  expect(html).toContain('href="/dashboard/leaderboard"');
+  expect(html).toContain("See who’s growing this month");
   expect(html).toContain("Tolu&#x27;s group");
   // Partner moved to its own You tab; Grow together is rows with buttons.
   expect(html).not.toContain('href="/partner"');
   expect(html).toContain(">Share link<");
+});
+
+test("Home previews this month’s board for everyone, with you after the top three", () => {
+  const leaderboard = { month: "November", top: [
+    { rank: 1, name: "Ada", points: 214, isMe: false },
+    { rank: 2, name: "Tolu", points: 198, isMe: false },
+    { rank: 3, name: "Kemi", points: 151, isMe: false },
+    { rank: 4, name: "Sam", points: 120, isMe: true },
+  ], me: { rank: 4, points: 120 }, total: 19, points: 120 };
+  const html = renderToStaticMarkup(<DashboardHomeView greeting="Hello" data={{ ...data, leaderboard }} />);
+
+  expect(html).toContain("You’re #4 of 19 in November · 120 pts");
+  expect(html).toContain('href="/dashboard/leaderboard"');
+  expect(html).not.toContain("cohort");
+  expect(html).toContain(">You<");
 });
 
 test("the learning card uses the current track's level art and falls back to the staircase", () => {

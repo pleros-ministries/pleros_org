@@ -9,6 +9,7 @@ import {
   EMPTY_MONTHLY_COUNTS,
   denseRankFor,
   monthWindow,
+  previewMonthlyLeaderboard,
   rankByPoints,
   scoreMonth,
   type MonthlyCounts,
@@ -21,8 +22,9 @@ export const metadata = { title: "Monthly leaderboard preview", robots: { index:
 export const instant = false;
 
 /**
- * Mockup (Pastor's review, relayed 25 November 2026): one board for everyone,
- * per calendar month. The real page components on sample data; nothing saved.
+ * The monthly leaderboard (Pastor, 25 November 2026; live at
+ * /dashboard/leaderboard): the real page components on sample data, for
+ * checking without signing in. Nothing saved.
  */
 const SCREENS = {
   page: "1 This month",
@@ -96,7 +98,8 @@ export default async function MonthlyLeaderboardPreview({ searchParams }: { sear
         id="preview-home-leaderboard"
         dense
         month={data.month.name}
-        board={{ top: data.top.slice(0, 5), me: data.me.rank ? { rank: data.me.rank, points: data.me.points } : null, total: data.total }}
+        board={previewMonthlyLeaderboard(data)}
+        href="?screen=page"
       />
     </div></div>
     // Keyed so each screen starts from its own sample state.

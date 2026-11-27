@@ -10,10 +10,11 @@ vi.mock("@/lib/db/queries/daily-report-declarations", () => ({ getOwnDailyDeclar
 vi.mock("@/lib/db/queries/community-discipleship", () => ({ getOwnDisciplerSummary: reads.support }));
 vi.mock("@/lib/db/queries/sogp-journey", () => ({ getActiveSogpJourney: reads.journey }));
 vi.mock("@/lib/db/queries/sogp-certification-facts", () => ({ getOwnCertificationFacts: reads.facts }));
-vi.mock("@/lib/db/queries/sogp-leaderboard", () => ({ getSogpLeaderboard: reads.leaderboard }));
+vi.mock("@/lib/db/queries/monthly-leaderboard", () => ({ getMonthlyLeaderboard: reads.leaderboard }));
 vi.mock("@/lib/db/queries/sogp-discipleship", () => ({ getHomeDiscipleshipSummary: reads.group }));
 vi.mock("@/lib/sogp/daily-date", () => ({ lagosToday: () => "2026-10-13" }));
 vi.mock("@/lib/db/queries/notification-preferences", () => ({ getReminderPreferences: async () => ({ remindersSavedAt: new Date("2026-10-01T00:00:00Z") }) }));
+import { buildMonthlyLeaderboard, monthWindow } from "@/lib/leaderboard/monthly";
 import { getDashboardHomeData } from "./home-data";
 import type { getDashboardViewer } from "./viewer";
 
@@ -69,6 +70,30 @@ test("missing capabilities skip course/report/support reads rather than granting
 test("read failures propagate to the error boundary instead of manufacturing zero counts", async () => {
   reads.activities.mockRejectedValue(new Error("read failed"));
   await expect(getDashboardHomeData(viewer())).rejects.toThrow("read failed");
+});
+
+test("everyone signed in gets this month’s board, enrolled or not; hidden, they see it without themselves", async () => {
+  const people = ["Ada", "Tolu", "Kemi", "Chidi", "Funmi", "Ife"].map((name, index) => ({ userId: `u-${index}`, firstName: name, alias: null, hidden: false, counts: { learningDays: 10 - index, prayerSessions: 0, bibleDays: 0, invitations: 0 } }));
+  const own = { userId: "own-user", firstName: "Sam", alias: null, hidden: false, counts: { learningDays: 9, prayerSessions: 0, bibleDays: 0, invitations: 0 } };
+  const board = (hidden: boolean) => buildMonthlyLeaderboard({ month: monthWindow("2026-10-13"), viewerId: "own-user", viewer: { firstName: "Sam", alias: null, hidden }, people: [...people, { ...own, hidden }] });
+
+  reads.leaderboard.mockResolvedValue(board(false));
+  const data = await getDashboardHomeData(viewer(false));
+  expect(reads.leaderboard).toHaveBeenCalledWith("own-user");
+  expect(data.leaderboard).toMatchObject({ month: "October", total: 7, me: { rank: 2, points: 45 }, points: 45 });
+  expect(data.leaderboard?.top).toHaveLength(5);
+  expect(JSON.stringify(data.leaderboard)).not.toContain("u-");
+
+  reads.leaderboard.mockResolvedValue(board(true));
+  const hidden = await getDashboardHomeData(viewer(false));
+  expect(hidden.leaderboard).toMatchObject({ total: 6, me: null, points: 45 });
+  expect(hidden.leaderboard?.top.some(row => row.isMe)).toBe(false);
+});
+
+test("an unreadable board leaves Home without it", async () => {
+  reads.leaderboard.mockRejectedValue(new Error("board failed"));
+  const data = await getDashboardHomeData(viewer(true));
+  expect(data.leaderboard).toBeNull();
 });
 
 test("the SOGP projection degrades to hidden when the journey cannot load", async () => {

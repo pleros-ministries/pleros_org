@@ -82,8 +82,8 @@ const DASHBOARD_FOCUS: Array<[RegExp, (match: RegExpMatchArray) => DashboardFocu
   [/^\/dashboard\/(community|sogp)\/enrollees$/, () => ({ title: "My enrollees", back: GROUPS })],
   [/^\/dashboard\/community\/invitations\/\d+\/sent$/, () => ({ title: "Invitation", back: { href: "/dashboard/community/enrollees", label: "Back to My enrollees" } })],
   [/^\/dashboard\/sogp\/invitations\/\d+$/, () => ({ title: "Group invitation", back: COMMUNITY })],
-  [/^\/dashboard\/sogp\/(month|path|plan|listen|follow-up|readiness|referrals|leaderboard|certificate|traditional|history)$/, m => ({
-    title: ({ month: "This month", history: "Your history", path: "Change path or pace", plan: "Edit full plan", listen: "Today’s listening", "follow-up": "Your follow-up person", readiness: "Certification", referrals: "Invite someone", leaderboard: "Leaderboard", certificate: "Certificate", traditional: "Calendar and assessments" } as Record<string, string>)[m[1]],
+  [/^\/dashboard\/sogp\/(month|path|plan|listen|follow-up|readiness|referrals|certificate|traditional|history)$/, m => ({
+    title: ({ month: "This month", history: "Your history", path: "Change path or pace", plan: "Edit full plan", listen: "Today’s listening", "follow-up": "Your follow-up person", readiness: "Certification", referrals: "Invite someone", certificate: "Certificate", traditional: "Calendar and assessments" } as Record<string, string>)[m[1]],
     back: SOGP_TOOLS.has(m[1]!) ? SOGP_PAGE : MY_SOGP,
   })],
   [/^\/dashboard\/sogp\/.+$/, () => ({ title: "Learning", back: MY_SOGP })],
@@ -117,7 +117,8 @@ const DASHBOARD_FOCUS: Array<[RegExp, (match: RegExpMatchArray) => DashboardFocu
   [/^\/dashboard\/library\/teachings$/, () => ({ title: "Teachings Library", back: LIBRARY })],
   [/^\/dashboard\/podcast$/, () => ({ title: "Podcast", back: LIBRARY })],
   [/^\/dashboard\/(prayer-watch|pre-sogp)(\/.*)?$/, m => ({ title: m[1] === "pre-sogp" ? "Pre-SOGP" : "Prayer Watch", back: MY_SOGP })],
-  [/^\/dashboard\/podcast\/leaderboard$/, () => ({ title: "Podcast leaderboard", back: { href: "/dashboard/podcast", label: "Back to Podcast" } })],
+  // One board for everyone (Pastor, 25 November 2026), opened from Home and Learning.
+  [/^\/dashboard\/leaderboard$/, () => ({ title: "Leaderboard", back: YOU })],
   [/^\/dashboard\/discipleship-journey\/[^/]+$/, () => ({ title: "Discipleship journey", back: { href: "/dashboard/discipleship-journey", label: "Back to discipleship journey" } })],
   [/^\/dashboard\/welcomepack\/([^/]+)/, m => ({ title: ({ join: "Join", setup: "App and reminders", gifts: "Your gifts", orientation: "Orientation video", audiobook: "Audiobook" } as Record<string, string>)[m[1]] ?? "Welcome Pack", back: { href: "/dashboard/welcomepack", label: "Back to Welcome Pack" } })],
   [/^\/dashboard\/(welcomepack|discipleship-journey)(\/.*)?$/, m => ({

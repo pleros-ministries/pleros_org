@@ -2,13 +2,15 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { BookOpenIcon, EyeIcon, EyeOffIcon, FlameIcon, HeadphonesIcon, LockIcon, SunriseIcon, TrophyIcon } from "lucide-react";
+import { HeadphonesIcon, LockIcon, SunriseIcon, TrophyIcon } from "lucide-react";
 
+import { MonthlyLeaderboard } from "@/components/dashboard/leaderboard/monthly-leaderboard";
+import { dashboardFont, dashboardHeadingFont } from "@/components/dashboard/v3/font";
 import type { DayActivity, PrayerWatchSession } from "@/lib/community/ministry-report";
 import { BIBLE_BOOKS, getBibleBook } from "@/lib/bible-reading";
+import { buildMonthlyLeaderboard, monthWindow, PRAYER_SESSIONS_PER_DAY, type MonthlyPerson } from "@/lib/leaderboard/monthly";
 import { podcastSeries } from "@/lib/podcast-page-content";
 import { PODCAST_FOUNDATIONS_DAYS, PODCAST_FOUNDATIONS_PLAN, PODCAST_FOUNDATIONS_TITLE } from "@/lib/podcast-journey";
-import { PODCAST_LEADERBOARD_POINTS, buildPodcastLeaderboard, type PodcastLeaderboardListener } from "@/lib/podcast-leaderboard";
 import { shiftDate } from "@/lib/sogp/daily-date";
 import { cn } from "@/lib/utils";
 import { devotionFor, isWritableDay } from "@/lib/preview/pleros/daily-report";
@@ -17,7 +19,7 @@ import { updateDevotion } from "@/lib/preview/pleros/store";
 import type { DemoState } from "@/lib/preview/pleros/types";
 
 import { useDemo } from "../demo-context";
-import { Badge, DayTracker, PageHeader, StatStrip, buttonPrimary, buttonSecondary, focusRing, longDate, panel, relativeDay, shortDate } from "../ui";
+import { Badge, DayTracker, PageHeader, StatStrip, buttonPrimary, buttonSecondary, longDate, panel, relativeDay, shortDate } from "../ui";
 import { useTrackerWindow } from "../use-tracker";
 import { ExternalLink, Field, ListPanel, Row, Section, Tick, fieldControl, monthLabel, selectControl } from "./parts";
 
@@ -220,7 +222,7 @@ export function PodcastDestination() {
       <PageHeader
         eyebrow={`${PODCAST_FOUNDATIONS_TITLE} · day ${current.day} of ${PODCAST_FOUNDATIONS_DAYS}`}
         title="Podcast"
-        actions={<Link href={href("destinations/podcast-leaderboard")} className={buttonSecondary}><TrophyIcon className="size-3.5" aria-hidden />Leaderboard</Link>}
+        actions={<Link href={href("destinations/leaderboard")} className={buttonSecondary}><TrophyIcon className="size-3.5" aria-hidden />Leaderboard</Link>}
       />
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
@@ -296,77 +298,30 @@ export function PodcastDestination() {
   );
 }
 
-// ─── Podcast leaderboard ──────────────────────────────────────────────────
+// ─── Leaderboard ──────────────────────────────────────────────────────────
 
-export function PodcastLeaderboardDestination() {
+/**
+ * One board for everyone, for the month (Pastor, 25 November 2026): the real
+ * page on this demo's synthetic month. Hiding and the name show but aren't saved.
+ */
+export function LeaderboardDestination() {
   const { state, viewer, today } = useDemo();
-  // Opt-in and off by default; the choice lives in this tab only.
-  const [visible, setVisible] = useState(false);
-  const listeners: PodcastLeaderboardListener[] = state.people.map((person) => {
+  const people: MonthlyPerson[] = state.people.map((person) => {
     const days = monthDays(state, person.id);
-    const listening = days.filter(([, entry]) => entry.podcastEpisodes > 0).map(([dateKey]) => dateKey);
     return {
       userId: person.id,
-      name: person.firstName,
-      listeningDays: listening.length,
-      prayerWatch: days.filter(([, entry]) => entry.prayerWatch.includes("morning")).length,
-      activityDays: listening,
-      visible: seeded(`${person.id}:podcast-board`) > 0.3,
+      firstName: person.firstName,
+      alias: null,
+      hidden: false,
+      counts: {
+        learningDays: days.filter(([, entry]) => entry.podcastEpisodes > 0 || entry.sogp?.listened || entry.sogp?.quizAttempted || entry.sogp?.writtenSubmitted || entry.sogp?.preparationDone).length,
+        prayerSessions: days.reduce((total, [, entry]) => total + Math.min(PRAYER_SESSIONS_PER_DAY, new Set(entry.prayerWatch).size), 0),
+        bibleDays: days.filter(([, entry]) => (entry.bible?.chapters ?? 0) > 0).length,
+        invitations: Math.floor(seeded(`${person.id}:invitations`) * 3),
+      },
     };
   });
-  const board = buildPodcastLeaderboard({ listeners, viewerId: viewer.id, viewerVisible: visible, todayKey: today });
-
-  return (
-    <div className="grid gap-6">
-      <PageHeader eyebrow={`Resets monthly · ${board.monthLabel}`} title="Podcast leaderboard" />
-
-      {board.me ? (
-        <section className={cn(panel, "grid gap-4 p-4 sm:p-5")} aria-label="Your score">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="grid gap-0.5">
-              <p className="text-[12.5px] text-(--color-text-muted)">{visible ? "Your rank" : "Your private rank"}</p>
-              <p className="text-[22px] font-medium tabular-nums text-(--color-text-strong)">#{board.me.rank} · {board.me.points} pts</p>
-            </div>
-            <button type="button" aria-pressed={visible} onClick={() => setVisible((value) => !value)} className={cn("inline-flex min-h-8 items-center gap-1.5 rounded-full border border-(--color-line-strong) bg-white px-3 text-[12.5px] font-medium text-(--color-text-strong) hover:border-(--color-brand-blue)", focusRing)}>
-              {visible ? <EyeIcon className="size-3.5" aria-hidden /> : <EyeOffIcon className="size-3.5" aria-hidden />}
-              {visible ? "Shown on the board" : "Hidden from the board"}
-            </button>
-          </div>
-          <dl className="grid grid-cols-3 gap-2 text-center">
-            {[
-              ["Listening", board.me.breakdown.listening],
-              ["Prayer Watch", board.me.breakdown.prayer],
-              ["Streak bonus", board.me.breakdown.streak],
-            ].map(([label, value]) => (
-              <div key={label} className="rounded-[var(--radius-sm)] bg-(--color-surface-muted) px-2 py-2">
-                <dt className="text-[11.5px] text-(--color-text-muted)">{label}</dt>
-                <dd className="text-[15px] font-medium tabular-nums text-(--color-text-strong)">{value}</dd>
-              </div>
-            ))}
-          </dl>
-          <p className="text-[12px] text-(--color-text-muted)">
-            {PODCAST_LEADERBOARD_POINTS.listeningDay} points per listening day, {PODCAST_LEADERBOARD_POINTS.prayerWatch} per morning Prayer Watch, plus a bonus every seven-day streak.
-          </p>
-        </section>
-      ) : (
-        <p className="text-[13px] text-(--color-text-muted)">Mark an episode this month to get a score.</p>
-      )}
-
-      <Section title="This month" detail={`${board.top.length} listeners shown`}>
-        <ol className={cn(panel, "divide-y divide-(--color-line) overflow-hidden")}>
-          {board.top.map((entry) => (
-            <li key={`${entry.rank}-${entry.name}`} className={cn("flex items-center gap-3 px-4 py-2.5 sm:px-5", entry.isMe && "bg-(--color-brand-sky-soft)")}>
-              <span className={cn("grid size-7 shrink-0 place-items-center rounded-full text-[12px] font-medium tabular-nums", entry.rank <= 3 ? "bg-(--color-brand-lime) text-(--color-brand-blue)" : "bg-(--color-surface-muted) text-(--color-text-muted)")}>{entry.rank}</span>
-              <span className="min-w-0 flex-1 truncate text-[13.5px] font-medium text-(--color-text-strong)">{entry.name}{entry.isMe ? " (you)" : ""}</span>
-              {entry.currentStreak > 1 ? (
-                <span className="inline-flex items-center gap-0.5 text-[12px] text-(--color-text-muted)"><FlameIcon className="size-3.5" aria-hidden />{entry.currentStreak}</span>
-              ) : null}
-              <span className="w-14 text-right text-[13px] font-medium tabular-nums text-(--color-brand-blue)">{entry.points}</span>
-            </li>
-          ))}
-        </ol>
-      </Section>
-      <p className="flex items-center gap-1.5 text-[12px] text-(--color-text-muted)"><BookOpenIcon className="size-3.5" aria-hidden />First names only. Scores come from this demo&apos;s synthetic month.</p>
-    </div>
-  );
+  const own = state.people.find((person) => person.id === viewer.id);
+  const data = buildMonthlyLeaderboard({ month: monthWindow(today), people, viewerId: viewer.id, viewer: { firstName: own?.firstName ?? "You", alias: null, hidden: false } });
+  return <div className={`${dashboardFont.className} ${dashboardFont.variable} ${dashboardHeadingFont.variable}`}><MonthlyLeaderboard data={data} /></div>;
 }

@@ -41,20 +41,21 @@ const sogp: DashboardHomeData["sogp"] = {
     return [dateKey, { dateKey, learning: day >= 12 ? { title: `Sample teaching ${day - 11}`, meta: `Level ${Math.ceil((day - 11) / 6)} · track ${day - 11}`, href: "#", done: learnt } : null, prayer: day < 21 && day % 3 ? 1 : day === 21 ? 1 : 0, bible: day < 21 && day % 2 === 0 }];
   })) },
   progress: { teaching: { done: 9, total: 24, unit: "days" }, prayer: { percent: 64, required: 80 }, assessment: { done: 8, total: 9 } },
-  leaderboard: { rank: 7, points: 240 },
   invite: { code: "a1b2c3d4", url: "https://pleros.org/sogp?ref=a1b2c3d4", joined: 3 },
-  board: { total: 162, me: { rank: 7, points: 240 }, top: [
-    { rank: 1, name: "Ada O.", points: 410, isMe: false }, { rank: 2, name: "Bola K.", points: 388, isMe: false }, { rank: 3, name: "Chuka E.", points: 352, isMe: false },
-    { rank: 4, name: "Dami A.", points: 301, isMe: false }, { rank: 5, name: "Efe T.", points: 287, isMe: false },
-  ] },
   group: { kind: "member", groupName: "SOGP Discipleship Group", leaderFirstName: "Ada" },
   shareDayNumber: null,
 };
 
+/** This month's board for everyone (sample first names only). */
+const leaderboard: DashboardHomeData["leaderboard"] = { month: "October", total: 162, points: 240, me: { rank: 7, points: 240 }, top: [
+  { rank: 1, name: "Ada", points: 410, isMe: false }, { rank: 2, name: "Bola", points: 388, isMe: false }, { rank: 3, name: "Chuka", points: 352, isMe: false },
+  { rank: 4, name: "Dami", points: 301, isMe: false }, { rank: 5, name: "Efe", points: 287, isMe: false },
+] };
+
 /** Labelled sample data only. */
 export default async function HomePreview({ searchParams }: { searchParams: Promise<{ card?: string }> }) {
   const { card = "start" } = await searchParams;
-  const data: DashboardHomeData = { day: "2026-10-16", reports, card: cards[card] ?? cards.start, sogp: card === "start" ? null : sogp,
+  const data: DashboardHomeData = { day: "2026-10-16", reports, card: cards[card] ?? cards.start, sogp: card === "start" ? null : sogp, leaderboard,
     learning: { title: "", href: "#", action: "", completed: 0, total: 0, enrolled: card !== "start" } };
   return <div className={`${dashboardFont.className} ${dashboardHeadingFont.variable} ${styles.root}`} data-dashboard-v3><p className="px-4 py-2 text-xs text-(--color-text-muted)">Visual preview · sample data · nothing saved</p><DashboardHomeView name="Tolu" greeting="Good morning" data={data} /></div>;
 }

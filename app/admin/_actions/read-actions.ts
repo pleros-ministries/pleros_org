@@ -26,7 +26,7 @@ import {
 } from "@/lib/db/queries/staff-invites";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
-import { and, count, eq } from "drizzle-orm";
+import { and, count, eq, isNotNull } from "drizzle-orm";
 import { hasAdminAccess } from "@/lib/app-role";
 import { getDashboardStats } from "@/lib/db/queries/students";
 import { getContentOverview } from "@/lib/db/queries/content";
@@ -228,6 +228,7 @@ export async function getAdminSogpData(): Promise<AdminSogpData> {
     morningPrayerRows,
     preparationCompletionRows,
     reviewCompletionRows,
+    aliasRows,
   ] = await Promise.all([
     getSogpOperationsData(),
     db.query.lessons.findMany({
@@ -260,7 +261,13 @@ export async function getAdminSogpData(): Promise<AdminSogpData> {
         userId: schema.sogpLiveClassAttendance.userId,
       })
       .from(schema.sogpLiveClassAttendance),
+    // Names chosen for the monthly leaderboard (migration 0082).
+    db
+      .select({ userId: schema.leaderboardProfiles.userId, alias: schema.leaderboardProfiles.alias })
+      .from(schema.leaderboardProfiles)
+      .where(isNotNull(schema.leaderboardProfiles.alias)),
   ]);
+  const aliasByUser = new Map(aliasRows.map((row) => [row.userId, row.alias]));
   const statusByEnrollment = await getStudentStatusesForEnrollments(
     data.enrollments.map((enrollment) => ({
       enrollmentId: enrollment.id,
@@ -315,7 +322,7 @@ export async function getAdminSogpData(): Promise<AdminSogpData> {
         country: enrollment.country,
         region: enrollment.region,
         birthYear: enrollment.birthYear,
-        leaderboardAlias: enrollment.leaderboardAlias,
+        leaderboardAlias: aliasByUser.get(enrollment.userId) ?? null,
         referralSource: enrollment.referralSource,
         whatsappConsent: enrollment.whatsappConsent,
         whatsappOptedInAt: serializeDate(enrollment.whatsappOptedInAt),

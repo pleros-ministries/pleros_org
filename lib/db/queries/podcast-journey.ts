@@ -78,25 +78,6 @@ export async function setPodcastTrack(
     });
 }
 
-export async function setPodcastLeaderboardVisible(
-  userId: string,
-  visible: boolean,
-  todayKey: string,
-) {
-  await db
-    .insert(schema.podcastJourneys)
-    .values({
-      userId,
-      track: PODCAST_FOUNDATIONS_TRACK,
-      startedOn: todayKey,
-      leaderboardVisible: visible,
-    })
-    .onConflictDoUpdate({
-      target: schema.podcastJourneys.userId,
-      set: { leaderboardVisible: visible, updatedAt: sql`now()` },
-    });
-}
-
 export async function getPodcastJourney(
   userId: string,
   now = new Date(),

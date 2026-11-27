@@ -35,7 +35,8 @@ export async function getSogpDailyParticipation(
         userId: schema.sogpEnrollments.userId,
         name: schema.sogpEnrollments.name,
         email: schema.sogpEnrollments.email,
-        leaderboardAlias: schema.sogpEnrollments.leaderboardAlias,
+        // The person's name on the monthly leaderboard (migration 0082).
+        leaderboardAlias: schema.leaderboardProfiles.alias,
         fullness: schema.sogpEnrollments.fullnessMembership,
         pastorId: schema.pastorAssignments.pastorUserId,
         pastorName: schema.users.name,
@@ -46,6 +47,7 @@ export async function getSogpDailyParticipation(
         eq(schema.pastorAssignments.enrollmentId, schema.sogpEnrollments.id),
       )
       .leftJoin(schema.users, eq(schema.users.id, schema.pastorAssignments.pastorUserId))
+      .leftJoin(schema.leaderboardProfiles, eq(schema.leaderboardProfiles.userId, schema.sogpEnrollments.userId))
       .where(
         and(
           eq(schema.sogpEnrollments.cohortId, cohortId),
@@ -455,6 +457,7 @@ export async function getSogpEnrolleePerformance(
       enrollment: schema.sogpEnrollments,
       cohort: schema.sogpCohorts,
       pastorName: schema.users.name,
+      leaderboardAlias: schema.leaderboardProfiles.alias,
     })
     .from(schema.sogpEnrollments)
     .innerJoin(schema.sogpCohorts, eq(schema.sogpCohorts.id, schema.sogpEnrollments.cohortId))
@@ -463,6 +466,7 @@ export async function getSogpEnrolleePerformance(
       eq(schema.pastorAssignments.enrollmentId, schema.sogpEnrollments.id),
     )
     .leftJoin(schema.users, eq(schema.users.id, schema.pastorAssignments.pastorUserId))
+    .leftJoin(schema.leaderboardProfiles, eq(schema.leaderboardProfiles.userId, schema.sogpEnrollments.userId))
     .where(eq(schema.sogpEnrollments.id, enrollmentId))
     .limit(1);
   if (!row) return null;
@@ -512,7 +516,7 @@ export async function getSogpEnrolleePerformance(
       country: enrollment.country,
       region: enrollment.region,
       birthYear: enrollment.birthYear,
-      leaderboardAlias: enrollment.leaderboardAlias,
+      leaderboardAlias: row.leaderboardAlias,
       referralSource: enrollment.referralSource,
       whatsappConsent: enrollment.whatsappConsent,
       enrollmentStatus: enrollment.status,
