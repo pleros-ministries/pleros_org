@@ -32,10 +32,10 @@ function learningDoor(card: HomeLearningCard | undefined, fallback: DashboardHom
   if (card?.kind === "start") {
     return {
       href: card.href,
-      meta: "SOGP",
-      title: "Make room to grow",
-      summary: "Choose a daily pace that fits your life.",
-      action: "Start SOGP",
+      meta: card.meta ?? "SOGP",
+      title: card.title ?? "Make room to grow",
+      summary: card.summary ?? "Pick a path and see where it takes you",
+      action: card.action ?? "Choose a learning path",
       value: 0,
       total: 0,
     };
@@ -59,9 +59,9 @@ function learningDoor(card: HomeLearningCard | undefined, fallback: DashboardHom
     const episodeLabel = card.episodes.length === 1 ? "episode" : "episodes";
     return {
       href: card.href,
-      meta: `${card.pace === 2 ? "30" : "15"} min/day · Podcast path`,
+      meta: card.doctrinal ? "One a day · Personalised path" : `${card.pace === 2 ? "30" : "15"} min/day · Podcast path`,
       title: `Day ${card.dayNumber} is waiting for you`,
-      summary: `${listened} of ${card.episodes.length} ${episodeLabel} marked listened`,
+      summary: card.doctrinal ? card.series : `${listened} of ${card.episodes.length} ${episodeLabel} marked listened`,
       action: active?.positionSeconds ? "Resume learning" : "Start learning",
       value: listened,
       total: card.episodes.length,

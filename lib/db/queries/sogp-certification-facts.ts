@@ -50,9 +50,10 @@ export async function getOwnCertificationFacts(userId:string,loadedState?:Awaite
   const prayerPass=prayerTotal>0&&prayerPercent>=prayerRequired;
   const next=learningResume(state);
   return {
-    pathLabel:podcast?state?.path==="podcast_two"?"Two podcasts a day":"One podcast a day":"Traditional path",
+    pathLabel:state?.path==="doctrinal"?"Personalised path":podcast?state?.path==="podcast_two"?"Two podcasts a day":"One podcast a day":"Doctrinal path",
     podcast,learningDone,learningTotal,learningPass,
-    learningLabel:podcast?"Episodes listened in your saved plan":"Required assessments complete",
+    // A doctrinal journey counts toward the certificate like a podcast plan (user, 24 November).
+    learningLabel:state?.path==="doctrinal"?"Teachings listened in your personalised path":podcast?"Episodes listened in your saved plan":"Required assessments complete",
     resumeHref:podcast?next?`/dashboard/sogp/listen?day=${next.dayNumber}`:"/dashboard/sogp/plan":"/dashboard/sogp/traditional",
     reviews:{attended,missed:missed.length,madeUp,outstandingMakeups:missed.length-madeUp,owed:owedReviews.length,outstanding:outstanding.length,reviewPass},
     prayer:{present:prayerPresent,total:prayerTotal,percent:prayerPercent,required:prayerRequired,pass:prayerPass},

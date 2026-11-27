@@ -25,7 +25,7 @@ export type DistributionGroup = {
 };
 
 const ROLES: DistributionRole[] = ["Pastor", "General Leader", "Worker", "Member", "Added by you"];
-const LOCATIONS = ["Lagos", "Ibadan", "Ife", "Osogbo", "Sagamu", "Calabar", "Kwara"];
+const LOCATIONS = ["Lagos", "Ibadan", "Ife", "Osogbo", "Sagamu", "Calabar", "Kwara", "North"];
 
 function Check() {
   return (

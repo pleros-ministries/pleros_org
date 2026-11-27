@@ -22,6 +22,7 @@ Consolidated 2026-10-13. Keep this file short, current, pattern-focused, and fre
 - Use sentence case and UK English in user-facing copy. Preserve technical identifiers, routes, schemas, events, and third-party names.
 - Verify UI work in the visible browser at relevant mobile and desktop widths; tests alone are not proof of the rendered flow.
 - After meaningful corrections or newly proven patterns, update the relevant section here instead of appending a dated diary entry.
+- SOGP allocation review: exclude consent-form respondents (Yes or No), show groups/removals and current + pending + new workload. Prefer older/same-year leaders locally then remotely; pin explicit pairings by ID and prioritise nominated gender-specific pools. Obtain gender confirmation, explain unanswered group-join invitations and age exceptions before decisions, and retain confirmed identity exclusions. Final presentations freeze agreed allocations, separate retained invitations from new allocations, and show directed workload exceptions. Review before live assignments; inspect schema names before queries.
 
 ## Project setup
 
@@ -199,3 +200,9 @@ Consolidated 2026-10-13. Keep this file short, current, pattern-focused, and fre
 - Back navigation such as `Back to oversight` is a plain text link with a left arrow, without button borders/backgrounds. Preserve requested mobile heading line breaks with a wide enough measure.
 - Keep FCC first-time worshipper fields, validation, and per-location Sheet headers aligned; capture WhatsApp number and home address.
 - Scope reset/minimal-state requests narrowly; a requested minimal home reset removes route-specific pages/components and leaves `app/page.tsx` minimal.
+
+## Hosting (Railway, from 25 November 2026)
+
+- Production runs on Railway: a Docker standalone build, Postgres over the private network, and cron services that call the app at `web.railway.internal:3000`. The runbook is `docs/handover/2026-11-25-railway-migration.md`.
+- A Railway cron keeps firing after its deployment is removed. Pause it by removing its schedule or deleting the service, never by removing the deployment.
+- Never run production crons against a database copy: they send real pushes to real people.

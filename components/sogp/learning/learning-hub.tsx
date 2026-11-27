@@ -3,11 +3,10 @@ import type { CSSProperties } from "react";
 import { ChevronRightIcon, PlayIcon, RefreshCcwIcon } from "lucide-react";
 
 import groupStyles from "@/components/community/discipleship/discipleship-group.module.css";
-import type { LearningHubData } from "@/lib/dashboard/learning-hub";
+import type { LearningHubData, PathSummary } from "@/lib/dashboard/learning-hub";
 import type { LearningViewData } from "@/lib/sogp/learning-view";
 
 import styles from "./learning-hub.module.css";
-import { OtherLearning, otherLearningTiles } from "./other-learning";
 import { SOGP_PAGE } from "./sogp-school";
 
 /** Each level's art; `wide` is the 3:1 cut that covers wide cards without a seam (as on Home). */
@@ -17,6 +16,34 @@ const LEVEL_ART: Record<number, { image: string; wide: string; field: string; in
   3: { image: "my-learning-level-3.webp", wide: "my-learning-level-3-wide.webp", field: "#b84f35", ink: "#a8432c" },
   4: { image: "my-learning-level-4.webp", wide: "my-learning-level-4-wide.webp", field: "#56298a", ink: "#4a2275" },
 };
+
+/** The daily time, folded into the card's one top line (user, 24 November); the path itself is named under Your path. */
+const PACE: Record<NonNullable<LearningHubData["path"]>, string> = { traditional: "1 hr a day", podcast_one: "15 min a day", podcast_two: "30 min a day", doctrinal: "One a day" };
+
+/** What heads Learning for each path. */
+const PATH_NAMES: Record<NonNullable<LearningHubData["path"]>, string> = { traditional: "Doctrinal path", podcast_one: "Podcast", podcast_two: "Podcast", doctrinal: "Personalised path" };
+
+/**
+ * Your path (user, 24 November): three counts, a few rows and one note, in the
+ * dashboard's strip-and-rows vocabulary. Replaces Other learning, which is retired.
+ */
+function YourPath({ summary }: { summary: PathSummary }) {
+  return <>
+    <div className={groupStyles.sectionTitle}><h2>Your path</h2><Link href="/dashboard/sogp/path" className={`${groupStyles.quiet} inline-flex items-center gap-0.5`}>Change path<ChevronRightIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" /></Link></div>
+    <div className={groupStyles.strip}>{summary.counts.map(count => <div key={count.label}><span>{count.label}</span><strong>{count.value}</strong></div>)}</div>
+    <div className={groupStyles.sectionTitle}><h2>{summary.listTitle}</h2>{summary.more ? <Link href={summary.more.href} className={groupStyles.quiet}>{summary.more.label}</Link> : null}</div>
+    <div className={groupStyles.panel}>{summary.rows.length ? <ul className={groupStyles.list}>{summary.rows.map(row => {
+      const body = <>
+        <span className={groupStyles.rowCopy}><span className={groupStyles.rowTitle}>{row.title}</span><span className={groupStyles.rowMeta}>{row.meta}</span></span>
+        {row.end ? <span className={groupStyles.rowMeta}>{row.end}</span> : null}
+        {row.href ? <ChevronRightIcon className={`${groupStyles.chev} size-4`} strokeWidth={2} aria-hidden="true" /> : null}
+      </>;
+      const tone = row.muted ? { color: "var(--color-community-muted)" } : undefined;
+      return <li key={row.title + row.meta}>{row.href ? <Link href={row.href} className={groupStyles.row} style={tone}>{body}</Link> : <div className={groupStyles.row} style={tone}>{body}</div>}</li>;
+    })}</ul> : <p className={groupStyles.empty}>{summary.empty}</p>}</div>
+    {summary.note ? <p className={groupStyles.note}>{summary.note}</p> : null}
+  </>;
+}
 
 const initials = (name: string) => name.trim().split(/\s+/).slice(0, 2).map(part => part[0] ?? "").join("").toUpperCase();
 
@@ -40,7 +67,7 @@ export function LearningHub({ hub, learning }: { hub: LearningHubData; learning:
 
   const resume = next
     ? <section className={styles.card} aria-label="Resume learning" style={nextStyle}>
-      <div className={styles.cardTop}><span>{next.finished ? "Journey complete" : `Day ${next.dayNumber}`}</span><span className={styles.pace}>Podcast</span></div>
+      <div className={styles.cardTop}><span>{next.finished ? "Journey complete" : `Day ${next.dayNumber} · Podcast`}</span></div>
       <div>
         <h2>{next.finished ? "You’ve finished this journey" : next.episodeTitle ?? next.title}</h2>
         <span className={styles.cardMeta}>{next.listened} of {next.totalDays} listened · day {next.dayNumber} of {next.totalDays}</span>
@@ -53,8 +80,8 @@ export function LearningHub({ hub, learning }: { hub: LearningHubData; learning:
     : hub.state === "start"
     ? <section className={styles.card} style={{ "--hub-art": `url("/assets/dashboard/learning-card/${art.image}")`, "--hub-art-wide": `url("/assets/dashboard/learning-card/${art.wide}")`, "--hub-field": art.field, "--hub-ink": art.ink } as CSSProperties}>
       <div className={styles.cardTop}><span>{hub.cohortTitle ?? "SOGP"}</span></div>
-      <div><h2>Choose how you’ll learn</h2><span className={styles.cardMeta}>A lesson a day, or podcasts at your own pace</span></div>
-      <Link href="/dashboard/sogp/path" className={styles.resume}>Get started <ChevronRightIcon className="size-4" strokeWidth={2.2} /></Link>
+      <div><h2>Choose a learning path</h2><span className={styles.cardMeta}>Doctrinal, podcast or your own personalised path</span></div>
+      <Link href="/dashboard/sogp/path" className={styles.resume}>Choose a path <ChevronRightIcon className="size-4" strokeWidth={2.2} /></Link>
     </section>
     : finished ? <section className={styles.card} aria-label="SOGP finished" style={{ "--hub-art": `url("/assets/dashboard/learning-card/${LEVEL_ART[2]!.image}")`, "--hub-art-wide": `url("/assets/dashboard/learning-card/${LEVEL_ART[2]!.wide}")`, "--hub-field": LEVEL_ART[2]!.field, "--hub-ink": LEVEL_ART[2]!.ink } as CSSProperties}>
       <div className={styles.cardTop}><span>{hub.cohortTitle ?? "SOGP"} · Completed</span></div>
@@ -64,7 +91,7 @@ export function LearningHub({ hub, learning }: { hub: LearningHubData; learning:
         : <Link href={hub.certificate.available ? "/dashboard/sogp/certificate" : "/dashboard/sogp/readiness"} className={styles.resume}>{hub.certificate.available ? "View your certificate" : "Check your certificate"} <ChevronRightIcon className="size-4" strokeWidth={2.2} /></Link>}
     </section>
     : <section className={styles.card} aria-label="Resume learning" style={{ "--hub-art": `url("/assets/dashboard/learning-card/${art.image}")`, "--hub-art-wide": `url("/assets/dashboard/learning-card/${art.wide}")`, "--hub-field": art.field, "--hub-ink": art.ink } as CSSProperties}>
-      <div className={styles.cardTop}><span>{hub.card.eyebrow}</span><span className={styles.pace}>{hub.paceLabel}</span></div>
+      <div className={styles.cardTop}><span>{[hub.card.eyebrow, hub.path ? PACE[hub.path] : null].filter(Boolean).join(" · ")}</span></div>
       <div>
         <h2>{hub.card.title}</h2>
         <span className={styles.cardMeta}>{hub.card.progress}</span>
@@ -89,7 +116,7 @@ export function LearningHub({ hub, learning }: { hub: LearningHubData; learning:
 
       {/* Your current learning, a class of its own: its name heads the card playing from it. */}
       <div className={styles.sectionTitle}>
-        <h2>{next ? next.title : "School of God’s Purpose"}</h2>
+        <h2>{next ? next.title : PATH_NAMES[hub.path ?? "traditional"]}</h2>
         <Link href={next ? "/dashboard/sogp/next" : SOGP_PAGE} className="inline-flex items-center gap-0.5">{next ? "Change" : "Open"}<ChevronRightIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" /></Link>
       </div>
       {resume}
@@ -109,8 +136,7 @@ export function LearningHub({ hub, learning }: { hub: LearningHubData; learning:
 
       {hub.state === "active" ? <Link href="/dashboard" className={`${groupStyles.quiet} -mt-1 inline-flex items-center gap-0.5 justify-self-start`}>Today’s tasks are on Home<ChevronRightIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" /></Link> : null}
 
-      <div className={styles.sectionTitle}><h2>Other learning</h2></div>
-      <OtherLearning tiles={otherLearningTiles(hub)} />
+      {hub.summary && !next ? <YourPath summary={hub.summary} /> : null}
     </div>
   </div>;
 }

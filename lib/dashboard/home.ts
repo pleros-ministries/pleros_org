@@ -20,9 +20,10 @@ export function homeReportRows(input: { devotionalCount: number; ministryCount: 
 
 /** Paper adaptive home cards: start (blue), traditional, podcast (white, per-episode). */
 export type HomeLearningCard =
-  | { kind: "start"; href: string }
+  /** No path yet, or a plan path saved before its plan; the copy defaults to choosing a path. */
+  | { kind: "start"; href: string; meta?: string; title?: string; summary?: string; action?: string }
   | { kind: "traditional"; title: string; href: string; completed: number; total: number; level?: number }
-  | { kind: "podcast"; pace: 1 | 2; href: string; series: string; episodes: { part: string; duration: string; durationSeconds: number; positionSeconds: number; listened: boolean }[]; dayNumber: number };
+  | { kind: "podcast"; pace: 1 | 2; href: string; doctrinal?: boolean; series: string; episodes: { part: string; duration: string; durationSeconds: number; positionSeconds: number; listened: boolean }[]; dayNumber: number };
 
 /** One SOGP day on Home's Today (Pastor, 21 October): numbered through the cohort, teaching and review days alike. */
 export type HomeSogpDay = {

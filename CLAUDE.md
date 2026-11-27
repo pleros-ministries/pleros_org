@@ -22,7 +22,9 @@ This file is loaded by every Claude session in this repo. Keep it short: the det
 
 ## Non-negotiables
 
-- **Push to `main` after each piece.** Conventional commit subjects (`feat:`, `fix:`, `style:`, `copy:`, `docs:`, `perf:`), a short body explaining why, and the Co-Authored-By line. Stage only your own paths; another session may be editing the same checkout.
+- **Ship each piece through a pull request.** `main` is protected: direct pushes are rejected, and a PR needs `build-and-test` to pass before it can merge (auto-merge is off). Conventional commit subjects (`feat:`, `fix:`, `style:`, `copy:`, `docs:`, `perf:`), a short body explaining why, and the Co-Authored-By line. Stage only your own paths; another session may be editing the same checkout.
+- **Work in this checkout.** For small changes, branch from `main` here; don't create a separate git worktree (user, 24 November).
+- **Always commit `docs/ai_scratchpad.md`** when it has changes, even ones an earlier session left (user, 24 November).
 - **No production flags.** Build the behaviour on main and delete the old path in the same change.
 - **Migrations:**
   - write the SQL by hand;
@@ -36,7 +38,7 @@ This file is loaded by every Claude session in this repo. Keep it short: the det
   - Any page reading the session, params or searchParams needs `export const instant = false;`.
   - Read `node_modules/next/dist/docs/` before changing framework behaviour.
 - **Before committing:**
-  - always run `npx tsc --noEmit -p .`, since one type error fails the Vercel deploy;
+  - always run `npx tsc --noEmit -p .`, since one type error fails the Railway build (production moved from Vercel to Railway on 25 November; see `docs/handover/2026-11-25-railway-migration.md`);
   - don't run the full test, lint or build suites unless asked;
   - run a focused vitest file for new pure logic.
 - **Check the UI visually** at 375px with the in-app browser. Use the `/preview/**` pages when you can't sign in. Say plainly what you couldn't verify.

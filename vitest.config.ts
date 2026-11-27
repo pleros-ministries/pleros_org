@@ -13,6 +13,8 @@ export default defineConfig({
     // Otherwise the vitest defaults.
     exclude: [
       "**/.claude/**",
+      // The standalone build copies the source tree (tests included) into .next/standalone.
+      "**/.next/**",
       "**/node_modules/**",
       "**/dist/**",
       "**/cypress/**",

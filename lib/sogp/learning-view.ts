@@ -2,7 +2,8 @@ import type { SogpLearningState } from "@/lib/db/queries/sogp-learning";
 import { readPodcastPlan, type PodcastPace } from "./podcast-plan";
 import suggestions from "./podcast-suggestions.json";
 
-export type LearningEpisode = { guid: string; title: string; duration: string; audioUrl: string };
+/** A podcast episode, or a Library teaching keyed "teaching:<id>" with its series (doctrinal journey). */
+export type LearningEpisode = { guid: string; title: string; duration: string; audioUrl: string; series?: string };
 export type LearningViewData = {
   state: SogpLearningState | null;
   episodes: LearningEpisode[];
@@ -10,7 +11,15 @@ export type LearningViewData = {
   writeBlockReason: "not_enabled" | "withdrawn" | null;
   /** `choice` is null while a link arrival has not yet kept or changed their person. */
   followUp?: { name: string; source?: "code" | "link" | "geography" | null; choice?: "accepted" | "requested" | null } | null;
-  traditional: { completed: number; total: number; nextTitle: string | null; resumeHref: string };
+  traditional: {
+    completed: number; total: number; nextTitle: string | null; resumeHref: string;
+    /**
+     * The SOGP levels for the learning path chooser (user, 24 November): each
+     * level's published tracks with their release dates, and whether it's open.
+     * A level opens once the one before it is complete; level 4 has no tracks yet.
+     */
+    levels: Array<{ level: number; tracks: Array<{ title: string; releaseAt: string }>; done: number; open: boolean }>;
+  };
 };
 export function learningWriteNotice(data: LearningViewData) {
   return data.writeBlockReason === "withdrawn" ? "This enrolment is withdrawn. Your history remains available, but learning settings cannot be changed." : "New learning settings are not enabled here yet. Your existing learning remains available.";

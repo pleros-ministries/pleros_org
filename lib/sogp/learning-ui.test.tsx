@@ -1,13 +1,14 @@
 import { expect, test, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
-import { LearningHome, PathChooser } from "@/components/sogp/learning/learning-home";
+import { LearningHome } from "@/components/sogp/learning/learning-home";
+import { PathChooser } from "@/components/sogp/learning/path-chooser";
 import { PlanEditor } from "@/components/sogp/learning/plan-editor";
 import { ListeningPage } from "@/components/sogp/learning/listening-page";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { LearningViewData } from "./learning-view";
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn(),refresh: vi.fn() }) }));
 vi.mock("@/app/_actions/sogp-learning-actions", () => ({ chooseSogpPathAction: vi.fn(),editSogpPlanAction: vi.fn(),setSogpListenedAction: vi.fn(),saveSogpPlaybackAction: vi.fn() }));
-const data: LearningViewData = { state: { path: "podcast_two", revision: 3, plan: { episodesPerDay: 2, episodeGuids: ["a","b"], historyEpisodeGuids: [] }, progress: { listenedEpisodeGuids: ["a"], playbackPositions: [] } }, episodes: [], canWrite: true,writeBlockReason: null, traditional: { completed: 2,total: 24,nextTitle: "Saved traditional lesson",resumeHref: "/dashboard/sogp/course/day/3" } };
+const data: LearningViewData = { state: { path: "podcast_two", revision: 3, plan: { episodesPerDay: 2, episodeGuids: ["a","b"], historyEpisodeGuids: [] }, progress: { listenedEpisodeGuids: ["a"], playbackPositions: [] } }, episodes: [], canWrite: true,writeBlockReason: null, traditional: { completed: 2,total: 24,nextTitle: "Saved traditional lesson",resumeHref: "/dashboard/sogp/course/day/3",levels: [] } };
 test("resume exposes the incomplete podcast day and retains traditional tools", () => {
   const html = renderToStaticMarkup(<LearningHome data={data} />);
   expect(html).toContain('href="/dashboard/sogp/listen?day=1"');
@@ -37,14 +38,15 @@ test("traditional resume uses its own saved lesson, not podcast marks", () => {
   expect(html).toContain('href="/dashboard/sogp/course/day/3"');
   expect(html).toContain("2 of 24 tracks completed");
 });
-test("all three path choices remain available with a read-only explanation during activation rollback", () => {
+test("all three learning paths remain available with a read-only explanation during activation rollback", () => {
   const html = renderToStaticMarkup(<QueryClientProvider client={new QueryClient()}><PathChooser data={{ ...data,canWrite: false }} /></QueryClientProvider>);
-  // Traditional, then Podcast at 30 or 15 minutes a day: three choices.
-  expect(html).toContain("Traditional · 1 hr/day");
-  expect(html).toContain("30 min/day · 2 episodes");
-  expect(html).toContain("15 min/day · 1 episode");
+  // Doctrinal path, Podcast at 15 or 30 minutes a day, and a personalised path (user, 24 November).
+  expect(html).toContain("Choose a learning path");
+  expect(html).toContain("Doctrinal path");
+  expect(html).toContain("30 min a day");
+  expect(html).toContain("15 min a day");
+  expect(html).toContain("Personalised path");
   expect(html).toContain("Your existing learning remains available");
-  expect(html).toContain("Both paths keep their own history");
 });
 test("withdrawn learners get an access explanation rather than a rollout message", () => {
   const html = renderToStaticMarkup(<QueryClientProvider client={new QueryClient()}><PathChooser data={{ ...data,canWrite: false,writeBlockReason: "withdrawn" }} /></QueryClientProvider>);

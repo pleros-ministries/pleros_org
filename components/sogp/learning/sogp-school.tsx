@@ -36,14 +36,17 @@ function Chip({ tone, children }: { tone: [string, string]; children: ReactNode 
 }
 
 export function SogpSchool({ hub, facts, followUp }: { hub: LearningHubData; facts: CertificationFacts | null; followUp: LearningViewData["followUp"] }) {
-  const podcast = hub.path === "podcast_one" || hub.path === "podcast_two";
+  // A doctrinal journey is a plan too: Library teachings, one a day (migration 0079).
+  const podcast = hub.path === "podcast_one" || hub.path === "podcast_two" || hub.path === "doctrinal";
+  const doctrinal = hub.path === "doctrinal";
+  const unit = doctrinal ? "teachings" : "episodes";
   const days = hub.journey.days;
   const issued = facts?.certificateAvailable ?? hub.certificate.available;
 
   const tools: Array<{ href: string; icon: ReactNode; title: string; meta: string }> = [
     { href: "/dashboard/sogp/path", icon: <RepeatIcon />, title: "Change path or pace", meta: hub.paceLabel },
-    ...(podcast ? [{ href: "/dashboard/sogp/plan", icon: <ListMusicIcon />, title: "Your tracklist", meta: "The episodes in your plan" }] : []),
-    { href: "/dashboard/sogp/history", icon: <HistoryIcon />, title: "History", meta: podcast ? `${hub.card.done} episodes listened` : `${hub.doneCount} ${hub.doneCount === 1 ? "teaching" : "teachings"} done` },
+    ...(podcast ? [{ href: "/dashboard/sogp/plan", icon: <ListMusicIcon />, title: doctrinal ? "Your teachings" : "Your tracklist", meta: doctrinal ? "The teachings in your path" : "The episodes in your plan" }] : []),
+    { href: "/dashboard/sogp/history", icon: <HistoryIcon />, title: "History", meta: podcast ? `${hub.card.done} ${unit} listened` : `${hub.doneCount} ${hub.doneCount === 1 ? "teaching" : "teachings"} done` },
     { href: "/dashboard/sogp/reviews", icon: <CalendarCheckIcon />, title: "Group reviews", meta: hub.review ? `Next: ${hub.review.when}` : "Weekly, with your group" },
     { href: hub.discipler ? "/dashboard/community/discipleship" : "/dashboard/community/ask", icon: <MessageCircleQuestionIcon />, title: "Ask about a teaching", meta: hub.discipler ? `${hub.discipler.firstName} answers` : "Pleros answers" },
     { href: followUp ? "/dashboard/sogp/follow-up/welcome" : "/dashboard/sogp/follow-up", icon: <UserRoundIcon />, title: "Your follow-up person", meta: followUp?.name ?? "Assigned soon" },
@@ -53,10 +56,10 @@ export function SogpSchool({ hub, facts, followUp }: { hub: LearningHubData; fac
   const share = hub.card.total ? Math.min(100, Math.round((hub.card.done / hub.card.total) * 100)) : 0;
   const finished = hub.next.finished;
   const action = hub.state === "withdrawn" ? null
-    : hub.state === "start" ? { href: "/dashboard/sogp/path", label: "Choose how you’ll learn" }
+    : hub.state === "start" ? { href: "/dashboard/sogp/path", label: "Choose a learning path" }
     : finished && hub.next.canChoose ? { href: "/dashboard/sogp/next", label: "Choose what’s next" }
     : { href: hub.card.href, label: hub.card.action };
-  const line = [days?.current ? `Day ${days.current} of ${days.total}` : null, podcast ? `${hub.card.done} of ${hub.card.total} episodes` : `${hub.doneCount} of ${hub.card.total || 24} teachings`].filter(Boolean).join(" · ");
+  const line = [days?.current ? `Day ${days.current} of ${days.total}` : null, podcast ? `${hub.card.done} of ${hub.card.total} ${unit}` : `${hub.doneCount} of ${hub.card.total || 24} teachings`].filter(Boolean).join(" · ");
   const left = facts ? [!facts.learningPass, !facts.prayer.pass, !facts.reviews.reviewPass].filter(Boolean).length : 0;
 
   // Learning's frame, for the same 16px gutter and column width.
@@ -67,7 +70,7 @@ export function SogpSchool({ hub, facts, followUp }: { hub: LearningHubData; fac
     <section className={`${cards.card} ${page.hero}`} style={artStyle("sogp")} aria-label="School of God’s Purpose">
       <span className={cards.art} aria-hidden="true" />
       <span className={`${cards.top} ${page.heroTop}`}>
-        <span className={cards.tag}>{[hub.cohortTitle, podcast ? "Podcast" : "Traditional"].filter(Boolean).join(" · ")}</span>
+        <span className={cards.tag}>{[hub.cohortTitle, doctrinal ? "Personalised path" : podcast ? "Podcast" : "Doctrinal path"].filter(Boolean).join(" · ")}</span>
         <h1>School of God’s Purpose</h1>
         <span className={page.heroLine}>{hub.state === "withdrawn" ? "Your enrolment is withdrawn. Your history stays here." : line}</span>
       </span>
@@ -90,7 +93,7 @@ export function SogpSchool({ hub, facts, followUp }: { hub: LearningHubData; fac
       </div>
       {facts && !issued ? <div className={page.counts}>
         <div className={page.count} data-warn={!facts.learningPass || undefined}>
-          <span>{facts.podcast ? "Episodes" : "Teachings"}</span><b>{facts.learningDone}</b>
+          <span>{doctrinal ? "Teachings" : facts.podcast ? "Episodes" : "Teachings"}</span><b>{facts.learningDone}</b>
           <span className={page.countDetail}><i aria-hidden="true" />{facts.learningPass ? "all in" : `of ${facts.learningTotal}`}</span>
         </div>
         <div className={page.count} data-warn={!facts.prayer.pass || undefined}>
@@ -105,7 +108,7 @@ export function SogpSchool({ hub, facts, followUp }: { hub: LearningHubData; fac
     </div>
 
     {podcast ? <>
-      <div className={styles.sectionTitle}><h2>Your podcast plan</h2></div>
+      <div className={styles.sectionTitle}><h2>{doctrinal ? "Your personalised path" : "Your podcast plan"}</h2></div>
       <div className={styles.panel}><Link href={hub.card.href} className={styles.row}>
         <Chip tone={["#e6ecfc", "#1f3260"]}><ListMusicIcon className="size-[18px]" strokeWidth={2} /></Chip>
         <span className={styles.rowCopy}><span className={styles.rowTitle}>{hub.card.title}</span><span className={styles.rowMeta} style={{ whiteSpace: "normal" }}>{hub.card.progress}</span></span>

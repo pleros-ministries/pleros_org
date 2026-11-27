@@ -3,7 +3,7 @@ import { and, asc, eq, sql } from "drizzle-orm";
 import { fetchAnchorEpisodes } from "@/lib/anchor-rss";
 import { CommunityError } from "@/lib/community/errors";
 import { createPodcastPlan, editPodcastPlan, switchPodcastPace, type PodcastLearningPlan, type PodcastLearningProgress, type PodcastPace } from "@/lib/sogp/podcast-plan";
-import { learningGuid, learningPath, learningPosition, learningRequest, learningRevision, type SogpLearningPath } from "@/lib/sogp/learning-input";
+import { isPlanPath, isTeachingKey, learningGuid, learningPath, learningPosition, learningRequest, learningRevision, planPace, type SogpLearningPath } from "@/lib/sogp/learning-input";
 import { withSogpLearningLock, bumpSogpLearningRevision, type LearningTx } from "@/lib/db/sogp-learning-lock";
 import * as s from "@/lib/db/schema";
 import { requireSogpLearningWrites, sogpLearningSchemaReady } from "./sogp-learning-gate";
@@ -50,6 +50,13 @@ export async function getOwnSogpLearning(userId: string): Promise<SogpLearningSt
 async function availableEpisodes() {
   return new Set((await fetchAnchorEpisodes()).map(episode => episode.guid));
 }
+/** What a plan may hold: podcast episodes, or Library teachings for a doctrinal journey (migration 0079). */
+async function availableItems(guids: unknown) {
+  const teachings = Array.isArray(guids) && guids.some(guid => typeof guid === "string" && isTeachingKey(guid));
+  if (!teachings) return availableEpisodes();
+  const { getLibraryLearningItems } = await import("./learning-catalogue");
+  return new Set((await getLibraryLearningItems()).map(item => item.guid));
+}
 const CHANGED = "Your learning plan changed in another tab. Reload before saving.";
 
 async function persist(tx: LearningTx, userId: string, current: SogpLearningState, path: SogpLearningPath, plan: PodcastLearningPlan | null, expectedRevision: number) {
@@ -57,7 +64,9 @@ async function persist(tx: LearningTx, userId: string, current: SogpLearningStat
   if (expectedRevision !== current.revision) throw new CommunityError(CHANGED);
   if (plan && new Set([...plan.episodeGuids,...plan.historyEpisodeGuids]).size !== plan.episodeGuids.length + plan.historyEpisodeGuids.length) throw new CommunityError("Completed history cannot be added to the remaining queue.");
   const revision = current.revision + 1;
-  await tx.insert(s.sogpLearningPreferences).values({ userId,path,revision,hasPodcastPlan: plan !== null,episodesPerDay: plan?.episodesPerDay ?? 1 }).onConflictDoUpdate({ target: s.sogpLearningPreferences.userId, set: { path,revision,hasPodcastPlan: plan !== null,episodesPerDay: plan?.episodesPerDay ?? 1,updatedAt: sql`now()` } });
+  // A path may be saved before its plan (user, 24 November), so the pace follows the path.
+  const episodesPerDay = plan?.episodesPerDay ?? (isPlanPath(path) ? planPace(path) : 1);
+  await tx.insert(s.sogpLearningPreferences).values({ userId,path,revision,hasPodcastPlan: plan !== null,episodesPerDay }).onConflictDoUpdate({ target: s.sogpLearningPreferences.userId, set: { path,revision,hasPodcastPlan: plan !== null,episodesPerDay,updatedAt: sql`now()` } });
   await tx.delete(s.sogpLearningPlanItems).where(eq(s.sogpLearningPlanItems.userId,userId));
   if (plan) {
     const rows = (["queue","history"] as const).flatMap(source => (source === "queue" ? plan.episodeGuids : plan.historyEpisodeGuids).map((episodeGuid,position) => ({ userId,source,position,episodeGuid })));
@@ -69,18 +78,25 @@ async function persist(tx: LearningTx, userId: string, current: SogpLearningStat
 export async function chooseOwnSogpPath(userId: string, value: unknown): Promise<SogpLearningState> {
   requireSogpLearningWrites();
   const input = learningRequest(value), path = learningPath(input.path), expectedRevision = learningRevision(input.expectedRevision);
-  const catalogue = input.episodeGuids === undefined ? null : await availableEpisodes();
+  const catalogue = input.episodeGuids === undefined ? null : await availableItems(input.episodeGuids);
   return withSogpLearningLock(userId, async tx => {
     await requireEnrollment(tx,userId,true);
     const current = await loadState(tx,userId);
     let plan = current.plan;
-    if (path !== "traditional") {
-      const pace = path === "podcast_one" ? 1 : 2;
+    if (isPlanPath(path)) {
+      const pace = planPace(path), teachings = path === "doctrinal";
+      // A plan holds one kind: podcast episodes or Library teachings. Moving between
+      // Podcast and a doctrinal journey starts that plan afresh; listens are kept.
+      if (plan && [...plan.episodeGuids,...plan.historyEpisodeGuids].some(guid => isTeachingKey(guid) !== teachings)) plan = null;
       if (!plan) {
-        if (!Array.isArray(input.episodeGuids) || !input.episodeGuids.length) throw new CommunityError("Choose episodes for your podcast plan first.");
-        plan = domain(() => createPodcastPlan(input.episodeGuids as string[],pace));
-        if (plan.episodeGuids.some(guid => !catalogue?.has(guid))) throw new CommunityError("One of those episodes is not available. Your choice is unchanged.");
-      } else {
+        // The path saves on its own first; the plan follows when it's built (user, 24 November).
+        const guids = Array.isArray(input.episodeGuids) ? input.episodeGuids : [];
+        if (teachings && guids.length > 120) throw new CommunityError("A personalised path holds up to 120 teachings.");
+        if (guids.length) {
+          plan = domain(() => createPodcastPlan(guids as string[],pace));
+          if (plan.episodeGuids.some(guid => !catalogue?.has(guid) || isTeachingKey(guid) !== teachings)) throw new CommunityError(teachings ? "One of those teachings is not in the Library. Your choice is unchanged." : "One of those episodes is not available. Your choice is unchanged.");
+        }
+      } else if (!teachings) {
         if (input.episodeGuids !== undefined && JSON.stringify(input.episodeGuids) !== JSON.stringify(plan.episodeGuids)) throw new CommunityError("A plan already exists. Use the plan editor to change its episodes.");
         plan = domain(() => switchPodcastPace(plan!,pace,facts(current)));
       }
@@ -91,11 +107,11 @@ export async function chooseOwnSogpPath(userId: string, value: unknown): Promise
 
 export async function editOwnSogpPlan(userId: string, value: unknown): Promise<SogpLearningState> {
   requireSogpLearningWrites();
-  const input = learningRequest(value), expectedRevision = learningRevision(input.expectedRevision), catalogue = await availableEpisodes();
+  const input = learningRequest(value), expectedRevision = learningRevision(input.expectedRevision), catalogue = await availableItems(input.episodeGuids);
   return withSogpLearningLock(userId, async tx => {
     await requireEnrollment(tx,userId,true);
     const current = await loadState(tx,userId);
-    if (!current.plan) throw new CommunityError("Choose a podcast plan first.");
+    if (!current.plan) throw new CommunityError("Build your plan first.");
     const plan = domain(() => editPodcastPlan(current.plan!,input.episodeGuids as string[],facts(current),catalogue));
     return persist(tx,userId,current,current.path,plan,expectedRevision);
   });
