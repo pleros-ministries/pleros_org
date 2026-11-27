@@ -106,7 +106,8 @@ export function TourOverlay() {
   const [state, setState] = useState<{ index: number; path: TourPath | null; mode: PlanMode | null; closed: boolean }>(() => ({ index: 0, path: (params.get("path") as TourPath | null) ?? null, mode: null, closed: false }));
   const steps = useMemo(() => stepsFor(state.path, arrival, state.mode), [state.path, arrival, state.mode]);
   const step = steps[state.index];
-  const [rect, setRect] = useState<DOMRect | null>(null);
+  // The spotlight belongs to one step; a stale one from the step before is ignored.
+  const [measured, setRect] = useState<{ id: string; rect: DOMRect | null } | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const [cardHeight, setCardHeight] = useState(180);
   const go = useCallback((screenTo: Screen) => router.push(`${pathname}?screen=${screenTo}&arrival=${arrival}`, { scroll: false }), [router, pathname, arrival]);
@@ -126,15 +127,15 @@ export function TourOverlay() {
 
   // Find the target, bring it into view, and follow it while the page moves.
   useLayoutEffect(() => {
-    if (!step || state.closed || step.kind !== "spot" || step.screen !== screen) { setRect(null); return; }
+    if (!step || state.closed || step.kind !== "spot" || step.screen !== screen) return;
     let frame = 0, settled = 0, found: Element | null = null;
     const started = performance.now();
     const measure = () => {
       found = found?.isConnected ? found : step.find?.() ?? null;
       if (found) {
         if (!settled) { found.scrollIntoView({ block: "center", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" }); settled = performance.now(); }
-        setRect(found.getBoundingClientRect());
-      } else if (performance.now() - started > 4000) { setRect(null); return; }
+        setRect({ id: step.id, rect: found.getBoundingClientRect() });
+      } else if (performance.now() - started > 4000) { setRect({ id: step.id, rect: null }); return; }
       frame = requestAnimationFrame(measure);
     };
     frame = requestAnimationFrame(measure);
@@ -205,6 +206,7 @@ export function TourOverlay() {
   }
 
   const pad = step.pad ?? 8;
+  const rect = measured && step && measured.id === step.id && step.kind === "spot" && step.screen === screen && !state.closed ? measured.rect : null;
   const hole = rect ? { top: rect.top - pad, left: rect.left - pad, width: rect.width + pad * 2, height: rect.height + pad * 2 } : null;
   const vh = typeof window !== "undefined" ? window.innerHeight : 800;
   const below = hole ? hole.top + hole.height + 12 + cardHeight < vh - 8 : true;
