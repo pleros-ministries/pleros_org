@@ -16,6 +16,7 @@ import { getHomeInvite } from "@/lib/db/queries/sogp-referrals";
 import { getMonthlyLeaderboard } from "@/lib/db/queries/monthly-leaderboard";
 import { previewMonthlyLeaderboard } from "@/lib/leaderboard/monthly";
 import { getReminderPreferences } from "@/lib/db/queries/notification-preferences";
+import { getNextLearning, getNextLearningCard } from "@/lib/db/queries/next-learning";
 import { cohortWeekLabel, homeReportRows, homeSogpToday, type DashboardHomeData, type HomeSogp } from "./home";
 import { getMonthCalendarData } from "./month-data";
 
@@ -76,6 +77,25 @@ export async function getDashboardHomeData(viewer: NonNullable<Awaited<ReturnTyp
       episodes: parsed.map(({ part, duration, durationSeconds, positionSeconds, listened }) => ({ part, duration, durationSeconds, positionSeconds, listened })) };
   } else if (!podcast && lesson) {
     card = { kind: "traditional", title: lesson.lesson.title, level: lesson.curriculumLevel, href: `/dashboard/sogp/course/day/${lesson.dayNumber}`, completed: course.tracks.filter(track => track.completed).length, total: course.tracks.length };
+  }
+  // Learning's own rules (user, 27 November): withdrawn says so; once SOGP is
+  // finished or the cohort has ended, the chosen next learning heads the card,
+  // and a finished doctrinal path celebrates instead of resuming its last track.
+  if (course) {
+    const chosen = Boolean(state?.revision || course.tracks.some(track => track.completed));
+    const published = course.tracks.filter(track => track.lesson.status === "published" && track.dayNumber != null);
+    const doneAll = !podcast && published.length > 0 && published.every(track => track.completed);
+    const endsAt = course.cohort?.endsAt;
+    const ended = course.learnerState === "completed" || (endsAt ? Date.now() > new Date(endsAt).getTime() : false);
+    if (course.learnerState === "withdrawn") {
+      if (chosen) card = { kind: "withdrawn", title: card?.kind === "traditional" ? card.title : card?.kind === "podcast" ? card.series : "Your SOGP journey" };
+    } else if (chosen && (doneAll || (podcast && !waiting) || ended)) {
+      const nextCard = await getNextLearning(userId).then(choice => choice ? getNextLearningCard(userId) : null).catch(() => null);
+      if (nextCard) card = { kind: "next", title: nextCard.title, episodeTitle: nextCard.episodeTitle, episodeNumber: nextCard.episodeNumber, totalDays: nextCard.totalDays, listened: nextCard.listened, finished: nextCard.finished, todayListened: nextCard.todayListened };
+      else if (doneAll) card = { kind: "finished", tracks: published.length, certificate: Boolean(course.certificate && !course.certificate.revokedAt) };
+      // Cohort over, SOGP not finished: as on Learning, the lessons stay open and the card says why.
+      else if (ended && (card?.kind === "traditional" || card?.kind === "podcast")) card = { ...card, ended: true };
+    }
   }
   // The shared month (Pastor, 25 November 2026); unreadable, Home shows Today without it.
   const month = journey && card?.kind !== "start" ? await getMonthCalendarData(userId, { state, course }).catch(() => null) : null;

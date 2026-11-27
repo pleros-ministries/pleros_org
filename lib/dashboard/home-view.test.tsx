@@ -139,3 +139,27 @@ test("the learning card uses the current track's level art and falls back to the
   expect(level3).toContain("my-learning-level-3.webp");
   expect(podcast).toContain("my-learning-background-v5.webp");
 });
+
+test("Home's learning card follows Learning once SOGP is finished, after it, and when withdrawn", () => {
+  const render = (card: DashboardHomeData["card"]) => renderToStaticMarkup(<DashboardHomeView greeting="Good evening" data={{ ...data, card }} />);
+
+  const finished = render({ kind: "finished", tracks: 60, certificate: true });
+  expect(finished).toContain("You’ve finished SOGP");
+  expect(finished).toContain("60 tracks · certificate ready");
+  expect(finished).toContain('href="/dashboard/sogp/next"');
+  expect(finished).not.toContain("Resume learning");
+
+  const next = render({ kind: "next", title: "The Reality of God’s Purpose", episodeTitle: "Knowing God", episodeNumber: 3, totalDays: 30, listened: 2, finished: false, todayListened: false });
+  expect(next).toContain("Episode 3 of 30 · Podcast");
+  expect(next).toContain("Knowing God");
+  expect(next).toContain("Listen now");
+  expect(next).toContain('href="/dashboard/podcast"');
+
+  const ended = render({ kind: "traditional", title: "Knowing God", href: "/dashboard/sogp/course/day/12", completed: 11, total: 60, ended: true });
+  expect(ended).toContain("Your cohort has ended. Your lessons stay open");
+  expect(ended).toContain("Resume learning");
+
+  const withdrawn = render({ kind: "withdrawn", title: "Your SOGP journey" });
+  expect(withdrawn).toContain("Your enrolment is withdrawn");
+  expect(withdrawn).not.toContain("Resume learning");
+});

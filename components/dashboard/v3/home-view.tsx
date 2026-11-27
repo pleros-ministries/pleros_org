@@ -40,12 +40,48 @@ function learningDoor(card: HomeLearningCard | undefined, fallback: DashboardHom
     };
   }
 
+  if (card?.kind === "next") {
+    return {
+      href: card.finished ? "/dashboard/sogp/next" : "/dashboard/podcast",
+      meta: card.finished ? "Journey complete" : `Episode ${card.episodeNumber} of ${card.totalDays} · Podcast`,
+      title: card.finished ? "You’ve finished this journey" : card.episodeTitle ?? card.title,
+      summary: `${card.listened} of ${card.totalDays} listened`,
+      action: card.finished ? "Choose what’s next" : card.todayListened ? "Open today’s episode" : "Listen now",
+      value: card.listened,
+      total: card.totalDays,
+    };
+  }
+
+  if (card?.kind === "finished") {
+    return {
+      href: "/dashboard/sogp/next",
+      meta: "SOGP · Completed",
+      title: "You’ve finished SOGP",
+      summary: `${card.tracks} tracks${card.certificate ? " · certificate ready" : " complete"}`,
+      action: "Choose what’s next",
+      value: 0,
+      total: 0,
+    };
+  }
+
+  if (card?.kind === "withdrawn") {
+    return {
+      href: "/dashboard/sogp",
+      meta: "SOGP",
+      title: card.title,
+      summary: "Your enrolment is withdrawn. Your history stays on Learning",
+      action: "Open learning",
+      value: 0,
+      total: 0,
+    };
+  }
+
   if (card?.kind === "traditional") {
     return {
       href: card.href,
       meta: "1 hr/day · Traditional SOGP",
       title: card.title,
-      summary: `${card.completed} of ${card.total} tracks completed`,
+      summary: card.ended ? "Your cohort has ended. Your lessons stay open" : `${card.completed} of ${card.total} tracks completed`,
       action: "Resume learning",
       value: card.completed,
       total: card.total,
@@ -64,7 +100,7 @@ function learningDoor(card: HomeLearningCard | undefined, fallback: DashboardHom
       href: card.href,
       meta: card.doctrinal ? "One a day · Personalised path" : `${card.pace === 2 ? "30" : "15"} min/day · Podcast path`,
       title: card.series,
-      summary: card.doctrinal ? "Today’s teaching" : today,
+      summary: card.ended ? "Your cohort has ended. Your plan stays open" : card.doctrinal ? "Today’s teaching" : today,
       action: active?.positionSeconds ? "Resume learning" : "Start learning",
       value: listened,
       total: card.episodes.length,
@@ -112,7 +148,8 @@ function LearningDestination({ card, fallback, hubHref }: {
 }) {
   const door = learningDoor(card, fallback);
   const percent = door.total > 0 ? Math.min(100, door.value / door.total * 100) : 0;
-  const art = learningArt[card?.kind === "traditional" ? card.level ?? 1 : 1] ?? learningArt[1];
+  // As on Learning: the finished card takes level 2's art, everything else level 1 unless it's a level's track.
+  const art = learningArt[card?.kind === "traditional" ? card.level ?? 1 : card?.kind === "finished" ? 2 : 1] ?? learningArt[1];
 
   return <section
     className={styles.homeLearningCard}
