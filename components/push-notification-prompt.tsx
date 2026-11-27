@@ -25,6 +25,8 @@ export function PushNotificationPrompt() {
 
   if (
     pathname.startsWith("/preview/") ||
+    // The demo stands in for the dashboard, which never shows this prompt.
+    pathname === "/demo" || pathname.startsWith("/demo/") ||
     // Signed-in learners are offered the learner-bound subscription instead.
     pathname.startsWith("/dashboard") ||
     !isSupported ||
