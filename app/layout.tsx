@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { RootIntegrations } from "@/components/root-integrations";
-import { Be_Vietnam_Pro, Sen } from "next/font/google";
+import { beVietnamPro, sen } from "@/lib/fonts";
 import localFont from "next/font/local";
+import "./fonts/self-hosted.css";
 import "./globals.css";
 
 const suisseIntl = localFont({
@@ -37,20 +38,6 @@ const suisseIntl = localFont({
   display: "swap",
   preload: true,
   fallback: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
-});
-
-const sen = Sen({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-sen",
-  display: "swap",
-});
-
-const beVietnamPro = Be_Vietnam_Pro({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  variable: "--font-be-vietnam-pro",
-  display: "swap",
 });
 
 export const metadata: Metadata = {
