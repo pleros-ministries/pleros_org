@@ -79,7 +79,8 @@ export function LearningHub({ hub, learning }: { hub: LearningHubData; learning:
     </section>
     : hub.state === "start"
     ? <section data-tour="learning-card" className={styles.card} style={{ "--hub-art": `url("/assets/dashboard/learning-card/${art.image}")`, "--hub-art-wide": `url("/assets/dashboard/learning-card/${art.wide}")`, "--hub-field": art.field, "--hub-ink": art.ink } as CSSProperties}>
-      <div className={styles.cardTop}><span>{hub.cohortTitle ?? "SOGP"}</span></div>
+      {/* The cohort is already under the page heading; the card says only what's next. */}
+      <div className={styles.cardTop}><span>Not chosen yet</span></div>
       <div><h2>Choose your SOGP path</h2><span className={styles.cardMeta}>Doctrinal, podcast or your own personalised path</span></div>
       <Link href="/dashboard/sogp/path" className={styles.resume}>Choose a path <ChevronRightIcon className="size-4" strokeWidth={2.2} /></Link>
     </section>
@@ -115,10 +116,11 @@ export function LearningHub({ hub, learning }: { hub: LearningHubData; learning:
       <div><h1>Learning</h1>{next ? <p className={groupStyles.sub}>Your next learning, after SOGP</p> : hub.cohortTitle ? <p className={groupStyles.sub}>{[hub.cohortTitle, hub.weekLabel].filter(Boolean).join(" · ")}</p> : null}</div>
 
       {/* Your current learning, a class of its own: its name heads the card playing from it. */}
-      <div className={styles.sectionTitle}>
+      {/* No path yet: no path name to head the card (user, 27 November). */}
+      {hub.state === "start" && !next ? null : <div className={styles.sectionTitle}>
         <h2>{next ? next.title : PATH_NAMES[hub.path ?? "traditional"]}</h2>
         <Link href={next ? "/dashboard/sogp/next" : SOGP_PAGE} className="inline-flex items-center gap-0.5">{next ? "Change" : "Open"}<ChevronRightIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" /></Link>
-      </div>
+      </div>}
       {resume}
 
       {hub.state === "preparing" ? <p className={styles.notice}>Your cohort hasn’t started yet. Pre-SOGP is open now, and your first teachings unlock on the start date.</p> : null}
