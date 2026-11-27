@@ -166,6 +166,8 @@ export function LearningTour({ start }: { start: Start }) {
     </div>;
   }
 
+  // Spotlights are measured in the browser; until then (and on the server) draw nothing.
+  if (!current) return null;
   const pad = 8;
   const hole = rect ? { top: rect.top - pad, left: rect.left - pad, width: rect.width + pad * 2, height: rect.height + pad * 2 } : null;
   const vh = window.innerHeight;
