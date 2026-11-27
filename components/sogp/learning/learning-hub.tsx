@@ -30,7 +30,7 @@ const PATH_NAMES: Record<NonNullable<LearningHubData["path"]>, string> = { tradi
 function YourPath({ summary }: { summary: PathSummary }) {
   return <>
     <div className={groupStyles.sectionTitle}><h2>Your path</h2><Link href="/dashboard/sogp/path" className={`${groupStyles.quiet} inline-flex items-center gap-0.5`}>Change path<ChevronRightIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" /></Link></div>
-    <div className={groupStyles.strip}>{summary.counts.map(count => <div key={count.label}><span>{count.label}</span><strong>{count.value}</strong></div>)}</div>
+    <div className={groupStyles.strip} data-tour="your-path">{summary.counts.map(count => <div key={count.label}><span>{count.label}</span><strong>{count.value}</strong></div>)}</div>
     <div className={groupStyles.sectionTitle}><h2>{summary.listTitle}</h2>{summary.more ? <Link href={summary.more.href} className={groupStyles.quiet}>{summary.more.label}</Link> : null}</div>
     <div className={groupStyles.panel}>{summary.rows.length ? <ul className={groupStyles.list}>{summary.rows.map(row => {
       const body = <>
@@ -66,7 +66,7 @@ export function LearningHub({ hub, learning }: { hub: LearningHubData; learning:
   const nextStyle = { "--hub-art": `url("/assets/dashboard/learning-card/${nextArt.image}")`, "--hub-art-wide": `url("/assets/dashboard/learning-card/${nextArt.wide}")`, "--hub-field": nextArt.field, "--hub-ink": nextArt.ink } as CSSProperties;
 
   const resume = next
-    ? <section className={styles.card} aria-label="Resume learning" style={nextStyle}>
+    ? <section data-tour="learning-card" className={styles.card} aria-label="Resume learning" style={nextStyle}>
       <div className={styles.cardTop}><span>{next.finished ? "Journey complete" : `Episode ${next.episodeNumber} of ${next.totalDays} · Podcast`}</span></div>
       <div>
         <h2>{next.finished ? "You’ve finished this journey" : next.episodeTitle ?? next.title}</h2>
@@ -78,19 +78,19 @@ export function LearningHub({ hub, learning }: { hub: LearningHubData; learning:
         : <Link href="/dashboard/podcast" className={styles.resume}>{next.todayListened ? "Open today’s episode" : "Listen now"} <PlayIcon className="size-4" fill="currentColor" strokeWidth={0} /></Link>}
     </section>
     : hub.state === "start"
-    ? <section className={styles.card} style={{ "--hub-art": `url("/assets/dashboard/learning-card/${art.image}")`, "--hub-art-wide": `url("/assets/dashboard/learning-card/${art.wide}")`, "--hub-field": art.field, "--hub-ink": art.ink } as CSSProperties}>
+    ? <section data-tour="learning-card" className={styles.card} style={{ "--hub-art": `url("/assets/dashboard/learning-card/${art.image}")`, "--hub-art-wide": `url("/assets/dashboard/learning-card/${art.wide}")`, "--hub-field": art.field, "--hub-ink": art.ink } as CSSProperties}>
       <div className={styles.cardTop}><span>{hub.cohortTitle ?? "SOGP"}</span></div>
       <div><h2>Choose a learning path</h2><span className={styles.cardMeta}>Doctrinal, podcast or your own personalised path</span></div>
       <Link href="/dashboard/sogp/path" className={styles.resume}>Choose a path <ChevronRightIcon className="size-4" strokeWidth={2.2} /></Link>
     </section>
-    : finished ? <section className={styles.card} aria-label="SOGP finished" style={{ "--hub-art": `url("/assets/dashboard/learning-card/${LEVEL_ART[2]!.image}")`, "--hub-art-wide": `url("/assets/dashboard/learning-card/${LEVEL_ART[2]!.wide}")`, "--hub-field": LEVEL_ART[2]!.field, "--hub-ink": LEVEL_ART[2]!.ink } as CSSProperties}>
+    : finished ? <section data-tour="learning-card" className={styles.card} aria-label="SOGP finished" style={{ "--hub-art": `url("/assets/dashboard/learning-card/${LEVEL_ART[2]!.image}")`, "--hub-art-wide": `url("/assets/dashboard/learning-card/${LEVEL_ART[2]!.wide}")`, "--hub-field": LEVEL_ART[2]!.field, "--hub-ink": LEVEL_ART[2]!.ink } as CSSProperties}>
       <div className={styles.cardTop}><span>{hub.cohortTitle ?? "SOGP"} · Completed</span></div>
       <div><h2>You’ve finished SOGP</h2><span className={styles.cardMeta}>{hub.doneCount} tracks{hub.certificate.available ? " · certificate ready" : " complete"}</span></div>
       {hub.next.canChoose
         ? <Link href="/dashboard/sogp/next" className={styles.resume}>Choose what’s next <ChevronRightIcon className="size-4" strokeWidth={2.2} /></Link>
         : <Link href={hub.certificate.available ? "/dashboard/sogp/certificate" : "/dashboard/sogp/readiness"} className={styles.resume}>{hub.certificate.available ? "View your certificate" : "Check your certificate"} <ChevronRightIcon className="size-4" strokeWidth={2.2} /></Link>}
     </section>
-    : <section className={styles.card} aria-label="Resume learning" style={{ "--hub-art": `url("/assets/dashboard/learning-card/${art.image}")`, "--hub-art-wide": `url("/assets/dashboard/learning-card/${art.wide}")`, "--hub-field": art.field, "--hub-ink": art.ink } as CSSProperties}>
+    : <section data-tour="learning-card" className={styles.card} aria-label="Resume learning" style={{ "--hub-art": `url("/assets/dashboard/learning-card/${art.image}")`, "--hub-art-wide": `url("/assets/dashboard/learning-card/${art.wide}")`, "--hub-field": art.field, "--hub-ink": art.ink } as CSSProperties}>
       <div className={styles.cardTop}><span>{[hub.card.eyebrow, hub.path ? PACE[hub.path] : null].filter(Boolean).join(" · ")}</span></div>
       <div>
         <h2>{hub.card.title}</h2>
@@ -106,7 +106,7 @@ export function LearningHub({ hub, learning }: { hub: LearningHubData; learning:
   const linkChoicePending = learning.followUp?.source === "link" && learning.followUp.choice == null;
   return <div className={styles.page}>
     <div className={styles.column}>
-      {linkChoicePending ? <Link href="/dashboard/sogp/follow-up/welcome" className={`${styles.panel} ${styles.row}`} style={{ display: "flex", background: "#eef3fe", borderColor: "#d6e0fb" }}>
+      {linkChoicePending ? <Link href="/dashboard/sogp/follow-up/welcome" data-tour="leader-banner" className={`${styles.panel} ${styles.row}`} style={{ display: "flex", background: "#eef3fe", borderColor: "#d6e0fb" }}>
         <span className={styles.avatar} aria-hidden="true">{initials(learning.followUp!.name)}</span>
         <span className={styles.rowCopy}><span className={styles.rowTitle} style={{ fontWeight: 500 }}>{learning.followUp!.name.split(" ")[0]} invited you</span><span className={styles.rowMeta}>Keep them as the person who looks after you, or ask for someone else</span></span>
         <ChevronRightIcon className="size-4 shrink-0 text-[#a6abb2]" strokeWidth={2} />

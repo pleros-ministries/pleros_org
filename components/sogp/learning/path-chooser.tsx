@@ -94,7 +94,7 @@ export function PathChooser({ data }: { data: LearningViewData }) {
 
   const card = (key: PathKey, title: string, line: string, fact: string, body: ReactNode) => {
     const on = open === key;
-    return <div className={styles.slot}>
+    return <div className={styles.slot} data-tour-path={key}>
       <div className={styles.path} data-on={on} style={look(key)}>
         <button type="button" aria-pressed={on} aria-expanded={on} className={styles.head} onClick={() => { setOpen(on ? null : key); setError(null); }}>
           <span className={styles.art} aria-hidden="true" />
@@ -116,7 +116,7 @@ export function PathChooser({ data }: { data: LearningViewData }) {
   const levelFourSoon = !data.traditional.levels.find(entry => entry.level === 4)?.tracks.length;
   const sogpBody = taught.length ? <>
     <span className={styles.ask} id="start-level">Where are you starting?</span>
-    <div role="radiogroup" aria-labelledby="start-level" className={styles.choices} data-count="3">
+    <div role="radiogroup" aria-labelledby="start-level" className={styles.choices} data-count="3" data-tour="start-level">
       {taught.map(entry => <button key={entry.level} type="button" role="radio" aria-checked={level === entry.level} disabled={!entry.open} className={styles.choice} onClick={() => setLevel(entry.level)}>
         <strong>{!entry.open ? <LockIcon className="size-3" strokeWidth={2.2} aria-hidden="true" /> : null}Level {entry.level}</strong>
       </button>)}
@@ -124,8 +124,8 @@ export function PathChooser({ data }: { data: LearningViewData }) {
     {locked ? <p className={styles.levelMeta}>Each level opens once you’ve finished the one before it.</p> : null}
     {chosen ? <>
       <p className={styles.levelMeta}>{chosen.tracks.length} tracks · {dateRange(new Date(chosen.tracks[0]!.releaseAt), new Date(chosen.tracks.at(-1)!.releaseAt))}</p>
-      <ol className={styles.tracks}>{chosen.tracks.map((track, index) => <li key={track.title + track.releaseAt}><span className={styles.no}>{index + 1}</span><span>{track.title}</span><span className={styles.date}>{dayMonth.format(new Date(track.releaseAt))}</span></li>)}</ol>
-      <p className={styles.lede}>
+      <ol className={styles.tracks} data-tour="level-tracks">{chosen.tracks.map((track, index) => <li key={track.title + track.releaseAt}><span className={styles.no}>{index + 1}</span><span>{track.title}</span><span className={styles.date}>{dayMonth.format(new Date(track.releaseAt))}</span></li>)}</ol>
+      <p className={styles.lede} data-tour="level-finish">
         {following.length ? <>Then {following.length > 1 ? "levels" : "level"} {following.map(entry => entry.level).join(" and ")}. </> : null}
         {lastRelease ? <>{trackCount} tracks done by <b>{longDate.format(new Date(lastRelease))}</b>. </> : null}
         {levelFourSoon ? "Level 4 is coming soon." : null}
@@ -136,23 +136,23 @@ export function PathChooser({ data }: { data: LearningViewData }) {
   const finishPodcast = (days: number) => longDate.format(new Date(openedAt + (days - 1) * 86_400_000));
   const podcastBody = <>
     <span className={styles.ask} id="pace">Choose your pace</span>
-    <div role="radiogroup" aria-labelledby="pace" className={styles.choices}>
+    <div role="radiogroup" aria-labelledby="pace" className={styles.choices} data-tour="pace">
       {([[1, "15 min a day", "1 episode"], [2, "30 min a day", "2 episodes"]] as const).map(([value, label, sub]) => <button key={value} type="button" role="radio" aria-checked={pace === value} className={styles.choice} onClick={() => { setPace(value); setError(null); }}><strong>{label}</strong><span>{sub}</span></button>)}
     </div>
     {/* The shared month (Pastor, 25 November 2026): the plan in the months it falls in, not 30 days of your own. */}
-    {pace ? <p className={styles.lede}>{pace * 30} episodes, {pace === 2 ? "two" : "one"} a day: {describeMonthSplit(lagosToday(), 30, pace)}, done by <b>{finishPodcast(30)}</b>. Then the doctrinal path from level 1.</p> : null}
+    {pace ? <p className={styles.lede} data-tour="pace-finish">{pace * 30} episodes, {pace === 2 ? "two" : "one"} a day: {describeMonthSplit(lagosToday(), 30, pace)}, done by <b>{finishPodcast(30)}</b>. Then the doctrinal path from level 1.</p> : null}
     {pace && planHoldsTeachings ? <p className={styles.lede}>Your personalised path’s order is set aside. Your listens stay.</p> : null}
   </>;
 
   const doctrinalBody = <>
-    <p className={styles.lede}>Choose a series or single teachings from the Library next. One a day, up to 120, and it counts toward your certificate.</p>
+    <p className={styles.lede} data-tour="doctrinal-note">Choose a series or single teachings from the Library next. One a day, up to 120, and it counts toward your certificate.</p>
     {plan && !planHoldsTeachings && current !== "doctrinal" ? <p className={styles.lede}>Your podcast plan’s order is set aside. Your listens stay.</p> : null}
   </>;
 
   const action = !target ? "Continue" : target === current ? "Keep this path" : target === "traditional" ? `Start level ${level}` : target === "doctrinal" ? "Choose my teachings" : "Build my podcast plan";
   return <section className={`${learn.page} ${learn.choicePage}`}>
     <header className={learn.header}><h1>Choose a learning path</h1><p className={styles.lede}>{current ? "You keep everything you’ve done. Switching only changes what comes next" : "See where each one leads. You can change later"}</p></header>
-    <div role="group" aria-label="Learning path" className={styles.paths}>
+    <div role="group" aria-label="Learning path" className={styles.paths} data-tour="paths">
       {card("sogp", "Doctrinal path", "A teaching, quiz and written response each day", `1 hr a day · ${taught.length || 3} levels`, sogpBody)}
       {card("podcast", "Podcast", "Short episodes at your own pace", "15 or 30 min a day", podcastBody)}
       {card("doctrinal", "Personalised path", "The doctrinal series you want, in your order", "One a day · up to 120", doctrinalBody)}
@@ -161,7 +161,7 @@ export function PathChooser({ data }: { data: LearningViewData }) {
     <div className={styles.footer}>
       {error ? <p role="alert" className={learn.error}>{error}</p> : null}
       {open === "podcast" && !pace ? <p className={styles.footNote}>Choose a pace to continue</p> : null}
-      <button type="button" className={learn.primary} disabled={!ready || saving} onClick={proceed}>{saving ? "Saving…" : action}<DashboardIcon name="right" size={16} /></button>
+      <button type="button" className={learn.primary} disabled={!ready || saving} onClick={proceed} data-tour="path-continue">{saving ? "Saving…" : action}<DashboardIcon name="right" size={16} /></button>
     </div>
   </section>;
 }

@@ -7,6 +7,8 @@ import { CommunityQueryProvider } from "@/components/community/community-query-p
 import { DashboardFrameFallback } from "@/components/dashboard/shell/dashboard-frame-fallback";
 import { DashboardShell } from "@/components/dashboard/shell/dashboard-shell";
 import { PushBindingSync } from "@/components/push/push-binding-sync";
+import { LearningTour } from "@/components/dashboard/tour/learning-tour";
+import { getLearningTourStart } from "@/lib/db/queries/learning-tour";
 import { recordDashboardVisit } from "@/lib/db/queries/admin-analytics";
 import { getDashboardViewer } from "@/lib/dashboard/viewer";
 import { normalizeLearnerReturnTo } from "@/lib/sogp/auth-flow";
@@ -51,6 +53,16 @@ async function DashboardFrame({ children }: { children: React.ReactNode }) {
       >
         {children}
       </DashboardShell>
+      {viewer.capabilities.sogpEnrolled ? <Suspense fallback={null}><TourGate userId={viewer.session.user.id} name={viewer.session.user.name} /></Suspense> : null}
     </CommunityQueryProvider>
   );
+}
+
+/**
+ * The guided tour (user, 24 November): its own boundary, so reading whether it
+ * runs never holds up the shell. A failed read just means no tour this visit.
+ */
+async function TourGate({ userId, name }: { userId: string; name: string }) {
+  const start = await getLearningTourStart(userId, name).catch(() => null);
+  return start ? <LearningTour start={start} /> : null;
 }

@@ -91,7 +91,7 @@ function Picker({ groups, chosen, setChosen, max, perDay, unit, searchLabel, onR
   }).filter(entry => !needle || entry.groupHit || entry.items.length);
   return <>
     {intro}
-    <label className={styles.search}><SearchIcon className="size-4" strokeWidth={2} aria-hidden="true" /><input type="search" placeholder={searchLabel} value={query} onChange={event => setQuery(event.target.value)} aria-label={searchLabel} /></label>
+    <label className={styles.search} data-tour="plan-search"><SearchIcon className="size-4" strokeWidth={2} aria-hidden="true" /><input type="search" placeholder={searchLabel} value={query} onChange={event => setQuery(event.target.value)} aria-label={searchLabel} /></label>
     <div className={styles.box}>{visible.map(({ group, groupHit, items }) => {
       const guids = group.items.map(item => item.guid);
       const picked = guids.filter(guid => chosen.includes(guid)).length;
@@ -102,7 +102,7 @@ function Picker({ groups, chosen, setChosen, max, perDay, unit, searchLabel, onR
             <strong>{group.title}</strong>
             <span>{picked ? `${picked} of ${guids.length} added` : `${guids.length} ${guids.length === 1 ? unit.one : unit.many}`}<ChevronDownIcon className="size-3.5" strokeWidth={2} aria-hidden="true" /></span>
           </button>
-          <button type="button" className={styles.add} aria-pressed={picked === guids.length} disabled={full && picked === 0} onClick={() => addGroup(guids)}>
+          <button type="button" className={styles.add} data-tour="plan-add" aria-pressed={picked === guids.length} disabled={full && picked === 0} onClick={() => addGroup(guids)}>
             {picked === guids.length ? <><CheckIcon className="size-3.5" strokeWidth={2.4} aria-hidden="true" />Added</> : <><PlusIcon className="size-3.5" strokeWidth={2.4} aria-hidden="true" />{picked ? "Add the rest" : "Add all"}</>}
           </button>
         </div>
@@ -115,10 +115,10 @@ function Picker({ groups, chosen, setChosen, max, perDay, unit, searchLabel, onR
         })}</div></div></div>
       </div>;
     })}{visible.length === 0 ? <p className={`${learn.muted} p-4`}>Nothing matches “{query}”.</p> : null}</div>
-    <div className={styles.tray}>
+    <div className={styles.tray} data-tour="plan-tray">
       <div className={styles.trayRow}><b>{chosen.length} of {max} {unit.many}</b><span className={styles.dur}>{chosen.length ? `${days} ${days === 1 ? "day" : "days"} · done by ${doneBy(days)}` : `Add ${unit.many} to begin`}</span></div>
       <div className={styles.meter} aria-hidden="true"><i style={{ transform: `scaleX(${Math.min(1, chosen.length / max)})` }} /></div>
-      <button type="button" className={learn.primary} disabled={!chosen.length} onClick={onReview} style={{ width: "100%" }}>Put them in order<DashboardIcon name="right" size={16} /></button>
+      <button type="button" className={learn.primary} disabled={!chosen.length} onClick={onReview} data-tour="plan-review" style={{ width: "100%" }}>Put them in order<DashboardIcon name="right" size={16} /></button>
     </div>
   </>;
 }
@@ -133,7 +133,7 @@ function Review({ order, setOrder, items, perDay, eyebrow, unit, saving, error, 
   const move = (index: number, by: -1 | 1) => setOrder(list => { const next = [...list]; const [item] = next.splice(index, 1); next.splice(index + by, 0, item!); return next; });
   return <section className={learn.page}>
     <header className={learn.header}><p className={learn.eyebrow}>{eyebrow}</p><h1>Your {days.length} {days.length === 1 ? "day" : "days"}</h1><p className={styles.lede}>Done by {doneBy(days.length)}. Move any {unit} up or down</p></header>
-    <div className={styles.box}>{days.slice(0, shown).map((guids, day) => <div key={day} className={styles.day}>
+    <div className={styles.box}>{days.slice(0, shown).map((guids, day) => <div key={day} className={styles.day} data-tour={day === 0 ? "plan-day" : undefined}>
       <span className={styles.dayLabel}>Day {day + 1}{perDay === 1 && items.get(guids[0]!)?.series ? ` · ${items.get(guids[0]!)!.series}` : ""}</span>
       {guids.map((guid, offset) => {
         const index = day * perDay + offset, item = items.get(guid), title = item?.title ?? "No longer available";
@@ -147,7 +147,7 @@ function Review({ order, setOrder, items, perDay, eyebrow, unit, saving, error, 
     {shown < days.length ? <button type="button" className={`${styles.add} ${styles.showMore}`} onClick={() => setShown(count => count + 8)}>Show more days</button> : null}
     <div className={styles.footer}>
       {error ? <p role="alert" className={learn.error}>{error}</p> : null}
-      <button type="button" className={learn.primary} disabled={saving || !order.length} onClick={onStart}>{saving ? "Saving…" : "Start my plan"}<DashboardIcon name="check" /></button>
+      <button type="button" className={learn.primary} disabled={saving || !order.length} onClick={onStart} data-tour="plan-start">{saving ? "Saving…" : "Start my plan"}<DashboardIcon name="check" /></button>
       <button type="button" className={learn.secondary} disabled={saving} onClick={onBack}>Back</button>
     </div>
   </section>;
@@ -179,9 +179,9 @@ export function PodcastBuilder({ data, path }: { data: LearningViewData; path: "
   const days = Math.ceil(suggested.length / pace);
   return <section className={learn.page} style={tab === "own" ? { paddingBottom: 0 } : undefined}>
     <header className={learn.header}><p className={learn.eyebrow}>{eyebrow}</p><h1>Build your podcast plan</h1><p className={styles.lede}>{slots} episodes, {pace === 2 ? "two" : "one"} a day. Use ours or pick your own</p></header>
-    <div className={styles.segmented} role="tablist" aria-label="Plan">
-      <button type="button" role="tab" aria-selected={tab === "suggested"} disabled={!suggested.length} onClick={() => setTab("suggested")}>Suggested plan</button>
-      <button type="button" role="tab" aria-selected={tab === "own"} onClick={() => setTab("own")}>Build my own</button>
+    <div className={styles.segmented} role="tablist" aria-label="Plan" data-tour="plan-tabs">
+      <button type="button" role="tab" aria-selected={tab === "suggested"} disabled={!suggested.length} onClick={() => setTab("suggested")} data-tour-mode="suggested">Suggested plan</button>
+      <button type="button" role="tab" aria-selected={tab === "own"} onClick={() => setTab("own")} data-tour-mode="own">Build my own</button>
     </div>
     {tab === "suggested" ? <>
       <div className={styles.planCard} style={art("podcast-sky", "#d4e8fc", "#16406e")}>
@@ -191,12 +191,12 @@ export function PodcastBuilder({ data, path }: { data: LearningViewData; path: "
         <span className={styles.planMeta}>Done by {doneBy(days)}, then the doctrinal path from level 1</span>
       </div>
       <h2 className="text-[15px] font-medium">In this order</h2>
-      <div className={styles.box}>{inOrder.map(group => <div key={`${group.title}-${group.first}`} className={styles.series}><div className={styles.seriesRow}>
+      <div className={styles.box} data-tour="plan-order">{inOrder.map(group => <div key={`${group.title}-${group.first}`} className={styles.series}><div className={styles.seriesRow}>
         <span className={styles.toggle}><strong>{group.title}</strong><span>{group.count} {group.count === 1 ? "episode" : "episodes"} · {dayRange(Math.floor(group.first / pace) + 1, Math.floor(group.last / pace) + 1)}</span></span>
       </div></div>)}</div>
       <div className={styles.footer}>
         {error ? <p role="alert" className={learn.error}>{error}</p> : null}
-        <button type="button" className={learn.primary} disabled={saving || !data.canWrite} onClick={() => save(suggested)}>{saving ? "Saving…" : "Use this plan"}<DashboardIcon name="right" size={16} /></button>
+        <button type="button" className={learn.primary} disabled={saving || !data.canWrite} onClick={() => save(suggested)} data-tour="plan-use">{saving ? "Saving…" : "Use this plan"}<DashboardIcon name="right" size={16} /></button>
         <button type="button" className={learn.secondary} disabled={saving} onClick={() => setReview([...suggested])}>See it day by day</button>
       </div>
     </> : !episodes.length ? <p className={learn.muted}>The podcast library is unavailable right now. Your path is saved; come back to build your plan.</p>

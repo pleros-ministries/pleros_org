@@ -291,6 +291,7 @@ psql "${DATABASE_URL_UNPOOLED:-$DATABASE_URL}" -f apply.sql
 | 0077_multi_group_membership | 83 | Several groups per person: one active membership per group, not per person |
 | 0078_partner_gifts | 84 | Report giving on the Partner tab |
 | 0079_doctrinal_journey_path | 85 | `doctrinal` learning path, one a day (applied 24 November) |
+| 0080_learning_tour_progress | 86 | Guided tour progress per learner (applied 24 November) |
 
 - **Live data changes outside the app:** on 19 October, `community_groups` id 3 was closed. Nothing else.
 - **Scripts against server-only code** (read-only probes):

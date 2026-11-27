@@ -144,7 +144,7 @@ function LearningDestination({ card, fallback, hubHref }: {
       </div>
       <span>{Math.round(percent)}%</span>
     </div> : null}
-    <Link className={styles.homeLearningAction} href={door.href}>
+    <Link className={styles.homeLearningAction} href={door.href} data-tour="home-learning">
       {door.action}
       <DashboardIcon name="arrow" />
     </Link>
@@ -251,7 +251,7 @@ function PrayerWatchRow({ today }: { today: HomeToday }) {
  * path only, done once the quiz and written response are).
  */
 function TodaySection({ today, month }: { today: HomeToday; month: HomeMonth | null }) {
-  return <section className={styles.homeSection} aria-labelledby="home-today-heading">
+  return <section className={styles.homeSection} aria-labelledby="home-today-heading" data-tour="home-today">
     <div className={styles.homeSectionHeader}>
       <h2 id="home-today-heading">Today</h2>
       {today.total > 0 ? <span className={styles.metadata}>{today.done} of {today.total} done</span> : null}

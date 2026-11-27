@@ -2795,6 +2795,27 @@ export const churchMeetingReports = pgTable("church_meeting_reports", {
   check("church_meeting_reports_brought_check", sql`${t.peopleBrought} between 0 and 50`),
 ]);
 
+/**
+ * The guided tour for new learners (user, 24 November; migration 0080): where
+ * they are, the path and plan mode they picked, and whether it's done or
+ * skipped, so it resumes on any device and never shows again once over.
+ */
+export const learningTourProgress = pgTable("learning_tour_progress", {
+  userId: text("user_id").primaryKey().references(() => users.id, { onDelete: "cascade" }),
+  status: text("status").$type<"active" | "done" | "skipped">().notNull().default("active"),
+  step: text("step"),
+  path: text("path").$type<"sogp" | "podcast" | "doctrinal">(),
+  planMode: text("plan_mode").$type<"suggested" | "own">(),
+  startedAt: timestamp("started_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  finishedAt: timestamp("finished_at", { withTimezone: true }),
+}, t => [
+  check("learning_tour_progress_status_check", sql`${t.status} in ('active','done','skipped')`),
+  check("learning_tour_progress_path_check", sql`${t.path} is null or ${t.path} in ('sogp','podcast','doctrinal')`),
+  check("learning_tour_progress_mode_check", sql`${t.planMode} is null or ${t.planMode} in ('suggested','own')`),
+  check("learning_tour_progress_step_check", sql`${t.step} is null or length(${t.step}) between 1 and 40`),
+]);
+
 /** Explicit learner choices only: reads and migration never populate this table. */
 export const sogpLearningPreferences = pgTable("sogp_learning_preferences", {
   userId: text("user_id").primaryKey().references(() => users.id, { onDelete: "cascade" }),
