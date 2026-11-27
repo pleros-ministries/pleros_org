@@ -6,6 +6,8 @@ import { CheckIcon, LockIcon } from "lucide-react";
 
 import { chooseSogpPathAction } from "@/app/_actions/sogp-learning-actions";
 import { DashboardIcon } from "@/components/dashboard/v3/primitives";
+import { describeMonthSplit } from "@/lib/learning/month-calendar";
+import { lagosToday } from "@/lib/sogp/daily-date";
 import { isPlanPath, isTeachingKey, type SogpLearningPath } from "@/lib/sogp/learning-input";
 import { learningWriteNotice, type LearningViewData } from "@/lib/sogp/learning-view";
 
@@ -137,7 +139,8 @@ export function PathChooser({ data }: { data: LearningViewData }) {
     <div role="radiogroup" aria-labelledby="pace" className={styles.choices}>
       {([[1, "15 min a day", "1 episode"], [2, "30 min a day", "2 episodes"]] as const).map(([value, label, sub]) => <button key={value} type="button" role="radio" aria-checked={pace === value} className={styles.choice} onClick={() => { setPace(value); setError(null); }}><strong>{label}</strong><span>{sub}</span></button>)}
     </div>
-    {pace ? <p className={styles.lede}>{pace * 30} episodes over 30 days, done by <b>{finishPodcast(30)}</b>. Then the doctrinal path from level 1.</p> : null}
+    {/* The shared month (Pastor, 25 November 2026): the plan in the months it falls in, not 30 days of your own. */}
+    {pace ? <p className={styles.lede}>{pace * 30} episodes, {pace === 2 ? "two" : "one"} a day: {describeMonthSplit(lagosToday(), 30, pace)}, done by <b>{finishPodcast(30)}</b>. Then the doctrinal path from level 1.</p> : null}
     {pace && planHoldsTeachings ? <p className={styles.lede}>Your personalised path’s order is set aside. Your listens stay.</p> : null}
   </>;
 

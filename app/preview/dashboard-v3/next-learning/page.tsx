@@ -21,7 +21,7 @@ const FINISHED: LearningHubData = {
   ...SAMPLE_HUB, state: "completed", weekLabel: null, doneCount: 24, certificate: { available: true },
   card: { ...SAMPLE_HUB.card, done: 24, total: 24 }, next: { canChoose: true, finished: true, card: null },
 };
-const CHOSEN: LearningHubData = { ...FINISHED, next: { canChoose: true, finished: true, card: { kind: "podcast", title: "30-day Foundations", dayNumber: 3, totalDays: 30, listened: 2, finished: false, episodeTitle: "The Place of the Gospel in Your Life (Part 3)", todayListened: false } } };
+const CHOSEN: LearningHubData = { ...FINISHED, next: { canChoose: true, finished: true, card: { kind: "podcast", title: "30-day Foundations", episodeNumber: 3, totalDays: 30, listened: 2, finished: false, episodeTitle: "The Place of the Gospel in Your Life (Part 3)", todayListened: false } } };
 
 const OPTIONS: NextOption[] = [
   { key: "foundations", art: "podcast", title: "The Foundations podcast", detail: "The Place of the Gospel, The Reality and Pursuit of God’s Purpose, and How to Fulfil it", meta: "30 days · one episode a day", pick: { kind: "foundations" } },

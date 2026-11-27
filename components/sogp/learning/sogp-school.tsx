@@ -40,7 +40,6 @@ export function SogpSchool({ hub, facts, followUp }: { hub: LearningHubData; fac
   const podcast = hub.path === "podcast_one" || hub.path === "podcast_two" || hub.path === "doctrinal";
   const doctrinal = hub.path === "doctrinal";
   const unit = doctrinal ? "teachings" : "episodes";
-  const days = hub.journey.days;
   const issued = facts?.certificateAvailable ?? hub.certificate.available;
 
   const tools: Array<{ href: string; icon: ReactNode; title: string; meta: string }> = [
@@ -59,7 +58,7 @@ export function SogpSchool({ hub, facts, followUp }: { hub: LearningHubData; fac
     : hub.state === "start" ? { href: "/dashboard/sogp/path", label: "Choose a learning path" }
     : finished && hub.next.canChoose ? { href: "/dashboard/sogp/next", label: "Choose what’s next" }
     : { href: hub.card.href, label: hub.card.action };
-  const line = [days?.current ? `Day ${days.current} of ${days.total}` : null, podcast ? `${hub.card.done} of ${hub.card.total} ${unit}` : `${hub.doneCount} of ${hub.card.total || 24} teachings`].filter(Boolean).join(" · ");
+  const line = podcast ? `${hub.card.done} of ${hub.card.total} ${unit}` : `${hub.doneCount} of ${hub.card.total || 24} teachings`;
   const left = facts ? [!facts.learningPass, !facts.prayer.pass, !facts.reviews.reviewPass].filter(Boolean).length : 0;
 
   // Learning's frame, for the same 16px gutter and column width.
@@ -115,7 +114,7 @@ export function SogpSchool({ hub, facts, followUp }: { hub: LearningHubData; fac
         <ChevronRightIcon className={`${styles.chev} size-4`} strokeWidth={2} />
       </Link></div>
     </> : hub.levels.length ? <>
-      <div className={styles.sectionTitle}><h2>Your four levels</h2>{days ? <Link href="/dashboard/sogp/days" className={styles.quiet}>Your {days.total} days</Link> : null}</div>
+      <div className={styles.sectionTitle}><h2>Your four levels</h2><Link href="/dashboard/sogp/month" className={styles.quiet}>{hub.journey.month}</Link></div>
       {/* Each level in its own art (blue staircase, green stones, terracotta arch, plum hill). */}
       <div className={page.levels}>
         {hub.levels.map(level => {
@@ -155,9 +154,9 @@ export function SogpSchool({ hub, facts, followUp }: { hub: LearningHubData; fac
         <span className={styles.rowCopy}><span className={styles.rowTitle}>{tool.title}</span><span className={styles.rowMeta}>{tool.meta}</span></span>
         <ChevronRightIcon className={`${styles.chev} size-4`} strokeWidth={2} />
       </Link></li>)}
-      {days ? null : <li><Link href="/dashboard/sogp/traditional" className={styles.row}>
+      {hub.state === "start" ? null : <li><Link href="/dashboard/sogp/month" className={styles.row}>
         <span className="shrink-0 text-[var(--color-community-muted)]" aria-hidden="true"><CalendarDaysIcon className="size-4" /></span>
-        <span className={styles.rowCopy}><span className={styles.rowTitle}>Calendar and assessments</span><span className={styles.rowMeta}>Every teaching day</span></span>
+        <span className={styles.rowCopy}><span className={styles.rowTitle}>This month</span><span className={styles.rowMeta}>{hub.journey.month}: what you did and what’s next</span></span>
         <ChevronRightIcon className={`${styles.chev} size-4`} strokeWidth={2} />
       </Link></li>}
     </ul></div>
