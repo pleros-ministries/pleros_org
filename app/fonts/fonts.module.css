@@ -1,0 +1,8 @@
+/* The CSS variables and classes next/font/google used to generate, for the
+   self-hosted faces in self-hosted.css (loaded once by the root layout). */
+.sen { --font-sen: "Sen", "Sen Fallback"; }
+.beVietnamPro { --font-be-vietnam-pro: "Be Vietnam Pro", "Be Vietnam Pro Fallback"; }
+.dashboard { --font-dashboard: "Be Vietnam Pro", "Be Vietnam Pro Fallback"; }
+.dashboardFace { font-family: "Be Vietnam Pro", "Be Vietnam Pro Fallback"; font-style: normal; }
+.dashboardHeading { --font-dashboard-heading: "Sen", "Sen Fallback"; }
+.dashboardHeadingFace { font-family: "Sen", "Sen Fallback"; font-style: normal; }
