@@ -22,8 +22,9 @@ export function LeaderboardPreview({ board, id, dense = false, month, href = "/d
     <header className={styles.boardHead}>
       <span className={styles.boardIcon} aria-hidden="true"><TrophyIcon className="size-4" strokeWidth={2.2} /></span>
       <span className={styles.rowCopy}>
-        <h2 id={id}>Leaderboard</h2>
-        <span className={styles.rowMeta}>{board.me ? `You’re #${board.me.rank} of ${board.total} in ${month} · ${board.me.points} pts` : `Top of ${board.total} in ${month}`}</span>
+        {/* The board is the month's (Pastor, 27 November): its name heads it. */}
+        <h2 id={id}>{month} leaderboard</h2>
+        <span className={styles.rowMeta}>{board.me ? `You’re #${board.me.rank} of ${board.total} · ${board.me.points} pts` : `Top of ${board.total} this month`}</span>
       </span>
       <Link href={href} className={styles.boardAll}>See all</Link>
     </header>

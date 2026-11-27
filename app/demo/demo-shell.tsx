@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { CompassIcon, RotateCcwIcon, XIcon } from "lucide-react";
 
 import { LearningTour } from "@/components/dashboard/tour/learning-tour";
+import { YouBottomBar } from "@/components/dashboard/shell/you-bottom-bar";
+import { RootHeader } from "@/components/dashboard/v3/primitives";
 import { LearningWritesProvider, type LearningWrites } from "@/components/sogp/learning/learning-writes";
 import type { SogpLearningState } from "@/lib/db/queries/sogp-learning";
 import { tourSteps, type TourMode, type TourPath } from "@/lib/sogp/learning-tour";
@@ -128,12 +130,20 @@ export function DemoShell({ children }: { children: ReactNode }) {
   return <QueryClientProvider client={client}>
     <LearningWritesProvider value={writes}>
       <DemoContext.Provider value={{ arrival, state }}>
-        <div className={styles.bar} data-demo-bar>
-          <span className={styles.label}>Demo · nothing saved</span>
-          <button type="button" className={styles.barButton} onClick={() => setPicking(true)}><CompassIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" />Jump to a step</button>
+        <div className={styles.top}>
+          <div className={styles.bar} data-demo-bar>
+            <span className={styles.label}>Demo · nothing saved</span>
+            <button type="button" className={styles.barButton} onClick={() => setPicking(true)}><CompassIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" />Jump to a step</button>
+          </div>
+          {/* The real You frame: the switch and bell explain themselves rather than leave the demo. */}
+          <RootHeader active="you" onMenu={() => setNotice("The menu opens in the real app, not the demo")} onNotifications={() => setNotice("Notifications open in the real app, not the demo")}
+            onTab={tab => { if (tab === "community") setNotice("Community opens in the real app, not the demo"); else router.push(DEMO_ROUTES.home); }} />
         </div>
         {notice ? <p className={styles.notice} role="status">{notice}</p> : null}
-        <div onClickCapture={onClickCapture}>{children}</div>
+        <div onClickCapture={onClickCapture} className={styles.page}>
+          <div className={styles.content}>{children}</div>
+          <YouBottomBar learningHref="/dashboard/sogp" current={pathname === DEMO_ROUTES.home ? "/dashboard" : pathname.startsWith(DEMO_ROUTES.learning) ? "/dashboard/sogp" : pathname} />
+        </div>
         <LearningTour key={tour.key} start={{ resume: tour.resume, ...demoNames(tour.arrival) }} routes={DEMO_ROUTES} onSave={() => undefined} />
         {picking ? <Picker arrival={arrival} onJump={jump} onClose={() => setPicking(false)} /> : null}
       </DemoContext.Provider>
