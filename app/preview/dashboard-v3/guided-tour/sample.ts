@@ -38,23 +38,16 @@ export function learningView(arrival: Arrival): LearningViewData {
 const base: LearningHubData = { ...SAMPLE_HUB, cohortTitle: "SOGP November 2026", weekLabel: "Week 1 of 4", doneCount: 0, catchUp: null, review: null };
 
 export const HUB: Record<TourPath | "none", LearningHubData> = {
-  none: { ...base, path: null, state: "start", summary: null, card: { ...base.card, level: 1 } },
+  none: { ...base, path: null, state: "start", month: null, card: { ...base.card, level: 1 } },
   sogp: { ...base, path: "traditional", state: "active",
     card: { eyebrow: "Level 1", title: "Gospel: The Word of Truth", progress: "Track 1 of 18 · ready to start", done: 0, total: 18, href: "#", action: "Start today’s teaching", level: 1 },
-    summary: { counts: [{ label: "Tracks", value: "18" }, { label: "Levels", value: "3" }, { label: "Done by", value: dayMonth(20) }], listTitle: "Levels",
-      rows: [1, 2, 3].map(level => ({ title: `Level ${level}`, meta: `6 tracks · ${dayMonth((level - 1) * 7)}–${dayMonth((level - 1) * 7 + 5)}`, end: level === 1 ? "Now" : null, href: "#", muted: false }))
-        .concat([{ title: "Level 4", meta: "6 tracks · Coming soon", end: null, href: null as never, muted: true }, { title: "Advanced SOGP", meta: "After level 4", end: null, href: null as never, muted: true }]),
-      more: null, note: "A track a day, with a group review at the end of each level.", empty: null } },
+    month: { name: new Date(start).toLocaleDateString("en-GB", { month: "long", timeZone: "Africa/Lagos" }), daysLeft: 30, rows: [0, 1, 2].map(day => ({ when: day === 0 ? "Today" : dayMonth(day), title: "Gospel: The Word of Truth", meta: `Level 1 · track ${day + 1}`, href: "#" })), note: "A track a day, with a group review at the end of each level.", empty: null } },
   podcast: { ...base, path: "podcast_two", state: "active",
     card: { eyebrow: "Episode 1 of 60", title: "The Reality of God’s Purpose", progress: "0 of 2 episodes today · 0 of 60 in your plan", done: 0, total: 60, href: "#", action: "Listen now", level: 1 },
-    summary: { counts: [{ label: "Episodes", value: "60" }, { label: "Days left", value: "30" }, { label: "Done by", value: dayMonth(29) }], listTitle: "Coming up",
-      rows: [0, 1, 2].map(day => ({ title: "The Reality of God’s Purpose", meta: `Episodes ${day * 2 + 1} and ${day * 2 + 2}`, end: day === 0 ? "Today" : dayMonth(day), href: "#", muted: false })),
-      more: { label: "See all 60", href: "#" }, note: "When your plan is done, SOGP follows from level 1.", empty: null } },
+    month: { name: new Date(start).toLocaleDateString("en-GB", { month: "long", timeZone: "Africa/Lagos" }), daysLeft: 30, rows: [0, 1, 2].map(day => ({ when: day === 0 ? "Today" : dayMonth(day), title: "The Reality of God’s Purpose", meta: `Episodes ${day * 2 + 1} and ${day * 2 + 2}`, href: "#" })), note: "When your plan is done, SOGP follows from level 1.", empty: null } },
   doctrinal: { ...base, path: "doctrinal", state: "active",
     card: { eyebrow: "Teaching 1 of 5", title: "Understanding the Gospel", progress: "Faith & Growth · 0 of 5 teachings", done: 0, total: 5, href: "#", action: "Listen now", level: 1 },
-    summary: { counts: [{ label: "Teachings", value: "5" }, { label: "Days left", value: "5" }, { label: "Done by", value: dayMonth(4) }], listTitle: "Coming up",
-      rows: library.slice(0, 3).map((item, day) => ({ title: item.title, meta: `Teaching ${day + 1} · ${item.series}`, end: day === 0 ? "Today" : dayMonth(day), href: "#", muted: false })),
-      more: { label: "See all 5", href: "#" }, note: "Add teachings from the Library at any time.", empty: null } },
+    month: { name: new Date(start).toLocaleDateString("en-GB", { month: "long", timeZone: "Africa/Lagos" }), daysLeft: 30, rows: library.slice(0, 3).map((item, day) => ({ when: day === 0 ? "Today" : dayMonth(day), title: item.title, meta: item.series, href: "#" })), note: "Add teachings from the Library at any time.", empty: null } },
 };
 
 /** The shared month from today to its end, one planned item a day (sample titles). */
