@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { ArrowLeftIcon, ArrowRightIcon, HandIcon, XIcon } from "lucide-react";
 
 import { saveLearningTourAction } from "@/app/_actions/learning-tour-actions";
-import { resumeIndex, routeOf, syncToRoute, TOUR_ROUTES, tourSteps, type TourMode, type TourPath, type TourStatus } from "@/lib/sogp/learning-tour";
+import { resumeIndex, routeOf, syncToRoute, TOUR_ROUTES, tourSteps, type TourMode, type TourPath, type TourRoute, type TourStatus } from "@/lib/sogp/learning-tour";
 
 import styles from "./learning-tour.module.css";
 
@@ -14,6 +14,8 @@ export const TOUR_REPLAY_EVENT = "pleros:tour-replay";
 
 type Start = { resume: { step: string | null; path: TourPath | null; mode: TourMode | null } | null; firstName: string; leaderFirstName: string | null };
 type State = { active: boolean; index: number; path: TourPath | null; mode: TourMode | null };
+type Progress = { status: TourStatus; step: string | null; path: TourPath | null; mode: TourMode | null };
+const saveProgress = (value: Progress) => { void saveLearningTourAction(value).catch(() => undefined); };
 
 /**
  * The guided tour for new learners (user, 24 November; mockup
@@ -21,11 +23,12 @@ type State = { active: boolean; index: number; path: TourPath | null; mode: Tour
  * pages. Tap steps wait for the learner's own tap, and their taps do the real
  * thing (saving the path or plan); the tour follows to the next page. Progress
  * saves as they go so it resumes on any device; done or skipped, it stays away.
+ * /demo passes its own pages and keeps progress in memory.
  */
-export function LearningTour({ start }: { start: Start }) {
+export function LearningTour({ start, routes = TOUR_ROUTES, onSave = saveProgress, onFinish }: { start: Start; routes?: Record<TourRoute, string>; onSave?: (value: Progress) => void; onFinish?: (status: "done" | "skipped") => void }) {
   const router = useRouter();
   const pathname = usePathname();
-  const route = routeOf(pathname);
+  const route = routeOf(pathname, routes);
   const names = useMemo(() => ({ firstName: start.firstName, leaderFirstName: start.leaderFirstName }), [start.firstName, start.leaderFirstName]);
   const [state, setState] = useState<State>(() => {
     const resume = start.resume;
@@ -48,14 +51,14 @@ export function LearningTour({ start }: { start: Start }) {
 
   const save = (status: TourStatus, value: { index: number; path: TourPath | null; mode: TourMode | null }) => {
     const id = tourSteps(value.path, value.mode, names)[value.index]?.id ?? null;
-    void saveLearningTourAction({ status, step: id, path: value.path, mode: value.mode }).catch(() => undefined);
+    onSave({ status, step: id, path: value.path, mode: value.mode });
   };
 
   const onPage = Boolean(step && step.route === route);
   const advance = () => setState(value => ({ ...value, index: syncToRoute(tourSteps(value.path, value.mode, names), value.index, route) + 1 }));
   const next = () => {
     const following = steps[index + 1];
-    if (following && following.route !== route) router.push(TOUR_ROUTES[following.route]);
+    if (following && following.route !== route) router.push(routes[following.route]);
     advance();
   };
   // Effects call the latest save and advance through this, so they don't restart every render.
@@ -78,13 +81,13 @@ export function LearningTour({ start }: { start: Start }) {
 
   // Replay from Profile.
   useEffect(() => {
-    const replay = () => { const fresh = { active: true, index: 0, path: null, mode: null }; setState(fresh); latest.current.save("active", fresh); router.push(TOUR_ROUTES.home); };
+    const replay = () => { const fresh = { active: true, index: 0, path: null, mode: null }; setState(fresh); latest.current.save("active", fresh); router.push(routes.home); };
     window.addEventListener(TOUR_REPLAY_EVENT, replay);
     return () => window.removeEventListener(TOUR_REPLAY_EVENT, replay);
-  }, [router]);
+  }, [router, routes.home]);
 
   const back = () => setState(value => ({ ...value, index: Math.max(0, index - 1) }));
-  const finish = (status: "done" | "skipped") => { save(status, { ...state, index }); setState(value => ({ ...value, active: false })); };
+  const finish = (status: "done" | "skipped") => { save(status, { ...state, index }); setState(value => ({ ...value, active: false })); onFinish?.(status); };
 
   // Find the target, bring it into view, and follow it as the page moves.
   useLayoutEffect(() => {
@@ -146,7 +149,7 @@ export function LearningTour({ start }: { start: Start }) {
   if (!onPage) {
     // Waiting for a page their tap is opening, or for them to reach Home after sign-up.
     if (awaiting || step.id === "welcome") return null;
-    return <Link href={TOUR_ROUTES[step.route]} className={styles.pill}>Continue the tour<ArrowRightIcon className="size-3.5" strokeWidth={2.2} /></Link>;
+    return <Link href={routes[step.route]} className={styles.pill}>Continue the tour<ArrowRightIcon className="size-3.5" strokeWidth={2.2} /></Link>;
   }
 
   const count = state.path ? (state.path === "podcast" && !state.mode ? tourSteps("podcast", "suggested", names).length : steps.length) : tourSteps("sogp", null, names).length;

@@ -4,11 +4,11 @@ import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { ArrowDownIcon, ArrowUpIcon, CheckIcon, ChevronDownIcon, PlusIcon, SearchIcon } from "lucide-react";
 
-import { chooseSogpPathAction } from "@/app/_actions/sogp-learning-actions";
 import { DashboardIcon } from "@/components/dashboard/v3/primitives";
 import { isTeachingKey } from "@/lib/sogp/learning-input";
 import { learningWriteNotice, podcastSuggestion, type LearningEpisode, type LearningViewData } from "@/lib/sogp/learning-view";
 
+import { useLearningWrites } from "./learning-writes";
 import learn from "./learning.module.css";
 import styles from "./learning-paths.module.css";
 
@@ -54,16 +54,17 @@ function libraryGroups(teachings: LearningEpisode[]): Group[] {
 function useSavePlan(data: LearningViewData, path: "podcast_one" | "podcast_two" | "doctrinal") {
   const router = useRouter();
   const query = useQueryClient();
+  const writes = useLearningWrites();
   const [saving, startSave] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const save = (guids: string[]) => {
     setError(null);
     startSave(async () => {
       try {
-        const result = await chooseSogpPathAction({ path, expectedRevision: data.state?.revision ?? 0, episodeGuids: guids });
+        const result = await writes.choosePath({ path, expectedRevision: data.state?.revision ?? 0, episodeGuids: guids });
         if (!result.ok) { setError(result.error); return; }
         query.setQueryData<LearningViewData>(["sogp", "learning-v3"], old => ({ ...(old ?? data), state: result.value }));
-        router.push("/dashboard/sogp"); router.refresh();
+        router.push(writes.href("/dashboard/sogp")); router.refresh();
       } catch { setError("Couldn’t save your plan. Check your connection and try again; your picks are still here."); }
     });
   };

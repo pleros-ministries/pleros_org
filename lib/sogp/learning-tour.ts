@@ -37,9 +37,9 @@ export const TOUR_ROUTES: Record<TourRoute, string> = {
   learning: "/dashboard/sogp",
 };
 
-export function routeOf(pathname: string): TourRoute | null {
+export function routeOf(pathname: string, routes: Record<TourRoute, string> = TOUR_ROUTES): TourRoute | null {
   const path = pathname.replace(/\/+$/, "") || "/";
-  return (Object.entries(TOUR_ROUTES) as Array<[TourRoute, string]>).find(([, href]) => href === path)?.[0] ?? null;
+  return (Object.entries(routes) as Array<[TourRoute, string]>).find(([, href]) => href === path)?.[0] ?? null;
 }
 
 export function tourSteps(path: TourPath | null, mode: TourMode | null, names: TourNames): TourStep[] {
