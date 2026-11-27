@@ -10,7 +10,7 @@ import {
 import { toLagosDateKey } from "@/lib/sogp/formation-progress";
 
 import * as schema from "../schema";
-import { getPodcastEpisodeProgress } from "./podcast-progress";
+import { getPodcastEpisodeProgress, getPodcastListenedOn } from "./podcast-progress";
 import { getMorningPrayerWatchDateKeys } from "./prayer-watch";
 
 export type PodcastJourneyData = {
@@ -19,6 +19,8 @@ export type PodcastJourneyData = {
   calendarEndKey: string;
   episodes: RssEpisode[];
   listenedEpisodeGuids: string[];
+  /** This month: the Lagos day each episode was first marked listened. */
+  listenedOn: Record<string, string>;
   prayerDateKeys: string[];
   /** The stored choice; `resolvePodcastJourney` decides what it shows. */
   track: string;
@@ -76,25 +78,6 @@ export async function setPodcastTrack(
     });
 }
 
-export async function setPodcastLeaderboardVisible(
-  userId: string,
-  visible: boolean,
-  todayKey: string,
-) {
-  await db
-    .insert(schema.podcastJourneys)
-    .values({
-      userId,
-      track: PODCAST_FOUNDATIONS_TRACK,
-      startedOn: todayKey,
-      leaderboardVisible: visible,
-    })
-    .onConflictDoUpdate({
-      target: schema.podcastJourneys.userId,
-      set: { leaderboardVisible: visible, updatedAt: sql`now()` },
-    });
-}
-
 export async function getPodcastJourney(
   userId: string,
   now = new Date(),
@@ -102,7 +85,8 @@ export async function getPodcastJourney(
   const todayKey = toLagosDateKey(now);
   const journey = await ensurePodcastJourney(userId, todayKey);
   const previousMonthStartKey = getPodcastPreviousMonthStartKey(todayKey);
-  const [episodes, listenedEpisodeGuids, prayerDateKeys, joinedAt] =
+  const monthStartKey = `${todayKey.slice(0, 7)}-01`;
+  const [episodes, listenedEpisodeGuids, prayerDateKeys, joinedAt, listenedOn] =
     await Promise.all([
       fetchAnchorEpisodes(),
       getPodcastEpisodeProgress(userId),
@@ -117,6 +101,7 @@ export async function getPodcastJourney(
         todayKey,
       ),
       getUserJoinedAt(userId),
+      getPodcastListenedOn(userId, monthStartKey, todayKey),
     ]);
   const { startKey, endKey } = getPodcastCalendarWindow({
     todayKey,
@@ -129,6 +114,7 @@ export async function getPodcastJourney(
     calendarEndKey: endKey,
     episodes,
     listenedEpisodeGuids,
+    listenedOn,
     prayerDateKeys,
     track: journey.track,
     startedOn: journey.startedOn,

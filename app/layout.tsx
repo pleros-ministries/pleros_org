@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { RootIntegrations } from "@/components/root-integrations";
-import { Be_Vietnam_Pro, DM_Sans, Figtree, Sen } from "next/font/google";
+import { Be_Vietnam_Pro, Sen } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 
@@ -53,21 +53,6 @@ const beVietnamPro = Be_Vietnam_Pro({
   display: "swap",
 });
 
-const figtree = Figtree({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
-  variable: "--font-figtree",
-  display: "swap",
-});
-
-const dmSans = DM_Sans({
-  subsets: ["latin"],
-  style: ["italic"],
-  weight: ["300", "400", "500"],
-  variable: "--font-dm-sans",
-  display: "swap",
-});
-
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "https://pleros.org"),
   title: {
@@ -93,7 +78,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${suisseIntl.variable} ${sen.variable} ${beVietnamPro.variable} ${figtree.variable} ${dmSans.variable}`}
+      className={`${suisseIntl.variable} ${sen.variable} ${beVietnamPro.variable}`}
       suppressHydrationWarning
     >
       <body className="page-shell antialiased" suppressHydrationWarning>

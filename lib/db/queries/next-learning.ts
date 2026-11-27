@@ -16,7 +16,7 @@ import {
 import { toLagosDateKey } from "@/lib/sogp/formation-progress";
 
 import { ensurePodcastJourney } from "./podcast-journey";
-import { getPodcastEpisodeProgress } from "./podcast-progress";
+import { getPodcastEpisodeProgress, getPodcastListenedOn } from "./podcast-progress";
 import { getMorningPrayerWatchDateKeys } from "./prayer-watch";
 
 /**
@@ -87,17 +87,20 @@ export function ownJourneyEpisodes(guids: readonly string[], episodes: readonly 
   return guids.map(guid => byGuid.get(guid)).filter((episode): episode is RssEpisode => Boolean(episode));
 }
 
-export type NextLearningCard = { kind: "podcast"; title: string; dayNumber: number; totalDays: number; listened: number; finished: boolean; episodeTitle: string | null; todayListened: boolean };
+/** `episodeNumber` is today's episode's place in the plan; days belong to the shared month (Pastor, 25 November 2026). */
+export type NextLearningCard = { kind: "podcast"; title: string; episodeNumber: number; totalDays: number; listened: number; finished: boolean; episodeTitle: string | null; todayListened: boolean };
 
 /** What Learning shows for the chosen next learning. */
 export async function getNextLearningCard(userId: string): Promise<NextLearningCard | null> {
   const today = toLagosDateKey(new Date());
   const journey = await ensurePodcastJourney(userId, today);
-  const [episodes, listened, own, prayer] = await Promise.all([
+  const monthStartKey = `${today.slice(0, 7)}-01`;
+  const [episodes, listened, own, prayer, listenedOn] = await Promise.all([
     fetchAnchorEpisodes(),
     getPodcastEpisodeProgress(userId),
     getOwnJourneyGuids(userId),
-    getMorningPrayerWatchDateKeys(userId, journey.startedOn, today),
+    getMorningPrayerWatchDateKeys(userId, monthStartKey, today),
+    getPodcastListenedOn(userId, monthStartKey, today),
   ]);
   const resolved = resolvePodcastJourney({
     track: journey.track,
@@ -106,8 +109,10 @@ export async function getNextLearningCard(userId: string): Promise<NextLearningC
     ownEpisodes: ownJourneyEpisodes(own, episodes),
   });
   if (resolved.kind !== "plan") return null;
-  const days = buildPodcastJourneyDays({ planEpisodes: resolved.episodes, startedOn: resolved.startedOn, todayKey: today, listenedGuids: new Set(listened), prayerDateKeys: new Set(prayer) });
-  const summary = summarisePodcastJourney(days, today);
-  const day = days[summary.dayNumber - 1];
-  return { kind: "podcast", title: resolved.title, ...summary, episodeTitle: day?.episode?.title ?? null, todayListened: day?.episodeListened ?? false };
+  const listenedGuids = new Set(listened);
+  const days = buildPodcastJourneyDays({ planEpisodes: resolved.episodes, todayKey: today, listenedGuids, listenedOn, prayerDateKeys: new Set(prayer) });
+  const summary = summarisePodcastJourney(resolved.episodes, listenedGuids);
+  const day = days.find(entry => entry.dateKey === today);
+  const index = day?.episode ? resolved.episodes.findIndex(episode => episode.guid === day.episode!.guid) : -1;
+  return { kind: "podcast", title: resolved.title, ...summary, episodeNumber: index >= 0 ? index + 1 : summary.listened, episodeTitle: day?.episode?.title ?? null, todayListened: day?.episodeListened ?? false };
 }

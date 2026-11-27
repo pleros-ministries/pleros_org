@@ -1,0 +1,13 @@
+.git
+.next
+node_modules
+.env*
+!.env.example
+*.pem
+pleros-auth-cred.json
+docs
+tmp
+output
+coverage
+.claude
+.superpowers

@@ -1,0 +1,67 @@
+/* The shared month: Home's day strip grown into a calendar. Learning fills the
+   day in soft blue, as on Home; Prayer Watch and Bible reading are the two dots
+   under it. Colour stays to one blue and grey: nothing here needs attention. */
+
+.calendar { display: grid; min-width: 0; }
+.weekdays, .week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; margin: 0; padding: 0; list-style: none; }
+.weekdays { margin-top: 10px; padding-bottom: 2px; }
+.weekdays span { text-align: center; font-size: 10.5px; line-height: 14px; color: var(--color-text-muted); }
+.week { padding: 1px 0; }
+
+/* Weeks other than this one fold away on Home and open in place. */
+.fold { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows 280ms var(--ease-out), opacity 200ms var(--ease-out); }
+.fold > div { min-height: 0; overflow: hidden; }
+.fold[data-open] { grid-template-rows: 1fr; opacity: 1; }
+
+.day { display: grid; justify-items: center; gap: 4px; width: 100%; min-width: 0; padding: 5px 0 6px; border: 0; border-radius: 12px; background: none; color: var(--color-text); font: inherit; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: background-color 180ms var(--ease-out); }
+.day b { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--color-surface-muted, #f1f2f5); font-family: var(--font-dashboard-heading); font-size: 13.5px; line-height: 18px; font-weight: 500; font-variant-numeric: tabular-nums; transition: background-color 180ms var(--ease-out), color 180ms var(--ease-out); }
+.day[data-learnt] b { background: #e4ebfd; color: #2331ae; }
+.day[data-state="later"] b { color: var(--color-text-muted); }
+.day[data-state="before"] { cursor: default; }
+.day[data-state="before"] b { background: none; color: #b5bac3; }
+.day[data-state="today"] { background: var(--status-blue-bg, #eaf0fd); }
+.day[data-state="today"] b { background: white; color: var(--color-brand-blue); box-shadow: inset 0 0 0 2px var(--color-brand-blue); }
+.day[data-state="today"][data-learnt] b { background: #e4ebfd; }
+.day[aria-pressed="true"]:not([data-state="today"]) { background: #eef0f4; }
+.day:focus-visible { outline: 2px solid var(--color-community-blue, #2056d6); outline-offset: 1px; }
+
+.marks { display: inline-flex; gap: 3px; height: 5px; }
+.marks i { width: 5px; height: 5px; border-radius: 50%; background: #dfe2e8; }
+.marks i[data-on] { background: #2056d6; }
+.day[data-state="later"] .marks, .day[data-state="before"] .marks { visibility: hidden; }
+
+.more { display: flex; align-items: center; justify-content: center; gap: 4px; width: 100%; height: 36px; margin: 2px 0 0; padding: 0; border: 0; background: none; color: var(--color-brand-blue); font: inherit; font-size: 12.5px; font-weight: 500; cursor: pointer; }
+.more svg { transition: transform 180ms var(--ease-out); }
+.more[aria-expanded="true"] svg { transform: rotate(180deg); }
+
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 8px 2px 2px; font-size: 11.5px; line-height: 16px; color: var(--color-text-muted); }
+.legend > span { display: inline-flex; align-items: center; gap: 6px; }
+.legendDay { display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: #e4ebfd; box-shadow: inset 0 0 0 1px #c9d6f8; }
+
+/* The day you open, under the calendar; it folds away the way it came. */
+.detailFold { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 240ms var(--ease-out); }
+.detailFold > div { min-height: 0; overflow: hidden; }
+.detailFold[data-open] { grid-template-rows: 1fr; }
+.detail { display: grid; gap: 10px; margin: 8px 0 4px; padding: 12px; border-radius: 10px; background: #f6f7f9; animation: detail-in 220ms var(--ease-out) both; }
+.detailDate { margin: 0; font-size: 13px; line-height: 18px; font-weight: 500; color: var(--color-text-strong, var(--color-text)); }
+.line { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.line > svg { flex: none; width: 16px; height: 16px; color: var(--color-text-muted); }
+.lineCopy { display: grid; flex: 1; gap: 1px; min-width: 0; }
+.lineCopy > :first-child { font-size: 13px; line-height: 18px; font-weight: 500; }
+.lineCopy > :last-child { font-size: 12px; line-height: 17px; color: var(--color-text-muted); }
+.lineLink { justify-self: start; color: var(--color-brand-blue); text-decoration: none; }
+.lineLink:hover { text-decoration: underline; }
+.check { flex: none; display: grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: var(--color-community-green-ink, #2c6a22); color: white; animation: check-pop 220ms var(--ease-out) both; }
+@keyframes detail-in { from { opacity: 0; transform: translateY(-4px); } }
+@keyframes check-pop { from { opacity: 0; transform: scale(.6); } }
+
+/* The month page */
+.page { display: grid; grid-template-columns: minmax(0, 1fr); align-content: start; gap: 12px; max-width: 640px; margin-inline: auto; padding: 16px 16px max(28px, env(safe-area-inset-bottom)); color: var(--color-community-ink); }
+.page > * { min-width: 0; }
+.page p { margin: 0; }
+.calendarPanel { padding: 2px 10px 10px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .fold, .detailFold, .day, .day b, .more svg { transition: none; }
+  .detail, .check { animation: none; }
+}

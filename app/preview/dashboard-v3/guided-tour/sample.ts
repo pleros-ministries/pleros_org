@@ -57,6 +57,20 @@ export const HUB: Record<TourPath | "none", LearningHubData> = {
       more: { label: "See all 5", href: "#" }, note: "Add teachings from the Library at any time.", empty: null } },
 };
 
+/** The shared month from today to its end, one planned item a day (sample titles). */
+function sampleMonth(todayKey: string, podcast: boolean): HomeSogp["month"] {
+  const [year, month] = todayKey.split("-").map(Number) as [number, number];
+  const length = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  const today = Number(todayKey.slice(8));
+  const key = todayKey.slice(0, 7);
+  const days = Object.fromEntries(Array.from({ length }, (_, index) => {
+    const day = index + 1, dateKey = `${key}-${String(day).padStart(2, "0")}`;
+    const n = day - today + 1;
+    return [dateKey, { dateKey, learning: n >= 1 ? { title: podcast ? `Sample episode ${n}` : `Sample track ${n}`, meta: podcast ? `Episode ${n}` : `Level 1 · track ${n}`, href: "#", done: false } : null, prayer: 0, bible: false }];
+  }));
+  return { key, name: new Date(Date.UTC(year, month - 1, 1)).toLocaleDateString("en-GB", { month: "long", timeZone: "UTC" }), todayKey, daysLeft: length - today + 1, daysSoFar: today, podcast, days };
+}
+
 /** Home, before a path (Choose a learning path) and after one (today's steps). */
 function sogpToday(path: TourPath): HomeSogp {
   const today = new Date(start).toISOString().slice(0, 10);
@@ -64,19 +78,14 @@ function sogpToday(path: TourPath): HomeSogp {
   return {
     cohortTitle: "SOGP November 2026", weekLabel: "Week 1 of 4",
     today: {
-      dateKey: today, dateLabel: new Date(start).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", timeZone: "Africa/Lagos" }), done: 0, total: podcast ? 2 : 3, ended: null,
-      sogpDays: Array.from({ length: 28 }, (_, index) => {
-        const dateKey = new Date(start + index * DAY).toISOString().slice(0, 10);
-        return { number: index + 1, dateKey, weekday: new Date(start + index * DAY).toLocaleDateString("en-GB", { weekday: "short", timeZone: "UTC" }), dayOfMonth: Number(dateKey.slice(8)), state: index === 0 ? "today" as const : "later" as const, review: (index + 1) % 7 === 0,
-          detail: { teaching: (index + 1) % 7 === 0 ? null : { title: `Day ${index + 1}`, href: null, listened: false, assessed: false }, prayed: false, reviewTitle: (index + 1) % 7 === 0 ? `Week ${(index + 1) / 7} group review` : null } };
-      }),
-      dayNumber: 1,
+      dateKey: today, dateLabel: new Date(start).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", timeZone: "Africa/Lagos" }), done: 0, total: podcast ? 2 : 3,
       teaching: { title: path === "sogp" ? "Gospel: The Word of Truth" : path === "podcast" ? "The Reality of God’s Purpose · day 1" : "Understanding the Gospel · day 1", href: "#", done: false, dayNumber: 1, podcast, questionGuid: null },
       prayerWatch: { complete: false },
       assessment: podcast ? null : { complete: false, href: "#" },
       review: null,
     },
-    progress: null, leaderboard: null, invite: null, board: null,
+    month: sampleMonth(today, podcast),
+    progress: null, invite: null,
     group: { kind: "member", groupName: "Ada’s group", leaderFirstName: "Ada" },
     shareDayNumber: null,
   };

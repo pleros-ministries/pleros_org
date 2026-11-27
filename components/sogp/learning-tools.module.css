@@ -1,4 +1,4 @@
-/* Learning tools (calendar, history, leaderboard, certificate, readiness,
+/* Learning tools (calendar, history, certificate, readiness,
    referrals): the Learning hub's look — h1 and a muted line, count strips,
    white panels of rows, status pills and blue actions. Fits a 360px phone. */
 
@@ -67,25 +67,6 @@ button.row { cursor: pointer; }
 .field { display: grid; gap: 6px; min-width: 0; font-size: 13px; font-weight: 500; }
 .input { width: 100%; min-width: 0; height: 40px; padding: 0 12px; border: 1px solid var(--dashboard-panel-edge, #e2e5ea); border-radius: 10px; background: white; color: var(--color-text-strong); font: inherit; font-size: 16px; font-weight: 400; outline: none; }
 .input:focus { border-color: var(--color-community-blue, #2056d6); }
-
-/* Leaderboard: rank chips with medal tints for the top three, your row in blue. */
-.board { overflow: hidden; border: 1px solid var(--dashboard-panel-edge, #e2e5ea); border-radius: 12px; background: white; }
-.boardHead { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid var(--color-line, #e7e9ec); }
-.boardHead h2 { margin: 0; font-family: var(--font-dashboard-heading); font-size: 15px; line-height: 20px; font-weight: 500; }
-.boardIcon { display: grid; flex: none; place-items: center; width: 32px; height: 32px; border-radius: 9px; background: #fff1c2; color: #8a5a00; }
-.boardList { margin: 0; padding: 6px; list-style: none; }
-.boardRow { display: flex; align-items: center; gap: 10px; min-width: 0; min-height: 40px; padding: 4px 8px; border-radius: 8px; }
-.boardRow[data-me] { --color-text-muted: var(--color-text-on-sky); background: #eef3fe; }
-.boardRow[data-me] .boardName { color: var(--color-community-blue, #2056d6); font-weight: 500; }
-.boardRank { display: grid; flex: none; place-items: center; width: 24px; height: 24px; border-radius: 7px; background: #f1f2f5; color: var(--color-text-muted); font-size: 11.5px; font-weight: 600; font-variant-numeric: tabular-nums; }
-.boardRank[data-rank="1"] { background: #fde68a; color: #7a5200; }
-.boardRank[data-rank="2"] { background: #e5e7eb; color: #4b5260; }
-.boardRank[data-rank="3"] { background: #f6d5b8; color: #7a3a10; }
-.boardCopy { display: grid; flex: 1; min-width: 0; }
-.boardName { overflow: hidden; font-size: 13px; line-height: 18px; color: var(--color-text-strong); text-overflow: ellipsis; white-space: nowrap; }
-.boardPts { flex: none; font-family: var(--font-dashboard-heading); font-size: 13px; font-weight: 500; font-variant-numeric: tabular-nums; color: var(--color-text-strong); }
-.boardPts small { font-family: var(--font-dashboard); font-size: 11px; font-weight: 400; color: var(--color-text-muted); }
-.streak { display: inline-flex; align-items: center; gap: 3px; font-size: 11.5px; line-height: 15px; color: #8a5a00; }
 
 /* Calendar and assessments: on wide screens the calendar sits beside the day. */
 @media (min-width: 64rem) {

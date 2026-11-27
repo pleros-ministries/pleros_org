@@ -77,11 +77,11 @@ export function tourSteps(path: TourPath | null, mode: TourMode | null, names: T
     ],
     podcast: [
       { id: "pace", route: "choose", kind: "spot", target: "pace", advance: "tap", title: "Choose your pace", body: "15 minutes is one episode a day. 30 minutes is two.", tap: "Tap a pace" },
-      { id: "finish", route: "choose", kind: "spot", target: "pace-finish", advance: "next", optional: true, title: "Where it leads", body: "Thirty days of episodes, then the doctrinal path from level 1." },
+      { id: "finish", route: "choose", kind: "spot", target: "pace-finish", advance: "next", optional: true, title: "Where it leads", body: "Thirty episodes, then the doctrinal path from level 1." },
       { id: "go", route: "choose", kind: "spot", target: "path-continue", advance: "tap-nav", title: "Now your plan", body: "Your path saves now, so you won’t lose it.", tap: "Tap Build my podcast plan" },
       { id: "tabs", route: "plan", kind: "spot", target: "plan-tabs", advance: "tap", title: "Ours, or your own", body: "Take our suggested plan in one tap, or build your own from any series.", tap: "Tap one" },
       ...(mode === "own" ? picker("series", "episode") : [
-        { id: "order", route: "plan" as const, kind: "spot" as const, target: "plan-order", advance: "next" as const, title: "What you’ll hear", body: "Each series in order, with the days it falls on." },
+        { id: "order", route: "plan" as const, kind: "spot" as const, target: "plan-order", advance: "next" as const, title: "What you’ll hear", body: "Each series in order, with the dates it falls on." },
         { id: "use", route: "plan" as const, kind: "spot" as const, target: "plan-use", advance: "tap-nav" as const, title: "Start listening", body: "You can still swap or reorder episodes later.", tap: "Tap Use this plan" },
       ]),
     ],

@@ -8,7 +8,6 @@ import {
   BookOpenIcon,
   CheckIcon,
   CopyIcon,
-  FlameIcon,
   GraduationCapIcon,
   LinkIcon,
   LockIcon,
@@ -21,7 +20,6 @@ import { discipleshipJourneySections } from "@/lib/discipleship-journey-content"
 import { PRE_SOGP_PREPARATION_DAYS } from "@/lib/sogp/calendar";
 import { SOGP_LEVELS, SOGP_TRACKS } from "@/lib/sogp/curriculum";
 import { shiftDate } from "@/lib/sogp/daily-date";
-import { LEADERBOARD_POINTS, computeStreaks, rankByPoints, scoreParticipant } from "@/lib/sogp/leaderboard-scoring";
 import { buildPreSogpSeed } from "@/lib/sogp/preparation-seed";
 import { cn } from "@/lib/utils";
 import { devotionFor } from "@/lib/preview/pleros/daily-report";
@@ -30,14 +28,13 @@ import {
   COHORT_WEEKS,
   cohortLabel,
   dayState,
-  isDayComplete,
   prayedMorning,
   sogpProgress,
   sogpSchedule,
   teachingDone,
   type SogpDayState,
 } from "@/lib/preview/pleros/sogp";
-import type { DemoPerson, DemoState } from "@/lib/preview/pleros/types";
+import type { DemoPerson } from "@/lib/preview/pleros/types";
 
 import { useDemo } from "../demo-context";
 import { Badge, EmptyState, PageHeader, StatStrip, buttonPrimary, buttonSecondary, dayNumber, focusRing, longDate, panel, shortDate, weekday } from "../ui";
@@ -236,71 +233,6 @@ export function SogpCourseDestination() {
           );
         })}
       </div>
-    </div>
-  );
-}
-
-// ─── SOGP leaderboard ─────────────────────────────────────────────────────
-
-function cohortScore(state: DemoState, person: DemoPerson) {
-  const schedule = sogpSchedule(state.today).filter((day) => day.dateKey <= state.today);
-  const counts = { quizPassed: 0, writtenApproved: 0, daysCompleted: 0, prayerWatch: 0, reviews: 0, preparationDays: 0, shares: 0, referrals: 0 };
-  const active: string[] = [];
-  for (const day of schedule) {
-    const record = devotionFor(state, person.id, day.dateKey);
-    if (record.sogp?.quizAttempted) counts.quizPassed += 1;
-    if (record.sogp?.writtenSubmitted) counts.writtenApproved += 1;
-    if (isDayComplete(day, record)) counts.daysCompleted += 1;
-    if (prayedMorning(record)) counts.prayerWatch += 1;
-    if (record.sogp?.reviewAttended) counts.reviews += 1;
-    if (record.sogp?.listened || prayedMorning(record) || record.sogp?.reviewAttended) active.push(day.dateKey);
-  }
-  counts.preparationDays = 9 + Math.floor(seeded(`${person.id}:prep-days`) * 6);
-  counts.shares = Math.floor(seeded(`${person.id}:shares`) * 4);
-  counts.referrals = Math.floor(seeded(`${person.id}:referrals`) * 3);
-  const streaks = computeStreaks(active, state.today);
-  return { breakdown: scoreParticipant(counts, streaks.longest), currentStreak: streaks.current };
-}
-
-export function SogpLeaderboardDestination() {
-  const { state, viewer, today } = useDemo();
-  if (!viewer.inCohort) return <NotInCohort title="SOGP leaderboard" />;
-  const rows = rankByPoints(
-    state.people
-      .filter((person) => person.inCohort)
-      .map((person) => {
-        const score = cohortScore(state, person);
-        return { id: person.id, name: person.firstName, points: score.breakdown.total, breakdown: score.breakdown, currentStreak: score.currentStreak };
-      }),
-  );
-  const me = rows.find((row) => row.id === viewer.id)!;
-
-  return (
-    <div className="grid gap-6">
-      <PageHeader eyebrow={cohortLabel(today)} title="SOGP leaderboard" />
-      <StatStrip
-        items={[
-          { label: "Your rank", value: `#${me.rank}`, detail: `of ${rows.length}` },
-          { label: "Course", value: me.breakdown.course },
-          { label: "Attendance", value: me.breakdown.attendance },
-          { label: "Sharing and streaks", value: me.breakdown.sharing + me.breakdown.streak },
-        ]}
-      />
-      <Section title="Cohort ranking" detail={`${rows.length} learners`}>
-        <ol className={cn(panel, "divide-y divide-(--color-line) overflow-hidden")}>
-          {rows.map((row) => (
-            <li key={row.id} className={cn("flex items-center gap-3 px-4 py-2.5 sm:px-5", row.id === viewer.id && "bg-(--color-brand-sky-soft)")}>
-              <span className={cn("grid size-7 shrink-0 place-items-center rounded-full text-[12px] font-medium tabular-nums", row.rank <= 3 ? "bg-(--color-brand-lime) text-(--color-brand-blue)" : "bg-(--color-surface-muted) text-(--color-text-muted)")}>{row.rank}</span>
-              <span className="min-w-0 flex-1 truncate text-[13.5px] font-medium text-(--color-text-strong)">{row.name}{row.id === viewer.id ? " (you)" : ""}</span>
-              {row.currentStreak > 1 ? <span className="inline-flex items-center gap-0.5 text-[12px] text-(--color-text-muted)"><FlameIcon className="size-3.5" aria-hidden />{row.currentStreak}</span> : null}
-              <span className="w-14 text-right text-[13px] font-medium tabular-nums text-(--color-brand-blue)">{row.points}</span>
-            </li>
-          ))}
-        </ol>
-      </Section>
-      <p className="text-[12px] text-(--color-text-muted)">
-        {LEADERBOARD_POINTS.quizPassed} per quiz, {LEADERBOARD_POINTS.dayCompleted} per completed day, {LEADERBOARD_POINTS.prayerWatch} per morning Prayer Watch, {LEADERBOARD_POINTS.review} per review and {LEADERBOARD_POINTS.referral} per referral. First names only.
-      </p>
     </div>
   );
 }

@@ -525,6 +525,8 @@ export const studentProgress = pgTable(
       .notNull()
       .references(() => lessons.id, { onDelete: "cascade" }),
     audioListened: boolean("audio_listened").notNull().default(false),
+    /** When the teaching was first marked listened (migration 0081); null for earlier listens. */
+    audioListenedAt: timestamp("audio_listened_at", { withTimezone: true }),
     notesRead: boolean("notes_read").notNull().default(false),
     quizPassed: boolean("quiz_passed").notNull().default(false),
     highestQuizScore: integer("highest_quiz_score"),
@@ -938,10 +940,11 @@ export const podcastEpisodeProgress = pgTable(
 );
 
 /**
- * One row per podcast listener: the daily journey they follow and whether
- * they appear on the podcast leaderboard. `track` is `foundations`, `latest`
- * or `series:<id>` (`lib/podcast-journey.ts`); `started_on` is the Lagos date
- * of Day 1. The row is created on the listener's first visit.
+ * One row per podcast listener: the daily journey they follow. `track` is
+ * `foundations`, `latest` or `series:<id>` (`lib/podcast-journey.ts`);
+ * `started_on` is the Lagos date of Day 1. The row is created on the
+ * listener's first visit. The old opt-in `leaderboard_visible` column is
+ * unused since the monthly leaderboard (migration 0082) and dropped later.
  */
 export const podcastJourneys = pgTable("podcast_journeys", {
   userId: text("user_id")
@@ -949,7 +952,6 @@ export const podcastJourneys = pgTable("podcast_journeys", {
     .references(() => users.id, { onDelete: "cascade" }),
   track: text("track").notNull().default("foundations"),
   startedOn: date("started_on", { mode: "string" }).notNull(),
-  leaderboardVisible: boolean("leaderboard_visible").notNull().default(false),
   createdAt: timestamp("created_at", { withTimezone: true })
     .notNull()
     .defaultNow(),
@@ -1102,9 +1104,9 @@ export const sogpEnrollments = pgTable(
     }),
     reason: text("reason"),
     status: sogpEnrollmentStatusEnum("status").notNull().default("enrolled"),
-    // Optional per-cohort display name shown on the leaderboard instead of
-    // the learner's real name. Null means "show my real name".
-    leaderboardAlias: text("leaderboard_alias"),
+    // The old per-cohort `leaderboard_alias` column (and its unique index) is
+    // unused since the monthly leaderboard (`leaderboard_profiles`, migration
+    // 0082) and dropped later.
     // Admin-set Fullness of Christ Church membership tag; null = not set.
     fullnessMembership: sogpFullnessMembershipEnum("fullness_membership"),
     // Per-student referral link code (minted lazily) and the enrolment that
@@ -1139,9 +1141,35 @@ export const sogpEnrollments = pgTable(
       .on(t.referralCode)
       .where(sql`${t.referralCode} IS NOT NULL`),
     index("sogp_enrollments_referred_by_idx").on(t.referredByEnrollmentId),
-    uniqueIndex("sogp_enrollments_cohort_leaderboard_alias_idx")
-      .on(t.cohortId, t.leaderboardAlias)
-      .where(sql`${t.leaderboardAlias} IS NOT NULL`),
+  ],
+);
+
+/**
+ * How a person appears on the monthly leaderboard (Pastor, 25 November 2026;
+ * migration 0082). Everyone is on the board by default; `hidden` takes them
+ * off it (they still see their own rank), and `alias` is shown instead of
+ * their first name, unique regardless of case.
+ */
+export const leaderboardProfiles = pgTable(
+  "leaderboard_profiles",
+  {
+    userId: text("user_id")
+      .primaryKey()
+      .references(() => users.id, { onDelete: "cascade" }),
+    hidden: boolean("hidden").notNull().default(false),
+    alias: text("alias"),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (t) => [
+    uniqueIndex("leaderboard_profiles_alias_idx")
+      .on(sql`lower(${t.alias})`)
+      .where(sql`${t.alias} IS NOT NULL`),
+    check(
+      "leaderboard_profiles_alias_length",
+      sql`${t.alias} IS NULL OR char_length(${t.alias}) BETWEEN 2 AND 24`,
+    ),
   ],
 );
 

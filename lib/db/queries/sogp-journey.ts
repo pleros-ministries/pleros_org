@@ -9,6 +9,8 @@ import {
   getPreSogpCountdown,
   resolvePreparationStartsAt,
 } from "@/lib/sogp/calendar";
+import { LATE_RECORD_DAYS } from "@/lib/leaderboard/monthly";
+import { shiftDateKey } from "@/lib/notifications/zoned-time";
 import { toLagosDateKey } from "@/lib/sogp/formation-progress";
 import { calculateSogpEligibility } from "@/lib/sogp/assessment";
 import {
@@ -371,14 +373,23 @@ export async function setSogpMorningPrayerComplete(input: {
       row.cohort.preparationStartsAt,
     ),
   );
-  if (
-    !isDateWithinSogpWindow({
-      dateKey: input.dateKey,
-      startDateKey: preparationDates[0]!,
-      endDateKey: toLagosDateKey(row.cohort.endsAt),
-      todayKey: toLagosDateKey(new Date()),
-    })
-  ) {
+  const todayKey = toLagosDateKey(new Date());
+  // The cohort's own dates, or any day of the last week: Prayer Watch runs
+  // every day of the shared month (Pastor, 25 November 2026), with the same
+  // seven days' grace as reports.
+  const withinCohort = isDateWithinSogpWindow({
+    dateKey: input.dateKey,
+    startDateKey: preparationDates[0]!,
+    endDateKey: toLagosDateKey(row.cohort.endsAt),
+    todayKey,
+  });
+  const withinWeek = isDateWithinSogpWindow({
+    dateKey: input.dateKey,
+    startDateKey: shiftDateKey(todayKey, -LATE_RECORD_DAYS),
+    endDateKey: todayKey,
+    todayKey,
+  });
+  if (!withinCohort && !withinWeek) {
     throw new Error("That Prayer Watch date is unavailable.");
   }
   if (input.complete) {

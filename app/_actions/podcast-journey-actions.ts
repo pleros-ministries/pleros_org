@@ -5,10 +5,7 @@ import { revalidatePath } from "next/cache";
 import { fetchAnchorEpisodes } from "@/lib/anchor-rss";
 import { getDashboardActionSession } from "@/lib/dashboard-action-session";
 import { getOwnJourneyGuids } from "@/lib/db/queries/next-learning";
-import {
-  setPodcastLeaderboardVisible,
-  setPodcastTrack,
-} from "@/lib/db/queries/podcast-journey";
+import { setPodcastTrack } from "@/lib/db/queries/podcast-journey";
 import {
   buildPodcastSeriesCatalogue,
   isPodcastTrackAvailable,
@@ -43,21 +40,5 @@ export async function choosePodcastTrackAction(
 
   await setPodcastTrack(session.user.id, track, toLagosDateKey(new Date()));
   revalidatePath("/dashboard/podcast");
-  return { ok: true };
-}
-
-export async function setPodcastLeaderboardVisibilityAction(
-  visible: boolean,
-): Promise<PodcastJourneyActionResult> {
-  const session = await getDashboardActionSession();
-  if (!session) return { ok: false, error: SIGNED_OUT };
-
-  await setPodcastLeaderboardVisible(
-    session.user.id,
-    visible === true,
-    toLagosDateKey(new Date()),
-  );
-  revalidatePath("/dashboard/podcast");
-  revalidatePath("/dashboard/podcast/leaderboard");
   return { ok: true };
 }

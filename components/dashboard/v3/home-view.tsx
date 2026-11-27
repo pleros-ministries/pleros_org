@@ -4,16 +4,15 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type ReactNode } from "react";
-import { BookOpenCheckIcon, BookOpenIcon, CheckIcon, ChevronDownIcon, ClipboardCheckIcon, CopyIcon, GiftIcon, HeadphonesIcon, HeartHandshakeIcon, Share2Icon, TrophyIcon, UserPlusIcon, UsersRoundIcon } from "lucide-react";
-import { ReportSheet, sheetStyles as sheet } from "@/components/community/report/report-sheet";
-import type { DashboardHomeData, HomeLearningCard, HomeReport, HomeSogp, HomeSogpDay, HomeToday } from "@/lib/dashboard/home";
+import { BookOpenCheckIcon, CheckIcon, ClipboardCheckIcon, CopyIcon, GiftIcon, HeadphonesIcon, Share2Icon, TrophyIcon, UserPlusIcon, UsersRoundIcon } from "lucide-react";
+import type { DashboardHomeData, HomeLeaderboard, HomeLearningCard, HomeMonth, HomeReport, HomeSogp, HomeToday } from "@/lib/dashboard/home";
 import { PRAYER_WATCH_YOUTUBE_URL } from "@/lib/prayer-watch";
 import { buildReferralShareMessage } from "@/lib/sogp/referral";
 import { useAskAfterTeaching } from "@/components/sogp/ask-after-teaching";
 import { LeaderboardPreview } from "@/components/sogp/learning/leaderboard-preview";
 import { DashboardIcon, StatusPill } from "./primitives";
 import styles from "./dashboard.module.css";
-import strip from "./sogp-day-strip.module.css";
+import { MonthCalendar } from "@/components/dashboard/month/month-calendar";
 
 // Only loaded when a learner opens it.
 const ShareLearningProgressDialog = dynamic(() => import("@/components/sogp/share-learning-progress-dialog").then(module => module.ShareLearningProgressDialog), { ssr: false });
@@ -60,8 +59,8 @@ function learningDoor(card: HomeLearningCard | undefined, fallback: DashboardHom
     return {
       href: card.href,
       meta: card.doctrinal ? "One a day · Personalised path" : `${card.pace === 2 ? "30" : "15"} min/day · Podcast path`,
-      title: `Day ${card.dayNumber} is waiting for you`,
-      summary: card.doctrinal ? card.series : `${listened} of ${card.episodes.length} ${episodeLabel} marked listened`,
+      title: card.series,
+      summary: card.doctrinal ? "Today’s teaching" : `${card.episodes.map(episode => episode.part).join(" and ")} · ${listened} of ${card.episodes.length} ${episodeLabel} listened`,
       action: active?.positionSeconds ? "Resume learning" : "Start learning",
       value: listened,
       total: card.episodes.length,
@@ -170,58 +169,6 @@ function ReportsDestination({ day, rows }: { day: string; rows: HomeReport[] }) 
   </section>;
 }
 
-const dayStateLabel = { done: "done", missed: "to catch up", today: "today", later: "upcoming" } as const;
-const monthFormat = new Intl.DateTimeFormat("en-GB", { month: "long", timeZone: "UTC" });
-
-/** A row of SOGP days: the big number is the SOGP day, the weekday and date sit under it. */
-function DayWeek({ days, label, onOpen }: { days: HomeSogpDay[]; label?: string; onOpen: (day: HomeSogpDay) => void }) {
-  return <>
-    {label ? <p className={strip.weekLabel}>{label}</p> : null}
-    <ol className={strip.strip} aria-label={label ?? "This week of SOGP"}>
-      {/* Every day can be tapped to see what it held (Pastor, 22 October). */}
-      {days.map(day => <li key={day.dateKey}>
-        <button type="button" onClick={() => onOpen(day)} className={`${strip.day} w-full cursor-pointer border-0 bg-transparent`} data-state={day.state === "today" ? undefined : day.state} data-today={day.state === "today" || undefined} data-review={day.review || undefined}
-          aria-label={`Day ${day.number}, ${day.weekday} ${day.dayOfMonth} ${monthFormat.format(new Date(`${day.dateKey}T00:00:00.000Z`))}${day.review ? ", group review" : ""}, ${dayStateLabel[day.state]}. Open to see what it held`}>
-          <b>{day.number}</b>
-          <span>{day.weekday} {day.dayOfMonth}</span>
-        </button>
-      </li>)}
-    </ol>
-  </>;
-}
-
-function DayLine({ icon, title, detail, done }: { icon: ReactNode; title: string; detail: string; done: boolean }) {
-  return <div className="flex items-center gap-3">
-    <span className="shrink-0 text-(--color-text-muted) [&>svg]:size-4" aria-hidden="true">{icon}</span>
-    {/* The label, then muted detail beneath it, so the sheet reads in order. */}
-    <span className="grid min-w-0 flex-1 gap-0.5"><span className="text-[13.5px] leading-5 font-medium">{title}</span><span className="text-[12.5px] leading-[18px] text-(--color-text-muted)">{detail}</span></span>
-    <span className="grid size-5 shrink-0 place-items-center rounded-full border-[1.5px]" style={{ borderColor: done ? "var(--color-community-green-ink)" : "#c9ced6", background: done ? "var(--color-community-green-ink)" : "transparent" }} aria-label={done ? "Done" : "Not yet"}>
-      {done ? <CheckIcon className="size-3 text-white" strokeWidth={3} aria-hidden="true" /> : null}
-    </span>
-  </div>;
-}
-
-/** One SOGP day, opened from the strip: its teaching, Prayer Watch and assessment, each ticked or not. */
-function DaySheet({ day, onClose }: { day: HomeSogpDay; onClose: () => void }) {
-  const router = useRouter();
-  const date = `${day.weekday} ${day.dayOfMonth} ${monthFormat.format(new Date(`${day.dateKey}T00:00:00.000Z`))}`;
-  const { teaching, prayed, reviewTitle } = day.detail;
-  const subtitle = day.review ? "Group review day" : day.state === "later" ? "Opens on the day" : day.state === "today" ? "Today" : day.state === "missed" ? "Something still to catch up" : "All done";
-  return <ReportSheet title={`Day ${day.number} · ${date}`} subtitle={subtitle} onClose={onClose}
-    footer={close => <>
-      <button type="button" className={sheet.quiet} onClick={close}>Close</button>
-      {teaching?.href && day.state !== "later" ? <button type="button" className={`${sheet.primary} ${sheet.fit}`} onClick={() => { close(); router.push(teaching.href!); }}>Open the teaching</button> : null}
-    </>}>
-    {() => day.state === "later" && !day.review ? <p className={sheet.muted}>{teaching ? `${teaching.title} opens on ${date}.` : `This day opens on ${date}.`}</p>
-      : <div className="grid gap-3.5">
-        {reviewTitle ? <DayLine icon={<UsersRoundIcon />} title="Group review" detail={reviewTitle} done={day.state === "done"} /> : null}
-        {teaching ? <DayLine icon={<BookOpenIcon />} title="Teaching" detail={teaching.title} done={teaching.listened} /> : null}
-        {day.state === "later" ? null : <DayLine icon={<HeartHandshakeIcon />} title="Prayer Watch" detail="Morning, 5:30 am" done={prayed} />}
-        {teaching ? <DayLine icon={<ClipboardCheckIcon />} title="Assessment" detail="Quiz and written response" done={teaching.assessed} /> : null}
-      </div>}
-  </ReportSheet>;
-}
-
 function Tick({ done, label, pending, onToggle }: { done: boolean; label: string; pending?: boolean; onToggle?: () => void }) {
   return <button type="button" className={styles.homeTick} data-complete={done} aria-pressed={done} disabled={pending || !onToggle} onClick={onToggle} aria-label={label}>
     <span>{done ? <DashboardIcon name="check" size={16} /> : null}</span>
@@ -299,38 +246,27 @@ function PrayerWatchRow({ today }: { today: HomeToday }) {
 }
 
 /**
- * Today (Pastor, 21 October): your SOGP days, one week with all of them a tap
- * away, then Teaching, Prayer Watch and Assessment (traditional path only,
- * done once the quiz and written response are), then Share what you learnt.
+ * Today: the shared month (Pastor, 25 November 2026), folded to this week with
+ * the rest a tap away, then Teaching, Prayer Watch and Assessment (traditional
+ * path only, done once the quiz and written response are).
  */
-function TodaySection({ today }: { today: HomeToday }) {
-  const [open, setOpen] = useState(false);
-  const [opened, setOpened] = useState<HomeSogpDay | null>(null);
-  const days = today.sogpDays;
-  const at = today.dayNumber ?? days.filter(day => day.dateKey <= today.dateKey).at(-1)?.number ?? 1;
-  const weekStart = Math.floor((at - 1) / 7) * 7;
-  const weeks = Array.from({ length: Math.ceil(days.length / 7) }, (_, index) => days.slice(index * 7, index * 7 + 7));
+function TodaySection({ today, month }: { today: HomeToday; month: HomeMonth | null }) {
   return <section className={styles.homeSection} aria-labelledby="home-today-heading" data-tour="home-today">
     <div className={styles.homeSectionHeader}>
-      <h2 id="home-today-heading">{today.ended ? "Your SOGP days" : "Today"}</h2>
+      <h2 id="home-today-heading">Today</h2>
       {today.total > 0 ? <span className={styles.metadata}>{today.done} of {today.total} done</span> : null}
     </div>
     <div className={styles.homePanel}>
       <div className={styles.homeTodayHead}>
-        <span className={styles.rowTitle}>{today.ended
-          ? `Finished ${today.ended.lastLabel} · ${today.ended.toCatchUp ? `${today.ended.toCatchUp} ${today.ended.toCatchUp === 1 ? "day" : "days"} to catch up` : "all caught up"}`
-          : <>{today.dayNumber ? `Day ${today.dayNumber} of ${days.length} · ` : ""}{today.dateLabel}</>}</span>
+        <span className={styles.rowTitle}>{today.dateLabel}</span>
+        {month ? <span className={styles.metadata}>{month.daysSoFar === 1 ? "A new month" : month.daysLeft === 1 ? "Last day" : `${month.daysLeft} days left`}</span> : null}
       </div>
-      {days.length ? <>
-        {open ? <div className={strip.weeks}>{weeks.map((week, index) => <DayWeek key={index} label={`Week ${index + 1}`} days={week} onOpen={setOpened} />)}</div>
-          : <DayWeek days={days.slice(weekStart, weekStart + 7)} onOpen={setOpened} />}
-        {days.length > 7 ? <button type="button" className={strip.more} aria-expanded={open} onClick={() => setOpen(value => !value)}>
-          {open ? "Show this week only" : `See all ${days.length} days`}<ChevronDownIcon className="size-4" strokeWidth={2.2} aria-hidden="true" />
-        </button> : null}
-        <div className={strip.divider} />
+      {month ? <>
+        <MonthCalendar monthKey={month.key} todayKey={month.todayKey} days={month.days} podcast={month.podcast} collapsible />
+        <div className={styles.homeDivider} />
       </> : null}
-      {today.teaching ? <TeachingRow teaching={today.ended && today.teaching.dayNumber ? { ...today.teaching, title: `Track ${today.teaching.dayNumber} · ${today.teaching.title}` } : today.teaching} /> : null}
-      {today.prayerWatch ? <PrayerWatchRow today={today} /> : null}
+      {today.teaching ? <TeachingRow teaching={today.teaching} /> : null}
+      <PrayerWatchRow today={today} />
       {today.assessment ? <div className={styles.homeTaskRow}>
         <span className={styles.homeReportIcon} data-tone="lilac"><ClipboardCheckIcon className="size-4" strokeWidth={2} /></span>
         <span className={styles.rowCopy}>
@@ -340,7 +276,6 @@ function TodaySection({ today }: { today: HomeToday }) {
         <Tick done={today.assessment.complete} label={today.assessment.complete ? "Assessment done" : "Marked done when you finish the quiz and written response"} />
       </div> : null}
     </div>
-    {opened ? <DaySheet day={opened} onClose={() => setOpened(null)} /> : null}
   </section>;
 }
 
@@ -374,14 +309,14 @@ function ActionRow({ href, icon, tone, title, children, action, prefetch, onClic
 }
 
 /** Grow together as actionable rows with buttons (Pastor review, 18 October), not illustrated tiles. */
-function GrowTogether({ sogp }: { sogp: HomeSogp }) {
+function GrowTogether({ sogp, leaderboard }: { sogp: HomeSogp; leaderboard: HomeLeaderboard | null | undefined }) {
   const group = sogp.group;
   return <section className={styles.homeSection} aria-labelledby="home-grow-heading">
     <div className={styles.homeSectionHeader}><h2 id="home-grow-heading">Grow together</h2></div>
     <ul className={styles.homeActions}>
       {/* With a board to show, the leaderboard has its own preview under Your progress. */}
-      {sogp.board ? null : <ActionRow href="/dashboard/sogp/leaderboard" icon={<TrophyIcon className="size-4" strokeWidth={2} />} tone={["#fff1c2", "#8a5a00"]} title={sogp.leaderboard ? <>Leaderboard · <span className={styles.homeRank}>#{sogp.leaderboard.rank}</span></> : "Leaderboard"} action="View">
-        <span>{sogp.leaderboard ? `${sogp.leaderboard.points} points this cohort` : "See how your cohort is growing"}</span>
+      {leaderboard?.top.length ? null : <ActionRow href="/dashboard/leaderboard" icon={<TrophyIcon className="size-4" strokeWidth={2} />} tone={["#fff1c2", "#8a5a00"]} title={leaderboard?.me ? <>Leaderboard · <span className={styles.homeRank}>#{leaderboard.me.rank}</span></> : "Leaderboard"} action="View">
+        <span>{leaderboard?.points ? `${leaderboard.points} points in ${leaderboard.month}` : "See who’s growing this month"}</span>
       </ActionRow>}
       {/* With a link to show, Invite someone has its own panel. */}
       {sogp.invite ? null : <ActionRow href="/dashboard/sogp/referrals" icon={<UserPlusIcon className="size-4" strokeWidth={2} />} tone={["#f6d9de", "#5e2236"]} title="Invite someone" action="Share link">
@@ -473,15 +408,15 @@ export function DashboardHomeView({ name, greeting, data }: { name?: string; gre
     <div className={styles.homeMain}>
       <LearningDestination card={data.card} fallback={data.learning} hubHref={learningHubHref} />
       {sogp?.today ? <ShareCard dayNumber={sogp.shareDayNumber} /> : null}
-      {sogp?.today ? <TodaySection today={sogp.today} /> : null}
+      {sogp?.today ? <TodaySection today={sogp.today} month={sogp.month} /> : null}
       {sogp?.progress ? <ProgressSection progress={sogp.progress} /> : null}
-      {/* The same leaderboard preview as Learning (Pastor, 20 October), not one row among the others. */}
-      {sogp?.board ? <div className={styles.homeSection}><LeaderboardPreview board={sogp.board} id="home-leaderboard" dense /></div> : null}
+      {/* The month's board (Pastor, 25 November 2026), for everyone signed in, not one row among the others. */}
+      {data.leaderboard?.top.length ? <div className={styles.homeSection}><LeaderboardPreview board={data.leaderboard} id="home-leaderboard" dense month={data.leaderboard.month} /></div> : null}
     </div>
     <div className={styles.homeSide}>
       {sogp?.invite ? <InvitePanel invite={sogp.invite} /> : null}
       {data.welcomePack && !data.welcomePack.done ? <WelcomePackRow /> : null}
-      {sogp ? <GrowTogether sogp={sogp} /> : null}
+      {sogp ? <GrowTogether sogp={sogp} leaderboard={data.leaderboard} /> : null}
       {data.reports ? <ReportsDestination day={data.day} rows={data.reports} /> : null}
     </div>
   </div>;

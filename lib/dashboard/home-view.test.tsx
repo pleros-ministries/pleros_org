@@ -53,8 +53,10 @@ test("the learning destination uses the approved background with dynamic progres
   expect(html).toContain("my-learning-background-v5.webp");
   expect(html).toContain('href="/dashboard/sogp"');
   expect(html).toContain('href="/dashboard/sogp/listen?day=4"');
-  expect(html).toContain("Day 4 is waiting for you");
-  expect(html).toContain("1 of 2 episodes marked listened");
+  // Days belong to the month now (Pastor, 25 November 2026): the card names the series and today's parts.
+  expect(html).toContain("The Reality of God’s Purpose");
+  expect(html).toContain("Part 7 and Part 8 · 1 of 2 episodes listened");
+  expect(html).not.toContain("Day 4 is waiting");
   expect(html).toContain('aria-valuenow="1"');
   expect(html).toContain('aria-valuemax="2"');
 });
@@ -74,43 +76,60 @@ const sogp: NonNullable<DashboardHomeData["sogp"]> = {
   cohortTitle: "SOGP October 2026",
   weekLabel: "Week 2 of 4",
   today: {
-    dateKey: "2026-10-16", dateLabel: "Friday 16 October", done: 1, total: 2, ended: null,
-    sogpDays: [
-      { number: 4, dateKey: "2026-10-15", weekday: "Thu", dayOfMonth: 15, state: "missed", review: false, detail: { teaching: null, prayed: false, reviewTitle: null } },
-      { number: 5, dateKey: "2026-10-16", weekday: "Fri", dayOfMonth: 16, state: "today", review: false, detail: { teaching: null, prayed: false, reviewTitle: null } },
-    ],
-    dayNumber: 5,
-    teaching: { title: "Walk of Faith · day 5", href: "/dashboard/sogp/listen?day=5", done: false, dayNumber: null, podcast: true, questionGuid: null },
+    dateKey: "2026-10-16", dateLabel: "Friday 16 October", done: 1, total: 2,
+    teaching: { title: "Walk of Faith · Part 5", href: "/dashboard/sogp/listen?day=5", done: false, dayNumber: null, podcast: true, questionGuid: null },
     prayerWatch: { complete: true },
     assessment: null,
     review: { title: "Level 2 group review", when: "Sunday 18 October", href: null, complete: false },
   },
+  month: { key: "2026-10", name: "October", todayKey: "2026-10-16", daysLeft: 16, daysSoFar: 16, podcast: true, days: {
+    "2026-10-15": { dateKey: "2026-10-15", learning: { title: "Walk of Faith", meta: "Part 4", done: true }, prayer: 2, bible: true },
+    "2026-10-16": { dateKey: "2026-10-16", learning: { title: "Walk of Faith", meta: "Part 5", done: false }, prayer: 1, bible: false },
+  } },
   progress: { teaching: { done: 7, total: 30, unit: "episodes" }, prayer: { percent: 83, required: 80 }, assessment: null },
-  leaderboard: { rank: 7, points: 240 },
   group: { kind: "member", groupName: "SOGP Discipleship Group", leaderFirstName: "Tolu" },
   shareDayNumber: 4,
 };
 
 test("the SOGP sections bring the old dashboard's day, checklist, progress and tiles onto the home", () => {
-  const html = renderToStaticMarkup(<DashboardHomeView name="Ada" greeting="Good evening" data={{ ...data, sogp }} />);
+  const html = renderToStaticMarkup(<DashboardHomeView name="Ada" greeting="Good evening" data={{ ...data, sogp, leaderboard: { month: "October", top: [], me: null, total: 0, points: 0 } }} />);
 
   expect(html).toContain("SOGP October 2026 · Week 2 of 4");
   expect(html).toContain("Friday 16 October");
   expect(html).toContain("1 of 2 done");
   expect(html).toContain("5:30 am Prayer Watch");
   expect(html).toContain('aria-pressed="true"');
-  // Today is your SOGP days and the three ticks (Pastor, 21 October); podcast learners have no assessment.
-  expect(html).toContain("Day 5 of 2");
+  // Today is the shared month and the ticks (Pastor, 25 November 2026); podcast learners have no assessment.
+  expect(html).toContain("16 days left");
+  expect(html).toContain("See all of October");
+  expect(html).toContain("Thursday 15 October: learnt, Prayer Watch 2 times, Bible read");
+  expect(html).not.toContain("Day 5 of");
   expect(html).toContain("Teaching");
   expect(html).not.toContain("Assessment");
   expect(html).toContain("Share what you learnt");
   expect(html).toContain("of 30 episodes");
-  expect(html).toContain('href="/dashboard/sogp/leaderboard"');
-  expect(html).toContain("#7");
+  // Before anyone has points this month, the board is a quiet row.
+  expect(html).toContain('href="/dashboard/leaderboard"');
+  expect(html).toContain("See who’s growing this month");
   expect(html).toContain("Tolu&#x27;s group");
   // Partner moved to its own You tab; Grow together is rows with buttons.
   expect(html).not.toContain('href="/partner"');
   expect(html).toContain(">Share link<");
+});
+
+test("Home previews this month’s board for everyone, with you after the top three", () => {
+  const leaderboard = { month: "November", top: [
+    { rank: 1, name: "Ada", points: 214, isMe: false },
+    { rank: 2, name: "Tolu", points: 198, isMe: false },
+    { rank: 3, name: "Kemi", points: 151, isMe: false },
+    { rank: 4, name: "Sam", points: 120, isMe: true },
+  ], me: { rank: 4, points: 120 }, total: 19, points: 120 };
+  const html = renderToStaticMarkup(<DashboardHomeView greeting="Hello" data={{ ...data, leaderboard }} />);
+
+  expect(html).toContain("You’re #4 of 19 in November · 120 pts");
+  expect(html).toContain('href="/dashboard/leaderboard"');
+  expect(html).not.toContain("cohort");
+  expect(html).toContain(">You<");
 });
 
 test("the learning card uses the current track's level art and falls back to the staircase", () => {

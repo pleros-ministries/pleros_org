@@ -178,7 +178,7 @@ export function PodcastBuilder({ data, path }: { data: LearningViewData; path: "
   }, []);
   const days = Math.ceil(suggested.length / pace);
   return <section className={learn.page} style={tab === "own" ? { paddingBottom: 0 } : undefined}>
-    <header className={learn.header}><p className={learn.eyebrow}>{eyebrow}</p><h1>Build your podcast plan</h1><p className={styles.lede}>{slots} episodes over 30 days. Use ours or pick your own</p></header>
+    <header className={learn.header}><p className={learn.eyebrow}>{eyebrow}</p><h1>Build your podcast plan</h1><p className={styles.lede}>{slots} episodes, {pace === 2 ? "two" : "one"} a day. Use ours or pick your own</p></header>
     <div className={styles.segmented} role="tablist" aria-label="Plan" data-tour="plan-tabs">
       <button type="button" role="tab" aria-selected={tab === "suggested"} disabled={!suggested.length} onClick={() => setTab("suggested")} data-tour-mode="suggested">Suggested plan</button>
       <button type="button" role="tab" aria-selected={tab === "own"} onClick={() => setTab("own")} data-tour-mode="own">Build my own</button>

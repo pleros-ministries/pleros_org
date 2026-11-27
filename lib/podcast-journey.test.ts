@@ -281,47 +281,44 @@ describe("podcast journeys", () => {
     ).toMatchObject({ kind: "latest", fellBack: false });
   });
 
-  test("gives each journey day the next episode, from the start date", () => {
+  test("lays the plan on the shared month: listened days, then one a day from today", () => {
     const plan = buildFoundationsPlan(catalogue).slice(0, 4);
     const days = buildPodcastJourneyDays({
       planEpisodes: plan,
-      startedOn: "2026-10-30",
-      todayKey: "2026-11-01",
+      todayKey: "2026-11-03",
       listenedGuids: new Set([plan[0]!.guid, plan[1]!.guid]),
-      prayerDateKeys: new Set(["2026-10-30"]),
+      // The first was listened to last month, so it isn't on November's calendar.
+      listenedOn: { [plan[0]!.guid]: "2026-10-30", [plan[1]!.guid]: "2026-11-01" },
+      prayerDateKeys: new Set(["2026-11-01"]),
     });
 
-    expect(
-      days.map((day) => [day.dayNumber, day.dateKey, day.episode?.guid, day.state]),
-    ).toEqual([
-      [1, "2026-10-30", plan[0]!.guid, "complete"],
-      // Listened, but the morning Prayer Watch was missed: open to catch up.
-      [2, "2026-10-31", plan[1]!.guid, "missed"],
-      [3, "2026-11-01", plan[2]!.guid, "current"],
-      [4, "2026-11-02", plan[3]!.guid, "future"],
+    expect(days).toHaveLength(30);
+    expect(days.slice(0, 5).map((day) => [day.dateKey, day.episode?.guid ?? null, day.state])).toEqual([
+      ["2026-11-01", plan[1]!.guid, "complete"],
+      // Nothing listened and no Prayer Watch: open to catch up, never lost.
+      ["2026-11-02", null, "missed"],
+      ["2026-11-03", plan[2]!.guid, "current"],
+      ["2026-11-04", plan[3]!.guid, "future"],
+      ["2026-11-05", null, "future"],
     ]);
-    expect(summarisePodcastJourney(days, "2026-11-01")).toEqual({
-      dayNumber: 3,
-      totalDays: 4,
-      listened: 2,
-      finished: false,
-    });
+    expect(summarisePodcastJourney(plan, new Set([plan[0]!.guid, plan[1]!.guid]))).toEqual({ totalDays: 4, listened: 2, finished: false });
   });
 
-  test("marks a journey finished once its last day has passed", () => {
+  test("keeps today's listening on today and moves the plan on a day", () => {
+    const plan = buildFoundationsPlan(catalogue).slice(0, 3);
     const days = buildPodcastJourneyDays({
-      planEpisodes: buildFoundationsPlan(catalogue).slice(0, 2),
-      startedOn: "2026-10-01",
-      todayKey: "2026-10-09",
-      listenedGuids: new Set(),
+      planEpisodes: plan,
+      todayKey: "2026-11-03",
+      listenedGuids: new Set([plan[0]!.guid]),
+      listenedOn: { [plan[0]!.guid]: "2026-11-03" },
       prayerDateKeys: new Set(),
     });
+    expect(days.slice(2, 5).map((day) => day.episode?.guid ?? null)).toEqual([plan[0]!.guid, plan[1]!.guid, plan[2]!.guid]);
+  });
 
-    expect(summarisePodcastJourney(days, "2026-10-09")).toEqual({
-      dayNumber: 2,
-      totalDays: 2,
-      listened: 0,
-      finished: true,
-    });
+  test("marks a journey finished once every episode is listened to", () => {
+    const plan = buildFoundationsPlan(catalogue).slice(0, 2);
+    expect(summarisePodcastJourney(plan, new Set(plan.map((episode) => episode.guid)))).toEqual({ totalDays: 2, listened: 2, finished: true });
+    expect(summarisePodcastJourney([], new Set())).toEqual({ totalDays: 0, listened: 0, finished: false });
   });
 });

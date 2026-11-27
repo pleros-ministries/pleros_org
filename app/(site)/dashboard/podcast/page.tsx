@@ -4,7 +4,8 @@ import { PodcastProgressPage } from "@/components/dashboard/podcast-progress-pag
 import { getAppSession } from "@/lib/app-session";
 import { getOwnJourneyGuids } from "@/lib/db/queries/next-learning";
 import { getPodcastJourney } from "@/lib/db/queries/podcast-journey";
-import { getPodcastLeaderboard } from "@/lib/db/queries/podcast-leaderboard";
+import { getMonthlyLeaderboard } from "@/lib/db/queries/monthly-leaderboard";
+import { previewMonthlyLeaderboard } from "@/lib/leaderboard/monthly";
 
 // Reads the session on every request (Cache Components).
 export const instant = false;
@@ -19,7 +20,8 @@ export default async function DashboardPodcastPage({ searchParams }: { searchPar
 
   const [journey, leaderboard, ownEpisodeGuids] = await Promise.all([
     getPodcastJourney(appSession.user.id),
-    getPodcastLeaderboard(appSession.user.id),
+    // Unreadable, the page shows without the board.
+    getMonthlyLeaderboard(appSession.user.id).then(data => previewMonthlyLeaderboard(data)).catch(() => null),
     getOwnJourneyGuids(appSession.user.id).catch(() => []),
   ]);
 
@@ -27,6 +29,7 @@ export default async function DashboardPodcastPage({ searchParams }: { searchPar
     <PodcastProgressPage
       episodes={journey.episodes}
       listenedEpisodeGuids={journey.listenedEpisodeGuids}
+      listenedOn={journey.listenedOn}
       todayKey={journey.todayKey}
       initialDateKey={date}
       calendarStartKey={journey.calendarStartKey}

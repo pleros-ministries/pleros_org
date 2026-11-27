@@ -35,6 +35,7 @@ describe("partner page", () => {
     );
     expect(sectionsSource).toContain("<PartnerGiving");
     expect(sectionsSource).toContain("signedIn={false}");
+    expect(sectionsSource).toContain("giveCard={false}");
     const order = [
       "Give now</button>",
       "<h2>Ways to give</h2>",

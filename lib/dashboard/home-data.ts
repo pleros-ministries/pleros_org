@@ -12,10 +12,12 @@ import { lagosToday } from "@/lib/sogp/daily-date";
 import { getOwnCertificationFacts } from "@/lib/db/queries/sogp-certification-facts";
 import { getHomeDiscipleshipSummary } from "@/lib/db/queries/sogp-discipleship";
 import { getActiveSogpJourney } from "@/lib/db/queries/sogp-journey";
-import { getSogpLeaderboard } from "@/lib/db/queries/sogp-leaderboard";
 import { getHomeInvite } from "@/lib/db/queries/sogp-referrals";
+import { getMonthlyLeaderboard } from "@/lib/db/queries/monthly-leaderboard";
+import { previewMonthlyLeaderboard } from "@/lib/leaderboard/monthly";
 import { getReminderPreferences } from "@/lib/db/queries/notification-preferences";
 import { cohortWeekLabel, homeReportRows, homeSogpToday, type DashboardHomeData, type HomeSogp } from "./home";
+import { getMonthCalendarData } from "./month-data";
 
 /** Authenticated, read-only projection. No fixture identity or invented playback position. */
 export async function getDashboardHomeData(viewer: NonNullable<Awaited<ReturnType<typeof getDashboardViewer>>>): Promise<DashboardHomeData> {
@@ -34,7 +36,8 @@ export async function getDashboardHomeData(viewer: NonNullable<Awaited<ReturnTyp
     // SOGP is the home's centre. Each read degrades to "not shown" on its own.
     enrolled ? getActiveSogpJourney(userId).catch(() => null) : Promise.resolve(null),
     enrolled ? getOwnCertificationFacts(userId).catch(() => null) : Promise.resolve(null),
-    enrolled ? getSogpLeaderboard(userId).catch(() => null) : Promise.resolve(null),
+    // One board for everyone signed in (Pastor, 25 November 2026).
+    getMonthlyLeaderboard(userId).catch(() => null),
     enrolled ? getHomeDiscipleshipSummary(userId).catch(() => ({ kind: "none" as const })) : Promise.resolve({ kind: "none" as const }),
     // Unreadable preferences hide the row rather than nag.
     getReminderPreferences(userId).then(prefs => prefs.remindersSavedAt !== null).catch(() => true),
@@ -74,26 +77,23 @@ export async function getDashboardHomeData(viewer: NonNullable<Awaited<ReturnTyp
   } else if (!podcast && lesson) {
     card = { kind: "traditional", title: lesson.lesson.title, level: lesson.curriculumLevel, href: `/dashboard/sogp/course/day/${lesson.dayNumber}`, completed: course.tracks.filter(track => track.completed).length, total: course.tracks.length };
   }
+  // The shared month (Pastor, 25 November 2026); unreadable, Home shows Today without it.
+  const month = journey && card?.kind !== "start" ? await getMonthCalendarData(userId, { state, course }).catch(() => null) : null;
   const sogp: HomeSogp | null = journey ? {
     cohortTitle: journey.cohort.title,
     weekLabel: cohortWeekLabel(journey.cohort.startsAt, journey.cohort.endsAt, day),
     // On the podcast path, today's teaching is the plan's day, ticked by the player.
     // Your SOGP days wait until a path is chosen, so a new enrolee isn't told to catch up (fix 2).
     today: card?.kind === "start" ? null : homeSogpToday(journey.days, day, podcast
-      ? card?.kind === "podcast" ? { title: `${card.series} · day ${card.dayNumber}`, href: card.href, done: card.episodes.every(episode => episode.listened) } : null
-      : undefined),
+      ? card?.kind === "podcast" ? { title: card.doctrinal ? card.series : `${card.series} · ${card.episodes.map(episode => episode.part).join(" and ")}`, href: card.href, done: card.episodes.every(episode => episode.listened) } : null
+      : undefined, month?.morningPrayedToday ?? false),
+    month: month ? { key: month.month.key, name: month.month.name, todayKey: month.todayKey, daysLeft: month.month.daysLeft, daysSoFar: month.month.daysSoFar, podcast: month.podcast, days: month.days } : null,
     progress: facts ? {
       teaching: facts.podcast
         ? { done: facts.learningDone, total: facts.learningTotal, unit: "episodes" }
         : { done: journey.days.filter(row => row.track?.audioListened).length, total: journey.days.filter(row => row.track).length, unit: "days" },
       prayer: { percent: facts.prayer.percent, required: facts.prayer.required },
       assessment: facts.podcast ? null : { done: facts.learningDone, total: facts.learningTotal },
-    } : null,
-    leaderboard: leaderboard?.me ? { rank: leaderboard.me.rank, points: leaderboard.me.points } : null,
-    board: leaderboard && leaderboard.top.length ? {
-      top: leaderboard.top.slice(0, 5).map(row => ({ rank: row.rank, name: row.name, points: row.points, isMe: row.isMe })),
-      me: leaderboard.me ? { rank: leaderboard.me.rank, points: leaderboard.me.points } : null,
-      total: leaderboard.total,
     } : null,
     group,
     invite,
@@ -102,6 +102,7 @@ export async function getDashboardHomeData(viewer: NonNullable<Awaited<ReturnTyp
   return {
     day, reports, card, sogp,
     welcomePack: { done: welcomePackDone },
+    leaderboard: leaderboard ? previewMonthlyLeaderboard(leaderboard) : null,
     learning: podcast ? {
       title: waiting ? `Day ${waiting.dayNumber} is waiting for you` : "Your current plan is complete",
       href: waiting ? `/dashboard/sogp/listen?day=${waiting.dayNumber}` : "/dashboard/sogp/plan",

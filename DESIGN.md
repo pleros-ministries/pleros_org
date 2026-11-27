@@ -166,7 +166,9 @@ Most of these classes come from `components/community/discipleship/discipleship-
 | Lettered branch mark | `Mark` (`oversight-view.tsx`) |
 | Bottom-sheet pop-up | `ReportSheet`, `Segmented`, `Stepper`, `sheetStyles` (`components/community/report/report-sheet.tsx`) |
 | Oversight tabs header | `OversightHeader` (`components/dashboard/church/oversight-nav.tsx`) |
-| Leaderboard preview | `LeaderboardPreview` (`components/sogp/learning/leaderboard-preview.tsx`, `dense` on Home) |
+| Leaderboard preview | `LeaderboardPreview` (`components/sogp/learning/leaderboard-preview.tsx`, `dense` on Home, full on the Podcast page; always the month's one board) |
+| The monthly leaderboard | `MonthlyLeaderboard` (`components/dashboard/leaderboard/monthly-leaderboard.tsx`, `/dashboard/leaderboard`): count strip, ranking, Your points, How points work, then the show-me switch and leaderboard name, both optimistic |
+| The month calendar | `MonthCalendar` (`components/dashboard/month/month-calendar.tsx`; `collapsible` on Home, `legend` and `selectToday` on the month page) |
 | Message someone | `MessageButton` (`bare` and `primary` let it match the buttons beside it) |
 | Install the app | `GetAppButton` (tones `light`, `dark`, `quiet`) |
 | Loading state | `PageSkeleton` in each tab's `loading.tsx` |
@@ -205,6 +207,12 @@ Most of these classes come from `components/community/discipleship/discipleship-
   - Tapping a card opens its details in a separate white panel under it, never inside the card; tapping again closes it. The chosen card keeps an ink outline and a check.
   - Choices inside a panel read as choices: tiles with a radio dot, or a lock when not yet open. SOGP shows only the chosen level's tracks, with plain dates ("24 Nov", no weekday) in a quieter grey, then one closing line. Never a dotted timeline.
 - **Your path** on Learning (user, 24 November): the dashboard's own vocabulary, never a timeline: a three-count strip, a panel of rows, and one note.
+- **The month calendar** (Pastor, 25 November 2026): calendars show the calendar month, the same for everyone, never a window counted from when someone started.
+  - It grows out of Home's day strip: Monday-first weeks of 32px round days. A day you learnt fills in soft blue (#e4ebfd on #2331ae); today has the blue ring on a `--status-blue-bg` cell; later days are muted.
+  - Two 5px dots sit under each past day: Prayer Watch, then Bible reading, blue when done and grey when not. One blue and grey only: nothing on a calendar needs attention, so never amber.
+  - Tapping a day opens what it held, or what's planned, in a quiet #f6f7f9 panel under the calendar that folds open and shut (`grid-template-rows`); never a sheet. Each line says its state in words.
+  - Home folds it to this week with "See all of November"; the other weeks unfold in place.
+  - Dates are the date: never "Day 10 of 28" or "Day 4 of 30". Plans count episodes ("Episode 19 of 30") and say how they fall across months ("6 in what's left of November and 24 in December").
 - **Learning card line and button:** the card's line stays within about 62% of the card so it clears the lit doorway; the button sizes to its label on one line.
 - **No second blue hero:** only the My learning card is blue. Other illustrated tiles take their own complementary palette.
 

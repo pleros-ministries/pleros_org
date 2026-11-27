@@ -27,35 +27,35 @@ const sogp: DashboardHomeData["sogp"] = {
   cohortTitle: "SOGP October 2026",
   weekLabel: "Week 2 of 4",
   today: {
-    dateKey: "2026-10-21", dateLabel: "Wednesday 21 October", done: 1, total: 3, ended: null,
-    // 28 SOGP days from Monday 12 October; today is day 10, day 4 was missed.
-    sogpDays: Array.from({ length: 28 }, (_, index) => {
-      const dateKey = new Date(Date.UTC(2026, 9, 12 + index)).toISOString().slice(0, 10);
-      const number = index + 1;
-      return { number, dateKey, weekday: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"][index % 7]!, dayOfMonth: Number(dateKey.slice(8)), state: number === 10 ? "today" as const : number === 4 ? "missed" as const : number < 10 ? "done" as const : "later" as const, review: number % 7 === 0,
-        detail: { teaching: number % 7 === 0 ? null : { title: `Sample teaching ${number}`, href: number <= 10 ? "#" : null, listened: number < 10 && number !== 4, assessed: number < 9 && number !== 4 }, prayed: number < 10, reviewTitle: number % 7 === 0 ? `Week ${number / 7} group review` : null } };
-    }),
-    dayNumber: 10,
+    dateKey: "2026-10-21", dateLabel: "Wednesday 21 October", done: 1, total: 3,
     teaching: { title: "Biblical Origin and Ontology", href: "#", done: false, dayNumber: 10, podcast: false, questionGuid: "sogp-lesson-preview" },
     prayerWatch: { complete: true },
     assessment: { complete: false, href: "#" },
     review: { title: "Level 2 group review", when: "Sunday 25 October", href: null, complete: false },
   },
+  // The shared month: October so far, then the plan a track a day (sample titles).
+  month: { key: "2026-10", name: "October", todayKey: "2026-10-21", daysLeft: 11, daysSoFar: 21, podcast: false, days: Object.fromEntries(Array.from({ length: 31 }, (_, index) => {
+    const dateKey = `2026-10-${String(index + 1).padStart(2, "0")}`;
+    const day = index + 1;
+    const learnt = day >= 12 && day < 21 && day !== 15;
+    return [dateKey, { dateKey, learning: day >= 12 ? { title: `Sample teaching ${day - 11}`, meta: `Level ${Math.ceil((day - 11) / 6)} · track ${day - 11}`, href: "#", done: learnt } : null, prayer: day < 21 && day % 3 ? 1 : day === 21 ? 1 : 0, bible: day < 21 && day % 2 === 0 }];
+  })) },
   progress: { teaching: { done: 9, total: 24, unit: "days" }, prayer: { percent: 64, required: 80 }, assessment: { done: 8, total: 9 } },
-  leaderboard: { rank: 7, points: 240 },
   invite: { code: "a1b2c3d4", url: "https://pleros.org/sogp?ref=a1b2c3d4", joined: 3 },
-  board: { total: 162, me: { rank: 7, points: 240 }, top: [
-    { rank: 1, name: "Ada O.", points: 410, isMe: false }, { rank: 2, name: "Bola K.", points: 388, isMe: false }, { rank: 3, name: "Chuka E.", points: 352, isMe: false },
-    { rank: 4, name: "Dami A.", points: 301, isMe: false }, { rank: 5, name: "Efe T.", points: 287, isMe: false },
-  ] },
   group: { kind: "member", groupName: "SOGP Discipleship Group", leaderFirstName: "Ada" },
   shareDayNumber: null,
 };
 
+/** This month's board for everyone (sample first names only). */
+const leaderboard: DashboardHomeData["leaderboard"] = { month: "October", total: 162, points: 240, me: { rank: 7, points: 240 }, top: [
+  { rank: 1, name: "Ada", points: 410, isMe: false }, { rank: 2, name: "Bola", points: 388, isMe: false }, { rank: 3, name: "Chuka", points: 352, isMe: false },
+  { rank: 4, name: "Dami", points: 301, isMe: false }, { rank: 5, name: "Efe", points: 287, isMe: false },
+] };
+
 /** Labelled sample data only. */
 export default async function HomePreview({ searchParams }: { searchParams: Promise<{ card?: string }> }) {
   const { card = "start" } = await searchParams;
-  const data: DashboardHomeData = { day: "2026-10-16", reports, card: cards[card] ?? cards.start, sogp: card === "start" ? null : sogp,
+  const data: DashboardHomeData = { day: "2026-10-16", reports, card: cards[card] ?? cards.start, sogp: card === "start" ? null : sogp, leaderboard,
     learning: { title: "", href: "#", action: "", completed: 0, total: 0, enrolled: card !== "start" } };
   return <div className={`${dashboardFont.className} ${dashboardHeadingFont.variable} ${styles.root}`} data-dashboard-v3><p className="px-4 py-2 text-xs text-(--color-text-muted)">Visual preview · sample data · nothing saved</p><DashboardHomeView name="Tolu" greeting="Good morning" data={data} /></div>;
 }

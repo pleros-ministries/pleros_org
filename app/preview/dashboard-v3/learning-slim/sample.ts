@@ -34,7 +34,7 @@ export const SAMPLE_HUB: LearningHubData = {
     ],
     more: null, note: "A track a day, with a group review at the end of each level.", empty: null,
   },
-  journey: { welcomePackDone: true, preSogp: { done: 10, total: 10 }, days: { current: 9, total: 28, teaching: 24, reviews: 4 }, prayerToday: true },
+  journey: { welcomePackDone: true, preSogp: { done: 10, total: 10 }, month: "December", prayerToday: true },
 };
 
 export const SAMPLE_FACTS: CertificationFacts = {

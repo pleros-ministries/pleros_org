@@ -27,7 +27,7 @@ import {
   summarisePodcastJourney,
   summarisePodcastProgress,
 } from "@/lib/podcast-journey";
-import type { PodcastLeaderboardData } from "@/lib/podcast-leaderboard";
+import type { previewMonthlyLeaderboard } from "@/lib/leaderboard/monthly";
 import {
   groupPodcastEpisodesBySeries,
   STANDALONE_PODCAST_SERIES_ID,
@@ -350,6 +350,7 @@ function PodcastSeriesGroup({
 export function PodcastProgressPage({
   episodes,
   listenedEpisodeGuids,
+  listenedOn = {},
   previewMode = false,
   initialDateKey,
   todayKey,
@@ -364,6 +365,8 @@ export function PodcastProgressPage({
 }: {
   episodes: RssEpisode[];
   listenedEpisodeGuids: string[];
+  /** This month: the Lagos day each episode was first marked listened. */
+  listenedOn?: Record<string, string>;
   previewMode?: boolean;
   initialDateKey?: string;
   todayKey: string;
@@ -371,7 +374,8 @@ export function PodcastProgressPage({
   calendarEndKey: string;
   prayerDateKeys: string[];
   listenerName: string;
-  leaderboard: PodcastLeaderboardData | null;
+  /** This month's board for everyone (Pastor, 25 November 2026). */
+  leaderboard: ReturnType<typeof previewMonthlyLeaderboard> | null;
   /** The stored journey choice (`podcast_journeys.track`). */
   track: string;
   /** Day 1 of that journey in Lagos time. */
@@ -381,6 +385,7 @@ export function PodcastProgressPage({
 }) {
   const [query, setQuery] = useState("");
   const [localListenedGuids, setLocalListenedGuids] = useState(listenedEpisodeGuids);
+  const [localListenedOn, setLocalListenedOn] = useState(listenedOn);
   const [localPrayerDateKeys, setLocalPrayerDateKeys] = useState(prayerDateKeys);
   const [localTrack, setLocalTrack] = useState(track);
   const [localStartedOn, setLocalStartedOn] = useState(startedOn);
@@ -411,9 +416,9 @@ export function PodcastProgressPage({
     journey.kind === "plan"
       ? buildPodcastJourneyDays({
           planEpisodes: journey.episodes,
-          startedOn: journey.startedOn,
           todayKey,
           listenedGuids: listened,
+          listenedOn: localListenedOn,
           prayerDateKeys: prayed,
         })
       : buildPodcastDays({
@@ -425,12 +430,9 @@ export function PodcastProgressPage({
           endKey: calendarEndKey,
         });
   const journeySummary =
-    journey.kind === "plan" ? summarisePodcastJourney(days, todayKey) : null;
-  // Today when it is in the calendar; otherwise a finished journey opens on
-  // its last day.
-  const defaultDay =
-    days.find((day) => day.dateKey === todayKey) ??
-    (journeySummary?.finished ? days.at(-1) : days[0])!;
+    journey.kind === "plan" ? summarisePodcastJourney(journey.episodes, listened) : null;
+  // Today is always in the month; the latest-releases calendar opens on it too.
+  const defaultDay = days.find((day) => day.dateKey === todayKey) ?? days.at(-1)!;
   const selectedDay =
     days.find((day) => day.dateKey === selectedDateKey) ?? defaultDay;
   const summary = summarisePodcastProgress({
@@ -440,7 +442,20 @@ export function PodcastProgressPage({
     todayKey,
   });
 
+  // A tick is today's listening, so the month shows it on today.
+  function setLocalListenedDays(episodeGuids: string[], nextListened: boolean) {
+    setLocalListenedOn((current) => {
+      const next = { ...current };
+      for (const guid of episodeGuids) {
+        if (!nextListened) delete next[guid];
+        else if (!localListenedGuids.includes(guid)) next[guid] = todayKey;
+      }
+      return next;
+    });
+  }
+
   function toggleLocalListened(episodeGuid: string, nextListened: boolean) {
+    setLocalListenedDays([episodeGuid], nextListened);
     setLocalListenedGuids((current) => {
       if (nextListened) {
         return current.includes(episodeGuid) ? current : [...current, episodeGuid];
@@ -451,6 +466,7 @@ export function PodcastProgressPage({
   }
 
   function setLocalSeriesListened(episodeGuids: string[], nextListened: boolean) {
+    setLocalListenedDays(episodeGuids, nextListened);
     setLocalListenedGuids((current) => {
       if (nextListened) {
         return [...new Set([...current, ...episodeGuids])];
@@ -484,7 +500,7 @@ export function PodcastProgressPage({
   const subtitle = journeySummary
     ? journeySummary.finished
       ? `${journey.title} · finished`
-      : `${journey.title} · day ${journeySummary.dayNumber} of ${journeySummary.totalDays}`
+      : `${journey.title} · ${journeySummary.listened} of ${journeySummary.totalDays} listened`
     : `Hi ${firstName}, new episodes Monday to Saturday`;
 
   return (
@@ -519,6 +535,7 @@ export function PodcastProgressPage({
           // A save error belongs to the day it happened on.
           key={selectedDay.dateKey}
           day={selectedDay}
+          plan={journey.kind === "plan"}
           todayKey={todayKey}
           previewMode={previewMode}
           onSetEpisodeListened={toggleLocalListened}

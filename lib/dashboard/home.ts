@@ -1,6 +1,7 @@
 import { dailyCategoryStatus, type DailyReportCategory, type DailyReportDeclaration } from "@/lib/community/daily-report";
 import type { StatusTone } from "@/components/dashboard/v3/primitives";
-import { buildSogpDays } from "@/lib/sogp/sogp-days";
+import type { previewMonthlyLeaderboard } from "@/lib/leaderboard/monthly";
+import type { CalendarDay } from "@/lib/learning/month-calendar";
 
 export type HomeReport = { category: DailyReportCategory; title: string; description: string; status: string; tone: StatusTone };
 export function homeReportRows(input: { devotionalCount: number; ministryCount: number; meetingCount: number; declarations: { category: string; declaration: string }[] }): HomeReport[] {
@@ -25,33 +26,13 @@ export type HomeLearningCard =
   | { kind: "traditional"; title: string; href: string; completed: number; total: number; level?: number }
   | { kind: "podcast"; pace: 1 | 2; href: string; doctrinal?: boolean; series: string; episodes: { part: string; duration: string; durationSeconds: number; positionSeconds: number; listened: boolean }[]; dayNumber: number };
 
-/** One SOGP day on Home's Today (Pastor, 21 October): numbered through the cohort, teaching and review days alike. */
-export type HomeSogpDay = {
-  number: number; dateKey: string; weekday: string; dayOfMonth: number; state: "done" | "missed" | "today" | "later"; review: boolean;
-  /** What the day held, for its sheet when tapped (Pastor, 22 October: "is it telling me the truth about day 11?"). */
-  detail: {
-    teaching: { title: string; href: string | null; listened: boolean; assessed: boolean } | null;
-    prayed: boolean;
-    reviewTitle: string | null;
-  };
-};
 export type HomeToday = {
   dateKey: string;
   dateLabel: string;
-  /** Every SOGP day; Home shows today's week and opens the rest. */
-  sogpDays: HomeSogpDay[];
-  /** Today's SOGP day, or null when today isn't one. */
-  dayNumber: number | null;
-  /**
-   * The cohort's days are over (user, 22 October: Home lost the calendar once
-   * September's cohort ended). Home keeps the days, and Teaching and
-   * Assessment become the first day still to catch up.
-   */
-  ended: { lastLabel: string; toCatchUp: number } | null;
   /** Today's teaching: the traditional track (ticked when listened) or the podcast day (ticked by the player). */
   teaching: { title: string; href: string; done: boolean; dayNumber: number | null; podcast: boolean; questionGuid: string | null } | null;
-  /** Morning Prayer Watch for today; null outside the cohort's dates. */
-  prayerWatch: { complete: boolean } | null;
+  /** The 5:30 am Prayer Watch, every day of the month (Pastor, 25 November 2026). */
+  prayerWatch: { complete: boolean };
   /** The traditional path's quiz and written response, marked done when finished; null on the podcast path. */
   assessment: { complete: boolean; href: string } | null;
   /** Kept for Learning and the SOGP page; Home's Today no longer shows it. */
@@ -59,10 +40,13 @@ export type HomeToday = {
   done: number;
   total: number;
 };
+/** The shared month on Home's Today: what you did each day, and your plan to the month's end. */
+export type HomeMonth = { key: string; name: string; todayKey: string; daysLeft: number; daysSoFar: number; podcast: boolean; days: Record<string, CalendarDay> };
 export type HomeSogp = {
   cohortTitle: string;
   weekLabel: string | null;
   today: HomeToday | null;
+  month: HomeMonth | null;
   /** The same three as Today (Pastor, 21 October), from what's ticked each day. */
   progress: null | {
     teaching: { done: number; total: number; unit: "days" | "episodes" };
@@ -70,14 +54,18 @@ export type HomeSogp = {
     /** Null on the podcast path, which has no assessments. */
     assessment: { done: number; total: number } | null;
   };
-  leaderboard: { rank: number; points: number } | null;
-  /** The cohort's top five and the viewer, for Home's leaderboard preview (Pastor, 20 October). */
   /** The learner's invite link and code for Home's Invite someone panel (Pastor, 20 October). */
   invite?: { code: string; url: string; joined: number } | null;
-  board?: { top: Array<{ rank: number; name: string; points: number; isMe: boolean }>; me: { rank: number; points: number } | null; total: number } | null;
   group: { kind: "member"; groupName: string; leaderFirstName: string } | { kind: "leader"; groups: number; disciples: number } | { kind: "none" };
   shareDayNumber: number | null;
 };
+
+/**
+ * This month's leaderboard for Home (Pastor, 25 November 2026): the top five
+ * and you, for everyone signed in. `me` is null while you have no points or
+ * have hidden yourself; `points` is yours either way.
+ */
+export type HomeLeaderboard = ReturnType<typeof previewMonthlyLeaderboard>;
 
 export type DashboardHomeData = {
   day: string;
@@ -87,6 +75,7 @@ export type DashboardHomeData = {
   sogp?: HomeSogp | null;
   /** Welcome Pack stays on Home until its last step (reminders) is saved. */
   welcomePack?: { done: boolean } | null;
+  leaderboard?: HomeLeaderboard | null;
 };
 
 type JourneyDay = {
@@ -101,42 +90,19 @@ type JourneyDay = {
 export type HomePodcastTeaching = { title: string; href: string; done: boolean } | null;
 
 /**
- * Today on Home (Pastor, 21 October): your SOGP days, numbered from the cohort's
- * first day (teaching and review days alike), and three things to tick:
- * Teaching (listened), Prayer Watch, and Assessment on the traditional path
- * (done once the quiz and written response are). `podcast` is today's listening
- * on the podcast path, which has no assessment; undefined means traditional.
+ * Today on Home: three things to tick, Teaching (listened), Prayer Watch, and
+ * Assessment on the traditional path (done once the quiz and written response
+ * are). The calendar above them is the shared month (Pastor, 25 November 2026),
+ * so Today shows every day, before and after the cohort's own dates. After the
+ * cohort, Teaching and Assessment are the first track still to catch up.
+ * `podcast` is today's listening on the podcast path, which has no assessment;
+ * undefined means traditional. `morningPrayed` ticks Prayer Watch on days
+ * outside the cohort.
  */
-export function homeSogpToday(days: JourneyDay[], todayKey: string, podcast?: HomePodcastTeaching): HomeToday | null {
-  const byDate = new Map(days.map(day => [day.dateKey, day]));
+export function homeSogpToday(days: JourneyDay[], todayKey: string, podcast?: HomePodcastTeaching, morningPrayed = false): HomeToday {
+  const today = days.find(day => day.dateKey === todayKey);
   const lastKey = days.map(day => day.dateKey).sort().at(-1);
-  // Before the cohort starts there is nothing to keep. After it ends the days stay, to catch up.
-  const after = !byDate.has(todayKey) && lastKey !== undefined && todayKey > lastKey;
-  if (!byDate.has(todayKey) && !after) return null;
-  const weekdayFormat = new Intl.DateTimeFormat("en-GB", { weekday: "short", timeZone: "UTC" });
-  const plan = buildSogpDays(days.map(day => ({
-    dateKey: day.dateKey, kind: day.kind, prayerWatchComplete: day.prayerWatchComplete,
-    track: day.track ? { dayNumber: day.track.dayNumber, title: day.track.title, accessible: day.track.accessible, quizPassed: day.track.quizPassed, assessmentComplete: day.track.assessmentComplete } : null,
-    review: day.review ? { title: day.review.title, complete: day.review.complete } : null,
-  })), todayKey);
-  const sogpDays: HomeSogpDay[] = plan.days.map(day => ({
-    number: day.number,
-    dateKey: day.dateKey,
-    weekday: weekdayFormat.format(new Date(`${day.dateKey}T00:00:00.000Z`)),
-    dayOfMonth: Number(day.dateKey.slice(8)),
-    state: day.isToday ? "today" : day.complete ? "done" : day.past ? "missed" : "later",
-    review: day.kind === "review",
-    detail: (() => {
-      const source = byDate.get(day.dateKey);
-      const track = podcast === undefined ? source?.track ?? null : null;
-      return {
-        teaching: track ? { title: track.title, href: track.accessible ? `/dashboard/sogp/course/day/${track.dayNumber}` : null, listened: track.audioListened, assessed: track.assessmentComplete } : null,
-        prayed: source?.prayerWatchComplete ?? false,
-        reviewTitle: source?.review?.title ?? null,
-      };
-    })(),
-  }));
-  const today = byDate.get(todayKey);
+  const after = !today && lastKey !== undefined && todayKey > lastKey;
   const nextReview = days.find(day => day.dateKey >= todayKey && day.review && !day.review.complete)?.review ?? null;
   const reviewDay = today?.review ?? nextReview;
   const review = reviewDay ? {
@@ -146,28 +112,19 @@ export function homeSogpToday(days: JourneyDay[], todayKey: string, podcast?: Ho
     complete: reviewDay.complete,
   } : null;
   // After the cohort, the first teaching day not yet listened to and assessed.
-  const behind = after && podcast === undefined ? days.filter(day => day.track?.accessible && !(day.track.audioListened && day.track.assessmentComplete)) : [];
-  const track = podcast === undefined ? (after ? behind[0]?.track ?? null : today?.track?.accessible ? today.track : null) : null;
+  const behind = after && podcast === undefined ? days.find(day => day.track?.accessible && !(day.track.audioListened && day.track.assessmentComplete))?.track ?? null : null;
+  const track = podcast === undefined ? (after ? behind : today?.track?.accessible ? today.track : null) : null;
   const teaching = podcast ? { title: podcast.title, href: podcast.href, done: podcast.done, dayNumber: null, podcast: true, questionGuid: null }
-    : track ? { title: track.title, href: `/dashboard/sogp/course/day/${track.dayNumber}`, done: track.audioListened, dayNumber: track.dayNumber, podcast: false, questionGuid: `sogp-lesson-${track.lessonId}` }
+    : track ? { title: after ? `Track ${track.dayNumber} · ${track.title}` : track.title, href: `/dashboard/sogp/course/day/${track.dayNumber}`, done: track.audioListened, dayNumber: track.dayNumber, podcast: false, questionGuid: `sogp-lesson-${track.lessonId}` }
     : null;
   const assessment = track ? { complete: track.assessmentComplete, href: `/dashboard/sogp/course/day/${track.dayNumber}` } : null;
-  const checks = today ? [
-    ...(teaching ? [teaching.done] : []),
-    today.prayerWatchComplete,
-    ...(assessment ? [assessment.complete] : []),
-  ] : after ? [
-    ...(teaching ? [teaching.done] : []),
-    ...(assessment ? [assessment.complete] : []),
-  ] : [];
+  const prayerWatch = { complete: today ? today.prayerWatchComplete || morningPrayed : morningPrayed };
+  const checks = [...(teaching ? [teaching.done] : []), prayerWatch.complete, ...(assessment ? [assessment.complete] : [])];
   return {
     dateKey: todayKey,
     dateLabel: new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" }).format(new Date(`${todayKey}T00:00:00.000Z`)),
-    sogpDays,
-    dayNumber: sogpDays.find(day => day.dateKey === todayKey)?.number ?? null,
-    ended: after ? { lastLabel: new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "numeric", month: "long", timeZone: "UTC" }).format(new Date(`${lastKey}T00:00:00.000Z`)), toCatchUp: behind.length } : null,
     teaching,
-    prayerWatch: today ? { complete: today.prayerWatchComplete } : null,
+    prayerWatch,
     assessment,
     review,
     done: checks.filter(Boolean).length,

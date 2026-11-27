@@ -16,13 +16,12 @@ export const dashboardNavigation: { key: SectionKey; label: string; items: Dashb
   { key: "devotion", label: "Devotion", items: [
     destination("prayer-watch", "Prayer Watch & Bible reading", "/dashboard/prayer-watch"),
     destination("podcast", "Podcast", "/dashboard/podcast"),
-    destination("podcast-leaderboard", "Podcast leaderboard", "/dashboard/podcast/leaderboard"),
+    destination("leaderboard", "Leaderboard", "/dashboard/leaderboard"),
   ] },
   { key: "training", label: "Training", items: [
     destination("pre-sogp", "Pre-SOGP", "/dashboard/pre-sogp"),
     { key: "sogp", label: "SOGP", path: "sogp", actualRoute: "/dashboard/sogp" },
     destination("sogp-course", "SOGP course", "/dashboard/sogp/course"),
-    destination("sogp-leaderboard", "SOGP leaderboard", "/dashboard/sogp/leaderboard"),
     destination("sogp-certificate", "Certificate", "/dashboard/sogp/certificate"),
     destination("sogp-referrals", "Referrals", "/dashboard/sogp/referrals"),
     destination("discipleship-journey", "Discipleship journey", "/dashboard/discipleship-journey"),
