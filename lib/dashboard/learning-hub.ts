@@ -66,12 +66,13 @@ export type LearningMonth = {
   /** "November" */
   name: string;
   daysLeft: number;
-  rows: Array<{ when: string; title: string; meta: string; href: string | null }>;
+  /** Each day as a calendar tile: "Sat" over "28"; today is marked. */
+  rows: Array<{ weekday: string; day: string; today: boolean; title: string; meta: string; href: string | null }>;
   note: string | null;
   empty: string | null;
 };
 /** "Fri 28 Nov" */
-const dayLabel = new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "Africa/Lagos" });
+const weekdayShort = new Intl.DateTimeFormat("en-GB", { weekday: "short", timeZone: "Africa/Lagos" });
 const addDays = (key: string, days: number) => new Date(new Date(`${key}T12:00:00.000Z`).getTime() + days * 86_400_000);
 const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 
@@ -179,7 +180,7 @@ export async function getLearningHubData(userId: string, state: SogpLearningStat
     month = {
       name: window.name,
       daysLeft: window.daysLeft,
-      rows: (data?.rest ?? []).slice(0, 3).map(({ dateKey, item }) => ({ when: dateKey === day ? "Today" : dayLabel.format(addDays(dateKey, 0)), title: item.title, meta: item.meta, href: item.href ?? null })),
+      rows: (data?.rest ?? []).slice(0, 3).map(({ dateKey, item }) => ({ weekday: weekdayShort.format(addDays(dateKey, 0)), day: String(Number(dateKey.slice(8))), today: dateKey === day, title: item.title, meta: item.meta, href: item.href ?? null })),
       note: (data ? monthCarryNote(data) : null) ?? (path === "traditional" ? "A track a day, with a group review at the end of each level." : null),
       empty: data?.rest.length ? null : podcast ? "Your plan is done. Choose what’s next." : `Nothing left to learn in ${window.name}.`,
     };

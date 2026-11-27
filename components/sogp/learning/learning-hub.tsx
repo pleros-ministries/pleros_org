@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { ChevronRightIcon, PlayIcon, RefreshCcwIcon } from "lucide-react";
 
 import groupStyles from "@/components/community/discipleship/discipleship-group.module.css";
@@ -23,6 +23,14 @@ const PACE: Record<NonNullable<LearningHubData["path"]>, string> = { traditional
 /** What heads Learning for each path. */
 const PATH_NAMES: Record<NonNullable<LearningHubData["path"]>, string> = { traditional: "Doctrinal path", podcast_one: "Podcast", podcast_two: "Podcast", doctrinal: "Personalised path" };
 
+/** A day as a small calendar leaf (user, 27 November): weekday over the date; today in soft blue. */
+function DateTile({ weekday, day, today }: { weekday: string; day: string; today: boolean }) {
+  return <span className={styles.dateTile} data-today={today || undefined} aria-label={today ? `Today, ${weekday} ${day}` : `${weekday} ${day}`}>
+    <span aria-hidden="true">{today ? "Today" : weekday}</span>
+    <b aria-hidden="true">{day}</b>
+  </span>;
+}
+
 /** How each path runs, in words, for Your path's first row. */
 const PACE_LINE: Record<NonNullable<LearningHubData["path"]>, string> = { traditional: "A track a day, about an hour", podcast_one: "One episode a day, about 15 minutes", podcast_two: "Two episodes a day, about 30 minutes", doctrinal: "One teaching a day, chosen by you" };
 
@@ -37,8 +45,9 @@ function MonthAndPath({ hub }: { hub: LearningHubData }) {
   const certificate = hub.certificate.available ? "Ready to download"
     : plan ? `${hub.card.done} of ${hub.card.total} ${hub.path === "doctrinal" ? "teachings" : "episodes"} listened`
     : `${hub.doneCount} of ${hub.card.total} tracks done`;
-  const row = (title: string, meta: string, href: string | null, end?: string) => {
+  const row = (title: string, meta: string, href: string | null, end?: string, lead?: ReactNode) => {
     const body = <>
+      {lead}
       <span className={groupStyles.rowCopy}><span className={groupStyles.rowTitle}>{title}</span><span className={groupStyles.rowMeta}>{meta}</span></span>
       {end ? <span className={groupStyles.rowMeta}>{end}</span> : null}
       {href ? <ChevronRightIcon className={`${groupStyles.chev} size-4`} strokeWidth={2} aria-hidden="true" /> : null}
@@ -48,7 +57,7 @@ function MonthAndPath({ hub }: { hub: LearningHubData }) {
   return <>
     <div className={groupStyles.sectionTitle}><h2>Rest of {month.name}</h2><Link href="/dashboard/sogp/month" className={`${groupStyles.quiet} inline-flex items-center gap-0.5`}>See {month.name}<ChevronRightIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" /></Link></div>
     <div className={groupStyles.panel} data-tour="your-path">{month.rows.length
-      ? <ul className={groupStyles.list}>{month.rows.map(item => <li key={item.when + item.title}>{row(item.title, `${item.when} · ${item.meta}`, item.href)}</li>)}</ul>
+      ? <ul className={groupStyles.list}>{month.rows.map(item => <li key={item.day + item.title}>{row(item.title, item.meta, item.href, undefined, <DateTile weekday={item.weekday} day={item.day} today={item.today} />)}</li>)}</ul>
       : <p className={groupStyles.empty}>{month.empty}</p>}</div>
 
     <div className={groupStyles.sectionTitle}><h2>Your path</h2><Link href="/dashboard/sogp/path" className={`${groupStyles.quiet} inline-flex items-center gap-0.5`}>Change<ChevronRightIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" /></Link></div>
