@@ -158,7 +158,7 @@ export function LearningTour({ start }: { start: Start }) {
         <h2 id="tour-title" className={styles.title}>{step.title}</h2>
         <p className={styles.body}>{step.body}</p>
         <div className={styles.sheetActions}>
-          {last ? <button type="button" className={styles.primary} onClick={() => finish("done")} autoFocus>{state.path === "sogp" ? "Start today’s teaching" : "Listen to day 1"}<ArrowRightIcon className="size-4" strokeWidth={2.2} /></button>
+          {last ? <button type="button" className={styles.primary} onClick={() => finish("done")} autoFocus>{state.path === "sogp" ? "Start today’s teaching" : state.path === "podcast" ? "Listen to the first episode" : "Listen to the first teaching"}<ArrowRightIcon className="size-4" strokeWidth={2.2} /></button>
             : <><button type="button" className={styles.primary} onClick={next} autoFocus>Show me<ArrowRightIcon className="size-4" strokeWidth={2.2} /></button>
               <button type="button" className={styles.quiet} onClick={() => finish("skipped")}>I’ll look around myself</button></>}
         </div>
