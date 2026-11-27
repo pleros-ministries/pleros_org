@@ -24,7 +24,11 @@ export type HomeLearningCard =
   /** No path yet, or a plan path saved before its plan; the copy defaults to choosing a path. */
   | { kind: "start"; href: string; meta?: string; title?: string; summary?: string; action?: string }
   | { kind: "traditional"; title: string; href: string; completed: number; total: number; level?: number }
-  | { kind: "podcast"; pace: 1 | 2; href: string; doctrinal?: boolean; series: string; episodes: { part: string; duration: string; durationSeconds: number; positionSeconds: number; listened: boolean }[]; dayNumber: number };
+  | { kind: "podcast"; pace: 1 | 2; href: string; doctrinal?: boolean; series: string; episodes: { part: string; duration: string; durationSeconds: number; positionSeconds: number; listened: boolean }[]; dayNumber: number }
+  // The same states as Learning's card (user, 27 November).
+  | { kind: "finished"; tracks: number; certificate: boolean }
+  | { kind: "next"; title: string; episodeTitle: string | null; episodeNumber: number; totalDays: number; listened: number; finished: boolean; todayListened: boolean }
+  | { kind: "withdrawn"; title: string };
 
 export type HomeToday = {
   dateKey: string;
