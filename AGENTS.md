@@ -131,6 +131,13 @@ Pastor, 19 October; plan in `docs/plans/groups-as-oversight.md`. Groups replace 
 - Steps follow whichever path they tap (Doctrinal, Podcast with Suggested or Build my own, Personalised) through Learning ("Your path") and Home's Today to "You're all set". Tap steps wait for the learner's own tap, and that tap does the real thing (saving the path or plan); the tour follows to the next page, skips ahead when their tap lands further on, and steps back if a save fails and the page doesn't change.
 - Targets are `data-tour` attributes on the real components; keep them when changing those screens.
 - Progress lives in `learning_tour_progress` (migration 0080): status active/done/skipped, step, path and plan mode, so it resumes on any device and never shows again once done or skipped. Off the tour's pages, a "Continue the tour" pill leads back.
+- `/demo` (user, 27 November) is the same tour over the same components for showing it without an account, such as to the Pastor. It's an open link with `noindex` and sample data only. "Jump to a step" opens it at any step of any path, for either arrival (signed up, or group link). It replays the taps that lead there, such as opening a card or adding a series.
+- Nothing in `/demo` saves:
+  - the path chooser and plan builder save through `LearningWritesProvider` (`components/sogp/learning/learning-writes.tsx`), which is the real server actions on the dashboard and an in-memory copy in the demo;
+  - every other same-origin write in the demo is answered in the browser, so someone signed in can't tick their own day by mistake;
+  - links to the tour's four pages stay in the demo, and other dashboard links say they open in the real app.
+
+  A new save on these screens must go through `LearningWritesProvider` or a plain `fetch`, never straight to a server action.
 
 ### After SOGP: what's next
 

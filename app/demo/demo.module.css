@@ -1,0 +1,30 @@
+/* /demo: a quiet bar above the real screens, and the step picker sheet. Above the tour (80–82). */
+.bar { position: sticky; top: 0; z-index: 85; display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; padding: 4px 16px; background: var(--dashboard-topbar-bg, #051480); color: white; }
+.label { font-size: 12px; line-height: 16px; color: rgb(255 255 255 / 0.78); }
+.barButton { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 10px; border-radius: 10px; border: 1px solid rgb(255 255 255 / 0.28); background: rgb(255 255 255 / 0.08); color: white; font: inherit; font-size: 12.5px; font-weight: 500; white-space: nowrap; cursor: pointer; transition: background-color 150ms var(--ease-out); }
+.barButton:hover { background: rgb(255 255 255 / 0.16); }
+.notice { position: fixed; left: 16px; right: 16px; bottom: 88px; z-index: 86; margin: 0 auto; max-width: 360px; padding: 10px 14px; border-radius: 10px; background: #1d2433; color: white; font-size: 13px; line-height: 20px; text-align: center; animation: rise 200ms var(--ease-out); }
+
+.backdrop { position: fixed; inset: 0; z-index: 90; display: grid; align-items: end; justify-items: center; background: rgb(15 20 35 / 0.42); animation: fade 200ms var(--ease-out); }
+.sheet { display: grid; gap: 8px; width: 100%; max-width: 480px; max-height: min(86dvh, 720px); overflow-y: auto; padding: 16px 16px calc(20px + env(safe-area-inset-bottom)); border-radius: 16px 16px 0 0; background: white; box-shadow: 0 -8px 32px rgb(15 20 35 / 0.16); animation: rise 260ms var(--ease-drawer, var(--ease-out)); }
+@media (min-width: 640px) { .backdrop { align-items: center; } .sheet { border-radius: 16px; } }
+.sheetHead { display: flex; align-items: center; justify-content: space-between; }
+.sheetHead h2 { margin: 0; font-family: var(--font-dashboard-heading); font-size: 17px; line-height: 24px; font-weight: 500; letter-spacing: var(--dashboard-tracking-heading, -0.02em); }
+.close { display: grid; place-items: center; width: 36px; height: 36px; margin-right: -8px; border: 0; border-radius: 10px; background: transparent; color: var(--color-text-muted); cursor: pointer; }
+.ask { margin-top: 6px; font-size: 12px; line-height: 16px; color: var(--color-text-muted); }
+
+.segmented { display: flex; padding: 3px; border-radius: 10px; background: #eceef2; }
+.segmented button { flex: 1; min-width: 0; height: 32px; padding: 0 6px; border: 0; border-radius: 8px; background: transparent; color: var(--color-text-muted); font: inherit; font-size: 12.5px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; transition: background-color 150ms var(--ease-out), color 150ms var(--ease-out); }
+.segmented button[aria-checked="true"] { background: white; color: var(--color-text-strong); box-shadow: 0 1px 2px rgb(15 20 35 / 0.12); }
+
+.steps { display: grid; margin: 0; padding: 0; list-style: none; border: 1px solid var(--dashboard-panel-edge, #e2e5ea); border-radius: 10px; overflow: hidden; }
+.steps li + li { border-top: 1px solid var(--dashboard-panel-edge, #e2e5ea); }
+.steps button { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 8px 12px; border: 0; background: white; color: var(--color-text-strong); font: inherit; font-size: 13.5px; line-height: 20px; text-align: left; cursor: pointer; transition: background-color 150ms var(--ease-out); }
+.steps button:hover { background: #f6f7f9; }
+.no { font-size: 12px; color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
+.where { font-size: 12px; color: var(--color-text-muted); white-space: nowrap; }
+.restart { display: inline-flex; align-items: center; justify-self: start; gap: 6px; height: 36px; margin-top: 4px; padding: 0; border: 0; background: transparent; color: var(--color-community-blue, #2056d6); font: inherit; font-size: 12.5px; font-weight: 500; cursor: pointer; }
+
+@keyframes fade { from { opacity: 0; } }
+@keyframes rise { from { transform: translateY(12px); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .backdrop, .sheet, .notice { animation: none; } }

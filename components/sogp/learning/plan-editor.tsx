@@ -3,12 +3,12 @@ import Link from "next/link";
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { chooseSogpPathAction, editSogpPlanAction } from "@/app/_actions/sogp-learning-actions";
 import { moveRemainingEpisode, podcastSuggestion, learningWriteNotice, type LearningViewData } from "@/lib/sogp/learning-view";
 import { isPlanPath, isTeachingKey } from "@/lib/sogp/learning-input";
 import { JourneyBuilder, PodcastBuilder } from "./plan-builder";
 import { DashboardIcon } from "@/components/dashboard/v3/primitives";
 import { GripVerticalIcon, LockIcon } from "lucide-react";
+import { useLearningWrites } from "./learning-writes";
 import styles from "./learning.module.css";
 
 function seconds(duration: string | undefined) {
@@ -37,6 +37,7 @@ function PlanEdit({ data: allData,requestedPath }: { data: LearningViewData;requ
   const data = { ...allData,episodes: allData.episodes.filter(episode => isTeachingKey(episode.guid) === teachingPlan) };
   const router = useRouter();
   const query = useQueryClient();
+  const writes = useLearningWrites();
   const [base] = useState(() => ({ revision: data.state?.revision ?? 0,guids: [...(data.state?.plan?.episodeGuids ?? [])] }));
   const pace = data.state?.plan?.episodesPerDay ?? (requestedPath === "podcast_two" ? 2 : 1);
   const existingPlan = data.state?.plan !== null && data.state?.plan !== undefined;
@@ -80,10 +81,10 @@ function PlanEdit({ data: allData,requestedPath }: { data: LearningViewData;requ
     if (!existingPlan && !draft.length) { setError("Choose at least one episode to start your plan.");return; }
     startSave(async () => {
       try {
-        const result = existingPlan ? await editSogpPlanAction({ expectedRevision: base.revision,episodeGuids: draft }) : await chooseSogpPathAction({ expectedRevision: base.revision,path: requestedPath ?? "podcast_one",episodeGuids: draft });
+        const result = existingPlan ? await writes.editPlan({ expectedRevision: base.revision,episodeGuids: draft }) : await writes.choosePath({ expectedRevision: base.revision,path: requestedPath ?? "podcast_one",episodeGuids: draft });
         if (!result.ok) { setError(result.error);return; }
         query.setQueryData<LearningViewData>(["sogp","learning-v3"],old => ({ ...(old ?? data),state: result.value }));
-        router.push(startDayOne ? "/dashboard/sogp/listen?day=1" : "/dashboard/sogp");router.refresh();
+        router.push(writes.href(startDayOne ? "/dashboard/sogp/listen?day=1" : "/dashboard/sogp"));router.refresh();
       } catch { setError("Your plan could not be saved. Your draft is still here; try again."); }
     });
   }

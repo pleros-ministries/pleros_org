@@ -4,13 +4,13 @@ import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { CheckIcon, LockIcon } from "lucide-react";
 
-import { chooseSogpPathAction } from "@/app/_actions/sogp-learning-actions";
 import { DashboardIcon } from "@/components/dashboard/v3/primitives";
 import { describeMonthSplit } from "@/lib/learning/month-calendar";
 import { lagosToday } from "@/lib/sogp/daily-date";
 import { isPlanPath, isTeachingKey, type SogpLearningPath } from "@/lib/sogp/learning-input";
 import { learningWriteNotice, type LearningViewData } from "@/lib/sogp/learning-view";
 
+import { useLearningWrites } from "./learning-writes";
 import learn from "./learning.module.css";
 import styles from "./learning-paths.module.css";
 import { PaceSwitchConfirm, PathSwitchConfirm } from "./path-switch";
@@ -60,6 +60,7 @@ export function PathChooser({ data }: { data: LearningViewData }) {
   const [saving, startSave] = useTransition();
   const router = useRouter();
   const query = useQueryClient();
+  const writes = useLearningWrites();
 
   const target: SogpLearningPath | null = open === "sogp" ? "traditional" : open === "doctrinal" ? "doctrinal" : open === "podcast" && pace ? pace === 2 ? "podcast_two" : "podcast_one" : null;
   const ready = target !== null && data.canWrite;
@@ -68,11 +69,11 @@ export function PathChooser({ data }: { data: LearningViewData }) {
     setError(null);
     startSave(async () => {
       try {
-        const result = await chooseSogpPathAction({ path, expectedRevision: data.state?.revision ?? 0 });
+        const result = await writes.choosePath({ path, expectedRevision: data.state?.revision ?? 0 });
         if (!result.ok) { setError(result.error); return; }
         query.setQueryData<LearningViewData>(["sogp", "learning-v3"], old => ({ ...(old ?? data), state: result.value }));
         // A plan path without its plan goes on to build it; everything else ends on Learning.
-        router.push(isPlanPath(path) && !result.value.plan ? `/dashboard/sogp/plan?path=${path}` : "/dashboard/sogp");
+        router.push(writes.href(isPlanPath(path) && !result.value.plan ? `/dashboard/sogp/plan?path=${path}` : "/dashboard/sogp"));
         router.refresh();
       } catch { setError("Couldn’t save your path. Check your connection and try again; your previous choice is unchanged."); }
     });
@@ -80,7 +81,7 @@ export function PathChooser({ data }: { data: LearningViewData }) {
 
   function proceed() {
     if (!target) return;
-    if (target === current) { router.push(isPlanPath(target) && !plan ? `/dashboard/sogp/plan?path=${target}` : "/dashboard/sogp"); return; }
+    if (target === current) { router.push(writes.href(isPlanPath(target) && !plan ? `/dashboard/sogp/plan?path=${target}` : "/dashboard/sogp")); return; }
     // Switching between saved plans previews what's kept first (Paper).
     const podcastSide = (path: SogpLearningPath) => path === "traditional" || path === "podcast_one" || path === "podcast_two";
     if (current && plan && !planHoldsTeachings && podcastSide(current) && podcastSide(target)) { setConfirming(true); return; }
