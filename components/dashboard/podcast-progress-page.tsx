@@ -27,7 +27,7 @@ import {
   summarisePodcastJourney,
   summarisePodcastProgress,
 } from "@/lib/podcast-journey";
-import type { PodcastLeaderboardData } from "@/lib/podcast-leaderboard";
+import type { previewMonthlyLeaderboard } from "@/lib/leaderboard/monthly";
 import {
   groupPodcastEpisodesBySeries,
   STANDALONE_PODCAST_SERIES_ID,
@@ -374,7 +374,8 @@ export function PodcastProgressPage({
   calendarEndKey: string;
   prayerDateKeys: string[];
   listenerName: string;
-  leaderboard: PodcastLeaderboardData | null;
+  /** This month's board for everyone (Pastor, 25 November 2026). */
+  leaderboard: ReturnType<typeof previewMonthlyLeaderboard> | null;
   /** The stored journey choice (`podcast_journeys.track`). */
   track: string;
   /** Day 1 of that journey in Lagos time. */

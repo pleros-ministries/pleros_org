@@ -79,11 +79,8 @@ export function buildDashboardNavigation(
   const devotion: DashboardNavItem[] = [
     { key: "prayer-watch", label: "Prayer Watch", href: "/dashboard/prayer-watch" },
     { key: "podcast", label: "Podcast", href: "/dashboard/podcast" },
-    {
-      key: "podcast-leaderboard",
-      label: "Podcast leaderboard",
-      href: "/dashboard/podcast/leaderboard",
-    },
+    // One board for everyone, whatever their path (Pastor, 25 November 2026).
+    { key: "leaderboard", label: "Leaderboard", href: "/dashboard/leaderboard" },
   ];
 
   const training: DashboardNavItem[] = caps.sogpEnrolled
@@ -91,11 +88,6 @@ export function buildDashboardNavigation(
         { key: "pre-sogp", label: "Pre-SOGP", href: "/dashboard/pre-sogp" },
         { key: "sogp", label: "SOGP", href: "/dashboard/sogp" },
         { key: "sogp-course", label: "SOGP course", href: "/dashboard/sogp/course" },
-        {
-          key: "sogp-leaderboard",
-          label: "SOGP leaderboard",
-          href: "/dashboard/sogp/leaderboard",
-        },
         { key: "sogp-certificate", label: "Certificate", href: "/dashboard/sogp/certificate" },
         { key: "sogp-referrals", label: "Referrals", href: "/dashboard/sogp/referrals" },
       ]

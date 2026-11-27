@@ -7,7 +7,9 @@ import group from "@/components/community/discipleship/discipleship-group.module
 import hub from "@/components/sogp/learning/learning-hub.module.css";
 import {
   LATE_RECORD_DAYS,
+  LEADERBOARD_ALIAS_HELP,
   MONTHLY_POINTS,
+  normaliseLeaderboardAlias,
   PRAYER_SESSIONS_PER_DAY,
   placeViewer,
   type MonthlyEntry,
@@ -19,8 +21,6 @@ import styles from "./leaderboard.module.css";
 export type LeaderboardSaveResult = { ok: true } | { ok: false; error: string };
 
 const SAVE_ERROR = "Couldn’t save that. Check your connection and try again.";
-const NAME_RULE = /^[\p{L}\p{N} _-]+$/u;
-const NAME_HELP = "Use 2 to 24 letters or numbers. Spaces, - and _ are fine too.";
 
 const plural = (count: number, one: string, many = `${one}s`) => `${count} ${count === 1 ? one : many}`;
 
@@ -98,10 +98,11 @@ export function MonthlyLeaderboard({ data, saveHidden, saveAlias }: {
     });
   }
 
-  function saveName(next: string | null) {
+  function saveName(raw: string | null) {
     setNameError(null);
-    if (next !== null && (next.length < 2 || next.length > 24 || !NAME_RULE.test(next))) {
-      setNameError(NAME_HELP);
+    const next = normaliseLeaderboardAlias(raw);
+    if (next === undefined) {
+      setNameError(LEADERBOARD_ALIAS_HELP);
       return;
     }
     const previous = alias;
@@ -120,10 +121,10 @@ export function MonthlyLeaderboard({ data, saveHidden, saveAlias }: {
 
   function submitName(event: FormEvent) {
     event.preventDefault();
-    saveName((draft ?? alias ?? "").trim() || null);
+    saveName(draft ?? alias ?? "");
   }
 
-  const typed = (draft ?? alias ?? "").trim() || null;
+  const typed = normaliseLeaderboardAlias(draft ?? alias ?? "");
   const boardMeta = board.myRank && shown
     ? `You’re #${board.myRank} of ${board.total}`
     : board.myRank ? "You’re hidden. Only you see your rank"

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type ReactNode } from "react";
 import { BookOpenCheckIcon, CheckIcon, ClipboardCheckIcon, CopyIcon, GiftIcon, HeadphonesIcon, Share2Icon, TrophyIcon, UserPlusIcon, UsersRoundIcon } from "lucide-react";
-import type { DashboardHomeData, HomeLearningCard, HomeMonth, HomeReport, HomeSogp, HomeToday } from "@/lib/dashboard/home";
+import type { DashboardHomeData, HomeLeaderboard, HomeLearningCard, HomeMonth, HomeReport, HomeSogp, HomeToday } from "@/lib/dashboard/home";
 import { PRAYER_WATCH_YOUTUBE_URL } from "@/lib/prayer-watch";
 import { buildReferralShareMessage } from "@/lib/sogp/referral";
 import { useAskAfterTeaching } from "@/components/sogp/ask-after-teaching";
@@ -309,14 +309,14 @@ function ActionRow({ href, icon, tone, title, children, action, prefetch, onClic
 }
 
 /** Grow together as actionable rows with buttons (Pastor review, 18 October), not illustrated tiles. */
-function GrowTogether({ sogp }: { sogp: HomeSogp }) {
+function GrowTogether({ sogp, leaderboard }: { sogp: HomeSogp; leaderboard: HomeLeaderboard | null | undefined }) {
   const group = sogp.group;
   return <section className={styles.homeSection} aria-labelledby="home-grow-heading">
     <div className={styles.homeSectionHeader}><h2 id="home-grow-heading">Grow together</h2></div>
     <ul className={styles.homeActions}>
       {/* With a board to show, the leaderboard has its own preview under Your progress. */}
-      {sogp.board ? null : <ActionRow href="/dashboard/sogp/leaderboard" icon={<TrophyIcon className="size-4" strokeWidth={2} />} tone={["#fff1c2", "#8a5a00"]} title={sogp.leaderboard ? <>Leaderboard · <span className={styles.homeRank}>#{sogp.leaderboard.rank}</span></> : "Leaderboard"} action="View">
-        <span>{sogp.leaderboard ? `${sogp.leaderboard.points} points this cohort` : "See how your cohort is growing"}</span>
+      {leaderboard?.top.length ? null : <ActionRow href="/dashboard/leaderboard" icon={<TrophyIcon className="size-4" strokeWidth={2} />} tone={["#fff1c2", "#8a5a00"]} title={leaderboard?.me ? <>Leaderboard · <span className={styles.homeRank}>#{leaderboard.me.rank}</span></> : "Leaderboard"} action="View">
+        <span>{leaderboard?.points ? `${leaderboard.points} points in ${leaderboard.month}` : "See who’s growing this month"}</span>
       </ActionRow>}
       {/* With a link to show, Invite someone has its own panel. */}
       {sogp.invite ? null : <ActionRow href="/dashboard/sogp/referrals" icon={<UserPlusIcon className="size-4" strokeWidth={2} />} tone={["#f6d9de", "#5e2236"]} title="Invite someone" action="Share link">
@@ -410,13 +410,13 @@ export function DashboardHomeView({ name, greeting, data }: { name?: string; gre
       {sogp?.today ? <ShareCard dayNumber={sogp.shareDayNumber} /> : null}
       {sogp?.today ? <TodaySection today={sogp.today} month={sogp.month} /> : null}
       {sogp?.progress ? <ProgressSection progress={sogp.progress} /> : null}
-      {/* The same leaderboard preview as Learning (Pastor, 20 October), not one row among the others. */}
-      {sogp?.board ? <div className={styles.homeSection}><LeaderboardPreview board={sogp.board} id="home-leaderboard" dense /></div> : null}
+      {/* The month's board (Pastor, 25 November 2026), for everyone signed in, not one row among the others. */}
+      {data.leaderboard?.top.length ? <div className={styles.homeSection}><LeaderboardPreview board={data.leaderboard} id="home-leaderboard" dense month={data.leaderboard.month} /></div> : null}
     </div>
     <div className={styles.homeSide}>
       {sogp?.invite ? <InvitePanel invite={sogp.invite} /> : null}
       {data.welcomePack && !data.welcomePack.done ? <WelcomePackRow /> : null}
-      {sogp ? <GrowTogether sogp={sogp} /> : null}
+      {sogp ? <GrowTogether sogp={sogp} leaderboard={data.leaderboard} /> : null}
       {data.reports ? <ReportsDestination day={data.day} rows={data.reports} /> : null}
     </div>
   </div>;

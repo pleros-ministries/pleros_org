@@ -1,5 +1,6 @@
 import { dailyCategoryStatus, type DailyReportCategory, type DailyReportDeclaration } from "@/lib/community/daily-report";
 import type { StatusTone } from "@/components/dashboard/v3/primitives";
+import type { previewMonthlyLeaderboard } from "@/lib/leaderboard/monthly";
 import type { CalendarDay } from "@/lib/learning/month-calendar";
 
 export type HomeReport = { category: DailyReportCategory; title: string; description: string; status: string; tone: StatusTone };
@@ -53,14 +54,18 @@ export type HomeSogp = {
     /** Null on the podcast path, which has no assessments. */
     assessment: { done: number; total: number } | null;
   };
-  leaderboard: { rank: number; points: number } | null;
-  /** The cohort's top five and the viewer, for Home's leaderboard preview (Pastor, 20 October). */
   /** The learner's invite link and code for Home's Invite someone panel (Pastor, 20 October). */
   invite?: { code: string; url: string; joined: number } | null;
-  board?: { top: Array<{ rank: number; name: string; points: number; isMe: boolean }>; me: { rank: number; points: number } | null; total: number } | null;
   group: { kind: "member"; groupName: string; leaderFirstName: string } | { kind: "leader"; groups: number; disciples: number } | { kind: "none" };
   shareDayNumber: number | null;
 };
+
+/**
+ * This month's leaderboard for Home (Pastor, 25 November 2026): the top five
+ * and you, for everyone signed in. `me` is null while you have no points or
+ * have hidden yourself; `points` is yours either way.
+ */
+export type HomeLeaderboard = ReturnType<typeof previewMonthlyLeaderboard>;
 
 export type DashboardHomeData = {
   day: string;
@@ -70,6 +75,7 @@ export type DashboardHomeData = {
   sogp?: HomeSogp | null;
   /** Welcome Pack stays on Home until its last step (reminders) is saved. */
   welcomePack?: { done: boolean } | null;
+  leaderboard?: HomeLeaderboard | null;
 };
 
 type JourneyDay = {

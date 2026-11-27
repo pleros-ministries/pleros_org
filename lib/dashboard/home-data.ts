@@ -12,8 +12,9 @@ import { lagosToday } from "@/lib/sogp/daily-date";
 import { getOwnCertificationFacts } from "@/lib/db/queries/sogp-certification-facts";
 import { getHomeDiscipleshipSummary } from "@/lib/db/queries/sogp-discipleship";
 import { getActiveSogpJourney } from "@/lib/db/queries/sogp-journey";
-import { getSogpLeaderboard } from "@/lib/db/queries/sogp-leaderboard";
 import { getHomeInvite } from "@/lib/db/queries/sogp-referrals";
+import { getMonthlyLeaderboard } from "@/lib/db/queries/monthly-leaderboard";
+import { previewMonthlyLeaderboard } from "@/lib/leaderboard/monthly";
 import { getReminderPreferences } from "@/lib/db/queries/notification-preferences";
 import { cohortWeekLabel, homeReportRows, homeSogpToday, type DashboardHomeData, type HomeSogp } from "./home";
 import { getMonthCalendarData } from "./month-data";
@@ -35,7 +36,8 @@ export async function getDashboardHomeData(viewer: NonNullable<Awaited<ReturnTyp
     // SOGP is the home's centre. Each read degrades to "not shown" on its own.
     enrolled ? getActiveSogpJourney(userId).catch(() => null) : Promise.resolve(null),
     enrolled ? getOwnCertificationFacts(userId).catch(() => null) : Promise.resolve(null),
-    enrolled ? getSogpLeaderboard(userId).catch(() => null) : Promise.resolve(null),
+    // One board for everyone signed in (Pastor, 25 November 2026).
+    getMonthlyLeaderboard(userId).catch(() => null),
     enrolled ? getHomeDiscipleshipSummary(userId).catch(() => ({ kind: "none" as const })) : Promise.resolve({ kind: "none" as const }),
     // Unreadable preferences hide the row rather than nag.
     getReminderPreferences(userId).then(prefs => prefs.remindersSavedAt !== null).catch(() => true),
@@ -93,12 +95,6 @@ export async function getDashboardHomeData(viewer: NonNullable<Awaited<ReturnTyp
       prayer: { percent: facts.prayer.percent, required: facts.prayer.required },
       assessment: facts.podcast ? null : { done: facts.learningDone, total: facts.learningTotal },
     } : null,
-    leaderboard: leaderboard?.me ? { rank: leaderboard.me.rank, points: leaderboard.me.points } : null,
-    board: leaderboard && leaderboard.top.length ? {
-      top: leaderboard.top.slice(0, 5).map(row => ({ rank: row.rank, name: row.name, points: row.points, isMe: row.isMe })),
-      me: leaderboard.me ? { rank: leaderboard.me.rank, points: leaderboard.me.points } : null,
-      total: leaderboard.total,
-    } : null,
     group,
     invite,
     shareDayNumber: journey.days.find(row => row.dateKey === day)?.track?.dayNumber ?? lesson?.dayNumber ?? null,
@@ -106,6 +102,7 @@ export async function getDashboardHomeData(viewer: NonNullable<Awaited<ReturnTyp
   return {
     day, reports, card, sogp,
     welcomePack: { done: welcomePackDone },
+    leaderboard: leaderboard ? previewMonthlyLeaderboard(leaderboard) : null,
     learning: podcast ? {
       title: waiting ? `Day ${waiting.dayNumber} is waiting for you` : "Your current plan is complete",
       href: waiting ? `/dashboard/sogp/listen?day=${waiting.dayNumber}` : "/dashboard/sogp/plan",

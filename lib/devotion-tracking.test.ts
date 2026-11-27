@@ -75,8 +75,9 @@ describe("dashboard devotion tracking", () => {
     expect(schema).toContain("podcastEpisodeProgress");
   });
 
-  test("lets a listener choose a podcast journey and opt in to the leaderboard", () => {
+  test("lets a listener choose a podcast journey and see the month’s one leaderboard", () => {
     const podcastPage = source("components", "dashboard", "podcast-progress-page.tsx");
+    const details = source("components", "dashboard", "podcast-other-details.tsx");
     const journeyActions = source("app", "_actions", "podcast-journey-actions.ts");
     const schema = source("lib", "db", "schema.ts");
 
@@ -84,7 +85,9 @@ describe("dashboard devotion tracking", () => {
     expect(podcastPage).toContain("PodcastJourneyCard");
     expect(podcastPage).toContain("Listen as a daily journey");
     expect(journeyActions).toContain("choosePodcastTrackAction");
-    expect(journeyActions).toContain("setPodcastLeaderboardVisibilityAction");
+    // No podcast-only opt-in: everyone shares one board (Pastor, 25 November 2026).
+    expect(journeyActions).not.toContain("Leaderboard");
+    expect(details).toContain("LeaderboardPreview");
     expect(schema).toContain("podcastJourneys");
   });
 

@@ -108,6 +108,22 @@ Pastor, 19 October; plan in `docs/plans/groups-as-oversight.md`. Groups replace 
 - Prayer Watch can be ticked for any cohort day or any of the last seven days (`setSogpMorningPrayerComplete`), so Today keeps Prayer Watch every day of the month.
 - Open: the Doctrinal path still follows its cohort for releases and group reviews; the month lays its remaining tracks one a day.
 
+### The monthly leaderboard (Pastor, 25 November 2026)
+
+- One board for everyone signed in, whatever their path, for the Lagos calendar month. It starts afresh on the 1st. It replaced the cohort board and the opt-in podcast board: `/dashboard/sogp/leaderboard` and `/dashboard/podcast/leaderboard` redirect to `/dashboard/leaderboard`.
+- **Points** (`MONTHLY_POINTS`, `lib/leaderboard/monthly.ts`):
+  - **5 for each day you learnt**, however much you did that day: a podcast or Library episode marked listened, a lesson's teaching (`student_progress.audio_listened_at`), a quiz attempt, a written submission, or a Pre-SOGP day. These are the same sources as the month calendar's learnt days.
+  - **2 for each Prayer Watch session**, three a day at most. "Another time" is one session.
+  - **3 for each day of Bible reading** with chapters read.
+  - **10 for each person who joined** this month. This covers your groups and any group under you, credited up the oversight tree, plus enrolments made with your referral link. The branch's follow-up group (`is_default`) doesn't count. One person counts once for each person credited.
+  - Prayer Watch and Bible reading count only if recorded within `LATE_RECORD_DAYS` (7) of the day.
+  - No sharing points and no streak bonus.
+- **The query:** `getMonthlyLeaderboard` (`lib/db/queries/monthly-leaderboard.ts`) runs four grouped reads in parallel, then reads names. It is wrapped in React `cache()`. Home loads it for everyone signed in, the Podcast page shows its preview, and the SOGP calendar links to it.
+- **Names and hiding:** peers see a first name or a leaderboard name. `leaderboard_profiles` (migration 0082) holds `hidden` and `alias` for each person: 2–24 letters, numbers, spaces, `-` and `_`, unique whatever the case. The 11 old cohort names were copied across.
+- **What people see:** everyone is on the board by default. "Show me on the leaderboard" takes you off it, but you still see your own rank and points. Home's preview leaves you out while you're hidden. The payload carries no user ids. Both settings save optimistically.
+- **Staff screens** read the name from `leaderboard_profiles`.
+- **Open:** drop `sogp_enrollments.leaderboard_alias` (and its index) and `podcast_journeys.leaderboard_visible` in a later migration, now that nothing reads them.
+
 ### After SOGP: what's next
 
 - Someone who has finished SOGP (every published track, or their podcast plan), or whose cohort has ended, chooses their next learning at `/dashboard/sogp/next` (Pastor, 21 October). Withdrawn learners can't. The choice becomes the current learning at the top of Learning ; SOGP stays reachable from its page (`/dashboard/sogp/school`), and history and the certificate are untouched. Other learning, where SOGP used to move, was retired on 24 November.

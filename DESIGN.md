@@ -166,7 +166,8 @@ Most of these classes come from `components/community/discipleship/discipleship-
 | Lettered branch mark | `Mark` (`oversight-view.tsx`) |
 | Bottom-sheet pop-up | `ReportSheet`, `Segmented`, `Stepper`, `sheetStyles` (`components/community/report/report-sheet.tsx`) |
 | Oversight tabs header | `OversightHeader` (`components/dashboard/church/oversight-nav.tsx`) |
-| Leaderboard preview | `LeaderboardPreview` (`components/sogp/learning/leaderboard-preview.tsx`, `dense` on Home) |
+| Leaderboard preview | `LeaderboardPreview` (`components/sogp/learning/leaderboard-preview.tsx`, `dense` on Home, full on the Podcast page; always the month's one board) |
+| The monthly leaderboard | `MonthlyLeaderboard` (`components/dashboard/leaderboard/monthly-leaderboard.tsx`, `/dashboard/leaderboard`): count strip, ranking, Your points, How points work, then the show-me switch and leaderboard name, both optimistic |
 | The month calendar | `MonthCalendar` (`components/dashboard/month/month-calendar.tsx`; `collapsible` on Home, `legend` and `selectToday` on the month page) |
 | Message someone | `MessageButton` (`bare` and `primary` let it match the buttons beside it) |
 | Install the app | `GetAppButton` (tones `light`, `dark`, `quiet`) |

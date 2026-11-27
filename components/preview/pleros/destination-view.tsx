@@ -16,7 +16,7 @@ import {
   LocationGroupDestination,
   MessagesDestination,
 } from "./destinations/community";
-import { PodcastDestination, PodcastLeaderboardDestination, PrayerWatchDestination } from "./destinations/devotion";
+import { LeaderboardDestination, PodcastDestination, PrayerWatchDestination } from "./destinations/devotion";
 import { ChurchDestination, PartnershipDestination, ReportHistoryDestination } from "./destinations/personal";
 import {
   CertificateDestination,
@@ -24,7 +24,6 @@ import {
   PreSogpDestination,
   ReferralsDestination,
   SogpCourseDestination,
-  SogpLeaderboardDestination,
 } from "./destinations/training";
 import {
   AudiobookDestination,
@@ -41,10 +40,9 @@ const SCREENS: Record<string, ComponentType> = {
   partnership: PartnershipDestination,
   "prayer-watch": PrayerWatchDestination,
   podcast: PodcastDestination,
-  "podcast-leaderboard": PodcastLeaderboardDestination,
+  leaderboard: LeaderboardDestination,
   "pre-sogp": PreSogpDestination,
   "sogp-course": SogpCourseDestination,
-  "sogp-leaderboard": SogpLeaderboardDestination,
   "sogp-certificate": CertificateDestination,
   "sogp-referrals": ReferralsDestination,
   "discipleship-journey": DiscipleshipJourneyDestination,
