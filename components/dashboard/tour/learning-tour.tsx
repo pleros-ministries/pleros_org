@@ -78,10 +78,14 @@ export function LearningTour({ start }: { start: Start }) {
 
   // Replay from Profile.
   useEffect(() => {
-    const replay = () => { const fresh = { active: true, index: 0, path: null, mode: null }; setState(fresh); latest.current.save("active", fresh); router.push(TOUR_ROUTES.home); };
+    // Someone replaying already has a path, and Home's card opens Learning for them, so the replay opens on the chooser.
+    const replay = () => {
+      const fresh = { active: true, index: Math.max(0, tourSteps(null, null, names).findIndex(entry => entry.id === "paths")), path: null, mode: null };
+      setState(fresh); latest.current.save("active", fresh); router.push(TOUR_ROUTES.choose);
+    };
     window.addEventListener(TOUR_REPLAY_EVENT, replay);
     return () => window.removeEventListener(TOUR_REPLAY_EVENT, replay);
-  }, [router]);
+  }, [router, names]);
 
   const back = () => setState(value => ({ ...value, index: Math.max(0, index - 1) }));
   const finish = (status: "done" | "skipped") => { save(status, { ...state, index }); setState(value => ({ ...value, active: false })); };
@@ -118,7 +122,11 @@ export function LearningTour({ start }: { start: Start }) {
       if (step.id === "pick") {
         const picked = clicked.closest("[data-tour-path]")?.getAttribute("data-tour-path") as TourPath | null;
         if (!picked) return;
-        setTimeout(() => setState(value => ({ ...value, path: picked, mode: null, index: index + 1 })), 420);
+        setTimeout(() => {
+          // Tapping the card that was already open closes it; open it again so its details show.
+          document.querySelector<HTMLElement>(`[data-tour-path="${picked}"] button[aria-expanded="false"]`)?.click();
+          setState(value => ({ ...value, path: picked, mode: null, index: index + 1 }));
+        }, 420);
         return;
       }
       if (step.id === "tabs") {
