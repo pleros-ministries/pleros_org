@@ -33,7 +33,7 @@ function learningDoor(card: HomeLearningCard | undefined, fallback: DashboardHom
       href: card.href,
       meta: card.meta ?? "SOGP",
       title: card.title ?? "Start your SOGP journey",
-      summary: card.summary ?? "Pick a path and see where it takes you",
+      summary: card.summary ?? "Pick a path you can keep up with",
       action: card.action ?? "Choose your SOGP path",
       value: 0,
       total: 0,
@@ -146,7 +146,7 @@ function LearningDestination({ card, fallback, hubHref }: {
     </div> : null}
     <Link className={styles.homeLearningAction} href={door.href} data-tour="home-learning">
       {door.action}
-      <DashboardIcon name="arrow" />
+      <DashboardIcon name="arrow" size={16} strokeWidth={2} />
     </Link>
   </section>;
 }

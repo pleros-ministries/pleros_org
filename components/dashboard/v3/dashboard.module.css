@@ -67,10 +67,12 @@
 .swipePage[data-area="community"] { left: 100%; }
 .swipePage[data-active="true"] { position: relative; }
 .greeting { font-size: 21px; line-height: 28px; font-weight: 500; letter-spacing: var(--dashboard-tracking-heading, -0.02em); margin: 0; }
+/* Label on top, title and line under it, the action on the bottom edge level
+   with the art's base, so the card never shows an empty band (user, 27 November). */
 .homeLearningCard {
   position: relative;
-  display: grid;
-  align-content: start;
+  display: flex;
+  flex-direction: column;
   min-height: 252px;
   margin-top: 24px;
   padding: 20px;
@@ -143,16 +145,17 @@
 .homeLearningProgressRow { display: flex; align-items: center; gap: 12px; width: 72%; margin-top: 16px; color: white; font-size: 13px; line-height: 20px; font-weight: 500; }
 .homeLearningProgress { flex: 1; height: 4px; overflow: hidden; border-radius: 999px; background: rgb(255 255 255 / 24%); }
 .homeLearningProgress span { display: block; height: 100%; border-radius: inherit; background: var(--learning-accent, #d8ff65); }
+/* Whatever sits above the action keeps at least 18px from it. */
+.homeLearningCard > :nth-last-child(2) { margin-bottom: 18px; }
 .homeLearningAction {
   position: relative;
   z-index: 1;
   display: inline-flex;
   align-items: center;
-  justify-content: space-between;
-  justify-self: start;
-  min-width: 176px;
+  gap: 6px;
+  align-self: flex-start;
   min-height: var(--dashboard-control-height);
-  margin-top: 18px;
+  margin-top: auto;
   padding: 0 14px;
   border-radius: var(--dashboard-control-radius);
   background: white;
