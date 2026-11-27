@@ -32,7 +32,7 @@ function learningDoor(card: HomeLearningCard | undefined, fallback: DashboardHom
     return {
       href: card.href,
       meta: card.meta ?? "SOGP",
-      title: card.title ?? "Make room to grow",
+      title: card.title ?? "Start your SOGP journey",
       summary: card.summary ?? "Pick a path and see where it takes you",
       action: card.action ?? "Choose your SOGP path",
       value: 0,
