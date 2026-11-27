@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { runDailyReportReminderDispatcher } from "@/lib/notifications/daily-report-dispatch";
 import { runReminderDispatcher } from "@/lib/notifications/dispatcher";
 
-// Scheduled every five minutes in vercel.json. Each run only does work for
+// Scheduled every five minutes by the Railway cron-reminders service. Each run only does work for
 // learners whose reminder is due, but a busy slot loads one journey per
 // learner, so allow the full Pro duration.
 export const maxDuration = 300;

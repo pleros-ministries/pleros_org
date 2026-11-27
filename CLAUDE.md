@@ -38,7 +38,7 @@ This file is loaded by every Claude session in this repo. Keep it short: the det
   - Any page reading the session, params or searchParams needs `export const instant = false;`.
   - Read `node_modules/next/dist/docs/` before changing framework behaviour.
 - **Before committing:**
-  - always run `npx tsc --noEmit -p .`, since one type error fails the Vercel deploy;
+  - always run `npx tsc --noEmit -p .`, since one type error fails the Railway build (production moved from Vercel to Railway on 25 November; see `docs/handover/2026-11-25-railway-migration.md`);
   - don't run the full test, lint or build suites unless asked;
   - run a focused vitest file for new pure logic.
 - **Check the UI visually** at 375px with the in-app browser. Use the `/preview/**` pages when you can't sign in. Say plainly what you couldn't verify.
