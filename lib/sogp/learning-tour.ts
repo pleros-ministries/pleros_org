@@ -48,7 +48,7 @@ export function tourSteps(path: TourPath | null, mode: TourMode | null, names: T
     body: leader ? `You joined ${leader}’s group. ${leader} leads your group and will walk with you. First, let’s set up how you’ll learn. It takes about a minute.` : "Let’s set up how you’ll learn. It takes about a minute, and you can change it later." };
   const common: TourStep[] = [
     welcome,
-    { id: "start", route: "home", kind: "spot", target: "home-learning", advance: "tap-nav", title: "Start here", body: "Your learning lives in this card.", tap: "Tap Choose a learning path" },
+    { id: "start", route: "home", kind: "spot", target: "home-learning", advance: "tap-nav", title: "Start here", body: "Your learning lives in this card.", tap: "Tap Choose your SOGP path" },
     { id: "paths", route: "choose", kind: "spot", target: "paths", advance: "next", title: "Three ways through SOGP", body: "The doctrinal path is a track a day, with a quiz and a written response. Podcast is shorter episodes. A personalised path is teachings you pick from the Library." },
     { id: "pick", route: "choose", kind: "spot", target: "paths", advance: "tap", title: "Pick the one that fits your days", body: "Each one shows where it leads before you commit.", tap: "Tap a path" },
   ];
