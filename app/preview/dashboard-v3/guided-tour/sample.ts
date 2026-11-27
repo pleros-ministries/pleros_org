@@ -46,14 +46,14 @@ export const HUB: Record<TourPath | "none", LearningHubData> = {
         .concat([{ title: "Level 4", meta: "6 tracks · Coming soon", end: null, href: null as never, muted: true }, { title: "Advanced SOGP", meta: "After level 4", end: null, href: null as never, muted: true }]),
       more: null, note: "A track a day, with a group review at the end of each level.", empty: null } },
   podcast: { ...base, path: "podcast_two", state: "active",
-    card: { eyebrow: "Day 1", title: "The Reality of God’s Purpose", progress: "0 of 2 episodes today · 0 of 60 in your plan", done: 0, total: 60, href: "#", action: "Listen to day 1", level: 1 },
+    card: { eyebrow: "Episode 1 of 60", title: "The Reality of God’s Purpose", progress: "0 of 2 episodes today · 0 of 60 in your plan", done: 0, total: 60, href: "#", action: "Listen now", level: 1 },
     summary: { counts: [{ label: "Episodes", value: "60" }, { label: "Days left", value: "30" }, { label: "Done by", value: dayMonth(29) }], listTitle: "Coming up",
-      rows: [0, 1, 2].map(day => ({ title: "The Reality of God’s Purpose", meta: `Day ${day + 1} · 2 episodes`, end: dayMonth(day), href: "#", muted: false })),
-      more: { label: "See all 30", href: "#" }, note: "When your plan is done, SOGP follows from level 1.", empty: null } },
+      rows: [0, 1, 2].map(day => ({ title: "The Reality of God’s Purpose", meta: `Episodes ${day * 2 + 1} and ${day * 2 + 2}`, end: day === 0 ? "Today" : dayMonth(day), href: "#", muted: false })),
+      more: { label: "See all 60", href: "#" }, note: "When your plan is done, SOGP follows from level 1.", empty: null } },
   doctrinal: { ...base, path: "doctrinal", state: "active",
-    card: { eyebrow: "Day 1", title: "Understanding the Gospel", progress: "Faith & Growth · 0 of 5 teachings", done: 0, total: 5, href: "#", action: "Listen to day 1", level: 1 },
+    card: { eyebrow: "Teaching 1 of 5", title: "Understanding the Gospel", progress: "Faith & Growth · 0 of 5 teachings", done: 0, total: 5, href: "#", action: "Listen now", level: 1 },
     summary: { counts: [{ label: "Teachings", value: "5" }, { label: "Days left", value: "5" }, { label: "Done by", value: dayMonth(4) }], listTitle: "Coming up",
-      rows: library.slice(0, 3).map((item, day) => ({ title: item.title, meta: `Day ${day + 1} · ${item.series}`, end: dayMonth(day), href: "#", muted: false })),
+      rows: library.slice(0, 3).map((item, day) => ({ title: item.title, meta: `Teaching ${day + 1} · ${item.series}`, end: day === 0 ? "Today" : dayMonth(day), href: "#", muted: false })),
       more: { label: "See all 5", href: "#" }, note: "Add teachings from the Library at any time.", empty: null } },
 };
 
@@ -79,7 +79,7 @@ function sogpToday(path: TourPath): HomeSogp {
     cohortTitle: "SOGP November 2026", weekLabel: "Week 1 of 4",
     today: {
       dateKey: today, dateLabel: new Date(start).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", timeZone: "Africa/Lagos" }), done: 0, total: podcast ? 2 : 3,
-      teaching: { title: path === "sogp" ? "Gospel: The Word of Truth" : path === "podcast" ? "The Reality of God’s Purpose · day 1" : "Understanding the Gospel · day 1", href: "#", done: false, dayNumber: 1, podcast, questionGuid: null },
+      teaching: { title: path === "sogp" ? "Gospel: The Word of Truth" : path === "podcast" ? "The Reality of God’s Purpose" : "Understanding the Gospel", href: "#", done: false, dayNumber: 1, podcast, questionGuid: null },
       prayerWatch: { complete: false },
       assessment: podcast ? null : { complete: false, href: "#" },
       review: null,

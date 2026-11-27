@@ -147,6 +147,8 @@ function Picker({ arrival: initial, onJump, onClose }: { arrival: Arrival; onJum
   const [path, setPath] = useState<TourPath>("sogp");
   const [mode, setMode] = useState<TourMode>("suggested");
   const steps = tourSteps(path, path === "podcast" ? mode : null, demoNames(arrival));
+  // The steps before a path is tapped belong to no path.
+  const common = tourSteps(null, null, demoNames(arrival)).length;
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => { if (event.key === "Escape") onClose(); };
     window.addEventListener("keydown", onKey);
@@ -173,7 +175,7 @@ function Picker({ arrival: initial, onJump, onClose }: { arrival: Arrival; onJum
       <span className={styles.ask}>Open at</span>
       <ol className={styles.steps}>
         {steps.map((step, index) => <li key={step.id}>
-          <button type="button" onClick={() => onJump(arrival, index < 4 ? null : path, index < 4 ? null : mode, step.id)}>
+          <button type="button" onClick={() => onJump(arrival, index < common ? null : path, index < common ? null : mode, step.id)}>
             <span className={styles.no}>{index + 1}</span><span>{step.title}</span><span className={styles.where}>{PAGE[step.route]}</span>
           </button>
         </li>)}

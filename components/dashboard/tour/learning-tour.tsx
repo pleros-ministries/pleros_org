@@ -25,7 +25,7 @@ const saveProgress = (value: Progress) => { void saveLearningTourAction(value).c
  * saves as they go so it resumes on any device; done or skipped, it stays away.
  * /demo passes its own pages and keeps progress in memory.
  */
-export function LearningTour({ start, routes = TOUR_ROUTES, onSave = saveProgress, onFinish }: { start: Start; routes?: Record<TourRoute, string>; onSave?: (value: Progress) => void; onFinish?: (status: "done" | "skipped") => void }) {
+export function LearningTour({ start, routes = TOUR_ROUTES, onSave = saveProgress }: { start: Start; routes?: Record<TourRoute, string>; onSave?: (value: Progress) => void }) {
   const router = useRouter();
   const pathname = usePathname();
   const route = routeOf(pathname, routes);
@@ -81,13 +81,17 @@ export function LearningTour({ start, routes = TOUR_ROUTES, onSave = saveProgres
 
   // Replay from Profile.
   useEffect(() => {
-    const replay = () => { const fresh = { active: true, index: 0, path: null, mode: null }; setState(fresh); latest.current.save("active", fresh); router.push(routes.home); };
+    // Someone replaying already has a path, and Home's card opens Learning for them, so the replay opens on the chooser.
+    const replay = () => {
+      const fresh = { active: true, index: Math.max(0, tourSteps(null, null, names).findIndex(entry => entry.id === "paths")), path: null, mode: null };
+      setState(fresh); latest.current.save("active", fresh); router.push(routes.choose);
+    };
     window.addEventListener(TOUR_REPLAY_EVENT, replay);
     return () => window.removeEventListener(TOUR_REPLAY_EVENT, replay);
-  }, [router, routes.home]);
+  }, [router, names, routes.choose]);
 
   const back = () => setState(value => ({ ...value, index: Math.max(0, index - 1) }));
-  const finish = (status: "done" | "skipped") => { save(status, { ...state, index }); setState(value => ({ ...value, active: false })); onFinish?.(status); };
+  const finish = (status: "done" | "skipped") => { save(status, { ...state, index }); setState(value => ({ ...value, active: false })); };
 
   // Find the target, bring it into view, and follow it as the page moves.
   useLayoutEffect(() => {
@@ -121,7 +125,11 @@ export function LearningTour({ start, routes = TOUR_ROUTES, onSave = saveProgres
       if (step.id === "pick") {
         const picked = clicked.closest("[data-tour-path]")?.getAttribute("data-tour-path") as TourPath | null;
         if (!picked) return;
-        setTimeout(() => setState(value => ({ ...value, path: picked, mode: null, index: index + 1 })), 420);
+        setTimeout(() => {
+          // Tapping the card that was already open closes it; open it again so its details show.
+          document.querySelector<HTMLElement>(`[data-tour-path="${picked}"] button[aria-expanded="false"]`)?.click();
+          setState(value => ({ ...value, path: picked, mode: null, index: index + 1 }));
+        }, 420);
         return;
       }
       if (step.id === "tabs") {
@@ -161,7 +169,7 @@ export function LearningTour({ start, routes = TOUR_ROUTES, onSave = saveProgres
         <h2 id="tour-title" className={styles.title}>{step.title}</h2>
         <p className={styles.body}>{step.body}</p>
         <div className={styles.sheetActions}>
-          {last ? <button type="button" className={styles.primary} onClick={() => finish("done")} autoFocus>{state.path === "sogp" ? "Start today’s teaching" : "Listen to day 1"}<ArrowRightIcon className="size-4" strokeWidth={2.2} /></button>
+          {last ? <button type="button" className={styles.primary} onClick={() => finish("done")} autoFocus>{state.path === "sogp" ? "Start today’s teaching" : state.path === "podcast" ? "Listen to the first episode" : "Listen to the first teaching"}<ArrowRightIcon className="size-4" strokeWidth={2.2} /></button>
             : <><button type="button" className={styles.primary} onClick={next} autoFocus>Show me<ArrowRightIcon className="size-4" strokeWidth={2.2} /></button>
               <button type="button" className={styles.quiet} onClick={() => finish("skipped")}>I’ll look around myself</button></>}
         </div>

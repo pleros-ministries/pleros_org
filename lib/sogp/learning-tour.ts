@@ -54,11 +54,11 @@ export function tourSteps(path: TourPath | null, mode: TourMode | null, names: T
   ];
   if (!path) return common;
   const end: TourStep[] = [
-    { id: "card", route: "learning", kind: "spot", target: "learning-card", advance: "next", title: path === "sogp" ? "Today’s teaching is here" : "Day 1 is ready", body: path === "sogp" ? "Each day, open the next track from this card. Missed a day? It waits for you." : "Each day, listen from this card. Missed a day? It waits for you." },
+    { id: "card", route: "learning", kind: "spot", target: "learning-card", advance: "next", title: path === "sogp" ? "Today’s teaching is here" : path === "podcast" ? "Your first episode is ready" : "Your first teaching is ready", body: path === "sogp" ? "Each day, open the next track from this card. Missed a day? It waits for you." : "Each day, listen from this card. Missed a day? It waits for you." },
     { id: "your-path", route: "learning", kind: "spot", target: "your-path", advance: "next", title: "Your path at a glance", body: "How much there is, how long is left, and when you’ll finish. Change path any time from here." },
     ...(leader ? [{ id: "leader", route: "learning" as const, kind: "spot" as const, target: "leader-banner", advance: "next" as const, optional: true, title: `${leader} looks after you`, body: `Keep ${leader} as your leader, or ask for someone else. Either way, nothing else changes.` }] : []),
     { id: "home-day", route: "home", kind: "spot", target: "home-today", advance: "next", optional: true, title: "Your day, on Home", body: path === "sogp" ? "Teaching, Prayer Watch and your assessment, ticked off as you go." : "Your listening and Prayer Watch, ticked off as you go." },
-    { id: "done", route: "home", kind: "sheet", advance: "next", title: "You’re all set", body: path === "sogp" ? "Start today’s teaching whenever you’re ready. You can replay this tour from Profile." : path === "podcast" ? "Day 1 is waiting. You can replay this tour from Profile." : "Your first teaching is waiting. Add more from the Library any time. You can replay this tour from Profile." },
+    { id: "done", route: "home", kind: "sheet", advance: "next", title: "You’re all set", body: path === "sogp" ? "Start today’s teaching whenever you’re ready. You can replay this tour from Profile." : path === "podcast" ? "Your first episode is waiting. You can replay this tour from Profile." : "Your first teaching is waiting. Add more from the Library any time. You can replay this tour from Profile." },
   ];
   const picker = (noun: string, unit: string): TourStep[] => [
     { id: "own-search", route: "plan", kind: "spot", target: "plan-search", advance: "next", title: `Find a ${noun}`, body: `Search by series or ${unit}.` },
