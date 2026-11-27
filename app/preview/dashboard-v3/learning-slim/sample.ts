@@ -22,17 +22,14 @@ export const SAMPLE_HUB: LearningHubData = {
   ],
   advancedInterest: false,
   next: { canChoose: false, finished: false, card: null },
-  summary: {
-    counts: [{ label: "Tracks", value: "18" }, { label: "Levels", value: "3" }, { label: "Done by", value: "14 Dec" }],
-    listTitle: "Levels",
+  month: {
+    name: "November", daysLeft: 4,
     rows: [
-      { title: "Level 1", meta: "6 tracks · 24–29 Nov", end: "Done", href: "#", muted: false },
-      { title: "Level 2", meta: "6 tracks · 1–6 Dec", end: "3 of 6", href: "#", muted: false },
-      { title: "Level 3", meta: "6 tracks · 8–13 Dec", end: null, href: "#", muted: false },
-      { title: "Level 4", meta: "6 tracks · Coming soon", end: null, href: null, muted: true },
-      { title: "Advanced SOGP", meta: "After level 4", end: null, href: null, muted: true },
+      { when: "Today", title: "Biblical Origin and Ontology", meta: "Level 2 · track 10", href: "#" },
+      { when: "Fri 28 Nov", title: "The Nature of Man", meta: "Level 2 · track 11", href: "#" },
+      { when: "Sat 29 Nov", title: "Sin and Redemption", meta: "Level 2 · track 12", href: "#" },
     ],
-    more: null, note: "A track a day, with a group review at the end of each level.", empty: null,
+    note: "A track a day, with a group review at the end of each level.", empty: null,
   },
   journey: { welcomePackDone: true, preSogp: { done: 10, total: 10 }, month: "December", prayerToday: true },
 };

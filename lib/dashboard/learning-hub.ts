@@ -16,13 +16,11 @@ import { lagosToday } from "@/lib/sogp/daily-date";
 import { SOGP_LEVELS } from "@/lib/sogp/curriculum";
 import { learningResume } from "@/lib/sogp/learning-view";
 import { isPlanPath, type SogpLearningPath } from "@/lib/sogp/learning-input";
-import { readPodcastPlan } from "@/lib/sogp/podcast-plan";
 import { monthWindow } from "@/lib/leaderboard/monthly";
 
 import { cohortWeekLabel, homeSogpToday } from "./home";
 import { getMonthCalendarData, monthCarryNote } from "./month-data";
 
-const SOGP_SCHOOL = "/dashboard/sogp/school";
 const weekdayFormat = new Intl.DateTimeFormat("en-GB", { weekday: "short", timeZone: "UTC" });
 const opensFormat = new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "Africa/Lagos" });
 
@@ -50,10 +48,10 @@ export type LearningHubData = {
    */
   next: { canChoose: boolean; finished: boolean; card: NextLearningCard | null };
   /**
-   * Your path on Learning (user, 24 November): three counts, a few rows and
-   * one note, in the dashboard's strip-and-rows vocabulary. Null before a path.
+   * The rest of this month on Learning (user, 27 November): the next few days
+   * in words, no counts strip. Null before a path or while a plan is unbuilt.
    */
-  summary: PathSummary | null;
+  month: LearningMonth | null;
   /** The learning path, Welcome Pack → Pre-SOGP → SOGP (Pastor review, 18 October). */
   journey: {
     welcomePackDone: boolean;
@@ -64,22 +62,16 @@ export type LearningHubData = {
   };
 };
 
-export type PathSummary = {
-  counts: Array<{ label: string; value: string }>;
-  listTitle: string;
-  rows: Array<{ title: string; meta: string; end: string | null; href: string | null; muted: boolean }>;
-  more: { label: string; href: string } | null;
+export type LearningMonth = {
+  /** "November" */
+  name: string;
+  daysLeft: number;
+  rows: Array<{ when: string; title: string; meta: string; href: string | null }>;
   note: string | null;
   empty: string | null;
 };
-const dayMonth = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", timeZone: "Africa/Lagos" });
-/** "24–30 Nov", or "28 Nov – 4 Dec" across months. */
-function dateRange(from: Date, to: Date) {
-  const a = dayMonth.formatToParts(from), b = dayMonth.formatToParts(to);
-  const month = (parts: Intl.DateTimeFormatPart[]) => parts.find(part => part.type === "month")?.value;
-  const day = (parts: Intl.DateTimeFormatPart[]) => parts.find(part => part.type === "day")?.value;
-  return month(a) === month(b) ? `${day(a)}–${dayMonth.format(to)}` : `${dayMonth.format(from)} – ${dayMonth.format(to)}`;
-}
+/** "Fri 28 Nov" */
+const dayLabel = new Intl.DateTimeFormat("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "Africa/Lagos" });
 const addDays = (key: string, days: number) => new Date(new Date(`${key}T12:00:00.000Z`).getTime() + days * 86_400_000);
 const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 
@@ -179,53 +171,17 @@ export async function getLearningHubData(userId: string, state: SogpLearningStat
     return { level: definition.level, title: definition.title, done, total: tracks.length || definition.tracks.length, state, opens: state === "later" && firstRelease ? opensFormat.format(new Date(firstRelease)) : null };
   });
 
-  // Every published track done, a finished podcast plan, or an ended cohort.
-  let summary: PathSummary | null = null;
-  if (path && planless) {
-    const slots = doctrinal ? 120 : path === "podcast_two" ? 60 : 30;
-    summary = { counts: doctrinal ? [{ label: "Teachings", value: "0" }, { label: "Up to", value: "120" }, { label: "Pace", value: "One a day" }] : [{ label: "Episodes", value: `0 of ${slots}` }, { label: "Days left", value: String(monthWindow(day).daysLeft) }, { label: "Pace", value: path === "podcast_two" ? "30 min" : "15 min" }],
-      listTitle: "Coming up", rows: [], more: null, note: null,
-      empty: doctrinal ? "No teachings yet. Choose a series or single teachings from the Library." : "Your plan is empty. Take the suggested plan or pick your own episodes." };
-  } else if (path && podcast) {
-    // The shared month (Pastor, 25 November 2026): your next days dated to the
-    // month's end, then what carries into the next one. Progress stays yours.
-    const read = readPodcastPlan(state!.plan!, { listenedEpisodeGuids: new Set(state!.progress.listenedEpisodeGuids), playbackPositionSeconds: new Map<string, number>() });
-    const episodes = read.days.flatMap(entry => entry.episodes);
-    const month = await getMonthCalendarData(userId, { state, course }).catch(() => null);
-    const name = month?.month.name ?? monthWindow(day).name;
-    summary = {
-      counts: [
-        { label: doctrinal ? "Teachings" : "Episodes", value: `${episodes.filter(episode => episode.listened).length} of ${episodes.length}` },
-        { label: "Days left", value: String(month?.month.daysLeft ?? monthWindow(day).daysLeft) },
-        { label: "Finishes", value: month?.finishKey ? dayMonth.format(addDays(month.finishKey, 0)) : "Done" },
-      ],
-      listTitle: month?.month.daysSoFar === 1 ? `Your ${name} plan` : `Rest of ${name}`,
-      rows: (month?.rest ?? []).slice(0, 3).map(({ dateKey, item }) => ({ title: item.title, meta: item.meta, end: dateKey === day ? "Today" : dayMonth.format(addDays(dateKey, 0)), href: item.href ?? null, muted: false })),
-      more: { label: `See ${name}`, href: "/dashboard/sogp/month" },
-      note: month ? monthCarryNote(month) : null,
-      empty: month?.rest.length ? null : "Your plan is done. Choose what’s next.",
-    };
-  } else if (path === "traditional") {
-    const taught = SOGP_LEVELS.map(definition => {
-      const tracks = published.filter(track => track.curriculumLevel === definition.level);
-      const dates = tracks.map(track => new Date(track.releaseAt).getTime()).sort((a, b) => a - b);
-      return { level: definition.level, count: tracks.length || definition.tracks.length, done: tracks.filter(track => track.completed).length, first: dates[0], last: dates.at(-1), published: tracks.length > 0 };
-    });
-    const live = taught.filter(level => level.published);
-    const lastDate = live.map(level => level.last).filter((value): value is number => value !== undefined).sort((a, b) => b - a)[0];
-    summary = {
-      counts: [{ label: "Tracks", value: String(live.reduce((sum, level) => sum + level.count, 0)) }, { label: "Levels", value: String(live.length) }, { label: "Done by", value: lastDate ? dayMonth.format(new Date(lastDate)) : "—" }],
-      listTitle: "Levels",
-      rows: [...taught.map(level => ({
-        title: `Level ${level.level}`,
-        meta: `${plural(level.count, "track")} · ${!level.published ? "Coming soon" : level.first && level.last ? dateRange(new Date(level.first), new Date(level.last)) : "Dates to come"}`,
-        end: level.published && level.done === level.count ? "Done" : level.published && level.done ? `${level.done} of ${level.count}` : null,
-        href: level.published ? SOGP_SCHOOL : null,
-        muted: !level.published,
-      })), { title: "Advanced SOGP", meta: "After level 4", end: null, href: null, muted: true }],
-      more: null,
-      note: "A track a day, with a group review at the end of each level.",
-      empty: null,
+  // The shared month (Pastor, 25 November 2026): your next days, dated, then one line on what follows.
+  let month: LearningMonth | null = null;
+  if (path && !planless) {
+    const data = await getMonthCalendarData(userId, { state, course }).catch(() => null);
+    const window = data?.month ?? monthWindow(day);
+    month = {
+      name: window.name,
+      daysLeft: window.daysLeft,
+      rows: (data?.rest ?? []).slice(0, 3).map(({ dateKey, item }) => ({ when: dateKey === day ? "Today" : dayLabel.format(addDays(dateKey, 0)), title: item.title, meta: item.meta, href: item.href ?? null })),
+      note: (data ? monthCarryNote(data) : null) ?? (path === "traditional" ? "A track a day, with a group review at the end of each level." : null),
+      empty: data?.rest.length ? null : podcast ? "Your plan is done. Choose what’s next." : `Nothing left to learn in ${window.name}.`,
     };
   }
 
@@ -247,7 +203,7 @@ export async function getLearningHubData(userId: string, state: SogpLearningStat
     levels,
     advancedInterest,
     next: { canChoose: canChooseNext, finished: finishedSogp, card: canChooseNext ? nextCard : null },
-    summary,
+    month,
     journey: {
       welcomePackDone,
       preSogp,

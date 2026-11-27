@@ -3,7 +3,7 @@ import type { CSSProperties } from "react";
 import { ChevronRightIcon, PlayIcon, RefreshCcwIcon } from "lucide-react";
 
 import groupStyles from "@/components/community/discipleship/discipleship-group.module.css";
-import type { LearningHubData, PathSummary } from "@/lib/dashboard/learning-hub";
+import type { LearningHubData } from "@/lib/dashboard/learning-hub";
 import type { LearningViewData } from "@/lib/sogp/learning-view";
 
 import styles from "./learning-hub.module.css";
@@ -23,25 +23,40 @@ const PACE: Record<NonNullable<LearningHubData["path"]>, string> = { traditional
 /** What heads Learning for each path. */
 const PATH_NAMES: Record<NonNullable<LearningHubData["path"]>, string> = { traditional: "Doctrinal path", podcast_one: "Podcast", podcast_two: "Podcast", doctrinal: "Personalised path" };
 
+/** How each path runs, in words, for Your path's first row. */
+const PACE_LINE: Record<NonNullable<LearningHubData["path"]>, string> = { traditional: "A track a day, about an hour", podcast_one: "One episode a day, about 15 minutes", podcast_two: "Two episodes a day, about 30 minutes", doctrinal: "One teaching a day, chosen by you" };
+
 /**
- * Your path (user, 24 November): three counts, a few rows and one note, in the
- * dashboard's strip-and-rows vocabulary. Replaces Other learning, which is retired.
+ * Learning below the card (user, 27 November): the rest of the month in
+ * words, then your path in two rows. No counts strips, no level list: the
+ * levels live on the SOGP page.
  */
-function YourPath({ summary }: { summary: PathSummary }) {
+function MonthAndPath({ hub }: { hub: LearningHubData }) {
+  const month = hub.month!;
+  const plan = hub.path === "podcast_one" || hub.path === "podcast_two" || hub.path === "doctrinal";
+  const certificate = hub.certificate.available ? "Ready to download"
+    : plan ? `${hub.card.done} of ${hub.card.total} ${hub.path === "doctrinal" ? "teachings" : "episodes"} listened`
+    : `${hub.doneCount} of ${hub.card.total} tracks done`;
+  const row = (title: string, meta: string, href: string | null, end?: string) => {
+    const body = <>
+      <span className={groupStyles.rowCopy}><span className={groupStyles.rowTitle}>{title}</span><span className={groupStyles.rowMeta}>{meta}</span></span>
+      {end ? <span className={groupStyles.rowMeta}>{end}</span> : null}
+      {href ? <ChevronRightIcon className={`${groupStyles.chev} size-4`} strokeWidth={2} aria-hidden="true" /> : null}
+    </>;
+    return href ? <Link href={href} className={groupStyles.row}>{body}</Link> : <div className={groupStyles.row}>{body}</div>;
+  };
   return <>
-    <div className={groupStyles.sectionTitle}><h2>Your path</h2><Link href="/dashboard/sogp/path" className={`${groupStyles.quiet} inline-flex items-center gap-0.5`}>Change path<ChevronRightIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" /></Link></div>
-    <div className={groupStyles.strip} data-tour="your-path">{summary.counts.map(count => <div key={count.label}><span>{count.label}</span><strong>{count.value}</strong></div>)}</div>
-    <div className={groupStyles.sectionTitle}><h2>{summary.listTitle}</h2>{summary.more ? <Link href={summary.more.href} className={groupStyles.quiet}>{summary.more.label}</Link> : null}</div>
-    <div className={groupStyles.panel}>{summary.rows.length ? <ul className={groupStyles.list}>{summary.rows.map(row => {
-      const body = <>
-        <span className={groupStyles.rowCopy}><span className={groupStyles.rowTitle}>{row.title}</span><span className={groupStyles.rowMeta}>{row.meta}</span></span>
-        {row.end ? <span className={groupStyles.rowMeta}>{row.end}</span> : null}
-        {row.href ? <ChevronRightIcon className={`${groupStyles.chev} size-4`} strokeWidth={2} aria-hidden="true" /> : null}
-      </>;
-      const tone = row.muted ? { color: "var(--color-community-muted)" } : undefined;
-      return <li key={row.title + row.meta}>{row.href ? <Link href={row.href} className={groupStyles.row} style={tone}>{body}</Link> : <div className={groupStyles.row} style={tone}>{body}</div>}</li>;
-    })}</ul> : <p className={groupStyles.empty}>{summary.empty}</p>}</div>
-    {summary.note ? <p className={groupStyles.note}>{summary.note}</p> : null}
+    <div className={groupStyles.sectionTitle}><h2>Rest of {month.name}</h2><Link href="/dashboard/sogp/month" className={`${groupStyles.quiet} inline-flex items-center gap-0.5`}>See {month.name}<ChevronRightIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" /></Link></div>
+    <div className={groupStyles.panel} data-tour="your-path">{month.rows.length
+      ? <ul className={groupStyles.list}>{month.rows.map(item => <li key={item.when + item.title}>{row(item.title, `${item.when} · ${item.meta}`, item.href)}</li>)}</ul>
+      : <p className={groupStyles.empty}>{month.empty}</p>}</div>
+
+    <div className={groupStyles.sectionTitle}><h2>Your path</h2><Link href="/dashboard/sogp/path" className={`${groupStyles.quiet} inline-flex items-center gap-0.5`}>Change<ChevronRightIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" /></Link></div>
+    <div className={groupStyles.panel}><ul className={groupStyles.list}>
+      <li>{row(PATH_NAMES[hub.path ?? "traditional"], PACE_LINE[hub.path ?? "traditional"], null)}</li>
+      <li>{row("Certificate", certificate, SOGP_PAGE)}</li>
+    </ul></div>
+    {month.note ? <p className={groupStyles.note}>{month.note}</p> : null}
   </>;
 }
 
@@ -113,14 +128,9 @@ export function LearningHub({ hub, learning }: { hub: LearningHubData; learning:
         <ChevronRightIcon className="size-4 shrink-0 text-[#a6abb2]" strokeWidth={2} />
       </Link> : null}
 
-      <div><h1>Learning</h1>{next ? <p className={groupStyles.sub}>Your next learning, after SOGP</p> : hub.cohortTitle ? <p className={groupStyles.sub}>{[hub.cohortTitle, hub.weekLabel].filter(Boolean).join(" · ")}</p> : null}</div>
+      {/* The month frames the page (Pastor, 27 November); the cohort line only before a path. */}
+      <div><h1>Learning</h1>{next ? <p className={groupStyles.sub}>Your next learning, after SOGP</p> : hub.month ? <p className={groupStyles.sub}>{hub.month.name} · {hub.month.daysLeft === 1 ? "last day" : `${hub.month.daysLeft} days left`}</p> : hub.cohortTitle ? <p className={groupStyles.sub}>{[hub.cohortTitle, hub.weekLabel].filter(Boolean).join(" · ")}</p> : null}</div>
 
-      {/* Your current learning, a class of its own: its name heads the card playing from it. */}
-      {/* No path yet: no path name to head the card (user, 27 November). */}
-      {hub.state === "start" && !next ? null : <div className={styles.sectionTitle}>
-        <h2>{next ? next.title : PATH_NAMES[hub.path ?? "traditional"]}</h2>
-        <Link href={next ? "/dashboard/sogp/next" : SOGP_PAGE} className="inline-flex items-center gap-0.5">{next ? "Change" : "Open"}<ChevronRightIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" /></Link>
-      </div>}
       {resume}
 
       {hub.state === "preparing" ? <p className={styles.notice}>Your cohort hasn’t started yet. Pre-SOGP is open now, and your first teachings unlock on the start date.</p> : null}
@@ -136,9 +146,8 @@ export function LearningHub({ hub, learning }: { hub: LearningHubData; learning:
         <Link href={hub.catchUp.href} className={styles.btn}>Catch up</Link>
       </div> : null}
 
-      {hub.state === "active" ? <Link href="/dashboard" className={`${groupStyles.quiet} -mt-1 inline-flex items-center gap-0.5 justify-self-start`}>Today’s tasks are on Home<ChevronRightIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" /></Link> : null}
 
-      {hub.summary && !next ? <YourPath summary={hub.summary} /> : null}
+      {hub.month && !next ? <MonthAndPath hub={hub} /> : null}
     </div>
   </div>;
 }
