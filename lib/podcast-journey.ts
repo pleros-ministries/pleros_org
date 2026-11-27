@@ -18,8 +18,6 @@ export const PODCAST_DAILY_VIEW_START_KEY = "2026-10-05";
 export type PodcastDay = {
   dateKey: string;
   state: SogpCalendarState;
-  /** Day N of a journey; absent on the latest-releases calendar. */
-  dayNumber?: number;
   /**
    * A journey day's episode, or on the latest-releases calendar the episode
    * released that day in Lagos time (Sundays have none).
@@ -92,11 +90,10 @@ export type ResolvedPodcastJourney = (
 };
 
 export type PodcastJourneySummary = {
-  /** Today's day number, held at the first or last day outside the journey. */
-  dayNumber: number;
+  /** The plan's length: one episode a day. */
   totalDays: number;
   listened: number;
-  /** Today is past the journey's last day. */
+  /** Every episode in the plan is listened to. */
   finished: boolean;
 };
 
@@ -452,55 +449,67 @@ export function resolvePodcastJourney({
 }
 
 /**
- * One episode a day from the start date. Day N opens on its date; missed days
- * stay open to catch up, and a day is complete with its episode and the
- * morning Prayer Watch.
+ * The shared month (Pastor, 25 November 2026): every day of the calendar month
+ * holds the plan episode you listened to that day or, from today, the next
+ * one still to listen to, one a day. Nothing dates from when you started, and
+ * an unfinished episode is never lost: it moves to the next day.
  */
 export function buildPodcastJourneyDays({
   planEpisodes,
-  startedOn,
   todayKey,
   listenedGuids,
+  listenedOn,
   prayerDateKeys,
 }: {
   planEpisodes: readonly RssEpisode[];
-  startedOn: string;
   todayKey: string;
   listenedGuids: ReadonlySet<string>;
+  /** The Lagos day each episode was first marked listened, where known. */
+  listenedOn: Readonly<Record<string, string>>;
   prayerDateKeys: ReadonlySet<string>;
 }): PodcastDay[] {
-  return planEpisodes.map((episode, index) => {
-    const dateKey = addDays(startedOn, index);
-    const episodeListened = listenedGuids.has(episode.guid);
+  const today = parseDateKey(todayKey);
+  const startKey = `${todayKey.slice(0, 7)}-01`;
+  const endKey = toDateKey(new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth() + 1, 0)));
+  // A day shows the first plan episode listened to on it.
+  const heard = new Map<string, RssEpisode>();
+  for (const episode of planEpisodes) {
+    const day = listenedGuids.has(episode.guid) ? listenedOn[episode.guid] : undefined;
+    if (day && day >= startKey && day <= todayKey && !heard.has(day)) heard.set(day, episode);
+  }
+  const waiting = planEpisodes.filter((episode) => !listenedGuids.has(episode.guid));
+  let next = 0;
+  const days: PodcastDay[] = [];
+  for (let dateKey = startKey; dateKey <= endKey; dateKey = addDays(dateKey, 1)) {
+    const listened = heard.get(dateKey) ?? null;
+    // From today, the plan: today keeps what you've already listened to.
+    const episode = dateKey < todayKey || (dateKey === todayKey && listened) ? listened : waiting[next++] ?? null;
+    const episodeListened = episode ? listenedGuids.has(episode.guid) : false;
     const prayerWatchComplete = prayerDateKeys.has(dateKey);
-
-    return {
+    days.push({
       dateKey,
-      dayNumber: index + 1,
       episode,
       episodeListened,
       prayerWatchComplete,
       state: deriveSogpCalendarState({
         dateKey,
         todayKey,
-        requirements: [episodeListened, prayerWatchComplete],
+        requirements: episode ? [episodeListened, prayerWatchComplete] : [prayerWatchComplete],
       }),
-    };
-  });
+    });
+  }
+  return days;
 }
 
+/** Your own progress through the plan; the calendar above it is the month. */
 export function summarisePodcastJourney(
-  days: readonly PodcastDay[],
-  todayKey: string,
+  planEpisodes: readonly RssEpisode[],
+  listenedGuids: ReadonlySet<string>,
 ): PodcastJourneySummary {
-  const lastDay = days.at(-1);
-  const finished = lastDay ? todayKey > lastDay.dateKey : false;
-  const todayIndex = days.findIndex((day) => day.dateKey === todayKey);
-
+  const listened = planEpisodes.filter((episode) => listenedGuids.has(episode.guid)).length;
   return {
-    dayNumber: todayIndex >= 0 ? todayIndex + 1 : finished ? days.length : 1,
-    totalDays: days.length,
-    listened: days.filter((day) => day.episodeListened).length,
-    finished,
+    totalDays: planEpisodes.length,
+    listened,
+    finished: planEpisodes.length > 0 && listened === planEpisodes.length,
   };
 }

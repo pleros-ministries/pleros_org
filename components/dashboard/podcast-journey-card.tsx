@@ -41,8 +41,8 @@ export function PodcastJourneyCard({
           <span className={styles.rowMeta}>
             {summary
               ? finished
-                ? `Finished · ${summary.totalDays} days`
-                : `Day ${summary.dayNumber} of ${summary.totalDays} · ${summary.listened} listened`
+                ? `Finished · ${summary.totalDays} episodes`
+                : `${summary.listened} of ${summary.totalDays} listened`
               : "Each new episode on the day it comes out"}
           </span>
         </span>

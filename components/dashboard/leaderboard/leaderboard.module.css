@@ -1,0 +1,46 @@
+/* The monthly leaderboard page. Rows, panels and strips come from
+   discipleship-group.module.css and the board list from learning-hub.module.css;
+   this file holds only what the page adds. */
+
+.page { display: grid; grid-template-columns: minmax(0, 1fr); align-content: start; gap: 12px; max-width: 640px; margin-inline: auto; padding: 16px 16px max(28px, env(safe-area-inset-bottom)); color: var(--color-community-ink); }
+.page > * { min-width: 0; }
+.page p { margin: 0; }
+.page :is(button, a, input):focus-visible { outline: 2px solid var(--color-community-blue, #2056d6); outline-offset: 2px; }
+
+.value { flex: none; font-family: var(--font-dashboard-heading); font-size: 13px; line-height: 18px; font-weight: 500; font-variant-numeric: tabular-nums; color: var(--color-community-ink); }
+.value[data-quiet] { color: var(--color-community-muted); }
+/* Explanations wrap rather than trail off. */
+.wrap { overflow: visible; white-space: normal; text-overflow: clip; }
+
+/* Show me on the leaderboard */
+.switchRow { display: flex; align-items: center; gap: 12px; min-height: 36px; padding: 12px 14px; cursor: pointer; }
+.switch { position: relative; flex: none; display: inline-flex; }
+.switch input { position: absolute; inset: 0; margin: 0; opacity: 0; cursor: pointer; }
+.track { width: 36px; height: 20px; border-radius: 999px; background: #c9ccd2; transition: background-color 180ms var(--ease-out); }
+.thumb { position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 999px; background: white; box-shadow: 0 1px 2px rgb(15 23 40 / 20%); transition: transform 180ms var(--ease-out); pointer-events: none; }
+.switch input:checked + .track { background: var(--color-community-blue, #2056d6); }
+.switch input:checked + .track + .thumb { transform: translateX(16px); }
+.switch input:focus-visible + .track { outline: 2px solid var(--color-community-blue, #2056d6); outline-offset: 2px; }
+.switch input:disabled { cursor: not-allowed; }
+
+/* Leaderboard name */
+.nameForm { display: grid; gap: 8px; padding: 12px 14px 14px; border-top: 1px solid var(--color-line, #e7e9ec); }
+.label { font-size: 13px; line-height: 18px; font-weight: 500; }
+.field { display: flex; gap: 8px; min-width: 0; }
+.input { flex: 1; min-width: 0; height: 40px; padding: 0 12px; border: 1px solid var(--dashboard-panel-edge, #e2e5ea); border-radius: 10px; background: white; color: var(--color-community-ink); font: inherit; font-size: 16px; outline: none; }
+.input::placeholder { font-size: 14px; color: var(--color-community-muted); }
+.input:focus { border-color: var(--color-community-blue, #2056d6); }
+.field > button { height: 40px; }
+.helper { font-size: 12px; line-height: 17px; color: var(--color-community-muted); }
+.error { font-size: 12.5px; line-height: 18px; color: #b42318; }
+
+/* Your own row comes and goes with the switch. */
+.meRow { animation: row-in 220ms var(--ease-out) both; }
+.meRow[data-closing] { animation: row-out 180ms var(--ease-out) both; }
+@keyframes row-in { from { opacity: 0; transform: translateY(-4px); } }
+@keyframes row-out { to { opacity: 0; transform: translateY(-4px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .meRow, .meRow[data-closing] { animation: none; }
+  .track, .thumb { transition: none; }
+}

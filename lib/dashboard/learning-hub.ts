@@ -17,9 +17,10 @@ import { SOGP_LEVELS } from "@/lib/sogp/curriculum";
 import { learningResume } from "@/lib/sogp/learning-view";
 import { isPlanPath, type SogpLearningPath } from "@/lib/sogp/learning-input";
 import { readPodcastPlan } from "@/lib/sogp/podcast-plan";
-import { buildSogpDays } from "@/lib/sogp/sogp-days";
+import { monthWindow } from "@/lib/leaderboard/monthly";
 
 import { cohortWeekLabel, homeSogpToday } from "./home";
+import { getMonthCalendarData, monthCarryNote } from "./month-data";
 
 const SOGP_SCHOOL = "/dashboard/sogp/school";
 const weekdayFormat = new Intl.DateTimeFormat("en-GB", { weekday: "short", timeZone: "UTC" });
@@ -57,8 +58,8 @@ export type LearningHubData = {
   journey: {
     welcomePackDone: boolean;
     preSogp: { done: number; total: number };
-    /** Numbered SOGP days: 24 teaching days plus the review days. */
-    days: { current: number | null; total: number; teaching: number; reviews: number } | null;
+    /** The shared month's name, for the SOGP page's link to it (Pastor, 25 November 2026). */
+    month: string;
     prayerToday: boolean | null;
   };
 };
@@ -151,7 +152,7 @@ export async function getLearningHubData(userId: string, state: SogpLearningStat
     const listened = state!.progress.listenedEpisodeGuids.length;
     const planned = new Set([...state!.plan!.episodeGuids, ...state!.plan!.historyEpisodeGuids]).size;
     card = waiting
-      ? { eyebrow: `Day ${waiting.dayNumber}`, title: doctrinal ? first : first.replace(/\s*\(Part\s+\d+\)\s*$/i, ""), progress: doctrinal ? `${catalogue.get(waiting.episodeGuids[0]!)?.series ?? "From the Library"} · ${listened} of ${planned} teachings` : `${waiting.listened} of ${waiting.total} ${waiting.total === 1 ? "episode" : "episodes"} today · ${listened} of ${planned} in your plan`, done: listened, total: planned, href: `/dashboard/sogp/listen?day=${waiting.dayNumber}`, action: `Listen to day ${waiting.dayNumber}`, level: 1 }
+      ? { eyebrow: `${doctrinal ? "Teaching" : "Episode"} ${Math.min(planned, listened + 1)} of ${planned}`, title: doctrinal ? first : first.replace(/\s*\(Part\s+\d+\)\s*$/i, ""), progress: doctrinal ? `${catalogue.get(waiting.episodeGuids[0]!)?.series ?? "From the Library"} · ${listened} of ${planned} teachings` : `${waiting.listened} of ${waiting.total} ${waiting.total === 1 ? "episode" : "episodes"} today · ${listened} of ${planned} in your plan`, done: listened, total: planned, href: `/dashboard/sogp/listen?day=${waiting.dayNumber}`, action: "Listen now", level: 1 }
       : { eyebrow: "Plan complete", title: "Choose what’s next", progress: `${plural(listened, unit)} listened`, done: listened, total: planned, href: "/dashboard/sogp/plan", action: "Edit your plan", level: 1 };
   } else {
     const track = next ?? published.at(-1) ?? null;
@@ -159,7 +160,7 @@ export async function getLearningHubData(userId: string, state: SogpLearningStat
     card = track
       ? { // The level alone; its name doesn't need saying on the card (user, 24 November).
       eyebrow: `Level ${level}`, title: track.lesson.title, progress: `Track ${track.dayNumber} of ${published.length} · ${doneCount} done`, done: doneCount, total: published.length, href: `/dashboard/sogp/course/day/${track.dayNumber}`, action: next ? `Resume track ${track.dayNumber}` : "Review your last track", level }
-      : { eyebrow: "Traditional", title: "Your teachings open soon", progress: "Nothing released yet", done: 0, total: 0, href: "/dashboard/sogp/traditional", action: "Open your calendar", level: 1 };
+      : { eyebrow: "Traditional", title: "Your teachings open soon", progress: "Nothing released yet", done: 0, total: 0, href: "/dashboard/sogp/month", action: "Open this month", level: 1 };
   }
 
   // Missed earlier days with an open, unfinished teaching. Never blocks today.
@@ -182,26 +183,27 @@ export async function getLearningHubData(userId: string, state: SogpLearningStat
   let summary: PathSummary | null = null;
   if (path && planless) {
     const slots = doctrinal ? 120 : path === "podcast_two" ? 60 : 30;
-    summary = { counts: doctrinal ? [{ label: "Teachings", value: "0" }, { label: "Up to", value: "120" }, { label: "Pace", value: "One a day" }] : [{ label: "Episodes", value: `0 of ${slots}` }, { label: "Days", value: "30" }, { label: "Pace", value: path === "podcast_two" ? "30 min" : "15 min" }],
+    summary = { counts: doctrinal ? [{ label: "Teachings", value: "0" }, { label: "Up to", value: "120" }, { label: "Pace", value: "One a day" }] : [{ label: "Episodes", value: `0 of ${slots}` }, { label: "Days left", value: String(monthWindow(day).daysLeft) }, { label: "Pace", value: path === "podcast_two" ? "30 min" : "15 min" }],
       listTitle: "Coming up", rows: [], more: null, note: null,
       empty: doctrinal ? "No teachings yet. Choose a series or single teachings from the Library." : "Your plan is empty. Take the suggested plan or pick your own episodes." };
   } else if (path && podcast) {
-    const progress = { listenedEpisodeGuids: new Set(state!.progress.listenedEpisodeGuids), playbackPositionSeconds: new Map<string, number>() };
-    const read = readPodcastPlan(state!.plan!, progress);
-    const left = read.days.filter(entry => !entry.complete);
-    const items = read.days.reduce((sum, entry) => sum + entry.episodes.length, 0);
-    const label = (guid: string) => catalogue.get(guid)?.title ?? (doctrinal ? "Teaching" : "Episode");
+    // The shared month (Pastor, 25 November 2026): your next days dated to the
+    // month's end, then what carries into the next one. Progress stays yours.
+    const read = readPodcastPlan(state!.plan!, { listenedEpisodeGuids: new Set(state!.progress.listenedEpisodeGuids), playbackPositionSeconds: new Map<string, number>() });
+    const episodes = read.days.flatMap(entry => entry.episodes);
+    const month = await getMonthCalendarData(userId, { state, course }).catch(() => null);
+    const name = month?.month.name ?? monthWindow(day).name;
     summary = {
-      counts: [{ label: doctrinal ? "Teachings" : "Episodes", value: String(items) }, { label: "Days left", value: String(left.length) }, { label: "Done by", value: left.length ? dayMonth.format(addDays(day, left.length - 1)) : "Done" }],
-      listTitle: "Coming up",
-      rows: left.slice(0, 3).map((entry, index) => {
-        const title = doctrinal ? label(entry.episodes[0]!.episodeGuid) : label(entry.episodes[0]!.episodeGuid).replace(/\s*\(Part\s+\d+\)\s*$/i, "");
-        const meta = doctrinal ? `Day ${entry.dayNumber} · ${catalogue.get(entry.episodes[0]!.episodeGuid)?.series ?? "Library"}` : `Day ${entry.dayNumber} · ${plural(entry.episodes.length, "episode")}`;
-        return { title, meta, end: dayMonth.format(addDays(day, index)), href: `/dashboard/sogp/listen?day=${entry.dayNumber}`, muted: false };
-      }),
-      more: left.length > 3 ? { label: `See all ${left.length}`, href: "/dashboard/sogp/plan" } : null,
-      note: doctrinal ? "Add teachings from the Library at any time." : path === "podcast_two" || path === "podcast_one" ? "When your plan is done, the doctrinal path follows from level 1." : null,
-      empty: left.length ? null : "Your plan is done. Choose what’s next.",
+      counts: [
+        { label: doctrinal ? "Teachings" : "Episodes", value: `${episodes.filter(episode => episode.listened).length} of ${episodes.length}` },
+        { label: "Days left", value: String(month?.month.daysLeft ?? monthWindow(day).daysLeft) },
+        { label: "Finishes", value: month?.finishKey ? dayMonth.format(addDays(month.finishKey, 0)) : "Done" },
+      ],
+      listTitle: month?.month.daysSoFar === 1 ? `Your ${name} plan` : `Rest of ${name}`,
+      rows: (month?.rest ?? []).slice(0, 3).map(({ dateKey, item }) => ({ title: item.title, meta: item.meta, end: dateKey === day ? "Today" : dayMonth.format(addDays(dateKey, 0)), href: item.href ?? null, muted: false })),
+      more: { label: `See ${name}`, href: "/dashboard/sogp/month" },
+      note: month ? monthCarryNote(month) : null,
+      empty: month?.rest.length ? null : "Your plan is done. Choose what’s next.",
     };
   } else if (path === "traditional") {
     const taught = SOGP_LEVELS.map(definition => {
@@ -249,10 +251,7 @@ export async function getLearningHubData(userId: string, state: SogpLearningStat
     journey: {
       welcomePackDone,
       preSogp,
-      days: journey && !podcast ? (() => {
-        const plan = buildSogpDays(journey.days, day);
-        return plan.days.length ? { current: plan.current?.number ?? null, total: plan.days.length, teaching: plan.teachingDays, reviews: plan.reviewDays } : null;
-      })() : null,
+      month: monthWindow(day).name,
       prayerToday: journey ? journey.days.find(row => row.dateKey === day)?.prayerWatchComplete ?? null : null,
     },
   };
