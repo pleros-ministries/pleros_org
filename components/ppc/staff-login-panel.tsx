@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
 
@@ -31,7 +30,6 @@ const tabCopy: Record<
 };
 
 export function StaffLoginPanel() {
-  const router = useRouter();
   const [activeTab, setActiveTab] = useState<StaffRoleTab>("admin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -99,12 +97,12 @@ export function StaffLoginPanel() {
         return;
       }
 
-      router.push(
+      // A full page load: a prefetch made while signed out would send you back here.
+      window.location.assign(
         getPostAuthRedirectPath({
           resolvedRole: access?.role ?? "admin",
         }),
       );
-      router.refresh();
     });
   };
 

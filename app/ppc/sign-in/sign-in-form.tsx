@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { authClient } from "@/lib/auth/auth-client";
 import { previewPortalAccess } from "@/app/ppc/_actions/auth-entry-actions";
@@ -16,7 +15,6 @@ type SignInFormProps = {
 };
 
 export function SignInForm({ returnTo }: SignInFormProps) {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -66,13 +64,13 @@ export function SignInForm({ returnTo }: SignInFormProps) {
         return;
       }
 
-      router.push(
+      // A full page load: a prefetch made while signed out would send you back here.
+      window.location.assign(
         getPostAuthRedirectPath({
           resolvedRole: access?.role ?? "student",
           returnTo,
         }),
       );
-      router.refresh();
     });
   };
 
