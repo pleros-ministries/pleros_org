@@ -55,7 +55,7 @@ test("the learning destination uses the approved background with dynamic progres
   expect(html).toContain('href="/dashboard/sogp/listen?day=4"');
   // Days belong to the month now (Pastor, 25 November 2026): the card names the series and today's parts.
   expect(html).toContain("The Reality of God’s Purpose");
-  expect(html).toContain("Part 7 and Part 8 · 1 of 2 episodes listened");
+  expect(html).toContain("Parts 7 and 8 today");
   expect(html).not.toContain("Day 4 is waiting");
   expect(html).toContain('aria-valuenow="1"');
   expect(html).toContain('aria-valuemax="2"');
