@@ -32,6 +32,7 @@ This file is loaded by every Claude session in this repo. Keep it short: the det
   - apply with psql inside a transaction and record the sha256 in `drizzle.__drizzle_migrations`;
   - add the journal entry and the schema in the same change (handover §8).
 - **The local database is production.**
+  - `.env`'s `DATABASE_URL` is Railway's public URL (`DATABASE_PUBLIC_URL` on the Postgres service). Neon is only the read-only fallback since 25 November (`NEON_DATABASE_URL`); never read or write it as if it were live.
   - Read freely, but never create real invitations, moves, messages, reports or toggles to test.
   - Revert anything you change.
 - **Next.js 16.3 with Cache Components.**
