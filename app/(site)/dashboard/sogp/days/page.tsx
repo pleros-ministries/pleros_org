@@ -1,22 +1,6 @@
-import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
-import { SogpDaysView } from "@/components/sogp/learning/sogp-days-view";
-import { getAppSession } from "@/lib/app-session";
-import { getActiveSogpJourney } from "@/lib/db/queries/sogp-journey";
-import { lagosToday } from "@/lib/sogp/daily-date";
-import { buildSogpDays } from "@/lib/sogp/sogp-days";
-
-// Reads the session on every request (Cache Components).
-export const instant = false;
-
-export const metadata: Metadata = { title: "Your SOGP days" };
-
-export default async function SogpDaysPage() {
-  const session = await getAppSession();
-  if (!session) redirect("/login?returnTo=/dashboard/sogp/days");
-  const journey = await getActiveSogpJourney(session.user.id).catch(() => null);
-  const plan = journey ? buildSogpDays(journey.days, lagosToday()) : null;
-  if (!plan?.days.length) redirect("/dashboard/sogp/traditional");
-  return <SogpDaysView plan={plan} />;
+/** The cohort's numbered days gave way to the shared month (Pastor, 25 November 2026). */
+export default function SogpDaysPage() {
+  redirect("/dashboard/sogp/month");
 }

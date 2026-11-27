@@ -27,6 +27,7 @@ export default async function DashboardPodcastPage({ searchParams }: { searchPar
     <PodcastProgressPage
       episodes={journey.episodes}
       listenedEpisodeGuids={journey.listenedEpisodeGuids}
+      listenedOn={journey.listenedOn}
       todayKey={journey.todayKey}
       initialDateKey={date}
       calendarStartKey={journey.calendarStartKey}

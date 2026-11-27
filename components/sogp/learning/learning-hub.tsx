@@ -67,15 +67,15 @@ export function LearningHub({ hub, learning }: { hub: LearningHubData; learning:
 
   const resume = next
     ? <section className={styles.card} aria-label="Resume learning" style={nextStyle}>
-      <div className={styles.cardTop}><span>{next.finished ? "Journey complete" : `Day ${next.dayNumber} · Podcast`}</span></div>
+      <div className={styles.cardTop}><span>{next.finished ? "Journey complete" : `Episode ${next.episodeNumber} of ${next.totalDays} · Podcast`}</span></div>
       <div>
         <h2>{next.finished ? "You’ve finished this journey" : next.episodeTitle ?? next.title}</h2>
-        <span className={styles.cardMeta}>{next.listened} of {next.totalDays} listened · day {next.dayNumber} of {next.totalDays}</span>
+        <span className={styles.cardMeta}>{next.listened} of {next.totalDays} listened</span>
         <div className={styles.meter} aria-hidden="true"><i style={{ width: `${next.totalDays ? Math.min(100, Math.round((next.listened / next.totalDays) * 100)) : 0}%` }} /></div>
       </div>
       {next.finished
         ? <Link href="/dashboard/sogp/next" className={styles.resume}>Choose what’s next <ChevronRightIcon className="size-4" strokeWidth={2.2} /></Link>
-        : <Link href="/dashboard/podcast" className={styles.resume}>{next.todayListened ? `Open day ${next.dayNumber}` : `Listen to day ${next.dayNumber}`} <PlayIcon className="size-4" fill="currentColor" strokeWidth={0} /></Link>}
+        : <Link href="/dashboard/podcast" className={styles.resume}>{next.todayListened ? "Open today’s episode" : "Listen now"} <PlayIcon className="size-4" fill="currentColor" strokeWidth={0} /></Link>}
     </section>
     : hub.state === "start"
     ? <section className={styles.card} style={{ "--hub-art": `url("/assets/dashboard/learning-card/${art.image}")`, "--hub-art-wide": `url("/assets/dashboard/learning-card/${art.wide}")`, "--hub-field": art.field, "--hub-ink": art.ink } as CSSProperties}>

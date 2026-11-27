@@ -64,7 +64,7 @@ describe("connected dashboard navigation", () => {
   });
   test("restores internal destinations and query strings without accepting external URLs", () => {
     const sections = buildDashboardNavigation(member);
-    expect(dashboardAreaHref("you", sections, "/dashboard/sogp/days?from=home")).toBe("/dashboard/sogp/days?from=home");
+    expect(dashboardAreaHref("you", sections, "/dashboard/sogp/month?from=home")).toBe("/dashboard/sogp/month?from=home");
     expect(dashboardAreaHref("community", sections, "/dashboard/community/report?day=2026-10-12")).toBe("/dashboard/community/report?day=2026-10-12");
     expect(dashboardAreaHref("community", sections, "/dashboard/community/messages/4")).toBe("/dashboard/community/messages/4");
     for (const unsafe of ["https://evil.test/dashboard/community", "//evil.test/dashboard/community", "javascript:alert(1)", "/admin", "/dashboard/communityish"]) expect(dashboardAreaHref("community", sections, unsafe)).toBe("/dashboard/community");
@@ -85,7 +85,7 @@ describe("connected dashboard navigation", () => {
     expect(dashboardParentForPath("/dashboard/sogp/listen")).toEqual({ href: "/dashboard/sogp", label: "Back to Learning" });
     // Trails under You start at You; Community trails stop at their bottom-bar tab.
     expect(dashboardTrailForPath("/dashboard/sogp/course/day/4/quiz").map(crumb => crumb.label)).toEqual(["You", "Learning", "Lesson"]);
-    expect(dashboardTrailForPath("/dashboard/sogp/days").map(crumb => crumb.label)).toEqual(["You", "Learning", "SOGP"]);
+    expect(dashboardTrailForPath("/dashboard/sogp/month").map(crumb => crumb.label)).toEqual(["You", "Learning"]);
     expect(dashboardTrailForPath("/dashboard/library/teachings").map(crumb => crumb.label)).toEqual(["You", "Library"]);
     expect(dashboardParentForPath("/dashboard/podcast")).toEqual({ href: "/dashboard/library", label: "Back to Library" });
     expect(dashboardParentForPath("/dashboard/prayer-watch")).toEqual({ href: "/dashboard/sogp", label: "Back to Learning" });

@@ -525,6 +525,8 @@ export const studentProgress = pgTable(
       .notNull()
       .references(() => lessons.id, { onDelete: "cascade" }),
     audioListened: boolean("audio_listened").notNull().default(false),
+    /** When the teaching was first marked listened (migration 0081); null for earlier listens. */
+    audioListenedAt: timestamp("audio_listened_at", { withTimezone: true }),
     notesRead: boolean("notes_read").notNull().default(false),
     quizPassed: boolean("quiz_passed").notNull().default(false),
     highestQuizScore: integer("highest_quiz_score"),

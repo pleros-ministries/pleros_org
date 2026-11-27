@@ -286,6 +286,8 @@
 .homeSectionHeader h2 { margin: 0; font-size: 15px; line-height: 22px; font-weight: 500; }
 .homePanel { padding: 4px 16px; border: 1px solid var(--dashboard-panel-edge); border-radius: var(--dashboard-panel-radius, 10px); background: white; box-shadow: var(--shadow-sm); }
 .homeTodayHead { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding-top: 12px; }
+/* Between the month calendar and today's rows. */
+.homeDivider { height: 1px; margin: 4px 0 0; background: var(--color-line); }
 .homeTaskRow { position: relative; display: flex; align-items: center; gap: 12px; min-height: 72px; padding: 10px 0; }
 .homeTaskRow:not(:last-child)::after { content: ""; position: absolute; left: 48px; right: 0; bottom: 0; height: 1px; background: var(--color-line); }
 .homeInlineLink { color: var(--color-brand-blue); font-weight: 500; text-decoration: none; }

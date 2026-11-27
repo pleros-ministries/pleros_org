@@ -561,6 +561,13 @@
    "when": 1793448000000,
    "tag": "0079_doctrinal_journey_path",
    "breakpoints": true
+  },
+  {
+   "idx": 81,
+   "version": "7",
+   "when": 1793620800000,
+   "tag": "0081_lesson_audio_listened_at",
+   "breakpoints": true
   }
  ]
 }

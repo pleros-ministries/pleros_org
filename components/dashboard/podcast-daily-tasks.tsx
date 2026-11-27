@@ -63,12 +63,15 @@ function DoneButton({
 
 export function PodcastDailyTasks({
   day,
+  plan = false,
   todayKey,
   previewMode,
   onSetEpisodeListened,
   onSetPrayerComplete,
 }: {
   day: PodcastDay;
+  /** A plan's day on the shared month, not the latest-releases calendar. */
+  plan?: boolean;
   todayKey: string;
   previewMode: boolean;
   onSetEpisodeListened: (episodeGuid: string, listened: boolean) => void;
@@ -153,7 +156,11 @@ export function PodcastDailyTasks({
   const heading = isToday ? `Today, ${weekdayDayLabel}` : weekdayDayLabel;
   // The podcast releases Monday to Saturday.
   const isSunday = new Date(`${day.dateKey}T00:00:00.000Z`).getUTCDay() === 0;
-  const noEpisodeNote = isSunday
+  const noEpisodeNote = plan
+    ? isFuture || isToday
+      ? "Your plan has no more episodes for this day. Choose what’s next when you’re ready."
+      : "Nothing from your plan was listened to on this day. Unfinished episodes move to the next day."
+    : isSunday
     ? "There is no new episode on Sundays. Catch up on any you missed in all episodes below."
     : isFuture
       ? "This episode opens on its date."
@@ -162,7 +169,6 @@ export function PodcastDailyTasks({
         : "No new episode was released on this day. Catch up on any you missed in all episodes below.";
   const episodeMeta = episode
     ? [
-        day.dayNumber ? `Day ${day.dayNumber}` : null,
         getPodcastSeriesTitle(episode.title),
         durationLabel(episode.duration),
       ]

@@ -1,9 +1,10 @@
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, gte, inArray, lt } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 
 import * as schema from "../schema";
 import { dedupeEpisodes, normaliseEpisodeText } from "@/lib/podcast-episode-search";
+import { lagosRange, toLagosDateKey as lagosDateKey } from "@/lib/sogp/daily-participation";
 
 import { sogpLearningSchemaReady } from "./sogp-learning-gate";
 
@@ -18,6 +19,16 @@ export async function getPodcastEpisodeProgress(userId: string): Promise<string[
     .where(eq(schema.podcastEpisodeProgress.userId, userId));
 
   return rows.map((row) => row.episodeGuid);
+}
+
+/** The Lagos day each episode was first marked listened, from `startKey` to `todayKey`. */
+export async function getPodcastListenedOn(userId: string, startKey: string, todayKey: string): Promise<Record<string, string>> {
+  const { start, end } = lagosRange(startKey, todayKey);
+  const rows = await db
+    .select({ episodeGuid: schema.podcastEpisodeProgress.episodeGuid, listenedAt: schema.podcastEpisodeProgress.listenedAt })
+    .from(schema.podcastEpisodeProgress)
+    .where(and(eq(schema.podcastEpisodeProgress.userId, userId), gte(schema.podcastEpisodeProgress.listenedAt, start), lt(schema.podcastEpisodeProgress.listenedAt, end)));
+  return Object.fromEntries(rows.filter((row) => row.listenedAt).map((row) => [row.episodeGuid, lagosDateKey(row.listenedAt!)]));
 }
 
 /**
