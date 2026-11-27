@@ -3,10 +3,9 @@
 import { usePathname } from "next/navigation";
 import { GoogleAnalytics } from "@/components/google-analytics";
 import { MetaPixel } from "@/components/meta-pixel";
-import { PushNotificationPrompt } from "@/components/push-notification-prompt";
 import { ServiceWorkerRegister } from "@/components/service-worker-register";
 
-/** Synthetic demo routes never mount tracking, push or service-worker effects. */
+/** Synthetic demo routes never mount tracking or service-worker effects. Pleros never asks for notifications unprompted: learners turn reminders on from the dashboard. */
 export function RootIntegrations() {
   const pathname = usePathname();
   if (pathname === "/preview/pleros" || pathname.startsWith("/preview/pleros/") || pathname === "/preview/dashboard-v3" || pathname.startsWith("/preview/dashboard-v3/")) {
@@ -15,7 +14,6 @@ export function RootIntegrations() {
   return (
     <>
       <ServiceWorkerRegister />
-      <PushNotificationPrompt />
       <GoogleAnalytics />
       <MetaPixel />
     </>
