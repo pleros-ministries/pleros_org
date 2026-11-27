@@ -85,7 +85,8 @@ export async function getDashboardHomeData(viewer: NonNullable<Awaited<ReturnTyp
     const chosen = Boolean(state?.revision || course.tracks.some(track => track.completed));
     const published = course.tracks.filter(track => track.lesson.status === "published" && track.dayNumber != null);
     const doneAll = !podcast && published.length > 0 && published.every(track => track.completed);
-    const ended = course.learnerState === "completed" || Date.now() > new Date(course.cohort.endsAt).getTime();
+    const endsAt = course.cohort?.endsAt;
+    const ended = course.learnerState === "completed" || (endsAt ? Date.now() > new Date(endsAt).getTime() : false);
     if (course.learnerState === "withdrawn") {
       if (chosen) card = { kind: "withdrawn", title: card?.kind === "traditional" ? card.title : card?.kind === "podcast" ? card.series : "Your SOGP journey" };
     } else if (chosen && (doneAll || (podcast && !waiting) || ended)) {
