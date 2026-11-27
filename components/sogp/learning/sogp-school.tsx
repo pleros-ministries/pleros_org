@@ -55,7 +55,7 @@ export function SogpSchool({ hub, facts, followUp }: { hub: LearningHubData; fac
   const share = hub.card.total ? Math.min(100, Math.round((hub.card.done / hub.card.total) * 100)) : 0;
   const finished = hub.next.finished;
   const action = hub.state === "withdrawn" ? null
-    : hub.state === "start" ? { href: "/dashboard/sogp/path", label: "Choose a learning path" }
+    : hub.state === "start" ? { href: "/dashboard/sogp/path", label: "Choose your SOGP path" }
     : finished && hub.next.canChoose ? { href: "/dashboard/sogp/next", label: "Choose what’s next" }
     : { href: hub.card.href, label: hub.card.action };
   const line = podcast ? `${hub.card.done} of ${hub.card.total} ${unit}` : `${hub.doneCount} of ${hub.card.total || 24} teachings`;

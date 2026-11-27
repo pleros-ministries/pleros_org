@@ -39,7 +39,7 @@ function dateRange(from: Date, to: Date) {
 const keyOf = (path: SogpLearningPath | null): PathKey | null => path === "traditional" ? "sogp" : path === "doctrinal" ? "doctrinal" : path ? "podcast" : null;
 
 /**
- * Choose a learning path (user and Pastor, 18–24 November). Three coloured
+ * Choose your SOGP path (user and Pastor, 18–24 November). Three coloured
  * cards; tapping one opens its details in a panel under it (tap again to
  * close). The path saves on Continue, before any plan is built, and every
  * path ends on Learning. Existing learners still preview a switch first.
@@ -152,7 +152,7 @@ export function PathChooser({ data }: { data: LearningViewData }) {
 
   const action = !target ? "Continue" : target === current ? "Keep this path" : target === "traditional" ? `Start level ${level}` : target === "doctrinal" ? "Choose my teachings" : "Build my podcast plan";
   return <section className={`${learn.page} ${learn.choicePage}`}>
-    <header className={learn.header}><h1>Choose a learning path</h1><p className={styles.lede}>{current ? "You keep everything you’ve done. Switching only changes what comes next" : "See where each one leads. You can change later"}</p></header>
+    <header className={learn.header}><h1>Choose your SOGP path</h1><p className={styles.lede}>{current ? "You keep everything you’ve done. Switching only changes what comes next" : "See where each one leads. You can change later"}</p></header>
     <div role="group" aria-label="Learning path" className={styles.paths} data-tour="paths">
       {card("sogp", "Doctrinal path", "A teaching, quiz and written response each day", `1 hr a day · ${taught.length || 3} levels`, sogpBody)}
       {card("podcast", "Podcast", "Short episodes at your own pace", "15 or 30 min a day", podcastBody)}

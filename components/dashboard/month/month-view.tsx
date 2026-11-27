@@ -46,9 +46,9 @@ export function MonthView({ data }: { data: MonthCalendarData }) {
         {item.href ? <ChevronRightIcon className={`${group.chev} size-4`} strokeWidth={2} aria-hidden="true" /> : null}
       </>;
       return <li key={dateKey}>{item.href ? <Link href={item.href} className={group.row}>{body}</Link> : <div className={group.row}>{body}</div>}</li>;
-    })}</ul> : <p className={group.empty}>{data.path ? "Nothing planned for the rest of the month. Choose what’s next on Learning." : "Choose a learning path and your plan for the month appears here."}</p>}</div>
+    })}</ul> : <p className={group.empty}>{data.path ? "Nothing planned for the rest of the month. Choose what’s next on Learning." : "Choose your SOGP path and your plan for the month appears here."}</p>}</div>
 
     <p className={group.note}>{note ? `${note} ` : ""}An unfinished day is never lost: it moves to the next.</p>
-    {data.path ? null : <Link href="/dashboard/sogp/path" className={`${group.quiet} inline-flex items-center gap-0.5 justify-self-start`}>Choose a learning path<ChevronRightIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" /></Link>}
+    {data.path ? null : <Link href="/dashboard/sogp/path" className={`${group.quiet} inline-flex items-center gap-0.5 justify-self-start`}>Choose your SOGP path<ChevronRightIcon className="size-3.5" strokeWidth={2.2} aria-hidden="true" /></Link>}
   </section>;
 }

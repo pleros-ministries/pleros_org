@@ -41,7 +41,7 @@ test("traditional resume uses its own saved lesson, not podcast marks", () => {
 test("all three learning paths remain available with a read-only explanation during activation rollback", () => {
   const html = renderToStaticMarkup(<QueryClientProvider client={new QueryClient()}><PathChooser data={{ ...data,canWrite: false }} /></QueryClientProvider>);
   // Doctrinal path, Podcast at 15 or 30 minutes a day, and a personalised path (user, 24 November).
-  expect(html).toContain("Choose a learning path");
+  expect(html).toContain("Choose your SOGP path");
   expect(html).toContain("Doctrinal path");
   expect(html).toContain("30 min a day");
   expect(html).toContain("15 min a day");

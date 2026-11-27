@@ -34,7 +34,7 @@ function learningDoor(card: HomeLearningCard | undefined, fallback: DashboardHom
       meta: card.meta ?? "SOGP",
       title: card.title ?? "Make room to grow",
       summary: card.summary ?? "Pick a path and see where it takes you",
-      action: card.action ?? "Choose a learning path",
+      action: card.action ?? "Choose your SOGP path",
       value: 0,
       total: 0,
     };
