@@ -12,8 +12,8 @@ export type Arrival = "direct" | "link";
 
 const DAY = 86_400_000;
 const start = Date.now();
-/** "Fri 28 Nov", as Learning dates its days. */
-const dayLabel = (offset: number) => new Date(start + offset * DAY).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", timeZone: "Africa/Lagos" });
+/** A day's calendar tile, as Learning shows it: "Sat" over "28". */
+const dayParts = (offset: number) => { const date = new Date(start + offset * DAY); return { weekday: date.toLocaleDateString("en-GB", { weekday: "short", timeZone: "Africa/Lagos" }), day: date.toLocaleDateString("en-GB", { day: "numeric", timeZone: "Africa/Lagos" }) }; };
 
 const podcastEpisodes = suggestions.suggested60EpisodeDefault.map(row => ({ guid: `yt:${row.videoId}`, title: row.title, duration: row.duration, audioUrl: "" }));
 const teachings = [
@@ -42,13 +42,13 @@ export const HUB: Record<TourPath | "none", LearningHubData> = {
   none: { ...base, path: null, state: "start", month: null, card: { ...base.card, level: 1 } },
   sogp: { ...base, path: "traditional", state: "active",
     card: { eyebrow: "Level 1", title: "Gospel: The Word of Truth", progress: "Track 1 of 18 · ready to start", done: 0, total: 18, href: "#", action: "Start today’s teaching", level: 1 },
-    month: { name: new Date(start).toLocaleDateString("en-GB", { month: "long", timeZone: "Africa/Lagos" }), daysLeft: 30, rows: [0, 1, 2].map(day => ({ when: day === 0 ? "Today" : dayLabel(day), title: SOGP_LEVELS[0]!.tracks[day]?.title ?? "Sample track", meta: `Level 1 · track ${day + 1}`, href: "#" })), note: "A track a day, with a group review at the end of each level.", empty: null } },
+    month: { name: new Date(start).toLocaleDateString("en-GB", { month: "long", timeZone: "Africa/Lagos" }), daysLeft: 30, rows: [0, 1, 2].map(day => ({ weekday: dayParts(day).weekday, day: dayParts(day).day, today: day === 0, title: SOGP_LEVELS[0]!.tracks[day]?.title ?? "Sample track", meta: `Level 1 · track ${day + 1}`, href: "#" })), note: "A track a day, with a group review at the end of each level.", empty: null } },
   podcast: { ...base, path: "podcast_two", state: "active",
     card: { eyebrow: "Episode 1 of 60", title: "The Reality of God’s Purpose", progress: "0 of 2 episodes today · 0 of 60 in your plan", done: 0, total: 60, href: "#", action: "Listen now", level: 1 },
-    month: { name: new Date(start).toLocaleDateString("en-GB", { month: "long", timeZone: "Africa/Lagos" }), daysLeft: 30, rows: [0, 1, 2].map(day => ({ when: day === 0 ? "Today" : dayLabel(day), title: "The Reality of God’s Purpose", meta: `Episodes ${day * 2 + 1} and ${day * 2 + 2}`, href: "#" })), note: "When your plan is done, SOGP follows from level 1.", empty: null } },
+    month: { name: new Date(start).toLocaleDateString("en-GB", { month: "long", timeZone: "Africa/Lagos" }), daysLeft: 30, rows: [0, 1, 2].map(day => ({ weekday: dayParts(day).weekday, day: dayParts(day).day, today: day === 0, title: "The Reality of God’s Purpose", meta: `Episodes ${day * 2 + 1} and ${day * 2 + 2}`, href: "#" })), note: "When your plan is done, SOGP follows from level 1.", empty: null } },
   doctrinal: { ...base, path: "doctrinal", state: "active",
     card: { eyebrow: "Teaching 1 of 5", title: "Understanding the Gospel", progress: "Faith & Growth · 0 of 5 teachings", done: 0, total: 5, href: "#", action: "Listen now", level: 1 },
-    month: { name: new Date(start).toLocaleDateString("en-GB", { month: "long", timeZone: "Africa/Lagos" }), daysLeft: 30, rows: library.slice(0, 3).map((item, day) => ({ when: day === 0 ? "Today" : dayLabel(day), title: item.title, meta: item.series, href: "#" })), note: "Add teachings from the Library at any time.", empty: null } },
+    month: { name: new Date(start).toLocaleDateString("en-GB", { month: "long", timeZone: "Africa/Lagos" }), daysLeft: 30, rows: library.slice(0, 3).map((item, day) => ({ weekday: dayParts(day).weekday, day: dayParts(day).day, today: day === 0, title: item.title, meta: item.series, href: "#" })), note: "Add teachings from the Library at any time.", empty: null } },
 };
 
 /** The shared month from today to its end, one planned item a day (sample titles). */

@@ -25,9 +25,9 @@ export const SAMPLE_HUB: LearningHubData = {
   month: {
     name: "November", daysLeft: 4,
     rows: [
-      { when: "Today", title: "Biblical Origin and Ontology", meta: "Level 2 · track 10", href: "#" },
-      { when: "Fri 28 Nov", title: "The Nature of Man", meta: "Level 2 · track 11", href: "#" },
-      { when: "Sat 29 Nov", title: "Sin and Redemption", meta: "Level 2 · track 12", href: "#" },
+      { weekday: "Fri", day: "27", today: true, title: "Biblical Origin and Ontology", meta: "Level 2 · track 10", href: "#" },
+      { weekday: "Sat", day: "28", today: false, title: "The Nature of Man", meta: "Level 2 · track 11", href: "#" },
+      { weekday: "Sun", day: "29", today: false, title: "Sin and Redemption", meta: "Level 2 · track 12", href: "#" },
     ],
     note: "A track a day, with a group review at the end of each level.", empty: null,
   },
