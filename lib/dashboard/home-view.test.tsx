@@ -155,6 +155,10 @@ test("Home's learning card follows Learning once SOGP is finished, after it, and
   expect(next).toContain("Listen now");
   expect(next).toContain('href="/dashboard/podcast"');
 
+  const ended = render({ kind: "traditional", title: "Knowing God", href: "/dashboard/sogp/course/day/12", completed: 11, total: 60, ended: true });
+  expect(ended).toContain("Your cohort has ended. Your lessons stay open");
+  expect(ended).toContain("Resume learning");
+
   const withdrawn = render({ kind: "withdrawn", title: "Your SOGP journey" });
   expect(withdrawn).toContain("Your enrolment is withdrawn");
   expect(withdrawn).not.toContain("Resume learning");

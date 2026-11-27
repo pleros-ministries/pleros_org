@@ -92,6 +92,8 @@ export async function getDashboardHomeData(viewer: NonNullable<Awaited<ReturnTyp
       const nextCard = await getNextLearning(userId).then(choice => choice ? getNextLearningCard(userId) : null).catch(() => null);
       if (nextCard) card = { kind: "next", title: nextCard.title, episodeTitle: nextCard.episodeTitle, episodeNumber: nextCard.episodeNumber, totalDays: nextCard.totalDays, listened: nextCard.listened, finished: nextCard.finished, todayListened: nextCard.todayListened };
       else if (doneAll) card = { kind: "finished", tracks: published.length, certificate: Boolean(course.certificate && !course.certificate.revokedAt) };
+      // Cohort over, SOGP not finished: as on Learning, the lessons stay open and the card says why.
+      else if (ended && (card?.kind === "traditional" || card?.kind === "podcast")) card = { ...card, ended: true };
     }
   }
   // The shared month (Pastor, 25 November 2026); unreadable, Home shows Today without it.
