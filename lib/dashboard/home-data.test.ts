@@ -45,7 +45,7 @@ beforeEach(() => {
 test("the You home resumes the selected podcast path without awarding traditional credit",async () => {
   reads.learning.mockResolvedValue({ path: "podcast_two",revision: 2,plan: { episodesPerDay: 2,episodeGuids: ["a","b","c","d"],historyEpisodeGuids: ["older"] },progress: { listenedEpisodeGuids: ["a","older"],playbackPositions: [] } });
   const data = await getDashboardHomeData(viewer());
-  expect(data.learning).toMatchObject({ title: "Day 1 is waiting for you",href: "/dashboard/sogp/listen?day=1",completed: 2,total: 5,unit: "episodes",pathLabel: "30 min/day · Podcast path" });
+  expect(data.learning).toMatchObject({ title: "Day 1 is waiting for you",href: "/dashboard/sogp/listen?day=1",completed: 2,total: 5,unit: "episodes",pathLabel: "30 min a day · Podcast path" });
 });
 
 test("home reads are self-scoped, use the existing access rules, and expose a narrow DTO", async () => {

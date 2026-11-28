@@ -114,7 +114,7 @@ export async function getLearningHubData(userId: string, state: SogpLearningStat
   const path = state?.revision ? state.path : course.tracks.some(track => track.completed) ? "traditional" : null;
   // A plan path saved before its plan is built (user, 24 November).
   const planless = isPlanPath(path) && !state?.plan;
-  const paceLabel = path === "podcast_two" ? "30 min/day · Podcast" : path === "podcast_one" ? "15 min/day · Podcast" : path === "doctrinal" ? "One a day · Personalised path" : "1 hr/day · Doctrinal path";
+  const paceLabel = path === "podcast_two" ? "30 min a day · Podcast" : path === "podcast_one" ? "15 min a day · Podcast" : path === "doctrinal" ? "One a day · Personalised path" : "1 hr a day · Doctrinal path";
   // Cohort status isn't kept current, so the cohort's own dates decide the phase.
   const now = Date.now();
   const starts = new Date(course.cohort.startsAt).getTime();

@@ -11,7 +11,7 @@ export function LearningHome({ data }: { data: LearningViewData }) {
   return <section className={`${styles.page} ${styles.homePage}`}>
     <header className={`${styles.header} ${styles.homeHeader}`}><h1>Your learning, your pace</h1><p className={styles.muted}>Your current plan and history stay with you.</p></header>
     <article className={styles.card}>
-      <p className={styles.meta}>{podcast ? data.state!.path === "podcast_two" ? "30 min/day · Podcast path" : "15 min/day · Podcast path" : "1 hr/day · Traditional SOGP"}</p>
+      <p className={styles.meta}>{podcast ? data.state!.path === "podcast_two" ? "30 min a day · Podcast path" : "15 min a day · Podcast path" : "1 hr a day · Doctrinal path"}</p>
       <h2 data-dashboard-learning-title>{podcast ? next ? `Day ${next.dayNumber} is waiting for you` : "Your current plan is complete" : data.traditional.nextTitle ?? "Your traditional learning"}</h2>
       <p>{podcast ? next ? `${next.listened} of ${next.total} ${next.total === 1 ? "episode" : "episodes"} marked listened` : "Choose more episodes whenever you’re ready." : `${data.traditional.completed} of ${data.traditional.total} tracks completed`}</p>
       <Link className={styles.primary} href={resumeHref}>{podcast && !next ? "Edit your plan" : "Resume learning"}<DashboardIcon name="play" size={24} /></Link>

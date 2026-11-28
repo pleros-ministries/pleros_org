@@ -60,7 +60,7 @@ export async function getDashboardHomeData(viewer: NonNullable<Awaited<ReturnTyp
   } else if (planless) {
     card = doctrinal
       ? { kind: "start", href: "/dashboard/sogp/plan?path=doctrinal", meta: "Personalised path", title: "Choose your teachings", summary: "Your path is saved. Pick teachings from the Library next", action: "Choose teachings" }
-      : { kind: "start", href: `/dashboard/sogp/plan?path=${state!.path}`, meta: state!.path === "podcast_two" ? "30 min/day · Podcast" : "15 min/day · Podcast", title: "Finish building your plan", summary: "Your path is saved. Take our plan or pick your own episodes", action: "Build my plan" };
+      : { kind: "start", href: `/dashboard/sogp/plan?path=${state!.path}`, meta: state!.path === "podcast_two" ? "30 min a day · Podcast" : "15 min a day · Podcast", title: "Finish building your plan", summary: "Your path is saved. Take our plan or pick your own episodes", action: "Build my plan" };
   } else if (podcast && waiting) {
     const catalogue = new Map((await getLearningCatalogue().catch(() => [])).map(row => [row.guid, row]));
     const positions = new Map(state.progress.playbackPositions.map(row => [row.episodeGuid, row.positionSeconds]));
@@ -129,7 +129,7 @@ export async function getDashboardHomeData(viewer: NonNullable<Awaited<ReturnTyp
       action: waiting ? "Resume listening" : "Edit your plan",
       completed: state.progress.listenedEpisodeGuids.filter(guid => planned!.has(guid)).length,
       total: planned!.size,enrolled: true,unit: "episodes",
-      pathLabel: doctrinal ? "One a day · Personalised path" : state.path === "podcast_two" ? "30 min/day · Podcast path" : "15 min/day · Podcast path",
+      pathLabel: doctrinal ? "One a day · Personalised path" : state.path === "podcast_two" ? "30 min a day · Podcast path" : "15 min a day · Podcast path",
     } : {
       title: lesson?.lesson.title ?? (course ? "Your SOGP journey" : "Start SOGP"),
       href: lesson ? `/dashboard/sogp/course/day/${lesson.dayNumber}` : course ? "/dashboard/sogp" : "/sogp/enrol",

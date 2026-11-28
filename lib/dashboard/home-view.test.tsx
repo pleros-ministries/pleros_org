@@ -3,7 +3,7 @@ import { expect, test, vi } from "vitest";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 
-import { DashboardHomeView } from "@/components/dashboard/v3/home-view";
+import { DashboardHomeView, homeSubLine } from "@/components/dashboard/v3/home-view";
 import type { DashboardHomeData } from "./home";
 
 const data: DashboardHomeData = {
@@ -32,7 +32,7 @@ const data: DashboardHomeData = {
     total: 30,
     enrolled: true,
     unit: "episodes",
-    pathLabel: "30 min/day · Podcast path",
+    pathLabel: "30 min a day · Podcast path",
   },
 };
 
@@ -157,8 +157,13 @@ test("Home's learning card follows Learning once SOGP is finished, after it, and
   expect(next).toContain('href="/dashboard/podcast"');
 
   const ended = render({ kind: "traditional", title: "Knowing God", href: "/dashboard/sogp/course/day/12", completed: 11, total: 60, ended: true });
-  expect(ended).toContain("Your cohort has ended. Your lessons stay open");
+  expect(ended).toContain("11 of 60 tracks done · cohort ended");
+  expect(ended).not.toContain("Traditional SOGP");
   expect(ended).toContain("Resume learning");
+
+  // The line under the greeting: the cohort's week while it runs, then the month.
+  expect(homeSubLine({ cohortTitle: "SOGP September 2026", weekLabel: "Week 2 of 4", month: null })).toBe("SOGP September 2026 · Week 2 of 4");
+  expect(homeSubLine({ cohortTitle: "SOGP September 2026", weekLabel: null, month: { key: "2026-11", name: "November", todayKey: "2026-11-28", daysLeft: 3, daysSoFar: 28, podcast: false, days: {} } })).toBe("November 2026");
 
   const withdrawn = render({ kind: "withdrawn", title: "Your SOGP journey" });
   expect(withdrawn).toContain("Your enrolment is withdrawn");

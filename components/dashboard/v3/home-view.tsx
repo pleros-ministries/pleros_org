@@ -79,9 +79,10 @@ function learningDoor(card: HomeLearningCard | undefined, fallback: DashboardHom
   if (card?.kind === "traditional") {
     return {
       href: card.href,
-      meta: "1 hr/day · Traditional SOGP",
+      // The same words as Learning's card (user, 28 November): level and pace, never a second name for the path.
+      meta: [card.level ? `Level ${card.level}` : null, "1 hr a day"].filter(Boolean).join(" · "),
       title: card.title,
-      summary: card.ended ? "Your cohort has ended. Your lessons stay open" : `${card.completed} of ${card.total} tracks completed`,
+      summary: `${card.completed} of ${card.total} tracks done${card.ended ? " · cohort ended" : ""}`,
       action: "Resume learning",
       value: card.completed,
       total: card.total,
@@ -98,7 +99,7 @@ function learningDoor(card: HomeLearningCard | undefined, fallback: DashboardHom
       : `${card.episodes.length} ${card.episodes.length === 1 ? "episode" : "episodes"} today`;
     return {
       href: card.href,
-      meta: card.doctrinal ? "One a day · Personalised path" : `${card.pace === 2 ? "30" : "15"} min/day · Podcast path`,
+      meta: card.doctrinal ? "One a day · Personalised path" : `${card.pace === 2 ? "30" : "15"} min a day · Podcast path`,
       title: card.series,
       summary: card.ended ? "Your cohort has ended. Your plan stays open" : card.doctrinal ? "Today’s teaching" : today,
       action: active?.positionSeconds ? "Resume learning" : "Start learning",
@@ -118,6 +119,16 @@ function learningDoor(card: HomeLearningCard | undefined, fallback: DashboardHom
     value: fallback.completed,
     total: fallback.total,
   };
+}
+
+/**
+ * The line under the greeting (user, 28 November): the cohort and its week
+ * while it runs; after that the month, as Learning frames it, never a
+ * finished cohort's name.
+ */
+export function homeSubLine(sogp: Pick<HomeSogp, "cohortTitle" | "weekLabel" | "month">) {
+  if (sogp.weekLabel || !sogp.month) return [sogp.cohortTitle, sogp.weekLabel].filter(Boolean).join(" · ");
+  return `${sogp.month.name} ${sogp.month.key.slice(0, 4)}`;
 }
 
 function reportsCompleted(rows: HomeReport[]) {
@@ -323,7 +334,7 @@ function TodaySection({ today, month }: { today: HomeToday; month: HomeMonth | n
 /** The same three as Today, as counts (Pastor, 21 October); colour only where something needs attention. */
 function ProgressSection({ progress }: { progress: NonNullable<HomeSogp["progress"]> }) {
   const cells: Array<{ label: string; value: string; detail: string; warn: boolean }> = [
-    { label: "Teaching", value: String(progress.teaching.done), detail: `of ${progress.teaching.total} ${progress.teaching.unit}`, warn: false },
+    { label: "Teaching", value: String(progress.teaching.done), detail: `of ${progress.teaching.total} ${progress.teaching.unit === "days" ? "listened" : progress.teaching.unit}`, warn: false },
     { label: "Prayer Watch", value: `${progress.prayer.percent}%`, detail: progress.prayer.percent >= progress.prayer.required ? "on track" : `needs ${progress.prayer.required}%`, warn: progress.prayer.percent < progress.prayer.required },
     ...(progress.assessment ? [{ label: "Assessment", value: String(progress.assessment.done), detail: `of ${progress.assessment.total} done`, warn: false }] : []),
   ];
@@ -444,7 +455,7 @@ export function DashboardHomeView({ name, greeting, data }: { name?: string; gre
   return <div className={`${styles.content} ${styles.homeContent}`}>
     <div className={styles.homeGreeting}>
       <h1 className={styles.greeting} data-dashboard-greeting>{name ? `${greeting}, ${name}` : greeting}</h1>
-      {sogp ? <p className={styles.metadata}>{[sogp.cohortTitle, sogp.weekLabel].filter(Boolean).join(" · ")}</p> : null}
+      {sogp ? <p className={styles.metadata}>{homeSubLine(sogp)}</p> : null}
     </div>
     <div className={styles.homeMain}>
       <LearningDestination card={data.card} fallback={data.learning} hubHref={learningHubHref} />
