@@ -143,7 +143,7 @@ export function LearningHub({ hub, learning }: { hub: LearningHubData; learning:
       {resume}
 
       {hub.state === "preparing" ? <p className={styles.notice}>Your cohort hasn’t started yet. Pre-SOGP is open now, and your first teachings unlock on the start date.</p> : null}
-      {next ? null : hub.next.canChoose ? <p className={styles.notice}>{finished ? "Choose your next teachings so you always have something to learn and share. It becomes your current learning here." : <>Your cohort has ended. Your history and any remaining lessons stay open. <Link href="/dashboard/sogp/next" className={groupStyles.quiet}>Choose what’s next</Link></>}</p>
+      {next ? null : hub.next.canChoose ? <p className={styles.notice}>{finished ? "Choose your next teachings so you always have something to learn and share. It becomes your current learning here." : <>{hub.month?.rows.length ? "Your cohort has ended. Your plan carries on below at your own pace." : "Your cohort has ended. Your history and any remaining lessons stay open."} <Link href="/dashboard/sogp/next" className={groupStyles.quiet}>Choose what’s next</Link></>}</p>
         : hub.state === "completed" ? <p className={styles.notice}>Your cohort has ended. Your history and any remaining lessons stay open here.</p> : null}
 
       {hub.catchUp && hub.state === "active" && !next ? <div className={styles.catch}>
